@@ -1,228 +1,435 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Subscribe: Sensory Intelligence Lab</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    /* ── Reset ── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<title>Upgrade — Sensory Intelligence Lab</title>
 
-    :root {
-      --font-body: 'Inter', sans-serif;
-      --font-heading: 'Space Grotesk', sans-serif;
-      --color-bg: #ffffff;
-      --color-surface: #f9f9f7;
-      --color-border: #e5e5e0;
-      --color-text: #1a1a1a;
-      --color-muted: #6b6b6b;
-      --color-accent: #2a5c45;
-      --color-accent-light: #edf4f0;
-      --color-accent-hover: #1e4433;
-      --color-error-bg: #fdf2f2;
-      --color-error-border: #e8c4c4;
-      --color-error-text: #7a2e2e;
-      --color-success-bg: #edf4f0;
-      --color-success-border: #b8d9c8;
-      --color-success-text: #1e4433;
-      --max-width: 680px;
-      --header-height: 56px;
-    }
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    body {
-      font-family: var(--font-body);
-      color: var(--color-text);
-      background: var(--color-bg);
-      line-height: 1.6;
-      min-height: 100vh;
-    }
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
 
-    a { color: var(--color-text); text-decoration: underline; text-underline-offset: 3px; }
-    a:hover { color: var(--color-accent); }
+<style>
 
-    header {
-      border-bottom: 1px solid var(--color-border);
-      padding: 0 2rem;
-      height: var(--header-height);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      background: var(--color-bg);
-      z-index: 10;
-    }
+/* ─────────────────────────────
+BASE
+───────────────────────────── */
 
-    header h1 { font-family: var(--font-heading); font-size: 1rem; font-weight: 600; }
-    header nav { display: flex; gap: 1.5rem; flex-wrap: wrap; }
-    header nav a { font-size: 0.875rem; font-weight: 500; text-decoration: none; color: var(--color-muted); }
-    header nav a:hover { color: var(--color-text); }
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-    main { max-width: calc(var(--max-width) + 4rem); margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+:root {
 
-    .page-header { margin-bottom: 2.5rem; padding-bottom: 2rem; border-bottom: 1px solid var(--color-border); }
-    .page-header h1 { font-family: var(--font-heading); font-size: 2rem; font-weight: 600; margin-bottom: 0.75rem; }
-    .page-intro { font-size: 1rem; color: var(--color-muted); max-width: 520px; line-height: 1.65; }
+  --font-body: 'Inter', sans-serif;
+  --font-heading: 'Space Grotesk', sans-serif;
 
-    .subscribe-form-wrap {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 4px;
-      padding: 2rem;
-      max-width: 420px;
-      margin: 0 auto;
-    }
+  --color-bg: #ffffff;
+  --color-surface: #f9f9f7;
+  --color-border: #e5e5e0;
 
-    .field { margin-bottom: 1rem; }
-    label { display: block; font-size: 0.775rem; font-weight: 500; color: var(--color-text); margin-bottom: 0.35rem; }
-    input { width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--color-border); border-radius: 3px; background: white; font-family: var(--font-body); font-size: 0.875rem; color: var(--color-text); transition: border-color 0.15s, box-shadow 0.15s; outline: none; }
-    input:focus { border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(42,92,69,0.1); }
-    input::placeholder { color: #aaa; }
+  --color-text: #1a1a1a;
+  --color-muted: #6b6b6b;
 
-    .submit-btn {
-      width: 100%;
-      margin-top: 0.5rem;
-      padding: 0.7rem 1rem;
-      border: none;
-      border-radius: 3px;
-      background: var(--color-accent);
-      color: white;
-      font-family: var(--font-body);
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.15s, opacity 0.15s;
-    }
-    .submit-btn:hover { background: var(--color-accent-hover); }
-    .submit-btn:active { opacity: 0.85; }
-    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  --color-accent: #2a5c45;
+  --color-accent-hover: #1e4433;
 
-    .message { margin-top: 0.85rem; padding: 0.65rem 0.8rem; border-radius: 3px; font-size: 0.8rem; line-height: 1.5; display: none; }
-    .message.error { background: var(--color-error-bg); border: 1px solid var(--color-error-border); color: var(--color-error-text); display: block; }
-    .message.success { background: var(--color-success-bg); border: 1px solid var(--color-success-border); color: var(--color-success-text); display: block; }
+  --max-width: 680px;
 
-    footer { border-top: 1px solid var(--color-border); padding: 1.5rem 2rem; text-align: center; font-size: 0.8rem; color: var(--color-muted); }
+}
 
-    @media (max-width: 640px) {
-      header nav { gap: 1rem; }
-      header h1 { font-size: 0.875rem; }
-    }
-  </style>
+body {
+
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background: var(--color-bg);
+  line-height: 1.6;
+  min-height: 100vh;
+
+}
+
+header {
+
+  border-bottom: 1px solid var(--color-border);
+  padding: 0 2rem;
+  height: 56px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+}
+
+header h1 {
+
+  font-family: var(--font-heading);
+  font-size: 1rem;
+
+}
+
+main {
+
+  max-width: calc(var(--max-width) + 4rem);
+  margin: 0 auto;
+  padding: 2.5rem 2rem 4rem;
+
+}
+
+.page-header {
+
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--color-border);
+
+}
+
+.page-header h1 {
+
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+
+}
+
+.page-intro {
+
+  color: var(--color-muted);
+  max-width: 520px;
+
+}
+
+/* ─────────────────────────────
+PLANS
+───────────────────────────── */
+
+.plan-grid {
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+
+}
+
+@media (max-width: 640px) {
+
+  .plan-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+.plan-card {
+
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  padding: 1.75rem;
+
+}
+
+.plan-title {
+
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+
+}
+
+.plan-price {
+
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+
+}
+
+.plan-features {
+
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  margin-bottom: 1.5rem;
+
+}
+
+.plan-btn {
+
+  width: 100%;
+  padding: 0.7rem;
+  border: none;
+  background: var(--color-accent);
+  color: white;
+  cursor: pointer;
+
+}
+
+.plan-btn:disabled {
+
+  opacity: 0.5;
+
+}
+
+.message {
+
+  margin-top: 1rem;
+  padding: 0.65rem;
+  font-size: 0.8rem;
+  display: none;
+
+}
+
+.message.error {
+
+  display: block;
+  background: #fdf2f2;
+  border: 1px solid #e8c4c4;
+
+}
+
+footer {
+
+  border-top: 1px solid var(--color-border);
+  padding: 1.5rem;
+  text-align: center;
+  font-size: 0.8rem;
+
+}
+
+</style>
+
 </head>
+
 <body>
 
 <header>
-  <h1>Sensory Intelligence Lab</h1>
-  <nav>
-    <a href="/">Home</a>
-    <a href="/about/">About</a>
-    <a href="/music-therapy/">Music Therapy</a>
-    <a href="/online-sessions/">Online Sessions</a>
-    <a href="/events/">Events</a>
-    <a href="/contact/">Contact</a>
-    <a href="/blog/">Blog</a>
-  </nav>
+<h1>Sensory Intelligence Lab</h1>
 </header>
 
 <main>
-  <div class="page-header">
-    <h1>Subscribe to the Lab</h1>
-    <p class="page-intro">
-      Unlock full access to the Sensory Intelligence Lab: daily listening prompts, ear training exercises, auditory minigames, and personalized regulation tools.
-    </p>
-  </div>
 
-  <div class="subscribe-form-wrap">
-    <form id="subscribeForm" novalidate>
-      <div class="field">
-        <label for="subFullName">Full name</label>
-        <input type="text" id="subFullName" placeholder="Your name" required autocomplete="name" />
-      </div>
-      <div class="field">
-        <label for="subEmail">Email</label>
-        <input type="email" id="subEmail" placeholder="you@example.com" required autocomplete="email" />
-      </div>
-      <div class="field">
-        <label for="subPlan">Choose a plan</label>
-        <select id="subPlan" required>
-          <option value="" disabled selected>Select a plan</option>
-          <option value="monthly">Monthly - $5</option>
-          <option value="yearly">Yearly - $50</option>
-        </select>
-      </div>
+<div class="page-header">
 
-      <div class="message" id="subMessage"></div>
+<h1>Upgrade your access</h1>
 
-      <button type="submit" class="submit-btn" id="subSubmitBtn">Subscribe</button>
-    </form>
-  </div>
+<p class="page-intro">
+You are currently using the free tier.
+Upgrade anytime to unlock advanced modules,
+full session history, and personalized training tools.
+</p>
+
+</div>
+
+<div class="plan-grid">
+
+<!-- MONTHLY -->
+
+<div class="plan-card">
+
+<div class="plan-title">
+Monthly
+</div>
+
+<div class="plan-price">
+$5 / month
+</div>
+
+<div class="plan-features">
+Full access to all modules and features.
+Cancel anytime.
+</div>
+
+<button
+class="plan-btn"
+id="monthlyBtn"
+>
+Upgrade Monthly
+</button>
+
+</div>
+
+<!-- YEARLY -->
+
+<div class="plan-card">
+
+<div class="plan-title">
+Yearly
+</div>
+
+<div class="plan-price">
+$50 / year
+</div>
+
+<div class="plan-features">
+Best value. Save over monthly pricing.
+</div>
+
+<button
+class="plan-btn"
+id="yearlyBtn"
+>
+Upgrade Yearly
+</button>
+
+</div>
+
+</div>
+
+<div
+class="message"
+id="message"
+></div>
+
 </main>
 
 <footer>
-  <p>Jordan Elias Music Therapy · Berlin · <a href="/contact/">Contact</a></p>
+Sensory Intelligence Lab
 </footer>
 
 <script>
-  const SUPABASE_URL = "https://lrjuufvrgkuvfxcmybtf.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1";
 
-  const { createClient } = supabase;
-  const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+/* ─────────────────────────────
+CONFIG
+───────────────────────────── */
 
-  const form = document.getElementById('subscribeForm');
-  const messageEl = document.getElementById('subMessage');
-  const submitBtn = document.getElementById('subSubmitBtn');
+const SUPABASE_URL =
+"https://lrjuufvrgkuvfxcmybtf.supabase.co"
 
-  function showMessage(text, type) {
-    messageEl.textContent = text;
-    messageEl.className = 'message ' + type;
+const SUPABASE_ANON_KEY =
+"sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1"
+
+const LOGIN_URL =
+"/sensory-intelligence-lab/"
+
+const DASHBOARD_URL =
+"/sensory-intelligence-lab/dashboard/"
+
+/* ─────────────────────────────
+CLIENT
+───────────────────────────── */
+
+const { createClient } = supabase
+
+const client =
+createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+)
+
+/* ─────────────────────────────
+SESSION GUARD
+───────────────────────────── */
+
+async function requireSession() {
+
+  const {
+    data: { session }
+  } =
+  await client.auth.getSession()
+
+  if (!session) {
+
+    window.location.href =
+    LOGIN_URL
+
   }
 
-  function clearMessage() {
-    messageEl.textContent = '';
-    messageEl.className = 'message';
+}
+
+requireSession()
+
+/* ─────────────────────────────
+UI
+───────────────────────────── */
+
+const messageEl =
+document.getElementById("message")
+
+const monthlyBtn =
+document.getElementById("monthlyBtn")
+
+const yearlyBtn =
+document.getElementById("yearlyBtn")
+
+function showError(text) {
+
+  messageEl.textContent =
+  text
+
+  messageEl.className =
+  "message error"
+
+}
+
+/* ─────────────────────────────
+STRIPE CHECKOUT
+───────────────────────────── */
+
+async function startCheckout(plan) {
+
+  monthlyBtn.disabled = true
+  yearlyBtn.disabled = true
+
+  try {
+
+    const response =
+    await fetch(
+      "/.netlify/functions/create-checkout-session",
+      {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          plan
+        })
+
+      }
+    )
+
+    if (!response.ok) {
+
+      throw new Error(
+        "Unable to start checkout."
+      )
+
+    }
+
+    const data =
+    await response.json()
+
+    window.location.href =
+    data.url
+
   }
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    clearMessage();
+  catch (err) {
 
-    const name = document.getElementById('subFullName').value.trim();
-    const email = document.getElementById('subEmail').value.trim();
-    const plan = document.getElementById('subPlan').value;
+    showError(
+      err.message ||
+      "Checkout failed."
+    )
 
-    if (!name || !email || !plan) {
-      showMessage('Please fill out all fields.', 'error');
-      return;
-    }
+    monthlyBtn.disabled = false
+    yearlyBtn.disabled = false
 
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Submitting…';
+  }
 
-    try {
-      // Create user in Supabase (if not exists)
-      const { data, error } = await client.auth.signUp({
-        email,
-        password: Math.random().toString(36).slice(-10), // temporary password
-        options: { data: { full_name: name, plan } }
-      });
+}
 
-      if (error && !error.message.includes('User already registered')) throw error;
+/* ─────────────────────────────
+EVENTS
+───────────────────────────── */
 
-      showMessage('Subscription successful! Check your email for confirmation.', 'success');
-      form.reset();
-    } catch (err) {
-      showMessage(err.message || 'Something went wrong.', 'error');
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Subscribe';
-    }
-  });
+monthlyBtn.onclick =
+() => startCheckout("monthly")
+
+yearlyBtn.onclick =
+() => startCheckout("yearly")
+
 </script>
 
 </body>
