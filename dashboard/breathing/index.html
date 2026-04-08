@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Breath Regulation — Sensory Intelligence Lab</title>
+
+  <script src="/dashboard/auth-guard.js"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --font-body:'Inter',sans-serif;
+      --font-heading:'Space Grotesk',sans-serif;
+      --bg:#fff;--surface:#f9f9f7;--border:#e5e5e0;
+      --text:#1a1a1a;--muted:#6b6b6b;
+      --accent:#2a5c45;--accent-light:#edf4f0;--accent-hover:#1e4433;
+
+      /* Breath visualiser colours — interpolated in JS */
+      --inhale-fill: 196, 82%, 65%;   /* HSL, cool blue-teal */
+      --hold-fill:   160, 45%, 55%;   /* HSL, mid-sage hold */
+      --exhale-fill: 150, 38%, 42%;   /* HSL, deep forest exhale */
+      --rest-fill:   150, 20%, 72%;   /* HSL, soft grey-green settle */
+    }
+    html{font-size:16px}
+    body{font-family:var(--font-body);color:var(--text);background:var(--bg);line-height:1.6;min-height:100vh}
+    a{color:var(--text);text-decoration:underline;text-underline-offset:3px}
+    a:hover{color:var(--accent)}
+
+    /* ── Header ── */
+    header{border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:10;gap:1rem}
+    header h1{font-family:var(--font-heading);font-size:1rem;font-weight:600;letter-spacing:-0.01em;white-space:nowrap;flex-shrink:0}
+    header nav{display:flex;gap:1.25rem;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+    header nav a{font-size:.8rem;font-weight:500;text-decoration:none;color:var(--muted);transition:color .15s;white-space:nowrap}
+    header nav a:hover{color:var(--text)}
+    @media(max-width:680px){header{height:auto;padding:.75rem 1rem;flex-wrap:wrap;gap:.5rem}header h1{font-size:.875rem}header nav{gap:.75rem;width:100%}header nav a{font-size:.75rem}}
+
+    /* ── Breadcrumb ── */
+    .bc{padding:.75rem 1.5rem 0;max-width:900px;margin:0 auto}
+    .bc ol{list-style:none;display:flex;gap:.3rem;align-items:center;font-size:.75rem;color:var(--muted);flex-wrap:wrap}
+    .bc li+li::before{content:'/';margin-right:.3rem;color:var(--border)}
+    .bc a{color:var(--muted);text-decoration:none}
+    .bc a:hover{color:var(--accent);text-decoration:underline}
+    @media(max-width:400px){.bc li.mid{display:none}.bc li.mid+li::before{display:none}}
+
+    /* ── Main layout ── */
+    main{max-width:900px;margin:0 auto;padding:2.5rem 2rem 4rem}
+    @media(max-width:600px){main{padding:1.5rem 1rem 3rem}}
+
+    /* ── Page header ── */
+    .ph{margin-bottom:2rem;padding-bottom:1.75rem;border-bottom:1px solid var(--border)}
+    .ph h2{font-family:var(--font-heading);font-size:2rem;font-weight:600;letter-spacing:-.02em;line-height:1.2;margin-bottom:.4rem}
+    .ph p{font-size:.9rem;color:var(--muted)}
+
+    /* ── Section label ── */
+    .sl{font-family:var(--font-heading);font-size:.65rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem}
+
+    /* ── Pattern selector ── */
+    .pattern-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:2rem}
+    @media(max-width:520px){.pattern-grid{grid-template-columns:1fr}}
+
+    .pb{font-family:var(--font-body);font-size:.85rem;font-weight:500;padding:.75rem 1rem;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer;transition:all .12s;text-align:left;line-height:1.3;width:100%}
+    .pb:hover:not(.sel){border-color:var(--accent);color:var(--accent)}
+    .pb.sel{background:var(--accent-light);border-color:var(--accent);color:var(--accent);font-weight:600}
+    .pb .pname{display:block;font-weight:600;margin-bottom:.15rem}
+    .pb .ptiming{display:block;font-size:.72rem;font-weight:500;color:var(--accent);opacity:.8;margin-bottom:.1rem;font-family:var(--font-heading);letter-spacing:.03em}
+    .pb.sel .ptiming{opacity:1}
+    .pb .pdesc{display:block;font-size:.72rem;font-weight:400;color:var(--muted);margin-top:.1rem}
+    .pb.sel .pdesc{color:var(--accent);opacity:.75}
+
+    /* ── Mantra quote ── */
+    .mantra{display:none;background:var(--surface);border-left:3px solid var(--accent);padding:1rem 1.25rem;margin-bottom:1.75rem;font-size:.9rem;line-height:1.7;color:var(--text);font-style:italic}
+    .mantra.vis{display:block}
+    .mantra .attr{display:block;margin-top:.4rem;font-size:.72rem;font-style:normal;color:var(--muted);font-weight:500;letter-spacing:.04em}
+
+    /* ── Action row ── */
+    .ar{display:flex;gap:.75rem;margin-bottom:2rem;flex-wrap:wrap;align-items:center}
+    .gb{font-family:var(--font-heading);font-size:.875rem;font-weight:600;padding:.8rem 2rem;border:none;background:var(--accent);color:white;cursor:pointer;transition:background .15s;letter-spacing:-.01em}
+    .gb:hover{background:var(--accent-hover)}
+    .gb:disabled{opacity:.4;cursor:not-allowed}
+
+    /* ── Breath session panel ── */
+    .session{display:none;border:1px solid var(--border);background:var(--surface)}
+    .session.vis{display:block}
+
+    /* ── Visualiser ── */
+    .viz-wrap{padding:2.5rem 1.5rem;display:flex;flex-direction:column;align-items:center;gap:1.5rem;border-bottom:1px solid var(--border);background:var(--bg)}
+
+    .viz-outer{position:relative;width:220px;height:220px;display:flex;align-items:center;justify-content:center}
+    .viz-ring{position:absolute;inset:0;border-radius:50%;transition:transform .15s ease-out;transform:scale(1)}
+    .viz-ring-1{background:radial-gradient(circle, hsl(var(--rest-fill)/0.13) 0%, hsl(var(--rest-fill)/0.04) 70%, transparent 100%);transform:scale(1.18)}
+    .viz-ring-2{background:radial-gradient(circle, hsl(var(--rest-fill)/0.08) 0%, transparent 100%);transform:scale(1.35)}
+    .viz-circle{
+      position:relative;z-index:2;
+      width:130px;height:130px;border-radius:50%;
+      background:radial-gradient(circle at 38% 38%, hsl(var(--rest-fill)) 0%, hsl(var(--rest-fill)/0.82) 100%);
+      box-shadow:0 4px 28px hsl(var(--rest-fill)/0.35), 0 0 0 1px hsl(var(--rest-fill)/0.18);
+      transition:width .1s, height .1s, background .4s, box-shadow .4s;
+      will-change:width,height,background,box-shadow;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .viz-label{
+      font-family:var(--font-heading);font-size:.7rem;font-weight:600;
+      letter-spacing:.12em;text-transform:uppercase;
+      color:white;opacity:.92;text-shadow:0 1px 3px rgba(0,0,0,.18);
+      pointer-events:none;user-select:none;text-align:center;line-height:1.3;
+    }
+
+    /* ── Session meta ── */
+    .session-meta{display:flex;gap:2rem;justify-content:center;align-items:center;flex-wrap:wrap}
+    .meta-item{text-align:center}
+    .meta-val{font-family:var(--font-heading);font-size:1.1rem;font-weight:600;color:var(--text);line-height:1}
+    .meta-sub{font-size:.68rem;font-weight:500;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin-top:.2rem}
+
+    /* ── Session controls ── */
+    .session-controls{padding:.85rem 1.5rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem}
+    .ppb{font-family:var(--font-heading);font-size:.8rem;font-weight:600;padding:.6rem 1.4rem;border:none;background:var(--accent);color:white;cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:.5rem;flex-shrink:0}
+    .ppb:hover{background:var(--accent-hover)}
+    .tri{width:0;height:0;border-left:9px solid white;border-top:5px solid transparent;border-bottom:5px solid transparent;display:inline-block;flex-shrink:0}
+    .bars{display:inline-flex;gap:3px;align-items:center}
+    .bars span{display:block;width:3px;height:11px;background:white}
+    .session-right{display:flex;align-items:center;gap:.75rem}
+    .db{font-family:var(--font-body);font-size:.8rem;font-weight:500;padding:.45rem 1.1rem;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer;transition:all .12s}
+    .db:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+    .db:disabled{opacity:.45;cursor:not-allowed}
+    .rs{font-size:.75rem;color:var(--muted)}
+
+    footer{border-top:1px solid var(--border);padding:1.5rem 2rem;text-align:center;font-size:.8rem;color:var(--muted);margin-top:2rem}
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Sensory Intelligence Lab</h1>
+  <nav>
+    <a href="/sensory-intelligence-lab/dashboard/">Home</a>
+    <a href="/sensory-intelligence-lab/dashboard/">Dashboard</a>
+    <a href="/sensory-intelligence-lab/account/">Account</a>
+    <a href="/sensory-intelligence-lab/sessions/">Sessions</a>
+    <a href="/blog/">Blog</a>
+  </nav>
+</header>
+
+<nav aria-label="Breadcrumb" class="bc">
+  <ol>
+    <li><a href="/sensory-intelligence-lab/dashboard/">Home</a></li>
+    <li class="mid"><a href="/sensory-intelligence-lab/dashboard/">Dashboard</a></li>
+    <li>Breath Regulation</li>
+  </ol>
+</nav>
+
+<main>
+  <div class="ph">
+    <h2>Breath Regulation</h2>
+    <p>Choose a breathing pattern. The circle and sound will guide each breath — simply follow what you see and hear. No counting required.</p>
+  </div>
+
+  <p class="sl">Choose a pattern</p>
+
+  <div class="pattern-grid">
+
+    <button class="pb" data-p="478" onclick="selectPattern('478',this)">
+      <span class="pname">4–7–8 Breath</span>
+      <span class="ptiming">Inhale 4 · Hold 7 · Exhale 8</span>
+      <span class="pdesc">Activates the parasympathetic nervous system through extended exhale and breath retention. 8 breaths · ~4 min.</span>
+    </button>
+
+    <button class="pb" data-p="box" onclick="selectPattern('box',this)">
+      <span class="pname">Box Breathing</span>
+      <span class="ptiming">Inhale 4 · Hold 4 · Exhale 4 · Hold 4</span>
+      <span class="pdesc">Symmetric four-phase cycle used for nervous system regulation and focused calm. 10 breaths · ~3 min.</span>
+    </button>
+
+    <button class="pb" data-p="physiological" onclick="selectPattern('physiological',this)">
+      <span class="pname">Physiological Sigh</span>
+      <span class="ptiming">Double inhale · Long exhale</span>
+      <span class="pdesc">Two-part inhale deflates alveolar collapse; extended exhale rapidly down-regulates stress. 10 breaths · ~3 min.</span>
+    </button>
+
+    <button class="pb" data-p="resonant" onclick="selectPattern('resonant',this)">
+      <span class="pname">Resonant Breathing</span>
+      <span class="ptiming">Inhale 5 · Exhale 5</span>
+      <span class="pdesc">Breathing at ~6 cycles per minute synchronises heart rate variability. Even, rhythmic, meditative. 18 breaths · ~3 min.</span>
+    </button>
+
+  </div>
+
+  <div class="mantra" id="mantra"><span id="mtext"></span><span class="attr" id="mattr"></span></div>
+
+  <div class="ar">
+    <button class="gb" id="startBtn" disabled onclick="startSession()">Begin session</button>
+  </div>
+
+  <div class="session" id="session">
+
+    <div class="viz-wrap">
+      <div class="viz-outer">
+        <div class="viz-ring viz-ring-2" id="ring2"></div>
+        <div class="viz-ring viz-ring-1" id="ring1"></div>
+        <div class="viz-circle" id="vizCircle">
+          <div class="viz-label" id="vizLabel">Settle</div>
+        </div>
+      </div>
+      <div class="session-meta">
+        <div class="meta-item">
+          <div class="meta-val" id="breathCount">—</div>
+          <div class="meta-sub">Breath</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-val" id="timeLeft">—</div>
+          <div class="meta-sub">Remaining</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-val" id="totalBreaths">—</div>
+          <div class="meta-sub">Total breaths</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="session-controls">
+      <button class="ppb" id="ppb" onclick="togglePlay()">
+        <span id="icon" class="tri"></span>
+        <span id="plabel">Play</span>
+      </button>
+      <div class="session-right">
+        <span class="rs" id="rs">Rendering audio…</span>
+        <button class="db" id="dlbtn" disabled onclick="dlWav()">Download WAV</button>
+      </div>
+    </div>
+
+  </div>
+
+  <br>
+  <h2>How these exercises work</h2>
+  <br>
+  <p>Each breathing pattern is drawn from clinical and research contexts where voluntary breath control has been shown to influence autonomic nervous system activity — specifically the balance between sympathetic (activating) and parasympathetic (calming) responses.</p>
+  <br>
+  <p>The extended exhale used in the 4–7–8 breath and the physiological sigh increases vagal tone, which is associated with reduced heart rate and a shift away from stress arousal. Box breathing's symmetrical structure is used in high-performance and clinical settings for sustained regulation. Resonant breathing targets the specific frequency (~0.1 Hz) at which heart rate variability peaks, producing measurable coherence between cardiac and respiratory rhythm.</p>
+  <br>
+  <p>The accompanying soundscape follows the shape of each breath: the fundamental tone and harmonic richness expand on inhale and contract on exhale, giving the sound the same quality of opening and closing as the breath itself. You do not need to consciously follow the pattern — the visual and sound are designed to entrain the body gently.</p>
+</main>
+
+<footer><p>Jordan Elias Music Therapy · Berlin · <a href="/contact/">Contact</a></p></footer>
+
+<script>
+'use strict';
+
+// ─────────────────────────────────────────────────────────
+// BREATHING PATTERNS
+// phase: { label, duration, type: 'inhale'|'hold'|'exhale'|'rest' }
+// ─────────────────────────────────────────────────────────
+const PATTERNS = {
+  '478': {
+    name: '4–7–8 Breath',
+    breaths: 8,
+    settleTime: 5,
+    phases: [
+      { label: 'Inhale',  dur: 4,  type: 'inhale' },
+      { label: 'Hold',    dur: 7,  type: 'hold'   },
+      { label: 'Exhale',  dur: 8,  type: 'exhale' },
+    ],
+    fund: 110,
+    mantra: { t: 'Sound your breath as if it were the beginning of a word you do not yet know.', a: 'After Pauline Oliveros, Sonic Meditations' },
+  },
+  'box': {
+    name: 'Box Breathing',
+    breaths: 10,
+    settleTime: 5,
+    phases: [
+      { label: 'Inhale',  dur: 4,  type: 'inhale' },
+      { label: 'Hold',    dur: 4,  type: 'hold'   },
+      { label: 'Exhale',  dur: 4,  type: 'exhale' },
+      { label: 'Rest',    dur: 4,  type: 'rest'   },
+    ],
+    fund: 98,
+    mantra: { t: 'Expand to the whole field of sound. You do not need to gather yourself — only listen.', a: 'After Pauline Oliveros, Deep Listening' },
+  },
+  'physiological': {
+    name: 'Physiological Sigh',
+    breaths: 10,
+    settleTime: 5,
+    phases: [
+      { label: 'Inhale',      dur: 2,   type: 'inhale'  },
+      { label: 'Inhale+',     dur: 1,   type: 'inhale'  },
+      { label: 'Exhale',      dur: 6,   type: 'exhale'  },
+    ],
+    fund: 82.4,
+    mantra: { t: 'The lowest sound is still a sound. Weight and stillness are not the same as absence.', a: 'After Salomé Voegelin, Listening to Noise and Silence' },
+  },
+  'resonant': {
+    name: 'Resonant Breathing',
+    breaths: 18,
+    settleTime: 4,
+    phases: [
+      { label: 'Inhale',  dur: 5,  type: 'inhale' },
+      { label: 'Exhale',  dur: 5,  type: 'exhale' },
+    ],
+    fund: 110,
+    mantra: { t: 'Include your listening in the sound. Breathe more deeply. What is slow can choose its own moment.', a: 'After Pauline Oliveros, Deep Listening' },
+  },
+};
+
+// ─────────────────────────────────────────────────────────
+// PRNG
+// ─────────────────────────────────────────────────────────
+function mkRng(seed) {
+  let s = seed >>> 0;
+  return () => {
+    s = (s + 0x6D2B79F5) >>> 0;
+    let t = Math.imul(s ^ s>>>15, 1|s);
+    t = (t + Math.imul(t ^ t>>>7, 61|t)) ^ t;
+    return ((t ^ t>>>14) >>> 0) / 4294967296;
+  };
+}
+
+// ─────────────────────────────────────────────────────────
+// MATH
+// ─────────────────────────────────────────────────────────
+const clamp = (v,lo,hi) => v<lo?lo:v>hi?hi:v;
+const lerp   = (a,b,t) => a+(b-a)*clamp(t,0,1);
+
+function easeInOut(t) { return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2; }
+function easeOut(t)   { return 1-Math.pow(1-clamp(t,0,1),2.2); }
+function easeIn(t)    { return Math.pow(clamp(t,0,1),2.2); }
+
+// ─────────────────────────────────────────────────────────
+// HSL COLOUR HELPERS
+// CSS vars store as "H, S%, L%" strings for interpolation
+// ─────────────────────────────────────────────────────────
+const PHASE_HSL = {
+  inhale:  [196, 72, 62],   // cool blue-teal
+  hold:    [165, 40, 55],   // sage-green
+  exhale:  [148, 38, 38],   // deep forest
+  rest:    [150, 18, 68],   // soft grey-sage
+  settle:  [150, 15, 75],   // near-neutral
+};
+
+function hslStr([h,s,l]) { return `${h}, ${s}%, ${l}%`; }
+
+function lerpHSL(a, b, t) {
+  return [
+    lerp(a[0],b[0],t),
+    lerp(a[1],b[1],t),
+    lerp(a[2],b[2],t),
+  ];
+}
+
+// ─────────────────────────────────────────────────────────
+// VISUALISER SIZES (fraction of outer container)
+// ─────────────────────────────────────────────────────────
+const SIZES = {
+  settle:  0.59,
+  inhale:  1.00,
+  hold:    0.97,
+  exhale:  0.46,
+  rest:    0.48,
+};
+
+// ─────────────────────────────────────────────────────────
+// SESSION STATE
+// ─────────────────────────────────────────────────────────
+const S = {
+  pattern: null,
+  seed: null,
+  isPlaying: false,
+  started: false,
+  liveCtx: null,
+  wavUrl: null,
+  rafId: null,
+
+  // Timer — wall-clock based
+  startWall: null,
+  totalPausedMs: 0,
+  pauseStartWall: null,
+
+  // Breath tracking
+  breathIdx: 0,
+  phaseIdx: 0,
+  phaseStart: 0,      // session-elapsed seconds when current phase began
+  inSettle: true,
+  done: false,
+
+  // Continuous smoothed state for visualiser
+  vizSize: SIZES.settle,
+  vizHSL: [...PHASE_HSL.settle],
+};
+
+function elapsed() {
+  if (S.startWall === null) return 0;
+  return (performance.now() - S.startWall - S.totalPausedMs) / 1000;
+}
+
+// ─────────────────────────────────────────────────────────
+// TOTAL DURATION
+// ─────────────────────────────────────────────────────────
+function totalDuration(p) {
+  const cycleLen = p.phases.reduce((s,ph)=>s+ph.dur, 0);
+  return p.settleTime + p.breaths * cycleLen;
+}
+
+function fmt(s) { s=Math.max(0,Math.floor(s)); return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; }
+
+// ─────────────────────────────────────────────────────────
+// PATTERN SELECTION
+// ─────────────────────────────────────────────────────────
+function selectPattern(key, btn) {
+  document.querySelectorAll('.pb').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  S.pattern = key;
+
+  const p = PATTERNS[key];
+  const m = p.mantra;
+  document.getElementById('mtext').textContent = m.t;
+  document.getElementById('mattr').textContent = '— '+m.a;
+  document.getElementById('mantra').classList.add('vis');
+  document.getElementById('startBtn').disabled = false;
+  document.getElementById('startBtn').textContent = 'Begin session';
+}
+
+// ─────────────────────────────────────────────────────────
+// START SESSION
+// ─────────────────────────────────────────────────────────
+async function startSession() {
+  if (!S.pattern) return;
+  const p = PATTERNS[S.pattern];
+
+  // Reset state
+  if (S.liveCtx) { S.liveCtx.close(); S.liveCtx = null; }
+  cancelAnimationFrame(S.rafId);
+  if (S.wavUrl) { URL.revokeObjectURL(S.wavUrl); S.wavUrl = null; }
+
+  S.seed           = (Math.random()*0xFFFFFF|0);
+  S.startWall      = performance.now();
+  S.totalPausedMs  = 0;
+  S.pauseStartWall = null;
+  S.isPlaying      = true;
+  S.started        = true;
+  S.breathIdx      = 0;
+  S.phaseIdx       = 0;
+  S.phaseStart     = 0;
+  S.inSettle       = true;
+  S.done           = false;
+  S.vizSize        = SIZES.settle;
+  S.vizHSL         = [...PHASE_HSL.settle];
+
+  document.getElementById('startBtn').textContent = 'Restart';
+  document.getElementById('session').classList.add('vis');
+  document.getElementById('totalBreaths').textContent = p.breaths;
+  document.getElementById('breathCount').textContent = '—';
+  document.getElementById('timeLeft').textContent = fmt(totalDuration(p));
+  document.getElementById('dlbtn').disabled = true;
+  document.getElementById('rs').textContent = 'Rendering audio…';
+
+  setIcon(true);
+  buildLive();
+  S.rafId = requestAnimationFrame(tick);
+
+  // Offline WAV
+  try {
+    const rng2 = mkRng(S.seed);
+    const dur  = totalDuration(p);
+    const SR   = 44100;
+    const oCtx = new OfflineAudioContext(1, Math.ceil(dur*SR), SR);
+    buildGraph(oCtx, p, rng2, dur);
+    const buf  = await oCtx.startRendering();
+    const blob = toWav(buf);
+    S.wavUrl   = URL.createObjectURL(blob);
+    document.getElementById('dlbtn').disabled = false;
+    document.getElementById('rs').textContent = 'WAV ready';
+  } catch(e) {
+    document.getElementById('rs').textContent = 'Render failed';
+    console.error(e);
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// TICK — BREATH SEQUENCER + VISUALISER
+// ─────────────────────────────────────────────────────────
+function tick() {
+  if (!S.isPlaying || S.done) return;
+
+  const el = elapsed();
+  const p  = PATTERNS[S.pattern];
+  const dur = totalDuration(p);
+
+  // Remaining time
+  document.getElementById('timeLeft').textContent = fmt(Math.max(0, dur - el));
+
+  if (el >= dur) { onComplete(); return; }
+
+  const cycleLen = p.phases.reduce((s,ph)=>s+ph.dur, 0);
+
+  // ── Settle phase ──
+  if (S.inSettle) {
+    if (el < p.settleTime) {
+      // Gentle pulse during settle — just hold steady
+      animateCircle('settle', 1.0, PHASE_HSL.settle);
+      document.getElementById('vizLabel').textContent = 'Settle';
+      S.rafId = requestAnimationFrame(tick);
+      return;
+    } else {
+      S.inSettle = false;
+      S.phaseStart = p.settleTime;
+      S.phaseIdx   = 0;
+      S.breathIdx  = 1;
+    }
+  }
+
+  // ── Breath sequencer ──
+  const breathEl = el - p.settleTime;
+  const breathTotal = p.breaths * cycleLen;
+
+  if (breathEl >= breathTotal) { onComplete(); return; }
+
+  // Which breath cycle are we in?
+  const cyclePos    = breathEl % cycleLen;
+  const breathNum   = Math.floor(breathEl / cycleLen) + 1;
+  document.getElementById('breathCount').textContent = Math.min(breathNum, p.breaths);
+
+  // Which phase within cycle?
+  let acc = 0;
+  let phaseIdx = 0;
+  for (let i=0; i<p.phases.length; i++) {
+    if (cyclePos < acc + p.phases[i].dur) { phaseIdx = i; break; }
+    acc += p.phases[i].dur;
+  }
+  const phase    = p.phases[phaseIdx];
+  const phaseT   = (cyclePos - acc) / phase.dur; // 0..1 within phase
+  const phaseType = phase.type;
+
+  // Smooth easing within phase
+  let eased;
+  if (phaseType === 'inhale')      eased = easeIn(phaseT);
+  else if (phaseType === 'exhale') eased = easeOut(phaseT);
+  else                             eased = 1.0; // hold/rest = static
+
+  // Target size & colour
+  const targetHSL  = PHASE_HSL[phaseType];
+  const targetSize = SIZES[phaseType];
+
+  // For smooth inter-phase transition: lerp current viz toward target
+  // Fast follow on inhale, gentler on exhale/rest
+  const followSpeed = phaseType === 'inhale' ? 0.09 : phaseType === 'exhale' ? 0.06 : 0.04;
+  S.vizSize = lerp(S.vizSize, lerp(phaseType==='inhale'?SIZES.exhale:SIZES.inhale, targetSize, eased), followSpeed);
+  S.vizHSL  = lerpHSL(S.vizHSL, targetHSL, followSpeed * 0.8);
+
+  animateCircle(phaseType, eased, targetHSL);
+  document.getElementById('vizLabel').textContent = phase.label;
+
+  S.rafId = requestAnimationFrame(tick);
+}
+
+function animateCircle(type, t, targetHSL) {
+  const circle = document.getElementById('vizCircle');
+  const ring1  = document.getElementById('ring1');
+  const ring2  = document.getElementById('ring2');
+
+  // Size: 130px base at full exhale, 200px at full inhale
+  const minPx = 72, maxPx = 190;
+  const sizePx = lerp(minPx, maxPx, S.vizSize);
+  circle.style.width  = sizePx + 'px';
+  circle.style.height = sizePx + 'px';
+
+  // Colour
+  const [h,sat,l] = S.vizHSL;
+  const hslStr = `${Math.round(h)}, ${Math.round(sat)}%, ${Math.round(l)}%`;
+  circle.style.background = `radial-gradient(circle at 38% 38%, hsl(${hslStr}) 0%, hsl(${Math.round(h)}, ${Math.round(sat)}%, ${Math.round(l-10)}%) 100%)`;
+  circle.style.boxShadow  = `0 4px 36px hsl(${hslStr}/0.40), 0 0 0 1px hsl(${hslStr}/0.18)`;
+
+  // Rings follow at a lag
+  const rs = 1 + (S.vizSize - 0.5) * 0.22;
+  ring1.style.transform = `scale(${lerp(1.1, 1.28, S.vizSize)})`;
+  ring1.style.background = `radial-gradient(circle, hsl(${hslStr}/0.10) 0%, hsl(${hslStr}/0.03) 70%, transparent 100%)`;
+  ring2.style.transform = `scale(${lerp(1.22, 1.52, S.vizSize)})`;
+  ring2.style.background = `radial-gradient(circle, hsl(${hslStr}/0.06) 0%, transparent 100%)`;
+}
+
+function onComplete() {
+  S.done = true;
+  S.isPlaying = false;
+  cancelAnimationFrame(S.rafId);
+  setIcon(false);
+  document.getElementById('vizLabel').textContent = 'Complete';
+  document.getElementById('breathCount').textContent = PATTERNS[S.pattern].breaths;
+  document.getElementById('timeLeft').textContent = '0:00';
+  document.getElementById('plabel').textContent = 'Begin again';
+  // Settle circle back to neutral
+  S.vizSize = SIZES.settle;
+  S.vizHSL  = [...PHASE_HSL.settle];
+  animateCircle('settle', 1, PHASE_HSL.settle);
+}
+
+// ─────────────────────────────────────────────────────────
+// PLAY / PAUSE
+// ─────────────────────────────────────────────────────────
+function togglePlay() {
+  if (!S.started) return;
+
+  if (S.done) { startSession(); return; }
+
+  if (S.isPlaying) {
+    S.pauseStartWall = performance.now();
+    S.liveCtx && S.liveCtx.suspend();
+    S.isPlaying = false;
+    cancelAnimationFrame(S.rafId);
+    setIcon(false);
+  } else {
+    if (S.pauseStartWall !== null) {
+      S.totalPausedMs += performance.now() - S.pauseStartWall;
+      S.pauseStartWall = null;
+    }
+    S.liveCtx && S.liveCtx.resume().then(() => {
+      S.isPlaying = true;
+      setIcon(true);
+      S.rafId = requestAnimationFrame(tick);
+    });
+  }
+}
+
+function setIcon(playing) {
+  const ic = document.getElementById('icon'), lb = document.getElementById('plabel');
+  if (playing) {
+    ic.className=''; ic.innerHTML='<span class="bars"><span></span><span></span></span>';
+    lb.textContent='Pause';
+  } else {
+    ic.className='tri'; ic.innerHTML='';
+    lb.textContent = S.done ? 'Begin again' : 'Resume';
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// AUDIO ENGINE
+// ─────────────────────────────────────────────────────────
+const SR = 44100;
+
+function buildLive() {
+  const p   = PATTERNS[S.pattern];
+  const dur = totalDuration(p);
+  const rng = mkRng(S.seed);
+  S.liveCtx = new (window.AudioContext||window.webkitAudioContext)({sampleRate:SR});
+  buildGraph(S.liveCtx, p, rng, dur);
+}
+
+function buildGraph(ctx, pattern, rng, dur) {
+  const now  = ctx.currentTime;
+  const FI   = 3, FO = 6;
+
+  // ── Master gain ──
+  const master = ctx.createGain();
+  master.connect(ctx.destination);
+  master.gain.setValueAtTime(0, now);
+  master.gain.linearRampToValueAtTime(0.85, now+FI);
+  master.gain.setValueAtTime(0.85, now+dur-FO);
+  master.gain.linearRampToValueAtTime(0, now+dur);
+
+  const fund = pattern.fund;
+  const cycleLen = pattern.phases.reduce((s,ph)=>s+ph.dur,0);
+
+  // ── Build breath automation schedule ──
+  // For each breath phase we know exact start/end times.
+  // We schedule oscillator frequency, filter, and gain to follow.
+
+  // JI ratios for drone voices — always consonant (this is a calming module)
+  const RATIOS = [[1,1],[3,2],[2,1],[4,3],[9,4]];
+  const N_VOICES = 4;
+
+  for (let v=0; v<N_VOICES; v++) {
+    const r = RATIOS[v % RATIOS.length];
+    const baseFund = fund * r[0] / r[1];
+
+    const osc   = ctx.createOscillator();
+    const filt  = ctx.createBiquadFilter();
+    const shelf = ctx.createBiquadFilter();
+    const pan   = ctx.createStereoPanner();
+    const gV    = ctx.createGain();
+
+    osc.connect(filt); filt.connect(shelf); shelf.connect(pan); pan.connect(gV); gV.connect(master);
+
+    osc.type = 'sine';
+    filt.type = 'lowpass';
+    shelf.type = 'lowshelf';
+    shelf.frequency.value = 220;
+
+    // Slow filter macro-LFO unique per voice
+    const mLfo = ctx.createOscillator();
+    const mLfoG = ctx.createGain();
+    mLfo.type = 'sine';
+    mLfo.frequency.value = 1/(40+rng()*30);
+    mLfoG.gain.value = 120 + rng()*160;
+    mLfo.connect(mLfoG); mLfoG.connect(filt.frequency);
+    mLfo.start(now); mLfo.stop(now+dur+.2);
+
+    // Pan — gentle slow sway
+    const panAmt   = (v%2===0?1:-1) * (0.18 + rng()*.22);
+    const panSpeed = 0.004 + v*.002;
+
+    // Settle: neutral, mid-filter, low amplitude
+    osc.frequency.setValueAtTime(baseFund * 0.998, now);
+    filt.frequency.setValueAtTime(600, now);
+    filt.Q.setValueAtTime(0.6, now);
+    shelf.gain.setValueAtTime(0, now);
+    gV.gain.setValueAtTime(0.04 / N_VOICES, now);
+    pan.pan.setValueAtTime(0, now);
+
+    // Schedule across all breath cycles
+    const settleEnd = pattern.settleTime;
+
+    // Settle ramp in
+    osc.frequency.linearRampToValueAtTime(baseFund, now+settleEnd);
+    filt.frequency.linearRampToValueAtTime(800, now+settleEnd);
+    gV.gain.linearRampToValueAtTime(0.12 / N_VOICES, now+settleEnd);
+
+    for (let b=0; b<pattern.breaths; b++) {
+      const cycleStart = settleEnd + b*cycleLen;
+      let phaseAcc = 0;
+
+      for (let pi=0; pi<pattern.phases.length; pi++) {
+        const ph = pattern.phases[pi];
+        const t0 = now + cycleStart + phaseAcc;
+        const t1 = t0 + ph.dur;
+        phaseAcc += ph.dur;
+
+        // Frequency — rise on inhale, fall on exhale, stable on hold/rest
+        // Minor 3rd (6/5) upward shift on inhale; back on exhale
+        let freqTarget;
+        if (ph.type === 'inhale') {
+          freqTarget = baseFund * (1 + 0.07 * (r[1]/r[0])); // gentle upward
+        } else if (ph.type === 'exhale') {
+          freqTarget = baseFund * 0.993;
+        } else if (ph.type === 'hold') {
+          // sustain inhale pitch gently
+          freqTarget = baseFund * 1.04;
+        } else {
+          // rest — return to base
+          freqTarget = baseFund;
+        }
+
+        osc.frequency.linearRampToValueAtTime(freqTarget, t1);
+
+        // Filter brightness — open on inhale, close on exhale
+        const fcTarget = ph.type==='inhale' ? 2400+rng()*600
+                       : ph.type==='hold'   ? 2000
+                       : ph.type==='exhale' ? 550+rng()*150
+                                             : 480;
+        filt.frequency.linearRampToValueAtTime(fcTarget, t1);
+
+        // Q — tighter on hold, loose elsewhere
+        const fqTarget = ph.type==='hold' ? 1.2 : 0.5;
+        filt.Q.linearRampToValueAtTime(fqTarget, t1);
+
+        // Shelf gain — warmth opens on inhale
+        const sgTarget = ph.type==='inhale' ? 3.5 : ph.type==='hold' ? 2.5 : 0.5;
+        shelf.gain.linearRampToValueAtTime(sgTarget, t1);
+
+        // Voice amplitude — swell on inhale, retreat on exhale
+        const vAmpBase = 0.12 / N_VOICES;
+        const ampTarget = ph.type==='inhale' ? vAmpBase*1.6
+                        : ph.type==='hold'   ? vAmpBase*1.4
+                        : ph.type==='exhale' ? vAmpBase*0.7
+                                              : vAmpBase*0.6;
+        gV.gain.linearRampToValueAtTime(ampTarget, t1);
+
+        // Pan motion — sinusoidal approximated by linear segments
+        const prog = (cycleStart + phaseAcc) / dur;
+        const panV = Math.sin(prog*Math.PI*2*panSpeed*dur) * panAmt;
+        pan.pan.linearRampToValueAtTime(clamp(panV,-1,1), t1);
+      }
+    }
+
+    // Fade to settle colour after last breath
+    const lastBreathEnd = now + settleEnd + pattern.breaths*cycleLen;
+    osc.frequency.linearRampToValueAtTime(baseFund, lastBreathEnd+2);
+    filt.frequency.linearRampToValueAtTime(700, lastBreathEnd+2);
+    gV.gain.linearRampToValueAtTime(0.08/N_VOICES, lastBreathEnd+2);
+
+    osc.start(now); osc.stop(now+dur+.2);
+  }
+
+  // ── Sub-drone (grounding) ──
+  {
+    const sub = ctx.createOscillator();
+    const subF= ctx.createBiquadFilter();
+    const subG= ctx.createGain();
+    sub.connect(subF); subF.connect(subG); subG.connect(master);
+    sub.type='sine';
+    sub.frequency.value = fund * 0.5;
+    subF.type='lowpass'; subF.frequency.value=160; subF.Q.value=0.5;
+
+    // Sub breathes gently — louder on exhale (grounding), quieter on inhale
+    subG.gain.setValueAtTime(0.02, now);
+    subG.gain.linearRampToValueAtTime(0.06, now+pattern.settleTime);
+
+    const settleEnd = pattern.settleTime;
+    for (let b=0; b<pattern.breaths; b++) {
+      let phaseAcc = 0;
+      const cycleStart = settleEnd + b*cycleLen;
+      for (const ph of pattern.phases) {
+        const t1 = now + cycleStart + phaseAcc + ph.dur;
+        const aT = ph.type==='inhale' ? 0.04 : ph.type==='exhale' ? 0.10 : 0.07;
+        subG.gain.linearRampToValueAtTime(aT, t1);
+        phaseAcc += ph.dur;
+      }
+    }
+    sub.start(now); sub.stop(now+dur+.2);
+  }
+
+  // ── Breath-texture: very soft noise swell on each inhale ──
+  {
+    const nLen = Math.min(SR*6, 264600);
+    const nBuf = ctx.createBuffer(1, nLen, SR);
+    const nd   = nBuf.getChannelData(0);
+    let b0=0,b1=0,b2=0,b3=0,b4=0;
+    const localRng = mkRng(rng()*0xFFFF);
+    for (let i=0;i<nLen;i++) {
+      const w=localRng()*2-1;
+      b0=.99886*b0+w*.0555179; b1=.99332*b1+w*.0750759;
+      b2=.96900*b2+w*.1538520; b3=.86650*b3+w*.3104856;
+      b4=.55000*b4+w*.5329522;
+      nd[i]=(b0+b1+b2+b3+b4+w*.1)*.11;
+    }
+    const nSrc=ctx.createBufferSource(); nSrc.buffer=nBuf; nSrc.loop=true;
+    const nHp=ctx.createBiquadFilter(); nHp.type='highpass'; nHp.frequency.value=1800;
+    const nLp=ctx.createBiquadFilter(); nLp.type='lowpass'; nLp.frequency.value=5000;
+    const nG=ctx.createGain();
+    nSrc.connect(nHp); nHp.connect(nLp); nLp.connect(nG); nG.connect(master);
+
+    nG.gain.setValueAtTime(0, now);
+
+    const settleEnd = pattern.settleTime;
+    for (let b=0; b<pattern.breaths; b++) {
+      let phaseAcc = 0;
+      const cycleStart = settleEnd + b*cycleLen;
+      for (const ph of pattern.phases) {
+        const t0 = now + cycleStart + phaseAcc;
+        const t1 = t0 + ph.dur;
+        // Subtle air texture — only on inhale
+        const aT = ph.type==='inhale' ? 0.018 : 0.0;
+        nG.gain.linearRampToValueAtTime(aT, t1 - 0.3);
+        nG.gain.linearRampToValueAtTime(0, t1);
+        phaseAcc += ph.dur;
+      }
+    }
+    nSrc.start(now); nSrc.stop(now+dur+.2);
+  }
+
+  return master;
+}
+
+// ─────────────────────────────────────────────────────────
+// WAV EXPORT
+// ─────────────────────────────────────────────────────────
+function toWav(buf) {
+  const ch=buf.numberOfChannels,sr=buf.sampleRate,len=buf.length;
+  const bps=16,bpsa=2,ba=ch*bpsa,ds=len*ba;
+  const ab=new ArrayBuffer(44+ds),v=new DataView(ab);
+  const ws=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i));};
+  ws(0,'RIFF');v.setUint32(4,36+ds,true);ws(8,'WAVE');
+  ws(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);
+  v.setUint16(22,ch,true);v.setUint32(24,sr,true);v.setUint32(28,sr*ba,true);
+  v.setUint16(32,ba,true);v.setUint16(34,bps,true);
+  ws(36,'data');v.setUint32(40,ds,true);
+  const d=buf.getChannelData(0); let o=44;
+  for(let i=0;i<len;i++){const s=Math.max(-1,Math.min(1,d[i]));v.setInt16(o,s<0?s*0x8000:s*0x7FFF,true);o+=2;}
+  return new Blob([ab],{type:'audio/wav'});
+}
+
+function dlWav() {
+  if (!S.wavUrl) return;
+  const a=document.createElement('a');
+  a.href=S.wavUrl;
+  a.download=`breath-${S.pattern}-${S.seed}.wav`;
+  a.click();
+}
+
+// ─────────────────────────────────────────────────────────
+// KEYBOARD
+// ─────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.code==='Space' && e.target.tagName!=='BUTTON' && e.target.tagName!=='INPUT') {
+    e.preventDefault();
+    if (S.started) togglePlay();
+  }
+});
+</script>
+</body>
+</html>
