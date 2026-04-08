@@ -1,0 +1,8 @@
+[build]
+  publish = "."
+  command = "npm run build" # or leave blank if static
+
+[[redirects]]
+  from = "/dashboard/*"
+  to = "/dashboard/index.html"
+  status = 200
