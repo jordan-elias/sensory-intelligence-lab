@@ -80,10 +80,9 @@
     .ptime{font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0}
 
     .pw{padding:.75rem 1.5rem 1rem}
-    .pbg{height:6px;background:var(--border);position:relative;cursor:pointer;user-select:none}
-    .pbg:hover{background:#d8d3ca}
+    .pbg{height:6px;background:var(--border);position:relative;user-select:none}
     .pfill{height:100%;background:var(--accent);width:0%;pointer-events:none}
-    .phandle{position:absolute;top:50%;transform:translate(-50%,-50%);width:14px;height:14px;background:var(--accent);border:2px solid white;cursor:grab;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+    .phandle{position:absolute;top:50%;transform:translate(-50%,-50%);width:14px;height:14px;background:var(--accent);border:2px solid white;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,.2)}
     .pm{position:absolute;top:-4px;width:1px;height:14px;background:var(--border);pointer-events:none}
 
     .pf{padding:.85rem 1.5rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem}
@@ -175,28 +174,6 @@
       <button class="db" id="dlbtn" disabled onclick="dlWav()">Download WAV</button>
     </div>
   </div>
-
-  <br>
-
-  <h2>How the soundscapes work</h2>
-
-<br>
-  <p>
-    Each soundscape is generated in real time rather than played from a recording. The system continuously shapes elements like rhythm, harmony, texture, and movement to support a gradual shift in attention and nervous system state. Because the sounds are created generatively, no two sessions are ever exactly the same — even when you select the same option.
-  </p>
-
-<br>
-  
-  <p>
-    The soundscapes follow a principle used in music therapy called the iso principle. Instead of forcing the listener into a new state immediately, the music begins by matching your current energy, then slowly guides you toward the desired state. This gradual transition helps the nervous system adapt comfortably and naturally.
-  </p>
-
-  <br>
-  
-  <p>
-    The structure and musical elements of each soundscape are guided by music cognition research and the neuroscience of sound perception, which explore how people respond to sound and how specific musical features can support attention, emotional regulation, and a sense of stability.
-  </p>
-
 </main>
 
 <footer><p>Jordan Elias Music Therapy · Berlin · <a href="/contact/">Contact</a></p></footer>
@@ -615,7 +592,7 @@ function buildGraph(ctx, curState, tgtState, rng) {
     sub.start(now); sub.stop(now+DUR+.1);
   }
 
-  // ── Pink noise ──
+  // ── Pink noise with wave-swell modulation ──
   if (arc.noiseStart > 0.005) {
     const nLen = Math.min(ctx.sampleRate*8, 441000);
     const nBuf = ctx.createBuffer(1, nLen, ctx.sampleRate);
@@ -632,11 +609,29 @@ function buildGraph(ctx, curState, tgtState, rng) {
     const nHp=ctx.createBiquadFilter(); nHp.type='highpass';
     const nLp=ctx.createBiquadFilter(); nLp.type='lowpass'; nLp.frequency.value=9000;
     const nG=ctx.createGain();
-    nSrc.connect(nHp); nHp.connect(nLp); nLp.connect(nG); nG.connect(master);
+
+    // Wave-swell LFO: 0.07-0.13 Hz = 8-14 second wave period, unique each seed
+    const waveSwell = ctx.createGain();
+    const waveLfo   = ctx.createOscillator();
+    const waveLfoG  = ctx.createGain();
+    waveLfo.type = 'sine';
+    waveLfo.frequency.value = 0.07 + rng() * 0.06;
+    // Centre at 0.72, swing +-0.28 -> range 0.44-1.0 (deep trough to full crest)
+    waveSwell.gain.value = 0.72;
+    waveLfoG.gain.value  = 0.28;
+    waveLfo.connect(waveLfoG);
+    waveLfoG.connect(waveSwell.gain);
+    waveLfo.start(now); waveLfo.stop(now+DUR+.1);
+
+    nSrc.connect(nHp); nHp.connect(nLp); nLp.connect(nG); nG.connect(waveSwell); waveSwell.connect(master);
+
+    // Arc envelope: ensure noise is completely gone by 210s (start of arrival section)
     const NS=60;
     for (let i=0;i<=NS;i++) {
       const tn=i/NS, ct=curve(tn,'sigmoid'), t=now+tn*DUR;
-      const na=lerp(arc.noiseStart*norm, arc.noiseEnd*norm, ct);
+      // Hard fade to 0 between 68% (204s) and 72% (216s) of duration
+      const fadeOut = tn < 0.68 ? 1 : Math.max(0, 1-(tn-0.68)/0.04);
+      const na=lerp(arc.noiseStart*norm, arc.noiseEnd*norm, ct) * fadeOut;
       const nh=lerp(arc.noiseHpStart, arc.noiseHpEnd, ct);
       if (i===0) { nG.gain.setValueAtTime(na,t); nHp.frequency.setValueAtTime(nh,t); }
       else       { nG.gain.linearRampToValueAtTime(na,t); nHp.frequency.linearRampToValueAtTime(nh,t); }
@@ -746,7 +741,7 @@ const S = {
   pausedAt:null,           // elapsed seconds when paused (null if playing)
   totalPausedMs:0,         // accumulated pause duration in ms
   pauseStartWall:null,     // wall time when pause began
-  rafId:null, wavUrl:null, isDragging:false,
+  rafId:null, wavUrl:null,
 };
 
 // Derive true elapsed seconds from wall clock — immune to seek/rebuild
@@ -869,66 +864,7 @@ function setIcon(playing) {
   else         { ic.className='tri'; ic.innerHTML=''; lb.textContent = (S.pausedAt===null&&S.sessionStartWall===null)?'Play':'Resume'; }
 }
 
-// ─────────────────────────────────────────────────────────
-// SEEKABLE PROGRESS BAR
-// Seek rebuilds the audio graph for correct sonic content.
-// The global timer is SHIFTED so elapsed matches the seek point.
-// ─────────────────────────────────────────────────────────
-function seekToFrac(frac) {
-  frac = c01(frac);
-  const targetSec = frac * DUR;
-  if (targetSec >= DUR - 0.5) { onEnded(); return; }
-
-  const wasPlaying = S.isPlaying;
-
-  // Rebuild audio
-  cancelAnimationFrame(S.rafId);
-  if (S.liveCtx) { S.liveCtx.close(); S.liveCtx = null; }
-  S.isPlaying = false;
-
-  // Shift the global wall-clock timer so getElapsed() returns targetSec
-  // getElapsed = (now - sessionStartWall - totalPausedMs) / 1000 = targetSec
-  // => sessionStartWall = now - targetSec*1000 - totalPausedMs
-  // We reset totalPausedMs to 0 and recompute sessionStartWall
-  S.totalPausedMs = 0;
-  S.pauseStartWall = null;
-  S.sessionStartWall = performance.now() - targetSec * 1000;
-
-  buildLive(); // auto-starts playing
-
-  if (!wasPlaying) {
-    // Pause immediately after rebuild
-    S.liveCtx.suspend();
-    S.pauseStartWall = performance.now();
-    S.isPlaying = false;
-    cancelAnimationFrame(S.rafId);
-    setIcon(false);
-  }
-
-  // Update display
-  const pct = frac*100;
-  document.getElementById('pfill').style.width  = pct+'%';
-  document.getElementById('phandle').style.left = pct+'%';
-  document.getElementById('ptime').textContent  = fmt(targetSec)+' / 5:00';
-  document.getElementById('pphase').textContent = phaseName(targetSec);
-}
-
-// Progress bar pointer events
-document.addEventListener('DOMContentLoaded', () => {
-  const bg = document.getElementById('pbg');
-  if (!bg) return;
-  const frac = e => {
-    const r=bg.getBoundingClientRect();
-    const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
-    return c01(x/r.width);
-  };
-  bg.addEventListener('mousedown', e => { if (!S.liveCtx) return; S.isDragging=true; seekToFrac(frac(e)); });
-  bg.addEventListener('touchstart', e => { if (!S.liveCtx) return; e.preventDefault(); S.isDragging=true; seekToFrac(frac(e)); },{passive:false});
-  document.addEventListener('mousemove', e => { if (!S.isDragging) return; seekToFrac(frac(e)); });
-  document.addEventListener('touchmove', e => { if (!S.isDragging) return; e.preventDefault(); seekToFrac(frac(e)); },{passive:false});
-  document.addEventListener('mouseup',  ()=>{ S.isDragging=false; });
-  document.addEventListener('touchend', ()=>{ S.isDragging=false; });
-});
+// Progress bar is display-only — no seeking while playing
 
 // ─────────────────────────────────────────────────────────
 // GENERATE
