@@ -6,20 +6,7 @@
   <title>Dashboard | Sensory Intelligence Lab</title>
 
   <!-- Auth gate: runs before body renders -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    (async () => {
-      const { createClient } = supabase;
-      const _client = createClient('YOUR_SUPABASE_URL', 'YOUR_SUPABASE_ANON_KEY');
-      const { data: { session } } = await _client.auth.getSession();
-      if (!session) {
-        window.location.replace('/sensory-intelligence-lab/');
-      }
-      // Expose client globally for the rest of the page
-      window.__supabaseClient = _client;
-      window.__session = session;
-    })();
-  </script>
+<script src="/dashboard/auth-guard.js"></script>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
 
