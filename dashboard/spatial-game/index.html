@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script defer src="https://cloud.umani.is/script.js" data-website-id="b465c3e2-0fb1-4c36-b5db-6eaf0fe05cb7"></script>
+
+  <title>Spatial Sound Tracking: The Auditory Shell Game</title>
+  <meta name="description" content="Train spatial attention by tracking moving sound sources in 3D space.">
+  <meta name="author" content="Jordan Elias">
+
+  <link rel="canonical" href="https://www.jordanelias.de/blog/source-localization/">
+  <link rel="icon" type="image/png" sizes="64x64" href="/images/favicon.png">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+
+  <style>
+    .lab-section {
+      border: 1px solid var(--text);
+      padding: 1em;
+      margin: 0 0 1.5em;
+    }
+
+    .lab-section > h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text);
+      opacity: 0.5;
+      margin: 0 0 1em;
+    }
+
+    .gen-module { margin-bottom: 0; }
+
+    /* Compact inline stats */
+    .spatial-stats {
+      display: flex;
+      gap: 1em;
+      justify-content: center;
+      margin: 0.75em 0;
+      padding: 0.4em 0;
+      border-top: 1px solid var(--text);
+      border-bottom: 1px solid var(--text);
+    }
+
+    .stat-item { display: flex; align-items: baseline; gap: 0.3em; }
+    .stat-label { font-family: 'Inter', sans-serif; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); opacity: 0.5; }
+    .stat-value { font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; font-weight: 500; color: var(--text); }
+
+    /* Buttons */
+    .lab-btn {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 500;
+      background-color: transparent;
+      color: var(--text);
+      border: 2px solid var(--text);
+      padding: 0.4em 1em;
+      cursor: pointer;
+      white-space: nowrap;
+      min-width: 70px;
+      border-radius: 0;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+    .lab-btn:hover { background-color: var(--accent-hover); color: var(--bg); border-color: var(--accent-hover); }
+    .lab-btn.on { background-color: var(--text); color: var(--bg); }
+    .lab-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .lab-preset-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--text);
+      padding: 2px 10px;
+      border-radius: 0;
+      cursor: pointer;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+    .lab-preset-btn:hover { background-color: var(--accent-hover); color: var(--bg); }
+    .lab-preset-btn.on { background-color: var(--text); color: var(--bg); }
+
+    /* Rows */
+    .gen-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 0.6em;
+      flex-wrap: wrap;
+    }
+
+    .gen-row-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text);
+      opacity: 0.5;
+      white-space: nowrap;
+    }
+
+    /* Control row */
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 0.6em;
+    }
+
+    .control-row .lab-btn {
+      flex-shrink: 0;
+    }
+
+    .control-row .feedback-msg {
+      flex: 1;
+      min-width: 120px;
+    }
+
+    /* Feedback */
+    .feedback-msg {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      color: var(--text);
+      padding: 0.4em 1em;
+      border: 2px solid var(--text);
+      text-align: center;
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .feedback-msg.success { opacity: 1; }
+    .feedback-msg.error { opacity: 0.6; }
+    .feedback-msg:empty { opacity: 0.2; }
+
+    /* Sliders */
+    .lab-ctrl { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .lab-ctrl input[type=range] {
+      width: 100%; -webkit-appearance: none; appearance: none;
+      height: 2px; background: var(--text); outline: none; cursor: pointer; opacity: 0.5;
+    }
+    .lab-ctrl input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: var(--text); cursor: pointer;
+    }
+    .lab-ctrl input[type=range]::-moz-range-thumb {
+      width: 12px; height: 12px; border-radius: 50%; background: var(--text); border: none; cursor: pointer;
+    }
+    .lab-ctrl-bottom { display: flex; justify-content: space-between; align-items: baseline; }
+    .lab-ctrl-label { font-family: 'Inter', sans-serif; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); opacity: 0.5; }
+    .lab-ctrl-val { font-family: 'Inter', sans-serif; font-size: 0.65rem; color: var(--text); opacity: 0.7; }
+
+    /* Collapsible */
+    .collapsible-section {
+      border-top: 1px solid var(--text);
+      margin-top: 0.75em;
+      padding-top: 0.75em;
+    }
+
+    .collapsible-header {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text);
+      opacity: 0.5;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0;
+    }
+
+    .collapsible-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+    }
+
+    .collapsible-content.active {
+      max-height: 1000px;
+      padding-top: 0.75em;
+    }
+
+    /* Spatial diagram - larger for this module */
+    .spatial-diagram-container {
+      border: 1px solid var(--text);
+      padding: 1em;
+      margin: 0.75em 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: var(--bg);
+    }
+
+    .spatial-diagram {
+      position: relative;
+      width: 300px;
+      height: 300px;
+      border: 1px solid var(--text);
+      border-radius: 50%;
+      background: transparent;
+    }
+
+    /* Sound sources */
+    .sound-source {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: opacity 0.3s ease;
+      cursor: pointer;
+    }
+
+    /* Hit area for mobile - invisible padding */
+    .sound-source::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+    }
+
+    .source-target {
+      background: var(--text);
+      border: 2px solid var(--text);
+      z-index: 10;
+    }
+
+    .source-distractor {
+      background: transparent;
+      border: 2px solid var(--text);
+      z-index: 5;
+    }
+
+    .source-clickable:hover {
+      transform: translate(-50%, -50%) scale(1.2);
+      cursor: pointer;
+    }
+
+    .source-selected {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    .source-revealed {
+      background: var(--text);
+      border-color: var(--text);
+    }
+
+    /* Path trace */
+    .path-trace {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    /* Phase indicator */
+    .phase-indicator {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text);
+      opacity: 0.5;
+      text-align: center;
+      margin: 0.5em 0;
+      min-height: 1.2em;
+    }
+
+    .lab-hint {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      color: var(--text);
+      opacity: 0.5;
+      margin-top: 0.5em;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      .spatial-stats { flex-direction: row; gap: 1em; }
+      
+      .control-row {
+        flex-wrap: wrap;
+      }
+      
+      .control-row .feedback-msg {
+        flex-basis: 100%;
+        margin-top: 6px;
+      }
+
+      .spatial-diagram {
+        width: 280px;
+        height: 280px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>Music &amp; Mental Health Blog</h1>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/about/">About</a>
+    <a href="/music-therapy/">Music Therapy</a>
+    <a href="/online-sessions/">Online Sessions</a>
+    <a href="/events/">Events</a>
+    <a href="/contact/">Contact</a>
+    <a href="/blog/">Blog</a>
+  </nav>
+</header>
+
+<main>
+
+  <nav aria-label="Breadcrumb" class="breadcrumb-nav">
+    <ol>
+      <li><a href="/">Home</a></li>
+      <li><a href="/blog/">Blog</a></li>
+      <li><a href="/blog/source-localization/" aria-current="page">Source Localization</a></li>
+    </ol>
+  </nav>
+
+  <h1>Spatial Sound Tracking</h1>
+
+  <p>[Article introduction about spatial attention, binaural cues, and the auditory shell game]</p>
+
+  <div class="lab-section">
+    <h3>the auditory shell game</h3>
+
+    <div class="gen-module">
+
+      <!-- Spatial Diagram (main interface) -->
+      <div class="spatial-diagram-container">
+        <div class="spatial-diagram" id="spatial-diagram">
+          <svg class="path-trace" id="path-trace"></svg>
+        </div>
+      </div>
+
+      <!-- Phase Indicator -->
+      <div class="phase-indicator" id="phase-indicator"></div>
+
+      <!-- Difficulty -->
+      <div class="gen-row">
+        <span class="gen-row-label">difficulty →</span>
+        <button class="lab-preset-btn on" data-difficulty="easy">easy</button>
+        <button class="lab-preset-btn" data-difficulty="medium">medium</button>
+        <button class="lab-preset-btn" data-difficulty="hard">hard</button>
+      </div>
+
+      <!-- Main Controls + Feedback (inline) -->
+      <div class="control-row">
+        <button class="lab-btn" id="btn-play">&#9654;&#xFE0E; play</button>
+        <button class="lab-btn" id="btn-next" disabled>next</button>
+        <div class="feedback-msg" id="feedback-msg"></div>
+      </div>
+
+      <!-- Stats -->
+      <div class="spatial-stats">
+        <div class="stat-item">
+          <span class="stat-label">trials</span>
+          <span class="stat-value" id="stat-trials">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">correct</span>
+          <span class="stat-value" id="stat-correct">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">accuracy</span>
+          <span class="stat-value" id="stat-accuracy">0%</span>
+        </div>
+      </div>
+
+      <!-- Custom Controls (Collapsible) -->
+      <div class="collapsible-section">
+        <div class="collapsible-header" id="custom-toggle">
+          <span>custom settings</span>
+          <span id="custom-icon">▼</span>
+        </div>
+        <div class="collapsible-content" id="custom-content">
+          
+          <div class="gen-row">
+            <span class="gen-row-label">sources →</span>
+            <button class="lab-preset-btn on" data-sources="2">2</button>
+            <button class="lab-preset-btn" data-sources="3">3</button>
+          </div>
+
+          <div class="gen-row">
+            <span class="gen-row-label">path complexity →</span>
+            <button class="lab-preset-btn on" data-complexity="simple">simple</button>
+            <button class="lab-preset-btn" data-complexity="medium">medium</button>
+            <button class="lab-preset-btn" data-complexity="complex">complex</button>
+          </div>
+
+          <div class="gen-row">
+            <div class="lab-ctrl">
+              <input type="range" id="movement-speed" min="0.5" max="2" step="0.1" value="1.0">
+              <div class="lab-ctrl-bottom">
+                <span class="lab-ctrl-label">movement speed</span>
+                <span class="lab-ctrl-val" id="movement-speed-val">1.0x</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <p class="lab-hint">headphones required · track the solid dot · click where it ends</p>
+
+    </div>
+  </div>
+
+  <p>[Article content continues]</p>
+
+</main>
+
+<footer>
+  <p>&copy; 2026 Jordan Elias</p>
+</footer>
+
+<!-- Resonance Audio -->
+<script src="https://cdn.jsdelivr.net/npm/resonance-audio/build/resonance-audio.min.js"></script>
+
+<!-- Localization Game -->
+<script src="/js/localization.js"></script>
+
+</body>
+</html>
