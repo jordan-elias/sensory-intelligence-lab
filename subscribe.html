@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subscribe: Sensory Intelligence Lab</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --font-body: 'Inter', sans-serif;
+      --font-heading: 'Space Grotesk', sans-serif;
+      --color-bg: #ffffff;
+      --color-surface: #f9f9f7;
+      --color-border: #e5e5e0;
+      --color-text: #1a1a1a;
+      --color-muted: #6b6b6b;
+      --color-accent: #2a5c45;
+      --color-accent-light: #edf4f0;
+      --color-accent-hover: #1e4433;
+      --color-error-bg: #fdf2f2;
+      --color-error-border: #e8c4c4;
+      --color-error-text: #7a2e2e;
+      --color-success-bg: #edf4f0;
+      --color-success-border: #b8d9c8;
+      --color-success-text: #1e4433;
+      --max-width: 680px;
+      --header-height: 56px;
+    }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--color-text);
+      background: var(--color-bg);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    a { color: var(--color-text); text-decoration: underline; text-underline-offset: 3px; }
+    a:hover { color: var(--color-accent); }
+
+    header {
+      border-bottom: 1px solid var(--color-border);
+      padding: 0 2rem;
+      height: var(--header-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: var(--color-bg);
+      z-index: 10;
+    }
+
+    header h1 { font-family: var(--font-heading); font-size: 1rem; font-weight: 600; }
+    header nav { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+    header nav a { font-size: 0.875rem; font-weight: 500; text-decoration: none; color: var(--color-muted); }
+    header nav a:hover { color: var(--color-text); }
+
+    main { max-width: calc(var(--max-width) + 4rem); margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+
+    .page-header { margin-bottom: 2.5rem; padding-bottom: 2rem; border-bottom: 1px solid var(--color-border); }
+    .page-header h1 { font-family: var(--font-heading); font-size: 2rem; font-weight: 600; margin-bottom: 0.75rem; }
+    .page-intro { font-size: 1rem; color: var(--color-muted); max-width: 520px; line-height: 1.65; }
+
+    .subscribe-form-wrap {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 4px;
+      padding: 2rem;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    .field { margin-bottom: 1rem; }
+    label { display: block; font-size: 0.775rem; font-weight: 500; color: var(--color-text); margin-bottom: 0.35rem; }
+    input { width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--color-border); border-radius: 3px; background: white; font-family: var(--font-body); font-size: 0.875rem; color: var(--color-text); transition: border-color 0.15s, box-shadow 0.15s; outline: none; }
+    input:focus { border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(42,92,69,0.1); }
+    input::placeholder { color: #aaa; }
+
+    .submit-btn {
+      width: 100%;
+      margin-top: 0.5rem;
+      padding: 0.7rem 1rem;
+      border: none;
+      border-radius: 3px;
+      background: var(--color-accent);
+      color: white;
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, opacity 0.15s;
+    }
+    .submit-btn:hover { background: var(--color-accent-hover); }
+    .submit-btn:active { opacity: 0.85; }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .message { margin-top: 0.85rem; padding: 0.65rem 0.8rem; border-radius: 3px; font-size: 0.8rem; line-height: 1.5; display: none; }
+    .message.error { background: var(--color-error-bg); border: 1px solid var(--color-error-border); color: var(--color-error-text); display: block; }
+    .message.success { background: var(--color-success-bg); border: 1px solid var(--color-success-border); color: var(--color-success-text); display: block; }
+
+    footer { border-top: 1px solid var(--color-border); padding: 1.5rem 2rem; text-align: center; font-size: 0.8rem; color: var(--color-muted); }
+
+    @media (max-width: 640px) {
+      header nav { gap: 1rem; }
+      header h1 { font-size: 0.875rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Sensory Intelligence Lab</h1>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/about/">About</a>
+    <a href="/music-therapy/">Music Therapy</a>
+    <a href="/online-sessions/">Online Sessions</a>
+    <a href="/events/">Events</a>
+    <a href="/contact/">Contact</a>
+    <a href="/blog/">Blog</a>
+  </nav>
+</header>
+
+<main>
+  <div class="page-header">
+    <h1>Subscribe to the Lab</h1>
+    <p class="page-intro">
+      Unlock full access to the Sensory Intelligence Lab: daily listening prompts, ear training exercises, auditory minigames, and personalized regulation tools.
+    </p>
+  </div>
+
+  <div class="subscribe-form-wrap">
+    <form id="subscribeForm" novalidate>
+      <div class="field">
+        <label for="subFullName">Full name</label>
+        <input type="text" id="subFullName" placeholder="Your name" required autocomplete="name" />
+      </div>
+      <div class="field">
+        <label for="subEmail">Email</label>
+        <input type="email" id="subEmail" placeholder="you@example.com" required autocomplete="email" />
+      </div>
+      <div class="field">
+        <label for="subPlan">Choose a plan</label>
+        <select id="subPlan" required>
+          <option value="" disabled selected>Select a plan</option>
+          <option value="monthly">Monthly - $15</option>
+          <option value="yearly">Yearly - $150</option>
+        </select>
+      </div>
+
+      <div class="message" id="subMessage"></div>
+
+      <button type="submit" class="submit-btn" id="subSubmitBtn">Subscribe</button>
+    </form>
+  </div>
+</main>
+
+<footer>
+  <p>Jordan Elias Music Therapy · Berlin · <a href="/contact/">Contact</a></p>
+</footer>
+
+<script>
+  const SUPABASE_URL = "https://lrjuufvrgkuvfxcmybtf.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1";
+
+  const { createClient } = supabase;
+  const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const form = document.getElementById('subscribeForm');
+  const messageEl = document.getElementById('subMessage');
+  const submitBtn = document.getElementById('subSubmitBtn');
+
+  function showMessage(text, type) {
+    messageEl.textContent = text;
+    messageEl.className = 'message ' + type;
+  }
+
+  function clearMessage() {
+    messageEl.textContent = '';
+    messageEl.className = 'message';
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearMessage();
+
+    const name = document.getElementById('subFullName').value.trim();
+    const email = document.getElementById('subEmail').value.trim();
+    const plan = document.getElementById('subPlan').value;
+
+    if (!name || !email || !plan) {
+      showMessage('Please fill out all fields.', 'error');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting…';
+
+    try {
+      // Create user in Supabase (if not exists)
+      const { data, error } = await client.auth.signUp({
+        email,
+        password: Math.random().toString(36).slice(-10), // temporary password
+        options: { data: { full_name: name, plan } }
+      });
+
+      if (error && !error.message.includes('User already registered')) throw error;
+
+      showMessage('Subscription successful! Check your email for confirmation.', 'success');
+      form.reset();
+    } catch (err) {
+      showMessage(err.message || 'Something went wrong.', 'error');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Subscribe';
+    }
+  });
+</script>
+
+</body>
+</html>
