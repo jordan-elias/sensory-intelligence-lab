@@ -90,6 +90,16 @@ status = 200
   to   = "/dashboard/spatial-game/index.html"
   status = 200
 
+  [[redirects]]
+  from = "/soundscape-machine"
+  to   = "/soundscape-machine/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/soundscape-machine/"
+  to   = "/soundscape-machine/index.html"
+  status = 200
+
 # ── Future modules — uncomment when folder is added to repo ──
 
 # [[redirects]]
