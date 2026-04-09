@@ -1,693 +1,272 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sensory Intelligence Lab</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --font-body:'Inter',sans-serif;
+      --font-heading:'Space Grotesk',sans-serif;
+      --bg:#fff;--surface:#f9f9f7;--border:#e5e5e0;
+      --text:#1a1a1a;--muted:#6b6b6b;
+      --accent:#2a5c45;--accent-light:#edf4f0;--accent-hover:#1e4433;
+      --error:#c0392b;--success:#2a5c45;
+    }
+    html{font-size:16px}
+    body{font-family:var(--font-body);color:var(--text);background:var(--bg);
+      min-height:100vh;display:flex;flex-direction:column;}
 
-<title>Sensory Intelligence Lab — Sign In</title>
+    header{border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;
+      display:flex;align-items:center;}
+    header h1{font-family:var(--font-heading);font-size:1rem;font-weight:600;letter-spacing:-0.01em}
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    .page{flex:1;display:flex;align-items:center;justify-content:center;padding:2rem 1rem}
 
-<!-- Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+    .card{width:100%;max-width:400px}
+    .card-header{margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
+    .card-header h2{font-family:var(--font-heading);font-size:1.5rem;font-weight:600;
+      letter-spacing:-.02em;margin-bottom:.3rem}
+    .card-header p{font-size:.875rem;color:var(--muted)}
 
-<style>
-/* ─────────────────────────────
-RESET
-───────────────────────────── */
+    /* Tab switcher */
+    .tabs{display:flex;gap:0;margin-bottom:1.75rem;border:1px solid var(--border)}
+    .tab{flex:1;font-family:var(--font-heading);font-size:.8rem;font-weight:600;
+      padding:.6rem 1rem;border:none;background:var(--bg);color:var(--muted);
+      cursor:pointer;transition:all .12s;letter-spacing:.02em}
+    .tab.active{background:var(--accent);color:white}
 
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+    /* Form */
+    .form-group{margin-bottom:1rem}
+    label{display:block;font-size:.8rem;font-weight:500;color:var(--text);margin-bottom:.35rem}
+    input[type="email"],input[type="password"]{
+      width:100%;padding:.65rem .9rem;border:1px solid var(--border);
+      background:var(--bg);color:var(--text);font-family:var(--font-body);
+      font-size:.9rem;outline:none;transition:border-color .12s;
+    }
+    input:focus{border-color:var(--accent)}
 
-:root {
-  --font-body: 'Inter', sans-serif;
-  --font-heading: 'Space Grotesk', sans-serif;
+    .btn{width:100%;font-family:var(--font-heading);font-size:.875rem;font-weight:600;
+      padding:.8rem;border:none;background:var(--accent);color:white;
+      cursor:pointer;transition:background .15s;letter-spacing:-.01em;margin-top:.5rem}
+    .btn:hover{background:var(--accent-hover)}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
 
-  --color-bg: #ffffff;
-  --color-surface: #f9f9f7;
-  --color-border: #e5e5e0;
+    /* Messages */
+    .msg{padding:.75rem 1rem;font-size:.8rem;line-height:1.5;margin-bottom:1rem;display:none}
+    .msg.error{background:#fdf2f2;border-left:3px solid var(--error);color:var(--error)}
+    .msg.success{background:var(--accent-light);border-left:3px solid var(--accent);color:var(--accent)}
+    .msg.show{display:block}
 
-  --color-text: #1a1a1a;
-  --color-muted: #6b6b6b;
+    /* Panel visibility */
+    .panel{display:none}
+    .panel.active{display:block}
 
-  --color-accent: #2a5c45;
-  --color-accent-hover: #1e4433;
-  --color-accent-light: #edf4f0;
+    /* Confirmation screen */
+    .confirm-screen{text-align:center;padding:2rem 0}
+    .confirm-icon{font-size:2.5rem;margin-bottom:1rem}
+    .confirm-screen h3{font-family:var(--font-heading);font-size:1.1rem;font-weight:600;margin-bottom:.5rem}
+    .confirm-screen p{font-size:.875rem;color:var(--muted);line-height:1.6}
+    .confirm-screen .email-shown{font-weight:600;color:var(--text)}
 
-  --color-error-bg: #fdf2f2;
-  --color-error-border: #e8c4c4;
-  --color-error-text: #7a2e2e;
-
-  --color-success-bg: #edf4f0;
-  --color-success-border: #b8d9c8;
-  --color-success-text: #1e4433;
-
-  --max-width: 680px;
-}
-
-html {
-  font-size: 16px;
-}
-
-body {
-  font-family: var(--font-body);
-  color: var(--color-text);
-  background: var(--color-bg);
-  line-height: 1.6;
-  min-height: 100vh;
-}
-
-/* ─────────────────────────────
-HEADER
-───────────────────────────── */
-
-header {
-  border-bottom: 1px solid var(--color-border);
-  padding: 0 2rem;
-  height: 56px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-header h1 {
-  font-family: var(--font-heading);
-  font-size: 1rem;
-}
-
-header nav {
-  display: flex;
-  gap: 1.5rem;
-}
-
-header nav a {
-  font-size: 0.875rem;
-  text-decoration: none;
-  color: var(--color-muted);
-}
-
-header nav a:hover {
-  color: var(--color-text);
-}
-
-/* ─────────────────────────────
-MAIN
-───────────────────────────── */
-
-main {
-  max-width: calc(var(--max-width) + 4rem);
-  margin: 0 auto;
-  padding: 2.5rem 2rem 4rem;
-}
-
-.page-header {
-  margin-bottom: 2rem;
-  border-bottom: 1px solid var(--color-border);
-  padding-bottom: 2rem;
-}
-
-.page-header h1 {
-  font-family: var(--font-heading);
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-}
-
-.page-intro {
-  color: var(--color-muted);
-  max-width: 520px;
-}
-
-.auth-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3rem;
-}
-
-@media (max-width: 640px) {
-  .auth-layout {
-    grid-template-columns: 1fr;
-  }
-}
-
-.benefits h2 {
-  font-family: var(--font-heading);
-  font-size: 1rem;
-  margin-bottom: 1rem;
-}
-
-.pricing-note {
-  margin-top: 2rem;
-  padding: 1rem;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  font-size: 0.8rem;
-}
-
-/* ─────────────────────────────
-FORM
-───────────────────────────── */
-
-.auth-form-wrap {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  padding: 1.75rem;
-}
-
-.tab-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  margin-bottom: 1.5rem;
-}
-
-.tab-btn {
-  padding: 0.6rem;
-  border: none;
-  cursor: pointer;
-  background: transparent;
-  color: var(--color-muted);
-}
-
-.tab-btn.active {
-  background: var(--color-accent);
-  color: white;
-}
-
-.field {
-  margin-bottom: 1rem;
-}
-
-label {
-  font-size: 0.75rem;
-}
-
-input {
-  width: 100%;
-  padding: 0.6rem;
-  border: 1px solid var(--color-border);
-}
-
-.signup-fields {
-  display: none;
-}
-
-.signup-fields.visible {
-  display: block;
-}
-
-.submit-btn {
-  width: 100%;
-  padding: 0.7rem;
-  background: var(--color-accent);
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-.submit-btn:disabled {
-  opacity: 0.5;
-}
-
-.message {
-  margin-top: 0.75rem;
-  padding: 0.6rem;
-  font-size: 0.8rem;
-  display: none;
-}
-
-.message.error {
-  display: block;
-  background: var(--color-error-bg);
-  border: 1px solid var(--color-error-border);
-}
-
-.message.success {
-  display: block;
-  background: var(--color-success-bg);
-  border: 1px solid var(--color-success-border);
-}
-
-footer {
-  border-top: 1px solid var(--color-border);
-  padding: 1.5rem;
-  text-align: center;
-  font-size: 0.8rem;
-}
-</style>
+    footer{border-top:1px solid var(--border);padding:1.25rem 2rem;
+      text-align:center;font-size:.8rem;color:var(--muted)}
+    footer a{color:var(--muted);text-decoration:none}
+    footer a:hover{color:var(--accent)}
+  </style>
 </head>
-
 <body>
 
 <header>
-<h1>Sensory Intelligence Lab</h1>
-<nav>
-<a href="/">Home</a>
-<a href="/blog/">Blog</a>
-<a href="/contact/">Contact</a>
-</nav>
+  <h1>Sensory Intelligence Lab</h1>
 </header>
 
-<main>
+<div class="page">
+  <div class="card">
 
-<div class="page-header">
-<h1>Sensory Intelligence Lab</h1>
+    <div class="card-header">
+      <h2>Welcome</h2>
+      <p>Sign in to access your training modules.</p>
+    </div>
 
-<p class="page-intro">
-Interactive tools for building sensory awareness: ear training,
-auditory attention, regulation, and listening skills grounded in
-music neuroscience and therapy.
-</p>
+    <!-- Auth tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('signin')">Sign in</button>
+      <button class="tab" onclick="switchTab('signup')">Create account</button>
+    </div>
+
+    <!-- Sign in panel -->
+    <div class="panel active" id="signinPanel">
+      <div class="msg" id="signinMsg"></div>
+
+      <div class="form-group">
+        <label for="signinEmail">Email</label>
+        <input type="email" id="signinEmail" placeholder="you@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label for="signinPassword">Password</label>
+        <input type="password" id="signinPassword" placeholder="Your password" autocomplete="current-password">
+      </div>
+      <button class="btn" id="signinBtn" onclick="handleSignIn()">Sign in</button>
+    </div>
+
+    <!-- Sign up panel -->
+    <div class="panel" id="signupPanel">
+      <div class="msg" id="signupMsg"></div>
+
+      <!-- Signup form (shown first) -->
+      <div id="signupForm">
+        <div class="form-group">
+          <label for="signupEmail">Email</label>
+          <input type="email" id="signupEmail" placeholder="you@email.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="signupPassword">Password</label>
+          <input type="password" id="signupPassword" placeholder="Choose a password (8+ characters)" autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label for="signupPasswordConfirm">Confirm password</label>
+          <input type="password" id="signupPasswordConfirm" placeholder="Repeat your password" autocomplete="new-password">
+        </div>
+        <button class="btn" id="signupBtn" onclick="handleSignUp()">Create account</button>
+      </div>
+
+      <!-- Confirmation notice (shown after signup) -->
+      <div id="signupConfirm" class="confirm-screen" style="display:none">
+        <div class="confirm-icon">✉️</div>
+        <h3>Check your email</h3>
+        <p>We've sent a confirmation link to<br>
+          <span class="email-shown" id="confirmedEmail"></span>
+        </p>
+        <p style="margin-top:.75rem">Click the link to verify your account, then come back here to sign in.</p>
+      </div>
+    </div>
+
+  </div>
 </div>
-
-<div class="auth-layout">
-
-<div class="benefits">
-
-<h2>Start with the free tier</h2>
-
-<div class="pricing-note">
-
-<strong>Free access included</strong>
-
-Create an account to begin using the lab immediately.
-You can upgrade anytime to unlock additional modules
-and advanced features.
-
-</div>
-
-</div>
-
-<div class="auth-form-wrap">
-
-<div class="tab-row">
-
-<button class="tab-btn active" id="showSignIn">
-Sign in
-</button>
-
-<button class="tab-btn" id="showSignUp">
-Create account
-</button>
-
-</div>
-
-<form id="authForm" novalidate>
-
-<div class="signup-fields" id="signupFields">
-
-<div class="field">
-<label>Full name</label>
-
-<input
-type="text"
-id="fullName"
-placeholder="Your name"
-autocomplete="name"
-/>
-
-</div>
-
-</div>
-
-<div class="field">
-
-<label>Email</label>
-
-<input
-type="email"
-id="email"
-required
-autocomplete="email"
-/>
-
-</div>
-
-<div class="field">
-
-<label>Password</label>
-
-<input
-type="password"
-id="password"
-required
-autocomplete="current-password"
-/>
-
-</div>
-
-<div class="message" id="message"></div>
-
-<button
-type="submit"
-class="submit-btn"
-id="submitBtn"
->
-Sign in
-</button>
-
-</form>
-
-</div>
-
-</div>
-
-</main>
 
 <footer>
-Jordan Elias Music Therapy · Berlin
+  <p>Jordan Elias Music Therapy · Berlin · <a href="/contact/">Contact</a></p>
 </footer>
 
-<script>
+<script type="module">
+  import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-/* ─────────────────────────────
-CONFIG
-───────────────────────────── */
+  const SUPABASE_URL      = "https://lrjuufvrgkuvfxcmybtf.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1";
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const SUPABASE_URL =
-"https://lrjuufvrgkuvfxcmybtf.supabase.co"
-
-const SUPABASE_ANON_KEY =
-"sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1"
-
-const DASHBOARD_URL =
-"/dashboard/"
-
-/* ─────────────────────────────
-CLIENT
-───────────────────────────── */
-
-const { createClient } = supabase
-
-const client =
-createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-)
-
-/* ─────────────────────────────
-AUTO SESSION CHECK
-───────────────────────────── */
-
-async function checkSession() {
-
-  const {
-    data: { session }
-  } =
-  await client.auth.getSession()
-
-  if (session) {
-
-    window.location.href =
-    DASHBOARD_URL
-
+  // ── If user is already signed in, send them to dashboard ──
+  // This handles the case where someone navigates back to / while logged in,
+  // AND handles the email confirmation redirect (Supabase redirects back to
+  // Site URL after confirmation, which is /, so we check for a session here).
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    window.location.replace("/dashboard/");
   }
 
-}
-
-checkSession()
-
-/* ─────────────────────────────
-UI STATE
-───────────────────────────── */
-
-let isSignUp = false
-
-const showSignInBtn =
-document.getElementById(
-  "showSignIn"
-)
-
-const showSignUpBtn =
-document.getElementById(
-  "showSignUp"
-)
-
-const signupFields =
-document.getElementById(
-  "signupFields"
-)
-
-const submitBtn =
-document.getElementById(
-  "submitBtn"
-)
-
-const fullNameInput =
-document.getElementById(
-  "fullName"
-)
-
-const messageEl =
-document.getElementById(
-  "message"
-)
-
-/* ─────────────────────────────
-MESSAGES
-───────────────────────────── */
-
-function showMessage(
-  text,
-  type
-) {
-
-  messageEl.textContent =
-  text
-
-  messageEl.className =
-  "message " + type
-
-}
-
-function clearMessage() {
-
-  messageEl.textContent =
-  ""
-
-  messageEl.className =
-  "message"
-
-}
-
-/* ─────────────────────────────
-TAB SWITCH
-───────────────────────────── */
-
-showSignUpBtn.onclick =
-() => {
-
-  isSignUp = true
-
-  signupFields.classList
-  .add("visible")
-
-  fullNameInput.required =
-  true
-
-  submitBtn.textContent =
-  "Create account"
-
-  showSignUpBtn.classList
-  .add("active")
-
-  showSignInBtn.classList
-  .remove("active")
-
-  clearMessage()
-
-}
-
-showSignInBtn.onclick =
-() => {
-
-  isSignUp = false
-
-  signupFields.classList
-  .remove("visible")
-
-  fullNameInput.required =
-  false
-
-  submitBtn.textContent =
-  "Sign in"
-
-  showSignInBtn.classList
-  .add("active")
-
-  showSignUpBtn.classList
-  .remove("active")
-
-  clearMessage()
-
-}
-
-/* ─────────────────────────────
-FORM SUBMIT
-───────────────────────────── */
-
-document
-.getElementById(
-  "authForm"
-)
-.addEventListener(
-  "submit",
-  async (e) => {
-
-e.preventDefault()
-
-clearMessage()
-
-const email =
-document
-.getElementById(
-  "email"
-)
-.value
-.trim()
-
-const password =
-document
-.getElementById(
-  "password"
-)
-.value
-
-submitBtn.disabled = true
-
-submitBtn.textContent =
-isSignUp
-? "Creating account…"
-: "Signing in…"
-
-try {
-
-if (isSignUp) {
-
-const fullName =
-fullNameInput
-.value
-.trim()
-
-if (!fullName) {
-
-showMessage(
-"Please enter your full name.",
-"error"
-)
-
-submitBtn.disabled =
-false
-
-submitBtn.textContent =
-"Create account"
-
-return
-
-}
-
-const {
-  error
-} =
-await client
-.auth
-.signUp({
-
-email,
-
-password,
-
-options: {
-
-data: {
-
-full_name:
-fullName
-
-},
-
-emailRedirectTo:
-
-window
-.location
-.origin
-
-}
-
-})
-
-if (error)
-throw error
-
-showMessage(
-"Account created. Redirecting…",
-"success"
-)
-
-setTimeout(
-() => {
-
-window.location.href =
-DASHBOARD_URL
-
-},
-800
-)
-
-}
-
-else {
-
-const {
-  error
-} =
-await client
-.auth
-.signInWithPassword({
-
-email,
-
-password
-
-})
-
-if (error)
-throw error
-
-window.location.href =
-DASHBOARD_URL
-
-}
-
-}
-
-catch (err) {
-
-showMessage(
-err.message ||
-"Something went wrong.",
-"error"
-)
-
-}
-
-finally {
-
-submitBtn.disabled =
-false
-
-submitBtn.textContent =
-isSignUp
-? "Create account"
-: "Sign in"
-
-}
-
-})
-
+  // ── Tab switching ──
+  window.switchTab = function(tab) {
+    document.querySelectorAll('.tab').forEach((t,i) => {
+      t.classList.toggle('active', (i===0 && tab==='signin') || (i===1 && tab==='signup'));
+    });
+    document.getElementById('signinPanel').classList.toggle('active', tab==='signin');
+    document.getElementById('signupPanel').classList.toggle('active', tab==='signup');
+  };
+
+  // ── Helpers ──
+  function showMsg(id, text, type) {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = `msg ${type} show`;
+  }
+  function clearMsg(id) {
+    const el = document.getElementById(id);
+    el.className = 'msg';
+  }
+  function setLoading(btnId, loading) {
+    document.getElementById(btnId).disabled = loading;
+    document.getElementById(btnId).textContent = loading
+      ? 'Please wait…'
+      : btnId === 'signinBtn' ? 'Sign in' : 'Create account';
+  }
+
+  // Allow Enter key to submit
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const signinActive = document.getElementById('signinPanel').classList.contains('active');
+    if (signinActive) handleSignIn();
+    else handleSignUp();
+  });
+
+  // ── Sign in ──
+  window.handleSignIn = async function() {
+    clearMsg('signinMsg');
+    const email    = document.getElementById('signinEmail').value.trim();
+    const password = document.getElementById('signinPassword').value;
+
+    if (!email || !password) {
+      showMsg('signinMsg', 'Please enter your email and password.', 'error'); return;
+    }
+
+    setLoading('signinBtn', true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading('signinBtn', false);
+
+    if (error) {
+      // Supabase returns a generic message for security — we surface a friendly one
+      if (error.message.includes('Email not confirmed')) {
+        showMsg('signinMsg', 'Please confirm your email address first. Check your inbox.', 'error');
+      } else {
+        showMsg('signinMsg', 'Incorrect email or password. Please try again.', 'error');
+      }
+      return;
+    }
+
+    // Success — redirect to dashboard
+    window.location.replace("/dashboard/");
+  };
+
+  // ── Sign up ──
+  window.handleSignUp = async function() {
+    clearMsg('signupMsg');
+    const email    = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    const confirm  = document.getElementById('signupPasswordConfirm').value;
+
+    if (!email || !password || !confirm) {
+      showMsg('signupMsg', 'Please fill in all fields.', 'error'); return;
+    }
+    if (password.length < 8) {
+      showMsg('signupMsg', 'Password must be at least 8 characters.', 'error'); return;
+    }
+    if (password !== confirm) {
+      showMsg('signupMsg', 'Passwords do not match.', 'error'); return;
+    }
+
+    setLoading('signupBtn', true);
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        // After email confirmation, Supabase redirects to Site URL (/)
+        // which then checks for a session and forwards to /dashboard/
+        emailRedirectTo: "https://sensory-intelligence-lab.netlify.app/",
+      }
+    });
+    setLoading('signupBtn', false);
+
+    if (error) {
+      showMsg('signupMsg', error.message, 'error'); return;
+    }
+
+    // Show confirmation notice
+    document.getElementById('signupForm').style.display = 'none';
+    document.getElementById('confirmedEmail').textContent = email;
+    document.getElementById('signupConfirm').style.display = 'block';
+  };
 </script>
-
 </body>
 </html>
