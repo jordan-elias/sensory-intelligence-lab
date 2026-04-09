@@ -25,6 +25,29 @@
   to   = "/dashboard/index.html"
   status = 200
 
+
+# ── Account and Booking pages (matched to actual folder names) ──
+
+[[redirects]]
+from = "/account"
+to   = "/account/index.html"
+status = 200
+
+[[redirects]]
+from = "/account/"
+to   = "/account/index.html"
+status = 200
+
+[[redirects]]
+from = "/booking"
+to   = "/booking/index.html"
+status = 200
+
+[[redirects]]
+from = "/booking/"
+to   = "/booking/index.html"
+status = 200
+
 # ── Module pages (matched to actual folder names) ──
 
 [[redirects]]
