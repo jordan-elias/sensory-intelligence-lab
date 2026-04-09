@@ -5,16 +5,16 @@
 
 # ── Redirects ──
 # Netlify processes these top to bottom and stops at the first match.
-# Status 200 means "rewrite" (serve the file but keep the URL).
-# Status 301 means "redirect" (change the URL in the browser).
+# Status 200 = rewrite (serve the file, keep the URL in the browser).
+# Status 301 = hard redirect (changes the URL in the browser).
 
-# Redirect root domain to index.html explicitly
+# Root — sign in / sign up page
 [[redirects]]
   from = "/"
   to   = "/index.html"
   status = 200
 
-# Dashboard folder
+# Dashboard
 [[redirects]]
   from = "/dashboard"
   to   = "/dashboard/index.html"
@@ -25,8 +25,7 @@
   to   = "/dashboard/index.html"
   status = 200
 
-# Module pages — add one block per module folder
-# Adjust these names to match your exact folder names in /dashboard/
+# ── Module pages (matched to actual folder names) ──
 
 [[redirects]]
   from = "/dashboard/regulation"
@@ -39,23 +38,13 @@
   status = 200
 
 [[redirects]]
-  from = "/dashboard/breath-regulation"
-  to   = "/dashboard/breath-regulation/index.html"
+  from = "/dashboard/breathing"
+  to   = "/dashboard/breathing/index.html"
   status = 200
 
 [[redirects]]
-  from = "/dashboard/breath-regulation/"
-  to   = "/dashboard/breath-regulation/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/dashboard/rhythmic-entrainment"
-  to   = "/dashboard/rhythmic-entrainment/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/dashboard/rhythmic-entrainment/"
-  to   = "/dashboard/rhythmic-entrainment/index.html"
+  from = "/dashboard/breathing/"
+  to   = "/dashboard/breathing/index.html"
   status = 200
 
 [[redirects]]
@@ -69,36 +58,39 @@
   status = 200
 
 [[redirects]]
-  from = "/dashboard/spatial-awareness"
-  to   = "/dashboard/spatial-awareness/index.html"
+  from = "/dashboard/spatial-game"
+  to   = "/dashboard/spatial-game/index.html"
   status = 200
 
 [[redirects]]
-  from = "/dashboard/spatial-awareness/"
-  to   = "/dashboard/spatial-awareness/index.html"
+  from = "/dashboard/spatial-game/"
+  to   = "/dashboard/spatial-game/index.html"
   status = 200
 
-[[redirects]]
-  from = "/dashboard/auditory-scene-analysis"
-  to   = "/dashboard/auditory-scene-analysis/index.html"
-  status = 200
+# ── Future modules — uncomment when folder is added to repo ──
 
-[[redirects]]
-  from = "/dashboard/auditory-scene-analysis/"
-  to   = "/dashboard/auditory-scene-analysis/index.html"
-  status = 200
+# [[redirects]]
+#   from = "/dashboard/rhythmic-entrainment"
+#   to   = "/dashboard/rhythmic-entrainment/index.html"
+#   status = 200
+#
+# [[redirects]]
+#   from = "/dashboard/rhythmic-entrainment/"
+#   to   = "/dashboard/rhythmic-entrainment/index.html"
+#   status = 200
 
-[[redirects]]
-  from = "/dashboard/check-in"
-  to   = "/dashboard/check-in/index.html"
-  status = 200
+# [[redirects]]
+#   from = "/dashboard/check-in"
+#   to   = "/dashboard/check-in/index.html"
+#   status = 200
+#
+# [[redirects]]
+#   from = "/dashboard/check-in/"
+#   to   = "/dashboard/check-in/index.html"
+#   status = 200
 
-[[redirects]]
-  from = "/dashboard/check-in/"
-  to   = "/dashboard/check-in/index.html"
-  status = 200
+# ── Other pages ──
 
-# Subscribe page
 [[redirects]]
   from = "/subscribe"
   to   = "/subscribe.html"
@@ -109,9 +101,10 @@
   to   = "/subscribe.html"
   status = 200
 
-# Catch-all — send any unmatched path to index.html
-# This handles Supabase auth callback redirects that may land
-# on unexpected paths. Client-side JS then checks auth and redirects.
+# ── Catch-all ──
+# Handles Supabase auth confirmation redirects that may land on
+# unexpected paths. The root index.html checks for a session and
+# forwards to /dashboard/ if one exists.
 [[redirects]]
   from   = "/*"
   to     = "/index.html"
