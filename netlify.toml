@@ -3,27 +3,121 @@
 [build]
   publish = "."
 
-# ── Redirect rules ──
-# These ensure clean URL routing and that Netlify doesn't 404
-# on paths that exist as real folders/files.
+# ── Redirects ──
+# Netlify processes these top to bottom and stops at the first match.
+# Status 200 means "rewrite" (serve the file but keep the URL).
+# Status 301 means "redirect" (change the URL in the browser).
 
-# The root handles auth. Everything under /dashboard/ is protected
-# by auth-guard.js on the client side. Netlify handles the 404 fallback.
+# Redirect root domain to index.html explicitly
+[[redirects]]
+  from = "/"
+  to   = "/index.html"
+  status = 200
 
+# Dashboard folder
 [[redirects]]
   from = "/dashboard"
-  to   = "/dashboard/"
-  status = 301
+  to   = "/dashboard/index.html"
+  status = 200
 
-# Catch-all: if a path isn't found, serve root index (handles any
-# Supabase auth callback that lands on an unexpected path)
+[[redirects]]
+  from = "/dashboard/"
+  to   = "/dashboard/index.html"
+  status = 200
+
+# Module pages — add one block per module folder
+# Adjust these names to match your exact folder names in /dashboard/
+
+[[redirects]]
+  from = "/dashboard/regulation"
+  to   = "/dashboard/regulation/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/dashboard/regulation/"
+  to   = "/dashboard/regulation/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/dashboard/breath-regulation"
+  to   = "/dashboard/breath-regulation/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/dashboard/breath-regulation/"
+  to   = "/dashboard/breath-regulation/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/dashboard/rhythmic-entrainment"
+  to   = "/dashboard/rhythmic-entrainment/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/dashboard/rhythmic-entrainment/"
+  to   = "/dashboard/rhythmic-entrainment/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/dashboard/ear-training"
+  to   = "/dashboard/ear-training/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/dashboard/ear-training/"
+  to   = "/dashboard/ear-training/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/dashboard/spatial-awareness"
+  to   = "/dashboard/spatial-awareness/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/dashboard/spatial-awareness/"
+  to   = "/dashboard/spatial-awareness/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/dashboard/auditory-scene-analysis"
+  to   = "/dashboard/auditory-scene-analysis/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/dashboard/auditory-scene-analysis/"
+  to   = "/dashboard/auditory-scene-analysis/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/dashboard/check-in"
+  to   = "/dashboard/check-in/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/dashboard/check-in/"
+  to   = "/dashboard/check-in/index.html"
+  status = 200
+
+# Subscribe page
+[[redirects]]
+  from = "/subscribe"
+  to   = "/subscribe.html"
+  status = 200
+
+[[redirects]]
+  from = "/subscribe/"
+  to   = "/subscribe.html"
+  status = 200
+
+# Catch-all — send any unmatched path to index.html
+# This handles Supabase auth callback redirects that may land
+# on unexpected paths. Client-side JS then checks auth and redirects.
 [[redirects]]
   from   = "/*"
   to     = "/index.html"
   status = 200
-  conditions = {Role = ["404"]}
 
-# Security headers
+# ── Security headers ──
 [[headers]]
   for = "/*"
   [headers.values]
