@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sensory Intelligence Lab</title>
+  <title>Sensory Intelligence Lab — Jordan Elias Music Therapy</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -13,94 +13,186 @@
       --bg:#fff;--surface:#f9f9f7;--border:#e5e5e0;
       --text:#1a1a1a;--muted:#6b6b6b;
       --accent:#2a5c45;--accent-light:#edf4f0;--accent-hover:#1e4433;
-      --error:#c0392b;--success:#2a5c45;
+      --error:#c0392b;
     }
     html{font-size:16px}
     body{font-family:var(--font-body);color:var(--text);background:var(--bg);
       min-height:100vh;display:flex;flex-direction:column;}
 
-    header{border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;
-      display:flex;align-items:center;}
-    header h1{font-family:var(--font-heading);font-size:1rem;font-weight:600;letter-spacing:-0.01em}
-
-    .page{flex:1;display:flex;align-items:center;justify-content:center;padding:2rem 1rem}
-
-    .card{width:100%;max-width:400px}
-    .card-header{margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
-    .card-header h2{font-family:var(--font-heading);font-size:1.5rem;font-weight:600;
-      letter-spacing:-.02em;margin-bottom:.3rem}
-    .card-header p{font-size:.875rem;color:var(--muted)}
-
-    /* Tab switcher */
-    .tabs{display:flex;gap:0;margin-bottom:1.75rem;border:1px solid var(--border)}
-    .tab{flex:1;font-family:var(--font-heading);font-size:.8rem;font-weight:600;
-      padding:.6rem 1rem;border:none;background:var(--bg);color:var(--muted);
-      cursor:pointer;transition:all .12s;letter-spacing:.02em}
-    .tab.active{background:var(--accent);color:white}
-
-    /* Form */
-    .form-group{margin-bottom:1rem}
-    label{display:block;font-size:.8rem;font-weight:500;color:var(--text);margin-bottom:.35rem}
-    input[type="email"],input[type="password"]{
-      width:100%;padding:.65rem .9rem;border:1px solid var(--border);
-      background:var(--bg);color:var(--text);font-family:var(--font-body);
-      font-size:.9rem;outline:none;transition:border-color .12s;
+    /* ── Landing header ── */
+    .landing-header{border-bottom:1px solid var(--border);padding:0 2rem;height:52px;
+      display:flex;align-items:center;justify-content:space-between;gap:1rem;}
+    .landing-wordmark{font-family:var(--font-heading);font-size:.9rem;font-weight:600;
+      letter-spacing:-.01em;text-decoration:none;color:var(--text);white-space:nowrap;}
+    .landing-wordmark:hover{color:var(--accent)}
+    .landing-nav{display:flex;gap:1.25rem;align-items:center;}
+    .landing-nav a{font-size:.78rem;font-weight:500;text-decoration:none;
+      color:var(--muted);transition:color .15s;white-space:nowrap;}
+    .landing-nav a:hover{color:var(--text)}
+    @media(max-width:580px){
+      .landing-header{padding:0 1rem}
+      .landing-nav{gap:.75rem}
+      .landing-nav a{font-size:.72rem}
+      .hide-xs{display:none}
     }
+
+    /* ── Two-column layout ── */
+    .page{flex:1;display:grid;grid-template-columns:1fr 1fr;align-items:stretch;}
+    @media(max-width:760px){.page{grid-template-columns:1fr}}
+
+    /* ── Left: intro ── */
+    .intro{padding:3.5rem 3rem 3rem 2.5rem;border-right:1px solid var(--border);
+      display:flex;flex-direction:column;justify-content:center;background:var(--surface);}
+    @media(max-width:760px){.intro{padding:2.5rem 1.5rem;border-right:none;border-bottom:1px solid var(--border)}}
+
+    .intro-eyebrow{font-family:var(--font-heading);font-size:.62rem;font-weight:600;
+      letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem;}
+    .intro h1{font-family:var(--font-heading);font-size:1.75rem;font-weight:600;
+      letter-spacing:-.025em;line-height:1.2;margin-bottom:1rem;}
+    .intro-lead{font-size:.88rem;line-height:1.75;color:var(--muted);
+      margin-bottom:1.75rem;max-width:38ch;}
+
+    .module-list{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.75rem;}
+    .module-item{display:flex;gap:.65rem;font-size:.8rem;line-height:1.5;}
+    .module-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);
+      flex-shrink:0;margin-top:.42rem;}
+    .module-name{font-weight:600;color:var(--text);}
+    .module-desc{color:var(--muted);}
+
+    .intro-credit{font-size:.73rem;color:var(--muted);line-height:1.55;
+      padding-top:1.25rem;border-top:1px solid var(--border);}
+    .intro-credit a{color:var(--muted);text-underline-offset:3px;}
+    .intro-credit a:hover{color:var(--accent);}
+
+    /* ── Right: auth ── */
+    .auth-side{padding:3.5rem 2.5rem 3rem;
+      display:flex;flex-direction:column;justify-content:center;}
+    @media(max-width:760px){.auth-side{padding:2rem 1.5rem}}
+
+    .auth-title{font-family:var(--font-heading);font-size:1.05rem;font-weight:600;
+      letter-spacing:-.015em;margin-bottom:1.4rem;}
+
+    .tabs{display:flex;border:1px solid var(--border);margin-bottom:1.4rem;}
+    .tab{flex:1;font-family:var(--font-heading);font-size:.78rem;font-weight:600;
+      padding:.55rem 1rem;border:none;background:var(--bg);color:var(--muted);
+      cursor:pointer;transition:all .12s;letter-spacing:.02em;}
+    .tab.active{background:var(--accent);color:white;}
+
+    .panel{display:none}.panel.active{display:block}
+
+    .form-group{margin-bottom:.85rem;}
+    label{display:block;font-size:.77rem;font-weight:500;color:var(--text);margin-bottom:.28rem;}
+    input[type="email"],input[type="password"]{
+      width:100%;padding:.58rem .85rem;border:1px solid var(--border);
+      background:var(--bg);color:var(--text);font-family:var(--font-body);
+      font-size:.875rem;outline:none;transition:border-color .12s;}
     input:focus{border-color:var(--accent)}
 
-    .btn{width:100%;font-family:var(--font-heading);font-size:.875rem;font-weight:600;
-      padding:.8rem;border:none;background:var(--accent);color:white;
-      cursor:pointer;transition:background .15s;letter-spacing:-.01em;margin-top:.5rem}
+    .btn{width:100%;font-family:var(--font-heading);font-size:.85rem;font-weight:600;
+      padding:.72rem;border:none;background:var(--accent);color:white;
+      cursor:pointer;transition:background .15s;letter-spacing:-.01em;margin-top:.3rem;}
     .btn:hover{background:var(--accent-hover)}
     .btn:disabled{opacity:.5;cursor:not-allowed}
 
-    /* Messages */
-    .msg{padding:.75rem 1rem;font-size:.8rem;line-height:1.5;margin-bottom:1rem;display:none}
-    .msg.error{background:#fdf2f2;border-left:3px solid var(--error);color:var(--error)}
-    .msg.success{background:var(--accent-light);border-left:3px solid var(--accent);color:var(--accent)}
+    .msg{padding:.65rem .9rem;font-size:.77rem;line-height:1.5;margin-bottom:.8rem;display:none;}
+    .msg.error{background:#fdf2f2;border-left:3px solid var(--error);color:var(--error);}
+    .msg.success{background:var(--accent-light);border-left:3px solid var(--accent);color:var(--accent);}
     .msg.show{display:block}
 
-    /* Panel visibility */
-    .panel{display:none}
-    .panel.active{display:block}
+    .form-links{margin-top:.85rem;display:flex;gap:1rem;flex-wrap:wrap;justify-content:space-between;}
+    .form-links a{font-size:.73rem;color:var(--muted);text-decoration:none;
+      text-underline-offset:3px;transition:color .12s;}
+    .form-links a:hover{color:var(--accent);text-decoration:underline;}
 
-    /* Confirmation screen */
-    .confirm-screen{text-align:center;padding:2rem 0}
-    .confirm-icon{font-size:2.5rem;margin-bottom:1rem}
-    .confirm-screen h3{font-family:var(--font-heading);font-size:1.1rem;font-weight:600;margin-bottom:.5rem}
-    .confirm-screen p{font-size:.875rem;color:var(--muted);line-height:1.6}
-    .confirm-screen .email-shown{font-weight:600;color:var(--text)}
+    .confirm-screen{text-align:center;padding:1.5rem 0;}
+    .confirm-icon{font-size:2rem;margin-bottom:.65rem;}
+    .confirm-screen h3{font-family:var(--font-heading);font-size:.95rem;font-weight:600;margin-bottom:.35rem;}
+    .confirm-screen p{font-size:.8rem;color:var(--muted);line-height:1.6;}
+    .confirm-email{font-weight:600;color:var(--text);}
 
-    footer{border-top:1px solid var(--border);padding:1.25rem 2rem;
-      text-align:center;font-size:.8rem;color:var(--muted)}
-    footer a{color:var(--muted);text-decoration:none}
-    footer a:hover{color:var(--accent)}
+    .forgot-back{font-size:.75rem;color:var(--muted);background:none;border:none;
+      cursor:pointer;padding:0;margin-bottom:1rem;text-align:left;
+      text-decoration:underline;text-underline-offset:3px;}
+    .forgot-back:hover{color:var(--accent)}
+
+    /* ── Footer ── */
+    footer{border-top:1px solid var(--border);padding:1rem 2rem;
+      display:flex;align-items:center;justify-content:space-between;
+      flex-wrap:wrap;gap:.5rem;font-size:.73rem;color:var(--muted);}
+    footer a{color:var(--muted);text-decoration:none;text-underline-offset:3px;}
+    footer a:hover{color:var(--accent);text-decoration:underline;}
+    .footer-links{display:flex;gap:1.25rem;}
+    @media(max-width:480px){footer{justify-content:center;text-align:center;}}
   </style>
 </head>
 <body>
 
-<header>
-  <h1>Sensory Intelligence Lab</h1>
+<header class="landing-header">
+  <a class="landing-wordmark" href="https://jordanelias.de/" target="_blank" rel="noopener">Jordan Elias</a>
+  <nav class="landing-nav">
+    <a href="https://jordanelias.de/music-therapy/" target="_blank" rel="noopener" class="hide-xs">Music therapy</a>
+    <a href="https://jordanelias.de/events/" target="_blank" rel="noopener" class="hide-xs">Events</a>
+    <a href="https://jordanelias.de/blog/" target="_blank" rel="noopener">Blog</a>
+    <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a>
+  </nav>
 </header>
 
 <div class="page">
-  <div class="card">
 
-    <div class="card-header">
-      <h2>Welcome</h2>
-      <p>Sign in to access your training modules.</p>
+  <div class="intro">
+    <p class="intro-eyebrow">Sensory Intelligence Lab</p>
+    <h1>Train your nervous system through sound.</h1>
+    <p class="intro-lead">An interactive training platform built on music therapy, neuroscience, and the science of how sound shapes attention, arousal, and regulation.</p>
+
+    <div class="module-list">
+      <div class="module-item">
+        <div class="module-dot"></div>
+        <div>
+          <span class="module-name">Regulation Engine — </span>
+          <span class="module-desc">generative soundscapes that meet your current state and guide you toward calm, focus, or activation using the ISO principle.</span>
+        </div>
+      </div>
+      <div class="module-item">
+        <div class="module-dot"></div>
+        <div>
+          <span class="module-name">Breath Regulation — </span>
+          <span class="module-desc">visual and sonic guides for four evidence-based breathing patterns including box breathing and the physiological sigh.</span>
+        </div>
+      </div>
+      <div class="module-item">
+        <div class="module-dot"></div>
+        <div>
+          <span class="module-name">Rhythmic Entrainment Trainer — </span>
+          <span class="module-desc">interactive pulse training using auditory-motor synchronisation to shift arousal state.</span>
+        </div>
+      </div>
+      <div class="module-item">
+        <div class="module-dot"></div>
+        <div>
+          <span class="module-name">Ear Training &amp; Spatial Awareness — </span>
+          <span class="module-desc">perceptual skill-building for auditory attention, sound localisation, and scene analysis.</span>
+        </div>
+      </div>
     </div>
 
-    <!-- Auth tabs -->
-    <div class="tabs">
+    <p class="intro-credit">
+      Created by <a href="https://jordanelias.de/music-therapy/" target="_blank" rel="noopener">Jordan Elias</a>,
+      music therapist based in Berlin. Modules are grounded in neurologic music therapy research,
+      psychoacoustics, and the work of Pauline Oliveros, among others.
+    </p>
+  </div>
+
+  <div class="auth-side">
+    <p class="auth-title">Access the Lab</p>
+
+    <div class="tabs" id="authTabs">
       <button class="tab active" onclick="switchTab('signin')">Sign in</button>
       <button class="tab" onclick="switchTab('signup')">Create account</button>
     </div>
 
-    <!-- Sign in panel -->
+    <!-- Sign in -->
     <div class="panel active" id="signinPanel">
       <div class="msg" id="signinMsg"></div>
-
       <div class="form-group">
         <label for="signinEmail">Email</label>
         <input type="email" id="signinEmail" placeholder="you@email.com" autocomplete="email">
@@ -110,13 +202,15 @@
         <input type="password" id="signinPassword" placeholder="Your password" autocomplete="current-password">
       </div>
       <button class="btn" id="signinBtn" onclick="handleSignIn()">Sign in</button>
+      <div class="form-links">
+        <a href="#" onclick="switchTab('signup');return false;">No account yet?</a>
+        <a href="#" onclick="switchTab('forgot');return false;">Forgot your password?</a>
+      </div>
     </div>
 
-    <!-- Sign up panel -->
+    <!-- Sign up -->
     <div class="panel" id="signupPanel">
       <div class="msg" id="signupMsg"></div>
-
-      <!-- Signup form (shown first) -->
       <div id="signupForm">
         <div class="form-group">
           <label for="signupEmail">Email</label>
@@ -124,148 +218,147 @@
         </div>
         <div class="form-group">
           <label for="signupPassword">Password</label>
-          <input type="password" id="signupPassword" placeholder="Choose a password (8+ characters)" autocomplete="new-password">
+          <input type="password" id="signupPassword" placeholder="At least 8 characters" autocomplete="new-password">
         </div>
         <div class="form-group">
-          <label for="signupPasswordConfirm">Confirm password</label>
-          <input type="password" id="signupPasswordConfirm" placeholder="Repeat your password" autocomplete="new-password">
+          <label for="signupConfirmPassword">Confirm password</label>
+          <input type="password" id="signupConfirmPassword" placeholder="Repeat your password" autocomplete="new-password">
         </div>
         <button class="btn" id="signupBtn" onclick="handleSignUp()">Create account</button>
+        <div class="form-links">
+          <a href="#" onclick="switchTab('signin');return false;">Already have an account?</a>
+        </div>
       </div>
-
-      <!-- Confirmation notice (shown after signup) -->
       <div id="signupConfirm" class="confirm-screen" style="display:none">
         <div class="confirm-icon">✉️</div>
-        <h3>Check your email</h3>
-        <p>We've sent a confirmation link to<br>
-          <span class="email-shown" id="confirmedEmail"></span>
-        </p>
-        <p style="margin-top:.75rem">Click the link to verify your account, then come back here to sign in.</p>
+        <h3>Check your inbox</h3>
+        <p>A confirmation link has been sent to<br>
+          <span class="confirm-email" id="confirmedEmail"></span></p>
+        <p style="margin-top:.55rem">Click the link to verify your account, then return here to sign in.</p>
       </div>
     </div>
 
+    <!-- Forgot password -->
+    <div class="panel" id="forgotPanel">
+      <button class="forgot-back" onclick="switchTab('signin')">← Back to sign in</button>
+      <div class="msg" id="forgotMsg"></div>
+      <div id="forgotForm">
+        <div class="form-group">
+          <label for="forgotEmail">Your email address</label>
+          <input type="email" id="forgotEmail" placeholder="you@email.com" autocomplete="email">
+        </div>
+        <button class="btn" id="forgotBtn" onclick="handleForgot()">Send reset link</button>
+      </div>
+      <div id="forgotConfirm" class="confirm-screen" style="display:none">
+        <div class="confirm-icon">✉️</div>
+        <h3>Reset link sent</h3>
+        <p>Check your inbox and follow the link to create a new password.</p>
+      </div>
+    </div>
   </div>
+
 </div>
 
 <footer>
-  <p>Jordan Elias Music Therapy · Berlin · <a href="/contact/">Contact</a></p>
+  <span>© Jordan Elias Music Therapy · Berlin</span>
+  <div class="footer-links">
+    <a href="https://jordanelias.de/" target="_blank" rel="noopener">jordanelias.de</a>
+    <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a>
+  </div>
 </footer>
 
 <script type="module">
   import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+  const supabase = createClient(
+    "https://lrjuufvrgkuvfxcmybtf.supabase.co",
+    "sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1"
+  );
 
-  const SUPABASE_URL      = "https://lrjuufvrgkuvfxcmybtf.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1";
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  // ── If user is already signed in, send them to dashboard ──
-  // This handles the case where someone navigates back to / while logged in,
-  // AND handles the email confirmation redirect (Supabase redirects back to
-  // Site URL after confirmation, which is /, so we check for a session here).
+  // Already signed in → go straight to dashboard
   const { data: { user } } = await supabase.auth.getUser();
-  if (user) {
-    window.location.replace("/dashboard/");
-  }
+  if (user) window.location.replace("/dashboard/");
 
-  // ── Tab switching ──
   window.switchTab = function(tab) {
-    document.querySelectorAll('.tab').forEach((t,i) => {
-      t.classList.toggle('active', (i===0 && tab==='signin') || (i===1 && tab==='signup'));
+    ['signin','signup','forgot'].forEach(t => {
+      document.getElementById(t+'Panel').classList.toggle('active', t === tab);
     });
-    document.getElementById('signinPanel').classList.toggle('active', tab==='signin');
-    document.getElementById('signupPanel').classList.toggle('active', tab==='signup');
+    document.querySelectorAll('#authTabs .tab').forEach((el, i) => {
+      el.classList.toggle('active',
+        (i === 0 && tab === 'signin') || (i === 1 && tab === 'signup')
+      );
+    });
+    // Hide tabs row when on forgot panel — it doesn't have a tab
+    document.getElementById('authTabs').style.display = tab === 'forgot' ? 'none' : 'flex';
   };
 
-  // ── Helpers ──
   function showMsg(id, text, type) {
     const el = document.getElementById(id);
-    el.textContent = text;
-    el.className = `msg ${type} show`;
+    el.textContent = text; el.className = `msg ${type} show`;
   }
-  function clearMsg(id) {
+  function clearMsg(id) { document.getElementById(id).className = 'msg'; }
+  function setLoading(id, loading, label) {
     const el = document.getElementById(id);
-    el.className = 'msg';
-  }
-  function setLoading(btnId, loading) {
-    document.getElementById(btnId).disabled = loading;
-    document.getElementById(btnId).textContent = loading
-      ? 'Please wait…'
-      : btnId === 'signinBtn' ? 'Sign in' : 'Create account';
+    el.disabled = loading; el.textContent = loading ? 'Please wait…' : label;
   }
 
-  // Allow Enter key to submit
   document.addEventListener('keydown', e => {
     if (e.key !== 'Enter') return;
-    const signinActive = document.getElementById('signinPanel').classList.contains('active');
-    if (signinActive) handleSignIn();
-    else handleSignUp();
+    if (document.getElementById('signinPanel').classList.contains('active')) handleSignIn();
+    else if (document.getElementById('signupPanel').classList.contains('active')) handleSignUp();
+    else if (document.getElementById('forgotPanel').classList.contains('active')) handleForgot();
   });
 
-  // ── Sign in ──
   window.handleSignIn = async function() {
     clearMsg('signinMsg');
     const email    = document.getElementById('signinEmail').value.trim();
     const password = document.getElementById('signinPassword').value;
-
-    if (!email || !password) {
-      showMsg('signinMsg', 'Please enter your email and password.', 'error'); return;
-    }
-
-    setLoading('signinBtn', true);
+    if (!email || !password) { showMsg('signinMsg','Please enter your email and password.','error'); return; }
+    setLoading('signinBtn', true, 'Sign in');
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading('signinBtn', false);
-
+    setLoading('signinBtn', false, 'Sign in');
     if (error) {
-      // Supabase returns a generic message for security — we surface a friendly one
-      if (error.message.includes('Email not confirmed')) {
-        showMsg('signinMsg', 'Please confirm your email address first. Check your inbox.', 'error');
-      } else {
-        showMsg('signinMsg', 'Incorrect email or password. Please try again.', 'error');
-      }
+      showMsg('signinMsg',
+        error.message.includes('Email not confirmed')
+          ? 'Please confirm your email address first — check your inbox.'
+          : 'Incorrect email or password.',
+        'error');
       return;
     }
-
-    // Success — redirect to dashboard
-    window.location.replace("/dashboard/");
+    window.location.replace('/dashboard/');
   };
 
-  // ── Sign up ──
   window.handleSignUp = async function() {
     clearMsg('signupMsg');
-    const email    = document.getElementById('signupEmail').value.trim();
-    const password = document.getElementById('signupPassword').value;
-    const confirm  = document.getElementById('signupPasswordConfirm').value;
-
-    if (!email || !password || !confirm) {
-      showMsg('signupMsg', 'Please fill in all fields.', 'error'); return;
-    }
-    if (password.length < 8) {
-      showMsg('signupMsg', 'Password must be at least 8 characters.', 'error'); return;
-    }
-    if (password !== confirm) {
-      showMsg('signupMsg', 'Passwords do not match.', 'error'); return;
-    }
-
-    setLoading('signupBtn', true);
+    const email = document.getElementById('signupEmail').value.trim();
+    const pw    = document.getElementById('signupPassword').value;
+    const pwc   = document.getElementById('signupConfirmPassword').value;
+    if (!email || !pw || !pwc) { showMsg('signupMsg','Please fill in all fields.','error'); return; }
+    if (pw.length < 8) { showMsg('signupMsg','Password must be at least 8 characters.','error'); return; }
+    if (pw !== pwc)    { showMsg('signupMsg','Passwords do not match.','error'); return; }
+    setLoading('signupBtn', true, 'Create account');
     const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        // After email confirmation, Supabase redirects to Site URL (/)
-        // which then checks for a session and forwards to /dashboard/
-        emailRedirectTo: "https://lab.jordanelias.de/",
-      }
+      email, password: pw,
+      options: { emailRedirectTo: "https://lab.jordanelias.de/" }
     });
-    setLoading('signupBtn', false);
-
-    if (error) {
-      showMsg('signupMsg', error.message, 'error'); return;
-    }
-
-    // Show confirmation notice
-    document.getElementById('signupForm').style.display = 'none';
-    document.getElementById('confirmedEmail').textContent = email;
+    setLoading('signupBtn', false, 'Create account');
+    if (error) { showMsg('signupMsg', error.message, 'error'); return; }
+    document.getElementById('signupForm').style.display    = 'none';
+    document.getElementById('confirmedEmail').textContent  = email;
     document.getElementById('signupConfirm').style.display = 'block';
+  };
+
+  window.handleForgot = async function() {
+    clearMsg('forgotMsg');
+    const email = document.getElementById('forgotEmail').value.trim();
+    if (!email) { showMsg('forgotMsg','Please enter your email address.','error'); return; }
+    setLoading('forgotBtn', true, 'Send reset link');
+    await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: "https://lab.jordanelias.de/account/"
+    });
+    setLoading('forgotBtn', false, 'Send reset link');
+    // Always show success — never reveal whether an account exists
+    document.getElementById('forgotForm').style.display    = 'none';
+    document.getElementById('forgotConfirm').style.display = 'block';
   };
 </script>
 </body>
