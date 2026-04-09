@@ -1,8 +1,32 @@
+# netlify.toml
+
 [build]
   publish = "."
-  command = "npm run build" # or leave blank if static
+
+# ── Redirect rules ──
+# These ensure clean URL routing and that Netlify doesn't 404
+# on paths that exist as real folders/files.
+
+# The root handles auth. Everything under /dashboard/ is protected
+# by auth-guard.js on the client side. Netlify handles the 404 fallback.
 
 [[redirects]]
-  from = "/dashboard/*"
-  to = "/dashboard/index.html"
+  from = "/dashboard"
+  to   = "/dashboard/"
+  status = 301
+
+# Catch-all: if a path isn't found, serve root index (handles any
+# Supabase auth callback that lands on an unexpected path)
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
   status = 200
+  conditions = {Role = ["404"]}
+
+# Security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
