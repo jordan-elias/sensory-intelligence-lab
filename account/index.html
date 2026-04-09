@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account — Sensory Intelligence Lab</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+  <script src="/dashboard/auth-guard.js" type="module"></script>
+  <script src="/assets/js/header.js" defer></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --font-body:'Inter',sans-serif;
+      --font-heading:'Space Grotesk',sans-serif;
+      --bg:#fff;--surface:#f9f9f7;--border:#e5e5e0;
+      --text:#1a1a1a;--muted:#6b6b6b;
+      --accent:#2a5c45;--accent-light:#edf4f0;--accent-hover:#1e4433;
+      --error:#c0392b;--error-bg:#fdf2f2;
+      --warning:#92610a;--warning-bg:#fdf8ee;
+    }
+    html{font-size:16px}
+    body{font-family:var(--font-body);color:var(--text);background:var(--bg);
+      min-height:100vh;display:flex;flex-direction:column;}
+
+    /* ── Breadcrumb ── */
+    .bc{padding:.75rem 1.5rem 0;max-width:860px;margin:0 auto}
+    .bc ol{list-style:none;display:flex;gap:.3rem;align-items:center;
+      font-size:.75rem;color:var(--muted);flex-wrap:wrap;}
+    .bc li+li::before{content:'/';margin-right:.3rem;color:var(--border)}
+    .bc a{color:var(--muted);text-decoration:none;}
+    .bc a:hover{color:var(--accent);text-decoration:underline;}
+
+    /* ── Main ── */
+    main{max-width:860px;margin:0 auto;padding:2.5rem 2rem 4rem;flex:1;width:100%;}
+    @media(max-width:600px){main{padding:1.5rem 1rem 3rem}}
+
+    /* ── Page header ── */
+    .ph{margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border);}
+    .ph h2{font-family:var(--font-heading);font-size:1.75rem;font-weight:600;
+      letter-spacing:-.02em;line-height:1.2;margin-bottom:.3rem;}
+    .ph p{font-size:.875rem;color:var(--muted);}
+
+    /* ── Section label ── */
+    .sl{font-family:var(--font-heading);font-size:.63rem;font-weight:600;
+      letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem;}
+
+    /* ── Cards ── */
+    .card{border:1px solid var(--border);margin-bottom:1.5rem;}
+    .card-head{padding:1rem 1.25rem;border-bottom:1px solid var(--border);
+      background:var(--surface);display:flex;align-items:center;
+      justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+    .card-head h3{font-family:var(--font-heading);font-size:.85rem;font-weight:600;
+      letter-spacing:-.01em;}
+    .card-body{padding:1.25rem;}
+
+    /* ── Plan badge ── */
+    .plan-badge{display:inline-block;font-family:var(--font-heading);font-size:.6rem;
+      font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+      padding:.2rem .55rem;border:1px solid currentColor;}
+    .plan-badge.free{color:var(--muted);border-color:var(--border);}
+    .plan-badge.pro{color:var(--accent);border-color:var(--accent);
+      background:var(--accent-light);}
+
+    /* ── Info rows ── */
+    .info-row{display:flex;align-items:baseline;justify-content:space-between;
+      gap:1rem;padding:.6rem 0;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+    .info-row:last-child{border-bottom:none;padding-bottom:0;}
+    .info-label{font-size:.78rem;font-weight:500;color:var(--muted);flex-shrink:0;}
+    .info-val{font-size:.875rem;color:var(--text);text-align:right;}
+
+    /* ── Forms ── */
+    .form-group{margin-bottom:1rem;}
+    .form-group:last-of-type{margin-bottom:0;}
+    label{display:block;font-size:.78rem;font-weight:500;color:var(--text);margin-bottom:.3rem;}
+    input[type="email"],input[type="password"],input[type="text"]{
+      width:100%;padding:.6rem .85rem;border:1px solid var(--border);
+      background:var(--bg);color:var(--text);font-family:var(--font-body);
+      font-size:.875rem;outline:none;transition:border-color .12s;}
+    input:focus{border-color:var(--accent);}
+    input:disabled{background:var(--surface);color:var(--muted);cursor:not-allowed;}
+
+    .btn{font-family:var(--font-heading);font-size:.8rem;font-weight:600;
+      padding:.65rem 1.5rem;border:none;background:var(--accent);color:white;
+      cursor:pointer;transition:background .15s;letter-spacing:-.01em;}
+    .btn:hover{background:var(--accent-hover);}
+    .btn:disabled{opacity:.5;cursor:not-allowed;}
+    .btn-outline{background:var(--bg);color:var(--text);border:1px solid var(--border);}
+    .btn-outline:hover{border-color:var(--accent);color:var(--accent);background:var(--bg);}
+    .btn-danger{background:var(--error-bg);color:var(--error);border:1px solid var(--error);}
+    .btn-danger:hover{background:var(--error);color:white;}
+
+    .btn-row{display:flex;gap:.65rem;flex-wrap:wrap;margin-top:1rem;}
+
+    /* ── Messages ── */
+    .msg{padding:.65rem .9rem;font-size:.78rem;line-height:1.5;
+      margin-bottom:.85rem;display:none;}
+    .msg.error{background:var(--error-bg);border-left:3px solid var(--error);color:var(--error);}
+    .msg.success{background:var(--accent-light);border-left:3px solid var(--accent);color:var(--accent);}
+    .msg.warning{background:var(--warning-bg);border-left:3px solid var(--warning);color:var(--warning);}
+    .msg.show{display:block;}
+
+    /* ── Password strength ── */
+    .pw-strength{height:3px;background:var(--border);margin-top:.4rem;position:relative;}
+    .pw-strength-fill{height:100%;width:0%;transition:width .2s,background .2s;}
+
+    /* ── Subscription plan display ── */
+    .plan-features{display:flex;flex-direction:column;gap:.4rem;margin-top:.85rem;}
+    .plan-feature{display:flex;align-items:baseline;gap:.5rem;font-size:.8rem;}
+    .plan-feature::before{content:'—';color:var(--accent);flex-shrink:0;}
+
+    /* ── Danger zone ── */
+    .danger-zone{border-color:#f5c6c6;}
+    .danger-zone .card-head{background:#fdf2f2;}
+    .danger-zone .card-head h3{color:var(--error);}
+
+    /* ── Password reset banner (shown when reset token present) ── */
+    .reset-banner{background:var(--accent-light);border:1px solid var(--accent);
+      padding:1.25rem;margin-bottom:1.5rem;}
+    .reset-banner h3{font-family:var(--font-heading);font-size:.9rem;font-weight:600;
+      color:var(--accent);margin-bottom:.25rem;}
+    .reset-banner p{font-size:.8rem;color:var(--accent);opacity:.85;}
+
+    /* ── Loading state ── */
+    .page-loading{opacity:0;transition:opacity .2s;}
+    .page-loading.ready{opacity:1;}
+
+    footer{border-top:1px solid var(--border);padding:1.25rem 2rem;
+      text-align:center;font-size:.78rem;color:var(--muted);}
+    footer a{color:var(--muted);text-decoration:none;text-underline-offset:3px;}
+    footer a:hover{color:var(--accent);text-decoration:underline;}
+  </style>
+</head>
+<body>
+
+<div id="lab-header"></div>
+
+<nav aria-label="Breadcrumb" class="bc">
+  <ol>
+    <li><a href="/dashboard/">Home</a></li>
+    <li>Account</li>
+  </ol>
+</nav>
+
+<main class="page-loading" id="mainContent">
+
+  <!-- Password reset banner — hidden by default, shown when token detected -->
+  <div class="reset-banner" id="resetBanner" style="display:none">
+    <h3>Set a new password</h3>
+    <p>You followed a password reset link. Enter your new password below.</p>
+  </div>
+
+  <div class="ph">
+    <h2>Account</h2>
+    <p id="accountSubtitle">Manage your profile, password, and subscription.</p>
+  </div>
+
+  <!-- ── Password reset form (only visible after reset link) ── -->
+  <div id="resetSection" style="display:none">
+    <p class="sl">New password</p>
+    <div class="card">
+      <div class="card-head"><h3>Set new password</h3></div>
+      <div class="card-body">
+        <div class="msg" id="resetMsg"></div>
+        <div class="form-group">
+          <label for="resetPw">New password</label>
+          <input type="password" id="resetPw" placeholder="At least 8 characters" autocomplete="new-password">
+          <div class="pw-strength"><div class="pw-strength-fill" id="resetPwStrength"></div></div>
+        </div>
+        <div class="form-group">
+          <label for="resetPwConfirm">Confirm new password</label>
+          <input type="password" id="resetPwConfirm" placeholder="Repeat your new password" autocomplete="new-password">
+        </div>
+        <div class="btn-row">
+          <button class="btn" id="resetPwBtn" onclick="handlePasswordReset()">Save new password</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Profile ── -->
+  <p class="sl">Profile</p>
+  <div class="card">
+    <div class="card-head">
+      <h3>Your details</h3>
+    </div>
+    <div class="card-body">
+      <div class="info-row">
+        <span class="info-label">Email</span>
+        <span class="info-val" id="displayEmail">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Name</span>
+        <span class="info-val" id="displayName">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Member since</span>
+        <span class="info-val" id="displayCreatedAt">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Update name ── -->
+  <p class="sl">Display name</p>
+  <div class="card">
+    <div class="card-head"><h3>Update name</h3></div>
+    <div class="card-body">
+      <div class="msg" id="nameMsg"></div>
+      <div class="form-group">
+        <label for="nameInput">Full name</label>
+        <input type="text" id="nameInput" placeholder="Your name" autocomplete="name">
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="nameBtn" onclick="handleNameUpdate()">Save name</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Change email ── -->
+  <p class="sl">Email address</p>
+  <div class="card">
+    <div class="card-head"><h3>Change email</h3></div>
+    <div class="card-body">
+      <div class="msg" id="emailMsg"></div>
+      <div class="form-group">
+        <label for="emailInput">New email address</label>
+        <input type="email" id="emailInput" placeholder="new@email.com" autocomplete="email">
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="emailBtn" onclick="handleEmailChange()">Send confirmation</button>
+      </div>
+      <p style="font-size:.72rem;color:var(--muted);margin-top:.75rem;line-height:1.5;">
+        A confirmation link will be sent to your new address. Your email won't change until you click it.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── Change password ── -->
+  <p class="sl">Password</p>
+  <div class="card">
+    <div class="card-head"><h3>Change password</h3></div>
+    <div class="card-body">
+      <div class="msg" id="passwordMsg"></div>
+      <div class="form-group">
+        <label for="currentPw">Current password</label>
+        <input type="password" id="currentPw" placeholder="Your current password" autocomplete="current-password">
+      </div>
+      <div class="form-group">
+        <label for="newPw">New password</label>
+        <input type="password" id="newPw" placeholder="At least 8 characters" autocomplete="new-password">
+        <div class="pw-strength"><div class="pw-strength-fill" id="newPwStrength"></div></div>
+      </div>
+      <div class="form-group">
+        <label for="newPwConfirm">Confirm new password</label>
+        <input type="password" id="newPwConfirm" placeholder="Repeat your new password" autocomplete="new-password">
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="passwordBtn" onclick="handlePasswordChange()">Update password</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Subscription ── -->
+  <p class="sl">Subscription</p>
+  <div class="card">
+    <div class="card-head">
+      <h3>Current plan</h3>
+      <span class="plan-badge free" id="planBadge">Free</span>
+    </div>
+    <div class="card-body">
+      <div class="info-row">
+        <span class="info-label">Plan</span>
+        <span class="info-val" id="planName">Free access</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Status</span>
+        <span class="info-val" id="planStatus">Active</span>
+      </div>
+      <div class="info-row" id="planExpiryRow" style="display:none">
+        <span class="info-label">Renews</span>
+        <span class="info-val" id="planExpiry">—</span>
+      </div>
+      <div class="plan-features" id="planFeatures">
+        <!-- populated by JS based on plan -->
+      </div>
+      <div class="btn-row" style="margin-top:1.25rem">
+        <a href="/subscribe/" class="btn" id="upgradeBtn">View plans</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Danger zone ── -->
+  <p class="sl">Account actions</p>
+  <div class="card danger-zone">
+    <div class="card-head"><h3>Sign out everywhere</h3></div>
+    <div class="card-body">
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:1rem;line-height:1.5;">
+        Signs you out of all devices and browsers where you're currently logged in.
+      </p>
+      <div class="msg" id="signoutMsg"></div>
+      <button class="btn btn-danger" onclick="handleSignOutAll()">Sign out all sessions</button>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>Jordan Elias Music Therapy · Berlin ·
+    <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a> ·
+    <a href="https://jordanelias.de/" target="_blank" rel="noopener">jordanelias.de</a>
+  </p>
+</footer>
+
+<script type="module">
+  // auth-guard.js has already checked the session and exposed:
+  //   window._supabase   — the client
+  //   window._currentUser — the user object
+  //   window._currentPlan — 'free' | 'pro' etc
+  //   fires 'authReady' event when done
+
+  // ── Wait for auth to be confirmed ──
+  function onAuthReady(cb) {
+    if (window._currentUser) { cb(); return; }
+    window.addEventListener('authReady', cb, { once: true });
+  }
+
+  // ── Helpers ──
+  function showMsg(id, text, type) {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = `msg ${type} show`;
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  function clearMsg(id) { document.getElementById(id).className = 'msg'; }
+  function setLoading(id, loading, label) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.disabled = loading;
+    el.textContent = loading ? 'Please wait…' : label;
+  }
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('en-GB', {
+      day: 'numeric', month: 'long', year: 'numeric'
+    });
+  }
+
+  // ── Password strength indicator ──
+  function updateStrength(inputId, barId) {
+    document.getElementById(inputId).addEventListener('input', function() {
+      const v = this.value;
+      const bar = document.getElementById(barId);
+      let score = 0;
+      if (v.length >= 8)  score++;
+      if (v.length >= 12) score++;
+      if (/[A-Z]/.test(v)) score++;
+      if (/[0-9]/.test(v)) score++;
+      if (/[^A-Za-z0-9]/.test(v)) score++;
+      const pct = (score / 5) * 100;
+      const col = score <= 1 ? '#c0392b' : score <= 3 ? '#e67e22' : '#2a5c45';
+      bar.style.width = pct + '%';
+      bar.style.background = col;
+    });
+  }
+  updateStrength('newPw', 'newPwStrength');
+  updateStrength('resetPw', 'resetPwStrength');
+
+  // ── Plan display ──
+  const PLAN_FEATURES = {
+    free: [
+      'Access to all core training modules',
+      'Generative soundscapes and breath tools',
+      'Rhythmic entrainment trainer',
+    ],
+    pro: [
+      'Full access to all modules',
+      'Session history and progress tracking',
+      'Priority access to new modules',
+      'Monthly 1:1 session with Jordan (session tier)',
+    ],
+  };
+
+  function renderPlan(plan, expiresAt) {
+    const badge    = document.getElementById('planBadge');
+    const planName = document.getElementById('planName');
+    const features = document.getElementById('planFeatures');
+    const expiryRow= document.getElementById('planExpiryRow');
+    const upgradeBtn = document.getElementById('upgradeBtn');
+
+    const isPro = plan !== 'free';
+    badge.textContent = isPro ? 'Pro' : 'Free';
+    badge.className   = `plan-badge ${isPro ? 'pro' : 'free'}`;
+    planName.textContent = isPro ? 'Pro membership' : 'Free access';
+
+    if (isPro && expiresAt) {
+      expiryRow.style.display = 'flex';
+      document.getElementById('planExpiry').textContent = fmtDate(expiresAt);
+    }
+
+    const list = PLAN_FEATURES[isPro ? 'pro' : 'free'] || PLAN_FEATURES.free;
+    features.innerHTML = list
+      .map(f => `<div class="plan-feature">${f}</div>`)
+      .join('');
+
+    if (isPro) {
+      upgradeBtn.textContent = 'Manage subscription';
+    }
+  }
+
+  // ── Detect password reset token in URL hash ──
+  // Supabase puts #access_token=...&type=recovery in the URL after reset click
+  function checkResetToken() {
+    const hash   = window.location.hash;
+    const params = new URLSearchParams(hash.replace('#', ''));
+    const type   = params.get('type');
+    if (type === 'recovery') {
+      document.getElementById('resetBanner').style.display  = 'block';
+      document.getElementById('resetSection').style.display = 'block';
+      // Scroll to reset form gently
+      setTimeout(() => {
+        document.getElementById('resetBanner').scrollIntoView({ behavior: 'smooth' });
+      }, 300);
+      return true;
+    }
+    return false;
+  }
+
+  // ── Init — runs once auth is confirmed ──
+  onAuthReady(async () => {
+    const supabase = window._supabase;
+    const user     = window._currentUser;
+    const plan     = window._currentPlan;
+
+    // Populate profile display
+    document.getElementById('displayEmail').textContent = user.email || '—';
+    document.getElementById('displayCreatedAt').textContent = fmtDate(user.created_at);
+
+    // Load full profile for name + plan details
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('full_name, plan, plan_expires_at')
+      .eq('id', user.id)
+      .single();
+
+    if (profile) {
+      document.getElementById('displayName').textContent =
+        profile.full_name || 'Not set';
+      document.getElementById('nameInput').value =
+        profile.full_name || '';
+      renderPlan(profile.plan || 'free', profile.plan_expires_at);
+    }
+
+    // Check for password reset token
+    checkResetToken();
+
+    // Show the page (was hidden to prevent flash before data loads)
+    document.getElementById('mainContent').classList.add('ready');
+  });
+
+  // ── Update name ──
+  window.handleNameUpdate = async function() {
+    clearMsg('nameMsg');
+    const name = document.getElementById('nameInput').value.trim();
+    if (!name) { showMsg('nameMsg','Please enter a name.','error'); return; }
+
+    setLoading('nameBtn', true, 'Save name');
+    const { error } = await window._supabase
+      .from('profiles')
+      .update({ full_name: name, updated_at: new Date().toISOString() })
+      .eq('id', window._currentUser.id);
+    setLoading('nameBtn', false, 'Save name');
+
+    if (error) { showMsg('nameMsg', error.message, 'error'); return; }
+    document.getElementById('displayName').textContent = name;
+    showMsg('nameMsg','Name updated.','success');
+  };
+
+  // ── Change email ──
+  window.handleEmailChange = async function() {
+    clearMsg('emailMsg');
+    const email = document.getElementById('emailInput').value.trim();
+    if (!email) { showMsg('emailMsg','Please enter an email address.','error'); return; }
+    if (email === window._currentUser.email) {
+      showMsg('emailMsg','That is your current email address.','warning'); return;
+    }
+
+    setLoading('emailBtn', true, 'Send confirmation');
+    const { error } = await window._supabase.auth.updateUser(
+      { email },
+      { emailRedirectTo: 'https://lab.jordanelias.de/account/' }
+    );
+    setLoading('emailBtn', false, 'Send confirmation');
+
+    if (error) { showMsg('emailMsg', error.message, 'error'); return; }
+    showMsg('emailMsg',
+      'A confirmation link has been sent to ' + email + '. Your email will update once you click it.',
+      'success');
+    document.getElementById('emailInput').value = '';
+  };
+
+  // ── Change password (requires current password re-auth) ──
+  window.handlePasswordChange = async function() {
+    clearMsg('passwordMsg');
+    const current = document.getElementById('currentPw').value;
+    const next    = document.getElementById('newPw').value;
+    const confirm = document.getElementById('newPwConfirm').value;
+
+    if (!current || !next || !confirm) {
+      showMsg('passwordMsg','Please fill in all fields.','error'); return;
+    }
+    if (next.length < 8) {
+      showMsg('passwordMsg','New password must be at least 8 characters.','error'); return;
+    }
+    if (next !== confirm) {
+      showMsg('passwordMsg','New passwords do not match.','error'); return;
+    }
+
+    setLoading('passwordBtn', true, 'Update password');
+
+    // Re-authenticate with current password first
+    const { error: reAuthError } = await window._supabase.auth.signInWithPassword({
+      email: window._currentUser.email,
+      password: current,
+    });
+
+    if (reAuthError) {
+      setLoading('passwordBtn', false, 'Update password');
+      showMsg('passwordMsg','Current password is incorrect.','error');
+      return;
+    }
+
+    // Now update to new password
+    const { error } = await window._supabase.auth.updateUser({ password: next });
+    setLoading('passwordBtn', false, 'Update password');
+
+    if (error) { showMsg('passwordMsg', error.message, 'error'); return; }
+
+    showMsg('passwordMsg','Password updated successfully.','success');
+    document.getElementById('currentPw').value = '';
+    document.getElementById('newPw').value      = '';
+    document.getElementById('newPwConfirm').value = '';
+  };
+
+  // ── Password reset (from email link) ──
+  window.handlePasswordReset = async function() {
+    clearMsg('resetMsg');
+    const pw  = document.getElementById('resetPw').value;
+    const pwc = document.getElementById('resetPwConfirm').value;
+
+    if (!pw || !pwc) {
+      showMsg('resetMsg','Please fill in both fields.','error'); return;
+    }
+    if (pw.length < 8) {
+      showMsg('resetMsg','Password must be at least 8 characters.','error'); return;
+    }
+    if (pw !== pwc) {
+      showMsg('resetMsg','Passwords do not match.','error'); return;
+    }
+
+    setLoading('resetPwBtn', true, 'Save new password');
+    const { error } = await window._supabase.auth.updateUser({ password: pw });
+    setLoading('resetPwBtn', false, 'Save new password');
+
+    if (error) { showMsg('resetMsg', error.message, 'error'); return; }
+
+    // Clear the hash from the URL so refresh doesn't re-show the reset form
+    history.replaceState(null, '', window.location.pathname);
+
+    showMsg('resetMsg','Password set successfully. You can now use it to sign in.','success');
+    document.getElementById('resetBanner').style.display  = 'none';
+
+    // Scroll to top of page so user sees their account
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 800);
+  };
+
+  // ── Sign out all sessions ──
+  window.handleSignOutAll = async function() {
+    const confirmed = window.confirm(
+      'This will sign you out on all devices. Continue?'
+    );
+    if (!confirmed) return;
+
+    showMsg('signoutMsg','Signing out everywhere…','warning');
+    const { error } = await window._supabase.auth.signOut({ scope: 'global' });
+    if (error) { showMsg('signoutMsg', error.message, 'error'); return; }
+    window.location.replace('/');
+  };
+</script>
+</body>
+</html>
