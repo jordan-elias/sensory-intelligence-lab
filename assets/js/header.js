@@ -104,6 +104,7 @@
       <a class="lab-wordmark" href="/dashboard/">Sensory Intelligence Lab</a>
       <nav class="lab-nav" id="labNav">
         <a href="/dashboard/">Dashboard</a>
+        <a href="/about/">About</a>
         <a href="/account/">Account</a>
         <a href="/booking/">Schedule a session</a>
         <a href="https://jordanelias.de/blog/" target="_blank" rel="noopener">Blog</a>
