@@ -61,53 +61,53 @@
 # ── Module pages ──
 
 [[redirects]]
-  from = "/dashboard/regulation"
-  to   = "/dashboard/regulation/index.html"
+  from = "/regulation"
+  to   = "/regulation/index.html"
   status = 200
 
 [[redirects]]
-  from = "/dashboard/regulation/"
-  to   = "/dashboard/regulation/index.html"
+  from = "/regulation/"
+  to   = "/regulation/index.html"
   status = 200
 
 [[redirects]]
-  from = "/dashboard/breathing"
-  to   = "/dashboard/breathing/index.html"
+  from = "/breathing"
+  to   = "/breathing/index.html"
   status = 200
 
 [[redirects]]
-  from = "/dashboard/breathing/"
-  to   = "/dashboard/breathing/index.html"
+  from = "/breathing/"
+  to   = "/breathing/index.html"
   status = 200
 
 [[redirects]]
-  from = "/dashboard/ear-training"
-  to   = "/dashboard/ear-training/index.html"
+  from = "/ear-training"
+  to   = "/ear-training/index.html"
   status = 200
 
 [[redirects]]
-  from = "/dashboard/ear-training/"
-  to   = "/dashboard/ear-training/index.html"
+  from = "/ear-training/"
+  to   = "/ear-training/index.html"
   status = 200
 
 [[redirects]]
-  from = "/dashboard/spatial-game"
-  to   = "/dashboard/spatial-game/index.html"
+  from = "/spatial-game"
+  to   = "/spatial-game/index.html"
   status = 200
 
 [[redirects]]
-  from = "/dashboard/spatial-game/"
-  to   = "/dashboard/spatial-game/index.html"
+  from = "/spatial-game/"
+  to   = "/spatial-game/index.html"
   status = 200
 
 [[redirects]]
-  from = "/dashboard/checkin"
-  to   = "/dashboard/checkin/index.html"
+  from = "/checkin"
+  to   = "/checkin/index.html"
   status = 200
 
 [[redirects]]
-  from = "/dashboard/checkin/"
-  to   = "/dashboard/checkin/index.html"
+  from = "/checkin/"
+  to   = "/checkin/index.html"
   status = 200
 
 [[redirects]]
@@ -120,7 +120,6 @@
   to   = "/library/index.html"
   status = 200
 
-# ── Soundscape Machine ──
 
 [[redirects]]
   from = "/soundscape-machine"
