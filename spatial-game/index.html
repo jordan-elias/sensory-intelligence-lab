@@ -3,438 +3,830 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script defer src="https://cloud.umani.is/script.js" data-website-id="b465c3e2-0fb1-4c36-b5db-6eaf0fe05cb7"></script>
+  <title>Spatial Awareness — Sensory Intelligence Lab</title>
 
-  <title>Spatial Sound Tracking: The Auditory Shell Game</title>
-  <meta name="description" content="Train spatial attention by tracking moving sound sources in 3D space.">
-  <meta name="author" content="Jordan Elias">
-
-  <link rel="canonical" href="https://www.jordanelias.de/blog/source-localization/">
-  <link rel="icon" type="image/png" sizes="64x64" href="/images/favicon.png">
+  <script src="/dashboard/auth-guard.js" type="module"></script>
+  <script src="/assets/js/header.js" defer></script>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/styles.css">
 
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --font-body: 'Inter', sans-serif;
+      --font-heading: 'Space Grotesk', sans-serif;
+      --bg: #ffffff;
+      --surface: #f9f9f7;
+      --border: #e5e5e0;
+      --text: #1a1a1a;
+      --muted: #6b6b6b;
+      --accent: #2a5c45;
+      --accent-light: #edf4f0;
+      --accent-hover: #1e4433;
+    }
+
+    html { font-size: 16px; }
+    body {
+      font-family: var(--font-body);
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+    a:hover { color: var(--accent); }
+
+    /* ── Breadcrumb ── */
+    .bc { padding: .75rem 1.5rem 0; max-width: 860px; margin: 0 auto; width: 100%; }
+    .bc ol { list-style: none; display: flex; gap: .3rem; align-items: center; font-size: .75rem; color: var(--muted); flex-wrap: wrap; }
+    .bc li + li::before { content: '/'; margin-right: .3rem; color: var(--border); }
+    .bc a { color: var(--muted); text-decoration: none; }
+    .bc a:hover { color: var(--accent); text-decoration: underline; }
+
+    /* ── Main ── */
+    main { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; flex: 1; width: 100%; }
+    @media (max-width: 600px) { main { padding: 1.5rem 1rem 3rem; } }
+
+    /* ── Page header ── */
+    .ph { margin-bottom: 2rem; padding-bottom: 1.75rem; border-bottom: 1px solid var(--border); }
+    .ph h2 { font-family: var(--font-heading); font-size: 2rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; margin-bottom: .4rem; }
+    .ph p { font-size: .9rem; color: var(--muted); }
+
+    .section-label {
+      font-family: var(--font-heading);
+      font-size: .65rem; font-weight: 600; letter-spacing: .14em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: .75rem;
+    }
+
+    /* ── Game container ── */
     .lab-section {
-      border: 1px solid var(--text);
-      padding: 1em;
-      margin: 0 0 1.5em;
+      border: 1px solid var(--border);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      background: var(--surface);
     }
-
     .lab-section > h3 {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 0.7rem;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text);
-      opacity: 0.5;
-      margin: 0 0 1em;
+      font-family: var(--font-heading);
+      font-size: .65rem; font-weight: 600; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 1.25rem;
     }
 
-    .gen-module { margin-bottom: 0; }
-
-    /* Compact inline stats */
+    /* ── Stats ── */
     .spatial-stats {
-      display: flex;
-      gap: 1em;
-      justify-content: center;
-      margin: 0.75em 0;
-      padding: 0.4em 0;
-      border-top: 1px solid var(--text);
-      border-bottom: 1px solid var(--text);
-    }
-
-    .stat-item { display: flex; align-items: baseline; gap: 0.3em; }
-    .stat-label { font-family: 'Inter', sans-serif; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); opacity: 0.5; }
-    .stat-value { font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; font-weight: 500; color: var(--text); }
-
-    /* Buttons */
-    .lab-btn {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 0.75rem;
-      font-weight: 500;
-      background-color: transparent;
-      color: var(--text);
-      border: 2px solid var(--text);
-      padding: 0.4em 1em;
-      cursor: pointer;
-      white-space: nowrap;
-      min-width: 70px;
-      border-radius: 0;
-      transition: background-color 0.15s ease, color 0.15s ease;
-    }
-    .lab-btn:hover { background-color: var(--accent-hover); color: var(--bg); border-color: var(--accent-hover); }
-    .lab-btn.on { background-color: var(--text); color: var(--bg); }
-    .lab-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-    .lab-preset-btn {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.7rem;
-      background: transparent;
-      color: var(--text);
-      border: 1px solid var(--text);
-      padding: 2px 10px;
-      border-radius: 0;
-      cursor: pointer;
-      transition: background-color 0.15s ease, color 0.15s ease;
-    }
-    .lab-preset-btn:hover { background-color: var(--accent-hover); color: var(--bg); }
-    .lab-preset-btn.on { background-color: var(--text); color: var(--bg); }
-
-    /* Rows */
-    .gen-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 0.6em;
+      display: flex; gap: 1.5rem; justify-content: center;
+      margin: .75rem 0; padding: .5rem 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
       flex-wrap: wrap;
     }
+    .stat-item { display: flex; align-items: baseline; gap: .35rem; }
+    .stat-label { font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+    .stat-value { font-family: var(--font-heading); font-size: .9rem; font-weight: 600; color: var(--text); }
 
+    /* ── Buttons ── */
+    .lab-btn {
+      font-family: var(--font-heading);
+      font-size: .78rem; font-weight: 600;
+      background: var(--bg); color: var(--text);
+      border: 1px solid var(--border);
+      padding: .5rem 1.2rem; cursor: pointer;
+      transition: all .12s; white-space: nowrap;
+    }
+    .lab-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+    .lab-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+    .lab-btn.primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
+    .lab-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+    .lab-preset-btn {
+      font-family: var(--font-body);
+      font-size: .72rem; font-weight: 500;
+      background: var(--bg); color: var(--muted);
+      border: 1px solid var(--border);
+      padding: .28rem .8rem; cursor: pointer;
+      transition: all .12s;
+    }
+    .lab-preset-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .lab-preset-btn.on { background: var(--accent); color: white; border-color: var(--accent); }
+
+    /* ── Rows ── */
+    .gen-row {
+      display: flex; align-items: center; gap: 6px;
+      margin-bottom: .6rem; flex-wrap: wrap;
+    }
     .gen-row-label {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.6rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text);
-      opacity: 0.5;
+      font-size: .62rem; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--muted);
       white-space: nowrap;
     }
 
-    /* Control row */
     .control-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 0.6em;
+      display: flex; align-items: center;
+      gap: 8px; margin-bottom: .6rem; flex-wrap: wrap;
     }
 
-    .control-row .lab-btn {
-      flex-shrink: 0;
-    }
-
-    .control-row .feedback-msg {
-      flex: 1;
-      min-width: 120px;
-    }
-
-    /* Feedback */
+    /* ── Feedback ── */
     .feedback-msg {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.75rem;
-      color: var(--text);
-      padding: 0.4em 1em;
-      border: 2px solid var(--text);
-      text-align: center;
-      min-height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      flex: 1; min-width: 120px;
+      font-size: .8rem; color: var(--text);
+      padding: .45rem 1rem;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      text-align: center; min-height: 38px;
+      display: flex; align-items: center; justify-content: center;
     }
+    .feedback-msg.correct { border-color: var(--accent); background: var(--accent-light); color: var(--accent-hover); font-weight: 500; }
+    .feedback-msg.wrong   { border-color: #c0a080; background: #fdf8f0; color: #6b4a1a; font-weight: 500; }
 
-    .feedback-msg.success { opacity: 1; }
-    .feedback-msg.error { opacity: 0.6; }
-    .feedback-msg:empty { opacity: 0.2; }
-
-    /* Sliders */
-    .lab-ctrl { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    /* ── Sliders ── */
+    .lab-ctrl { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 140px; }
     .lab-ctrl input[type=range] {
       width: 100%; -webkit-appearance: none; appearance: none;
-      height: 2px; background: var(--text); outline: none; cursor: pointer; opacity: 0.5;
+      height: 3px; background: var(--border); outline: none; cursor: pointer;
     }
     .lab-ctrl input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: var(--text); cursor: pointer;
+      -webkit-appearance: none; width: 13px; height: 13px;
+      border-radius: 50%; background: var(--accent); cursor: pointer;
     }
     .lab-ctrl input[type=range]::-moz-range-thumb {
-      width: 12px; height: 12px; border-radius: 50%; background: var(--text); border: none; cursor: pointer;
+      width: 13px; height: 13px; border-radius: 50%;
+      background: var(--accent); border: none; cursor: pointer;
     }
     .lab-ctrl-bottom { display: flex; justify-content: space-between; align-items: baseline; }
-    .lab-ctrl-label { font-family: 'Inter', sans-serif; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); opacity: 0.5; }
-    .lab-ctrl-val { font-family: 'Inter', sans-serif; font-size: 0.65rem; color: var(--text); opacity: 0.7; }
+    .lab-ctrl-label { font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+    .lab-ctrl-val { font-size: .65rem; color: var(--accent); font-weight: 500; }
 
-    /* Collapsible */
-    .collapsible-section {
-      border-top: 1px solid var(--text);
-      margin-top: 0.75em;
-      padding-top: 0.75em;
-    }
-
+    /* ── Collapsible ── */
+    .collapsible-section { border-top: 1px solid var(--border); margin-top: .85rem; padding-top: .85rem; }
     .collapsible-header {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.65rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text);
-      opacity: 0.5;
-      cursor: pointer;
-      user-select: none;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0;
+      font-size: .65rem; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted); cursor: pointer; user-select: none;
+      display: flex; justify-content: space-between; align-items: center;
     }
+    .collapsible-header:hover { color: var(--text); }
+    .collapsible-content { max-height: 0; overflow: hidden; transition: max-height .3s ease-out; }
+    .collapsible-content.active { max-height: 1000px; padding-top: .75rem; }
 
-    .collapsible-content {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease-out;
-    }
-
-    .collapsible-content.active {
-      max-height: 1000px;
-      padding-top: 0.75em;
-    }
-
-    /* Spatial diagram - larger for this module */
+    /* ── Spatial diagram ── */
     .spatial-diagram-container {
-      border: 1px solid var(--text);
-      padding: 1em;
-      margin: 0.75em 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      border: 1px solid var(--border);
+      padding: 1.25rem;
+      margin: .85rem 0;
+      display: flex; justify-content: center; align-items: center;
       background: var(--bg);
     }
-
     .spatial-diagram {
       position: relative;
-      width: 300px;
-      height: 300px;
-      border: 1px solid var(--text);
+      width: 280px; height: 280px;
+      border: 1px solid var(--border);
       border-radius: 50%;
       background: transparent;
     }
+    @media (max-width: 400px) {
+      .spatial-diagram { width: 240px; height: 240px; }
+    }
 
-    /* Sound sources */
+    /* ── Sound sources ── */
     .sound-source {
       position: absolute;
-      width: 12px;
-      height: 12px;
+      width: 12px; height: 12px;
       border-radius: 50%;
       transform: translate(-50%, -50%);
-      transition: opacity 0.3s ease;
+      transition: opacity .3s ease;
       cursor: pointer;
     }
-
-    /* Hit area for mobile - invisible padding */
     .sound-source::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
+      content: ''; position: absolute;
+      top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
+      width: 32px; height: 32px; border-radius: 50%;
     }
+    .source-target { background: var(--text); border: 2px solid var(--text); z-index: 10; }
+    .source-distractor { background: transparent; border: 2px solid var(--border); z-index: 5; }
+    .source-clickable:hover { transform: translate(-50%, -50%) scale(1.25); }
+    .source-selected { background: var(--accent); border-color: var(--accent); }
+    .source-revealed { background: var(--text); border-color: var(--text); }
 
-    .source-target {
-      background: var(--text);
-      border: 2px solid var(--text);
-      z-index: 10;
-    }
+    .path-trace { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
 
-    .source-distractor {
-      background: transparent;
-      border: 2px solid var(--text);
-      z-index: 5;
-    }
-
-    .source-clickable:hover {
-      transform: translate(-50%, -50%) scale(1.2);
-      cursor: pointer;
-    }
-
-    .source-selected {
-      background: var(--accent-hover);
-      border-color: var(--accent-hover);
-    }
-
-    .source-revealed {
-      background: var(--text);
-      border-color: var(--text);
-    }
-
-    /* Path trace */
-    .path-trace {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-    }
-
-    /* Phase indicator */
     .phase-indicator {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.65rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text);
-      opacity: 0.5;
-      text-align: center;
-      margin: 0.5em 0;
-      min-height: 1.2em;
+      font-size: .65rem; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted); text-align: center;
+      margin: .5rem 0; min-height: 1.2em;
     }
 
     .lab-hint {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.7rem;
-      color: var(--text);
-      opacity: 0.5;
-      margin-top: 0.5em;
-      text-align: center;
+      font-size: .72rem; color: var(--muted);
+      margin-top: .65rem; text-align: center; line-height: 1.5;
     }
 
-    @media (max-width: 600px) {
-      .spatial-stats { flex-direction: row; gap: 1em; }
-      
-      .control-row {
-        flex-wrap: wrap;
-      }
-      
-      .control-row .feedback-msg {
-        flex-basis: 100%;
-        margin-top: 6px;
-      }
+    /* ── Article text ── */
+    .article-text { margin-top: 2rem; }
+    .article-text h3 { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 600; margin-bottom: .6rem; }
+    .article-text p { font-size: .9rem; color: var(--muted); line-height: 1.75; margin-bottom: 1rem; }
 
-      .spatial-diagram {
-        width: 280px;
-        height: 280px;
-      }
-    }
+    /* ── Footer ── */
+    footer { border-top: 1px solid var(--border); padding: 1.25rem 1.5rem; text-align: center; font-size: .78rem; color: var(--muted); }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
   </style>
 </head>
-
 <body>
 
-<header>
-  <h1>Music &amp; Mental Health Blog</h1>
-  <nav>
-    <a href="/">Home</a>
-    <a href="/about/">About</a>
-    <a href="/music-therapy/">Music Therapy</a>
-    <a href="/online-sessions/">Online Sessions</a>
-    <a href="/events/">Events</a>
-    <a href="/contact/">Contact</a>
-    <a href="/blog/">Blog</a>
-  </nav>
-</header>
+<div id="lab-header"></div>
+
+<nav aria-label="Breadcrumb" class="bc">
+  <ol>
+    <li><a href="/dashboard/">Dashboard</a></li>
+    <li>Spatial Awareness</li>
+  </ol>
+</nav>
 
 <main>
 
-  <nav aria-label="Breadcrumb" class="breadcrumb-nav">
-    <ol>
-      <li><a href="/">Home</a></li>
-      <li><a href="/blog/">Blog</a></li>
-      <li><a href="/blog/source-localization/" aria-current="page">Source Localization</a></li>
-    </ol>
-  </nav>
-
-  <h1>Spatial Sound Tracking</h1>
-
-  <p>[Article introduction about spatial attention, binaural cues, and the auditory shell game]</p>
-
-  <div class="lab-section">
-    <h3>the auditory shell game</h3>
-
-    <div class="gen-module">
-
-      <!-- Spatial Diagram (main interface) -->
-      <div class="spatial-diagram-container">
-        <div class="spatial-diagram" id="spatial-diagram">
-          <svg class="path-trace" id="path-trace"></svg>
-        </div>
-      </div>
-
-      <!-- Phase Indicator -->
-      <div class="phase-indicator" id="phase-indicator"></div>
-
-      <!-- Difficulty -->
-      <div class="gen-row">
-        <span class="gen-row-label">difficulty →</span>
-        <button class="lab-preset-btn on" data-difficulty="easy">easy</button>
-        <button class="lab-preset-btn" data-difficulty="medium">medium</button>
-        <button class="lab-preset-btn" data-difficulty="hard">hard</button>
-      </div>
-
-      <!-- Main Controls + Feedback (inline) -->
-      <div class="control-row">
-        <button class="lab-btn" id="btn-play">&#9654;&#xFE0E; play</button>
-        <button class="lab-btn" id="btn-next" disabled>next</button>
-        <div class="feedback-msg" id="feedback-msg"></div>
-      </div>
-
-      <!-- Stats -->
-      <div class="spatial-stats">
-        <div class="stat-item">
-          <span class="stat-label">trials</span>
-          <span class="stat-value" id="stat-trials">0</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">correct</span>
-          <span class="stat-value" id="stat-correct">0</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">accuracy</span>
-          <span class="stat-value" id="stat-accuracy">0%</span>
-        </div>
-      </div>
-
-      <!-- Custom Controls (Collapsible) -->
-      <div class="collapsible-section">
-        <div class="collapsible-header" id="custom-toggle">
-          <span>custom settings</span>
-          <span id="custom-icon">▼</span>
-        </div>
-        <div class="collapsible-content" id="custom-content">
-          
-          <div class="gen-row">
-            <span class="gen-row-label">sources →</span>
-            <button class="lab-preset-btn on" data-sources="2">2</button>
-            <button class="lab-preset-btn" data-sources="3">3</button>
-          </div>
-
-          <div class="gen-row">
-            <span class="gen-row-label">path complexity →</span>
-            <button class="lab-preset-btn on" data-complexity="simple">simple</button>
-            <button class="lab-preset-btn" data-complexity="medium">medium</button>
-            <button class="lab-preset-btn" data-complexity="complex">complex</button>
-          </div>
-
-          <div class="gen-row">
-            <div class="lab-ctrl">
-              <input type="range" id="movement-speed" min="0.5" max="2" step="0.1" value="1.0">
-              <div class="lab-ctrl-bottom">
-                <span class="lab-ctrl-label">movement speed</span>
-                <span class="lab-ctrl-val" id="movement-speed-val">1.0x</span>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <p class="lab-hint">headphones required · track the solid dot · click where it ends</p>
-
-    </div>
+  <div class="ph">
+    <h2>Spatial Awareness</h2>
+    <p>Track a moving sound source through 3D space. Trains auditory attention, scene analysis, and sound localisation.</p>
   </div>
 
-  <p>[Article content continues]</p>
+  <div class="lab-section">
+    <h3>The auditory shell game</h3>
+
+    <!-- Spatial Diagram -->
+    <div class="spatial-diagram-container">
+      <div class="spatial-diagram" id="spatial-diagram">
+        <svg class="path-trace" id="path-trace"></svg>
+      </div>
+    </div>
+
+    <!-- Phase Indicator -->
+    <div class="phase-indicator" id="phase-indicator"></div>
+
+    <!-- Difficulty -->
+    <div class="gen-row">
+      <span class="gen-row-label">Difficulty</span>
+      <button class="lab-preset-btn on" data-difficulty="easy">Easy</button>
+      <button class="lab-preset-btn" data-difficulty="medium">Medium</button>
+      <button class="lab-preset-btn" data-difficulty="hard">Hard</button>
+    </div>
+
+    <!-- Controls + feedback -->
+    <div class="control-row">
+      <button class="lab-btn primary" id="btn-play">▶ Play</button>
+      <button class="lab-btn" id="btn-next" disabled>Next</button>
+      <div class="feedback-msg" id="feedback-msg"></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="spatial-stats">
+      <div class="stat-item">
+        <span class="stat-label">Trials</span>
+        <span class="stat-value" id="stat-trials">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Correct</span>
+        <span class="stat-value" id="stat-correct">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">Accuracy</span>
+        <span class="stat-value" id="stat-accuracy">—</span>
+      </div>
+    </div>
+
+    <!-- Custom settings (collapsible) -->
+    <div class="collapsible-section">
+      <div class="collapsible-header" id="custom-toggle">
+        <span>Custom settings</span>
+        <span id="custom-icon">▾</span>
+      </div>
+      <div class="collapsible-content" id="custom-content">
+
+        <div class="gen-row" style="margin-top:.5rem;">
+          <span class="gen-row-label">Sources</span>
+          <button class="lab-preset-btn on" data-sources="2">2</button>
+          <button class="lab-preset-btn" data-sources="3">3</button>
+        </div>
+
+        <div class="gen-row">
+          <span class="gen-row-label">Path</span>
+          <button class="lab-preset-btn on" data-complexity="simple">Simple</button>
+          <button class="lab-preset-btn" data-complexity="medium">Medium</button>
+          <button class="lab-preset-btn" data-complexity="complex">Complex</button>
+        </div>
+
+        <div class="gen-row">
+          <div class="lab-ctrl">
+            <input type="range" id="movement-speed" min="0.5" max="2" step="0.1" value="1.0">
+            <div class="lab-ctrl-bottom">
+              <span class="lab-ctrl-label">Movement speed</span>
+              <span class="lab-ctrl-val" id="movement-speed-val">1.0×</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <p class="lab-hint">Headphones recommended · Watch the moving dot · Click where it ends</p>
+
+  </div>
+
+  <!-- Context -->
+  <div class="article-text">
+    <h3>How spatial hearing works</h3>
+    <p>The auditory system locates sound in space using interaural time differences (ITD) — the tiny delay between a sound reaching each ear — and interaural level differences (ILD), the difference in loudness between ears. For sounds above and below, the shape of the outer ear (the pinna) introduces frequency-dependent filtering that the brain learns to decode as elevation.</p>
+    <p>Practising active sound tracking exercises the superior colliculus and auditory cortex circuits responsible for reflexive and voluntary spatial attention. The shell game format — watching a target, then selecting its resting position from among identical-looking distractors — separates perceptual tracking from motor response, isolating the attentional component.</p>
+    <p>This exercise is adapted from research on auditory scene analysis (Bregman, 1990) and the cocktail party effect. Consistent practice improves the ability to selectively attend to a single sound source in noisy environments.</p>
+  </div>
 
 </main>
 
 <footer>
-  <p>&copy; 2026 Jordan Elias</p>
+  <p>Jordan Elias Music Therapy · Berlin ·
+    <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a>
+  </p>
 </footer>
 
-<!-- Resonance Audio -->
+<!-- Resonance Audio for binaural spatialisation -->
 <script src="https://cdn.jsdelivr.net/npm/resonance-audio/build/resonance-audio.min.js"></script>
 
-<!-- Localization Game -->
-<script src="/js/localization.js"></script>
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════
+// GAME STATE
+// ═══════════════════════════════════════════════════════
+const state = {
+  difficulty: 'easy',
+  numSources: 2,
+  pathComplexity: 'simple',
+  movementSpeed: 1.0,
+
+  phase: 'idle',      // idle | observe | respond | result
+  targetIndex: 0,
+  positions: [],      // [{ x, y }] normalised 0–1 in diagram space
+  sourceEls: [],
+  selectedIndex: null,
+
+  trialCount: 0,
+  correctCount: 0,
+
+  audioCtx: null,
+  resonance: null,
+  animRaf: null,
+  pathPoints: [],     // recorded path of target during observe phase
+  observeStart: null,
+  observeDuration: 0,
+};
+
+// Difficulty → observe duration, num waypoints, distractor motion
+const DIFFICULTY = {
+  easy:   { observeMs: 3000, waypoints: 2, distractorMove: false },
+  medium: { observeMs: 2200, waypoints: 3, distractorMove: true  },
+  hard:   { observeMs: 1500, waypoints: 4, distractorMove: true  },
+};
+
+// ═══════════════════════════════════════════════════════
+// DOM REFS
+// ═══════════════════════════════════════════════════════
+const diagram     = document.getElementById('spatial-diagram');
+const pathSvg     = document.getElementById('path-trace');
+const phaseEl     = document.getElementById('phase-indicator');
+const feedbackEl  = document.getElementById('feedback-msg');
+const btnPlay     = document.getElementById('btn-play');
+const btnNext     = document.getElementById('btn-next');
+const statTrials  = document.getElementById('stat-trials');
+const statCorrect = document.getElementById('stat-correct');
+const statAcc     = document.getElementById('stat-accuracy');
+
+// ═══════════════════════════════════════════════════════
+// SETTINGS UI
+// ═══════════════════════════════════════════════════════
+document.querySelectorAll('[data-difficulty]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-difficulty]').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    state.difficulty = btn.dataset.difficulty;
+  });
+});
+
+document.querySelectorAll('[data-sources]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-sources]').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    state.numSources = parseInt(btn.dataset.sources);
+  });
+});
+
+document.querySelectorAll('[data-complexity]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-complexity]').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    state.pathComplexity = btn.dataset.complexity;
+  });
+});
+
+const speedSlider = document.getElementById('movement-speed');
+const speedVal    = document.getElementById('movement-speed-val');
+speedSlider.addEventListener('input', () => {
+  state.movementSpeed = parseFloat(speedSlider.value);
+  speedVal.textContent = state.movementSpeed.toFixed(1) + '×';
+});
+
+// Collapsible
+const customToggle  = document.getElementById('custom-toggle');
+const customContent = document.getElementById('custom-content');
+const customIcon    = document.getElementById('custom-icon');
+customToggle.addEventListener('click', () => {
+  const open = customContent.classList.toggle('active');
+  customIcon.textContent = open ? '▴' : '▾';
+});
+
+// ═══════════════════════════════════════════════════════
+// AUDIO — WEB AUDIO + RESONANCE AUDIO FOR BINAURAL HRTF
+// ═══════════════════════════════════════════════════════
+function initAudio() {
+  if (state.audioCtx) return;
+  state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (typeof ResonanceAudio !== 'undefined') {
+    state.resonance = new ResonanceAudio(state.audioCtx, {
+      ambisonicOrder: 1,
+    });
+    state.resonance.output.connect(state.audioCtx.destination);
+  }
+}
+
+// Returns a tone source playing at diagram-space position { x, y } (0–1 normalised)
+// x: 0=left, 1=right   y: 0=top, 1=bottom
+function createTone(freq, amp) {
+  const ctx = state.audioCtx;
+  const osc   = ctx.createOscillator();
+  const gain  = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0, ctx.currentTime);
+  gain.gain.linearRampToValueAtTime(amp, ctx.currentTime + 0.04);
+
+  let source;
+  if (state.resonance) {
+    source = state.resonance.createSource();
+    osc.connect(gain);
+    gain.connect(source.input);
+  } else {
+    // Fallback: simple stereo pan
+    const pan = ctx.createStereoPanner();
+    osc.connect(gain);
+    gain.connect(pan);
+    pan.connect(ctx.destination);
+    source = { pan, _gain: gain };
+  }
+
+  osc.start();
+  return { osc, gain, source };
+}
+
+function setTonePosition(tone, x, y) {
+  // Convert diagram 0–1 coords to 3D space: x→left/right, y→front/back
+  const px = (x - 0.5) * 4;     // -2 to +2 metres
+  const pz = (y - 0.5) * 4;     // -2 to +2 metres (front/back)
+  const py = 0;
+
+  if (state.resonance && tone.source.setPosition) {
+    tone.source.setPosition(px, py, -pz);
+  } else if (tone.source.pan) {
+    // Fallback: just pan left/right
+    tone.source.pan.value = px / 2;
+  }
+}
+
+function stopTone(tone) {
+  const ctx = state.audioCtx;
+  tone.gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.06);
+  tone.osc.stop(ctx.currentTime + 0.1);
+}
+
+// ═══════════════════════════════════════════════════════
+// DIAGRAM — SOURCE ELEMENTS
+// ═══════════════════════════════════════════════════════
+function getRadius() { return diagram.offsetWidth / 2; }
+
+// Convert normalised 0–1 to pixel position within diagram circle
+function normToPx(nx, ny) {
+  const r   = getRadius();
+  const pad = 0.15; // keep sources away from very edge
+  const lo  = pad, hi = 1 - pad;
+  const cx  = lo + nx * (hi - lo);
+  const cy  = lo + ny * (hi - lo);
+  return { px: cx * diagram.offsetWidth, py: cy * diagram.offsetHeight };
+}
+
+function placeDot(el, nx, ny) {
+  const { px, py } = normToPx(nx, ny);
+  el.style.left = px + 'px';
+  el.style.top  = py + 'px';
+}
+
+function buildSourceElements() {
+  // Remove old
+  state.sourceEls.forEach(el => el.remove());
+  state.sourceEls = [];
+
+  for (let i = 0; i < state.numSources; i++) {
+    const el = document.createElement('div');
+    el.className = 'sound-source source-distractor';
+    el.dataset.index = i;
+    diagram.appendChild(el);
+    state.sourceEls.push(el);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// PATH GENERATION
+// ═══════════════════════════════════════════════════════
+function randomPos() {
+  // Generate point inside circle (using rejection sampling)
+  const margin = 0.15;
+  for (let i = 0; i < 50; i++) {
+    const x = margin + Math.random() * (1 - margin * 2);
+    const y = margin + Math.random() * (1 - margin * 2);
+    const dx = x - 0.5, dy = y - 0.5;
+    if (dx * dx + dy * dy < 0.16) return { x, y }; // within circle of r=0.4
+  }
+  return { x: 0.5, y: 0.5 };
+}
+
+function generateWaypoints(start) {
+  const complexityCount = {
+    simple: 2, medium: 3, complex: 4
+  }[state.pathComplexity] || 2;
+  const diff = DIFFICULTY[state.difficulty];
+  const n = Math.max(complexityCount, diff.waypoints);
+  const pts = [start];
+  for (let i = 0; i < n; i++) pts.push(randomPos());
+  return pts;
+}
+
+function lerpPos(a, b, t) {
+  return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
+}
+
+function posAlongPath(waypoints, t) {
+  if (waypoints.length < 2) return waypoints[0] || { x: 0.5, y: 0.5 };
+  const segs = waypoints.length - 1;
+  const seg  = Math.min(Math.floor(t * segs), segs - 1);
+  const segT = (t * segs) - seg;
+  return lerpPos(waypoints[seg], waypoints[seg + 1], segT);
+}
+
+// ═══════════════════════════════════════════════════════
+// TRIAL LIFECYCLE
+// ═══════════════════════════════════════════════════════
+function startTrial() {
+  initAudio();
+  if (state.audioCtx.state === 'suspended') state.audioCtx.resume();
+
+  cancelAnimationFrame(state.animRaf);
+  clearPath();
+
+  // Assign positions
+  state.positions = [];
+  for (let i = 0; i < state.numSources; i++) {
+    state.positions.push(randomPos());
+  }
+  state.targetIndex = Math.floor(Math.random() * state.numSources);
+
+  buildSourceElements();
+
+  // Place all sources at initial positions
+  state.sourceEls.forEach((el, i) => {
+    placeDot(el, state.positions[i].x, state.positions[i].y);
+    el.classList.add('source-distractor');
+    el.classList.remove('source-target', 'source-clickable', 'source-selected', 'source-revealed');
+  });
+
+  // Generate movement path for target (and distractors on hard/medium)
+  const targetWaypoints = generateWaypoints(state.positions[state.targetIndex]);
+  const distractorWaypoints = state.positions.map((p, i) =>
+    i !== state.targetIndex ? generateWaypoints(p) : null
+  );
+
+  // Sound: target plays a distinct tone, distractors play masker tones
+  const targetFreq     = 440;
+  const distractorFreq = [330, 523];
+  const diff = DIFFICULTY[state.difficulty];
+
+  // Stop any previous tones
+  if (state._tones) state._tones.forEach(t => { try { stopTone(t); } catch(e){} });
+  state._tones = [];
+
+  const targetTone = createTone(targetFreq, 0.18);
+  state._tones.push(targetTone);
+
+  if (diff.distractorMove) {
+    state.positions.forEach((_, i) => {
+      if (i !== state.targetIndex) {
+        const t = createTone(distractorFreq[i % distractorFreq.length], 0.10);
+        state._tones.push(t);
+      }
+    });
+  }
+
+  setPhase('observe');
+  feedbackEl.textContent = '';
+  feedbackEl.className = 'feedback-msg';
+  btnPlay.disabled = true;
+  btnNext.disabled = true;
+
+  state.observeStart = performance.now();
+  state.observeDuration = diff.observeMs / state.movementSpeed;
+  state.pathPoints = [];
+
+  let toneIdx = 0;
+
+  function observeTick(now) {
+    const elapsed = now - state.observeStart;
+    const t = Math.min(elapsed / state.observeDuration, 1);
+
+    // Move target
+    const tPos = posAlongPath(targetWaypoints, t);
+    state.positions[state.targetIndex] = tPos;
+    placeDot(state.sourceEls[state.targetIndex], tPos.x, tPos.y);
+    setTonePosition(targetTone, tPos.x, tPos.y);
+    state.pathPoints.push({ ...tPos, t });
+
+    // Move distractors (medium/hard)
+    if (diff.distractorMove) {
+      let dToneIdx = 1;
+      state.positions.forEach((_, i) => {
+        if (i !== state.targetIndex && distractorWaypoints[i]) {
+          const dPos = posAlongPath(distractorWaypoints[i], t);
+          state.positions[i] = dPos;
+          placeDot(state.sourceEls[i], dPos.x, dPos.y);
+          if (state._tones[dToneIdx]) setTonePosition(state._tones[dToneIdx], dPos.x, dPos.y);
+          dToneIdx++;
+        }
+      });
+    }
+
+    if (t < 1) {
+      state.animRaf = requestAnimationFrame(observeTick);
+    } else {
+      // Observation complete — stop tones, enter respond phase
+      state._tones.forEach(tone => stopTone(tone));
+      state._tones = [];
+      drawPath();
+      enterRespondPhase();
+    }
+  }
+
+  state.animRaf = requestAnimationFrame(observeTick);
+}
+
+function enterRespondPhase() {
+  setPhase('respond');
+
+  // Shuffle all sources to random positions (they all look the same now)
+  const shuffledPositions = state.positions.map(() => randomPos());
+  state.sourceEls.forEach((el, i) => {
+    const np = shuffledPositions[i];
+    placeDot(el, np.x, np.y);
+    el.classList.add('source-clickable');
+    el.style.cursor = 'pointer';
+  });
+  state._shuffledPositions = shuffledPositions;
+
+  state.selectedIndex = null;
+  state.sourceEls.forEach((el, i) => {
+    el.onclick = () => selectSource(i);
+  });
+}
+
+function selectSource(idx) {
+  if (state.phase !== 'respond') return;
+  state.selectedIndex = idx;
+
+  state.sourceEls.forEach((el, i) => {
+    el.classList.remove('source-selected');
+    if (i === idx) el.classList.add('source-selected');
+  });
+
+  // Auto-submit on selection
+  submitAnswer();
+}
+
+function submitAnswer() {
+  if (state.selectedIndex === null) return;
+
+  const correct = state.selectedIndex === state.targetIndex;
+  state.trialCount++;
+  if (correct) state.correctCount++;
+
+  updateStats();
+  setPhase('result');
+
+  // Reveal true position
+  state.sourceEls.forEach((el, i) => {
+    el.onclick = null;
+    el.classList.remove('source-clickable', 'source-selected');
+    el.style.cursor = 'default';
+    if (i === state.targetIndex) el.classList.add('source-revealed', 'source-target');
+  });
+
+  if (correct) {
+    feedbackEl.textContent = 'Correct';
+    feedbackEl.className = 'feedback-msg correct';
+  } else {
+    feedbackEl.textContent = 'Incorrect — target revealed';
+    feedbackEl.className = 'feedback-msg wrong';
+  }
+
+  btnNext.disabled = false;
+  btnPlay.disabled = false;
+}
+
+function setPhase(ph) {
+  state.phase = ph;
+  const labels = {
+    idle:    '',
+    observe: 'Observe — track the moving dot',
+    respond: 'Respond — click where the dot ended',
+    result:  'Result',
+  };
+  phaseEl.textContent = labels[ph] || '';
+}
+
+// ═══════════════════════════════════════════════════════
+// PATH DRAWING
+// ═══════════════════════════════════════════════════════
+function clearPath() {
+  pathSvg.innerHTML = '';
+}
+
+function drawPath() {
+  clearPath();
+  if (state.pathPoints.length < 2) return;
+
+  const W = diagram.offsetWidth;
+  const H = diagram.offsetHeight;
+  const margin = 0.15;
+
+  function toSvg(nx, ny) {
+    const lo = margin, hi = 1 - margin;
+    return {
+      sx: (lo + nx * (hi - lo)) * W,
+      sy: (lo + ny * (hi - lo)) * H,
+    };
+  }
+
+  const pts = state.pathPoints.map(p => toSvg(p.x, p.y));
+  const d   = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.sx.toFixed(1)},${p.sy.toFixed(1)}`).join(' ');
+
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', d);
+  path.setAttribute('fill', 'none');
+  path.setAttribute('stroke', 'var(--accent)');
+  path.setAttribute('stroke-width', '1.5');
+  path.setAttribute('stroke-dasharray', '4 3');
+  path.setAttribute('opacity', '0.45');
+  pathSvg.appendChild(path);
+
+  // Start dot
+  const startPt = pts[0];
+  const startCirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  startCirc.setAttribute('cx', startPt.sx);
+  startCirc.setAttribute('cy', startPt.sy);
+  startCirc.setAttribute('r', '4');
+  startCirc.setAttribute('fill', 'var(--accent)');
+  startCirc.setAttribute('opacity', '0.5');
+  pathSvg.appendChild(startCirc);
+}
+
+// ═══════════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════════
+function updateStats() {
+  statTrials.textContent  = state.trialCount;
+  statCorrect.textContent = state.correctCount;
+  const pct = state.trialCount > 0
+    ? Math.round((state.correctCount / state.trialCount) * 100) + '%'
+    : '—';
+  statAcc.textContent = pct;
+}
+
+// ═══════════════════════════════════════════════════════
+// BUTTON HANDLERS
+// ═══════════════════════════════════════════════════════
+btnPlay.addEventListener('click', () => {
+  startTrial();
+});
+
+btnNext.addEventListener('click', () => {
+  startTrial();
+});
+</script>
 
 </body>
 </html>
