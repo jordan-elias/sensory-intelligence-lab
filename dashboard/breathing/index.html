@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Breath Regulation — Sensory Intelligence Lab</title>
 
-  <script src="/dashboard/auth-guard.js"></script>
+  <script src="/dashboard/auth-guard.js" type="module"></script>
+  <script src="/assets/js/header.js" defer></script>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
   <style>
@@ -16,28 +17,18 @@
       --bg:#fff;--surface:#f9f9f7;--border:#e5e5e0;
       --text:#1a1a1a;--muted:#6b6b6b;
       --accent:#2a5c45;--accent-light:#edf4f0;--accent-hover:#1e4433;
-
-      /* Breath visualiser colours — interpolated in JS */
-      --inhale-fill: 196, 82%, 65%;   /* HSL, cool blue-teal */
-      --hold-fill:   160, 45%, 55%;   /* HSL, mid-sage hold */
-      --exhale-fill: 150, 38%, 42%;   /* HSL, deep forest exhale */
-      --rest-fill:   150, 20%, 72%;   /* HSL, soft grey-green settle */
+      --inhale-fill: 196, 82%, 65%;
+      --hold-fill:   160, 45%, 55%;
+      --exhale-fill: 150, 38%, 42%;
+      --rest-fill:   150, 20%, 72%;
     }
     html{font-size:16px}
-    body{font-family:var(--font-body);color:var(--text);background:var(--bg);line-height:1.6;min-height:100vh}
+    body{font-family:var(--font-body);color:var(--text);background:var(--bg);line-height:1.6;min-height:100vh;display:flex;flex-direction:column;}
     a{color:var(--text);text-decoration:underline;text-underline-offset:3px}
     a:hover{color:var(--accent)}
 
-    /* ── Header ── */
-    header{border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:10;gap:1rem}
-    header h1{font-family:var(--font-heading);font-size:1rem;font-weight:600;letter-spacing:-0.01em;white-space:nowrap;flex-shrink:0}
-    header nav{display:flex;gap:1.25rem;align-items:center;flex-wrap:wrap;justify-content:flex-end}
-    header nav a{font-size:.8rem;font-weight:500;text-decoration:none;color:var(--muted);transition:color .15s;white-space:nowrap}
-    header nav a:hover{color:var(--text)}
-    @media(max-width:680px){header{height:auto;padding:.75rem 1rem;flex-wrap:wrap;gap:.5rem}header h1{font-size:.875rem}header nav{gap:.75rem;width:100%}header nav a{font-size:.75rem}}
-
     /* ── Breadcrumb ── */
-    .bc{padding:.75rem 1.5rem 0;max-width:900px;margin:0 auto}
+    .bc{padding:.75rem 1.5rem 0;max-width:900px;margin:0 auto;width:100%;}
     .bc ol{list-style:none;display:flex;gap:.3rem;align-items:center;font-size:.75rem;color:var(--muted);flex-wrap:wrap}
     .bc li+li::before{content:'/';margin-right:.3rem;color:var(--border)}
     .bc a{color:var(--muted);text-decoration:none}
@@ -45,7 +36,7 @@
     @media(max-width:400px){.bc li.mid{display:none}.bc li.mid+li::before{display:none}}
 
     /* ── Main layout ── */
-    main{max-width:900px;margin:0 auto;padding:2.5rem 2rem 4rem}
+    main{max-width:900px;margin:0 auto;padding:2.5rem 2rem 4rem;flex:1;}
     @media(max-width:600px){main{padding:1.5rem 1rem 3rem}}
 
     /* ── Page header ── */
@@ -126,26 +117,18 @@
     .db:disabled{opacity:.45;cursor:not-allowed}
     .rs{font-size:.75rem;color:var(--muted)}
 
-    footer{border-top:1px solid var(--border);padding:1.5rem 2rem;text-align:center;font-size:.8rem;color:var(--muted);margin-top:2rem}
+    footer{border-top:1px solid var(--border);padding:1.5rem 2rem;text-align:center;font-size:.8rem;color:var(--muted);margin-top:auto}
+    footer a{color:var(--muted);text-decoration:none;}
+    footer a:hover{color:var(--accent);}
   </style>
 </head>
 <body>
 
-<header>
-  <h1>Sensory Intelligence Lab</h1>
-  <nav>
-    <a href="/sensory-intelligence-lab/dashboard/">Home</a>
-    <a href="/sensory-intelligence-lab/dashboard/">Dashboard</a>
-    <a href="/sensory-intelligence-lab/account/">Account</a>
-    <a href="/sensory-intelligence-lab/sessions/">Sessions</a>
-    <a href="/blog/">Blog</a>
-  </nav>
-</header>
+<div id="lab-header"></div>
 
 <nav aria-label="Breadcrumb" class="bc">
   <ol>
-    <li><a href="/sensory-intelligence-lab/dashboard/">Home</a></li>
-    <li class="mid"><a href="/sensory-intelligence-lab/dashboard/">Dashboard</a></li>
+    <li><a href="/dashboard/">Dashboard</a></li>
     <li>Breath Regulation</li>
   </ol>
 </nav>
@@ -241,14 +224,13 @@
   <p>The accompanying soundscape follows the shape of each breath: the fundamental tone and harmonic richness expand on inhale and contract on exhale, giving the sound the same quality of opening and closing as the breath itself. You do not need to consciously follow the pattern — the visual and sound are designed to entrain the body gently.</p>
 </main>
 
-<footer><p>Jordan Elias Music Therapy · Berlin · <a href="/contact/">Contact</a></p></footer>
+<footer><p>Jordan Elias Music Therapy · Berlin · <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a></p></footer>
 
 <script>
 'use strict';
 
 // ─────────────────────────────────────────────────────────
 // BREATHING PATTERNS
-// phase: { label, duration, type: 'inhale'|'hold'|'exhale'|'rest' }
 // ─────────────────────────────────────────────────────────
 const PATTERNS = {
   '478': {
@@ -326,28 +308,21 @@ function easeIn(t)    { return Math.pow(clamp(t,0,1),2.2); }
 
 // ─────────────────────────────────────────────────────────
 // HSL COLOUR HELPERS
-// CSS vars store as "H, S%, L%" strings for interpolation
 // ─────────────────────────────────────────────────────────
 const PHASE_HSL = {
-  inhale:  [196, 72, 62],   // cool blue-teal
-  hold:    [165, 40, 55],   // sage-green
-  exhale:  [148, 38, 38],   // deep forest
-  rest:    [150, 18, 68],   // soft grey-sage
-  settle:  [150, 15, 75],   // near-neutral
+  inhale:  [196, 72, 62],
+  hold:    [165, 40, 55],
+  exhale:  [148, 38, 38],
+  rest:    [150, 18, 68],
+  settle:  [150, 15, 75],
 };
 
-function hslStr([h,s,l]) { return `${h}, ${s}%, ${l}%`; }
-
 function lerpHSL(a, b, t) {
-  return [
-    lerp(a[0],b[0],t),
-    lerp(a[1],b[1],t),
-    lerp(a[2],b[2],t),
-  ];
+  return [lerp(a[0],b[0],t), lerp(a[1],b[1],t), lerp(a[2],b[2],t)];
 }
 
 // ─────────────────────────────────────────────────────────
-// VISUALISER SIZES (fraction of outer container)
+// VISUALISER SIZES
 // ─────────────────────────────────────────────────────────
 const SIZES = {
   settle:  0.59,
@@ -368,20 +343,14 @@ const S = {
   liveCtx: null,
   wavUrl: null,
   rafId: null,
-
-  // Timer — wall-clock based
   startWall: null,
   totalPausedMs: 0,
   pauseStartWall: null,
-
-  // Breath tracking
   breathIdx: 0,
   phaseIdx: 0,
-  phaseStart: 0,      // session-elapsed seconds when current phase began
+  phaseStart: 0,
   inSettle: true,
   done: false,
-
-  // Continuous smoothed state for visualiser
   vizSize: SIZES.settle,
   vizHSL: [...PHASE_HSL.settle],
 };
@@ -391,9 +360,6 @@ function elapsed() {
   return (performance.now() - S.startWall - S.totalPausedMs) / 1000;
 }
 
-// ─────────────────────────────────────────────────────────
-// TOTAL DURATION
-// ─────────────────────────────────────────────────────────
 function totalDuration(p) {
   const cycleLen = p.phases.reduce((s,ph)=>s+ph.dur, 0);
   return p.settleTime + p.breaths * cycleLen;
@@ -408,7 +374,6 @@ function selectPattern(key, btn) {
   document.querySelectorAll('.pb').forEach(b=>b.classList.remove('sel'));
   btn.classList.add('sel');
   S.pattern = key;
-
   const p = PATTERNS[key];
   const m = p.mantra;
   document.getElementById('mtext').textContent = m.t;
@@ -425,7 +390,6 @@ async function startSession() {
   if (!S.pattern) return;
   const p = PATTERNS[S.pattern];
 
-  // Reset state
   if (S.liveCtx) { S.liveCtx.close(); S.liveCtx = null; }
   cancelAnimationFrame(S.rafId);
   if (S.wavUrl) { URL.revokeObjectURL(S.wavUrl); S.wavUrl = null; }
@@ -456,7 +420,6 @@ async function startSession() {
   buildLive();
   S.rafId = requestAnimationFrame(tick);
 
-  // Offline WAV
   try {
     const rng2 = mkRng(S.seed);
     const dur  = totalDuration(p);
@@ -484,17 +447,14 @@ function tick() {
   const p  = PATTERNS[S.pattern];
   const dur = totalDuration(p);
 
-  // Remaining time
   document.getElementById('timeLeft').textContent = fmt(Math.max(0, dur - el));
 
   if (el >= dur) { onComplete(); return; }
 
   const cycleLen = p.phases.reduce((s,ph)=>s+ph.dur, 0);
 
-  // ── Settle phase ──
   if (S.inSettle) {
     if (el < p.settleTime) {
-      // Gentle pulse during settle — just hold steady
       animateCircle('settle', 1.0, PHASE_HSL.settle);
       document.getElementById('vizLabel').textContent = 'Settle';
       S.rafId = requestAnimationFrame(tick);
@@ -507,18 +467,15 @@ function tick() {
     }
   }
 
-  // ── Breath sequencer ──
   const breathEl = el - p.settleTime;
   const breathTotal = p.breaths * cycleLen;
 
   if (breathEl >= breathTotal) { onComplete(); return; }
 
-  // Which breath cycle are we in?
   const cyclePos    = breathEl % cycleLen;
   const breathNum   = Math.floor(breathEl / cycleLen) + 1;
   document.getElementById('breathCount').textContent = Math.min(breathNum, p.breaths);
 
-  // Which phase within cycle?
   let acc = 0;
   let phaseIdx = 0;
   for (let i=0; i<p.phases.length; i++) {
@@ -526,21 +483,17 @@ function tick() {
     acc += p.phases[i].dur;
   }
   const phase    = p.phases[phaseIdx];
-  const phaseT   = (cyclePos - acc) / phase.dur; // 0..1 within phase
+  const phaseT   = (cyclePos - acc) / phase.dur;
   const phaseType = phase.type;
 
-  // Smooth easing within phase
   let eased;
   if (phaseType === 'inhale')      eased = easeIn(phaseT);
   else if (phaseType === 'exhale') eased = easeOut(phaseT);
-  else                             eased = 1.0; // hold/rest = static
+  else                             eased = 1.0;
 
-  // Target size & colour
   const targetHSL  = PHASE_HSL[phaseType];
   const targetSize = SIZES[phaseType];
 
-  // For smooth inter-phase transition: lerp current viz toward target
-  // Fast follow on inhale, gentler on exhale/rest
   const followSpeed = phaseType === 'inhale' ? 0.09 : phaseType === 'exhale' ? 0.06 : 0.04;
   S.vizSize = lerp(S.vizSize, lerp(phaseType==='inhale'?SIZES.exhale:SIZES.inhale, targetSize, eased), followSpeed);
   S.vizHSL  = lerpHSL(S.vizHSL, targetHSL, followSpeed * 0.8);
@@ -556,20 +509,16 @@ function animateCircle(type, t, targetHSL) {
   const ring1  = document.getElementById('ring1');
   const ring2  = document.getElementById('ring2');
 
-  // Size: 130px base at full exhale, 200px at full inhale
   const minPx = 72, maxPx = 190;
   const sizePx = lerp(minPx, maxPx, S.vizSize);
   circle.style.width  = sizePx + 'px';
   circle.style.height = sizePx + 'px';
 
-  // Colour
   const [h,sat,l] = S.vizHSL;
   const hslStr = `${Math.round(h)}, ${Math.round(sat)}%, ${Math.round(l)}%`;
   circle.style.background = `radial-gradient(circle at 38% 38%, hsl(${hslStr}) 0%, hsl(${Math.round(h)}, ${Math.round(sat)}%, ${Math.round(l-10)}%) 100%)`;
   circle.style.boxShadow  = `0 4px 36px hsl(${hslStr}/0.40), 0 0 0 1px hsl(${hslStr}/0.18)`;
 
-  // Rings follow at a lag
-  const rs = 1 + (S.vizSize - 0.5) * 0.22;
   ring1.style.transform = `scale(${lerp(1.1, 1.28, S.vizSize)})`;
   ring1.style.background = `radial-gradient(circle, hsl(${hslStr}/0.10) 0%, hsl(${hslStr}/0.03) 70%, transparent 100%)`;
   ring2.style.transform = `scale(${lerp(1.22, 1.52, S.vizSize)})`;
@@ -585,7 +534,6 @@ function onComplete() {
   document.getElementById('breathCount').textContent = PATTERNS[S.pattern].breaths;
   document.getElementById('timeLeft').textContent = '0:00';
   document.getElementById('plabel').textContent = 'Begin again';
-  // Settle circle back to neutral
   S.vizSize = SIZES.settle;
   S.vizHSL  = [...PHASE_HSL.settle];
   animateCircle('settle', 1, PHASE_HSL.settle);
@@ -646,7 +594,6 @@ function buildGraph(ctx, pattern, rng, dur) {
   const now  = ctx.currentTime;
   const FI   = 3, FO = 6;
 
-  // ── Master gain ──
   const master = ctx.createGain();
   master.connect(ctx.destination);
   master.gain.setValueAtTime(0, now);
@@ -656,12 +603,6 @@ function buildGraph(ctx, pattern, rng, dur) {
 
   const fund = pattern.fund;
   const cycleLen = pattern.phases.reduce((s,ph)=>s+ph.dur,0);
-
-  // ── Build breath automation schedule ──
-  // For each breath phase we know exact start/end times.
-  // We schedule oscillator frequency, filter, and gain to follow.
-
-  // JI ratios for drone voices — always consonant (this is a calming module)
   const RATIOS = [[1,1],[3,2],[2,1],[4,3],[9,4]];
   const N_VOICES = 4;
 
@@ -682,7 +623,6 @@ function buildGraph(ctx, pattern, rng, dur) {
     shelf.type = 'lowshelf';
     shelf.frequency.value = 220;
 
-    // Slow filter macro-LFO unique per voice
     const mLfo = ctx.createOscillator();
     const mLfoG = ctx.createGain();
     mLfo.type = 'sine';
@@ -691,11 +631,9 @@ function buildGraph(ctx, pattern, rng, dur) {
     mLfo.connect(mLfoG); mLfoG.connect(filt.frequency);
     mLfo.start(now); mLfo.stop(now+dur+.2);
 
-    // Pan — gentle slow sway
     const panAmt   = (v%2===0?1:-1) * (0.18 + rng()*.22);
     const panSpeed = 0.004 + v*.002;
 
-    // Settle: neutral, mid-filter, low amplitude
     osc.frequency.setValueAtTime(baseFund * 0.998, now);
     filt.frequency.setValueAtTime(600, now);
     filt.Q.setValueAtTime(0.6, now);
@@ -703,10 +641,7 @@ function buildGraph(ctx, pattern, rng, dur) {
     gV.gain.setValueAtTime(0.04 / N_VOICES, now);
     pan.pan.setValueAtTime(0, now);
 
-    // Schedule across all breath cycles
     const settleEnd = pattern.settleTime;
-
-    // Settle ramp in
     osc.frequency.linearRampToValueAtTime(baseFund, now+settleEnd);
     filt.frequency.linearRampToValueAtTime(800, now+settleEnd);
     gV.gain.linearRampToValueAtTime(0.12 / N_VOICES, now+settleEnd);
@@ -721,54 +656,39 @@ function buildGraph(ctx, pattern, rng, dur) {
         const t1 = t0 + ph.dur;
         phaseAcc += ph.dur;
 
-        // Frequency — rise on inhale, fall on exhale, stable on hold/rest
-        // Minor 3rd (6/5) upward shift on inhale; back on exhale
         let freqTarget;
-        if (ph.type === 'inhale') {
-          freqTarget = baseFund * (1 + 0.07 * (r[1]/r[0])); // gentle upward
-        } else if (ph.type === 'exhale') {
-          freqTarget = baseFund * 0.993;
-        } else if (ph.type === 'hold') {
-          // sustain inhale pitch gently
-          freqTarget = baseFund * 1.04;
-        } else {
-          // rest — return to base
-          freqTarget = baseFund;
-        }
+        if (ph.type === 'inhale')      freqTarget = baseFund * (1 + 0.07 * (r[1]/r[0]));
+        else if (ph.type === 'exhale') freqTarget = baseFund * 0.993;
+        else if (ph.type === 'hold')   freqTarget = baseFund * 1.04;
+        else                           freqTarget = baseFund;
 
         osc.frequency.linearRampToValueAtTime(freqTarget, t1);
 
-        // Filter brightness — open on inhale, close on exhale
         const fcTarget = ph.type==='inhale' ? 2400+rng()*600
                        : ph.type==='hold'   ? 2000
                        : ph.type==='exhale' ? 550+rng()*150
-                                             : 480;
+                                            : 480;
         filt.frequency.linearRampToValueAtTime(fcTarget, t1);
 
-        // Q — tighter on hold, loose elsewhere
         const fqTarget = ph.type==='hold' ? 1.2 : 0.5;
         filt.Q.linearRampToValueAtTime(fqTarget, t1);
 
-        // Shelf gain — warmth opens on inhale
         const sgTarget = ph.type==='inhale' ? 3.5 : ph.type==='hold' ? 2.5 : 0.5;
         shelf.gain.linearRampToValueAtTime(sgTarget, t1);
 
-        // Voice amplitude — swell on inhale, retreat on exhale
         const vAmpBase = 0.12 / N_VOICES;
         const ampTarget = ph.type==='inhale' ? vAmpBase*1.6
                         : ph.type==='hold'   ? vAmpBase*1.4
                         : ph.type==='exhale' ? vAmpBase*0.7
-                                              : vAmpBase*0.6;
+                                             : vAmpBase*0.6;
         gV.gain.linearRampToValueAtTime(ampTarget, t1);
 
-        // Pan motion — sinusoidal approximated by linear segments
         const prog = (cycleStart + phaseAcc) / dur;
         const panV = Math.sin(prog*Math.PI*2*panSpeed*dur) * panAmt;
         pan.pan.linearRampToValueAtTime(clamp(panV,-1,1), t1);
       }
     }
 
-    // Fade to settle colour after last breath
     const lastBreathEnd = now + settleEnd + pattern.breaths*cycleLen;
     osc.frequency.linearRampToValueAtTime(baseFund, lastBreathEnd+2);
     filt.frequency.linearRampToValueAtTime(700, lastBreathEnd+2);
@@ -777,7 +697,7 @@ function buildGraph(ctx, pattern, rng, dur) {
     osc.start(now); osc.stop(now+dur+.2);
   }
 
-  // ── Sub-drone (grounding) ──
+  // Sub-drone
   {
     const sub = ctx.createOscillator();
     const subF= ctx.createBiquadFilter();
@@ -786,8 +706,6 @@ function buildGraph(ctx, pattern, rng, dur) {
     sub.type='sine';
     sub.frequency.value = fund * 0.5;
     subF.type='lowpass'; subF.frequency.value=160; subF.Q.value=0.5;
-
-    // Sub breathes gently — louder on exhale (grounding), quieter on inhale
     subG.gain.setValueAtTime(0.02, now);
     subG.gain.linearRampToValueAtTime(0.06, now+pattern.settleTime);
 
@@ -805,7 +723,7 @@ function buildGraph(ctx, pattern, rng, dur) {
     sub.start(now); sub.stop(now+dur+.2);
   }
 
-  // ── Breath-texture: very soft noise swell on each inhale ──
+  // Breath texture noise
   {
     const nLen = Math.min(SR*6, 264600);
     const nBuf = ctx.createBuffer(1, nLen, SR);
@@ -834,7 +752,6 @@ function buildGraph(ctx, pattern, rng, dur) {
       for (const ph of pattern.phases) {
         const t0 = now + cycleStart + phaseAcc;
         const t1 = t0 + ph.dur;
-        // Subtle air texture — only on inhale
         const aT = ph.type==='inhale' ? 0.018 : 0.0;
         nG.gain.linearRampToValueAtTime(aT, t1 - 0.3);
         nG.gain.linearRampToValueAtTime(0, t1);
