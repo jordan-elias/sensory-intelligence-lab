@@ -6,7 +6,6 @@
 # ── Redirects ──
 # Netlify processes these top to bottom and stops at the first match.
 # Status 200 = rewrite (serve the file, keep the URL in the browser).
-# Status 301 = hard redirect (changes the URL in the browser).
 
 # Root — sign in / sign up page
 [[redirects]]
@@ -25,30 +24,41 @@
   to   = "/dashboard/index.html"
   status = 200
 
-
-# ── Account and Booking pages (matched to actual folder names) ──
-
-[[redirects]]
-from = "/account"
-to   = "/account/index.html"
-status = 200
+# ── Account and Booking ──
 
 [[redirects]]
-from = "/account/"
-to   = "/account/index.html"
-status = 200
+  from = "/account"
+  to   = "/account/index.html"
+  status = 200
 
 [[redirects]]
-from = "/booking"
-to   = "/booking/index.html"
-status = 200
+  from = "/account/"
+  to   = "/account/index.html"
+  status = 200
 
 [[redirects]]
-from = "/booking/"
-to   = "/booking/index.html"
-status = 200
+  from = "/booking"
+  to   = "/booking/index.html"
+  status = 200
 
-# ── Module pages (matched to actual folder names) ──
+[[redirects]]
+  from = "/booking/"
+  to   = "/booking/index.html"
+  status = 200
+
+# ── About page ──
+
+[[redirects]]
+  from = "/about"
+  to   = "/about/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/about/"
+  to   = "/about/index.html"
+  status = 200
+
+# ── Module pages ──
 
 [[redirects]]
   from = "/dashboard/regulation"
@@ -90,7 +100,29 @@ status = 200
   to   = "/dashboard/spatial-game/index.html"
   status = 200
 
-  [[redirects]]
+[[redirects]]
+  from = "/dashboard/checkin"
+  to   = "/dashboard/checkin/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/dashboard/checkin/"
+  to   = "/dashboard/checkin/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/library"
+  to   = "/library/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/library/"
+  to   = "/library/index.html"
+  status = 200
+
+# ── Soundscape Machine ──
+
+[[redirects]]
   from = "/soundscape-machine"
   to   = "/soundscape-machine/index.html"
   status = 200
@@ -98,6 +130,18 @@ status = 200
 [[redirects]]
   from = "/soundscape-machine/"
   to   = "/soundscape-machine/index.html"
+  status = 200
+
+# ── Subscribe ──
+
+[[redirects]]
+  from = "/subscribe"
+  to   = "/subscribe.html"
+  status = 200
+
+[[redirects]]
+  from = "/subscribe/"
+  to   = "/subscribe.html"
   status = 200
 
 # ── Future modules — uncomment when folder is added to repo ──
@@ -112,32 +156,9 @@ status = 200
 #   to   = "/dashboard/rhythmic-entrainment/index.html"
 #   status = 200
 
-# [[redirects]]
-#   from = "/dashboard/check-in"
-#   to   = "/dashboard/check-in/index.html"
-#   status = 200
-#
-# [[redirects]]
-#   from = "/dashboard/check-in/"
-#   to   = "/dashboard/check-in/index.html"
-#   status = 200
-
-# ── Other pages ──
-
-[[redirects]]
-  from = "/subscribe"
-  to   = "/subscribe.html"
-  status = 200
-
-[[redirects]]
-  from = "/subscribe/"
-  to   = "/subscribe.html"
-  status = 200
-
 # ── Catch-all ──
-# Handles Supabase auth confirmation redirects that may land on
-# unexpected paths. The root index.html checks for a session and
-# forwards to /dashboard/ if one exists.
+# Handles Supabase auth confirmation redirects.
+# MUST remain last.
 [[redirects]]
   from   = "/*"
   to     = "/index.html"
