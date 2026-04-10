@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book a Session — Sensory Intelligence Lab</title>
+
+  <script src="/dashboard/auth-guard.js" type="module"></script>
+  <script src="/assets/js/header.js" defer></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --font-body: 'Inter', sans-serif;
+      --font-heading: 'Space Grotesk', sans-serif;
+      --bg: #ffffff;
+      --surface: #f9f9f7;
+      --border: #e5e5e0;
+      --text: #1a1a1a;
+      --muted: #6b6b6b;
+      --accent: #2a5c45;
+      --accent-light: #edf4f0;
+      --accent-hover: #1e4433;
+      --error: #c0392b;
+      --error-bg: #fdf2f2;
+    }
+
+    html { font-size: 16px; }
+    body {
+      font-family: var(--font-body);
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+    a:hover { color: var(--accent); }
+
+    /* ── Breadcrumb ── */
+    .bc { padding: .75rem 1.5rem 0; max-width: 860px; margin: 0 auto; width: 100%; }
+    .bc ol { list-style: none; display: flex; gap: .3rem; align-items: center; font-size: .75rem; color: var(--muted); flex-wrap: wrap; }
+    .bc li + li::before { content: '/'; margin-right: .3rem; color: var(--border); }
+    .bc a { color: var(--muted); text-decoration: none; }
+    .bc a:hover { color: var(--accent); text-decoration: underline; }
+
+    /* ── Main ── */
+    main { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; flex: 1; width: 100%; }
+    @media (max-width: 600px) { main { padding: 1.5rem 1rem 3rem; } }
+
+    /* ── Page header ── */
+    .ph { margin-bottom: 2.5rem; padding-bottom: 1.75rem; border-bottom: 1px solid var(--border); }
+    .ph h2 { font-family: var(--font-heading); font-size: 2rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; margin-bottom: .4rem; }
+    .ph p { font-size: .9rem; color: var(--muted); max-width: 52ch; }
+
+    /* ── Section label ── */
+    .sl { font-family: var(--font-heading); font-size: .65rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: .85rem; }
+
+    /* ── Two-column layout ── */
+    .layout { display: grid; grid-template-columns: 1fr 320px; gap: 2.5rem; align-items: start; }
+    @media (max-width: 700px) { .layout { grid-template-columns: 1fr; } }
+
+    /* ── Session types ── */
+    .session-types { display: flex; flex-direction: column; gap: 1px; border: 1px solid var(--border); background: var(--border); margin-bottom: 2rem; }
+
+    .session-type {
+      background: var(--bg);
+      padding: 1.25rem 1.4rem;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: background .12s;
+      position: relative;
+    }
+    .session-type:hover { background: var(--surface); }
+    .session-type.selected {
+      background: var(--accent-light);
+      border-color: var(--accent);
+      z-index: 1;
+    }
+    .session-type-header {
+      display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+      margin-bottom: .3rem;
+    }
+    .session-type-name {
+      font-family: var(--font-heading);
+      font-size: .9rem; font-weight: 600;
+    }
+    .session-type-duration {
+      font-size: .72rem; color: var(--muted); white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .session-type-desc {
+      font-size: .78rem; color: var(--muted); line-height: 1.55;
+    }
+    .session-type.selected .session-type-desc { color: var(--accent-hover); opacity: .85; }
+    .session-type-price {
+      margin-top: .5rem;
+      font-family: var(--font-heading);
+      font-size: .78rem; font-weight: 600;
+      color: var(--accent);
+    }
+
+    /* ── Form ── */
+    .booking-form { border: 1px solid var(--border); }
+    .form-head {
+      padding: .9rem 1.25rem; border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .form-head h3 { font-family: var(--font-heading); font-size: .85rem; font-weight: 600; }
+    .form-body { padding: 1.4rem; }
+
+    .form-group { margin-bottom: 1rem; }
+    .form-group:last-of-type { margin-bottom: 0; }
+
+    label { display: block; font-size: .78rem; font-weight: 500; color: var(--text); margin-bottom: .3rem; }
+    label .opt { font-weight: 400; color: var(--muted); }
+
+    input[type="text"],
+    input[type="email"],
+    select,
+    textarea {
+      width: 100%;
+      padding: .6rem .85rem;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: .875rem;
+      outline: none;
+      transition: border-color .12s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+    input:disabled, select:disabled { background: var(--surface); color: var(--muted); cursor: not-allowed; }
+    textarea { resize: vertical; min-height: 90px; }
+    select { cursor: pointer; }
+
+    .submit-btn {
+      width: 100%;
+      font-family: var(--font-heading);
+      font-size: .875rem; font-weight: 600;
+      padding: .8rem;
+      border: none;
+      background: var(--accent);
+      color: white;
+      cursor: pointer;
+      transition: background .15s;
+      letter-spacing: -.01em;
+      margin-top: 1.25rem;
+    }
+    .submit-btn:hover { background: var(--accent-hover); }
+    .submit-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+    .msg {
+      padding: .65rem .9rem;
+      font-size: .78rem; line-height: 1.5;
+      margin-top: .85rem;
+      display: none;
+    }
+    .msg.success { display: block; background: var(--accent-light); border-left: 3px solid var(--accent); color: var(--accent-hover); }
+    .msg.error   { display: block; background: var(--error-bg); border-left: 3px solid var(--error); color: var(--error); }
+
+    /* ── Sidebar info ── */
+    .sidebar { display: flex; flex-direction: column; gap: 1.25rem; }
+
+    .info-card { border: 1px solid var(--border); }
+    .info-card-head {
+      padding: .75rem 1.1rem; border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .info-card-head h4 { font-family: var(--font-heading); font-size: .78rem; font-weight: 600; }
+    .info-card-body { padding: 1rem 1.1rem; }
+    .info-card-body p { font-size: .78rem; color: var(--muted); line-height: 1.65; margin-bottom: .6rem; }
+    .info-card-body p:last-child { margin-bottom: 0; }
+    .info-card-body ul { padding-left: 1rem; font-size: .78rem; color: var(--muted); line-height: 1.8; }
+
+    /* ── Confirmation screen ── */
+    .confirm-screen {
+      display: none;
+      text-align: center;
+      padding: 3rem 2rem;
+      border: 1px solid var(--border);
+      background: var(--accent-light);
+    }
+    .confirm-screen.visible { display: block; }
+    .confirm-icon { font-size: 2.5rem; margin-bottom: .75rem; }
+    .confirm-screen h3 { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 600; margin-bottom: .4rem; }
+    .confirm-screen p { font-size: .85rem; color: var(--accent-hover); line-height: 1.65; max-width: 42ch; margin: 0 auto; }
+    .confirm-screen p + p { margin-top: .5rem; }
+
+    /* ── Footer ── */
+    footer { border-top: 1px solid var(--border); padding: 1.25rem 1.5rem; text-align: center; font-size: .78rem; color: var(--muted); }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<div id="lab-header"></div>
+
+<nav aria-label="Breadcrumb" class="bc">
+  <ol>
+    <li><a href="/dashboard/">Dashboard</a></li>
+    <li>Book a session</li>
+  </ol>
+</nav>
+
+<main>
+
+  <div class="ph">
+    <h2>Book a session</h2>
+    <p>One-to-one sessions with Jordan, working with sound and regulation skills directly. Fill in the form and you'll hear back within two working days to confirm a time.</p>
+  </div>
+
+  <div class="layout">
+
+    <!-- Left: session type + form -->
+    <div>
+
+      <p class="sl">Session type</p>
+
+      <div class="session-types" id="sessionTypes">
+
+        <div class="session-type" data-type="intro" onclick="selectType(this)">
+          <div class="session-type-header">
+            <span class="session-type-name">Introductory call</span>
+            <span class="session-type-duration">30 min</span>
+          </div>
+          <p class="session-type-desc">A free conversation to find out whether working together is a good fit. No preparation needed.</p>
+          <div class="session-type-price">Free</div>
+        </div>
+
+        <div class="session-type" data-type="single" onclick="selectType(this)">
+          <div class="session-type-header">
+            <span class="session-type-name">Single session</span>
+            <span class="session-type-duration">50 min</span>
+          </div>
+          <p class="session-type-desc">A full working session. We might focus on regulation, sensory processing, listening practice, or creative work with sound — depending on what you need.</p>
+          <div class="session-type-price">€80</div>
+        </div>
+
+        <div class="session-type" data-type="block" onclick="selectType(this)">
+          <div class="session-type-header">
+            <span class="session-type-name">Block of 6 sessions</span>
+            <span class="session-type-duration">50 min each</span>
+          </div>
+          <p class="session-type-desc">Six sessions over 6–8 weeks. Recommended for deeper work — building a regulation practice, processing a specific period, or working through a structured theme.</p>
+          <div class="session-type-price">€420 <span style="font-weight:400;font-size:.7rem;color:var(--muted)">(saves €60)</span></div>
+        </div>
+
+      </div>
+
+      <!-- Booking form -->
+      <div class="booking-form" id="bookingForm" style="display:none;">
+        <div class="form-head">
+          <h3>Your details</h3>
+        </div>
+        <div class="form-body">
+
+          <!--
+            Netlify Forms: the name="booking-request" attribute and
+            data-netlify="true" handle email delivery automatically.
+            No serverless function needed.
+          -->
+          <form name="booking-request" data-netlify="true" netlify-honeypot="bot-field" id="theForm">
+            <input type="hidden" name="form-name" value="booking-request">
+            <input type="hidden" name="session-type" id="hiddenType" value="">
+            <p style="display:none"><label>Don't fill this out: <input name="bot-field"></label></p>
+
+            <div class="form-group">
+              <label for="nameInput">Your name</label>
+              <input type="text" id="nameInput" name="name" placeholder="Your full name" required autocomplete="name">
+            </div>
+
+            <div class="form-group">
+              <label for="emailInput">Email</label>
+              <input type="email" id="emailInput" name="email" placeholder="you@email.com" required autocomplete="email">
+            </div>
+
+            <div class="form-group">
+              <label for="timezoneInput">Timezone <span class="opt">(optional)</span></label>
+              <input type="text" id="timezoneInput" name="timezone" placeholder="e.g. Europe/Berlin, GMT+2">
+            </div>
+
+            <div class="form-group">
+              <label for="availabilityInput">When are you generally available? <span class="opt">(optional)</span></label>
+              <textarea id="availabilityInput" name="availability" placeholder="e.g. weekday mornings, Thursday afternoons…" rows="2"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="contextInput">Anything you'd like to share before we meet? <span class="opt">(optional)</span></label>
+              <textarea id="contextInput" name="context" placeholder="What's bringing you here, what you're hoping for, any relevant context…" rows="3"></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">Send request</button>
+          </form>
+
+          <div class="msg" id="formMsg"></div>
+
+        </div>
+      </div>
+
+      <!-- Confirmation -->
+      <div class="confirm-screen" id="confirmScreen">
+        <div class="confirm-icon">✉️</div>
+        <h3>Request sent</h3>
+        <p>Thank you — your booking request has been received.</p>
+        <p>Jordan will be in touch within two working days to confirm a time and share any next steps.</p>
+      </div>
+
+    </div>
+
+    <!-- Right: sidebar -->
+    <div class="sidebar">
+
+      <div class="info-card">
+        <div class="info-card-head"><h4>How sessions work</h4></div>
+        <div class="info-card-body">
+          <p>Sessions are held online via video call. You don't need any prior music experience or equipment beyond headphones.</p>
+          <p>Sessions are not music lessons. They draw on music therapy, somatic approaches, and neuroscience to support regulation, sensory processing, and nervous system care.</p>
+          <p>After your request is submitted, Jordan will reply with available times and a short intake form if this is your first session.</p>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-head"><h4>Sliding scale</h4></div>
+        <div class="info-card-body">
+          <p>A reduced fee is available if the standard rate isn't accessible. Mention this in your request — no explanation needed.</p>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-head"><h4>Cancellation</h4></div>
+        <div class="info-card-body">
+          <p>Sessions cancelled with less than 24 hours notice are charged in full. Life happens — please just let Jordan know as soon as you can.</p>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</main>
+
+<footer>
+  <p>Jordan Elias Music Therapy · Berlin ·
+    <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a>
+  </p>
+</footer>
+
+<script>
+'use strict';
+
+let selectedType = null;
+
+// Pre-fill email from auth
+function onAuthReady(cb) {
+  if (window._currentUser) { cb(); return; }
+  window.addEventListener('authReady', cb, { once: true });
+}
+
+onAuthReady(() => {
+  const user  = window._currentUser;
+  const email = user?.email || '';
+  const name  = user?.user_metadata?.full_name || '';
+  if (email) document.getElementById('emailInput').value = email;
+  if (name)  document.getElementById('nameInput').value  = name;
+});
+
+// Session type selection
+function selectType(el) {
+  document.querySelectorAll('.session-type').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedType = el.dataset.type;
+  document.getElementById('hiddenType').value = selectedType;
+  document.getElementById('bookingForm').style.display = 'block';
+  document.getElementById('bookingForm').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Form submission via Netlify Forms (AJAX)
+document.getElementById('theForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const btn   = document.getElementById('submitBtn');
+  const msgEl = document.getElementById('formMsg');
+  msgEl.className = 'msg';
+  btn.disabled   = true;
+  btn.textContent = 'Sending…';
+
+  const formData = new FormData(this);
+
+  try {
+    const response = await fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(formData).toString(),
+    });
+
+    if (response.ok) {
+      document.getElementById('bookingForm').style.display  = 'none';
+      document.getElementById('sessionTypes').style.display = 'none';
+      document.querySelector('.sl').style.display           = 'none';
+      document.getElementById('confirmScreen').classList.add('visible');
+    } else {
+      throw new Error('Network response was not ok');
+    }
+  } catch (err) {
+    msgEl.textContent = 'Something went wrong. Please try again, or email Jordan directly at hello@jordanelias.de';
+    msgEl.className   = 'msg error';
+    btn.disabled   = false;
+    btn.textContent = 'Send request';
+  }
+});
+</script>
+
+</body>
+</html>
