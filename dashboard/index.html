@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard | Sensory Intelligence Lab</title>
+  <title>Dashboard — Sensory Intelligence Lab</title>
 
-  <!-- Auth gate: runs before body renders -->
-<script src="/dashboard/auth-guard.js"></script>
+  <script src="/dashboard/auth-guard.js" type="module"></script>
+  <script src="/assets/js/header.js" defer></script>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
 
@@ -16,145 +16,76 @@
     :root {
       --font-body: 'Inter', sans-serif;
       --font-heading: 'Space Grotesk', sans-serif;
-      --color-bg: #ffffff;
-      --color-surface: #f9f9f7;
-      --color-border: #e5e5e0;
-      --color-text: #1a1a1a;
-      --color-muted: #6b6b6b;
-      --color-accent: #2a5c45;
-      --color-accent-light: #edf4f0;
-      --color-accent-hover: #1e4433;
-      --header-height: 56px;
+      --bg: #ffffff;
+      --surface: #f9f9f7;
+      --border: #e5e5e0;
+      --text: #1a1a1a;
+      --muted: #6b6b6b;
+      --accent: #2a5c45;
+      --accent-light: #edf4f0;
+      --accent-hover: #1e4433;
     }
 
     html { font-size: 16px; }
 
     body {
       font-family: var(--font-body);
-      color: var(--color-text);
-      background: var(--color-bg);
+      color: var(--text);
+      background: var(--bg);
       line-height: 1.6;
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
       opacity: 0;
       animation: fadeIn 0.25s ease 0.1s forwards;
     }
 
-    @keyframes fadeIn {
-      to { opacity: 1; }
-    }
+    @keyframes fadeIn { to { opacity: 1; } }
 
-    a {
-      color: var(--color-text);
-      text-decoration: underline;
-      text-underline-offset: 3px;
-    }
-    a:hover { color: var(--color-accent); }
-
-    /* ── Header ── */
-    header {
-      border-bottom: 1px solid var(--color-border);
-      padding: 0 2rem;
-      height: var(--header-height);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      background: var(--color-bg);
-      z-index: 10;
-    }
-
-    header h1 {
-      font-family: var(--font-heading);
-      font-size: 1rem;
-      font-weight: 600;
-      letter-spacing: -0.01em;
-      white-space: nowrap;
-    }
-
-    header nav {
-      display: flex;
-      gap: 1.5rem;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    header nav a {
-      font-size: 0.875rem;
-      font-weight: 500;
-      text-decoration: none;
-      color: var(--color-muted);
-      transition: color 0.15s;
-    }
-    header nav a:hover { color: var(--color-text); }
-
-    .sign-out-btn {
-      font-family: var(--font-body);
-      font-size: 0.8rem;
-      font-weight: 500;
-      padding: 0.4rem 0.9rem;
-      border: 1px solid var(--color-border);
-      border-radius: 3px;
-      background: transparent;
-      color: var(--color-muted);
-      cursor: pointer;
-      transition: border-color 0.15s, color 0.15s, background 0.15s;
-      text-decoration: none;
-    }
-    .sign-out-btn:hover {
-      border-color: var(--color-accent);
-      color: var(--color-accent);
-      background: var(--color-accent-light);
-    }
+    a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+    a:hover { color: var(--accent); }
 
     /* ── Breadcrumb ── */
-    .breadcrumb-nav {
-      padding: 1rem 2rem 0;
+    .bc {
+      padding: 0.75rem 1.5rem 0;
       max-width: 1100px;
       margin: 0 auto;
+      width: 100%;
     }
-
-    .breadcrumb-nav ol {
+    .bc ol {
       list-style: none;
       display: flex;
-      gap: 0.4rem;
+      gap: 0.3rem;
       align-items: center;
-      font-size: 0.8rem;
-      color: var(--color-muted);
+      font-size: 0.75rem;
+      color: var(--muted);
+      flex-wrap: wrap;
     }
-
-    .breadcrumb-nav li + li::before {
-      content: '/';
-      margin-right: 0.4rem;
-      color: var(--color-border);
-    }
-
-    .breadcrumb-nav a {
-      color: var(--color-muted);
-      text-decoration: none;
-    }
-    .breadcrumb-nav a:hover { color: var(--color-accent); text-decoration: underline; }
+    .bc li + li::before { content: '/'; margin-right: 0.3rem; color: var(--border); }
+    .bc a { color: var(--muted); text-decoration: none; }
+    .bc a:hover { color: var(--accent); text-decoration: underline; }
 
     /* ── Main ── */
     main {
       max-width: 1100px;
       margin: 0 auto;
-      padding: 2.5rem 2rem 4rem;
+      padding: 2.5rem 1.5rem 4rem;
+      flex: 1;
+      width: 100%;
     }
 
     /* ── Page header ── */
     .page-header {
       margin-bottom: 2.5rem;
       padding-bottom: 2rem;
-      border-bottom: 1px solid var(--color-border);
+      border-bottom: 1px solid var(--border);
       display: flex;
       align-items: flex-end;
       justify-content: space-between;
       gap: 2rem;
       flex-wrap: wrap;
     }
-
-    .page-header-text h2 {
+    .page-header h2 {
       font-family: var(--font-heading);
       font-size: 2rem;
       font-weight: 600;
@@ -162,84 +93,76 @@
       line-height: 1.2;
       margin-bottom: 0.4rem;
     }
-
-    .page-header-text p {
-      font-size: 0.9rem;
-      color: var(--color-muted);
-    }
+    .page-header p { font-size: 0.9rem; color: var(--muted); }
 
     /* ── Daily prompt ── */
     .prompt-block {
-      background: var(--color-accent-light);
+      background: var(--accent-light);
       border: 1px solid #c0d9c8;
-      border-radius: 4px;
+      border-radius: 2px;
       padding: 1.25rem 1.5rem;
       margin-bottom: 2.5rem;
       display: flex;
       gap: 1rem;
       align-items: flex-start;
     }
-
     .prompt-label {
       font-family: var(--font-heading);
-      font-size: 0.65rem;
+      font-size: 0.62rem;
       font-weight: 600;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: var(--color-accent);
+      color: var(--accent);
       white-space: nowrap;
       padding-top: 2px;
+      flex-shrink: 0;
     }
-
     .prompt-text {
-      font-size: 0.95rem;
-      color: var(--color-accent-hover);
-      line-height: 1.6;
+      font-size: 0.9rem;
+      color: var(--accent-hover);
+      line-height: 1.65;
       font-style: italic;
     }
 
-    /* ── Section headings ── */
+    /* ── Section label ── */
     .section-label {
       font-family: var(--font-heading);
-      font-size: 0.7rem;
+      font-size: 0.67rem;
       font-weight: 600;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: var(--color-muted);
+      color: var(--muted);
       margin-bottom: 1rem;
     }
 
     /* ── Module grid ── */
-    .modules-section {
-      margin-bottom: 3rem;
-    }
+    .modules-section { margin-bottom: 2.75rem; }
 
     .module-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
       gap: 1px;
-      border: 1px solid var(--color-border);
-      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--border);
       overflow: hidden;
-      background: var(--color-border);
     }
 
     .module-card {
-      background: var(--color-bg);
+      background: var(--bg);
       padding: 1.4rem 1.5rem;
-      cursor: pointer;
-      transition: background 0.15s;
       text-decoration: none;
       color: inherit;
       display: block;
+      transition: background 0.15s;
+      position: relative;
     }
+    .module-card:hover { background: var(--surface); }
+    .module-card:hover .module-arrow { transform: translateX(3px); color: var(--accent); }
 
-    .module-card:hover {
-      background: var(--color-surface);
-    }
-
-    .module-card:hover .module-arrow {
-      transform: translateX(3px);
+    .module-card.disabled {
+      cursor: default;
+      opacity: 0.55;
+      pointer-events: none;
     }
 
     .module-top {
@@ -248,103 +171,165 @@
       justify-content: space-between;
       margin-bottom: 0.6rem;
     }
-
-    .module-icon {
-      font-size: 1.1rem;
-      color: var(--color-accent);
-      line-height: 1;
-    }
-
+    .module-icon { font-size: 1.05rem; color: var(--accent); line-height: 1; }
     .module-arrow {
       font-size: 0.8rem;
-      color: var(--color-border);
+      color: var(--border);
       transition: transform 0.15s, color 0.15s;
-    }
-
-    .module-card:hover .module-arrow {
-      color: var(--color-accent);
     }
 
     .module-card h3 {
       font-family: var(--font-heading);
-      font-size: 0.95rem;
+      font-size: 0.93rem;
       font-weight: 600;
       letter-spacing: -0.01em;
       margin-bottom: 0.3rem;
       line-height: 1.3;
     }
-
     .module-card p {
-      font-size: 0.8rem;
-      color: var(--color-muted);
-      line-height: 1.5;
+      font-size: 0.78rem;
+      color: var(--muted);
+      line-height: 1.55;
     }
 
     .module-tag {
       display: inline-block;
       margin-top: 0.75rem;
-      font-size: 0.65rem;
+      font-size: 0.62rem;
       font-weight: 500;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--color-accent);
-      background: var(--color-accent-light);
+      color: var(--accent);
+      background: var(--accent-light);
       padding: 0.2rem 0.5rem;
-      border-radius: 2px;
     }
-
     .module-tag.coming-soon {
-      color: var(--color-muted);
-      background: var(--color-surface);
+      color: var(--muted);
+      background: var(--surface);
+    }
+    .module-tag.new {
+      color: #6b3a1a;
+      background: #fdf4ec;
     }
 
-    .module-card.disabled {
-      cursor: default;
+    /* ── Crisis resources footer ── */
+    .crisis-footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 1.5rem;
+      background: var(--surface);
+    }
+
+    .crisis-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .crisis-label {
+      font-family: var(--font-heading);
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .crisis-label::after {
+      content: attr(data-state);
+      font-size: 0.6rem;
       opacity: 0.6;
     }
-
-    .module-card.disabled:hover {
-      background: var(--color-bg);
+    .crisis-toggle-icon {
+      margin-left: auto;
+      transition: transform 0.2s;
+      font-style: normal;
     }
+    .crisis-label.open .crisis-toggle-icon { transform: rotate(180deg); }
 
-    /* ── Footer ── */
+    .crisis-grid {
+      display: none;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1.25rem 2rem;
+      margin-bottom: 1rem;
+    }
+    .crisis-grid.open { display: grid; }
+
+    .crisis-group h4 {
+      font-family: var(--font-heading);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.3rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .crisis-group ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    .crisis-group li {
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .crisis-group li strong {
+      display: block;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .crisis-group a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.72rem;
+    }
+    .crisis-group a:hover { color: var(--accent); text-decoration: underline; }
+
+    .crisis-note {
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.6;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      display: none;
+    }
+    .crisis-note.open { display: block; }
+
+    /* ── Site footer ── */
     footer {
-      border-top: 1px solid var(--color-border);
-      padding: 1.5rem 2rem;
+      border-top: 1px solid var(--border);
+      padding: 1.25rem 1.5rem;
       text-align: center;
-      font-size: 0.8rem;
-      color: var(--color-muted);
+      font-size: 0.78rem;
+      color: var(--muted);
     }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--accent); text-decoration: underline; }
 
     /* ── Responsive ── */
     @media (max-width: 640px) {
-      header nav { gap: 1rem; }
-      header h1 { font-size: 0.875rem; }
-      .page-header { flex-direction: column; align-items: flex-start; }
+      main { padding: 1.5rem 1rem 3rem; }
+      .page-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
       .module-grid { grid-template-columns: 1fr; }
+      .prompt-block { flex-direction: column; gap: 0.5rem; }
+      .crisis-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-<header>
-  <h1>Dashboard | Sensory Intelligence Lab</h1>
-  <nav>
-    <a href="/">Home</a>
-    <a href="/about/">About</a>
-    <a href="/music-therapy/">Music Therapy</a>
-    <a href="/online-sessions/">Online Sessions</a>
-    <a href="/events/">Events</a>
-    <a href="/contact/">Contact</a>
-    <a href="/blog/">Blog</a>
-    <button class="sign-out-btn" id="signOutBtn">Sign out</button>
-  </nav>
-</header>
+<div id="lab-header"></div>
 
-<nav aria-label="Breadcrumb" class="breadcrumb-nav">
+<nav aria-label="Breadcrumb" class="bc">
   <ol>
-    <li><a href="jordanelias.de">Home</a></li>
-    <li><a href="/">Sensory Intelligence Lab</a></li>
+    <li><a href="https://jordanelias.de/">jordanelias.de</a></li>
+    <li>Sensory Intelligence Lab</li>
     <li>Dashboard</li>
   </ol>
 </nav>
@@ -352,7 +337,7 @@
 <main>
 
   <div class="page-header">
-    <div class="page-header-text">
+    <div>
       <h2 id="greeting">Welcome back</h2>
       <p>Your sensory intelligence dashboard</p>
     </div>
@@ -364,87 +349,95 @@
     <span class="prompt-text" id="dailyPrompt">Loading…</span>
   </div>
 
-  <!-- Core modules -->
+  <!-- Core regulation modules -->
   <div class="modules-section">
-    <p class="section-label">Core modules</p>
+    <p class="section-label">Regulation</p>
     <div class="module-grid">
 
-      <a class="module-card" href="checkin/">
-        <div class="module-top">
-          <span class="module-icon">◑</span>
-          <span class="module-arrow">→</span>
-        </div>
-        <h3>Emotional & Sensory Check-In</h3>
-        <p>Track your state across the day. Visual graphs show patterns in mood, energy, and sensory load over time.</p>
-        <span class="module-tag">Self-awareness</span>
-      </a>
-
-      <a class="module-card" href="regulation/">
+      <a class="module-card" href="/dashboard/regulation/">
         <div class="module-top">
           <span class="module-icon">◎</span>
           <span class="module-arrow">→</span>
         </div>
         <h3>Regulation Toolkit</h3>
-        <p>Select your current state and target state. Receive a tailored listening sequence using iso principle, tempo modulation, and frequency layering.</p>
+        <p>Select your current state and target state. A 5-minute generative soundscape guides the shift using the ISO principle.</p>
         <span class="module-tag">Signature tool</span>
       </a>
 
-      <a class="module-card" href="sensory-load/">
+      <a class="module-card" href="/dashboard/breathing/">
         <div class="module-top">
-          <span class="module-icon">◈</span>
+          <span class="module-icon">◯</span>
           <span class="module-arrow">→</span>
         </div>
-        <h3>Sensory Load Monitor</h3>
-        <p>Log noise, light, crowding, and fatigue. See your daily sensory load score and spot patterns over time.</p>
-        <span class="module-tag">ADHD · Autism · Burnout</span>
+        <h3>Breath Regulation</h3>
+        <p>Four evidence-based breathing patterns with visual and generative audio guides. Box, 4-7-8, physiological sigh, resonant.</p>
+        <span class="module-tag">Parasympathetic · HRV</span>
       </a>
 
-      <a class="module-card" href="focus-timer/">
+      <a class="module-card" href="/dashboard/checkin/">
         <div class="module-top">
-          <span class="module-icon">○</span>
+          <span class="module-icon">◑</span>
           <span class="module-arrow">→</span>
         </div>
-        <h3>Focus Timer</h3>
-        <p>Sound-regulated focus sessions with background soundscapes, rhythm pacing, and gentle cues to support sustained attention.</p>
-        <span class="module-tag">Productivity</span>
+        <h3>Check-In</h3>
+        <p>Log your emotional state, energy, and sensory load. Track patterns across the day and over time.</p>
+        <span class="module-tag new">New</span>
       </a>
 
     </div>
   </div>
 
-  <!-- Training modules -->
+  <!-- Perception & training modules -->
   <div class="modules-section">
-    <p class="section-label">Training & perception</p>
+    <p class="section-label">Perception & training</p>
     <div class="module-grid">
 
-      <a class="module-card" href="spatial-game/">
-        <div class="module-top">
-          <span class="module-icon">◇</span>
-          <span class="module-arrow">→</span>
-        </div>
-        <h3>Spatial & Auditory Scene Games</h3>
-        <p>Scientifically grounded minigames for attention training, auditory discrimination, and sensory filtering.</p>
-        <span class="module-tag">Ear · Attention · Filtering</span>
-      </a>
-
-      <a class="module-card" href="ear-training/">
+      <a class="module-card" href="/dashboard/ear-training/">
         <div class="module-top">
           <span class="module-icon">◻</span>
           <span class="module-arrow">→</span>
         </div>
         <h3>Ear Training</h3>
-        <p>Pitch and timbre recognition exercises that bridge auditory perception, music neuroscience, and therapeutic listening practice.</p>
-        <span class="module-tag">Perception · Neuroscience</span>
+        <p>Interval and chord identification. Build your answer from components. Diatonic and chromatic pitch sets, arpeggio voicings.</p>
+        <span class="module-tag">Intervals · Chords · Perception</span>
       </a>
 
-      <a class="module-card" href="recordings/">
+      <a class="module-card" href="/dashboard/spatial-game/">
+        <div class="module-top">
+          <span class="module-icon">◇</span>
+          <span class="module-arrow">→</span>
+        </div>
+        <h3>Spatial Awareness</h3>
+        <p>Track moving sound sources in 3D space. Scientifically grounded attention training for auditory scene analysis.</p>
+        <span class="module-tag">Attention · Localisation</span>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- Creative tools -->
+  <div class="modules-section">
+    <p class="section-label">Creative tools</p>
+    <div class="module-grid">
+
+      <a class="module-card" href="/soundscape-machine/">
+        <div class="module-top">
+          <span class="module-icon">◈</span>
+          <span class="module-arrow">→</span>
+        </div>
+        <h3>Soundscape Machine</h3>
+        <p>Four-track tape composition tool. Upload or record field recordings. Reverb, LFO filter, tape degradation. Save and load sessions.</p>
+        <span class="module-tag">Field recording · Composition</span>
+      </a>
+
+      <a class="module-card" href="/dashboard/library/">
         <div class="module-top">
           <span class="module-icon">◉</span>
           <span class="module-arrow">→</span>
         </div>
-        <h3>Field Recording Library</h3>
-        <p>Collect and organise your field recordings. Reuse them for soundscape creation, regulation, and creative work.</p>
-        <span class="module-tag">Archive · Soundscape</span>
+        <h3>Recording Library</h3>
+        <p>Your personal archive of field recordings. Crop, rename, organise, and load directly into the Soundscape Machine.</p>
+        <span class="module-tag new">New</span>
       </a>
 
     </div>
@@ -456,29 +449,23 @@
     <div class="module-grid">
 
       <div class="module-card disabled">
-        <div class="module-top">
-          <span class="module-icon" style="opacity:0.4">⬡</span>
-        </div>
-        <h3>Soundscape Creator</h3>
-        <p>Layer and mix environmental sounds into personalised soundscapes for regulation and creative work.</p>
+        <div class="module-top"><span class="module-icon" style="opacity:.4">⬡</span></div>
+        <h3>Rhythmic Entrainment</h3>
+        <p>Interactive pulse training using auditory-motor synchronisation to shift arousal state.</p>
         <span class="module-tag coming-soon">In development</span>
       </div>
 
       <div class="module-card disabled">
-        <div class="module-top">
-          <span class="module-icon" style="opacity:0.4">⬡</span>
-        </div>
-        <h3>Generative Sequencer</h3>
-        <p>Constraint-based composition tools for improvisation and indeterminate music-making.</p>
-        <span class="module-tag coming-soon">In development</span>
-      </div>
-
-      <div class="module-card disabled">
-        <div class="module-top">
-          <span class="module-icon" style="opacity:0.4">⬡</span>
-        </div>
+        <div class="module-top"><span class="module-icon" style="opacity:.4">⬡</span></div>
         <h3>Sensory Location Database</h3>
         <p>Find and log locations by acoustic character — quiet spaces, resonant environments, and sonic refuges in your city.</p>
+        <span class="module-tag coming-soon">In development</span>
+      </div>
+
+      <div class="module-card disabled">
+        <div class="module-top"><span class="module-icon" style="opacity:.4">⬡</span></div>
+        <h3>Progress Dashboard</h3>
+        <p>Session history, module usage, and pattern tracking over time.</p>
         <span class="module-tag coming-soon">In development</span>
       </div>
 
@@ -487,92 +474,224 @@
 
 </main>
 
+<!-- Crisis resources -->
+<div class="crisis-footer">
+  <div class="crisis-inner">
+
+    <div class="crisis-label" id="crisisToggle" role="button" tabindex="0" aria-expanded="false">
+      If you need immediate support
+      <i class="crisis-toggle-icon">▾</i>
+    </div>
+
+    <div class="crisis-grid" id="crisisGrid">
+
+      <div class="crisis-group">
+        <h4>Crisis &amp; suicide prevention — Germany</h4>
+        <ul>
+          <li>
+            <strong>Telefonseelsorge</strong>
+            0800 111 0 111 or 0800 111 0 222
+            <a href="https://www.telefonseelsorge.de" target="_blank" rel="noopener">telefonseelsorge.de</a><br>
+            Free, 24/7, anonymous
+          </li>
+          <li>
+            <strong>Krisendienst Psychiatrie (Berlin)</strong>
+            030 39 063 00
+            <a href="https://krisendienst-psychiatrie.de" target="_blank" rel="noopener">krisendienst-psychiatrie.de</a>
+          </li>
+          <li>
+            <strong>Emergency services</strong>
+            112 (ambulance / fire) · 110 (police)
+          </li>
+        </ul>
+      </div>
+
+      <div class="crisis-group">
+        <h4>Mental health support</h4>
+        <ul>
+          <li>
+            <strong>BKE Online-Beratung</strong>
+            Chat counselling for young people
+            <a href="https://www.bke-beratung.de" target="_blank" rel="noopener">bke-beratung.de</a>
+          </li>
+          <li>
+            <strong>Deutschland Hilft</strong>
+            General crisis info &amp; referrals
+            <a href="https://www.deutschland-hilft.de" target="_blank" rel="noopener">deutschland-hilft.de</a>
+          </li>
+          <li>
+            <strong>International Association for Suicide Prevention</strong>
+            Directory of crisis centres worldwide
+            <a href="https://www.iasp.info/resources/Crisis_Centres/" target="_blank" rel="noopener">iasp.info</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="crisis-group">
+        <h4>LGBTQ+ support</h4>
+        <ul>
+          <li>
+            <strong>Schwulenberatung Berlin</strong>
+            030 194 46
+            <a href="https://www.schwulenberatungberlin.de" target="_blank" rel="noopener">schwulenberatungberlin.de</a>
+          </li>
+          <li>
+            <strong>Trans*-Beratung Berlin</strong>
+            <a href="https://transberatung.berlin" target="_blank" rel="noopener">transberatung.berlin</a>
+          </li>
+          <li>
+            <strong>ILGA-Europe</strong>
+            EU-wide LGBTQ+ rights and support directory
+            <a href="https://www.ilga-europe.org" target="_blank" rel="noopener">ilga-europe.org</a>
+          </li>
+          <li>
+            <strong>Trevor Project (international)</strong>
+            <a href="https://www.thetrevorproject.org" target="_blank" rel="noopener">thetrevorproject.org</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="crisis-group">
+        <h4>Eating disorders</h4>
+        <ul>
+          <li>
+            <strong>Bundeszentrale für gesundheitliche Aufklärung</strong>
+            Eating disorder info and referrals
+            <a href="https://www.bzga-essstoerungen.de" target="_blank" rel="noopener">bzga-essstoerungen.de</a>
+          </li>
+          <li>
+            <strong>Alliance for Eating Disorders (US/international)</strong>
+            +1 (866) 662-1235
+            <a href="https://www.allianceforeatingdisorders.com" target="_blank" rel="noopener">allianceforeatingdisorders.com</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="crisis-group">
+        <h4>Domestic violence &amp; abuse</h4>
+        <ul>
+          <li>
+            <strong>Hilfetelefon Gewalt gegen Frauen</strong>
+            08000 116 016 · Free, 24/7, multilingual
+            <a href="https://www.hilfetelefon.de" target="_blank" rel="noopener">hilfetelefon.de</a>
+          </li>
+          <li>
+            <strong>Weißer Ring</strong>
+            116 006 · Victim support
+            <a href="https://www.weisser-ring.de" target="_blank" rel="noopener">weisser-ring.de</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="crisis-group">
+        <h4>International resources</h4>
+        <ul>
+          <li>
+            <strong>Crisis Text Line</strong>
+            Text HOME to 741741 (US/UK/CA/IE)
+            <a href="https://www.crisistextline.org" target="_blank" rel="noopener">crisistextline.org</a>
+          </li>
+          <li>
+            <strong>Samaritans (UK/Ireland)</strong>
+            116 123 (free, 24/7)
+            <a href="https://www.samaritans.org" target="_blank" rel="noopener">samaritans.org</a>
+          </li>
+          <li>
+            <strong>Befrienders Worldwide</strong>
+            Global directory of crisis lines
+            <a href="https://www.befrienders.org" target="_blank" rel="noopener">befrienders.org</a>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+
+    <p class="crisis-note" id="crisisNote">
+      This platform is a training and self-care tool, not a substitute for clinical care. If you are in crisis or need urgent support, please reach out to one of the services above. If you are unsure which service is right for you, the Telefonseelsorge (0800 111 0 111) can help connect you.
+    </p>
+
+  </div>
+</div>
+
 <footer>
-  <p>Jordan Elias Music Therapy · Berlin · <a href="/contact/">Contact</a></p>
+  <p>Jordan Elias Music Therapy · Berlin ·
+    <a href="https://jordanelias.de/" target="_blank" rel="noopener">jordanelias.de</a> ·
+    <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a>
+  </p>
 </footer>
 
 <script>
-  const SUPABASE_URL = "https://lrjuufvrgkuvfxcmybtf.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1";
-
-
-  // Reuse the client created in the auth gate, or create a fresh one
-  const client = window.__supabaseClient || supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  // ── Personalise greeting ──
-  (async () => {
-    const { data: { session } } = await client.auth.getSession();
-    if (session) {
-      const name = session.user.user_metadata?.full_name
-                || session.user.email?.split('@')[0]
-                || 'there';
-      const firstName = name.split(' ')[0];
-      document.getElementById('greeting').textContent = `Welcome back, ${firstName}`;
-    }
-  })();
-
-  // ── Sign out ──
-  document.getElementById('signOutBtn').addEventListener('click', async () => {
-    await client.auth.signOut();
-    window.location.replace('/sensory-intelligence-lab/');
-  });
-
-  // ── Daily listening prompt ──
- // ── Daily listening prompt ──
-document.addEventListener('DOMContentLoaded', function () {
-
-  const prompts = [
-    "Sit still for two minutes. Without trying to identify anything, let sounds arrive and pass like weather.",
-    "Choose one sound in your environment right now. Follow it until it ends — or until you can't hear it anymore.",
-    "Notice the furthest sound you can hear. Then the nearest. Move your attention slowly between the two.",
-    "Listen to a piece of music and track only one instrument or voice for its entire duration.",
-    "Step outside for five minutes. Count how many distinct sound sources you can identify without looking.",
-    "Find the quietest place available to you. Spend three minutes noticing what silence actually contains.",
-    "Play a familiar song. Listen as if you are hearing it for the first time — focus only on the texture of the sound.",
-    "Pay attention to the rhythm of your own breathing for two minutes. Notice if any sounds around you synchronise with it.",
-    "Choose a room in your home. Close your eyes and build a map of the space using only sound.",
-    "Listen to a field recording or environmental sound. What story does it tell about the place it was made?",
-    "Notice the quality of silence between sounds. Is it empty, or does it have its own texture?",
-    "Hum a single note quietly and hold it. Notice how the room responds — what resonates, what absorbs.",
-    "Find a sound that feels regulating to you today. Stay with it for five minutes. Note how your body responds.",
-    "Listen to music you wouldn't normally choose. Suspend judgment and track only the physical sensation it produces.",
-    "Pay attention to the sound of your own voice today — its pitch, pace, and quality in different conversations.",
-    "Find a repeating sound — traffic, machinery, water. Listen until you stop hearing it as noise.",
-    "Choose three sounds from your environment. If they were instruments in an ensemble, what would the piece be called?",
-    "Listen to a piece with your eyes closed. Imagine the space in which it was recorded — its size, surfaces, light.",
-    "Notice when you next involuntarily attend to a sound. What drew your attention? What does that tell you?",
-    "Spend two minutes in focal listening — one source, full attention. Then switch to global listening — everything at once.",
-    "Find a drone or continuous tone in your environment. Follow its subtle variations rather than treating it as fixed.",
-    "Listen back to a field recording you have made. What do you hear now that you didn't notice when you recorded it?",
-    "Pay attention to how the acoustic character of your space changes at different times of day.",
-    "Choose a sound that you usually find irritating. Listen to it with neutral attention for two minutes.",
-    "Find a piece of music in a language you don't speak. Listen only to the phonetic texture — not meaning, only sound.",
-    "Notice the silence after a sound ends. How long does it take for quiet to settle?",
-    "Listen to the lowest frequency sound you can identify right now. Follow it.",
-    "Attend to the rhythm of the city, building, or space you are in. Is there a pulse beneath the surface?",
-    "Close your eyes and point toward a sound source. Open them. How accurate was your spatial sense?",
-    "Choose one minute of complete, undivided listening today — no other task, no interpretation. Just attend.",
-    "Find a sound that shifts your mood. Play it again. Notice the moment the shift occurs."
-  ];
-
-  const dayOfYear = Math.floor(
-    (new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000
-  );
-
-  const promptElement = document.getElementById('dailyPrompt');
-
-  if (promptElement) {
-    promptElement.textContent =
-      prompts[dayOfYear % prompts.length];
-  } else {
-  console.error("dailyPrompt element not found");
+// ── Greeting ──
+function onAuthReady(cb) {
+  if (window._currentUser) { cb(); return; }
+  window.addEventListener('authReady', cb, { once: true });
 }
 
-
+onAuthReady(() => {
+  const user = window._currentUser;
+  const name = user?.user_metadata?.full_name || user?.email?.split('@')[0] || '';
+  const firstName = name.split(' ')[0];
+  if (firstName) {
+    document.getElementById('greeting').textContent = `Welcome back, ${firstName}`;
+  }
 });
 
-  
+// ── Daily prompt ──
+const PROMPTS = [
+  "Sit still for two minutes. Without trying to identify anything, let sounds arrive and pass like weather.",
+  "Choose one sound in your environment right now. Follow it until it ends — or until you can't hear it anymore.",
+  "Notice the furthest sound you can hear. Then the nearest. Move your attention slowly between the two.",
+  "Listen to a piece of music and track only one instrument or voice for its entire duration.",
+  "Step outside for five minutes. Count how many distinct sound sources you can identify without looking.",
+  "Find the quietest place available to you. Spend three minutes noticing what silence actually contains.",
+  "Play a familiar song. Listen as if you are hearing it for the first time — focus only on the texture of the sound.",
+  "Pay attention to the rhythm of your own breathing for two minutes. Notice if any sounds around you synchronise with it.",
+  "Choose a room in your home. Close your eyes and build a map of the space using only sound.",
+  "Listen to a field recording or environmental sound. What story does it tell about the place it was made?",
+  "Notice the quality of silence between sounds. Is it empty, or does it have its own texture?",
+  "Hum a single note quietly and hold it. Notice how the room responds — what resonates, what absorbs.",
+  "Find a sound that feels regulating to you today. Stay with it for five minutes. Note how your body responds.",
+  "Listen to music you wouldn't normally choose. Suspend judgment and track only the physical sensation it produces.",
+  "Pay attention to the sound of your own voice today — its pitch, pace, and quality in different conversations.",
+  "Find a repeating sound — traffic, machinery, water. Listen until you stop hearing it as noise.",
+  "Choose three sounds from your environment. If they were instruments in an ensemble, what would the piece be called?",
+  "Listen to a piece with your eyes closed. Imagine the space in which it was recorded — its size, surfaces, light.",
+  "Notice when you next involuntarily attend to a sound. What drew your attention? What does that tell you?",
+  "Spend two minutes in focal listening — one source, full attention. Then switch to global listening — everything at once.",
+  "Find a drone or continuous tone in your environment. Follow its subtle variations rather than treating it as fixed.",
+  "Listen back to a field recording you have made. What do you hear now that you didn't notice when you recorded it?",
+  "Pay attention to how the acoustic character of your space changes at different times of day.",
+  "Choose a sound that you usually find irritating. Listen to it with neutral attention for two minutes.",
+  "Find a piece of music in a language you don't speak. Listen only to the phonetic texture — not meaning, only sound.",
+  "Notice the silence after a sound ends. How long does it take for quiet to settle?",
+  "Listen to the lowest frequency sound you can identify right now. Follow it.",
+  "Attend to the rhythm of the city, building, or space you are in. Is there a pulse beneath the surface?",
+  "Close your eyes and point toward a sound source. Open them. How accurate was your spatial sense?",
+  "Choose one minute of complete, undivided listening today — no other task, no interpretation. Just attend.",
+  "Find a sound that shifts your mood. Play it again. Notice the moment the shift occurs.",
+];
 
+const dayOfYear = Math.floor(
+  (new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000
+);
+const el = document.getElementById('dailyPrompt');
+if (el) el.textContent = PROMPTS[dayOfYear % PROMPTS.length];
+
+// ── Crisis resources toggle ──
+const toggle = document.getElementById('crisisToggle');
+const grid   = document.getElementById('crisisGrid');
+const note   = document.getElementById('crisisNote');
+
+toggle.addEventListener('click', () => {
+  const open = grid.classList.toggle('open');
+  note.classList.toggle('open', open);
+  toggle.classList.toggle('open', open);
+  toggle.setAttribute('aria-expanded', open);
+});
+
+toggle.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle.click(); }
+});
 </script>
 
 </body>
