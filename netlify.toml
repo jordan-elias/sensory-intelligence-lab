@@ -145,12 +145,12 @@
 
 [[redirects]]
   from = "/subscribe"
-  to   = "/subscribe.html"
+  to   = "/subscribe/index.html"
   status = 200
 
 [[redirects]]
   from = "/subscribe/"
-  to   = "/subscribe.html"
+  to   = "/subscribe/index.html"
   status = 200
 
 # ── Future modules — uncomment when folder is added to repo ──
