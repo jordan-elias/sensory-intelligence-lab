@@ -4,130 +4,248 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Account — Sensory Intelligence Lab</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+
   <script src="/dashboard/auth-guard.js" type="module"></script>
   <script src="/assets/js/header.js" defer></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+
   <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{
-      --font-body:'Inter',sans-serif;
-      --font-heading:'Space Grotesk',sans-serif;
-      --bg:#fff;--surface:#f9f9f7;--border:#e5e5e0;
-      --text:#1a1a1a;--muted:#6b6b6b;
-      --accent:#2a5c45;--accent-light:#edf4f0;--accent-hover:#1e4433;
-      --error:#c0392b;--error-bg:#fdf2f2;
-      --warning:#92610a;--warning-bg:#fdf8ee;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --font-body: 'Inter', sans-serif;
+      --font-heading: 'Space Grotesk', sans-serif;
+      --bg: #ffffff;
+      --surface: #f9f9f7;
+      --border: #e5e5e0;
+      --text: #1a1a1a;
+      --muted: #6b6b6b;
+      --accent: #2a5c45;
+      --accent-light: #edf4f0;
+      --accent-hover: #1e4433;
+      --error: #c0392b;
+      --error-bg: #fdf2f2;
+      --warning: #92610a;
+      --warning-bg: #fdf8ee;
     }
-    html{font-size:16px}
-    body{font-family:var(--font-body);color:var(--text);background:var(--bg);
-      min-height:100vh;display:flex;flex-direction:column;}
+
+    html { font-size: 16px; }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--text);
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
     /* ── Breadcrumb ── */
-    .bc{padding:.75rem 1.5rem 0;max-width:860px;margin:0 auto}
-    .bc ol{list-style:none;display:flex;gap:.3rem;align-items:center;
-      font-size:.75rem;color:var(--muted);flex-wrap:wrap;}
-    .bc li+li::before{content:'/';margin-right:.3rem;color:var(--border)}
-    .bc a{color:var(--muted);text-decoration:none;}
-    .bc a:hover{color:var(--accent);text-decoration:underline;}
+    .bc { padding: .75rem 1.5rem 0; max-width: 860px; margin: 0 auto; width: 100%; }
+    .bc ol { list-style: none; display: flex; gap: .3rem; align-items: center; font-size: .75rem; color: var(--muted); flex-wrap: wrap; }
+    .bc li + li::before { content: '/'; margin-right: .3rem; color: var(--border); }
+    .bc a { color: var(--muted); text-decoration: none; }
+    .bc a:hover { color: var(--accent); text-decoration: underline; }
 
     /* ── Main ── */
-    main{max-width:860px;margin:0 auto;padding:2.5rem 2rem 4rem;flex:1;width:100%;}
-    @media(max-width:600px){main{padding:1.5rem 1rem 3rem}}
+    main { max-width: 860px; margin: 0 auto; padding: 2.5rem 2rem 4rem; flex: 1; width: 100%; }
+    @media (max-width: 600px) { main { padding: 1.5rem 1rem 3rem; } }
 
     /* ── Page header ── */
-    .ph{margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border);}
-    .ph h2{font-family:var(--font-heading);font-size:1.75rem;font-weight:600;
-      letter-spacing:-.02em;line-height:1.2;margin-bottom:.3rem;}
-    .ph p{font-size:.875rem;color:var(--muted);}
+    .ph { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+    .ph h2 { font-family: var(--font-heading); font-size: 1.75rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; margin-bottom: .3rem; }
+    .ph p { font-size: .875rem; color: var(--muted); }
 
     /* ── Section label ── */
-    .sl{font-family:var(--font-heading);font-size:.63rem;font-weight:600;
-      letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem;}
+    .sl { font-family: var(--font-heading); font-size: .63rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: .75rem; }
 
     /* ── Cards ── */
-    .card{border:1px solid var(--border);margin-bottom:1.5rem;}
-    .card-head{padding:1rem 1.25rem;border-bottom:1px solid var(--border);
-      background:var(--surface);display:flex;align-items:center;
-      justify-content:space-between;gap:1rem;flex-wrap:wrap;}
-    .card-head h3{font-family:var(--font-heading);font-size:.85rem;font-weight:600;
-      letter-spacing:-.01em;}
-    .card-body{padding:1.25rem;}
-
-    /* ── Plan badge ── */
-    .plan-badge{display:inline-block;font-family:var(--font-heading);font-size:.6rem;
-      font-weight:600;letter-spacing:.1em;text-transform:uppercase;
-      padding:.2rem .55rem;border:1px solid currentColor;}
-    .plan-badge.free{color:var(--muted);border-color:var(--border);}
-    .plan-badge.pro{color:var(--accent);border-color:var(--accent);
-      background:var(--accent-light);}
+    .card { border: 1px solid var(--border); margin-bottom: 1.5rem; }
+    .card-head { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+    .card-head h3 { font-family: var(--font-heading); font-size: .85rem; font-weight: 600; letter-spacing: -.01em; }
+    .card-body { padding: 1.25rem; }
 
     /* ── Info rows ── */
-    .info-row{display:flex;align-items:baseline;justify-content:space-between;
-      gap:1rem;padding:.6rem 0;border-bottom:1px solid var(--border);flex-wrap:wrap;}
-    .info-row:last-child{border-bottom:none;padding-bottom:0;}
-    .info-label{font-size:.78rem;font-weight:500;color:var(--muted);flex-shrink:0;}
-    .info-val{font-size:.875rem;color:var(--text);text-align:right;}
+    .info-row { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: .6rem 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+    .info-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .info-label { font-size: .78rem; font-weight: 500; color: var(--muted); flex-shrink: 0; }
+    .info-val { font-size: .875rem; color: var(--text); text-align: right; }
 
     /* ── Forms ── */
-    .form-group{margin-bottom:1rem;}
-    .form-group:last-of-type{margin-bottom:0;}
-    label{display:block;font-size:.78rem;font-weight:500;color:var(--text);margin-bottom:.3rem;}
-    input[type="email"],input[type="password"],input[type="text"]{
-      width:100%;padding:.6rem .85rem;border:1px solid var(--border);
-      background:var(--bg);color:var(--text);font-family:var(--font-body);
-      font-size:.875rem;outline:none;transition:border-color .12s;}
-    input:focus{border-color:var(--accent);}
-    input:disabled{background:var(--surface);color:var(--muted);cursor:not-allowed;}
+    .form-group { margin-bottom: 1rem; }
+    .form-group:last-of-type { margin-bottom: 0; }
+    label { display: block; font-size: .78rem; font-weight: 500; color: var(--text); margin-bottom: .3rem; }
+    input[type="email"], input[type="password"], input[type="text"] {
+      width: 100%; padding: .6rem .85rem; border: 1px solid var(--border);
+      background: var(--bg); color: var(--text); font-family: var(--font-body);
+      font-size: .875rem; outline: none; transition: border-color .12s;
+    }
+    input:focus { border-color: var(--accent); }
+    input:disabled { background: var(--surface); color: var(--muted); cursor: not-allowed; }
 
-    .btn{font-family:var(--font-heading);font-size:.8rem;font-weight:600;
-      padding:.65rem 1.5rem;border:none;background:var(--accent);color:white;
-      cursor:pointer;transition:background .15s;letter-spacing:-.01em;}
-    .btn:hover{background:var(--accent-hover);}
-    .btn:disabled{opacity:.5;cursor:not-allowed;}
-    .btn-outline{background:var(--bg);color:var(--text);border:1px solid var(--border);}
-    .btn-outline:hover{border-color:var(--accent);color:var(--accent);background:var(--bg);}
-    .btn-danger{background:var(--error-bg);color:var(--error);border:1px solid var(--error);}
-    .btn-danger:hover{background:var(--error);color:white;}
+    .btn { font-family: var(--font-heading); font-size: .8rem; font-weight: 600; padding: .65rem 1.5rem; border: none; background: var(--accent); color: white; cursor: pointer; transition: background .15s; letter-spacing: -.01em; }
+    .btn:hover { background: var(--accent-hover); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-outline { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); background: var(--bg); }
+    .btn-danger { background: var(--error-bg); color: var(--error); border: 1px solid var(--error); }
+    .btn-danger:hover { background: var(--error); color: white; }
 
-    .btn-row{display:flex;gap:.65rem;flex-wrap:wrap;margin-top:1rem;}
+    .btn-row { display: flex; gap: .65rem; flex-wrap: wrap; margin-top: 1rem; }
 
     /* ── Messages ── */
-    .msg{padding:.65rem .9rem;font-size:.78rem;line-height:1.5;
-      margin-bottom:.85rem;display:none;}
-    .msg.error{background:var(--error-bg);border-left:3px solid var(--error);color:var(--error);}
-    .msg.success{background:var(--accent-light);border-left:3px solid var(--accent);color:var(--accent);}
-    .msg.warning{background:var(--warning-bg);border-left:3px solid var(--warning);color:var(--warning);}
-    .msg.show{display:block;}
+    .msg { padding: .65rem .9rem; font-size: .78rem; line-height: 1.5; margin-bottom: .85rem; display: none; }
+    .msg.error   { background: var(--error-bg);  border-left: 3px solid var(--error);   color: var(--error);   }
+    .msg.success { background: var(--accent-light); border-left: 3px solid var(--accent); color: var(--accent); }
+    .msg.warning { background: var(--warning-bg);  border-left: 3px solid var(--warning);color: var(--warning); }
+    .msg.show { display: block; }
 
     /* ── Password strength ── */
-    .pw-strength{height:3px;background:var(--border);margin-top:.4rem;position:relative;}
-    .pw-strength-fill{height:100%;width:0%;transition:width .2s,background .2s;}
+    .pw-strength { height: 3px; background: var(--border); margin-top: .4rem; }
+    .pw-strength-fill { height: 100%; width: 0%; transition: width .2s, background .2s; }
 
-    /* ── Subscription plan display ── */
-    .plan-features{display:flex;flex-direction:column;gap:.4rem;margin-top:.85rem;}
-    .plan-feature{display:flex;align-items:baseline;gap:.5rem;font-size:.8rem;}
-    .plan-feature::before{content:'—';color:var(--accent);flex-shrink:0;}
+    /* ── Subscription card ── */
+    .plan-header {
+      display: flex;
+      align-items: center;
+      gap: .85rem;
+      margin-bottom: 1.1rem;
+      padding-bottom: 1.1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .plan-icon {
+      width: 36px; height: 36px;
+      background: var(--accent-light);
+      border: 1px solid #c0d9c8;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .plan-header-text {}
+    .plan-header-name {
+      font-family: var(--font-heading);
+      font-size: .95rem; font-weight: 600;
+      letter-spacing: -.01em;
+      color: var(--text);
+    }
+    .plan-header-status {
+      font-size: .72rem;
+      color: var(--muted);
+      margin-top: .05rem;
+    }
+    .plan-header-status .status-active { color: var(--accent); font-weight: 500; }
+    .plan-header-status .status-beta   { color: var(--accent); font-weight: 500; }
+    .plan-header-status .status-free   { color: var(--muted); }
+
+    .plan-badge {
+      font-family: var(--font-heading);
+      font-size: .58rem; font-weight: 600;
+      letter-spacing: .1em; text-transform: uppercase;
+      padding: .2rem .55rem;
+      border: 1px solid currentColor;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+    .badge-free  { color: var(--muted); border-color: var(--border); }
+    .badge-paid  { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
+    .badge-beta  { color: #6b3a1a; border-color: #d4a87a; background: #fdf4ec; }
+
+    /* What's included list */
+    .includes-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: .4rem;
+      margin-bottom: 1.25rem;
+    }
+    .includes-list li {
+      display: flex;
+      gap: .55rem;
+      font-size: .8rem;
+      color: var(--text);
+      line-height: 1.45;
+    }
+    .includes-list li::before { content: '—'; color: var(--accent); flex-shrink: 0; }
+
+    /* Session usage bar */
+    .session-usage {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: .75rem 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .session-usage-label {
+      font-size: .72rem; font-weight: 500; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .08em;
+      margin-bottom: .5rem;
+    }
+    .session-pips {
+      display: flex; gap: 6px; align-items: center;
+    }
+    .session-pip {
+      width: 28px; height: 28px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .65rem; font-weight: 600; color: var(--muted);
+    }
+    .session-pip.used { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+    .session-pip.available { background: var(--accent); border-color: var(--accent); color: white; }
+    .session-pip-label {
+      font-size: .72rem; color: var(--muted);
+      margin-left: .5rem;
+    }
+
+    /* Billing actions */
+    .billing-actions {
+      display: flex; gap: .65rem; flex-wrap: wrap;
+      padding-top: 1.1rem;
+      border-top: 1px solid var(--border);
+    }
+    .billing-link {
+      font-family: var(--font-heading);
+      font-size: .78rem; font-weight: 600;
+      padding: .58rem 1.35rem;
+      text-decoration: none;
+      display: inline-block;
+      transition: all .15s;
+      cursor: pointer;
+      border: none;
+      letter-spacing: -.01em;
+    }
+    .billing-link.primary { background: var(--accent); color: white; }
+    .billing-link.primary:hover { background: var(--accent-hover); color: white; }
+    .billing-link.outline { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+    .billing-link.outline:hover { border-color: var(--accent); color: var(--accent); }
+    .billing-link:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ── Period info ── */
+    .period-info {
+      font-size: .75rem;
+      color: var(--muted);
+      margin-top: .85rem;
+      line-height: 1.55;
+    }
+
+    /* ── Password reset banner ── */
+    .reset-banner { background: var(--accent-light); border: 1px solid var(--accent); padding: 1.25rem; margin-bottom: 1.5rem; }
+    .reset-banner h3 { font-family: var(--font-heading); font-size: .9rem; font-weight: 600; color: var(--accent); margin-bottom: .25rem; }
+    .reset-banner p { font-size: .8rem; color: var(--accent); opacity: .85; }
 
     /* ── Danger zone ── */
-    .danger-zone{border-color:#f5c6c6;}
-    .danger-zone .card-head{background:#fdf2f2;}
-    .danger-zone .card-head h3{color:var(--error);}
+    .danger-zone { border-color: #f5c6c6; }
+    .danger-zone .card-head { background: #fdf2f2; }
+    .danger-zone .card-head h3 { color: var(--error); }
 
-    /* ── Password reset banner (shown when reset token present) ── */
-    .reset-banner{background:var(--accent-light);border:1px solid var(--accent);
-      padding:1.25rem;margin-bottom:1.5rem;}
-    .reset-banner h3{font-family:var(--font-heading);font-size:.9rem;font-weight:600;
-      color:var(--accent);margin-bottom:.25rem;}
-    .reset-banner p{font-size:.8rem;color:var(--accent);opacity:.85;}
+    /* ── Loading ── */
+    .page-loading { opacity: 0; transition: opacity .2s; }
+    .page-loading.ready { opacity: 1; }
 
-    /* ── Loading state ── */
-    .page-loading{opacity:0;transition:opacity .2s;}
-    .page-loading.ready{opacity:1;}
-
-    footer{border-top:1px solid var(--border);padding:1.25rem 2rem;
-      text-align:center;font-size:.78rem;color:var(--muted);}
-    footer a{color:var(--muted);text-decoration:none;text-underline-offset:3px;}
-    footer a:hover{color:var(--accent);text-decoration:underline;}
+    /* ── Footer ── */
+    footer { border-top: 1px solid var(--border); padding: 1.25rem 2rem; text-align: center; font-size: .78rem; color: var(--muted); }
+    footer a { color: var(--muted); text-decoration: none; text-underline-offset: 3px; }
+    footer a:hover { color: var(--accent); text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -136,14 +254,14 @@
 
 <nav aria-label="Breadcrumb" class="bc">
   <ol>
-    <li><a href="/dashboard/">Home</a></li>
+    <li><a href="/dashboard/">Dashboard</a></li>
     <li>Account</li>
   </ol>
 </nav>
 
 <main class="page-loading" id="mainContent">
 
-  <!-- Password reset banner — hidden by default, shown when token detected -->
+  <!-- Password reset banner -->
   <div class="reset-banner" id="resetBanner" style="display:none">
     <h3>Set a new password</h3>
     <p>You followed a password reset link. Enter your new password below.</p>
@@ -151,10 +269,10 @@
 
   <div class="ph">
     <h2>Account</h2>
-    <p id="accountSubtitle">Manage your profile, password, and subscription.</p>
+    <p>Manage your profile, password, and subscription.</p>
   </div>
 
-  <!-- ── Password reset form (only visible after reset link) ── -->
+  <!-- ── Password reset ── -->
   <div id="resetSection" style="display:none">
     <p class="sl">New password</p>
     <div class="card">
@@ -180,9 +298,7 @@
   <!-- ── Profile ── -->
   <p class="sl">Profile</p>
   <div class="card">
-    <div class="card-head">
-      <h3>Your details</h3>
-    </div>
+    <div class="card-head"><h3>Your details</h3></div>
     <div class="card-body">
       <div class="info-row">
         <span class="info-label">Email</span>
@@ -261,30 +377,14 @@
 
   <!-- ── Subscription ── -->
   <p class="sl">Subscription</p>
-  <div class="card">
+  <div class="card" id="subscriptionCard">
     <div class="card-head">
       <h3>Current plan</h3>
-      <span class="plan-badge free" id="planBadge">Free</span>
+      <span class="plan-badge badge-free" id="planBadge">Free</span>
     </div>
-    <div class="card-body">
-      <div class="info-row">
-        <span class="info-label">Plan</span>
-        <span class="info-val" id="planName">Free access</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Status</span>
-        <span class="info-val" id="planStatus">Active</span>
-      </div>
-      <div class="info-row" id="planExpiryRow" style="display:none">
-        <span class="info-label">Renews</span>
-        <span class="info-val" id="planExpiry">—</span>
-      </div>
-      <div class="plan-features" id="planFeatures">
-        <!-- populated by JS based on plan -->
-      </div>
-      <div class="btn-row" style="margin-top:1.25rem">
-        <a href="/subscribe/" class="btn" id="upgradeBtn">View plans</a>
-      </div>
+    <div class="card-body" id="subscriptionBody">
+      <!-- Populated by JS -->
+      <div style="font-size:.82rem;color:var(--muted);">Loading…</div>
     </div>
   </div>
 
@@ -294,7 +394,7 @@
     <div class="card-head"><h3>Sign out everywhere</h3></div>
     <div class="card-body">
       <p style="font-size:.8rem;color:var(--muted);margin-bottom:1rem;line-height:1.5;">
-        Signs you out of all devices and browsers where you're currently logged in.
+        Signs you out of all devices and browsers where you are currently logged in.
       </p>
       <div class="msg" id="signoutMsg"></div>
       <button class="btn btn-danger" onclick="handleSignOutAll()">Sign out all sessions</button>
@@ -311,13 +411,7 @@
 </footer>
 
 <script type="module">
-  // auth-guard.js has already checked the session and exposed:
-  //   window._supabase   — the client
-  //   window._currentUser — the user object
-  //   window._currentPlan — 'free' | 'pro' etc
-  //   fires 'authReady' event when done
 
-  // ── Wait for auth to be confirmed ──
   function onAuthReady(cb) {
     if (window._currentUser) { cb(); return; }
     window.addEventListener('authReady', cb, { once: true });
@@ -339,12 +433,10 @@
   }
   function fmtDate(iso) {
     if (!iso) return '—';
-    return new Date(iso).toLocaleDateString('en-GB', {
-      day: 'numeric', month: 'long', year: 'numeric'
-    });
+    return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   }
 
-  // ── Password strength indicator ──
+  // ── Password strength ──
   function updateStrength(inputId, barId) {
     document.getElementById(inputId).addEventListener('input', function() {
       const v = this.value;
@@ -355,104 +447,226 @@
       if (/[A-Z]/.test(v)) score++;
       if (/[0-9]/.test(v)) score++;
       if (/[^A-Za-z0-9]/.test(v)) score++;
-      const pct = (score / 5) * 100;
-      const col = score <= 1 ? '#c0392b' : score <= 3 ? '#e67e22' : '#2a5c45';
-      bar.style.width = pct + '%';
-      bar.style.background = col;
+      bar.style.width = (score / 5 * 100) + '%';
+      bar.style.background = score <= 1 ? '#c0392b' : score <= 3 ? '#e67e22' : '#2a5c45';
     });
   }
   updateStrength('newPw', 'newPwStrength');
   updateStrength('resetPw', 'resetPwStrength');
 
-  // ── Plan display ──
-  const PLAN_FEATURES = {
-    free: [
-      'Access to all core training modules',
-      'Generative soundscapes and breath tools',
-      'Rhythmic entrainment trainer',
-    ],
-    pro: [
-      'Full access to all modules',
-      'Session history and progress tracking',
-      'Priority access to new modules',
-      'Monthly 1:1 session with Jordan (session tier)',
-    ],
+  // ── Subscription rendering ──
+  const PLAN_CONFIG = {
+    free: {
+      label: 'Free',
+      badgeClass: 'badge-free',
+      icon: '◯',
+      statusText: 'Free tier — no subscription',
+      includes: [
+        'Regulation Engine',
+        'Breath Regulation',
+        'Ear Training',
+        'Resource Library',
+      ],
+    },
+    beta: {
+      label: 'Beta',
+      badgeClass: 'badge-beta',
+      icon: '◈',
+      statusText: 'Beta access — full Lab included',
+      includes: [
+        'Full access to all modules',
+        'Beta tester — thank you',
+      ],
+    },
+    lab: {
+      label: 'Lab',
+      badgeClass: 'badge-paid',
+      icon: '◎',
+      statusText: 'Active subscription',
+      includes: [
+        'Full access to all modules',
+        'Check-In & journaling',
+        'Spatial Awareness',
+        'Soundscape Machine',
+        'Timed journal',
+      ],
+    },
+    call1: {
+      label: 'Lab + 1 session',
+      badgeClass: 'badge-paid',
+      icon: '◎',
+      statusText: 'Active subscription',
+      includes: [
+        'Full access to all modules',
+        '1 × 50-min video session / month',
+        'Session scheduling',
+      ],
+    },
+    call2: {
+      label: 'Lab + 2 sessions',
+      badgeClass: 'badge-paid',
+      icon: '◎',
+      statusText: 'Active subscription',
+      includes: [
+        'Full access to all modules',
+        '2 × 50-min video sessions / month',
+        'Priority scheduling',
+      ],
+    },
   };
 
-  function renderPlan(plan, expiresAt) {
-    const badge    = document.getElementById('planBadge');
-    const planName = document.getElementById('planName');
-    const features = document.getElementById('planFeatures');
-    const expiryRow= document.getElementById('planExpiryRow');
-    const upgradeBtn = document.getElementById('upgradeBtn');
+  function renderSubscription(profile, bookingsUsed) {
+    const tier   = profile.subscription_tier || 'free';
+    const isBeta = !!profile.is_beta;
+    const key    = isBeta ? 'beta' : tier;
+    const cfg    = PLAN_CONFIG[key] || PLAN_CONFIG.free;
+    const isActive = ['active','trialing'].includes(profile.subscription_status);
 
-    const isPro = plan !== 'free';
-    badge.textContent = isPro ? 'Pro' : 'Free';
-    badge.className   = `plan-badge ${isPro ? 'pro' : 'free'}`;
-    planName.textContent = isPro ? 'Pro membership' : 'Free access';
+    // Badge
+    const badge = document.getElementById('planBadge');
+    badge.textContent = cfg.label;
+    badge.className = `plan-badge ${cfg.badgeClass}`;
 
-    if (isPro && expiresAt) {
-      expiryRow.style.display = 'flex';
-      document.getElementById('planExpiry').textContent = fmtDate(expiresAt);
+    // Build body HTML
+    const periodEnd = profile.current_period_end ? fmtDate(profile.current_period_end) : null;
+
+    const statusClass = (isActive || isBeta) ? (isBeta ? 'status-beta' : 'status-active') : 'status-free';
+
+    let sessionPipsHtml = '';
+    if (key === 'call1' || key === 'call2') {
+      const total = key === 'call1' ? 1 : 2;
+      const used  = Math.min(bookingsUsed || 0, total);
+      const avail = total - used;
+      let pips = '';
+      for (let i=0;i<used;i++)  pips += `<div class="session-pip used" title="Used">✓</div>`;
+      for (let i=0;i<avail;i++) pips += `<div class="session-pip available" title="Available">→</div>`;
+      const label = avail > 0
+        ? `${avail} session${avail > 1 ? 's' : ''} remaining this period`
+        : 'All sessions used this period';
+      sessionPipsHtml = `
+        <div class="session-usage">
+          <div class="session-usage-label">Sessions this period</div>
+          <div class="session-pips">
+            ${pips}
+            <span class="session-pip-label">${label}</span>
+          </div>
+        </div>`;
     }
 
-    const list = PLAN_FEATURES[isPro ? 'pro' : 'free'] || PLAN_FEATURES.free;
-    features.innerHTML = list
-      .map(f => `<div class="plan-feature">${f}</div>`)
-      .join('');
+    const includesHtml = cfg.includes.map(f => `<li>${f}</li>`).join('');
 
-    if (isPro) {
-      upgradeBtn.textContent = 'Manage subscription';
-    }
+    const billingActionsHtml = (() => {
+      if (isBeta) {
+        return `<div class="billing-actions">
+          <a href="/subscribe/" class="billing-link outline">View plans</a>
+        </div>`;
+      }
+      if (isActive) {
+        return `<div class="billing-actions">
+          <button class="billing-link primary" onclick="openPortal()">Manage billing</button>
+          <a href="/subscribe/" class="billing-link outline">Change plan</a>
+        </div>`;
+      }
+      return `<div class="billing-actions">
+        <a href="/subscribe/" class="billing-link primary">Upgrade</a>
+      </div>`;
+    })();
+
+    const periodHtml = isActive && periodEnd
+      ? `<p class="period-info">Next renewal: ${periodEnd}. You can cancel anytime via "Manage billing".</p>`
+      : (!isBeta && !isActive && tier !== 'free')
+        ? `<p class="period-info" style="color:var(--error)">Subscription inactive — your plan may have lapsed. <a href="/subscribe/">Renew here</a>.</p>`
+        : '';
+
+    document.getElementById('subscriptionBody').innerHTML = `
+      <div class="plan-header">
+        <div class="plan-icon">${cfg.icon}</div>
+        <div class="plan-header-text">
+          <div class="plan-header-name">${cfg.label}</div>
+          <div class="plan-header-status"><span class="${statusClass}">${cfg.statusText}</span></div>
+        </div>
+      </div>
+      ${sessionPipsHtml}
+      <ul class="includes-list">${includesHtml}</ul>
+      ${billingActionsHtml}
+      ${periodHtml}
+    `;
   }
 
-  // ── Detect password reset token in URL hash ──
-  // Supabase puts #access_token=...&type=recovery in the URL after reset click
-  function checkResetToken() {
-    const hash   = window.location.hash;
-    const params = new URLSearchParams(hash.replace('#', ''));
-    const type   = params.get('type');
-    if (type === 'recovery') {
-      document.getElementById('resetBanner').style.display  = 'block';
-      document.getElementById('resetSection').style.display = 'block';
-      // Scroll to reset form gently
-      setTimeout(() => {
-        document.getElementById('resetBanner').scrollIntoView({ behavior: 'smooth' });
-      }, 300);
-      return true;
-    }
-    return false;
-  }
+  // ── Stripe customer portal ──
+  window.openPortal = async function() {
+    const sb = window._supabase;
+    const btn = event?.target;
+    if (btn) { btn.disabled = true; btn.textContent = 'Opening…'; }
 
-  // ── Init — runs once auth is confirmed ──
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      const res = await fetch('/.netlify/functions/create-portal-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+      if (!res.ok) throw new Error('Could not open billing portal.');
+      const { url } = await res.json();
+      window.location.href = url;
+    } catch (err) {
+      showMsg('signoutMsg', err.message, 'error');
+      if (btn) { btn.disabled = false; btn.textContent = 'Manage billing'; }
+    }
+  };
+
+  // ── Init ──
   onAuthReady(async () => {
     const supabase = window._supabase;
     const user     = window._currentUser;
-    const plan     = window._currentPlan;
 
-    // Populate profile display
     document.getElementById('displayEmail').textContent = user.email || '—';
     document.getElementById('displayCreatedAt').textContent = fmtDate(user.created_at);
 
-    // Load full profile for name + plan details
+    // Load profile
     const { data: profile } = await supabase
       .from('profiles')
-      .select('full_name, plan, plan_expires_at')
+      .select('full_name, subscription_tier, subscription_status, is_beta, current_period_end')
       .eq('id', user.id)
       .single();
 
     if (profile) {
-      document.getElementById('displayName').textContent =
-        profile.full_name || 'Not set';
-      document.getElementById('nameInput').value =
-        profile.full_name || '';
-      renderPlan(profile.plan || 'free', profile.plan_expires_at);
+      document.getElementById('displayName').textContent = profile.full_name || 'Not set';
+      document.getElementById('nameInput').value = profile.full_name || '';
+
+      // Load session bookings for this period (for call1/call2)
+      let bookingsUsed = 0;
+      const tier = profile.subscription_tier;
+      if (tier === 'call1' || tier === 'call2') {
+        const periodEnd   = profile.current_period_end ? new Date(profile.current_period_end) : null;
+        const periodStart = periodEnd ? new Date(periodEnd.getFullYear(), periodEnd.getMonth()-1, periodEnd.getDate()) : null;
+        if (periodStart && periodEnd) {
+          const { data: bookings } = await supabase
+            .from('bookings')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('event_type', 'subscriber-session')
+            .gte('scheduled_at', periodStart.toISOString())
+            .lte('scheduled_at', periodEnd.toISOString())
+            .in('status', ['scheduled','completed']);
+          bookingsUsed = (bookings || []).length;
+        }
+      }
+
+      renderSubscription(profile, bookingsUsed);
     }
 
-    // Check for password reset token
-    checkResetToken();
+    // Password reset token
+    const hash   = window.location.hash;
+    const params = new URLSearchParams(hash.replace('#',''));
+    if (params.get('type') === 'recovery') {
+      document.getElementById('resetBanner').style.display = 'block';
+      document.getElementById('resetSection').style.display = 'block';
+      setTimeout(() => document.getElementById('resetBanner').scrollIntoView({ behavior: 'smooth' }), 300);
+    }
 
-    // Show the page (was hidden to prevent flash before data loads)
     document.getElementById('mainContent').classList.add('ready');
   });
 
@@ -461,14 +675,11 @@
     clearMsg('nameMsg');
     const name = document.getElementById('nameInput').value.trim();
     if (!name) { showMsg('nameMsg','Please enter a name.','error'); return; }
-
     setLoading('nameBtn', true, 'Save name');
-    const { error } = await window._supabase
-      .from('profiles')
+    const { error } = await window._supabase.from('profiles')
       .update({ full_name: name, updated_at: new Date().toISOString() })
       .eq('id', window._currentUser.id);
     setLoading('nameBtn', false, 'Save name');
-
     if (error) { showMsg('nameMsg', error.message, 'error'); return; }
     document.getElementById('displayName').textContent = name;
     showMsg('nameMsg','Name updated.','success');
@@ -479,65 +690,41 @@
     clearMsg('emailMsg');
     const email = document.getElementById('emailInput').value.trim();
     if (!email) { showMsg('emailMsg','Please enter an email address.','error'); return; }
-    if (email === window._currentUser.email) {
-      showMsg('emailMsg','That is your current email address.','warning'); return;
-    }
-
+    if (email === window._currentUser.email) { showMsg('emailMsg','That is your current email address.','warning'); return; }
     setLoading('emailBtn', true, 'Send confirmation');
     const { error } = await window._supabase.auth.updateUser(
       { email },
       { emailRedirectTo: 'https://lab.jordanelias.de/account/' }
     );
     setLoading('emailBtn', false, 'Send confirmation');
-
     if (error) { showMsg('emailMsg', error.message, 'error'); return; }
-    showMsg('emailMsg',
-      'A confirmation link has been sent to ' + email + '. Your email will update once you click it.',
-      'success');
+    showMsg('emailMsg', `A confirmation link has been sent to ${email}.`, 'success');
     document.getElementById('emailInput').value = '';
   };
 
-  // ── Change password (requires current password re-auth) ──
+  // ── Change password ──
   window.handlePasswordChange = async function() {
     clearMsg('passwordMsg');
     const current = document.getElementById('currentPw').value;
     const next    = document.getElementById('newPw').value;
     const confirm = document.getElementById('newPwConfirm').value;
-
-    if (!current || !next || !confirm) {
-      showMsg('passwordMsg','Please fill in all fields.','error'); return;
-    }
-    if (next.length < 8) {
-      showMsg('passwordMsg','New password must be at least 8 characters.','error'); return;
-    }
-    if (next !== confirm) {
-      showMsg('passwordMsg','New passwords do not match.','error'); return;
-    }
-
+    if (!current || !next || !confirm) { showMsg('passwordMsg','Please fill in all fields.','error'); return; }
+    if (next.length < 8) { showMsg('passwordMsg','New password must be at least 8 characters.','error'); return; }
+    if (next !== confirm) { showMsg('passwordMsg','New passwords do not match.','error'); return; }
     setLoading('passwordBtn', true, 'Update password');
-
-    // Re-authenticate with current password first
     const { error: reAuthError } = await window._supabase.auth.signInWithPassword({
-      email: window._currentUser.email,
-      password: current,
+      email: window._currentUser.email, password: current,
     });
-
     if (reAuthError) {
       setLoading('passwordBtn', false, 'Update password');
       showMsg('passwordMsg','Current password is incorrect.','error');
       return;
     }
-
-    // Now update to new password
     const { error } = await window._supabase.auth.updateUser({ password: next });
     setLoading('passwordBtn', false, 'Update password');
-
     if (error) { showMsg('passwordMsg', error.message, 'error'); return; }
-
     showMsg('passwordMsg','Password updated successfully.','success');
-    document.getElementById('currentPw').value = '';
-    document.getElementById('newPw').value      = '';
-    document.getElementById('newPwConfirm').value = '';
+    ['currentPw','newPw','newPwConfirm'].forEach(id => document.getElementById(id).value = '');
   };
 
   // ── Password reset (from email link) ──
@@ -545,45 +732,28 @@
     clearMsg('resetMsg');
     const pw  = document.getElementById('resetPw').value;
     const pwc = document.getElementById('resetPwConfirm').value;
-
-    if (!pw || !pwc) {
-      showMsg('resetMsg','Please fill in both fields.','error'); return;
-    }
-    if (pw.length < 8) {
-      showMsg('resetMsg','Password must be at least 8 characters.','error'); return;
-    }
-    if (pw !== pwc) {
-      showMsg('resetMsg','Passwords do not match.','error'); return;
-    }
-
+    if (!pw || !pwc) { showMsg('resetMsg','Please fill in both fields.','error'); return; }
+    if (pw.length < 8) { showMsg('resetMsg','Password must be at least 8 characters.','error'); return; }
+    if (pw !== pwc) { showMsg('resetMsg','Passwords do not match.','error'); return; }
     setLoading('resetPwBtn', true, 'Save new password');
     const { error } = await window._supabase.auth.updateUser({ password: pw });
     setLoading('resetPwBtn', false, 'Save new password');
-
     if (error) { showMsg('resetMsg', error.message, 'error'); return; }
-
-    // Clear the hash from the URL so refresh doesn't re-show the reset form
     history.replaceState(null, '', window.location.pathname);
-
-    showMsg('resetMsg','Password set successfully. You can now use it to sign in.','success');
-    document.getElementById('resetBanner').style.display  = 'none';
-
-    // Scroll to top of page so user sees their account
+    showMsg('resetMsg','Password set successfully.','success');
+    document.getElementById('resetBanner').style.display = 'none';
     setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 800);
   };
 
-  // ── Sign out all sessions ──
+  // ── Sign out all ──
   window.handleSignOutAll = async function() {
-    const confirmed = window.confirm(
-      'This will sign you out on all devices. Continue?'
-    );
-    if (!confirmed) return;
-
+    if (!window.confirm('This will sign you out on all devices. Continue?')) return;
     showMsg('signoutMsg','Signing out everywhere…','warning');
     const { error } = await window._supabase.auth.signOut({ scope: 'global' });
     if (error) { showMsg('signoutMsg', error.message, 'error'); return; }
     window.location.replace('/');
   };
+
 </script>
 </body>
 </html>
