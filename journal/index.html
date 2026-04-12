@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timed Journal — Sensory Intelligence Lab</title>
+
+  <script src="/dashboard/auth-guard.js" type="module"></script>
+  <script src="/assets/js/header.js" defer></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --font-body: 'Inter', sans-serif;
+      --font-heading: 'Space Grotesk', sans-serif;
+      --font-writing: 'Lora', Georgia, serif;
+      --bg: #ffffff;
+      --surface: #f9f9f7;
+      --border: #e5e5e0;
+      --text: #1a1a1a;
+      --muted: #6b6b6b;
+      --accent: #2a5c45;
+      --accent-light: #edf4f0;
+      --accent-hover: #1e4433;
+      --error: #c0392b;
+      --error-bg: #fdf2f2;
+    }
+
+    html { font-size: 16px; }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+    a:hover { color: var(--accent); }
+
+    /* ── Breadcrumb ── */
+    .bc { padding: .75rem 1.5rem 0; max-width: 900px; margin: 0 auto; width: 100%; }
+    .bc ol { list-style: none; display: flex; gap: .3rem; align-items: center; font-size: .75rem; color: var(--muted); flex-wrap: wrap; }
+    .bc li + li::before { content: '/'; margin-right: .3rem; color: var(--border); }
+    .bc a { color: var(--muted); text-decoration: none; }
+    .bc a:hover { color: var(--accent); text-decoration: underline; }
+
+    /* ── Main ── */
+    main { max-width: 900px; margin: 0 auto; padding: 2.5rem 2rem 4rem; flex: 1; width: 100%; }
+    @media (max-width: 600px) { main { padding: 1.5rem 1rem 3rem; } }
+
+    /* ── Page header ── */
+    .ph { margin-bottom: 2rem; padding-bottom: 1.75rem; border-bottom: 1px solid var(--border); }
+    .ph h2 { font-family: var(--font-heading); font-size: 2rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; margin-bottom: .4rem; }
+    .ph p { font-size: .9rem; color: var(--muted); }
+
+    .section-label {
+      font-family: var(--font-heading);
+      font-size: .65rem; font-weight: 600; letter-spacing: .14em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: .75rem;
+    }
+
+    /* ── Setup panel ── */
+    .setup-panel { display: block; }
+    .setup-panel.hidden { display: none; }
+
+    .setup-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 580px) { .setup-grid { grid-template-columns: 1fr; gap: 1.25rem; } }
+
+    .setup-group { display: flex; flex-direction: column; gap: .5rem; }
+
+    /* Option buttons (timer, music, prompt) */
+    .option-row { display: flex; gap: 4px; flex-wrap: wrap; }
+
+    .opt-btn {
+      font-family: var(--font-body);
+      font-size: .8rem; font-weight: 500;
+      padding: .38rem .9rem;
+      border: 1px solid var(--border);
+      background: var(--bg); color: var(--muted);
+      cursor: pointer; transition: all .12s;
+    }
+    .opt-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .opt-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+    /* Music selector — full-width cards */
+    .music-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 6px;
+    }
+
+    .music-card {
+      border: 1px solid var(--border);
+      background: var(--bg);
+      padding: .65rem .85rem;
+      cursor: pointer;
+      transition: all .12s;
+      text-align: left;
+    }
+    .music-card:hover { border-color: var(--accent); background: var(--accent-light); }
+    .music-card.active { border-color: var(--accent); background: var(--accent-light); }
+    .music-card .mc-name { font-family: var(--font-heading); font-size: .82rem; font-weight: 600; color: var(--text); display: block; margin-bottom: .1rem; }
+    .music-card .mc-desc { font-size: .68rem; color: var(--muted); line-height: 1.4; }
+    .music-card.active .mc-name { color: var(--accent-hover); }
+    .music-card.active .mc-desc { color: var(--accent); opacity: .75; }
+
+    /* Prompt selector */
+    .prompt-select {
+      font-family: var(--font-body);
+      font-size: .85rem;
+      padding: .6rem .85rem;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      width: 100%;
+      outline: none;
+      cursor: pointer;
+      transition: border-color .12s;
+    }
+    .prompt-select:focus { border-color: var(--accent); }
+
+    .prompt-display {
+      font-size: .85rem;
+      color: var(--accent-hover);
+      background: var(--accent-light);
+      border: 1px solid #c0d9c8;
+      padding: .75rem 1rem;
+      font-style: italic;
+      line-height: 1.6;
+      min-height: 2.5rem;
+      display: none;
+    }
+    .prompt-display.visible { display: block; }
+
+    /* Start button */
+    .start-zone { margin-top: .5rem; }
+    .start-btn {
+      font-family: var(--font-heading);
+      font-size: .9rem; font-weight: 600;
+      padding: .8rem 2.5rem;
+      border: none; background: var(--accent); color: white;
+      cursor: pointer; transition: background .15s; letter-spacing: -.01em;
+    }
+    .start-btn:hover { background: var(--accent-hover); }
+    .start-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* ── Countdown overlay ── */
+    .countdown-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(255,255,255,.96);
+      z-index: 200;
+      align-items: center; justify-content: center;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .countdown-overlay.visible { display: flex; }
+    .countdown-num {
+      font-family: var(--font-heading);
+      font-size: 7rem; font-weight: 600;
+      color: var(--accent);
+      letter-spacing: -.04em;
+      line-height: 1;
+      animation: countPulse .8s ease-in-out;
+    }
+    @keyframes countPulse {
+      0% { transform: scale(1.4); opacity: .5; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .countdown-sub { font-size: .85rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+
+    /* ── Writing panel ── */
+    .writing-panel { display: none; }
+    .writing-panel.visible { display: block; }
+
+    /* Timer strip */
+    .timer-strip {
+      display: flex; align-items: center; gap: 1.5rem;
+      padding: .85rem 1.25rem;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .timer-display {
+      font-family: var(--font-heading);
+      font-size: 1.6rem; font-weight: 600;
+      letter-spacing: .06em; color: var(--text);
+      font-variant-numeric: tabular-nums;
+      min-width: 70px;
+    }
+    .timer-display.urgent { color: var(--error); }
+    .timer-bar-wrap { flex: 1; min-width: 100px; height: 3px; background: var(--border); }
+    .timer-bar { height: 100%; background: var(--accent); width: 100%; transition: width 1s linear, background .5s; }
+    .timer-bar.urgent { background: var(--error); }
+    .timer-meta { font-size: .75rem; color: var(--muted); }
+
+    /* Active prompt banner */
+    .active-prompt {
+      background: var(--accent-light);
+      border-left: 3px solid var(--accent);
+      padding: .65rem 1rem;
+      margin-bottom: .85rem;
+      font-size: .85rem;
+      font-style: italic;
+      color: var(--accent-hover);
+      line-height: 1.55;
+      display: none;
+    }
+    .active-prompt.visible { display: block; }
+
+    /* Writing area */
+    .writing-area-wrap { position: relative; }
+
+    textarea#journalText {
+      width: 100%;
+      min-height: 380px;
+      padding: 1.5rem 1.75rem;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-writing);
+      font-size: 1.05rem;
+      line-height: 1.85;
+      resize: vertical;
+      outline: none;
+      transition: border-color .2s;
+    }
+    textarea#journalText:focus { border-color: var(--accent); }
+    textarea#journalText::placeholder { color: #c0c0bb; font-style: italic; }
+    textarea#journalText.session-over { background: var(--surface); cursor: default; }
+
+    .word-count {
+      position: absolute; bottom: .6rem; right: .75rem;
+      font-size: .65rem; color: var(--muted); font-variant-numeric: tabular-nums;
+      pointer-events: none;
+    }
+
+    /* ── Destroy canvas overlay ── */
+    #destroyCanvas {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: none; pointer-events: none;
+    }
+
+    /* ── Post-session actions ── */
+    .post-actions {
+      display: none;
+      gap: .75rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .post-actions.visible { display: flex; }
+
+    .action-btn {
+      font-family: var(--font-heading);
+      font-size: .82rem; font-weight: 600;
+      padding: .65rem 1.5rem;
+      border: none; background: var(--accent); color: white;
+      cursor: pointer; transition: background .15s; letter-spacing: -.01em;
+    }
+    .action-btn:hover { background: var(--accent-hover); }
+    .action-btn.outline {
+      background: var(--bg); color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .action-btn.outline:hover { border-color: var(--accent); color: var(--accent); background: var(--bg); }
+    .action-btn.danger {
+      background: var(--error-bg); color: var(--error);
+      border: 1px solid #e8c4c4;
+    }
+    .action-btn.danger:hover { background: var(--error); color: white; border-color: var(--error); }
+
+    /* ── Confirm destroy modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 300; display: none;
+      align-items: center; justify-content: center;
+      padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      width: 100%; max-width: 420px;
+      padding: 2rem;
+    }
+    .modal h3 { font-family: var(--font-heading); font-size: 1rem; font-weight: 600; margin-bottom: .5rem; }
+    .modal p { font-size: .85rem; color: var(--muted); margin-bottom: 1.25rem; line-height: 1.6; }
+    .modal-btns { display: flex; gap: .65rem; flex-wrap: wrap; }
+
+    /* ── Save name input ── */
+    .save-row { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; margin-top: .85rem; }
+    .save-row input {
+      font-family: var(--font-body); font-size: .85rem;
+      padding: .55rem .85rem;
+      border: 1px solid var(--border); background: var(--bg); color: var(--text);
+      outline: none; flex: 1; min-width: 140px; transition: border-color .12s;
+    }
+    .save-row input:focus { border-color: var(--accent); }
+
+    /* Messages */
+    .msg { padding: .6rem .9rem; font-size: .78rem; line-height: 1.5; display: none; margin-top: .65rem; }
+    .msg.success { background: var(--accent-light); border-left: 3px solid var(--accent); color: var(--accent); display: block; }
+    .msg.error { background: var(--error-bg); border-left: 3px solid var(--error); color: var(--error); display: block; }
+
+    /* ── Saved entries ── */
+    .entries-section { margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 2rem; }
+    .entries-list { display: flex; flex-direction: column; gap: 1px; border: 1px solid var(--border); }
+    .entry-item {
+      display: flex; align-items: center; gap: 1rem;
+      padding: .7rem 1rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      transition: background .1s;
+      cursor: pointer;
+    }
+    .entry-item:last-child { border-bottom: none; }
+    .entry-item:hover { background: var(--surface); }
+    .entry-name { font-size: .85rem; font-weight: 500; color: var(--text); flex: 1; }
+    .entry-date { font-size: .72rem; color: var(--muted); flex-shrink: 0; }
+    .entry-words { font-size: .68rem; color: var(--muted); flex-shrink: 0; }
+    .entry-delete {
+      font-size: .65rem; padding: .2rem .55rem;
+      border: 1px solid var(--border); background: var(--bg);
+      color: var(--muted); cursor: pointer; transition: all .1s; flex-shrink: 0;
+    }
+    .entry-delete:hover { border-color: var(--error); color: var(--error); }
+    .entries-empty { padding: 1.5rem; text-align: center; font-size: .85rem; color: var(--muted); }
+
+    /* ── Entry viewer modal ── */
+    .viewer-modal {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.5);
+      z-index: 300; display: none;
+      align-items: flex-start; justify-content: center;
+      padding: 2rem 1rem;
+      overflow-y: auto;
+    }
+    .viewer-modal.open { display: flex; }
+    .viewer-inner {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      width: 100%; max-width: 640px;
+      padding: 2rem;
+    }
+    .viewer-inner h3 { font-family: var(--font-heading); font-size: 1rem; font-weight: 600; margin-bottom: .25rem; }
+    .viewer-meta { font-size: .72rem; color: var(--muted); margin-bottom: 1.25rem; }
+    .viewer-text {
+      font-family: var(--font-writing);
+      font-size: .95rem; line-height: 1.85;
+      color: var(--text);
+      white-space: pre-wrap;
+      max-height: 60vh; overflow-y: auto;
+      border-top: 1px solid var(--border);
+      padding-top: 1.25rem;
+    }
+    .viewer-footer { margin-top: 1.25rem; display: flex; gap: .65rem; flex-wrap: wrap; }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 1.25rem 2rem;
+      text-align: center; font-size: .78rem; color: var(--muted);
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<div id="lab-header"></div>
+
+<nav aria-label="Breadcrumb" class="bc">
+  <ol>
+    <li><a href="/dashboard/">Dashboard</a></li>
+    <li>Timed Journal</li>
+  </ol>
+</nav>
+
+<main>
+
+  <div class="ph">
+    <h2>Timed Journal</h2>
+    <p>Set a timer, choose your soundscape and prompt. Write continuously until the time runs out.</p>
+  </div>
+
+  <!-- ── SETUP PANEL ── -->
+  <div class="setup-panel" id="setupPanel">
+
+    <div class="setup-grid">
+
+      <!-- Timer -->
+      <div class="setup-group">
+        <p class="section-label">Duration</p>
+        <div class="option-row" id="timerBtns">
+          <button class="opt-btn" data-min="1" onclick="setTimer(1,this)">1 min</button>
+          <button class="opt-btn active" data-min="3" onclick="setTimer(3,this)">3 min</button>
+          <button class="opt-btn" data-min="5" onclick="setTimer(5,this)">5 min</button>
+          <button class="opt-btn" data-min="10" onclick="setTimer(10,this)">10 min</button>
+          <button class="opt-btn" data-min="15" onclick="setTimer(15,this)">15 min</button>
+          <button class="opt-btn" data-min="20" onclick="setTimer(20,this)">20 min</button>
+        </div>
+      </div>
+
+      <!-- Prompt -->
+      <div class="setup-group">
+        <p class="section-label">Writing Prompt</p>
+        <select class="prompt-select" id="promptSelect" onchange="onPromptChange()">
+          <option value="">— Free write (no prompt) —</option>
+          <optgroup label="Self & Body">
+            <option value="Where does emotion live in your body right now? Describe it with the same precision you'd use to describe weather.">Where does emotion live in your body?</option>
+            <option value="What does your nervous system need today that it hasn't been given?">What does your nervous system need today?</option>
+            <option value="Describe your current state as if it were a landscape. What's the terrain? The light? The temperature?">Describe your state as a landscape.</option>
+            <option value="What are you carrying that doesn't belong to you?">What are you carrying that isn't yours?</option>
+            <option value="Write about a sensation you noticed today — not what caused it, just the sensation itself.">A sensation you noticed today.</option>
+          </optgroup>
+          <optgroup label="Sound & Attention">
+            <option value="Close your eyes for 30 seconds. Now write everything you heard, including sounds you usually ignore.">Write every sound you can hear.</option>
+            <option value="Write about a piece of music that changed something in you. What shifted, and when?">A piece of music that changed something.</option>
+            <option value="What sound, if it disappeared tomorrow, would leave the biggest silence in your life?">A sound whose absence would be felt.</option>
+            <option value="Write about a moment when sound became overwhelming. What was the texture of that experience?">When sound became overwhelming.</option>
+          </optgroup>
+          <optgroup label="Memory & Time">
+            <option value="Describe a memory using only sensory detail — no narrative, no explanation. Just what you perceived.">A memory in pure sensation.</option>
+            <option value="What were you doing five years ago at this time of day? Write into the gap between then and now.">Five years ago, this time of day.</option>
+            <option value="Write about something you've changed your mind about completely. What was the moment of turning?">Something you changed your mind about.</option>
+            <option value="What story about yourself have you been telling for so long you've stopped questioning it?">A story you've told yourself too long.</option>
+          </optgroup>
+          <optgroup label="Relationships & Others">
+            <option value="Write a letter to someone you haven't spoken to in a long time. You don't have to send it.">A letter you don't have to send.</option>
+            <option value="Describe a relationship — with a person, a place, or a practice — that has shaped your perception.">A relationship that shaped your perception.</option>
+            <option value="What do you wish someone understood about you that you've never quite found the words to say?">What you wish someone understood.</option>
+          </optgroup>
+          <optgroup label="Imagination & Possibility">
+            <option value="Invent a place that doesn't exist but should. Describe it in as much detail as you can.">A place that should exist.</option>
+            <option value="Write from the perspective of a sound — what it knows, where it's been, what it carries.">Write as a sound.</option>
+            <option value="What would you do if you knew no one would ever read this? Write that.">If no one would ever read this.</option>
+            <option value="Begin with: 'The thing I keep almost saying is…' and don't stop.">The thing I keep almost saying is…</option>
+          </optgroup>
+        </select>
+        <div class="prompt-display" id="promptDisplay"></div>
+      </div>
+
+    </div>
+
+    <!-- Music -->
+    <div style="margin-bottom: 2rem;">
+      <p class="section-label">Soundscape</p>
+      <div class="music-grid" id="musicGrid">
+        <div class="music-card active" data-music="amber" onclick="setMusic('amber',this)">
+          <span class="mc-name">Amber Drift</span>
+          <span class="mc-desc">Warm harmonics, slow movement. Calm and receptive.</span>
+        </div>
+        <div class="music-card" data-music="fog" onclick="setMusic('fog',this)">
+          <span class="mc-name">Grey Fog</span>
+          <span class="mc-desc">Low drones, muted texture. Inward and contemplative.</span>
+        </div>
+        <div class="music-card" data-music="current" onclick="setMusic('current',this)">
+          <span class="mc-name">Undertow</span>
+          <span class="mc-desc">Rhythmic pulse beneath still water. Quiet determination.</span>
+        </div>
+        <div class="music-card" data-music="voltage" onclick="setMusic('voltage',this)">
+          <span class="mc-name">Live Wire</span>
+          <span class="mc-desc">Bright, energised. Clarity and forward motion.</span>
+        </div>
+        <div class="music-card" data-music="eclipse" onclick="setMusic('eclipse',this)">
+          <span class="mc-name">Total Eclipse</span>
+          <span class="mc-desc">Unsettled harmonics, tension. For writing into difficulty.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="start-zone">
+      <button class="start-btn" id="startBtn" onclick="beginCountdown()">Begin session</button>
+    </div>
+
+  </div>
+
+  <!-- ── COUNTDOWN OVERLAY ── -->
+  <div class="countdown-overlay" id="countdownOverlay">
+    <div class="countdown-num" id="countdownNum">3</div>
+    <div class="countdown-sub">prepare to write</div>
+  </div>
+
+  <!-- ── WRITING PANEL ── -->
+  <div class="writing-panel" id="writingPanel">
+
+    <div class="timer-strip">
+      <div class="timer-display" id="timerDisplay">3:00</div>
+      <div class="timer-bar-wrap"><div class="timer-bar" id="timerBar"></div></div>
+      <div class="timer-meta" id="timerMeta">Keep writing</div>
+    </div>
+
+    <div class="active-prompt" id="activePrompt"></div>
+
+    <div class="writing-area-wrap">
+      <textarea id="journalText" placeholder="Begin writing. Don't stop, don't edit — just let the words come."></textarea>
+      <canvas id="destroyCanvas"></canvas>
+      <div class="word-count" id="wordCount">0 words</div>
+    </div>
+
+    <div class="post-actions" id="postActions">
+      <button class="action-btn" onclick="openSaveFlow()">Keep this entry</button>
+      <button class="action-btn outline" onclick="downloadEntry()">Download .txt</button>
+      <button class="action-btn danger" onclick="openDestroyConfirm()">Destroy forever</button>
+    </div>
+
+    <div class="save-row" id="saveRow" style="display:none">
+      <input type="text" id="entryNameInput" placeholder="Entry name (e.g. Entry 1)">
+      <button class="action-btn" onclick="saveEntry()">Save</button>
+      <button class="action-btn outline" onclick="closeSaveFlow()">Cancel</button>
+    </div>
+
+    <div class="msg" id="saveMsg"></div>
+
+  </div>
+
+  <!-- ── SAVED ENTRIES ── -->
+  <div class="entries-section" id="entriesSection" style="display:none">
+    <p class="section-label">Saved entries</p>
+    <div class="entries-list" id="entriesList">
+      <div class="entries-empty">No saved entries yet.</div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Destroy confirm modal -->
+<div class="modal-overlay" id="destroyModal">
+  <div class="modal">
+    <h3>Destroy this entry?</h3>
+    <p>This cannot be undone. The text will be permanently erased and is not stored anywhere.</p>
+    <div class="modal-btns">
+      <button class="action-btn danger" onclick="executeDestroy()">Yes, destroy it</button>
+      <button class="action-btn outline" onclick="closeModal('destroyModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Entry viewer modal -->
+<div class="viewer-modal" id="viewerModal">
+  <div class="viewer-inner">
+    <h3 id="viewerTitle">—</h3>
+    <div class="viewer-meta" id="viewerMeta"></div>
+    <div class="viewer-text" id="viewerText"></div>
+    <div class="viewer-footer">
+      <button class="action-btn outline" onclick="closeModal('viewerModal')">Close</button>
+      <button class="action-btn outline" onclick="downloadViewing()">Download .txt</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Jordan Elias Music Therapy · Berlin ·
+    <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a>
+  </p>
+</footer>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+const S = {
+  durationMin: 3,
+  music: 'amber',
+  prompt: '',
+  totalSec: 0,
+  remainSec: 0,
+  timerInterval: null,
+  sessionOver: false,
+  audioCtx: null,
+  masterGain: null,
+  musicNodes: [],
+  entries: [],         // loaded from Supabase
+  viewingEntry: null,
+  entryCount: 0,
+};
+
+// ═══════════════════════════════════════════════════════
+// MUSIC PROFILES
+// Each profile: { fund, complexity(0-1), brightness(0-1), pulse, tension }
+// ═══════════════════════════════════════════════════════
+const MUSIC = {
+  amber: {
+    label: 'Amber Drift',
+    fund: 82.4,
+    voices: 4,
+    ratios: [[1,1],[3,2],[2,1],[4,3]],
+    partialAmps: [1,.18,.06],
+    filterStart: 1800, filterEnd: 1600,
+    filterQ: 0.5,
+    lfoRate: 0.04, lfoDepth: 180,
+    panWidth: 0.35,
+    noise: 0.008, noiseHp: 600,
+    sub: 0.07,
+    breath: 0.07,
+    pulse: false,
+    description: 'Warm, slow, receptive'
+  },
+  fog: {
+    label: 'Grey Fog',
+    fund: 55,
+    voices: 3,
+    ratios: [[1,1],[3,2],[7,4]],
+    partialAmps: [1,.09,.03],
+    filterStart: 900, filterEnd: 700,
+    filterQ: 0.4,
+    lfoRate: 0.025, lfoDepth: 100,
+    panWidth: 0.18,
+    noise: 0.022, noiseHp: 80,
+    sub: 0.12,
+    breath: 0.05,
+    pulse: false,
+    description: 'Low, inward, still'
+  },
+  current: {
+    label: 'Undertow',
+    fund: 98,
+    voices: 4,
+    ratios: [[1,1],[3,2],[2,1],[5,3]],
+    partialAmps: [1,.28,.12],
+    filterStart: 2400, filterEnd: 2000,
+    filterQ: 0.7,
+    lfoRate: 0.09, lfoDepth: 350,
+    panWidth: 0.45,
+    noise: 0.014, noiseHp: 400,
+    sub: 0.05,
+    breath: 0.10,
+    pulse: true, pulseRate: 0.8,
+    description: 'Rhythmic, determined'
+  },
+  voltage: {
+    label: 'Live Wire',
+    fund: 110,
+    voices: 4,
+    ratios: [[1,1],[2,1],[3,1],[4,1]],
+    partialAmps: [1,.38,.22],
+    filterStart: 4500, filterEnd: 4000,
+    filterQ: 1.2,
+    lfoRate: 0.15, lfoDepth: 600,
+    panWidth: 0.55,
+    noise: 0.005, noiseHp: 1200,
+    sub: 0.02,
+    breath: 0.14,
+    pulse: true, pulseRate: 1.2,
+    description: 'Bright, energised'
+  },
+  eclipse: {
+    label: 'Total Eclipse',
+    fund: 65.4,
+    voices: 5,
+    ratios: [[1,1],[16,15],[6,5],[7,5],[4,3]],
+    partialAmps: [1,.35,.18],
+    filterStart: 1200, filterEnd: 900,
+    filterQ: 2.0,
+    lfoRate: 0.055, lfoDepth: 280,
+    panWidth: 0.6,
+    noise: 0.03, noiseHp: 200,
+    sub: 0.09,
+    breath: 0.06,
+    pulse: false,
+    description: 'Tense, unsettled, raw'
+  }
+};
+
+// ═══════════════════════════════════════════════════════
+// AUDIO ENGINE
+// ═══════════════════════════════════════════════════════
+function initAudio() {
+  if (S.audioCtx) return;
+  S.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  S.masterGain = S.audioCtx.createGain();
+  S.masterGain.gain.setValueAtTime(0, S.audioCtx.currentTime);
+  S.masterGain.connect(S.audioCtx.destination);
+}
+
+function startMusic(profileKey) {
+  initAudio();
+  if (S.audioCtx.state === 'suspended') S.audioCtx.resume();
+  stopMusic();
+
+  const p    = MUSIC[profileKey];
+  const ctx  = S.audioCtx;
+  const now  = ctx.currentTime;
+  const dur  = S.totalSec + 8;
+  const FI   = 4, FO = 6;
+
+  // Fade in
+  S.masterGain.gain.setValueAtTime(0, now);
+  S.masterGain.gain.linearRampToValueAtTime(0.8, now + FI);
+  S.masterGain.gain.setValueAtTime(0.8, now + dur - FO);
+  S.masterGain.gain.linearRampToValueAtTime(0, now + dur);
+
+  const nodes = [];
+
+  // ── Voices ──
+  for (let v = 0; v < p.voices; v++) {
+    const r = p.ratios[v % p.ratios.length];
+    const freq = p.fund * r[0] / r[1];
+
+    // Partials (3 harmonics)
+    for (let h = 0; h < 3; h++) {
+      const harmFreq = freq * (h + 1);
+      const amp = (p.partialAmps[h] || 0.02) * 0.14 / p.voices;
+
+      const osc  = ctx.createOscillator();
+      const filt = ctx.createBiquadFilter();
+      const pan  = ctx.createStereoPanner();
+      const gv   = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.value = harmFreq * (1 + (Math.random() - 0.5) * 0.002);
+
+      filt.type = 'lowpass';
+      filt.frequency.value = p.filterStart;
+      filt.Q.value = p.filterQ;
+
+      // LFO on filter
+      const lfo  = ctx.createOscillator();
+      const lfoG = ctx.createGain();
+      lfo.type = 'sine';
+      lfo.frequency.value = p.lfoRate * (0.85 + Math.random() * 0.3) + v * 0.01;
+      lfoG.gain.value = p.lfoDepth * (0.6 + Math.random() * 0.4);
+      lfo.connect(lfoG);
+      lfoG.connect(filt.frequency);
+      lfo.start(now);
+      lfo.stop(now + dur + .5);
+      nodes.push(lfo);
+
+      // Slow pan motion
+      const panAmt = (v % 2 === 0 ? 1 : -1) * p.panWidth * (0.4 + Math.random() * 0.6);
+      const panRate = 0.005 + v * 0.002;
+      // Schedule pan as linear ramp series
+      for (let i = 0; i <= 20; i++) {
+        const t = now + (i / 20) * dur;
+        const pv = Math.sin(i * Math.PI * 2 * panRate * 20) * panAmt;
+        if (i === 0) pan.pan.setValueAtTime(pv, t);
+        else pan.pan.linearRampToValueAtTime(pv, t);
+      }
+
+      // Breath amplitude (slow LFO)
+      const bLfo  = ctx.createOscillator();
+      const bLfoG = ctx.createGain();
+      bLfo.type = 'sine';
+      bLfo.frequency.value = p.breath * (0.8 + Math.random() * 0.4);
+      bLfoG.gain.value = amp * 0.3;
+      bLfo.connect(bLfoG);
+      bLfoG.connect(gv.gain);
+      bLfo.start(now);
+      bLfo.stop(now + dur + .5);
+      nodes.push(bLfo);
+
+      gv.gain.value = amp;
+
+      osc.connect(filt);
+      filt.connect(pan);
+      pan.connect(gv);
+      gv.connect(S.masterGain);
+
+      osc.start(now);
+      osc.stop(now + dur + .5);
+      nodes.push(osc, gv, pan, filt);
+    }
+  }
+
+  // ── Sub drone ──
+  if (p.sub > 0.01) {
+    const sub  = ctx.createOscillator();
+    const subF = ctx.createBiquadFilter();
+    const subG = ctx.createGain();
+    sub.type = 'sine';
+    sub.frequency.value = p.fund * 0.5;
+    subF.type = 'lowpass'; subF.frequency.value = 120; subF.Q.value = 0.5;
+    subG.gain.value = p.sub;
+    sub.connect(subF); subF.connect(subG); subG.connect(S.masterGain);
+    sub.start(now); sub.stop(now + dur + .5);
+    nodes.push(sub, subG, subF);
+  }
+
+  // ── Noise ──
+  if (p.noise > 0.002) {
+    const nLen = Math.min(ctx.sampleRate * 6, 264600);
+    const nBuf = ctx.createBuffer(1, nLen, ctx.sampleRate);
+    const nd   = nBuf.getChannelData(0);
+    let b0=0,b1=0,b2=0,b3=0,b4=0;
+    for (let i=0;i<nLen;i++) {
+      const w=Math.random()*2-1;
+      b0=.99886*b0+w*.0555179; b1=.99332*b1+w*.0750759;
+      b2=.96900*b2+w*.1538520; b3=.86650*b3+w*.3104856;
+      b4=.55000*b4+w*.5329522;
+      nd[i]=(b0+b1+b2+b3+b4+w*.1)*.11;
+    }
+    const nSrc = ctx.createBufferSource(); nSrc.buffer = nBuf; nSrc.loop = true;
+    const nHp  = ctx.createBiquadFilter(); nHp.type = 'highpass'; nHp.frequency.value = p.noiseHp;
+    const nLp  = ctx.createBiquadFilter(); nLp.type = 'lowpass'; nLp.frequency.value = 6000;
+    const nG   = ctx.createGain(); nG.gain.value = p.noise;
+    nSrc.connect(nHp); nHp.connect(nLp); nLp.connect(nG); nG.connect(S.masterGain);
+    nSrc.start(now); nSrc.stop(now + dur + .5);
+    nodes.push(nSrc, nG, nHp, nLp);
+  }
+
+  // ── Pulse (for current / voltage) ──
+  if (p.pulse) {
+    const pulseDur = 0.07;
+    const step = 1 / p.pulseRate;
+    let t = FI;
+    while (t < dur - FO) {
+      const pt = now + t;
+      const po = ctx.createOscillator();
+      const pg = ctx.createGain();
+      po.connect(pg); pg.connect(S.masterGain);
+      po.type = 'sine';
+      po.frequency.value = p.fund * 2;
+      pg.gain.setValueAtTime(0, pt);
+      pg.gain.linearRampToValueAtTime(0.022, pt + 0.01);
+      pg.gain.linearRampToValueAtTime(0, pt + pulseDur);
+      po.start(pt); po.stop(pt + pulseDur + 0.05);
+      nodes.push(po);
+      t += step + (Math.random() - 0.5) * step * 0.15;
+    }
+  }
+
+  S.musicNodes = nodes;
+}
+
+function stopMusic() {
+  if (!S.audioCtx) return;
+  const now = S.audioCtx.currentTime;
+  try {
+    S.masterGain.gain.cancelScheduledValues(now);
+    S.masterGain.gain.setValueAtTime(S.masterGain.gain.value, now);
+    S.masterGain.gain.linearRampToValueAtTime(0, now + 1.5);
+  } catch(e){}
+  S.musicNodes.forEach(n => {
+    try { if (n.stop) n.stop(now + 2); } catch(e){}
+    try { if (n.disconnect) n.disconnect(); } catch(e){}
+  });
+  S.musicNodes = [];
+}
+
+// ═══════════════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════════════
+function setTimer(min, btn) {
+  S.durationMin = min;
+  document.querySelectorAll('#timerBtns .opt-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function setMusic(key, card) {
+  S.music = key;
+  document.querySelectorAll('.music-card').forEach(c => c.classList.remove('active'));
+  card.classList.add('active');
+}
+
+function onPromptChange() {
+  const sel = document.getElementById('promptSelect');
+  const disp = document.getElementById('promptDisplay');
+  S.prompt = sel.value;
+  if (S.prompt) {
+    disp.textContent = S.prompt;
+    disp.classList.add('visible');
+  } else {
+    disp.classList.remove('visible');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// COUNTDOWN + SESSION START
+// ═══════════════════════════════════════════════════════
+function beginCountdown() {
+  document.getElementById('setupPanel').classList.add('hidden');
+  const overlay = document.getElementById('countdownOverlay');
+  const numEl   = document.getElementById('countdownNum');
+  overlay.classList.add('visible');
+
+  let n = 3;
+  numEl.textContent = n;
+  numEl.style.animation = 'none';
+  void numEl.offsetWidth;
+  numEl.style.animation = 'countPulse .8s ease-in-out';
+
+  const iv = setInterval(() => {
+    n--;
+    if (n <= 0) {
+      clearInterval(iv);
+      overlay.classList.remove('visible');
+      startSession();
+    } else {
+      numEl.textContent = n;
+      numEl.style.animation = 'none';
+      void numEl.offsetWidth;
+      numEl.style.animation = 'countPulse .8s ease-in-out';
+    }
+  }, 900);
+}
+
+function startSession() {
+  S.totalSec  = S.durationMin * 60;
+  S.remainSec = S.totalSec;
+  S.sessionOver = false;
+
+  // Show writing panel
+  document.getElementById('writingPanel').classList.add('visible');
+
+  // Active prompt
+  const apEl = document.getElementById('activePrompt');
+  if (S.prompt) {
+    apEl.textContent = S.prompt;
+    apEl.classList.add('visible');
+  }
+
+  // Reset textarea
+  const ta = document.getElementById('journalText');
+  ta.value = '';
+  ta.classList.remove('session-over');
+  ta.disabled = false;
+  ta.focus();
+
+  // Reset post actions
+  document.getElementById('postActions').classList.remove('visible');
+  document.getElementById('saveRow').style.display = 'none';
+  document.getElementById('saveMsg').className = 'msg';
+
+  // Reset destroy canvas
+  const canvas = document.getElementById('destroyCanvas');
+  canvas.style.display = 'none';
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  updateTimer();
+  startMusic(S.music);
+
+  S.timerInterval = setInterval(() => {
+    S.remainSec--;
+    updateTimer();
+    if (S.remainSec <= 0) endSession();
+  }, 1000);
+
+  // Word count listener
+  ta.addEventListener('input', updateWordCount);
+}
+
+function updateTimer() {
+  const m = Math.floor(S.remainSec / 60);
+  const s = String(S.remainSec % 60).padStart(2,'0');
+  const disp = document.getElementById('timerDisplay');
+  const bar  = document.getElementById('timerBar');
+  const meta = document.getElementById('timerMeta');
+
+  disp.textContent = `${m}:${s}`;
+  const pct = (S.remainSec / S.totalSec) * 100;
+  bar.style.width = pct + '%';
+
+  const urgent = S.remainSec <= 30;
+  disp.classList.toggle('urgent', urgent);
+  bar.classList.toggle('urgent', urgent);
+  meta.textContent = urgent ? 'Almost there' : 'Keep writing';
+}
+
+function updateWordCount() {
+  const text = document.getElementById('journalText').value.trim();
+  const words = text ? text.split(/\s+/).length : 0;
+  document.getElementById('wordCount').textContent = words + (words === 1 ? ' word' : ' words');
+}
+
+function endSession() {
+  clearInterval(S.timerInterval);
+  S.sessionOver = true;
+
+  const ta = document.getElementById('journalText');
+  ta.classList.add('session-over');
+  ta.disabled = true;
+
+  stopMusic();
+  document.getElementById('timerMeta').textContent = 'Session complete';
+  document.getElementById('timerDisplay').textContent = '0:00';
+  document.getElementById('timerBar').style.width = '0%';
+
+  document.getElementById('postActions').classList.add('visible');
+}
+
+// ═══════════════════════════════════════════════════════
+// SAVE FLOW
+// ═══════════════════════════════════════════════════════
+function openSaveFlow() {
+  const saveRow = document.getElementById('saveRow');
+  saveRow.style.display = 'flex';
+  S.entryCount++;
+  document.getElementById('entryNameInput').value = `Entry ${S.entryCount}`;
+  document.getElementById('entryNameInput').focus();
+  document.getElementById('entryNameInput').select();
+}
+
+function closeSaveFlow() {
+  document.getElementById('saveRow').style.display = 'none';
+}
+
+async function saveEntry() {
+  const name = document.getElementById('entryNameInput').value.trim() || `Entry ${S.entryCount}`;
+  const text = document.getElementById('journalText').value;
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+  const msgEl = document.getElementById('saveMsg');
+
+  const sb = window._supabase;
+  const user = window._currentUser;
+  if (!sb || !user) {
+    msgEl.className = 'msg error';
+    msgEl.textContent = 'Not logged in.';
+    return;
+  }
+
+  const { error } = await sb.from('journal_entries').insert({
+    user_id:    user.id,
+    title:      name,
+    content:    text,
+    word_count: words,
+    prompt:     S.prompt || null,
+    music:      S.music,
+    duration_min: S.durationMin,
+  });
+
+  if (error) {
+    msgEl.className = 'msg error';
+    msgEl.textContent = 'Could not save: ' + error.message;
+    return;
+  }
+
+  msgEl.className = 'msg success';
+  msgEl.textContent = `"${name}" saved.`;
+  document.getElementById('saveRow').style.display = 'none';
+  document.getElementById('postActions').classList.remove('visible');
+  await loadEntries();
+}
+
+function downloadEntry() {
+  const text = document.getElementById('journalText').value;
+  const date = new Date().toISOString().slice(0,10);
+  const blob = new Blob([text], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `journal-${date}.txt`;
+  a.click();
+}
+
+// ═══════════════════════════════════════════════════════
+// DESTROY ANIMATION
+// ═══════════════════════════════════════════════════════
+function openDestroyConfirm() {
+  document.getElementById('destroyModal').classList.add('open');
+}
+
+function executeDestroy() {
+  closeModal('destroyModal');
+  document.getElementById('postActions').classList.remove('visible');
+  document.getElementById('saveRow').style.display = 'none';
+
+  const ta = document.getElementById('journalText');
+  const canvas = document.getElementById('destroyCanvas');
+  const wrap = document.querySelector('.writing-area-wrap');
+
+  // Size canvas to match textarea
+  const rect = ta.getBoundingClientRect();
+  const wRect = wrap.getBoundingClientRect();
+  canvas.width  = ta.offsetWidth;
+  canvas.height = ta.offsetHeight;
+  canvas.style.display = 'block';
+  canvas.style.position = 'absolute';
+  canvas.style.top  = '0px';
+  canvas.style.left = '0px';
+  canvas.style.width  = ta.offsetWidth + 'px';
+  canvas.style.height = ta.offsetHeight + 'px';
+
+  const ctx = canvas.getContext('2d');
+
+  // Draw text as image first
+  // Use an offscreen canvas for initial render
+  const W = canvas.width, H = canvas.height;
+  ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--bg') || '#fff';
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#1a1a1a';
+  ctx.font = '17px Lora, Georgia, serif';
+  ctx.textBaseline = 'top';
+  const lines = ta.value.split('\n');
+  let y = 24;
+  lines.forEach(line => {
+    // Wrap words
+    const words = line.split(' ');
+    let row = '';
+    words.forEach(word => {
+      const test = row + word + ' ';
+      if (ctx.measureText(test).width > W - 56 && row) {
+        ctx.fillText(row, 28, y);
+        row = word + ' ';
+        y += 32;
+      } else {
+        row = test;
+      }
+    });
+    if (row) { ctx.fillText(row, 28, y); y += 32; }
+  });
+
+  ta.style.visibility = 'hidden';
+
+  // Capture pixel data, then animate pixelation → darkness
+  const imageData = ctx.getImageData(0, 0, W, H);
+  const origData  = new Uint8ClampedArray(imageData.data);
+
+  let frame = 0;
+  const totalFrames = 90; // ~3 seconds at 30fps
+
+  function destroyFrame() {
+    frame++;
+    const t = frame / totalFrames;
+    // Pixelation: block size grows
+    const blockSize = Math.max(1, Math.floor(1 + t * 40));
+    // Darkness: alpha blend to black
+    const darkPct = Math.pow(t, 0.8);
+
+    const w2 = canvas.width, h2 = canvas.height;
+    const newImageData = ctx.createImageData(w2, h2);
+    const d = newImageData.data;
+
+    for (let py = 0; py < h2; py += blockSize) {
+      for (let px = 0; px < w2; px += blockSize) {
+        // Sample centre of block from original
+        const cx = Math.min(px + Math.floor(blockSize/2), w2-1);
+        const cy = Math.min(py + Math.floor(blockSize/2), h2-1);
+        const si = (cy * w2 + cx) * 4;
+        const r0 = origData[si], g0 = origData[si+1], b0 = origData[si+2];
+        // Add noise
+        const noise = (Math.random() - 0.5) * 80 * t;
+        const r = Math.max(0, Math.min(255, r0 + noise));
+        const g = Math.max(0, Math.min(255, g0 + noise));
+        const b = Math.max(0, Math.min(255, b0 + noise));
+        // Blend toward black
+        const fr = r * (1 - darkPct);
+        const fg = g * (1 - darkPct);
+        const fb = b * (1 - darkPct);
+        // Fill block
+        for (let by = 0; by < blockSize && py+by < h2; by++) {
+          for (let bx = 0; bx < blockSize && px+bx < w2; bx++) {
+            const di = ((py+by) * w2 + (px+bx)) * 4;
+            d[di]   = fr;
+            d[di+1] = fg;
+            d[di+2] = fb;
+            d[di+3] = 255;
+          }
+        }
+      }
+    }
+
+    ctx.putImageData(newImageData, 0, 0);
+
+    if (frame < totalFrames) {
+      requestAnimationFrame(destroyFrame);
+    } else {
+      // Final: solid black
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, W, H);
+      ta.value = '';
+      ta.style.visibility = 'visible';
+      canvas.style.display = 'none';
+      // Reset to setup after a beat
+      setTimeout(resetToSetup, 1200);
+    }
+  }
+
+  requestAnimationFrame(destroyFrame);
+}
+
+function resetToSetup() {
+  document.getElementById('writingPanel').classList.remove('visible');
+  document.getElementById('activePrompt').classList.remove('visible');
+  document.getElementById('journalText').style.visibility = 'visible';
+  document.getElementById('journalText').classList.remove('session-over');
+  document.getElementById('journalText').disabled = false;
+  document.getElementById('journalText').value = '';
+  document.getElementById('wordCount').textContent = '0 words';
+  document.getElementById('saveMsg').className = 'msg';
+  document.getElementById('setupPanel').classList.remove('hidden');
+  document.getElementById('timerDisplay').textContent = S.durationMin + ':00';
+}
+
+// ═══════════════════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════════════════
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay, .viewer-modal').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// ═══════════════════════════════════════════════════════
+// SUPABASE — ENTRIES
+// ═══════════════════════════════════════════════════════
+async function loadEntries() {
+  const sb   = window._supabase;
+  const user = window._currentUser;
+  if (!sb || !user) return;
+
+  const { data, error } = await sb
+    .from('journal_entries')
+    .select('id, title, created_at, word_count, content, prompt, music, duration_min')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+
+  if (error) { console.error(error); return; }
+  S.entries = data || [];
+  S.entryCount = S.entries.length;
+  renderEntries();
+}
+
+function renderEntries() {
+  const section = document.getElementById('entriesSection');
+  const list    = document.getElementById('entriesList');
+
+  if (!S.entries.length) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = 'block';
+  list.innerHTML = S.entries.map(e => {
+    const date = new Date(e.created_at).toLocaleDateString('en-GB', {
+      day: 'numeric', month: 'short', year: 'numeric'
+    });
+    const words = e.word_count || 0;
+    return `
+      <div class="entry-item" onclick="viewEntry('${e.id}')">
+        <span class="entry-name">${escHtml(e.title || 'Untitled')}</span>
+        <span class="entry-date">${date}</span>
+        <span class="entry-words">${words} words</span>
+        <button class="entry-delete" onclick="deleteEntry(event,'${e.id}')">Delete</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function viewEntry(id) {
+  const e = S.entries.find(en => en.id === id);
+  if (!e) return;
+  S.viewingEntry = e;
+
+  document.getElementById('viewerTitle').textContent = e.title || 'Untitled';
+  const date = new Date(e.created_at).toLocaleDateString('en-GB', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+  const meta = [
+    date,
+    e.word_count ? `${e.word_count} words` : '',
+    e.duration_min ? `${e.duration_min} min session` : '',
+    e.music ? MUSIC[e.music]?.label || e.music : '',
+  ].filter(Boolean).join(' · ');
+  document.getElementById('viewerMeta').textContent = meta;
+  document.getElementById('viewerText').textContent = e.content || '';
+  document.getElementById('viewerModal').classList.add('open');
+}
+
+function downloadViewing() {
+  if (!S.viewingEntry) return;
+  const e = S.viewingEntry;
+  const blob = new Blob([e.content || ''], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${(e.title || 'journal').replace(/\s+/g,'-')}.txt`;
+  a.click();
+}
+
+async function deleteEntry(ev, id) {
+  ev.stopPropagation();
+  const e = S.entries.find(en => en.id === id);
+  if (!confirm(`Delete "${e?.title || 'this entry'}"? This cannot be undone.`)) return;
+
+  const { error } = await window._supabase
+    .from('journal_entries')
+    .delete()
+    .eq('id', id);
+
+  if (error) { alert('Delete failed: ' + error.message); return; }
+  await loadEntries();
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+function onAuthReady(cb) {
+  if (window._currentUser) { cb(); return; }
+  window.addEventListener('authReady', cb, { once: true });
+}
+
+onAuthReady(async () => {
+  await loadEntries();
+});
+</script>
+
+</body>
+</html>
