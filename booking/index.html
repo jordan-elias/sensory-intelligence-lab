@@ -2,29 +2,37 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Book a Session — Sensory Intelligence Lab</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Schedule a Session — Sensory Intelligence Lab</title>
 
+  <!-- Auth guard: checks session, sets window._supabase / window._currentUser, fires authReady -->
   <script src="/dashboard/auth-guard.js" type="module"></script>
+  <!-- Shared nav header -->
   <script src="/assets/js/header.js" defer></script>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet" />
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --font-body: 'Inter', sans-serif;
+      --font-body:    'Inter', sans-serif;
       --font-heading: 'Space Grotesk', sans-serif;
-      --bg: #ffffff;
-      --surface: #f9f9f7;
-      --border: #e5e5e0;
-      --text: #1a1a1a;
-      --muted: #6b6b6b;
-      --accent: #2a5c45;
+      --bg:           #ffffff;
+      --surface:      #f9f9f7;
+      --border:       #e5e5e0;
+      --text:         #1a1a1a;
+      --muted:        #6b6b6b;
+      --accent:       #2a5c45;
       --accent-light: #edf4f0;
       --accent-hover: #1e4433;
+      --error:        #c0392b;
+      --error-bg:     #fdf2f2;
+      --warning:      #92610a;
+      --warning-bg:   #fdf8ee;
     }
+
+    html { font-size: 16px; }
 
     body {
       font-family: var(--font-body);
@@ -32,219 +40,610 @@
       background: var(--bg);
       line-height: 1.6;
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
-    .container {
-      max-width: 860px;
-      margin: 2rem auto;
-      padding: 1rem;
-    }
+    a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+    a:hover { color: var(--accent); }
 
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.25rem;
-      margin-bottom: 1rem;
+    /* ── Breadcrumb ── */
+    .bc { padding: .75rem 1.5rem 0; max-width: 900px; margin: 0 auto; width: 100%; }
+    .bc ol {
+      list-style: none; display: flex; gap: .3rem;
+      align-items: center; font-size: .75rem; color: var(--muted); flex-wrap: wrap;
     }
+    .bc li + li::before { content: '/'; margin-right: .3rem; color: var(--border); }
+    .bc a { color: var(--muted); text-decoration: none; }
+    .bc a:hover { color: var(--accent); text-decoration: underline; }
 
-    .card h2 {
+    /* ── Main ── */
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem 4rem;
+      flex: 1;
+      width: 100%;
+    }
+    @media (max-width: 600px) { main { padding: 1.5rem 1rem 3rem; } }
+
+    /* ── Page header ── */
+    .ph {
+      margin-bottom: 2rem;
+      padding-bottom: 1.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .ph h2 {
       font-family: var(--font-heading);
-      margin-bottom: 0.5rem;
+      font-size: 2rem; font-weight: 600;
+      letter-spacing: -.02em; line-height: 1.2;
+      margin-bottom: .4rem;
+    }
+    .ph p { font-size: .9rem; color: var(--muted); }
+
+    /* ── Section label ── */
+    .section-label {
+      font-family: var(--font-heading);
+      font-size: .65rem; font-weight: 600;
+      letter-spacing: .14em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: .75rem;
     }
 
-    .hint {
-      font-size: 0.85rem;
-      color: var(--muted);
-      margin-top: 0.5rem;
+    /* ── Loading state ── */
+    .loading-block {
+      display: flex; align-items: center; gap: .75rem;
+      padding: 2rem 0; color: var(--muted); font-size: .85rem;
     }
-
-    .upgrade {
-      background: var(--accent-light);
-      border-color: var(--accent);
+    .loading-spinner {
+      width: 16px; height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      flex-shrink: 0;
     }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    .btn {
+    /* ── Messages ── */
+    .msg {
+      padding: .75rem 1rem; font-size: .82rem; line-height: 1.5;
+      margin-bottom: 1.25rem; display: none;
+    }
+    .msg.show { display: block; }
+    .msg.error   { background: var(--error-bg);   border-left: 3px solid var(--error);   color: var(--error);   }
+    .msg.warning { background: var(--warning-bg);  border-left: 3px solid var(--warning);  color: var(--warning); }
+    .msg.info    { background: var(--accent-light); border-left: 3px solid var(--accent);  color: var(--accent);  }
+
+    /* ── Plan status card ── */
+    .plan-card {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 1.1rem 1.35rem;
+      margin-bottom: 2rem;
+      display: flex; align-items: center;
+      justify-content: space-between;
+      gap: 1rem; flex-wrap: wrap;
+    }
+    .plan-card-left { display: flex; flex-direction: column; gap: .2rem; }
+    .plan-card-label { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; font-weight: 500; }
+    .plan-card-name  { font-family: var(--font-heading); font-size: .95rem; font-weight: 600; color: var(--text); }
+    .plan-badge {
       display: inline-block;
-      margin-top: 0.75rem;
-      padding: 0.6rem 1rem;
-      background: var(--accent);
-      color: white;
-      text-decoration: none;
-      border-radius: 8px;
+      font-family: var(--font-heading);
+      font-size: .6rem; font-weight: 600;
+      letter-spacing: .1em; text-transform: uppercase;
+      padding: .22rem .6rem;
+      border: 1px solid currentColor;
+    }
+    .plan-badge.free    { color: var(--muted); border-color: var(--border); }
+    .plan-badge.lab     { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
+    .plan-badge.call1   { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
+    .plan-badge.call2   { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
+    .plan-sessions-row  { font-size: .78rem; color: var(--muted); margin-top: .1rem; }
+    .plan-sessions-row strong { color: var(--text); font-weight: 600; }
+
+    /* ── Upgrade nudge ── */
+    .upgrade-nudge {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 1.1rem 1.35rem;
+      margin-bottom: 2rem;
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    }
+    .upgrade-nudge p { font-size: .82rem; color: var(--muted); line-height: 1.55; flex: 1; }
+    .upgrade-nudge p strong { color: var(--text); }
+    .nudge-btn {
+      font-family: var(--font-heading);
+      font-size: .78rem; font-weight: 600;
+      padding: .55rem 1.35rem;
+      border: none; background: var(--accent); color: white;
+      cursor: pointer; transition: background .15s; letter-spacing: -.01em;
+      text-decoration: none; display: inline-block; white-space: nowrap;
+    }
+    .nudge-btn:hover { background: var(--accent-hover); color: white; }
+
+    /* ── Calendar section ── */
+    .cal-section { margin-bottom: 2.5rem; }
+
+    .cal-section-head {
+      display: flex; align-items: baseline;
+      justify-content: space-between; gap: 1rem;
+      margin-bottom: 1rem; flex-wrap: wrap;
     }
 
-    .btn:hover {
-      background: var(--accent-hover);
+    .cal-section-meta { font-size: .78rem; color: var(--muted); }
+    .cal-section-meta.included {
+      color: var(--accent); font-weight: 500;
+    }
+
+    /* Cal.com embed wrapper */
+    .cal-embed-wrap {
+      border: 1px solid var(--border);
+      background: var(--bg);
+      overflow: hidden;
+      min-height: 500px;
+    }
+
+    /* Cal.com injects an iframe — constrain it */
+    .cal-embed-wrap iframe {
+      width: 100% !important;
+      border: none !important;
+    }
+
+    /* ── Session summary table ── */
+    .info-rows { border: 1px solid var(--border); margin-bottom: 2rem; }
+    .info-row {
+      display: flex; align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem; padding: .65rem 1rem;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { font-size: .78rem; font-weight: 500; color: var(--muted); flex-shrink: 0; }
+    .info-val   { font-size: .875rem; color: var(--text); text-align: right; }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 1.25rem 2rem;
+      text-align: center; font-size: .78rem; color: var(--muted);
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--accent); text-decoration: underline; }
+
+    @media (max-width: 600px) {
+      .plan-card, .upgrade-nudge { flex-direction: column; align-items: flex-start; }
     }
   </style>
 </head>
-
 <body>
 
-<main class="container">
-  <div id="booking-root"></div>
+<!-- Injected by header.js -->
+<div id="lab-header"></div>
+
+<nav aria-label="Breadcrumb" class="bc">
+  <ol>
+    <li><a href="/dashboard/">Dashboard</a></li>
+    <li>Schedule a Session</li>
+  </ol>
+</nav>
+
+<main>
+
+  <div class="ph">
+    <h2>Schedule a Session</h2>
+    <p>Book a one-to-one video session with Jordan. Included sessions are drawn from your current billing period.</p>
+  </div>
+
+  <!-- Populated by JS -->
+  <div id="pageMsg" class="msg"></div>
+  <div id="bookingRoot">
+    <div class="loading-block">
+      <div class="loading-spinner"></div>
+      Loading your session options…
+    </div>
+  </div>
+
 </main>
 
+<footer>
+  <p>Jordan Elias Music Therapy · Berlin ·
+    <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a> ·
+    <a href="https://jordanelias.de/" target="_blank" rel="noopener">jordanelias.de</a>
+  </p>
+</footer>
+
 <script type="module">
-import { createClient } from "https://esm.sh/@supabase/supabase-js";
-import { getBookingEntitlement } from "/booking/entitlement-logic.js";
 
-const supabase = createClient(
-  "https://lrjuufvrgkuvfxcmybtf.supabase.co",
-  "sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1"
-);
+// ─────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────
+function showPageMsg(text, type) {
+  const el = document.getElementById('pageMsg');
+  el.textContent = text;
+  el.className = `msg ${type} show`;
+}
 
-let entitlement;
-let user;
+function fmtDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('en-GB', {
+    day: 'numeric', month: 'long', year: 'numeric',
+  });
+}
 
-async function init() {
-  const { data: { user: authUser } } = await supabase.auth.getUser();
+// Safe billing-period start: subtract one month without day-overflow
+function periodStartFromEnd(periodEnd) {
+  const d = new Date(periodEnd);
+  // Use explicit year/month/day to avoid setMonth() day-overflow edge cases
+  // e.g. Mar 31 → Feb 28/29, not Mar 3
+  return new Date(d.getFullYear(), d.getMonth() - 1, d.getDate());
+}
 
-  if (!authUser) {
-    window.location.href = "/login";
+// ─────────────────────────────────────────────────────────
+// ENTITLEMENT LOGIC (inline — no separate module needed)
+// ─────────────────────────────────────────────────────────
+async function getEntitlement(supabase, userId) {
+
+  // 1. Fetch profile
+  const { data: profile, error: profileErr } = await supabase
+    .from('profiles')
+    .select('plan, subscription_tier, subscription_status, current_period_end, intro_call_used, email')
+    .eq('id', userId)
+    .single();
+
+  if (profileErr) throw new Error('Could not load your profile: ' + profileErr.message);
+
+  const plan   = profile.subscription_tier || profile.plan || 'free';
+  const status = profile.subscription_status || 'free';
+
+  // Treat lapsed / past_due subs the same as free for booking purposes
+  const isActive = status === 'active' || status === 'trialing';
+
+  // 2. Billing window
+  const periodEnd   = profile.current_period_end
+    ? new Date(profile.current_period_end)
+    : null;
+  const periodStart = periodEnd ? periodStartFromEnd(periodEnd) : null;
+
+  // 3. Count included sessions used in this billing period
+  let subscriberSessionsUsed = 0;
+  if (isActive && periodStart && periodEnd) {
+    const { data: bookings, error: bookErr } = await supabase
+      .from('bookings')
+      .select('event_type, status, scheduled_at')
+      .eq('user_id', userId)
+      .gte('scheduled_at', periodStart.toISOString())
+      .lte('scheduled_at', periodEnd.toISOString())
+      .in('status', ['scheduled', 'completed']);
+
+    if (bookErr) console.warn('Could not load bookings:', bookErr.message);
+
+    subscriberSessionsUsed = (bookings || []).filter(
+      b => b.event_type === 'subscriber-session'
+    ).length;
+  }
+
+  const introUsed = !!profile.intro_call_used;
+
+  // 4. Build entitlement object
+  const e = {
+    plan,
+    isActive,
+    status,
+    email: profile.email || '',
+    periodStart,
+    periodEnd,
+
+    // Intro (one-time, any plan)
+    canBookIntro: !introUsed,
+
+    // Included sessions
+    sessionsIncluded:  0,
+    sessionsUsed:      subscriberSessionsUsed,
+    sessionsRemaining: 0,
+    canBookIncluded:   false,
+
+    // Paid session always available
+    canBookPaid: true,
+
+    // Upgrade hints
+    showUpgradeToCall1: false,
+    showUpgradeToCall2: false,
+  };
+
+  if (!isActive) {
+    // Not subscribed — show upgrade to call1
+    e.showUpgradeToCall1 = true;
+    return e;
+  }
+
+  switch (plan) {
+    case 'lab':
+      // Lab-only: no included sessions
+      e.sessionsIncluded  = 0;
+      e.showUpgradeToCall1 = true;
+      break;
+
+    case 'call1':
+      e.sessionsIncluded  = 1;
+      e.sessionsUsed      = Math.min(subscriberSessionsUsed, 1);
+      e.sessionsRemaining = Math.max(0, 1 - subscriberSessionsUsed);
+      e.canBookIncluded   = subscriberSessionsUsed < 1;
+      e.showUpgradeToCall2 = true;
+      break;
+
+    case 'call2':
+      e.sessionsIncluded  = 2;
+      e.sessionsUsed      = Math.min(subscriberSessionsUsed, 2);
+      e.sessionsRemaining = Math.max(0, 2 - subscriberSessionsUsed);
+      e.canBookIncluded   = subscriberSessionsUsed < 2;
+      break;
+
+    default:
+      e.showUpgradeToCall1 = true;
+      break;
+  }
+
+  return e;
+}
+
+// ─────────────────────────────────────────────────────────
+// PLAN DISPLAY LABELS
+// ─────────────────────────────────────────────────────────
+const PLAN_LABELS = {
+  free:  'Free access',
+  lab:   'Lab Access',
+  call1: 'Lab + 1 session / month',
+  call2: 'Lab + 2 sessions / month',
+};
+
+// ─────────────────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────────────────
+function render(ent) {
+  const root = document.getElementById('bookingRoot');
+  root.innerHTML = '';
+
+  // ── Plan status card ──
+  const planCard = document.createElement('div');
+  planCard.className = 'plan-card';
+
+  const sessionsLine = ent.sessionsIncluded > 0
+    ? `<div class="plan-sessions-row">
+        <strong>${ent.sessionsRemaining}</strong> of ${ent.sessionsIncluded} included session${ent.sessionsIncluded > 1 ? 's' : ''} remaining this period
+        ${ent.periodEnd ? `· renews ${fmtDate(ent.periodEnd)}` : ''}
+       </div>`
+    : '';
+
+  const badgeClass = ['lab','call1','call2'].includes(ent.plan) && ent.isActive ? ent.plan : 'free';
+  const badgeLabel = ent.isActive && ent.plan !== 'free'
+    ? (PLAN_LABELS[ent.plan] || ent.plan)
+    : 'Free';
+
+  planCard.innerHTML = `
+    <div class="plan-card-left">
+      <span class="plan-card-label">Your plan</span>
+      <span class="plan-card-name">${PLAN_LABELS[ent.plan] || 'Free access'}</span>
+      ${sessionsLine}
+    </div>
+    <span class="plan-badge ${badgeClass}">${badgeLabel}</span>
+  `;
+  root.appendChild(planCard);
+
+  // ── Upgrade nudge ──
+  if (ent.showUpgradeToCall1 || ent.showUpgradeToCall2) {
+    const nudge = document.createElement('div');
+    nudge.className = 'upgrade-nudge';
+    const upgradeMsg = ent.showUpgradeToCall2
+      ? 'Upgrade to <strong>Lab + 2 sessions</strong> to include two video sessions each month.'
+      : 'Add a monthly video session by upgrading to <strong>Lab + 1 session</strong>.';
+    nudge.innerHTML = `
+      <p>${upgradeMsg}</p>
+      <a class="nudge-btn" href="/subscribe/">View plans</a>
+    `;
+    root.appendChild(nudge);
+  }
+
+  // ── Session sections to mount ──
+  // We collect which sections to show, then load Cal once and mount all.
+  const sections = [];
+
+  // Intro (one-time)
+  if (ent.canBookIntro) {
+    sections.push({
+      id:       'cal-intro',
+      label:    'Introductory Session',
+      meta:     'One-time · Complimentary',
+      metaClass: 'included',
+      calLink:  'jordan-elias/intro',
+      ns:       'intro',
+      rows: [
+        { label: 'Type',     val: 'Introductory call' },
+        { label: 'Cost',     val: 'Complimentary' },
+        { label: 'Duration', val: '30 minutes' },
+        { label: 'Format',   val: 'Video call' },
+      ],
+    });
+  }
+
+  // Included subscriber session
+  if (ent.canBookIncluded) {
+    sections.push({
+      id:       'cal-subscriber',
+      label:    'Monthly Session',
+      meta:     `Included in your plan · ${ent.sessionsRemaining} remaining`,
+      metaClass: 'included',
+      calLink:  'jordan-elias/subscriber-session',
+      ns:       'subscriber-session',
+      rows: [
+        { label: 'Type',      val: 'Subscriber session' },
+        { label: 'Cost',      val: 'Included in plan' },
+        { label: 'Remaining', val: `${ent.sessionsRemaining} of ${ent.sessionsIncluded} this period` },
+        { label: 'Duration',  val: '50 minutes' },
+        { label: 'Format',    val: 'Video call' },
+      ],
+    });
+  } else if (ent.sessionsIncluded > 0 && !ent.canBookIncluded) {
+    // Has a plan with sessions but used them all — show a note
+    const note = document.createElement('div');
+    note.className = 'msg info show';
+    note.style.marginBottom = '2rem';
+    note.textContent = `You've used all ${ent.sessionsIncluded} included session${ent.sessionsIncluded > 1 ? 's' : ''} for this billing period. Your next session will be available after ${fmtDate(ent.periodEnd)}.`;
+    root.appendChild(note);
+  }
+
+  // Single paid session (always shown)
+  sections.push({
+    id:       'cal-paid',
+    label:    'Single Session',
+    meta:     '€75 · Book anytime',
+    metaClass: '',
+    calLink:  'jordan-elias/session',
+    ns:       'session',
+    rows: [
+      { label: 'Type',     val: 'Individual session' },
+      { label: 'Cost',     val: '€75' },
+      { label: 'Duration', val: '50 minutes' },
+      { label: 'Format',   val: 'Video call' },
+    ],
+  });
+
+  // Build DOM for each section
+  sections.forEach(sec => {
+    const wrap = document.createElement('div');
+    wrap.className = 'cal-section';
+
+    const head = document.createElement('div');
+    head.className = 'cal-section-head';
+    head.innerHTML = `
+      <p class="section-label">${sec.label}</p>
+      <span class="cal-section-meta ${sec.metaClass}">${sec.meta}</span>
+    `;
+    wrap.appendChild(head);
+
+    // Info rows
+    const infoRows = document.createElement('div');
+    infoRows.className = 'info-rows';
+    sec.rows.forEach(r => {
+      const row = document.createElement('div');
+      row.className = 'info-row';
+      row.innerHTML = `<span class="info-label">${r.label}</span><span class="info-val">${r.val}</span>`;
+      infoRows.appendChild(row);
+    });
+    wrap.appendChild(infoRows);
+
+    // Cal embed target
+    const calWrap = document.createElement('div');
+    calWrap.className = 'cal-embed-wrap';
+    calWrap.id = sec.id;
+    wrap.appendChild(calWrap);
+
+    root.appendChild(wrap);
+  });
+
+  // Mount Cal.com once all DOM is ready
+  loadAndMountCal(sections);
+}
+
+// ─────────────────────────────────────────────────────────
+// CAL.COM LOADING + MOUNTING
+// ─────────────────────────────────────────────────────────
+function loadAndMountCal(sections) {
+  if (!sections.length) return;
+
+  // If Cal is already available (e.g. navigated back), mount immediately.
+  if (typeof window.Cal !== 'undefined') {
+    mountCalSections(sections);
     return;
   }
 
-  user = authUser;
-  entitlement = await getBookingEntitlement(supabase, user.id);
-
-  render();
-}
-
-function render() {
-  const root = document.getElementById("booking-root");
-  root.innerHTML = "";
-
-  // ─────────────────────────────
-  // INTRO SESSION
-  // ─────────────────────────────
-  if (entitlement.canBookIntro) {
-    root.innerHTML += `
-      <section class="card">
-        <h2>Intro Session</h2>
-        <div id="my-cal-inline-intro"></div>
-        <p class="hint">One-time introductory session</p>
-      </section>
-    `;
-  }
-
-  // ─────────────────────────────
-  // SUBSCRIBER SESSION
-  // ─────────────────────────────
-  if (entitlement.showIncludedSession) {
-    root.innerHTML += `
-      <section class="card">
-        <h2>Your Monthly Session</h2>
-        <div id="my-cal-inline-subscriber-session"></div>
-        <p class="hint">
-          Included in your plan (${entitlement.sessionsRemaining} remaining)
-        </p>
-      </section>
-    `;
-  }
-
-  // ─────────────────────────────
-  // PAID SESSION
-  // ─────────────────────────────
-  root.innerHTML += `
-    <section class="card">
-      <h2>Single Session (€75)</h2>
-      <div id="my-cal-inline-session"></div>
-      <p class="hint">Book anytime outside your subscription</p>
-    </section>
-  `;
-
-  // ─────────────────────────────
-  // UPGRADE PANEL
-  // ─────────────────────────────
-  root.innerHTML += `
-    <section class="card upgrade">
-      <h2>Plan Options</h2>
-
-      ${entitlement.plan === "lab"
-        ? `<p>Upgrade to Lab + 1 monthly session (€60)</p>`
-        : ""}
-
-      ${entitlement.plan === "call1"
-        ? `<p>Upgrade to Lab + 2 monthly sessions (€110)</p>`
-        : ""}
-
-      <a class="btn" href="/subscribe">View Plans</a>
-    </section>
-  `;
-
-  setTimeout(initCal, 0);
-}
-
-let calScriptLoaded = false;
-
-function initCal() {
-  if (calScriptLoaded) {
-    mountAll();
-    return;
-  }
-
-  const script = document.createElement("script");
-  script.src = "https://app.cal.com/embed/embed.js";
+  const script = document.createElement('script');
+  script.src = 'https://app.cal.com/embed/embed.js';
+  script.async = true;
 
   script.onload = () => {
-    calScriptLoaded = true;
-    mountAll();
+    // Cal embed.js exposes window.Cal after load
+    if (typeof window.Cal === 'undefined') {
+      showPageMsg('Cal.com embed could not load. Please refresh the page.', 'error');
+      return;
+    }
+    mountCalSections(sections);
+  };
+
+  script.onerror = () => {
+    showPageMsg('Could not load the booking calendar. Please check your connection and refresh.', 'error');
   };
 
   document.body.appendChild(script);
 }
 
-function mountAll() {
-  const nsIntro = "intro";
-  const nsSession = "session";
-  const nsSubscriber = "subscriber-session";
+function mountCalSections(sections) {
+  sections.forEach(sec => {
+    // Guard: only mount if the target element actually exists in the DOM
+    const el = document.getElementById(sec.id);
+    if (!el) return;
 
-  // INIT namespaces
-  if (entitlement.canBookIntro) {
-    window.Cal("init", nsIntro, { origin: "https://app.cal.com" });
-  }
+    // Init the namespace
+    window.Cal('init', sec.ns, { origin: 'https://app.cal.com' });
 
-  window.Cal("init", nsSession, { origin: "https://app.cal.com" });
-
-  if (entitlement.showIncludedSession) {
-    window.Cal("init", nsSubscriber, { origin: "https://app.cal.com" });
-  }
-
-  // INTRO
-  if (entitlement.canBookIntro) {
-    window.Cal.ns[nsIntro]("inline", {
-      elementOrSelector: "#my-cal-inline-intro",
-      calLink: "jordan-elias/intro",
-      config: { layout: "month_view", useSlotsViewOnSmallScreen: true }
+    // Mount inline calendar
+    window.Cal.ns[sec.ns]('inline', {
+      elementOrSelector: `#${sec.id}`,
+      calLink: sec.calLink,
+      config: {
+        layout: 'month_view',
+        useSlotsViewOnSmallScreen: true,
+      },
     });
 
-    window.Cal.ns[nsIntro]("ui", { layout: "month_view" });
-  }
-
-  // SUBSCRIBER SESSION
-  if (entitlement.showIncludedSession) {
-    window.Cal.ns[nsSubscriber]("inline", {
-      elementOrSelector: "#my-cal-inline-subscriber-session",
-      calLink: "jordan-elias/subscriber-session",
-      config: { layout: "month_view", useSlotsViewOnSmallScreen: true }
+    // UI theme — inherits page font/colour where Cal allows
+    window.Cal.ns[sec.ns]('ui', {
+      layout: 'month_view',
+      hideEventTypeDetails: false,
     });
-
-    window.Cal.ns[nsSubscriber]("ui", { layout: "month_view" });
-  }
-
-  // PAID SESSION
-  window.Cal.ns[nsSession]("inline", {
-    elementOrSelector: "#my-cal-inline-session",
-    calLink: "jordan-elias/session",
-    config: { layout: "month_view", useSlotsViewOnSmallScreen: true }
   });
-
-  window.Cal.ns[nsSession]("ui", { layout: "month_view" });
 }
 
-init();
+// ─────────────────────────────────────────────────────────
+// INIT — wait for auth-guard to confirm session
+// ─────────────────────────────────────────────────────────
+function onAuthReady(cb) {
+  // auth-guard.js sets window._currentUser synchronously if session is
+  // already resolved, otherwise it fires 'authReady' once it completes.
+  if (window._currentUser) {
+    cb();
+    return;
+  }
+  window.addEventListener('authReady', cb, { once: true });
+}
+
+onAuthReady(async () => {
+  const supabase = window._supabase;
+  const user     = window._currentUser;
+
+  // auth-guard already redirects to '/' if unauthenticated,
+  // but guard defensively here too.
+  if (!user || !supabase) {
+    window.location.replace('/');
+    return;
+  }
+
+  try {
+    const ent = await getEntitlement(supabase, user.id);
+    render(ent);
+  } catch (err) {
+    console.error('Booking page error:', err);
+    document.getElementById('bookingRoot').innerHTML = '';
+    showPageMsg(
+      'Something went wrong loading your session options. Please refresh the page. ' +
+      'If the problem persists, contact Jordan directly.',
+      'error'
+    );
+  }
+});
+
 </script>
 
 </body>
