@@ -131,6 +131,16 @@
   to   = "/soundscape-machine/index.html"
   status = 200
 
+[[redirects]]
+  from = "/journal"
+  to   = "/journal.html"
+  status = 200
+
+[[redirects]]
+  from = "/journal/"
+  to   = "/journal/index.html"
+  status = 200
+
 # ── Subscribe ──
 
 [[redirects]]
