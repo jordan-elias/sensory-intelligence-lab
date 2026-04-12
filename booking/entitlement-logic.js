@@ -1,97 +1,167 @@
+/**
+ * booking/entitlement-logic.js
+ *
+ * Standalone entitlement helper. Can be imported by the booking page
+ * or used in server-side functions.
+ *
+ * Usage:
+ *   import { getBookingEntitlement } from '/booking/entitlement-logic.js';
+ *   const ent = await getBookingEntitlement(supabase, userId);
+ */
+
+/**
+ * Safely subtract one calendar month from a Date without day-overflow.
+ * e.g. March 31 → February 28/29, not March 3.
+ */
+function periodStartFromEnd(periodEnd) {
+  const d = new Date(periodEnd);
+  return new Date(d.getFullYear(), d.getMonth() - 1, d.getDate());
+}
+
+/**
+ * Fetch and compute booking entitlements for a given user.
+ *
+ * @param {import('@supabase/supabase-js').SupabaseClient} supabase
+ * @param {string} userId  — auth.users UUID
+ * @returns {Promise<Entitlement>}
+ */
 export async function getBookingEntitlement(supabase, userId) {
-  // 1. Get user profile (plan + billing period + intro tracking)
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("plan, current_period_end, email, intro_call_used")
-    .eq("id", userId)
+
+  // ── 1. Profile ──
+  const { data: profile, error: profileErr } = await supabase
+    .from('profiles')
+    .select([
+      'plan',
+      'subscription_tier',
+      'subscription_status',
+      'current_period_end',
+      'intro_call_used',
+      'email',
+    ].join(', '))
+    .eq('id', userId)
     .single();
 
-  if (profileError) throw profileError;
+  if (profileErr) throw new Error('Could not load profile: ' + profileErr.message);
 
-  // 2. Define billing period (Stripe-driven)
-  const periodEnd = new Date(profile.current_period_end);
-  const periodStart = new Date(periodEnd);
-  periodStart.setMonth(periodStart.getMonth() - 1);
+  // Normalise plan key — support both 'plan' and 'subscription_tier' columns
+  const plan   = profile.subscription_tier || profile.plan || 'free';
+  const status = profile.subscription_status || 'free';
 
-  // 3. Fetch bookings in current billing period
-  const { data: bookings, error: bookingsError } = await supabase
-    .from("bookings")
-    .select("event_type, status, scheduled_at")
-    .eq("user_id", userId)
-    .gte("scheduled_at", periodStart.toISOString())
-    .lte("scheduled_at", periodEnd.toISOString());
+  // Active means the subscription is current (not lapsed / canceled / past_due)
+  const isActive = status === 'active' || status === 'trialing';
 
-  if (bookingsError) throw bookingsError;
+  // ── 2. Billing window ──
+  const periodEnd   = profile.current_period_end
+    ? new Date(profile.current_period_end)
+    : null;
+  const periodStart = periodEnd ? periodStartFromEnd(periodEnd) : null;
 
-  // 4. Count ONLY valid sessions
-  const validBookings = (bookings || []).filter(
-    (b) => b.status === "scheduled" || b.status === "completed"
-  );
+  // ── 3. Subscriber sessions used this period ──
+  let subscriberSessionsUsed = 0;
 
-  const subscriberSessionsUsed = validBookings.filter(
-    (b) => b.event_type === "subscriber-session"
-  ).length;
+  if (isActive && periodStart && periodEnd) {
+    const { data: bookings, error: bookErr } = await supabase
+      .from('bookings')
+      .select('event_type, status, scheduled_at')
+      .eq('user_id', userId)
+      .gte('scheduled_at', periodStart.toISOString())
+      .lte('scheduled_at', periodEnd.toISOString())
+      .in('status', ['scheduled', 'completed']);
 
-  const introUsed = profile.intro_call_used;
+    if (bookErr) {
+      // Non-fatal — log and continue; worst case user appears to have 0 sessions used
+      console.warn('Could not load bookings:', bookErr.message);
+    }
 
-  // 5. Base entitlement object
-  const entitlements = {
-    plan: profile.plan,
+    subscriberSessionsUsed = (bookings || []).filter(
+      b => b.event_type === 'subscriber-session'
+    ).length;
+  }
 
-    // session limits
-    sessionsIncluded: 0,
-    sessionsUsed: subscriberSessionsUsed,
-    sessionsRemaining: 0,
+  const introUsed = !!profile.intro_call_used;
 
-    // permissions
-    canBookIncludedSession: false,
-    canBookPaidSession: true,
-    canBookIntro: !introUsed,
-
-    // UI flags
-    showIntro: !introUsed,
-    showIncludedSession: false,
-    showExtraSession: true,
-    showUpgradeToCall1: false,
-    showUpgradeToCall2: false,
-
-    // metadata
+  // ── 4. Base entitlement ──
+  /** @type {Entitlement} */
+  const ent = {
+    plan,
+    isActive,
+    status,
+    email:        profile.email || '',
     periodStart,
     periodEnd,
+
+    // Intro: one-time regardless of plan
+    canBookIntro: !introUsed,
+
+    // Included sessions
+    sessionsIncluded:  0,
+    sessionsUsed:      subscriberSessionsUsed,
+    sessionsRemaining: 0,
+    canBookIncluded:   false,
+
+    // Paid single session always available
+    canBookPaid: true,
+
+    // Upgrade hints for UI
+    showUpgradeToCall1: false,
+    showUpgradeToCall2: false,
   };
 
-  // 6. Plan logic (your exact pricing model)
+  // If subscription is not active, treat as free
+  if (!isActive) {
+    ent.showUpgradeToCall1 = true;
+    return ent;
+  }
 
-  switch (profile.plan) {
-    case "lab":
-      // €5 plan → no sessions
-      entitlements.sessionsIncluded = 0;
-      entitlements.showUpgradeToCall1 = true;
+  // ── 5. Plan-specific session limits ──
+  switch (plan) {
+
+    case 'lab':
+      // €4 lab-only plan — no included sessions
+      ent.sessionsIncluded  = 0;
+      ent.showUpgradeToCall1 = true;
       break;
 
-    case "call1":
-      // €60 → 1 session/month
-      entitlements.sessionsIncluded = 1;
-      entitlements.sessionsRemaining = Math.max(0, 1 - subscriberSessionsUsed);
-      entitlements.canBookIncludedSession = subscriberSessionsUsed < 1;
-      entitlements.showIncludedSession = subscriberSessionsUsed < 1;
-      entitlements.showUpgradeToCall2 = true;
+    case 'call1':
+      // €60/month — 1 included session
+      ent.sessionsIncluded  = 1;
+      ent.sessionsUsed      = Math.min(subscriberSessionsUsed, 1);
+      ent.sessionsRemaining = Math.max(0, 1 - subscriberSessionsUsed);
+      ent.canBookIncluded   = subscriberSessionsUsed < 1;
+      ent.showUpgradeToCall2 = true;
       break;
 
-    case "call2":
-      // €110 → 2 sessions/month
-      entitlements.sessionsIncluded = 2;
-      entitlements.sessionsRemaining = Math.max(0, 2 - subscriberSessionsUsed);
-      entitlements.canBookIncludedSession = subscriberSessionsUsed < 2;
-      entitlements.showIncludedSession = subscriberSessionsUsed < 2;
+    case 'call2':
+      // €110/month — 2 included sessions
+      ent.sessionsIncluded  = 2;
+      ent.sessionsUsed      = Math.min(subscriberSessionsUsed, 2);
+      ent.sessionsRemaining = Math.max(0, 2 - subscriberSessionsUsed);
+      ent.canBookIncluded   = subscriberSessionsUsed < 2;
+      // call2 is the highest tier — no further upgrade hint
       break;
 
     default:
-      // no subscription
-      entitlements.canBookIncludedSession = false;
-      entitlements.showIncludedSession = false;
-      entitlements.showUpgradeToCall1 = true;
+      ent.showUpgradeToCall1 = true;
+      break;
   }
 
-  return entitlements;
+  return ent;
 }
+
+/**
+ * @typedef {Object} Entitlement
+ * @property {string}       plan
+ * @property {boolean}      isActive
+ * @property {string}       status
+ * @property {string}       email
+ * @property {Date|null}    periodStart
+ * @property {Date|null}    periodEnd
+ * @property {boolean}      canBookIntro
+ * @property {number}       sessionsIncluded
+ * @property {number}       sessionsUsed
+ * @property {number}       sessionsRemaining
+ * @property {boolean}      canBookIncluded
+ * @property {boolean}      canBookPaid
+ * @property {boolean}      showUpgradeToCall1
+ * @property {boolean}      showUpgradeToCall2
+ */
