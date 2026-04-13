@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard — Sensory Intelligence Lab</title>
+  <title>Dashboard | Sensory Intelligence Lab</title>
 
   <script src="/dashboard/auth-guard.js" type="module"></script>
-  <script src="/assets/js/header.js" defer></script>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
 
@@ -36,16 +35,132 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      opacity: 0;
-      animation: fadeIn 0.25s ease 0.1s forwards;
+      /* No margin or padding here — header must sit flush at top */
     }
-
-    @keyframes fadeIn { to { opacity: 1; } }
 
     a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
     a:hover { color: var(--accent); }
 
-    /* ── Breadcrumb ── */
+    /* ══════════════════════════════════════
+       HEADER
+    ══════════════════════════════════════ */
+    .sil-header {
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg);
+      z-index: 100;
+      gap: 1rem;
+      /* Full viewport width, no inherited constraints */
+      width: 100%;
+    }
+
+    .sil-header__wordmark {
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      flex-shrink: 0;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .sil-header__wordmark:hover { color: var(--accent); }
+
+    .sil-header__nav {
+      display: flex;
+      gap: 0.25rem;
+      align-items: center;
+    }
+
+    .sil-header__nav a {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-decoration: none;
+      color: var(--muted);
+      transition: color 0.15s;
+      white-space: nowrap;
+      padding: 0.3rem 0.65rem;
+    }
+    .sil-header__nav a:hover { color: var(--text); }
+
+    .sil-header__nav a.sil-active {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* Sign out — bordered box */
+    .sil-header__signout {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--muted);
+      background: none;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      padding: 0.3rem 0.75rem;
+      transition: color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+      line-height: 1.6;
+    }
+    .sil-header__signout:hover {
+      color: var(--text);
+      border-color: var(--text);
+    }
+    .sil-header__signout:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Mobile hamburger */
+    .sil-header__toggle {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      flex-shrink: 0;
+    }
+    .sil-header__toggle span {
+      display: block;
+      width: 20px;
+      height: 2px;
+      background: var(--text);
+    }
+
+    @media (max-width: 700px) {
+      .sil-header { padding: 0 1rem; }
+      .sil-header__toggle { display: flex; }
+      .sil-header__nav {
+        display: none;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0.75rem 1rem;
+        gap: 0;
+        z-index: 99;
+      }
+      .sil-header__nav.sil-open { display: flex; }
+      .sil-header__nav a,
+      .sil-header__signout { font-size: 0.875rem; padding: 0.55rem 0.5rem; }
+      .sil-header__signout { border: none; }
+    }
+
+    /* ══════════════════════════════════════
+       BREADCRUMB
+    ══════════════════════════════════════ */
     .bc {
       padding: 0.75rem 1.5rem 0;
       max-width: 1100px;
@@ -65,7 +180,9 @@
     .bc a { color: var(--muted); text-decoration: none; }
     .bc a:hover { color: var(--accent); text-decoration: underline; }
 
-    /* ── Main ── */
+    /* ══════════════════════════════════════
+       MAIN
+    ══════════════════════════════════════ */
     main {
       max-width: 1100px;
       margin: 0 auto;
@@ -73,17 +190,15 @@
       flex: 1;
       width: 100%;
     }
+    @media (max-width: 640px) { main { padding: 1.5rem 1rem 3rem; } }
 
-    /* ── Page header ── */
+    /* ══════════════════════════════════════
+       PAGE HEADER
+    ══════════════════════════════════════ */
     .page-header {
       margin-bottom: 2.5rem;
       padding-bottom: 2rem;
       border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 2rem;
-      flex-wrap: wrap;
     }
     .page-header h2 {
       font-family: var(--font-heading);
@@ -95,118 +210,12 @@
     }
     .page-header p { font-size: 0.9rem; color: var(--muted); }
 
-    <style>
-  .sil-header {
-    border-bottom: 1px solid var(--border, #e5e5e0);
-    padding: 0 1.5rem;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    background: var(--bg, #ffffff);
-    z-index: 100;
-    gap: 1rem;
-  }
- 
-  .sil-header__wordmark {
-    font-family: var(--font-heading, 'Space Grotesk', sans-serif);
-    font-size: 1rem;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    white-space: nowrap;
-    flex-shrink: 0;
-    text-decoration: none;
-    color: var(--text, #1a1a1a);
-  }
-  .sil-header__wordmark:hover { color: var(--accent, #2a5c45); }
- 
-  .sil-header__nav {
-    display: flex;
-    gap: 1.5rem;
-    align-items: center;
-  }
- 
-  .sil-header__nav a {
-    font-family: var(--font-body, 'Inter', sans-serif);
-    font-size: 0.8rem;
-    font-weight: 500;
-    text-decoration: none;
-    color: var(--muted, #6b6b6b);
-    transition: color 0.15s;
-    white-space: nowrap;
-  }
-  .sil-header__nav a:hover { color: var(--text, #1a1a1a); }
- 
-  /* Highlight the link matching the current page */
-  .sil-header__nav a.sil-active {
-    color: var(--accent, #2a5c45);
-    font-weight: 600;
-  }
- 
-  .sil-header__signout {
-    font-family: var(--font-body, 'Inter', sans-serif);
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: var(--muted, #6b6b6b);
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    transition: color 0.15s;
-    white-space: nowrap;
-  }
-  .sil-header__signout:hover { color: var(--text, #1a1a1a); }
-  .sil-header__signout:disabled { opacity: 0.5; cursor: not-allowed; }
- 
-  /* Mobile: collapse nav links, show hamburger */
-  .sil-header__toggle {
-    display: none;
-    flex-direction: column;
-    gap: 4px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    flex-shrink: 0;
-  }
-  .sil-header__toggle span {
-    display: block;
-    width: 20px;
-    height: 2px;
-    background: var(--text, #1a1a1a);
-    transition: opacity 0.15s;
-  }
- 
-  @media (max-width: 680px) {
-    .sil-header__toggle { display: flex; }
- 
-    .sil-header__nav {
-      display: none;
-      position: absolute;
-      top: 56px;
-      left: 0;
-      right: 0;
-      background: var(--bg, #ffffff);
-      border-bottom: 1px solid var(--border, #e5e5e0);
-      flex-direction: column;
-      align-items: flex-start;
-      padding: 1rem 1.5rem;
-      gap: 1rem;
-      z-index: 99;
-    }
-    .sil-header__nav.sil-open { display: flex; }
- 
-    .sil-header__nav a,
-    .sil-header__signout { font-size: 0.875rem; }
-  }
-
-    /* ── Daily prompt ── */
+    /* ══════════════════════════════════════
+       DAILY PROMPT
+    ══════════════════════════════════════ */
     .prompt-block {
       background: var(--accent-light);
       border: 1px solid #c0d9c8;
-      border-radius: 2px;
       padding: 1.25rem 1.5rem;
       margin-bottom: 2.5rem;
       display: flex;
@@ -230,8 +239,13 @@
       line-height: 1.65;
       font-style: italic;
     }
+    @media (max-width: 640px) {
+      .prompt-block { flex-direction: column; gap: 0.5rem; }
+    }
 
-    /* ── Section label ── */
+    /* ══════════════════════════════════════
+       SECTION LABEL
+    ══════════════════════════════════════ */
     .section-label {
       font-family: var(--font-heading);
       font-size: 0.67rem;
@@ -242,21 +256,47 @@
       margin-bottom: 1rem;
     }
 
-    /* ── Module grid ── */
+    /* ══════════════════════════════════════
+       MODULE SECTIONS + GRID
+    ══════════════════════════════════════ */
     .modules-section { margin-bottom: 2.75rem; }
 
+    /*
+      Key fix: use a fixed repeat count per section so partial rows
+      never produce dark/empty "ghost" cells.
+      Sections with 3 cards → 3 columns
+      Sections with 4 cards → 4 columns (wraps to 2+2 on medium screens)
+      auto-fill is NOT used — that's what was causing the dark gaps.
+    */
     .module-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
       gap: 1px;
-      border: 1px solid var(--border);
       background: var(--border);
+      border: 1px solid var(--border);
       overflow: hidden;
     }
 
+    /* Regulation: 3 cards */
+    .module-grid--3 { grid-template-columns: repeat(3, 1fr); }
+    /* Perception: 2 cards */
+    .module-grid--2 { grid-template-columns: repeat(2, 1fr); }
+    /* Creative: 2 cards */
+    /* Coming soon: 3 cards */
+
+    @media (max-width: 860px) {
+      .module-grid--3 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .module-grid--3,
+      .module-grid--2 { grid-template-columns: 1fr; }
+    }
+
+    /* ══════════════════════════════════════
+       MODULE CARD
+    ══════════════════════════════════════ */
     .module-card {
       background: var(--bg);
-      padding: 1.4rem 1.5rem;
+      padding: 1.5rem;
       text-decoration: none;
       color: inherit;
       display: block;
@@ -268,7 +308,7 @@
 
     .module-card.disabled {
       cursor: default;
-      opacity: 0.55;
+      opacity: 0.5;
       pointer-events: none;
     }
 
@@ -276,9 +316,9 @@
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      margin-bottom: 0.6rem;
+      margin-bottom: 0.65rem;
     }
-    .module-icon { font-size: 1.05rem; color: var(--accent); line-height: 1; }
+    .module-icon { font-size: 1.1rem; color: var(--accent); line-height: 1; }
     .module-arrow {
       font-size: 0.8rem;
       color: var(--border);
@@ -287,21 +327,21 @@
 
     .module-card h3 {
       font-family: var(--font-heading);
-      font-size: 0.93rem;
+      font-size: 0.95rem;
       font-weight: 600;
       letter-spacing: -0.01em;
-      margin-bottom: 0.3rem;
+      margin-bottom: 0.35rem;
       line-height: 1.3;
     }
     .module-card p {
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       color: var(--muted);
-      line-height: 1.55;
+      line-height: 1.6;
     }
 
     .module-tag {
       display: inline-block;
-      margin-top: 0.75rem;
+      margin-top: 0.85rem;
       font-size: 0.62rem;
       font-weight: 500;
       letter-spacing: 0.08em;
@@ -310,26 +350,18 @@
       background: var(--accent-light);
       padding: 0.2rem 0.5rem;
     }
-    .module-tag.coming-soon {
-      color: var(--muted);
-      background: var(--surface);
-    }
-    .module-tag.new {
-      color: #6b3a1a;
-      background: #fdf4ec;
-    }
+    .module-tag.coming-soon { color: var(--muted); background: var(--surface); }
+    .module-tag.new { color: #6b3a1a; background: #fdf4ec; }
 
-    /* ── Crisis resources footer ── */
+    /* ══════════════════════════════════════
+       CRISIS FOOTER
+    ══════════════════════════════════════ */
     .crisis-footer {
       border-top: 1px solid var(--border);
       padding: 2rem 1.5rem;
       background: var(--surface);
     }
-
-    .crisis-inner {
-      max-width: 1100px;
-      margin: 0 auto;
-    }
+    .crisis-inner { max-width: 1100px; margin: 0 auto; }
 
     .crisis-label {
       font-family: var(--font-heading);
@@ -345,16 +377,7 @@
       cursor: pointer;
       user-select: none;
     }
-    .crisis-label::after {
-      content: attr(data-state);
-      font-size: 0.6rem;
-      opacity: 0.6;
-    }
-    .crisis-toggle-icon {
-      margin-left: auto;
-      transition: transform 0.2s;
-      font-style: normal;
-    }
+    .crisis-toggle-icon { margin-left: auto; transition: transform 0.2s; font-style: normal; }
     .crisis-label.open .crisis-toggle-icon { transform: rotate(180deg); }
 
     .crisis-grid {
@@ -375,27 +398,10 @@
       padding-bottom: 0.3rem;
       border-bottom: 1px solid var(--border);
     }
-    .crisis-group ul {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
-    }
-    .crisis-group li {
-      font-size: 0.75rem;
-      color: var(--muted);
-      line-height: 1.45;
-    }
-    .crisis-group li strong {
-      display: block;
-      font-weight: 500;
-      color: var(--text);
-    }
-    .crisis-group a {
-      color: var(--muted);
-      text-decoration: none;
-      font-size: 0.72rem;
-    }
+    .crisis-group ul { list-style: none; display: flex; flex-direction: column; gap: 0.3rem; }
+    .crisis-group li { font-size: 0.75rem; color: var(--muted); line-height: 1.45; }
+    .crisis-group li strong { display: block; font-weight: 500; color: var(--text); }
+    .crisis-group a { color: var(--muted); text-decoration: none; font-size: 0.72rem; }
     .crisis-group a:hover { color: var(--accent); text-decoration: underline; }
 
     .crisis-note {
@@ -408,7 +414,9 @@
     }
     .crisis-note.open { display: block; }
 
-    /* ── Site footer ── */
+    /* ══════════════════════════════════════
+       SITE FOOTER
+    ══════════════════════════════════════ */
     footer {
       border-top: 1px solid var(--border);
       padding: 1.25rem 1.5rem;
@@ -418,446 +426,451 @@
     }
     footer a { color: var(--muted); text-decoration: none; }
     footer a:hover { color: var(--accent); text-decoration: underline; }
-
-    /* ── Responsive ── */
-    @media (max-width: 640px) {
-      main { padding: 1.5rem 1rem 3rem; }
-      .page-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-      .module-grid { grid-template-columns: 1fr; }
-      .prompt-block { flex-direction: column; gap: 0.5rem; }
-      .crisis-grid { grid-template-columns: 1fr; }
-    }
   </style>
-
-  
 </head>
 <body>
 
-<header class="sil-header">
-  <a class="sil-header__wordmark" href="/dashboard/">Sensory Intelligence Lab</a>
- 
-  <button class="sil-header__toggle" id="silMenuToggle" aria-label="Toggle navigation" aria-expanded="false">
-    <span></span><span></span><span></span>
-  </button>
- 
-  <nav class="sil-header__nav" id="silNav">
-    <a href="/dashboard/">Dashboard</a>
-    <a href="/account/">Account</a>
-    <a href="/booking/">Book a session</a>
-    <button class="sil-header__signout" id="silSignOut">Sign out</button>
+  <!-- ══════════════════════════════════════
+       HEADER
+  ══════════════════════════════════════ -->
+  <header class="sil-header">
+    <a class="sil-header__wordmark" href="/dashboard/">Sensory Intelligence Lab</a>
+
+    <button class="sil-header__toggle" id="silMenuToggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav class="sil-header__nav" id="silNav">
+      <a href="/dashboard/">Dashboard</a>
+      <a href="/account/">Account</a>
+      <a href="/booking/">Book a session</a>
+      <button class="sil-header__signout" id="silSignOut">Sign out</button>
+    </nav>
+  </header>
+
+  <!-- ══════════════════════════════════════
+       BREADCRUMB
+  ══════════════════════════════════════ -->
+  <nav aria-label="Breadcrumb" class="bc">
+    <ol>
+      <li>Sensory Intelligence Lab</li>
+      <li>Dashboard</li>
+    </ol>
   </nav>
-</header>
 
-<nav aria-label="Breadcrumb" class="bc">
-  <ol>
-    <li><a href="https://jordanelias.de/">jordanelias.de</a></li>
-    <li>Sensory Intelligence Lab</li>
-    <li>Dashboard</li>
-  </ol>
-</nav>
+  <!-- ══════════════════════════════════════
+       MAIN CONTENT
+  ══════════════════════════════════════ -->
+  <main>
 
-<main>
-
-  <div class="page-header">
-    <div>
+    <div class="page-header">
       <h2 id="greeting">Welcome back</h2>
       <p>Your sensory intelligence dashboard</p>
     </div>
-  </div>
 
-  <!-- Daily listening prompt -->
-  <div class="prompt-block">
-    <span class="prompt-label">Today's prompt</span>
-    <span class="prompt-text" id="dailyPrompt">Loading…</span>
-  </div>
+    <!-- Daily listening prompt -->
+    <div class="prompt-block">
+      <span class="prompt-label">Today's prompt</span>
+      <span class="prompt-text" id="dailyPrompt">Loading…</span>
+    </div>
 
-  <!-- Core regulation modules -->
-  <div class="modules-section">
-    <p class="section-label">Regulation</p>
-    <div class="module-grid">
+    <!-- ── Regulation ── -->
+    <div class="modules-section">
+      <p class="section-label">Regulation</p>
+      <div class="module-grid module-grid--3">
 
-      <a class="module-card" href="/regulation/">
-        <div class="module-top">
-          <span class="module-icon">◎</span>
-          <span class="module-arrow">→</span>
+        <a class="module-card" href="/regulation/">
+          <div class="module-top">
+            <span class="module-icon">◎</span>
+            <span class="module-arrow">→</span>
+          </div>
+          <h3>Regulation Engine</h3>
+          <p>Select your current state and target state. A 5-minute generative soundscape guides the shift using the ISO principle.</p>
+          <span class="module-tag">Signature tool</span>
+        </a>
+
+        <a class="module-card" href="/breathing/">
+          <div class="module-top">
+            <span class="module-icon">◯</span>
+            <span class="module-arrow">→</span>
+          </div>
+          <h3>Breathing Exercises</h3>
+          <p>Four evidence-based breathing patterns with visual and generative audio guides. Box, 4-7-8, physiological sigh, resonant.</p>
+          <span class="module-tag">Parasympathetic · HRV</span>
+        </a>
+
+        <a class="module-card" href="/checkin/">
+          <div class="module-top">
+            <span class="module-icon">◑</span>
+            <span class="module-arrow">→</span>
+          </div>
+          <h3>Check-In</h3>
+          <p>Log your emotional state, energy, and sensory load. Track patterns across the day and over time.</p>
+          <span class="module-tag new">New</span>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- ── Perception & training ── -->
+    <div class="modules-section">
+      <p class="section-label">Perception &amp; training</p>
+      <div class="module-grid module-grid--2">
+
+        <a class="module-card" href="/ear-training/">
+          <div class="module-top">
+            <span class="module-icon">◻</span>
+            <span class="module-arrow">→</span>
+          </div>
+          <h3>Ear Training</h3>
+          <p>Interval and chord identification. Practice diatonic and chromatic pitch sets, arpeggio voicings, and extended harmony.</p>
+          <span class="module-tag">Intervals · Chords · Perception</span>
+        </a>
+
+        <a class="module-card" href="/spatial-game/">
+          <div class="module-top">
+            <span class="module-icon">◇</span>
+            <span class="module-arrow">→</span>
+          </div>
+          <h3>Spatial Awareness</h3>
+          <p>Track moving sound sources in 3D space. Trains auditory attention, scene analysis, and sound localisation.</p>
+          <span class="module-tag">Attention · Localisation</span>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- ── Creative tools ── -->
+    <div class="modules-section">
+      <p class="section-label">Creative tools</p>
+      <div class="module-grid module-grid--2">
+
+        <a class="module-card" href="/soundscape-machine/">
+          <div class="module-top">
+            <span class="module-icon">◈</span>
+            <span class="module-arrow">→</span>
+          </div>
+          <h3>Soundscape Machine</h3>
+          <p>Four-track tape composition tool. Upload or record audio, apply reverb, LFO filter, and tape degradation. Save and load sessions.</p>
+          <span class="module-tag">Field recording · Composition</span>
+        </a>
+
+        <a class="module-card" href="/journal/">
+          <div class="module-top">
+            <span class="module-icon">◧</span>
+            <span class="module-arrow">→</span>
+          </div>
+          <h3>Timed Journal</h3>
+          <p>Set a timer, choose a soundscape and prompt, then write continuously. Entries are saved privately to your account.</p>
+          <span class="module-tag new">New</span>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- ── Library ── -->
+    <div class="modules-section">
+      <p class="section-label">Resources</p>
+      <div class="module-grid module-grid--2">
+
+        <a class="module-card" href="/library/">
+          <div class="module-top">
+            <span class="module-icon">◉</span>
+            <span class="module-arrow">→</span>
+          </div>
+          <h3>Library</h3>
+          <p>A curated collection of freely accessible resources — books, tools, sound archives, and research on listening, creativity, and wellbeing.</p>
+          <span class="module-tag new">New</span>
+        </a>
+
+        <a class="module-card" href="/booking/">
+          <div class="module-top">
+            <span class="module-icon">◌</span>
+            <span class="module-arrow">→</span>
+          </div>
+          <h3>Book a Session</h3>
+          <p>Schedule a one-to-one video session with Jordan. Included sessions are drawn from your current billing period.</p>
+          <span class="module-tag">Video · Music therapy</span>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- ── Coming soon ── -->
+    <div class="modules-section">
+      <p class="section-label">Coming soon</p>
+      <div class="module-grid module-grid--3">
+
+        <div class="module-card disabled">
+          <div class="module-top"><span class="module-icon" style="opacity:.4">⬡</span></div>
+          <h3>Rhythmic Entrainment</h3>
+          <p>Interactive pulse training using auditory-motor synchronisation to shift arousal state.</p>
+          <span class="module-tag coming-soon">In development</span>
         </div>
-        <h3>Regulation Engine</h3>
-        <p>Select your current state and target state. A 5-minute generative soundscape guides the shift using the ISO principle.</p>
-        <span class="module-tag">Signature tool</span>
-      </a>
 
-      <a class="module-card" href="/breathing/">
-        <div class="module-top">
-          <span class="module-icon">◯</span>
-          <span class="module-arrow">→</span>
+        <div class="module-card disabled">
+          <div class="module-top"><span class="module-icon" style="opacity:.4">⬡</span></div>
+          <h3>Sensory Location Database</h3>
+          <p>Find and log locations by acoustic character — quiet spaces, resonant environments, and sonic refuges in your city.</p>
+          <span class="module-tag coming-soon">In development</span>
         </div>
-        <h3>Breathing Exercises</h3>
-        <p>Four evidence-based breathing patterns with visual and generative audio guides. Box, 4-7-8, physiological sigh, resonant.</p>
-        <span class="module-tag">Parasympathetic · HRV</span>
-      </a>
 
-      <a class="module-card" href="/checkin/">
-        <div class="module-top">
-          <span class="module-icon">◑</span>
-          <span class="module-arrow">→</span>
+        <div class="module-card disabled">
+          <div class="module-top"><span class="module-icon" style="opacity:.4">⬡</span></div>
+          <h3>Progress Dashboard</h3>
+          <p>Session history, module usage, and pattern tracking over time.</p>
+          <span class="module-tag coming-soon">In development</span>
         </div>
-        <h3>Check-In</h3>
-        <p>Log your emotional state, energy, and sensory load. Track patterns across the day and over time.</p>
-        <span class="module-tag new">New</span>
-      </a>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ══════════════════════════════════════
+       CRISIS RESOURCES
+  ══════════════════════════════════════ -->
+  <div class="crisis-footer">
+    <div class="crisis-inner">
+
+      <div class="crisis-label" id="crisisToggle" role="button" tabindex="0" aria-expanded="false">
+        If you need immediate support
+        <i class="crisis-toggle-icon">▾</i>
+      </div>
+
+      <div class="crisis-grid" id="crisisGrid">
+
+        <div class="crisis-group">
+          <h4>Crisis &amp; suicide prevention — Germany</h4>
+          <ul>
+            <li>
+              <strong>Telefonseelsorge</strong>
+              0800 111 0 111 or 0800 111 0 222
+              <a href="https://www.telefonseelsorge.de" target="_blank" rel="noopener">telefonseelsorge.de</a><br>
+              Free, 24/7, anonymous
+            </li>
+            <li>
+              <strong>Krisendienst Psychiatrie (Berlin)</strong>
+              030 39 063 00
+              <a href="https://krisendienst-psychiatrie.de" target="_blank" rel="noopener">krisendienst-psychiatrie.de</a>
+            </li>
+            <li><strong>Emergency services</strong> 112 (ambulance / fire) · 110 (police)</li>
+          </ul>
+        </div>
+
+        <div class="crisis-group">
+          <h4>Mental health support</h4>
+          <ul>
+            <li>
+              <strong>BKE Online-Beratung</strong>
+              Chat counselling for young people
+              <a href="https://www.bke-beratung.de" target="_blank" rel="noopener">bke-beratung.de</a>
+            </li>
+            <li>
+              <strong>International Association for Suicide Prevention</strong>
+              Directory of crisis centres worldwide
+              <a href="https://www.iasp.info/resources/Crisis_Centres/" target="_blank" rel="noopener">iasp.info</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="crisis-group">
+          <h4>LGBTQ+ support</h4>
+          <ul>
+            <li>
+              <strong>Schwulenberatung Berlin</strong>
+              030 194 46
+              <a href="https://www.schwulenberatungberlin.de" target="_blank" rel="noopener">schwulenberatungberlin.de</a>
+            </li>
+            <li>
+              <strong>Trans*-Beratung Berlin</strong>
+              <a href="https://transberatung.berlin" target="_blank" rel="noopener">transberatung.berlin</a>
+            </li>
+            <li>
+              <strong>Trevor Project (international)</strong>
+              <a href="https://www.thetrevorproject.org" target="_blank" rel="noopener">thetrevorproject.org</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="crisis-group">
+          <h4>Eating disorders</h4>
+          <ul>
+            <li>
+              <strong>BZgA Essstörungen</strong>
+              <a href="https://www.bzga-essstoerungen.de" target="_blank" rel="noopener">bzga-essstoerungen.de</a>
+            </li>
+            <li>
+              <strong>Alliance for Eating Disorders (international)</strong>
+              +1 (866) 662-1235
+              <a href="https://www.allianceforeatingdisorders.com" target="_blank" rel="noopener">allianceforeatingdisorders.com</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="crisis-group">
+          <h4>Domestic violence &amp; abuse</h4>
+          <ul>
+            <li>
+              <strong>Hilfetelefon Gewalt gegen Frauen</strong>
+              08000 116 016 · Free, 24/7, multilingual
+              <a href="https://www.hilfetelefon.de" target="_blank" rel="noopener">hilfetelefon.de</a>
+            </li>
+            <li>
+              <strong>Weißer Ring</strong>
+              116 006
+              <a href="https://www.weisser-ring.de" target="_blank" rel="noopener">weisser-ring.de</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="crisis-group">
+          <h4>International resources</h4>
+          <ul>
+            <li>
+              <strong>Crisis Text Line</strong>
+              Text HOME to 741741 (US/UK/CA/IE)
+              <a href="https://www.crisistextline.org" target="_blank" rel="noopener">crisistextline.org</a>
+            </li>
+            <li>
+              <strong>Samaritans (UK/Ireland)</strong>
+              116 123
+              <a href="https://www.samaritans.org" target="_blank" rel="noopener">samaritans.org</a>
+            </li>
+            <li>
+              <strong>Befrienders Worldwide</strong>
+              <a href="https://www.befrienders.org" target="_blank" rel="noopener">befrienders.org</a>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <p class="crisis-note" id="crisisNote">
+        This platform is a training and self-care tool, not a substitute for clinical care. If you are in crisis or need urgent support, please reach out to one of the services above.
+      </p>
 
     </div>
   </div>
 
-  <!-- Perception & training modules -->
-  <div class="modules-section">
-    <p class="section-label">Perception & training</p>
-    <div class="module-grid">
-
-      <a class="module-card" href="/ear-training/">
-        <div class="module-top">
-          <span class="module-icon">◻</span>
-          <span class="module-arrow">→</span>
-        </div>
-        <h3>Ear Training</h3>
-        <p>Interval and chord identification. Practice diatonic and chromatic pitch sets, arpeggio voicings.</p>
-        <span class="module-tag">Intervals · Chords · Perception</span>
-      </a>
-
-      <a class="module-card" href="/spatial-game/">
-        <div class="module-top">
-          <span class="module-icon">◇</span>
-          <span class="module-arrow">→</span>
-        </div>
-        <h3>Spatial Awareness</h3>
-        <p>Track moving sound sources in 3D space. Grounded in attention training.</p>
-        <span class="module-tag">Attention · Localisation</span>
-      </a>
-
-    </div>
-  </div>
-
-  <!-- Creative tools -->
-  <div class="modules-section">
-    <p class="section-label">Creative tools</p>
-    <div class="module-grid">
-
-      <a class="module-card" href="/soundscape-machine/">
-        <div class="module-top">
-          <span class="module-icon">◈</span>
-          <span class="module-arrow">→</span>
-        </div>
-        <h3>Soundscape Machine</h3>
-        <p>Four-track tape composition tool. Upload or record audio files. Reverb, LFO filter, tape degradation. Save and load sessions.</p>
-        <span class="module-tag">Field recording · Composition</span>
-      </a>
-
-      <a class="module-card" href="/library/">
-        <div class="module-top">
-          <span class="module-icon">◉</span>
-          <span class="module-arrow">→</span>
-        </div>
-        <h3>Library</h3>
-        <p>A curated collection of freely accessible resources for exploring sound, listening, creativity, regulation, and wellbeing. </p>
-        <span class="module-tag new">New</span>
-      </a>
-
-    </div>
-  </div>
-
-  <!-- Coming soon -->
-  <div class="modules-section">
-    <p class="section-label">Coming soon</p>
-    <div class="module-grid">
-
-      <div class="module-card disabled">
-        <div class="module-top"><span class="module-icon" style="opacity:.4">⬡</span></div>
-        <h3>Rhythmic Entrainment</h3>
-        <p>Interactive pulse training using auditory-motor synchronisation to shift arousal state.</p>
-        <span class="module-tag coming-soon">In development</span>
-      </div>
-
-      <div class="module-card disabled">
-        <div class="module-top"><span class="module-icon" style="opacity:.4">⬡</span></div>
-        <h3>Sensory Location Database</h3>
-        <p>Find and log locations by acoustic character — quiet spaces, resonant environments, and sonic refuges in your city.</p>
-        <span class="module-tag coming-soon">In development</span>
-      </div>
-
-      <div class="module-card disabled">
-        <div class="module-top"><span class="module-icon" style="opacity:.4">⬡</span></div>
-        <h3>Progress Dashboard</h3>
-        <p>Session history, module usage, and pattern tracking over time.</p>
-        <span class="module-tag coming-soon">In development</span>
-      </div>
-
-    </div>
-  </div>
-
-</main>
-
-<!-- Crisis resources -->
-<div class="crisis-footer">
-  <div class="crisis-inner">
-
-    <div class="crisis-label" id="crisisToggle" role="button" tabindex="0" aria-expanded="false">
-      If you need immediate support
-      <i class="crisis-toggle-icon">▾</i>
-    </div>
-
-    <div class="crisis-grid" id="crisisGrid">
-
-      <div class="crisis-group">
-        <h4>Crisis &amp; suicide prevention — Germany</h4>
-        <ul>
-          <li>
-            <strong>Telefonseelsorge</strong>
-            0800 111 0 111 or 0800 111 0 222
-            <a href="https://www.telefonseelsorge.de" target="_blank" rel="noopener">telefonseelsorge.de</a><br>
-            Free, 24/7, anonymous
-          </li>
-          <li>
-            <strong>Krisendienst Psychiatrie (Berlin)</strong>
-            030 39 063 00
-            <a href="https://krisendienst-psychiatrie.de" target="_blank" rel="noopener">krisendienst-psychiatrie.de</a>
-          </li>
-          <li>
-            <strong>Emergency services</strong>
-            112 (ambulance / fire) · 110 (police)
-          </li>
-        </ul>
-      </div>
-
-      <div class="crisis-group">
-        <h4>Mental health support</h4>
-        <ul>
-          <li>
-            <strong>BKE Online-Beratung</strong>
-            Chat counselling for young people
-            <a href="https://www.bke-beratung.de" target="_blank" rel="noopener">bke-beratung.de</a>
-          </li>
-          <li>
-            <strong>Deutschland Hilft</strong>
-            General crisis info &amp; referrals
-            <a href="https://www.deutschland-hilft.de" target="_blank" rel="noopener">deutschland-hilft.de</a>
-          </li>
-          <li>
-            <strong>International Association for Suicide Prevention</strong>
-            Directory of crisis centres worldwide
-            <a href="https://www.iasp.info/resources/Crisis_Centres/" target="_blank" rel="noopener">iasp.info</a>
-          </li>
-        </ul>
-      </div>
-
-      <div class="crisis-group">
-        <h4>LGBTQ+ support</h4>
-        <ul>
-          <li>
-            <strong>Schwulenberatung Berlin</strong>
-            030 194 46
-            <a href="https://www.schwulenberatungberlin.de" target="_blank" rel="noopener">schwulenberatungberlin.de</a>
-          </li>
-          <li>
-            <strong>Trans*-Beratung Berlin</strong>
-            <a href="https://transberatung.berlin" target="_blank" rel="noopener">transberatung.berlin</a>
-          </li>
-          <li>
-            <strong>ILGA-Europe</strong>
-            EU-wide LGBTQ+ rights and support directory
-            <a href="https://www.ilga-europe.org" target="_blank" rel="noopener">ilga-europe.org</a>
-          </li>
-          <li>
-            <strong>Trevor Project (international)</strong>
-            <a href="https://www.thetrevorproject.org" target="_blank" rel="noopener">thetrevorproject.org</a>
-          </li>
-        </ul>
-      </div>
-
-      <div class="crisis-group">
-        <h4>Eating disorders</h4>
-        <ul>
-          <li>
-            <strong>Bundeszentrale für gesundheitliche Aufklärung</strong>
-            Eating disorder info and referrals
-            <a href="https://www.bzga-essstoerungen.de" target="_blank" rel="noopener">bzga-essstoerungen.de</a>
-          </li>
-          <li>
-            <strong>Alliance for Eating Disorders (US/international)</strong>
-            +1 (866) 662-1235
-            <a href="https://www.allianceforeatingdisorders.com" target="_blank" rel="noopener">allianceforeatingdisorders.com</a>
-          </li>
-        </ul>
-      </div>
-
-      <div class="crisis-group">
-        <h4>Domestic violence &amp; abuse</h4>
-        <ul>
-          <li>
-            <strong>Hilfetelefon Gewalt gegen Frauen</strong>
-            08000 116 016 · Free, 24/7, multilingual
-            <a href="https://www.hilfetelefon.de" target="_blank" rel="noopener">hilfetelefon.de</a>
-          </li>
-          <li>
-            <strong>Weißer Ring</strong>
-            116 006 · Victim support
-            <a href="https://www.weisser-ring.de" target="_blank" rel="noopener">weisser-ring.de</a>
-          </li>
-        </ul>
-      </div>
-
-      <div class="crisis-group">
-        <h4>International resources</h4>
-        <ul>
-          <li>
-            <strong>Crisis Text Line</strong>
-            Text HOME to 741741 (US/UK/CA/IE)
-            <a href="https://www.crisistextline.org" target="_blank" rel="noopener">crisistextline.org</a>
-          </li>
-          <li>
-            <strong>Samaritans (UK/Ireland)</strong>
-            116 123 (free, 24/7)
-            <a href="https://www.samaritans.org" target="_blank" rel="noopener">samaritans.org</a>
-          </li>
-          <li>
-            <strong>Befrienders Worldwide</strong>
-            Global directory of crisis lines
-            <a href="https://www.befrienders.org" target="_blank" rel="noopener">befrienders.org</a>
-          </li>
-        </ul>
-      </div>
-
-    </div>
-
-    <p class="crisis-note" id="crisisNote">
-      This platform is a training and self-care tool, not a substitute for clinical care. If you are in crisis or need urgent support, please reach out to one of the services above. If you are unsure which service is right for you, the Telefonseelsorge (0800 111 0 111) can help connect you.
+  <footer>
+    <p>Jordan Elias Music Therapy · Berlin ·
+      <a href="https://jordanelias.de/" target="_blank" rel="noopener">jordanelias.de</a> ·
+      <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a>
     </p>
-
-  </div>
-</div>
-
-<footer>
-  <p>Jordan Elias Music Therapy · Berlin ·
-    <a href="https://jordanelias.de/" target="_blank" rel="noopener">jordanelias.de</a> ·
-    <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a>
-  </p>
-</footer>
+  </footer>
 
   <script type="module">
-  // ── Active link highlight ──
-  const path = window.location.pathname.replace(/\/$/, '') || '/';
-  document.querySelectorAll('.sil-header__nav a').forEach(a => {
-    const href = a.getAttribute('href').replace(/\/$/, '') || '/';
-    if (href === path) a.classList.add('sil-active');
-  });
- 
-  // ── Mobile toggle ──
-  const toggle = document.getElementById('silMenuToggle');
-  const nav    = document.getElementById('silNav');
-  toggle.addEventListener('click', () => {
-    const open = nav.classList.toggle('sil-open');
-    toggle.setAttribute('aria-expanded', open);
-  });
-  // Close on nav link click
-  nav.querySelectorAll('a').forEach(a =>
-    a.addEventListener('click', () => nav.classList.remove('sil-open'))
-  );
- 
-  // ── Sign out ──
-  async function getSupabase() {
-    // Reuse client from auth-guard if available
-    if (window._supabase) return window._supabase;
-    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-    return createClient(
-      'https://lrjuufvrgkuvfxcmybtf.supabase.co',
-      'sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1'
-    );
-  }
- 
-  document.getElementById('silSignOut').addEventListener('click', async function () {
-    this.disabled = true;
-    this.textContent = 'Signing out…';
-    try {
-      const sb = await getSupabase();
-      await sb.auth.signOut();
-    } finally {
-      window.location.replace('/');
+    // ── Greeting ──
+    function onAuthReady(cb) {
+      if (window._currentUser) { cb(); return; }
+      window.addEventListener('authReady', cb, { once: true });
     }
-  });
-</script>
 
-<script>
-// ── Greeting ──
-function onAuthReady(cb) {
-  if (window._currentUser) { cb(); return; }
-  window.addEventListener('authReady', cb, { once: true });
-}
+    onAuthReady(() => {
+      const user = window._currentUser;
+      const name = user?.user_metadata?.full_name || user?.email?.split('@')[0] || '';
+      const firstName = name.split(' ')[0];
+      if (firstName) {
+        document.getElementById('greeting').textContent = `Welcome back, ${firstName}`;
+      }
+    });
 
-onAuthReady(() => {
-  const user = window._currentUser;
-  const name = user?.user_metadata?.full_name || user?.email?.split('@')[0] || '';
-  const firstName = name.split(' ')[0];
-  if (firstName) {
-    document.getElementById('greeting').textContent = `Welcome back, ${firstName}`;
-  }
-});
+    // ── Daily prompt ──
+    const PROMPTS = [
+      "Sit still for two minutes. Without trying to identify anything, let sounds arrive and pass like weather.",
+      "Choose one sound in your environment right now. Follow it until it ends — or until you can't hear it anymore.",
+      "Notice the furthest sound you can hear. Then the nearest. Move your attention slowly between the two.",
+      "Listen to a piece of music and track only one instrument or voice for its entire duration.",
+      "Step outside for five minutes. Count how many distinct sound sources you can identify without looking.",
+      "Find the quietest place available to you. Spend three minutes noticing what silence actually contains.",
+      "Play a familiar song. Listen as if you are hearing it for the first time — focus only on the texture of the sound.",
+      "Pay attention to the rhythm of your own breathing for two minutes. Notice if any sounds around you synchronise with it.",
+      "Choose a room in your home. Close your eyes and build a map of the space using only sound.",
+      "Listen to a field recording or environmental sound. What story does it tell about the place it was made?",
+      "Notice the quality of silence between sounds. Is it empty, or does it have its own texture?",
+      "Hum a single note quietly and hold it. Notice how the room responds — what resonates, what absorbs.",
+      "Find a sound that feels regulating to you today. Stay with it for five minutes. Note how your body responds.",
+      "Listen to music you wouldn't normally choose. Suspend judgment and track only the physical sensation it produces.",
+      "Pay attention to the sound of your own voice today — its pitch, pace, and quality in different conversations.",
+      "Find a repeating sound — traffic, machinery, water. Listen until you stop hearing it as noise.",
+      "Choose three sounds from your environment. If they were instruments in an ensemble, what would the piece be called?",
+      "Listen to a piece with your eyes closed. Imagine the space in which it was recorded — its size, surfaces, light.",
+      "Notice when you next involuntarily attend to a sound. What drew your attention? What does that tell you?",
+      "Spend two minutes in focal listening — one source, full attention. Then switch to global listening — everything at once.",
+      "Find a drone or continuous tone in your environment. Follow its subtle variations rather than treating it as fixed.",
+      "Listen back to a field recording you have made. What do you hear now that you didn't notice when you recorded it?",
+      "Pay attention to how the acoustic character of your space changes at different times of day.",
+      "Choose a sound that you usually find irritating. Listen to it with neutral attention for two minutes.",
+      "Find a piece of music in a language you don't speak. Listen only to the phonetic texture — not meaning, only sound.",
+      "Notice the silence after a sound ends. How long does it take for quiet to settle?",
+      "Listen to the lowest frequency sound you can identify right now. Follow it.",
+      "Attend to the rhythm of the city, building, or space you are in. Is there a pulse beneath the surface?",
+      "Close your eyes and point toward a sound source. Open them. How accurate was your spatial sense?",
+      "Choose one minute of complete, undivided listening today — no other task, no interpretation. Just attend.",
+    ];
 
-// ── Daily prompt ──
-const PROMPTS = [
-  "Sit still for two minutes. Without trying to identify anything, let sounds arrive and pass like weather.",
-  "Choose one sound in your environment right now. Follow it until it ends — or until you can't hear it anymore.",
-  "Notice the furthest sound you can hear. Then the nearest. Move your attention slowly between the two.",
-  "Listen to a piece of music and track only one instrument or voice for its entire duration.",
-  "Step outside for five minutes. Count how many distinct sound sources you can identify without looking.",
-  "Find the quietest place available to you. Spend three minutes noticing what silence actually contains.",
-  "Play a familiar song. Listen as if you are hearing it for the first time — focus only on the texture of the sound.",
-  "Pay attention to the rhythm of your own breathing for two minutes. Notice if any sounds around you synchronise with it.",
-  "Choose a room in your home. Close your eyes and build a map of the space using only sound.",
-  "Listen to a field recording or environmental sound. What story does it tell about the place it was made?",
-  "Notice the quality of silence between sounds. Is it empty, or does it have its own texture?",
-  "Hum a single note quietly and hold it. Notice how the room responds — what resonates, what absorbs.",
-  "Find a sound that feels regulating to you today. Stay with it for five minutes. Note how your body responds.",
-  "Listen to music you wouldn't normally choose. Suspend judgment and track only the physical sensation it produces.",
-  "Pay attention to the sound of your own voice today — its pitch, pace, and quality in different conversations.",
-  "Find a repeating sound — traffic, machinery, water. Listen until you stop hearing it as noise.",
-  "Choose three sounds from your environment. If they were instruments in an ensemble, what would the piece be called?",
-  "Listen to a piece with your eyes closed. Imagine the space in which it was recorded — its size, surfaces, light.",
-  "Notice when you next involuntarily attend to a sound. What drew your attention? What does that tell you?",
-  "Spend two minutes in focal listening — one source, full attention. Then switch to global listening — everything at once.",
-  "Find a drone or continuous tone in your environment. Follow its subtle variations rather than treating it as fixed.",
-  "Listen back to a field recording you have made. What do you hear now that you didn't notice when you recorded it?",
-  "Pay attention to how the acoustic character of your space changes at different times of day.",
-  "Choose a sound that you usually find irritating. Listen to it with neutral attention for two minutes.",
-  "Find a piece of music in a language you don't speak. Listen only to the phonetic texture — not meaning, only sound.",
-  "Notice the silence after a sound ends. How long does it take for quiet to settle?",
-  "Listen to the lowest frequency sound you can identify right now. Follow it.",
-  "Attend to the rhythm of the city, building, or space you are in. Is there a pulse beneath the surface?",
-  "Close your eyes and point toward a sound source. Open them. How accurate was your spatial sense?",
-  "Choose one minute of complete, undivided listening today — no other task, no interpretation. Just attend.",
-  "Find a sound that shifts your mood. Play it again. Notice the moment the shift occurs.",
-];
+    const dayOfYear = Math.floor(
+      (new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000
+    );
+    const promptEl = document.getElementById('dailyPrompt');
+    if (promptEl) promptEl.textContent = PROMPTS[dayOfYear % PROMPTS.length];
 
-const dayOfYear = Math.floor(
-  (new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000
-);
-const el = document.getElementById('dailyPrompt');
-if (el) el.textContent = PROMPTS[dayOfYear % PROMPTS.length];
+    // ── Crisis resources toggle ──
+    const crisisToggle = document.getElementById('crisisToggle');
+    const crisisGrid   = document.getElementById('crisisGrid');
+    const crisisNote   = document.getElementById('crisisNote');
 
-// ── Crisis resources toggle ──
-const toggle = document.getElementById('crisisToggle');
-const grid   = document.getElementById('crisisGrid');
-const note   = document.getElementById('crisisNote');
+    crisisToggle.addEventListener('click', () => {
+      const open = crisisGrid.classList.toggle('open');
+      crisisNote.classList.toggle('open', open);
+      crisisToggle.classList.toggle('open', open);
+      crisisToggle.setAttribute('aria-expanded', open);
+    });
 
-toggle.addEventListener('click', () => {
-  const open = grid.classList.toggle('open');
-  note.classList.toggle('open', open);
-  toggle.classList.toggle('open', open);
-  toggle.setAttribute('aria-expanded', open);
-});
+    crisisToggle.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); crisisToggle.click(); }
+    });
 
-toggle.addEventListener('keydown', e => {
-  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle.click(); }
-});
-</script>
+    // ── Header: active link ──
+    const path = window.location.pathname.replace(/\/$/, '') || '/';
+    document.querySelectorAll('.sil-header__nav a').forEach(a => {
+      const href = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
+      if (href === path) a.classList.add('sil-active');
+    });
+
+    // ── Header: mobile toggle ──
+    const menuToggle = document.getElementById('silMenuToggle');
+    const nav        = document.getElementById('silNav');
+    menuToggle.addEventListener('click', () => {
+      const open = nav.classList.toggle('sil-open');
+      menuToggle.setAttribute('aria-expanded', open);
+    });
+    nav.querySelectorAll('a').forEach(a =>
+      a.addEventListener('click', () => nav.classList.remove('sil-open'))
+    );
+
+    // ── Header: sign out ──
+    async function getSupabase() {
+      if (window._supabase) return window._supabase;
+      const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+      return createClient(
+        'https://lrjuufvrgkuvfxcmybtf.supabase.co',
+        'sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1'
+      );
+    }
+
+    document.getElementById('silSignOut').addEventListener('click', async function () {
+      this.disabled = true;
+      this.textContent = 'Signing out…';
+      try {
+        const sb = await getSupabase();
+        await sb.auth.signOut();
+      } finally {
+        window.location.replace('/');
+      }
+    });
+  </script>
 
 </body>
 </html>
