@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ear Training — Sensory Intelligence Lab</title>
 
-  <script src="/dashboard/auth-guard.js"></script>
-  
+  <script src="/dashboard/auth-guard.js" type="module"></script>
+
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
 
   <style>
@@ -40,58 +40,105 @@
       background: var(--color-bg);
       line-height: 1.6;
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
     a { color: var(--color-text); text-decoration: underline; text-underline-offset: 3px; }
     a:hover { color: var(--color-accent); }
 
-    /* ── Header ── */
-    header {
+    /* ══════════════════════════════════════
+       HEADER
+    ══════════════════════════════════════ */
+    .sil-header {
       border-bottom: 1px solid var(--color-border);
       padding: 0 1.5rem;
-      height: var(--header-height);
+      height: 56px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       position: sticky;
       top: 0;
+      left: 0;
+      right: 0;
       background: var(--color-bg);
       z-index: 10;
       gap: 1rem;
+      width: 100%;
     }
-
-    header h1 {
+    .sil-header__wordmark {
       font-family: var(--font-heading);
       font-size: 1rem;
       font-weight: 600;
       letter-spacing: -0.01em;
       white-space: nowrap;
       flex-shrink: 0;
+      text-decoration: none;
+      color: var(--color-text);
     }
-
-    header nav {
+    .sil-header__wordmark:hover { color: var(--color-accent); }
+    .sil-header__nav {
       display: flex;
-      gap: 1.25rem;
+      gap: 0.25rem;
       align-items: center;
-      flex-wrap: wrap;
-      justify-content: flex-end;
     }
-
-    header nav a {
+    .sil-header__nav a {
+      font-family: var(--font-body);
       font-size: 0.8rem;
       font-weight: 500;
       text-decoration: none;
       color: var(--color-muted);
       transition: color 0.15s;
       white-space: nowrap;
+      padding: 0.3rem 0.65rem;
     }
-    header nav a:hover { color: var(--color-text); }
-
-    @media (max-width: 680px) {
-      header { height: auto; padding: 0.75rem 1rem; flex-wrap: wrap; gap: 0.5rem; }
-      header h1 { font-size: 0.875rem; }
-      header nav { gap: 0.75rem; width: 100%; }
-      header nav a { font-size: 0.75rem; }
+    .sil-header__nav a:hover { color: var(--color-text); }
+    .sil-header__nav a.sil-active { color: var(--color-accent); font-weight: 600; }
+    .sil-header__signout {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--color-muted);
+      background: none;
+      border: 1px solid var(--color-border);
+      cursor: pointer;
+      padding: 0.3rem 0.75rem;
+      transition: color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+      line-height: 1.6;
+    }
+    .sil-header__signout:hover { color: var(--color-text); border-color: var(--color-text); }
+    .sil-header__signout:disabled { opacity: 0.5; cursor: not-allowed; }
+    .sil-header__toggle {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      flex-shrink: 0;
+    }
+    .sil-header__toggle span { display: block; width: 20px; height: 2px; background: var(--color-text); }
+    @media (max-width: 700px) {
+      .sil-header { padding: 0 1rem; }
+      .sil-header__toggle { display: flex; }
+      .sil-header__nav {
+        display: none;
+        position: absolute;
+        top: 56px; left: 0; right: 0;
+        background: var(--color-bg);
+        border-bottom: 1px solid var(--color-border);
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0.75rem 1rem;
+        gap: 0;
+        z-index: 99;
+      }
+      .sil-header__nav.sil-open { display: flex; }
+      .sil-header__nav a,
+      .sil-header__signout { font-size: 0.875rem; padding: 0.55rem 0.5rem; }
+      .sil-header__signout { border: none; }
     }
 
     /* ── Breadcrumb ── */
@@ -120,7 +167,6 @@
     .breadcrumb-nav a { color: var(--color-muted); text-decoration: none; }
     .breadcrumb-nav a:hover { color: var(--color-accent); text-decoration: underline; }
 
-    /* Hide intermediate breadcrumb steps on very small screens, keep first + last */
     @media (max-width: 400px) {
       .breadcrumb-nav li.bc-mid { display: none; }
       .breadcrumb-nav li.bc-mid + li::before { display: none; }
@@ -131,6 +177,7 @@
       max-width: 860px;
       margin: 0 auto;
       padding: 2.5rem 2rem 4rem;
+      flex: 1;
     }
 
     .page-header {
@@ -453,21 +500,26 @@
 </head>
 <body>
 
-<header>
-  <h1>Sensory Intelligence Lab</h1>
-  <nav>
-    <a href="/sensory-intelligence-lab/dashboard/">Home</a>
-    <a href="/sensory-intelligence-lab/dashboard/">Dashboard</a>
-    <a href="/sensory-intelligence-lab/account/">Account</a>
-    <a href="/sensory-intelligence-lab/sessions/">Sessions</a>
-    <a href="/blog/">Blog</a>
+<!-- ══════════════════════════════════════
+     HEADER
+══════════════════════════════════════ -->
+<header class="sil-header">
+  <a class="sil-header__wordmark" href="/dashboard/">Sensory Intelligence Lab</a>
+  <button class="sil-header__toggle" id="silMenuToggle" aria-label="Toggle navigation" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <nav class="sil-header__nav" id="silNav">
+    <a href="/dashboard/">Dashboard</a>
+    <a href="/account/">Account</a>
+    <a href="/booking/">Book a session</a>
+    <button class="sil-header__signout" id="silSignOut">Sign out</button>
   </nav>
 </header>
 
 <nav aria-label="Breadcrumb" class="breadcrumb-nav">
   <ol>
-    <li><a href="/sensory-intelligence-lab/dashboard/">Home</a></li>
-    <li class="bc-mid"><a href="/sensory-intelligence-lab/dashboard/">Dashboard</a></li>
+    <li><a href="/dashboard/">Home</a></li>
+    <li class="bc-mid"><a href="/dashboard/">Dashboard</a></li>
     <li>Ear Training</li>
   </ol>
 </nav>
@@ -587,12 +639,49 @@
   <p>Jordan Elias Music Therapy · Berlin · <a href="/contact/">Contact</a></p>
 </footer>
 
-<script>
+<script type="module">
+
+// ─────────────────────────────────────────────────────────
+// HEADER BEHAVIOUR
+// ─────────────────────────────────────────────────────────
+const path = window.location.pathname.replace(/\/$/, '') || '/';
+document.querySelectorAll('.sil-header__nav a').forEach(a => {
+  const href = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
+  if (href === path) a.classList.add('sil-active');
+});
+
+const menuToggle = document.getElementById('silMenuToggle');
+const silNav     = document.getElementById('silNav');
+menuToggle.addEventListener('click', () => {
+  const open = silNav.classList.toggle('sil-open');
+  menuToggle.setAttribute('aria-expanded', open);
+});
+silNav.querySelectorAll('a').forEach(a =>
+  a.addEventListener('click', () => silNav.classList.remove('sil-open'))
+);
+
+async function getSupabase() {
+  if (window._supabase) return window._supabase;
+  const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+  return createClient(
+    'https://lrjuufvrgkuvfxcmybtf.supabase.co',
+    'sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1'
+  );
+}
+
+document.getElementById('silSignOut').addEventListener('click', async function () {
+  this.disabled = true;
+  this.textContent = 'Signing out…';
+  try {
+    const sb = await getSupabase();
+    await sb.auth.signOut();
+  } finally {
+    window.location.replace('/');
+  }
+});
+
 // ══════════════════════════════════════════════
 // AUDIO ENGINE
-// One GainNode per oscillator. No shared buses.
-// Envelopes are strictly non-overlapping within
-// each voice to avoid phase/amplitude artifacts.
 // ══════════════════════════════════════════════
 
 let audioCtx = null;
@@ -603,10 +692,6 @@ function getCtx() {
   return audioCtx;
 }
 
-// Play one sine tone.
-// startOffset: seconds from now
-// duration: sustain body length in seconds (attack + sustain + release appended)
-// amp: peak amplitude (0–1)
 function sineTone(freq, startOffset, duration, amp) {
   if (amp === undefined) amp = 0.15;
   const ctx = getCtx();
@@ -620,8 +705,6 @@ function sineTone(freq, startOffset, duration, amp) {
   osc.type            = 'sine';
   osc.frequency.value = freq;
 
-  // Envelope: 30ms attack, then sustain, then 100ms release
-  // All times are absolute to avoid rounding errors
   const atk = 0.03;
   const rel = 0.10;
   const sus = Math.max(duration - atk, 0.01);
@@ -819,16 +902,12 @@ function generateInterval() {
 function playInterval() {
   const { interval, rootMidi } = state.currentAnswer;
   const upper  = rootMidi + interval.semitones;
-  const noteDur = 1.4; // sustain length (envelope adds ~130ms on top)
+  const noteDur = 1.4;
 
   if (state.presentation === 'simultaneous') {
-    // Lower amp per voice to keep sum clean
     sineTone(midiToHz(rootMidi), 0, noteDur, 0.12);
     sineTone(midiToHz(upper),    0, noteDur, 0.12);
   } else {
-    // Sequential: second note starts well after first has fully released
-    // Total first note time = atk(0.03) + noteDur + rel(0.10) = noteDur + 0.13
-    // Add 0.2s gap before second note
     const gap = noteDur + 0.13 + 0.20;
     if (state.presentation === 'sequential') {
       sineTone(midiToHz(rootMidi), 0,   noteDur, 0.15);
@@ -890,12 +969,9 @@ function playChord() {
   const noteDur   = 1.4;
 
   if (state.voicing === 'simultaneous') {
-    // Scale amplitude down per additional voice
     const amp = Math.max(0.07, 0.16 / Math.sqrt(midiNotes.length));
     midiNotes.forEach(m => sineTone(midiToHz(m), 0, noteDur, amp));
   } else {
-    // Non-overlapping arpeggio: each note starts after the previous has released
-    // Step = noteDur + atk(0.03) + rel(0.10) + 0.15 gap
     const step = noteDur + 0.03 + 0.10 + 0.15;
     const notes = state.voicing === 'arpUp' ? midiNotes : [...midiNotes].reverse();
     notes.forEach((m, i) => sineTone(midiToHz(m), i * step, noteDur, 0.15));
@@ -935,7 +1011,6 @@ function renderChordAnswer() {
 
   let rows = `<div class="chord-answer-rows">`;
 
-  // Quality row
   rows += `<div class="chord-answer-row">
     <span class="chord-row-label">Quality</span>
     <div class="chord-row-btns">
@@ -943,7 +1018,6 @@ function renderChordAnswer() {
     </div>
   </div>`;
 
-  // 7th row
   if (show7th) {
     rows += `<div class="chord-answer-row">
       <span class="chord-row-label">7th</span>
@@ -956,7 +1030,6 @@ function renderChordAnswer() {
     </div>`;
   }
 
-  // Combined 9 / 11 / 13 row
   if (showExtended) {
     rows += `<div class="chord-answer-row">
       <span class="chord-row-label">9 / 11 / 13</span>
@@ -981,7 +1054,6 @@ function renderChordAnswer() {
 
   area.innerHTML = `<div class="answer-section"><p class="section-label">Build your answer</p>${rows}</div>`;
 
-  // Wire toggles — each group is independent
   area.querySelectorAll('.ans-btn[data-grp]').forEach(btn => {
     btn.addEventListener('click', () => {
       if (state.submitted) return;
@@ -1014,40 +1086,30 @@ function chordToComponents(chord) {
   const set = state.chordSet;
   const c   = { quality: null, seventh: 'none', ninth: 'none', eleventh: 'none', thirteenth: 'none' };
 
-  // Triad quality from intervals
   if      (ivs[1] === 4 && ivs[2] === 7) c.quality = 'major';
   else if (ivs[1] === 3 && ivs[2] === 7) c.quality = 'minor';
   else if (ivs[1] === 4 && ivs[2] === 8) c.quality = 'aug';
   else if (ivs[1] === 3 && ivs[2] === 6) c.quality = n.includes('Half') ? 'halfdim' : 'dim';
 
-  // In the extended set, the answer UI has "Dominant" as a quality button.
-  // Dominant 7th/9th/11th/13th chords all use a major triad + ♭7, so they
-  // would otherwise map to 'major'. Override to 'dom' only in extended set.
   if (set === 'extended' && (n.startsWith('Dom') || n.startsWith('Dominant'))) {
     c.quality = 'dom';
   }
-  // In sevenths set, "Dominant 7th" has no separate 'dom' button — user picks
-  // Major quality + ♭7. So keep c.quality = 'major' for that chord.
 
-  // 7th
   if (ivs.length >= 4) {
     if      (ivs[3] === 11) c.seventh = 'maj7';
     else if (ivs[3] === 10) c.seventh = 'dom7';
     else if (ivs[3] === 9)  c.seventh = 'dim7';
   }
 
-  // 9th
   const ninth = ivs.find(i => i === 13 || i === 14 || i === 15);
   if      (ninth === 13) c.ninth = 'flat9';
   else if (ninth === 14) c.ninth = 'nat9';
   else if (ninth === 15) c.ninth = 'sharp9';
 
-  // 11th
   const el = ivs.find(i => i === 17 || i === 18);
   if      (el === 17) c.eleventh = 'nat11';
   else if (el === 18) c.eleventh = 'sharp11';
 
-  // 13th
   const th = ivs.find(i => i === 20 || i === 21);
   if      (th === 20) c.thirteenth = 'flat13';
   else if (th === 21) c.thirteenth = 'nat13';
@@ -1119,6 +1181,16 @@ function updateScore() {
   document.getElementById('scorePercent').innerHTML =
     pct ? `Accuracy <strong>${pct}</strong>` : '';
 }
+
+// expose for inline onclick handlers
+window.setMode          = setMode;
+window.setSetting       = setSetting;
+window.setChordSetting  = setChordSetting;
+window.startSession     = startSession;
+window.playCurrentSound = playCurrentSound;
+window.checkAnswer      = checkAnswer;
+window.nextQuestion     = nextQuestion;
+
 </script>
 
 </body>
