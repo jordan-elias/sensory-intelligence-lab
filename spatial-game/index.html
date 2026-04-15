@@ -6,7 +6,6 @@
   <title>Spatial Awareness — Sensory Intelligence Lab</title>
 
   <script src="/dashboard/auth-guard.js" type="module"></script>
-  <script src="/assets/js/header.js" defer></script>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
 
@@ -38,6 +37,100 @@
     }
     a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
     a:hover { color: var(--accent); }
+
+    /* ══════════════════════════════════════
+       HEADER
+    ══════════════════════════════════════ */
+    .sil-header {
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg);
+      z-index: 100;
+      gap: 1rem;
+      width: 100%;
+    }
+    .sil-header__wordmark {
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      flex-shrink: 0;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .sil-header__wordmark:hover { color: var(--accent); }
+    .sil-header__nav {
+      display: flex;
+      gap: 0.25rem;
+      align-items: center;
+    }
+    .sil-header__nav a {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-decoration: none;
+      color: var(--muted);
+      transition: color 0.15s;
+      white-space: nowrap;
+      padding: 0.3rem 0.65rem;
+    }
+    .sil-header__nav a:hover { color: var(--text); }
+    .sil-header__nav a.sil-active { color: var(--accent); font-weight: 600; }
+    .sil-header__signout {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--muted);
+      background: none;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      padding: 0.3rem 0.75rem;
+      transition: color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+      line-height: 1.6;
+    }
+    .sil-header__signout:hover { color: var(--text); border-color: var(--text); }
+    .sil-header__signout:disabled { opacity: 0.5; cursor: not-allowed; }
+    .sil-header__toggle {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      flex-shrink: 0;
+    }
+    .sil-header__toggle span { display: block; width: 20px; height: 2px; background: var(--text); }
+    @media (max-width: 700px) {
+      .sil-header { padding: 0 1rem; }
+      .sil-header__toggle { display: flex; }
+      .sil-header__nav {
+        display: none;
+        position: absolute;
+        top: 56px; left: 0; right: 0;
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0.75rem 1rem;
+        gap: 0;
+        z-index: 99;
+      }
+      .sil-header__nav.sil-open { display: flex; }
+      .sil-header__nav a,
+      .sil-header__signout { font-size: 0.875rem; padding: 0.55rem 0.5rem; }
+      .sil-header__signout { border: none; }
+    }
 
     /* ── Breadcrumb ── */
     .bc { padding: .75rem 1.5rem 0; max-width: 860px; margin: 0 auto; width: 100%; }
@@ -138,8 +231,8 @@
       text-align: center; min-height: 38px;
       display: flex; align-items: center; justify-content: center;
     }
-    .feedback-msg.correct { border-color: var(--accent); background: var(--accent-light); color: var(--accent-hover); font-weight: 500; }
-    .feedback-msg.wrong   { border-color: #c0a080; background: #fdf8f0; color: #6b4a1a; font-weight: 500; }
+    .feedback-msg.success { border-color: var(--accent); background: var(--accent-light); color: var(--accent-hover); font-weight: 500; }
+    .feedback-msg.error   { border-color: #c0a080; background: #fdf8f0; color: #6b4a1a; font-weight: 500; }
 
     /* ── Sliders ── */
     .lab-ctrl { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 140px; }
@@ -180,7 +273,7 @@
     }
     .spatial-diagram {
       position: relative;
-      width: 280px; height: 280px;
+      width: 300px; height: 300px;
       border: 1px solid var(--border);
       border-radius: 50%;
       background: transparent;
@@ -192,26 +285,33 @@
     /* ── Sound sources ── */
     .sound-source {
       position: absolute;
-      width: 12px; height: 12px;
+      width: 14px; height: 14px;
       border-radius: 50%;
       transform: translate(-50%, -50%);
-      transition: opacity .3s ease;
-      cursor: pointer;
+      transition: opacity .4s ease;
     }
-    .sound-source::before {
-      content: ''; position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      width: 32px; height: 32px; border-radius: 50%;
+    /* Target — filled solid */
+    .source-target {
+      background: var(--text);
+      border: 2px solid var(--text);
+      z-index: 10;
     }
-    .source-target { background: var(--text); border: 2px solid var(--text); z-index: 10; }
-    .source-distractor { background: transparent; border: 2px solid var(--border); z-index: 5; }
-    .source-clickable:hover { transform: translate(-50%, -50%) scale(1.25); }
+    /* Distractor — hollow ring */
+    .source-distractor {
+      background: transparent;
+      border: 2px solid var(--border);
+      z-index: 5;
+    }
+    /* Clickable state */
+    .source-clickable { cursor: pointer; }
+    .source-clickable:hover { transform: translate(-50%, -50%) scale(1.3); border-color: var(--accent); }
+    /* Post-guess states */
     .source-selected { background: var(--accent); border-color: var(--accent); }
-    .source-revealed { background: var(--text); border-color: var(--text); }
+    .source-revealed { background: var(--text); border-color: var(--text); box-shadow: 0 0 0 3px var(--accent-light); }
 
     .path-trace { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
 
+    /* Phase indicator */
     .phase-indicator {
       font-size: .65rem; letter-spacing: .1em; text-transform: uppercase;
       color: var(--muted); text-align: center;
@@ -236,7 +336,21 @@
 </head>
 <body>
 
-<div id="lab-header"></div>
+<!-- ══════════════════════════════════════
+     HEADER
+══════════════════════════════════════ -->
+<header class="sil-header">
+  <a class="sil-header__wordmark" href="/dashboard/">Sensory Intelligence Lab</a>
+  <button class="sil-header__toggle" id="silMenuToggle" aria-label="Toggle navigation" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <nav class="sil-header__nav" id="silNav">
+    <a href="/dashboard/">Dashboard</a>
+    <a href="/account/">Account</a>
+    <a href="/booking/">Book a session</a>
+    <button class="sil-header__signout" id="silSignOut">Sign out</button>
+  </nav>
+</header>
 
 <nav aria-label="Breadcrumb" class="bc">
   <ol>
@@ -330,7 +444,7 @@
       </div>
     </div>
 
-    <p class="lab-hint">Headphones recommended · Watch the moving dot · Click where it ends</p>
+    <p class="lab-hint">Headphones recommended · Listen to the distinct sound · Click where it ends</p>
 
   </div>
 
@@ -353,63 +467,634 @@
 <!-- Resonance Audio for binaural spatialisation -->
 <script src="https://cdn.jsdelivr.net/npm/resonance-audio/build/resonance-audio.min.js"></script>
 
-<script>
+<script type="module">
 'use strict';
+
+// ─────────────────────────────────────────────────────────
+// HEADER BEHAVIOUR
+// ─────────────────────────────────────────────────────────
+const path = window.location.pathname.replace(/\/$/, '') || '/';
+document.querySelectorAll('.sil-header__nav a').forEach(a => {
+  const href = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
+  if (href === path) a.classList.add('sil-active');
+});
+
+const menuToggle = document.getElementById('silMenuToggle');
+const silNav     = document.getElementById('silNav');
+menuToggle.addEventListener('click', () => {
+  const open = silNav.classList.toggle('sil-open');
+  menuToggle.setAttribute('aria-expanded', open);
+});
+silNav.querySelectorAll('a').forEach(a =>
+  a.addEventListener('click', () => silNav.classList.remove('sil-open'))
+);
+
+async function getSupabase() {
+  if (window._supabase) return window._supabase;
+  const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+  return createClient(
+    'https://lrjuufvrgkuvfxcmybtf.supabase.co',
+    'sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1'
+  );
+}
+
+document.getElementById('silSignOut').addEventListener('click', async function () {
+  this.disabled = true;
+  this.textContent = 'Signing out…';
+  try {
+    const sb = await getSupabase();
+    await sb.auth.signOut();
+  } finally {
+    window.location.replace('/');
+  }
+});
+
+// ═══════════════════════════════════════════════════════
+// TONE SOURCE
+// Synthesises a spatially-positioned sound with a distinct
+// timbre and rhythmic pattern using Resonance Audio.
+// ═══════════════════════════════════════════════════════
+class ToneSource {
+  constructor(audioCtx, resonanceScene, config) {
+    this.audioCtx       = audioCtx;
+    this.resonanceScene = resonanceScene;
+    this.frequency      = config.frequency;
+    this.timbre         = config.timbre;   // 'pluck' | 'hum' | 'chirp'
+    this.rhythmMs       = config.rhythmMs; // interval between notes in ms
+    this.isTarget       = config.isTarget;
+    this.position       = { x: 0, y: 0, z: -1 };
+    this.resonanceSource = null;
+    this._intervalId    = null;
+  }
+
+  init() {
+    this.resonanceSource = this.resonanceScene.createSource();
+    this.resonanceSource.setPosition(
+      this.position.x,
+      this.position.y,
+      this.position.z
+    );
+  }
+
+  _playNote() {
+    const ctx = this.audioCtx;
+    const now = ctx.currentTime;
+
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    switch (this.timbre) {
+
+      case 'pluck':
+        // Sine — sharp percussive decay
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(this.frequency, now);
+        gain.gain.setValueAtTime(0.32, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+        osc.connect(gain);
+        gain.connect(this.resonanceSource.input);
+        osc.start(now);
+        osc.stop(now + 0.25);
+        break;
+
+      case 'hum':
+        // Triangle — slow attack, sustained
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(this.frequency, now);
+        gain.gain.setValueAtTime(0.0, now);
+        gain.gain.linearRampToValueAtTime(0.22, now + 0.06);
+        gain.gain.linearRampToValueAtTime(0.16, now + 0.32);
+        gain.gain.linearRampToValueAtTime(0.0,  now + 0.42);
+        osc.connect(gain);
+        gain.connect(this.resonanceSource.input);
+        osc.start(now);
+        osc.stop(now + 0.45);
+        break;
+
+      case 'chirp': {
+        // Square through lowpass — bright, clipped
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(this.frequency, now);
+        const filt = ctx.createBiquadFilter();
+        filt.type = 'lowpass';
+        filt.frequency.value = 1400;
+        filt.Q.value = 1.2;
+        gain.gain.setValueAtTime(0.14, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+        osc.connect(filt);
+        filt.connect(gain);
+        gain.connect(this.resonanceSource.input);
+        osc.start(now);
+        osc.stop(now + 0.20);
+        break;
+      }
+    }
+  }
+
+  startRhythm() {
+    this._playNote();
+    this._intervalId = setInterval(() => this._playNote(), this.rhythmMs);
+  }
+
+  stopRhythm() {
+    if (this._intervalId !== null) {
+      clearInterval(this._intervalId);
+      this._intervalId = null;
+    }
+  }
+
+  setPosition(x, y, z) {
+    this.position = { x, y, z };
+    if (this.resonanceSource) {
+      this.resonanceSource.setPosition(x, y, z);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// PATH GENERATOR
+// Produces per-frame position arrays for each source.
+// Diagram is 300×300 px; origin at centre (150,150).
+// ═══════════════════════════════════════════════════════
+const DIAGRAM_RADIUS = 150; // px, half of 300px container
+
+function polarToXY(angleDeg, distance) {
+  const rad = (angleDeg - 90) * Math.PI / 180;
+  return {
+    x: distance * Math.cos(rad),
+    y: distance * Math.sin(rad),
+  };
+}
+
+function xyToSpatial(x, y) {
+  // Map diagram coords to Resonance Audio 3D space
+  // x → left/right,  y → front/back (z-axis)
+  return {
+    sx: (x / DIAGRAM_RADIUS) * 2,
+    sy: 0,
+    sz: -(y / DIAGRAM_RADIUS) * 2,
+  };
+}
+
+function generatePath(complexity, durationSec, startAngleDeg, speedMul) {
+  const FPS    = 60;
+  const frames = Math.round((durationSec / speedMul) * FPS);
+  const pts    = [];
+
+  if (complexity === 'simple') {
+    // Arc: 180° sweep at 70% radius
+    const r = DIAGRAM_RADIUS * 0.70;
+    for (let i = 0; i <= frames; i++) {
+      const angle = startAngleDeg + (180 * i / frames);
+      const { x, y } = polarToXY(angle, r);
+      const { sx, sy, sz } = xyToSpatial(x, y);
+      pts.push({ x, y, sx, sy, sz });
+    }
+
+  } else if (complexity === 'medium') {
+    // Lissajous figure
+    const A = DIAGRAM_RADIUS * 0.62;
+    const offset = startAngleDeg * Math.PI / 180;
+    for (let i = 0; i <= frames; i++) {
+      const t = (i / frames) * Math.PI * 2;
+      const x = A * Math.sin(3 * t + offset);
+      const y = A * Math.sin(2 * t);
+      const { sx, sy, sz } = xyToSpatial(x, y);
+      pts.push({ x, y, sx, sy, sz });
+    }
+
+  } else {
+    // Complex: smoothed random walk
+    let angle    = startAngleDeg;
+    let distance = DIAGRAM_RADIUS * 0.50;
+    const raw = [];
+    for (let i = 0; i <= frames; i++) {
+      angle    += (Math.random() - 0.5) * 28;
+      distance += (Math.random() - 0.5) * 18;
+      distance  = Math.max(24, Math.min(DIAGRAM_RADIUS * 0.82, distance));
+      const { x, y } = polarToXY(angle, distance);
+      raw.push({ x, y });
+    }
+    // Moving-average smooth
+    const W = 5;
+    for (let i = 0; i <= frames; i++) {
+      const lo = Math.max(0, i - W), hi = Math.min(frames, i + W);
+      let sx2 = 0, sy2 = 0;
+      for (let j = lo; j <= hi; j++) { sx2 += raw[j].x; sy2 += raw[j].y; }
+      const n = hi - lo + 1;
+      const x = sx2 / n, y = sy2 / n;
+      const sp = xyToSpatial(x, y);
+      pts.push({ x, y, sx: sp.sx, sy: sp.sy, sz: sp.sz });
+    }
+  }
+
+  return pts;
+}
 
 // ═══════════════════════════════════════════════════════
 // GAME STATE
 // ═══════════════════════════════════════════════════════
-const state = {
-  difficulty: 'easy',
-  numSources: 2,
-  pathComplexity: 'simple',
-  movementSpeed: 1.0,
+const G = {
+  audioCtx:       null,
+  resonanceScene: null,
 
-  phase: 'idle',      // idle | observe | respond | result
-  targetIndex: 0,
-  positions: [],      // [{ x, y }] normalised 0–1 in diagram space
-  sourceEls: [],
-  selectedIndex: null,
+  sources:        [],   // ToneSource[]
+  paths:          [],   // position arrays per source
+  targetIndex:    0,
 
-  trialCount: 0,
-  correctCount: 0,
+  phase: 'idle',  // idle | identity | handoff | tracking | reveal | guess | result
+  trials:  0,
+  correct: 0,
 
-  audioCtx: null,
-  resonance: null,
-  animRaf: null,
-  pathPoints: [],     // recorded path of target during observe phase
-  observeStart: null,
-  observeDuration: 0,
+  // Settings
+  numSources:    2,
+  complexity:    'simple',
+  speedMul:      1.0,
+
+  animRaf:       null,
+  trackStart:    null,  // performance.now() when tracking phase started
+  trackDuration: 0,     // ms
 };
 
-// Difficulty → observe duration, num waypoints, distractor motion
-const DIFFICULTY = {
-  easy:   { observeMs: 3000, waypoints: 2, distractorMove: false },
-  medium: { observeMs: 2200, waypoints: 3, distractorMove: true  },
-  hard:   { observeMs: 1500, waypoints: 4, distractorMove: true  },
-};
+// ─────────────────────────────────────────────────────────
+// AUDIO INIT
+// ─────────────────────────────────────────────────────────
+function initAudio() {
+  if (G.audioCtx) return;
+  G.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-// ═══════════════════════════════════════════════════════
-// DOM REFS
-// ═══════════════════════════════════════════════════════
-const diagram     = document.getElementById('spatial-diagram');
-const pathSvg     = document.getElementById('path-trace');
-const phaseEl     = document.getElementById('phase-indicator');
-const feedbackEl  = document.getElementById('feedback-msg');
-const btnPlay     = document.getElementById('btn-play');
-const btnNext     = document.getElementById('btn-next');
-const statTrials  = document.getElementById('stat-trials');
-const statCorrect = document.getElementById('stat-correct');
-const statAcc     = document.getElementById('stat-accuracy');
+  G.resonanceScene = new ResonanceAudio(G.audioCtx);
+  G.resonanceScene.setRoomProperties(
+    { width: 8, height: 3, depth: 8 },
+    {
+      left: 'acoustic-ceiling-tiles', right:  'acoustic-ceiling-tiles',
+      front:'acoustic-ceiling-tiles', back:   'acoustic-ceiling-tiles',
+      down: 'acoustic-ceiling-tiles', up:     'acoustic-ceiling-tiles',
+    }
+  );
+  G.resonanceScene.output.connect(G.audioCtx.destination);
+}
 
-// ═══════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────
+// SOURCE CONFIGS
+// Three sources with distinct timbres, pitches, and rhythms.
+// Different rhythms (pluck=quarter-note feel, hum=triplet,
+// chirp=dotted-eighth) make each source individually trackable.
+// ─────────────────────────────────────────────────────────
+const SOURCE_CONFIGS = [
+  {
+    frequency: 329.63,  // E4
+    timbre:    'pluck',
+    rhythmMs:  667,     // ~90 BPM quarter notes
+    isTarget:  true,
+  },
+  {
+    frequency: 392.00,  // G4
+    timbre:    'hum',
+    rhythmMs:  444,     // triplet eighths at 90 BPM
+    isTarget:  false,
+  },
+  {
+    frequency: 523.25,  // C5
+    timbre:    'chirp',
+    rhythmMs:  333,     // sixteenth-note feel
+    isTarget:  false,
+  },
+];
+
+function buildSources() {
+  G.sources.forEach(s => s.stopRhythm());
+  G.sources = [];
+
+  for (let i = 0; i < G.numSources; i++) {
+    const src = new ToneSource(G.audioCtx, G.resonanceScene, SOURCE_CONFIGS[i]);
+    src.init();
+    G.sources.push(src);
+  }
+  G.targetIndex = 0; // always first config
+}
+
+function buildPaths() {
+  G.paths = [];
+  // 5 seconds of movement per trial (divided by speed multiplier)
+  const dur = 5.0;
+  for (let i = 0; i < G.numSources; i++) {
+    const startAngle = Math.random() * 360;
+    G.paths.push(generatePath(G.complexity, dur, startAngle, G.speedMul));
+  }
+  G.trackDuration = (dur / G.speedMul) * 1000; // ms
+}
+
+// ─────────────────────────────────────────────────────────
+// DOM HELPERS
+// ─────────────────────────────────────────────────────────
+const diagram    = document.getElementById('spatial-diagram');
+const pathSvg    = document.getElementById('path-trace');
+const phaseEl    = document.getElementById('phase-indicator');
+const feedbackEl = document.getElementById('feedback-msg');
+const btnPlay    = document.getElementById('btn-play');
+const btnNext    = document.getElementById('btn-next');
+
+function setPhase(text) {
+  phaseEl.textContent = text;
+}
+
+function setFeedback(msg, cls) {
+  feedbackEl.textContent = msg;
+  feedbackEl.className   = 'feedback-msg' + (cls ? ' ' + cls : '');
+}
+
+function clearDots() {
+  diagram.querySelectorAll('.sound-source').forEach(d => d.remove());
+}
+
+function clearPath() {
+  pathSvg.innerHTML = '';
+}
+
+// Build dot elements. In 'identity' the target is visually distinct;
+// in 'reveal' all dots look the same (shell game).
+function drawDots(showTarget) {
+  clearDots();
+  G.sources.forEach((src, i) => {
+    const dot = document.createElement('div');
+    dot.className   = 'sound-source';
+    dot.dataset.idx = i;
+    if (showTarget && i === G.targetIndex) {
+      dot.classList.add('source-target');
+    } else {
+      dot.classList.add('source-distractor');
+    }
+    diagram.appendChild(dot);
+  });
+}
+
+function placeDots() {
+  G.sources.forEach((src, i) => {
+    const dot = diagram.querySelector(`.sound-source[data-idx="${i}"]`);
+    if (!dot) return;
+    const frame = currentFrame(i);
+    const pos   = G.paths[i][frame];
+    dot.style.left    = (150 + pos.x) + 'px';
+    dot.style.top     = (150 + pos.y) + 'px';
+    src.setPosition(pos.sx, pos.sy, pos.sz);
+  });
+}
+
+function currentFrame(sourceIndex) {
+  if (G.trackStart === null) return 0;
+  const elapsed = performance.now() - G.trackStart;
+  const total   = G.paths[sourceIndex].length - 1;
+  return Math.min(total, Math.floor((elapsed / G.trackDuration) * total));
+}
+
+function setDotsOpacity(opacity) {
+  diagram.querySelectorAll('.sound-source').forEach(d => {
+    d.style.opacity = opacity;
+  });
+}
+
+function drawPathTrace(sourceIndex) {
+  clearPath();
+  const pts = G.paths[sourceIndex];
+  if (pts.length < 2) return;
+
+  const W = diagram.offsetWidth;
+  const H = diagram.offsetHeight;
+
+  const d = pts.map((p, i) => {
+    const px = (150 / DIAGRAM_RADIUS) * (DIAGRAM_RADIUS + p.x);
+    const py = (150 / DIAGRAM_RADIUS) * (DIAGRAM_RADIUS + p.y);
+    return (i === 0 ? 'M' : 'L') + px.toFixed(1) + ',' + py.toFixed(1);
+  }).join(' ');
+
+  const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  el.setAttribute('d', d);
+  el.setAttribute('fill', 'none');
+  el.setAttribute('stroke', 'var(--accent)');
+  el.setAttribute('stroke-width', '1.5');
+  el.setAttribute('stroke-dasharray', '5 3');
+  el.setAttribute('opacity', '0.45');
+  pathSvg.appendChild(el);
+
+  // Start dot
+  const sp = pts[0];
+  const startDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  startDot.setAttribute('cx', (150 / DIAGRAM_RADIUS) * (DIAGRAM_RADIUS + sp.x));
+  startDot.setAttribute('cy', (150 / DIAGRAM_RADIUS) * (DIAGRAM_RADIUS + sp.y));
+  startDot.setAttribute('r', '4');
+  startDot.setAttribute('fill', 'var(--accent)');
+  startDot.setAttribute('opacity', '0.5');
+  pathSvg.appendChild(startDot);
+}
+
+function updateStats() {
+  document.getElementById('stat-trials').textContent  = G.trials;
+  document.getElementById('stat-correct').textContent = G.correct;
+  const pct = G.trials > 0
+    ? Math.round((G.correct / G.trials) * 100) + '%'
+    : '—';
+  document.getElementById('stat-accuracy').textContent = pct;
+}
+
+// ─────────────────────────────────────────────────────────
+// FIVE-PHASE TRIAL
+// ─────────────────────────────────────────────────────────
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// Fade opacity from current value to target over `ms` ms
+function fadeOpacity(fromVal, toVal, ms) {
+  return new Promise(resolve => {
+    const start = performance.now();
+    const dots  = diagram.querySelectorAll('.sound-source');
+    function step(now) {
+      const t = Math.min((now - start) / ms, 1);
+      const v = fromVal + (toVal - fromVal) * t;
+      dots.forEach(d => { d.style.opacity = v; });
+      if (t < 1) requestAnimationFrame(step);
+      else resolve();
+    }
+    requestAnimationFrame(step);
+  });
+}
+
+async function runTrial() {
+  btnPlay.disabled = true;
+  btnNext.disabled = true;
+  setFeedback('');
+  clearPath();
+
+  // ── PHASE 1: IDENTITY (0–3 s) ──────────────────────────
+  // Target plays solo for 1.5 s so the user can orient, then
+  // distractors join for another 1.5 s. Dots are visible and
+  // the target dot is visually distinct (solid vs hollow).
+  G.phase = 'identity';
+  setPhase('listen — the filled dot is the target');
+
+  buildPaths();
+  G.trackStart = performance.now(); // begin tracking path time from now
+
+  drawDots(true);   // target = solid, distractors = hollow
+  setDotsOpacity(1);
+  placeDots();      // set initial positions
+
+  // Target plays solo
+  G.sources[G.targetIndex].startRhythm();
+  await sleep(1500);
+
+  // Distractors join
+  G.sources.forEach((src, i) => {
+    if (i !== G.targetIndex) src.startRhythm();
+  });
+  await sleep(1500);
+
+  // ── PHASE 2: HANDOFF (3–4 s) ──────────────────────────
+  // Dots start moving; fade to invisible over 1 s.
+  G.phase = 'handoff';
+  setPhase('track the target as it moves');
+
+  G.trackStart = performance.now(); // restart timing from here for tracking
+
+  // Rebuild paths with fresh timing (movement phase = 5 s from here)
+  buildPaths();
+  G.trackStart = performance.now();
+
+  // Animation loop — runs through handoff + tracking
+  let animRunning = true;
+  function animate() {
+    if (!animRunning) return;
+    placeDots();
+    G.animRaf = requestAnimationFrame(animate);
+  }
+  animate();
+
+  // Fade dots out
+  await fadeOpacity(1, 0, 1000);
+
+  // ── PHASE 3: TRACKING (4–9 s) ─────────────────────────
+  // Audio and movement continue; dots invisible.
+  G.phase = 'tracking';
+  setPhase('tracking…');
+
+  // Wait remaining track duration (paths are 5 s / speedMul)
+  await sleep(Math.max(0, G.trackDuration - 1000));
+
+  // ── PHASE 4: REVEAL ───────────────────────────────────
+  // Stop audio and animation. Dots reappear at final positions,
+  // now all looking the same (the shell game).
+  G.phase = 'reveal';
+  setPhase('where did the target end up?');
+
+  animRunning = false;
+  if (G.animRaf) cancelAnimationFrame(G.animRaf);
+  G.sources.forEach(s => s.stopRhythm());
+
+  // Redraw as identical hollow dots (no target distinction)
+  drawDots(false);
+
+  // Place at final positions
+  G.sources.forEach((src, i) => {
+    const dot   = diagram.querySelector(`.sound-source[data-idx="${i}"]`);
+    const final = G.paths[i][G.paths[i].length - 1];
+    if (dot) {
+      dot.style.left    = (150 + final.x) + 'px';
+      dot.style.top     = (150 + final.y) + 'px';
+      dot.style.opacity = 1;
+    }
+  });
+
+  // Make clickable
+  diagram.querySelectorAll('.sound-source').forEach(dot => {
+    dot.classList.add('source-clickable');
+    dot.addEventListener('click', () => handleGuess(parseInt(dot.dataset.idx)), { once: true });
+  });
+
+  G.phase = 'guess';
+}
+
+// ─────────────────────────────────────────────────────────
+// GUESS HANDLING
+// ─────────────────────────────────────────────────────────
+function handleGuess(selectedIndex) {
+  if (G.phase !== 'guess') return;
+  G.phase = 'result';
+
+  // Remove click handlers + clickable style
+  diagram.querySelectorAll('.sound-source').forEach(d => {
+    d.classList.remove('source-clickable');
+    d.style.cursor = 'default';
+  });
+
+  const correct = selectedIndex === G.targetIndex;
+  G.trials++;
+  if (correct) G.correct++;
+  updateStats();
+
+  const selectedDot = diagram.querySelector(`.sound-source[data-idx="${selectedIndex}"]`);
+  if (selectedDot) selectedDot.classList.add('source-selected');
+
+  if (correct) {
+    setFeedback('Correct', 'success');
+    setPhase('');
+  } else {
+    setFeedback('Incorrect — target revealed', 'error');
+    const targetDot = diagram.querySelector(`.sound-source[data-idx="${G.targetIndex}"]`);
+    if (targetDot) targetDot.classList.add('source-revealed');
+    drawPathTrace(G.targetIndex);
+    setPhase('');
+  }
+
+  btnNext.disabled = false;
+  btnPlay.disabled = false;
+}
+
+// ─────────────────────────────────────────────────────────
+// RESET
+// ─────────────────────────────────────────────────────────
+function resetTrial() {
+  G.phase = 'idle';
+  if (G.animRaf) { cancelAnimationFrame(G.animRaf); G.animRaf = null; }
+  G.sources.forEach(s => s.stopRhythm());
+  clearDots();
+  clearPath();
+  setPhase('');
+  setFeedback('');
+  btnPlay.disabled  = false;
+  btnNext.disabled  = true;
+}
+
+// ─────────────────────────────────────────────────────────
 // SETTINGS UI
-// ═══════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────
+const PRESETS = {
+  easy:   { numSources: 2, complexity: 'simple',  speedMul: 1.0 },
+  medium: { numSources: 2, complexity: 'medium',  speedMul: 1.5 },
+  hard:   { numSources: 3, complexity: 'complex', speedMul: 1.5 },
+};
+
+function applyPreset(key) {
+  const p = PRESETS[key];
+  G.numSources = p.numSources;
+  G.complexity = p.complexity;
+  G.speedMul   = p.speedMul;
+
+  document.querySelectorAll('[data-sources]').forEach(b =>
+    b.classList.toggle('on', parseInt(b.dataset.sources) === p.numSources)
+  );
+  document.querySelectorAll('[data-complexity]').forEach(b =>
+    b.classList.toggle('on', b.dataset.complexity === p.complexity)
+  );
+  const speedSlider = document.getElementById('movement-speed');
+  speedSlider.value = p.speedMul;
+  document.getElementById('movement-speed-val').textContent = p.speedMul.toFixed(1) + '×';
+}
+
 document.querySelectorAll('[data-difficulty]').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('[data-difficulty]').forEach(b => b.classList.remove('on'));
     btn.classList.add('on');
-    state.difficulty = btn.dataset.difficulty;
+    applyPreset(btn.dataset.difficulty);
   });
 });
 
@@ -417,7 +1102,7 @@ document.querySelectorAll('[data-sources]').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('[data-sources]').forEach(b => b.classList.remove('on'));
     btn.classList.add('on');
-    state.numSources = parseInt(btn.dataset.sources);
+    G.numSources = parseInt(btn.dataset.sources);
   });
 });
 
@@ -425,407 +1110,41 @@ document.querySelectorAll('[data-complexity]').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('[data-complexity]').forEach(b => b.classList.remove('on'));
     btn.classList.add('on');
-    state.pathComplexity = btn.dataset.complexity;
+    G.complexity = btn.dataset.complexity;
   });
 });
 
-const speedSlider = document.getElementById('movement-speed');
-const speedVal    = document.getElementById('movement-speed-val');
-speedSlider.addEventListener('input', () => {
-  state.movementSpeed = parseFloat(speedSlider.value);
-  speedVal.textContent = state.movementSpeed.toFixed(1) + '×';
+document.getElementById('movement-speed').addEventListener('input', e => {
+  G.speedMul = parseFloat(e.target.value);
+  document.getElementById('movement-speed-val').textContent =
+    G.speedMul.toFixed(1) + '×';
 });
 
-// Collapsible
-const customToggle  = document.getElementById('custom-toggle');
-const customContent = document.getElementById('custom-content');
-const customIcon    = document.getElementById('custom-icon');
-customToggle.addEventListener('click', () => {
-  const open = customContent.classList.toggle('active');
-  customIcon.textContent = open ? '▴' : '▾';
+// Collapsible custom settings
+document.getElementById('custom-toggle').addEventListener('click', () => {
+  const content = document.getElementById('custom-content');
+  const icon    = document.getElementById('custom-icon');
+  const open    = content.classList.toggle('active');
+  icon.textContent = open ? '▴' : '▾';
 });
 
-// ═══════════════════════════════════════════════════════
-// AUDIO — WEB AUDIO + RESONANCE AUDIO FOR BINAURAL HRTF
-// ═══════════════════════════════════════════════════════
-function initAudio() {
-  if (state.audioCtx) return;
-  state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (typeof ResonanceAudio !== 'undefined') {
-    state.resonance = new ResonanceAudio(state.audioCtx, {
-      ambisonicOrder: 1,
-    });
-    state.resonance.output.connect(state.audioCtx.destination);
-  }
-}
-
-// Returns a tone source playing at diagram-space position { x, y } (0–1 normalised)
-// x: 0=left, 1=right   y: 0=top, 1=bottom
-function createTone(freq, amp) {
-  const ctx = state.audioCtx;
-  const osc   = ctx.createOscillator();
-  const gain  = ctx.createGain();
-  osc.type = 'sine';
-  osc.frequency.value = freq;
-  gain.gain.setValueAtTime(0, ctx.currentTime);
-  gain.gain.linearRampToValueAtTime(amp, ctx.currentTime + 0.04);
-
-  let source;
-  if (state.resonance) {
-    source = state.resonance.createSource();
-    osc.connect(gain);
-    gain.connect(source.input);
-  } else {
-    // Fallback: simple stereo pan
-    const pan = ctx.createStereoPanner();
-    osc.connect(gain);
-    gain.connect(pan);
-    pan.connect(ctx.destination);
-    source = { pan, _gain: gain };
-  }
-
-  osc.start();
-  return { osc, gain, source };
-}
-
-function setTonePosition(tone, x, y) {
-  // Convert diagram 0–1 coords to 3D space: x→left/right, y→front/back
-  const px = (x - 0.5) * 4;     // -2 to +2 metres
-  const pz = (y - 0.5) * 4;     // -2 to +2 metres (front/back)
-  const py = 0;
-
-  if (state.resonance && tone.source.setPosition) {
-    tone.source.setPosition(px, py, -pz);
-  } else if (tone.source.pan) {
-    // Fallback: just pan left/right
-    tone.source.pan.value = px / 2;
-  }
-}
-
-function stopTone(tone) {
-  const ctx = state.audioCtx;
-  tone.gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.06);
-  tone.osc.stop(ctx.currentTime + 0.1);
-}
-
-// ═══════════════════════════════════════════════════════
-// DIAGRAM — SOURCE ELEMENTS
-// ═══════════════════════════════════════════════════════
-function getRadius() { return diagram.offsetWidth / 2; }
-
-// Convert normalised 0–1 to pixel position within diagram circle
-function normToPx(nx, ny) {
-  const r   = getRadius();
-  const pad = 0.15; // keep sources away from very edge
-  const lo  = pad, hi = 1 - pad;
-  const cx  = lo + nx * (hi - lo);
-  const cy  = lo + ny * (hi - lo);
-  return { px: cx * diagram.offsetWidth, py: cy * diagram.offsetHeight };
-}
-
-function placeDot(el, nx, ny) {
-  const { px, py } = normToPx(nx, ny);
-  el.style.left = px + 'px';
-  el.style.top  = py + 'px';
-}
-
-function buildSourceElements() {
-  // Remove old
-  state.sourceEls.forEach(el => el.remove());
-  state.sourceEls = [];
-
-  for (let i = 0; i < state.numSources; i++) {
-    const el = document.createElement('div');
-    el.className = 'sound-source source-distractor';
-    el.dataset.index = i;
-    diagram.appendChild(el);
-    state.sourceEls.push(el);
-  }
-}
-
-// ═══════════════════════════════════════════════════════
-// PATH GENERATION
-// ═══════════════════════════════════════════════════════
-function randomPos() {
-  // Generate point inside circle (using rejection sampling)
-  const margin = 0.15;
-  for (let i = 0; i < 50; i++) {
-    const x = margin + Math.random() * (1 - margin * 2);
-    const y = margin + Math.random() * (1 - margin * 2);
-    const dx = x - 0.5, dy = y - 0.5;
-    if (dx * dx + dy * dy < 0.16) return { x, y }; // within circle of r=0.4
-  }
-  return { x: 0.5, y: 0.5 };
-}
-
-function generateWaypoints(start) {
-  const complexityCount = {
-    simple: 2, medium: 3, complex: 4
-  }[state.pathComplexity] || 2;
-  const diff = DIFFICULTY[state.difficulty];
-  const n = Math.max(complexityCount, diff.waypoints);
-  const pts = [start];
-  for (let i = 0; i < n; i++) pts.push(randomPos());
-  return pts;
-}
-
-function lerpPos(a, b, t) {
-  return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
-}
-
-function posAlongPath(waypoints, t) {
-  if (waypoints.length < 2) return waypoints[0] || { x: 0.5, y: 0.5 };
-  const segs = waypoints.length - 1;
-  const seg  = Math.min(Math.floor(t * segs), segs - 1);
-  const segT = (t * segs) - seg;
-  return lerpPos(waypoints[seg], waypoints[seg + 1], segT);
-}
-
-// ═══════════════════════════════════════════════════════
-// TRIAL LIFECYCLE
-// ═══════════════════════════════════════════════════════
-function startTrial() {
+// ─────────────────────────────────────────────────────────
+// PLAY / NEXT BUTTONS
+// ─────────────────────────────────────────────────────────
+btnPlay.addEventListener('click', async () => {
   initAudio();
-  if (state.audioCtx.state === 'suspended') state.audioCtx.resume();
-
-  cancelAnimationFrame(state.animRaf);
-  clearPath();
-
-  // Assign positions
-  state.positions = [];
-  for (let i = 0; i < state.numSources; i++) {
-    state.positions.push(randomPos());
-  }
-  state.targetIndex = Math.floor(Math.random() * state.numSources);
-
-  buildSourceElements();
-
-  // Place all sources at initial positions
-  state.sourceEls.forEach((el, i) => {
-    placeDot(el, state.positions[i].x, state.positions[i].y);
-    el.classList.add('source-distractor');
-    el.classList.remove('source-target', 'source-clickable', 'source-selected', 'source-revealed');
-  });
-
-  // Generate movement path for target (and distractors on hard/medium)
-  const targetWaypoints = generateWaypoints(state.positions[state.targetIndex]);
-  const distractorWaypoints = state.positions.map((p, i) =>
-    i !== state.targetIndex ? generateWaypoints(p) : null
-  );
-
-  // Sound: target plays a distinct tone, distractors play masker tones
-  const targetFreq     = 440;
-  const distractorFreq = [330, 523];
-  const diff = DIFFICULTY[state.difficulty];
-
-  // Stop any previous tones
-  if (state._tones) state._tones.forEach(t => { try { stopTone(t); } catch(e){} });
-  state._tones = [];
-
-  const targetTone = createTone(targetFreq, 0.18);
-  state._tones.push(targetTone);
-
-  if (diff.distractorMove) {
-    state.positions.forEach((_, i) => {
-      if (i !== state.targetIndex) {
-        const t = createTone(distractorFreq[i % distractorFreq.length], 0.10);
-        state._tones.push(t);
-      }
-    });
-  }
-
-  setPhase('observe');
-  feedbackEl.textContent = '';
-  feedbackEl.className = 'feedback-msg';
-  btnPlay.disabled = true;
-  btnNext.disabled = true;
-
-  state.observeStart = performance.now();
-  state.observeDuration = diff.observeMs / state.movementSpeed;
-  state.pathPoints = [];
-
-  let toneIdx = 0;
-
-  function observeTick(now) {
-    const elapsed = now - state.observeStart;
-    const t = Math.min(elapsed / state.observeDuration, 1);
-
-    // Move target
-    const tPos = posAlongPath(targetWaypoints, t);
-    state.positions[state.targetIndex] = tPos;
-    placeDot(state.sourceEls[state.targetIndex], tPos.x, tPos.y);
-    setTonePosition(targetTone, tPos.x, tPos.y);
-    state.pathPoints.push({ ...tPos, t });
-
-    // Move distractors (medium/hard)
-    if (diff.distractorMove) {
-      let dToneIdx = 1;
-      state.positions.forEach((_, i) => {
-        if (i !== state.targetIndex && distractorWaypoints[i]) {
-          const dPos = posAlongPath(distractorWaypoints[i], t);
-          state.positions[i] = dPos;
-          placeDot(state.sourceEls[i], dPos.x, dPos.y);
-          if (state._tones[dToneIdx]) setTonePosition(state._tones[dToneIdx], dPos.x, dPos.y);
-          dToneIdx++;
-        }
-      });
-    }
-
-    if (t < 1) {
-      state.animRaf = requestAnimationFrame(observeTick);
-    } else {
-      // Observation complete — stop tones, enter respond phase
-      state._tones.forEach(tone => stopTone(tone));
-      state._tones = [];
-      drawPath();
-      enterRespondPhase();
-    }
-  }
-
-  state.animRaf = requestAnimationFrame(observeTick);
-}
-
-function enterRespondPhase() {
-  setPhase('respond');
-
-  // Shuffle all sources to random positions (they all look the same now)
-  const shuffledPositions = state.positions.map(() => randomPos());
-  state.sourceEls.forEach((el, i) => {
-    const np = shuffledPositions[i];
-    placeDot(el, np.x, np.y);
-    el.classList.add('source-clickable');
-    el.style.cursor = 'pointer';
-  });
-  state._shuffledPositions = shuffledPositions;
-
-  state.selectedIndex = null;
-  state.sourceEls.forEach((el, i) => {
-    el.onclick = () => selectSource(i);
-  });
-}
-
-function selectSource(idx) {
-  if (state.phase !== 'respond') return;
-  state.selectedIndex = idx;
-
-  state.sourceEls.forEach((el, i) => {
-    el.classList.remove('source-selected');
-    if (i === idx) el.classList.add('source-selected');
-  });
-
-  // Auto-submit on selection
-  submitAnswer();
-}
-
-function submitAnswer() {
-  if (state.selectedIndex === null) return;
-
-  const correct = state.selectedIndex === state.targetIndex;
-  state.trialCount++;
-  if (correct) state.correctCount++;
-
-  updateStats();
-  setPhase('result');
-
-  // Reveal true position
-  state.sourceEls.forEach((el, i) => {
-    el.onclick = null;
-    el.classList.remove('source-clickable', 'source-selected');
-    el.style.cursor = 'default';
-    if (i === state.targetIndex) el.classList.add('source-revealed', 'source-target');
-  });
-
-  if (correct) {
-    feedbackEl.textContent = 'Correct';
-    feedbackEl.className = 'feedback-msg correct';
-  } else {
-    feedbackEl.textContent = 'Incorrect — target revealed';
-    feedbackEl.className = 'feedback-msg wrong';
-  }
-
-  btnNext.disabled = false;
-  btnPlay.disabled = false;
-}
-
-function setPhase(ph) {
-  state.phase = ph;
-  const labels = {
-    idle:    '',
-    observe: 'Observe — track the moving dot',
-    respond: 'Respond — click where the dot ended',
-    result:  'Result',
-  };
-  phaseEl.textContent = labels[ph] || '';
-}
-
-// ═══════════════════════════════════════════════════════
-// PATH DRAWING
-// ═══════════════════════════════════════════════════════
-function clearPath() {
-  pathSvg.innerHTML = '';
-}
-
-function drawPath() {
-  clearPath();
-  if (state.pathPoints.length < 2) return;
-
-  const W = diagram.offsetWidth;
-  const H = diagram.offsetHeight;
-  const margin = 0.15;
-
-  function toSvg(nx, ny) {
-    const lo = margin, hi = 1 - margin;
-    return {
-      sx: (lo + nx * (hi - lo)) * W,
-      sy: (lo + ny * (hi - lo)) * H,
-    };
-  }
-
-  const pts = state.pathPoints.map(p => toSvg(p.x, p.y));
-  const d   = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.sx.toFixed(1)},${p.sy.toFixed(1)}`).join(' ');
-
-  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  path.setAttribute('d', d);
-  path.setAttribute('fill', 'none');
-  path.setAttribute('stroke', 'var(--accent)');
-  path.setAttribute('stroke-width', '1.5');
-  path.setAttribute('stroke-dasharray', '4 3');
-  path.setAttribute('opacity', '0.45');
-  pathSvg.appendChild(path);
-
-  // Start dot
-  const startPt = pts[0];
-  const startCirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  startCirc.setAttribute('cx', startPt.sx);
-  startCirc.setAttribute('cy', startPt.sy);
-  startCirc.setAttribute('r', '4');
-  startCirc.setAttribute('fill', 'var(--accent)');
-  startCirc.setAttribute('opacity', '0.5');
-  pathSvg.appendChild(startCirc);
-}
-
-// ═══════════════════════════════════════════════════════
-// STATS
-// ═══════════════════════════════════════════════════════
-function updateStats() {
-  statTrials.textContent  = state.trialCount;
-  statCorrect.textContent = state.correctCount;
-  const pct = state.trialCount > 0
-    ? Math.round((state.correctCount / state.trialCount) * 100) + '%'
-    : '—';
-  statAcc.textContent = pct;
-}
-
-// ═══════════════════════════════════════════════════════
-// BUTTON HANDLERS
-// ═══════════════════════════════════════════════════════
-btnPlay.addEventListener('click', () => {
-  startTrial();
+  if (G.audioCtx.state === 'suspended') await G.audioCtx.resume();
+  buildSources();
+  runTrial();
 });
 
 btnNext.addEventListener('click', () => {
-  startTrial();
+  resetTrial();
 });
+
+// Init preset UI
+applyPreset('easy');
+
 </script>
 
 </body>
