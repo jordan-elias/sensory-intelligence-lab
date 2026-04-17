@@ -133,7 +133,7 @@
 
 [[redirects]]
   from = "/journal"
-  to   = "/journal.html"
+  to   = "/journal/index.html"
   status = 200
 
 [[redirects]]
@@ -141,6 +141,17 @@
   to   = "/journal/index.html"
   status = 200
 
+[[redirects]]
+  from = "/cocktail-party-problem"
+  to   = "/cocktail-party-problem/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/cocktail-party-problem/"
+  to   = "/cocktail-party-problem/index.html"
+  status = 200
+
+  
 # ── Subscribe ──
 
 [[redirects]]
