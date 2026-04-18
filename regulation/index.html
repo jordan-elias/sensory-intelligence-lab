@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Regulation Toolkit — Sensory Intelligence Lab</title>
 
-  <script src="/dashboard/auth-guard.js"></script>
-  
+  <script src="/dashboard/auth-guard.js" type="module"></script>
+
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -18,27 +18,91 @@
       --accent:#2a5c45;--accent-light:#edf4f0;--accent-hover:#1e4433;
     }
     html{font-size:16px}
-    body{font-family:var(--font-body);color:var(--text);background:var(--bg);line-height:1.6;min-height:100vh}
+    body{font-family:var(--font-body);color:var(--text);background:var(--bg);line-height:1.6;min-height:100vh;display:flex;flex-direction:column;}
     a{color:var(--text);text-decoration:underline;text-underline-offset:3px}
     a:hover{color:var(--accent)}
 
-    header{border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:10;gap:1rem}
-    header h1{font-family:var(--font-heading);font-size:1rem;font-weight:600;letter-spacing:-0.01em;white-space:nowrap;flex-shrink:0}
-    header nav{display:flex;gap:1.25rem;align-items:center;flex-wrap:wrap;justify-content:flex-end}
-    header nav a{font-size:.8rem;font-weight:500;text-decoration:none;color:var(--muted);transition:color .15s;white-space:nowrap}
-    header nav a:hover{color:var(--text)}
-    @media(max-width:680px){header{height:auto;padding:.75rem 1rem;flex-wrap:wrap;gap:.5rem}header h1{font-size:.875rem}header nav{gap:.75rem;width:100%}header nav a{font-size:.75rem}}
+    /* ══════════════════════════════════════
+       HEADER
+    ══════════════════════════════════════ */
+    .sil-header {
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0; left: 0; right: 0;
+      background: var(--bg);
+      z-index: 100;
+      gap: 1rem;
+      width: 100%;
+    }
+    .sil-header__wordmark {
+      font-family: var(--font-heading);
+      font-size: 1rem; font-weight: 600;
+      letter-spacing: -0.01em;
+      white-space: nowrap; flex-shrink: 0;
+      text-decoration: none; color: var(--text);
+    }
+    .sil-header__wordmark:hover { color: var(--accent); }
+    .sil-header__nav { display: flex; gap: 0.25rem; align-items: center; }
+    .sil-header__nav a {
+      font-family: var(--font-body);
+      font-size: 0.8rem; font-weight: 500;
+      text-decoration: none; color: var(--muted);
+      transition: color 0.15s; white-space: nowrap;
+      padding: 0.3rem 0.65rem;
+    }
+    .sil-header__nav a:hover { color: var(--text); }
+    .sil-header__nav a.sil-active { color: var(--accent); font-weight: 600; }
+    .sil-header__signout {
+      font-family: var(--font-body);
+      font-size: 0.8rem; font-weight: 500;
+      color: var(--muted); background: none;
+      border: 1px solid var(--border); cursor: pointer;
+      padding: 0.3rem 0.75rem;
+      transition: color 0.15s, border-color 0.15s;
+      white-space: nowrap; line-height: 1.6;
+    }
+    .sil-header__signout:hover { color: var(--text); border-color: var(--text); }
+    .sil-header__signout:disabled { opacity: 0.5; cursor: not-allowed; }
+    .sil-header__toggle {
+      display: none; flex-direction: column;
+      gap: 4px; background: none; border: none;
+      cursor: pointer; padding: 4px; flex-shrink: 0;
+    }
+    .sil-header__toggle span { display: block; width: 20px; height: 2px; background: var(--text); }
+    @media (max-width: 700px) {
+      .sil-header { padding: 0 1rem; }
+      .sil-header__toggle { display: flex; }
+      .sil-header__nav {
+        display: none; position: absolute;
+        top: 56px; left: 0; right: 0;
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+        flex-direction: column; align-items: flex-start;
+        padding: 0.75rem 1rem; gap: 0; z-index: 99;
+      }
+      .sil-header__nav.sil-open { display: flex; }
+      .sil-header__nav a,
+      .sil-header__signout { font-size: 0.875rem; padding: 0.55rem 0.5rem; }
+      .sil-header__signout { border: none; }
+    }
 
-    .bc{padding:.75rem 1.5rem 0;max-width:900px;margin:0 auto}
+    /* ── Breadcrumb ── */
+    .bc{padding:.75rem 1.5rem 0;max-width:900px;margin:0 auto;width:100%}
     .bc ol{list-style:none;display:flex;gap:.3rem;align-items:center;font-size:.75rem;color:var(--muted);flex-wrap:wrap}
     .bc li+li::before{content:'/';margin-right:.3rem;color:var(--border)}
     .bc a{color:var(--muted);text-decoration:none}
     .bc a:hover{color:var(--accent);text-decoration:underline}
     @media(max-width:400px){.bc li.mid{display:none}.bc li.mid+li::before{display:none}}
 
-    main{max-width:900px;margin:0 auto;padding:2.5rem 2rem 4rem}
+    main{max-width:900px;margin:0 auto;padding:2.5rem 2rem 4rem;flex:1;}
     @media(max-width:600px){main{padding:1.5rem 1rem 3rem}}
 
+    /* ── Page header ── */
     .ph{margin-bottom:2rem;padding-bottom:1.75rem;border-bottom:1px solid var(--border)}
     .ph h2{font-family:var(--font-heading);font-size:2rem;font-weight:600;letter-spacing:-.02em;line-height:1.2;margin-bottom:.4rem}
     .ph p{font-size:.9rem;color:var(--muted)}
@@ -94,26 +158,33 @@
     .db:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
     .db:disabled{opacity:.45;cursor:not-allowed}
 
-    footer{border-top:1px solid var(--border);padding:1.5rem 2rem;text-align:center;font-size:.8rem;color:var(--muted);margin-top:2rem}
+    footer{border-top:1px solid var(--border);padding:1.5rem 2rem;text-align:center;font-size:.8rem;color:var(--muted);margin-top:auto}
+    footer a{color:var(--muted);text-decoration:none;}
+    footer a:hover{color:var(--accent);}
   </style>
 </head>
 <body>
 
-<header>
-  <h1>Sensory Intelligence Lab</h1>
-  <nav>
-    <a href="/sensory-intelligence-lab/dashboard/">Home</a>
-    <a href="/sensory-intelligence-lab/dashboard/">Dashboard</a>
-    <a href="/sensory-intelligence-lab/account/">Account</a>
-    <a href="/sensory-intelligence-lab/sessions/">Sessions</a>
-    <a href="/blog/">Blog</a>
+<!-- ══════════════════════════════════════
+     HEADER
+══════════════════════════════════════ -->
+<header class="sil-header">
+  <a class="sil-header__wordmark" href="/dashboard/">Sensory Intelligence Lab</a>
+  <button class="sil-header__toggle" id="silMenuToggle" aria-label="Toggle navigation" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <nav class="sil-header__nav" id="silNav">
+    <a href="/dashboard/">Dashboard</a>
+    <a href="/account/">Account</a>
+    <a href="/booking/">Book a session</a>
+    <button class="sil-header__signout" id="silSignOut">Sign out</button>
   </nav>
 </header>
 
 <nav aria-label="Breadcrumb" class="bc">
   <ol>
-    <li><a href="/sensory-intelligence-lab/dashboard/">Home</a></li>
-    <li class="mid"><a href="/sensory-intelligence-lab/dashboard/">Dashboard</a></li>
+    <li><a href="/dashboard/">Dashboard</a></li>
+    <li class="mid"><a href="/dashboard/">Dashboard</a></li>
     <li>Regulation Toolkit</li>
   </ol>
 </nav>
@@ -186,30 +257,64 @@
 
   <p>
     Each soundscape is generated in real time rather than played from a recording. The system continuously shapes elements like rhythm, harmony, texture, and movement to support a gradual shift in attention and nervous system state. Because the sounds are created generatively, no two sessions are ever exactly the same — even when you select the same option.
-
   </p>
 
   <br>
 
   <p>
     The soundscapes follow a principle used in music therapy called the iso principle. Instead of forcing the listener into a new state immediately, the music begins by matching your current energy, then slowly guides you toward the desired state. This gradual transition helps the nervous system adapt comfortably and naturally.
-
   </p>
 
   <br>
-  
+
   <p>
     The structure and musical elements of each soundscape are guided by music cognition research and the neuroscience of sound perception, which explore how people respond to sound and how specific musical features can support attention, emotional regulation, and a sense of stability.
-
   </p>
-
-  
 </main>
 
-<footer><p>Jordan Elias Music Therapy · Berlin · <a href="/contact/">Contact</a></p></footer>
+<footer><p>Jordan Elias Music Therapy · Berlin · <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a></p></footer>
 
-<script>
+<script type="module">
 'use strict';
+
+// ─────────────────────────────────────────────────────────
+// HEADER BEHAVIOUR
+// ─────────────────────────────────────────────────────────
+const path = window.location.pathname.replace(/\/$/, '') || '/';
+document.querySelectorAll('.sil-header__nav a').forEach(a => {
+  const href = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
+  if (href === path) a.classList.add('sil-active');
+});
+
+const menuToggle = document.getElementById('silMenuToggle');
+const silNav     = document.getElementById('silNav');
+menuToggle.addEventListener('click', () => {
+  const open = silNav.classList.toggle('sil-open');
+  menuToggle.setAttribute('aria-expanded', open);
+});
+silNav.querySelectorAll('a').forEach(a =>
+  a.addEventListener('click', () => silNav.classList.remove('sil-open'))
+);
+
+async function getSupabase() {
+  if (window._supabase) return window._supabase;
+  const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+  return createClient(
+    'https://lrjuufvrgkuvfxcmybtf.supabase.co',
+    'sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1'
+  );
+}
+
+document.getElementById('silSignOut').addEventListener('click', async function () {
+  this.disabled = true;
+  this.textContent = 'Signing out…';
+  try {
+    const sb = await getSupabase();
+    await sb.auth.signOut();
+  } finally {
+    window.location.replace('/');
+  }
+});
 
 // ─────────────────────────────────────────────────────────
 // CONSTANTS
@@ -256,11 +361,6 @@ function brownian(rng, n, range) {
 
 // ─────────────────────────────────────────────────────────
 // COMPLEXITY MATRIX
-// Each state: { rh, ha, sp, pr } — all 0..1
-//  rh = rhythmic complexity   (event density, syncopation, irregularity)
-//  ha = harmonic complexity   (dissonance, interval spread, instability)
-//  sp = spectral complexity   (brightness, noise, upper partials)
-//  pr = predictive complexity (pattern repetition vs unpredictability)
 // ─────────────────────────────────────────────────────────
 const CX = {
   overwhelmed: { rh:.85, ha:.80, sp:.78, pr:.82 },
@@ -274,24 +374,18 @@ const CX = {
   energized:   { rh:.70, ha:.25, sp:.65, pr:.28 },
 };
 
-// Derive arc musical parameters from complexity matrix interpolation
 function arcFromCX(curState, tgtState) {
   const cS = CX[curState], cT = CX[tgtState];
   return {
-    // Rhythmic: tempo, chaos, density driven by rh
     tempoStart:   lerp(0, 148, cS.rh),
     tempoEnd:     lerp(0, 120, cT.rh),
     chaosStart:   cS.rh * 0.95,
     chaosEnd:     cT.rh * 0.2,
     densityStart: Math.round(cS.rh * 3.5),
     densityEnd:   Math.round(cT.rh * 2.5),
-
-    // Harmonic: ratio cluster spread, convergence
     dissonanceStart: cS.ha,
     dissonanceEnd:   cT.ha,
-    harmonicConvRate: 1 - cT.ha, // fast convergence for low-dissonance targets
-
-    // Spectral: filter brightness, noise, partials
+    harmonicConvRate: 1 - cT.ha,
     filterStart:  lerp(300, 7000, cS.sp),
     filterEnd:    lerp(300, 7000, cT.sp),
     filterQStart: lerp(0.4, 5.0, cS.ha),
@@ -300,61 +394,39 @@ function arcFromCX(curState, tgtState) {
     noiseEnd:     cT.sp * 0.04,
     noiseHpStart: lerp(80, 2000, cS.sp),
     noiseHpEnd:   lerp(80, 600,  cT.sp),
-
-    // Amplitude / dynamics — normalized to avoid jarring jumps
     ampStart: lerp(0.24, 0.42, (cS.rh+cS.sp)/2),
     ampEnd:   lerp(0.22, 0.40, (cT.rh+cT.sp)/2),
-
-    // Sub-oscillator — strong for grounded/calm targets
     subStart: lerp(0.0, 0.03, 1-cS.rh),
     subEnd:   lerp(0.0, 0.20, 1-cT.rh) * (cT.ha < 0.12 ? 1.5 : 0.6),
-
-    // Pan width
     panStart: lerp(0.05, 0.75, (cS.rh+cS.sp)/2),
     panEnd:   lerp(0.04, 0.50, (cT.rh+cT.sp)/2),
-
-    // Brownian drift in cents
     driftStart: lerp(1, 16, cS.ha),
     driftEnd:   lerp(0.5, 8, cT.ha),
-
-    // Breath rate (Hz) — Hz of amplitude cycle
     breathStart: lerp(0.08, 0.22, cS.rh),
     breathEnd:   lerp(0.06, 0.14, cT.rh),
-
-    // Polyrhythm for energized/alert targets
     polyrhythm: cT.rh > 0.4 && cT.pr > 0.15,
   };
 }
 
 // ─────────────────────────────────────────────────────────
-// STATE → MUSICAL IDENTITY
-// Timbre family per state: { oscCount, fundamentals, partialBalance, waveChar }
-//   partialBalance: [p1,p2,p3] relative amplitudes of 1st, 2nd, 3rd harmonics
+// TIMBRE
 // ─────────────────────────────────────────────────────────
 const TIMBRE = {
-  // Current-state timbres (start character)
   overwhelmed: { osc:5, fund:82.4,  pb:[1,.45,.25], filterChar:'dark-gritty' },
   anxious:     { osc:4, fund:110,   pb:[1,.35,.20], filterChar:'mid-tension' },
   tired:       { osc:3, fund:82.4,  pb:[1,.15,.06], filterChar:'dark-soft'   },
   unfocused:   { osc:4, fund:98,    pb:[1,.28,.14], filterChar:'mid-wander'  },
   overstim:    { osc:6, fund:65.4,  pb:[1,.40,.22], filterChar:'bright-full' },
-  // Target-state timbres (arrival character)
   calm:        { osc:3, fund:82.4,  pb:[1,.10,.03], filterChar:'warm-sparse' },
   alert:       { osc:4, fund:110,   pb:[1,.32,.18], filterChar:'bright-clear'},
   grounded:    { osc:3, fund:55,    pb:[1,.08,.02], filterChar:'deep-still'  },
   energized:   { osc:4, fund:110,   pb:[1,.38,.20], filterChar:'bright-full' },
 };
 
-// JI ratio clusters per harmonic complexity level
-// Lower ha → more consonant, fewer ratios; Higher ha → more dissonant, wider cluster
 const RATIO_CLUSTERS = {
-  // very consonant (ha < 0.15)
   stable:  [[1,1],[3,2],[2,1],[4,3],[3,1],[6,1]],
-  // moderate (0.15–0.45)
   mid:     [[1,1],[9,8],[5,4],[4,3],[3,2],[5,3]],
-  // tense (0.45–0.70)
   tense:   [[1,1],[16,15],[6,5],[7,5],[8,5],[9,5]],
-  // dissonant (> 0.70)
   harsh:   [[1,1],[16,15],[9,8],[6,5],[4,3],[7,4]],
 };
 
@@ -366,7 +438,7 @@ function ratioCluster(ha) {
 }
 
 // ─────────────────────────────────────────────────────────
-// PHASE LABELS — state-specific descriptive text
+// PHASE LABELS
 // ─────────────────────────────────────────────────────────
 const PHASE_LABELS = {
   'overwhelmed→calm':      ['Dispersing','Softening','Settling'],
@@ -392,7 +464,7 @@ const PHASE_LABELS = {
 };
 
 // ─────────────────────────────────────────────────────────
-// MANTRAS — 20 unique, spirit of Oliveros / Eno / Cage / Voegelin
+// MANTRAS
 // ─────────────────────────────────────────────────────────
 const MANTRAS = {
   'overwhelmed→calm':      { t:'Let each sound arrive without being invited. Nothing needs to be processed — only received.', a:'After Pauline Oliveros, Deep Listening' },
@@ -418,7 +490,7 @@ const MANTRAS = {
 };
 
 // ─────────────────────────────────────────────────────────
-// RHYTHM MOTIFS with phrase memory
+// RHYTHM MOTIFS
 // ─────────────────────────────────────────────────────────
 const MOTIFS = {
   sparse:   [[2.0,1.5,3.0],[1.5,2.5,2.0],[3.0,1.0,2.0]],
@@ -438,7 +510,6 @@ function buildGraph(ctx, curState, tgtState, rng) {
   const now  = ctx.currentTime;
   const STEPS = 200;
 
-  // ── Master gain — fade in/out ──
   const master = ctx.createGain();
   master.connect(ctx.destination);
   master.gain.setValueAtTime(0, now);
@@ -446,18 +517,14 @@ function buildGraph(ctx, curState, tgtState, rng) {
   master.gain.setValueAtTime(1.0, now + DUR - FO);
   master.gain.linearRampToValueAtTime(0, now + DUR);
 
-  // Normalize to target ~0.32 perceived amplitude
   const avgAmp = (arc.ampStart + arc.ampEnd) / 2;
   const norm   = avgAmp > 0 ? 0.32 / avgAmp : 1;
   const aS = arc.ampStart * norm, aE = arc.ampEnd * norm;
 
-  // ── Breath envelope on master (slow amplitude cycle) ──
-  // Scheduled as a series of sinusoidal-like peaks using gain automation
-  // Rate interpolates from breathStart → breathEnd Hz
   {
     const bS = arc.breathStart, bE = arc.breathEnd;
-    const depth = 0.07; // ± 7% amplitude swing
-    let t = FI; // start after fade-in
+    const depth = 0.07;
+    let t = FI;
     while (t < DUR - FO) {
       const prog  = t / DUR;
       const bRate = lerp(bS, bE, prog);
@@ -470,39 +537,25 @@ function buildGraph(ctx, curState, tgtState, rng) {
     }
   }
 
-  // ── Ratio clusters for start/end harmonic character ──
   const rStart = ratioCluster(arc.dissonanceStart);
   const rEnd   = ratioCluster(arc.dissonanceEnd);
 
-  // Voice count interpolates between current-state and target-state osc count
-  const nV = Math.round(lerp(curT.osc, tgtT.osc, 0)); // starts at curT.osc
-  const nVarr = [];
-  for (let v = 0; v < Math.max(curT.osc, tgtT.osc); v++) nVarr.push(v);
-
-  // Fundamental interpolates from curT.fund → tgtT.fund
   const fundS = curT.fund, fundE = tgtT.fund;
-
-  // Partial balance: curT.pb → tgtT.pb
   const pbS = curT.pb, pbE = tgtT.pb;
 
-  // Per-voice oscillators
   for (let v = 0; v < Math.max(curT.osc, tgtT.osc); v++) {
     const rS = rStart[v % rStart.length];
     const rE = rEnd[v % rEnd.length];
     const fS = fundS * rS[0] / rS[1];
     const fE = fundE * rE[0] / rE[1];
 
-    // This voice fades in/out based on whether it's active in start/end count
     const vActiveStart = v < curT.osc;
     const vActiveEnd   = v < tgtT.osc;
-    const vAmpMul = vActiveStart ? 1 : 0;
 
-    // Brownian drift
     const cDriftHz = fS * (Math.pow(2, arc.driftStart/1200) - 1);
     const eDriftHz = fE * (Math.pow(2, arc.driftEnd/1200) - 1);
     const drift = brownian(rng, STEPS+1, Math.max(cDriftHz, 0.01));
 
-    // Partials: 3 harmonics with balance from timbre families
     const PARTIALS = [
       { h:1, pbi:0 },
       { h:2, pbi:1 },
@@ -512,10 +565,9 @@ function buildGraph(ctx, curState, tgtState, rng) {
     for (const p of PARTIALS) {
       const osc    = ctx.createOscillator();
       const filt   = ctx.createBiquadFilter();
-      const shelf  = ctx.createBiquadFilter(); // low shelf — warmth
+      const shelf  = ctx.createBiquadFilter();
       const pan    = ctx.createStereoPanner();
       const gVoice = ctx.createGain();
-      const gBreath= ctx.createGain(); // per-voice breath LFO
 
       osc.connect(filt);
       filt.connect(shelf);
@@ -528,7 +580,6 @@ function buildGraph(ctx, curState, tgtState, rng) {
       shelf.type = 'lowshelf';
       shelf.frequency.value = 200;
 
-      // Voice breath LFO — unique rate per voice
       const vLfo  = ctx.createOscillator();
       const vLfoG = ctx.createGain();
       vLfo.type = 'sine';
@@ -538,7 +589,6 @@ function buildGraph(ctx, curState, tgtState, rng) {
       vLfoG.connect(gVoice.gain);
       vLfo.start(now); vLfo.stop(now+DUR+.1);
 
-      // Filter macro-LFO — 30–90s period, unique per voice
       const macroRate = (1/lerp(30,90,rng()));
       const mLfo  = ctx.createOscillator();
       const mLfoG = ctx.createGain();
@@ -549,7 +599,6 @@ function buildGraph(ctx, curState, tgtState, rng) {
       mLfoG.connect(filt.frequency);
       mLfo.start(now); mLfo.stop(now+DUR+.1);
 
-      // Filter micro-LFO
       const uLfo  = ctx.createOscillator();
       const uLfoG = ctx.createGain();
       uLfo.type = 'sine';
@@ -559,17 +608,14 @@ function buildGraph(ctx, curState, tgtState, rng) {
       uLfoG.connect(filt.frequency);
       uLfo.start(now); uLfo.stop(now+DUR+.1);
 
-      // Pan motion — slow sine unique per voice
       const panPhase = (v%2===0?1:-1)*(0.25+rng()*.3);
       const panSpeed = 0.007 + v*.003;
 
       for (let i=0; i<=STEPS; i++) {
         const tn   = i/STEPS;
-        // Apply harmonicConvergenceRate: harmonic dims converge faster for consonant targets
         const ct   = curve(tn, tn < 0.5 ? 'linear' : arc.dissonanceEnd < 0.2 ? 'exp' : 'sigmoid');
         const t    = now + tn*DUR;
 
-        // Frequency with brownian drift
         const fund = lerp(fundS, fundE, ct);
         const rNum = lerp(rS[0], rE[0], ct), rDen = lerp(rS[1], rE[1], ct);
         const baseF = fund * rNum/rDen * p.h;
@@ -578,24 +624,20 @@ function buildGraph(ctx, curState, tgtState, rng) {
         if (i===0) osc.frequency.setValueAtTime(freq, t);
         else       osc.frequency.linearRampToValueAtTime(freq, t);
 
-        // Filter — smooth continuous
         const fc = lerp(arc.filterStart, arc.filterEnd, ct);
         const fq = lerp(arc.filterQStart, arc.filterQEnd, ct);
         if (i===0) { filt.frequency.setValueAtTime(fc,t); filt.Q.setValueAtTime(fq,t); }
         else       { filt.frequency.linearRampToValueAtTime(fc,t); filt.Q.linearRampToValueAtTime(fq,t); }
 
-        // Low shelf — warmth increases at arrival
         const sg = lerp(-1.5, 3.5, ct);
         if (i===0) shelf.gain.setValueAtTime(sg,t);
         else       shelf.gain.linearRampToValueAtTime(sg,t);
 
-        // Pan
         const pw   = lerp(arc.panStart, arc.panEnd, ct);
         const panV = Math.sin(panPhase*Math.PI + tn*Math.PI*2*panSpeed*DUR)*pw;
         if (i===0) pan.pan.setValueAtTime(panV,t);
         else       pan.pan.linearRampToValueAtTime(panV,t);
 
-        // Voice amplitude — includes voice count fade and partial balance
         const nVoicesNow = lerp(curT.osc, tgtT.osc, ct);
         const vActive    = lerp(vActiveStart?1:0, vActiveEnd?1:0, ct);
         const pbNow_p    = lerp(pbS[p.pbi]||0.05, pbE[p.pbi]||0.05, ct);
@@ -608,7 +650,6 @@ function buildGraph(ctx, curState, tgtState, rng) {
     }
   }
 
-  // ── Sub-oscillator ──
   if (arc.subEnd > 0.01 || arc.subStart > 0.01) {
     const sub = ctx.createOscillator();
     const subF= ctx.createBiquadFilter();
@@ -622,7 +663,6 @@ function buildGraph(ctx, curState, tgtState, rng) {
     sub.start(now); sub.stop(now+DUR+.1);
   }
 
-  // ── Pink noise with wave-swell modulation ──
   if (arc.noiseStart > 0.005) {
     const nLen = Math.min(ctx.sampleRate*8, 441000);
     const nBuf = ctx.createBuffer(1, nLen, ctx.sampleRate);
@@ -640,13 +680,11 @@ function buildGraph(ctx, curState, tgtState, rng) {
     const nLp=ctx.createBiquadFilter(); nLp.type='lowpass'; nLp.frequency.value=9000;
     const nG=ctx.createGain();
 
-    // Wave-swell LFO: 0.07-0.13 Hz = 8-14 second wave period, unique each seed
     const waveSwell = ctx.createGain();
     const waveLfo   = ctx.createOscillator();
     const waveLfoG  = ctx.createGain();
     waveLfo.type = 'sine';
     waveLfo.frequency.value = 0.07 + rng() * 0.06;
-    // Centre at 0.72, swing +-0.28 -> range 0.44-1.0 (deep trough to full crest)
     waveSwell.gain.value = 0.72;
     waveLfoG.gain.value  = 0.28;
     waveLfo.connect(waveLfoG);
@@ -655,11 +693,9 @@ function buildGraph(ctx, curState, tgtState, rng) {
 
     nSrc.connect(nHp); nHp.connect(nLp); nLp.connect(nG); nG.connect(waveSwell); waveSwell.connect(master);
 
-    // Arc envelope: ensure noise is completely gone by 210s (start of arrival section)
     const NS=60;
     for (let i=0;i<=NS;i++) {
       const tn=i/NS, ct=curve(tn,'sigmoid'), t=now+tn*DUR;
-      // Hard fade to 0 between 68% (204s) and 72% (216s) of duration
       const fadeOut = tn < 0.68 ? 1 : Math.max(0, 1-(tn-0.68)/0.04);
       const na=lerp(arc.noiseStart*norm, arc.noiseEnd*norm, ct) * fadeOut;
       const nh=lerp(arc.noiseHpStart, arc.noiseHpEnd, ct);
@@ -669,7 +705,6 @@ function buildGraph(ctx, curState, tgtState, rng) {
     nSrc.start(now); nSrc.stop(now+DUR+.1);
   }
 
-  // ── Rhythm with phrase memory ──
   buildRhythm(ctx, arc, rng, master, now, DUR, norm, curState, tgtState);
 
   return master;
@@ -681,7 +716,6 @@ function buildRhythm(ctx, arc, rng, master, startAt, dur, norm, curState, tgtSta
   const fundS = TIMBRE[curState].fund;
   const fundE = TIMBRE[tgtState].fund;
 
-  // ── Phrase memory ──
   let motif=null, motifEnd=0, motifIdx=0, lastClass='';
 
   let t=0, hits=0;
@@ -695,7 +729,6 @@ function buildRhythm(ctx, arc, rng, master, startAt, dur, norm, curState, tgtSta
 
     if (density < 0.08) { t+=1+rng()*.5; continue; }
 
-    // Phrase memory — hold motif for 20–50 seconds before switching
     const dClass = density<1.5?'sparse':density<2.5?'moderate':density<3.5?'dense':'chaotic';
     if (t >= motifEnd || dClass !== lastClass) {
       const pool = MOTIFS[dClass] || MOTIFS.sparse;
@@ -727,7 +760,6 @@ function buildRhythm(ctx, arc, rng, master, startAt, dur, norm, curState, tgtSta
     t+=intv; hits++;
   }
 
-  // ── Polyrhythm layers (energized/alert targets) ──
   if (arc.polyrhythm) {
     const pair = POLY[Math.floor(rng()*POLY.length)];
     const [N,M] = pair;
@@ -761,20 +793,18 @@ function buildRhythm(ctx, arc, rng, master, startAt, dur, norm, curState, tgtSta
 }
 
 // ─────────────────────────────────────────────────────────
-// SESSION — GLOBAL IMMUTABLE TIMER
+// SESSION STATE
 // ─────────────────────────────────────────────────────────
 const S = {
   cur:null, tgt:null, key:null,
   seed:null, liveCtx:null, isPlaying:false,
-  // Timer state — wall-clock based, never mutated by seek
-  sessionStartWall:null,   // performance.now() when generation began
-  pausedAt:null,           // elapsed seconds when paused (null if playing)
-  totalPausedMs:0,         // accumulated pause duration in ms
-  pauseStartWall:null,     // wall time when pause began
+  sessionStartWall:null,
+  pausedAt:null,
+  totalPausedMs:0,
+  pauseStartWall:null,
   rafId:null, wavUrl:null,
 };
 
-// Derive true elapsed seconds from wall clock — immune to seek/rebuild
 function getElapsed() {
   if (S.sessionStartWall === null) return 0;
   const wallNow = performance.now();
@@ -823,7 +853,7 @@ function refreshUI() {
 }
 
 // ─────────────────────────────────────────────────────────
-// RAF LOOP — reads global wall-clock timer
+// RAF LOOP
 // ─────────────────────────────────────────────────────────
 function tick() {
   const elapsed = getElapsed();
@@ -845,26 +875,22 @@ function onEnded() {
   document.getElementById('pfill').style.width   = '100%';
   document.getElementById('phandle').style.left  = '100%';
   document.getElementById('pphase').textContent  = (PHASE_LABELS[S.key]||['','','Settled'])[2];
-  // Mark session as finished so timer stops
   S.pausedAt = DUR;
 }
 
 // ─────────────────────────────────────────────────────────
-// PLAY / PAUSE — timer-aware
+// PLAY / PAUSE
 // ─────────────────────────────────────────────────────────
 function togglePlay() {
   if (!S.liveCtx) return;
   if (S.isPlaying) {
-    // Pause
     S.pauseStartWall = performance.now();
     S.liveCtx.suspend();
     S.isPlaying = false;
     cancelAnimationFrame(S.rafId);
     setIcon(false);
   } else {
-    // Check if ended
     if (S.pausedAt !== null && S.pausedAt >= DUR - 0.5) { restartFull(); return; }
-    // Resume — add accumulated pause time
     if (S.pauseStartWall !== null) {
       S.totalPausedMs += performance.now() - S.pauseStartWall;
       S.pauseStartWall = null;
@@ -880,7 +906,6 @@ function togglePlay() {
 
 function restartFull() {
   if (S.liveCtx) { S.liveCtx.close(); S.liveCtx = null; }
-  // Reset global timer
   S.sessionStartWall = performance.now();
   S.totalPausedMs    = 0;
   S.pauseStartWall   = null;
@@ -893,8 +918,6 @@ function setIcon(playing) {
   if (playing) { ic.className=''; ic.innerHTML='<span class="bars"><span></span><span></span></span>'; lb.textContent='Pause'; }
   else         { ic.className='tri'; ic.innerHTML=''; lb.textContent = (S.pausedAt===null&&S.sessionStartWall===null)?'Play':'Resume'; }
 }
-
-// Progress bar is display-only — no seeking while playing
 
 // ─────────────────────────────────────────────────────────
 // GENERATE
@@ -909,14 +932,12 @@ async function generate() {
 
   S.seed  = (Math.random()*0xFFFFFF|0);
 
-  // Reset global timer
   S.sessionStartWall = performance.now();
   S.totalPausedMs    = 0;
   S.pauseStartWall   = null;
   S.pausedAt         = null;
   S.isPlaying        = false;
 
-  // UI
   document.getElementById('genBtn').textContent = 'Regenerate';
   document.getElementById('player').classList.add('vis');
   document.getElementById('ptitle').textContent = LABELS[S.cur]+' → '+LABELS[S.tgt];
@@ -929,7 +950,6 @@ async function generate() {
 
   buildLive();
 
-  // Offline WAV render — same seed
   try {
     const rng2  = mkRng(S.seed);
     const oCtx  = new OfflineAudioContext(1, DUR*SR, SR);
@@ -989,6 +1009,13 @@ document.addEventListener('keydown', e => {
     if (S.liveCtx) togglePlay();
   }
 });
+
+// expose for inline onclick handlers
+window.pick       = pick;
+window.generate   = generate;
+window.togglePlay = togglePlay;
+window.dlWav      = dlWav;
+
 </script>
 </body>
 </html>
