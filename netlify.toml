@@ -101,13 +101,13 @@
   status = 200
 
 [[redirects]]
-  from = "/checkin"
-  to   = "/checkin/index.html"
+  from = "/check-in"
+  to   = "/check-in/index.html"
   status = 200
 
 [[redirects]]
-  from = "/checkin/"
-  to   = "/checkin/index.html"
+  from = "/check-in/"
+  to   = "/check-in/index.html"
   status = 200
 
 [[redirects]]
