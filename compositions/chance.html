@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chance — Sensory Intelligence Lab</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+  <script src="/dashboard/auth-guard.js" type="module"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --font-body:'Inter',sans-serif;
+      --font-heading:'Space Grotesk',sans-serif;
+      --bg:#fff;--surface:#f9f9f7;--border:#e5e5e0;
+      --text:#1a1a1a;--muted:#6b6b6b;
+      --accent:#2a5c45;--accent-light:#edf4f0;--accent-hover:#1e4433;
+    }
+    html{font-size:16px}
+    body{font-family:var(--font-body);color:var(--text);background:var(--bg);
+      min-height:100vh;display:flex;flex-direction:column;}
+
+    /* ══════════════════════════════════════
+       HEADER
+    ══════════════════════════════════════ */
+    .sil-header {
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg);
+      z-index: 100;
+      gap: 1rem;
+      width: 100%;
+    }
+
+    .sil-header__wordmark {
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      flex-shrink: 0;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .sil-header__wordmark:hover { color: var(--accent); }
+
+    .sil-header__nav {
+      display: flex;
+      gap: 0.25rem;
+      align-items: center;
+    }
+
+    .sil-header__nav a {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-decoration: none;
+      color: var(--muted);
+      transition: color 0.15s;
+      white-space: nowrap;
+      padding: 0.3rem 0.65rem;
+    }
+    .sil-header__nav a:hover { color: var(--text); }
+    .sil-header__nav a.sil-active { color: var(--accent); font-weight: 600; }
+
+    .sil-header__signout {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--muted);
+      background: none;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      padding: 0.3rem 0.75rem;
+      transition: color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+      line-height: 1.6;
+    }
+    .sil-header__signout:hover { color: var(--text); border-color: var(--text); }
+    .sil-header__signout:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .sil-header__toggle {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      flex-shrink: 0;
+    }
+    .sil-header__toggle span { display: block; width: 20px; height: 2px; background: var(--text); }
+
+    @media (max-width: 700px) {
+      .sil-header { padding: 0 1rem; }
+      .sil-header__toggle { display: flex; }
+      .sil-header__nav {
+        display: none;
+        position: absolute;
+        top: 56px; left: 0; right: 0;
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0.75rem 1rem;
+        gap: 0;
+        z-index: 99;
+      }
+      .sil-header__nav.sil-open { display: flex; }
+      .sil-header__nav a,
+      .sil-header__signout { font-size: 0.875rem; padding: 0.55rem 0.5rem; }
+      .sil-header__signout { border: none; }
+    }
+
+    /* Breadcrumb */
+    .bc{padding:.75rem 1.5rem 0;max-width:1100px;margin:0 auto;width:100%}
+    .bc ol{list-style:none;display:flex;gap:.3rem;align-items:center;
+      font-size:.75rem;color:var(--muted);}
+    .bc li+li::before{content:'/';margin-right:.3rem;color:var(--border)}
+    .bc a{color:var(--muted);text-decoration:none;}
+    .bc a:hover{color:var(--accent);text-decoration:underline;}
+
+    /* Main */
+    main{max-width:1100px;margin:0 auto;padding:2.5rem 1.5rem 4rem;flex:1;width:100%;}
+    @media(max-width:600px){main{padding:1.5rem 1rem 3rem}}
+
+    /* Page header */
+    .ph{margin-bottom:2.5rem;padding-bottom:2rem;border-bottom:1px solid var(--border);}
+    .ph h2{font-family:var(--font-heading);font-size:1.5rem;font-weight:600;
+      letter-spacing:-.02em;line-height:1.2;margin-bottom:.4rem;}
+    .ph p{font-size:.9rem;color:var(--muted);}
+
+    /* Card container */
+    .card{border:1px solid var(--border);padding:1.5rem;margin-bottom:1.5rem;background:var(--bg)}
+    .card-title{font-family:var(--font-heading);font-size:.67rem;font-weight:600;
+      letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 1.25rem}
+
+    /* Card-based wizard */
+    .wizard-container{min-height:300px}
+    .card-step{display:none;animation:fadeIn 0.2s}
+    .card-step.active{display:block}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    
+    .card-step h3{font-family:var(--font-heading);font-size:1rem;font-weight:600;
+      letter-spacing:-.01em;margin-bottom:1rem;color:var(--text)}
+    .card-step p{font-size:.9rem;color:var(--muted);margin-bottom:1.5rem;line-height:1.65}
+
+    /* Checkboxes */
+    .checkbox-group{display:flex;flex-direction:column;gap:.75rem;margin-bottom:1.5rem}
+    .checkbox-item{display:flex;align-items:center;gap:.65rem}
+    .checkbox-item input[type="checkbox"]{width:18px;height:18px;cursor:pointer;accent-color:var(--accent)}
+    .checkbox-item label{font-size:.9rem;color:var(--text);cursor:pointer;flex:1}
+
+    /* Option pills */
+    .option-group{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem}
+    .option-btn{font-family:var(--font-body);font-size:.8rem;
+      background:transparent;color:var(--text);border:1px solid var(--border);
+      padding:.5rem 1rem;cursor:pointer;white-space:nowrap;transition:all .12s}
+    .option-btn:hover{background:var(--surface);border-color:var(--accent)}
+    .option-btn.selected{background:var(--accent);color:white;border-color:var(--accent)}
+
+    /* Sliders */
+    .ctrl{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.5rem}
+    .ctrl-lbl{font-family:var(--font-body);font-size:.75rem;font-weight:600;
+      letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+    .ctrl input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:3px;
+      background:var(--border);outline:none;cursor:pointer}
+    .ctrl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;
+      height:16px;border-radius:50%;background:var(--accent);cursor:pointer}
+    .ctrl input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;
+      background:var(--accent);border:none;cursor:pointer}
+    .ctrl-val{font-size:.85rem;color:var(--accent);font-weight:600}
+
+    /* Buttons */
+    .btn{font-family:var(--font-heading);font-size:.78rem;font-weight:600;
+      background:transparent;color:var(--text);border:1px solid var(--border);
+      padding:.5em 1.2em;cursor:pointer;white-space:nowrap;transition:all .12s}
+    .btn:hover{background:var(--accent);color:white;border-color:var(--accent)}
+    .btn.primary{background:var(--accent);color:white;border-color:var(--accent)}
+    .btn.primary:hover{background:var(--accent-hover)}
+    .btn:disabled{opacity:.3;cursor:not-allowed;pointer-events:none}
+
+    /* Step buttons */
+    .step-buttons{display:flex;gap:.75rem;margin-top:2rem;flex-wrap:wrap}
+    .step-buttons button{flex:1;min-width:100px}
+
+    /* Progress indicator */
+    .progress{display:flex;align-items:center;justify-content:center;gap:1rem;
+      margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
+    .progress-dot{width:8px;height:8px;border-radius:50%;background:var(--border);
+      transition:all .2s}
+    .progress-dot.active{background:var(--accent);width:12px;height:12px}
+    .progress-label{font-family:var(--font-heading);font-size:.7rem;font-weight:600;
+      letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+
+    /* Summary */
+    .summary-box{border:1px solid var(--border);padding:1.25rem;background:var(--surface);
+      margin-bottom:1.5rem}
+    .summary-title{font-family:var(--font-heading);font-size:.8rem;font-weight:600;
+      letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem}
+    .summary-row{font-size:.85rem;color:var(--text);margin-bottom:.5rem;
+      display:flex;justify-content:space-between}
+    .summary-row strong{color:var(--accent);font-weight:600}
+
+    /* Download/Export */
+    .export-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;
+      margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border)}
+    .dl-note{font-family:var(--font-body);font-size:.75rem;color:var(--muted)}
+    .dl-prog{font-family:var(--font-body);font-size:.75rem;color:var(--muted);display:none}
+
+    /* Transport */
+    .transport{display:flex;align-items:center;gap:.75rem;margin-top:1rem;flex-wrap:wrap}
+    .transport button{min-width:90px}
+
+    .hint{font-family:var(--font-body);font-size:.8rem;color:var(--muted);margin-top:1em;text-align:center}
+
+    /* Instructions */
+    .instructions{font-size:.9rem;line-height:1.75;color:var(--text)}
+    .instructions h2{font-family:var(--font-heading);font-size:1rem;font-weight:600;
+      letter-spacing:-.01em;margin:1.5rem 0 .4rem}
+    .instructions h2:first-child{margin-top:0}
+    .instructions a{color:var(--accent);text-decoration:underline}
+    .instructions a:hover{color:var(--accent-hover)}
+
+    footer{border-top:1px solid var(--border);padding:1.25rem 1.5rem;
+      text-align:center;font-size:.78rem;color:var(--muted);}
+    footer a{color:var(--muted);text-decoration:none;}
+    footer a:hover{color:var(--accent);}
+
+    @media(max-width:600px){
+      .step-buttons{flex-direction:column}
+      .step-buttons button{width:100%}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     HEADER
+══════════════════════════════════════ -->
+<header class="sil-header">
+  <a class="sil-header__wordmark" href="/dashboard/">Sensory Intelligence Lab</a>
+  <button class="sil-header__toggle" id="silMenuToggle" aria-label="Toggle navigation" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <nav class="sil-header__nav" id="silNav">
+    <a href="/dashboard/">Dashboard</a>
+    <a href="/account/">Account</a>
+    <a href="/booking/">Book a session</a>
+    <button class="sil-header__signout" id="silSignOut">Sign out</button>
+  </nav>
+</header>
+
+<!-- Breadcrumb -->
+<nav aria-label="Breadcrumb" class="bc">
+  <ol>
+    <li><a href="/dashboard/">Dashboard</a></li>
+    <li><a href="/compositions/">Compositions</a></li>
+    <li>Chance</li>
+  </ol>
+</nav>
+
+<!-- Main content -->
+<main>
+
+  <div class="ph">
+    <h2>Chance</h2>
+    <p>Create an indeterminate composition using John Cage's philosophy of chance operations and random parameters.</p>
+  </div>
+
+  <div class="card">
+    <p class="card-title">chance composer</p>
+
+    <!-- Progress indicator -->
+    <div class="progress">
+      <div class="progress-dot active" id="prog-0"></div>
+      <span class="progress-label">Elements</span>
+      <div class="progress-dot" id="prog-1"></div>
+      <span class="progress-label">Settings</span>
+      <div class="progress-dot" id="prog-2"></div>
+      <span class="progress-label">Generate</span>
+      <div class="progress-dot" id="prog-3"></div>
+      <span class="progress-label">Listen</span>
+    </div>
+
+    <!-- Wizard container -->
+    <div class="wizard-container">
+
+      <!-- Step 1: Choose elements -->
+      <div class="card-step active" id="step-0">
+        <h3>Step 1: Choose your elements</h3>
+        <p>Select which musical parameters will be controlled by chance. Each checked element will have random values determined by a random number generator.</p>
+        
+        <div class="checkbox-group">
+          <div class="checkbox-item">
+            <input type="checkbox" id="ch-pitch" checked>
+            <label for="ch-pitch"><strong>Pitch</strong> — random notes from a scale</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="ch-rhythm" checked>
+            <label for="ch-rhythm"><strong>Rhythm</strong> — random note duration and timing</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="ch-timbre">
+            <label for="ch-timbre"><strong>Timbre</strong> — random waveform and filter</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="ch-amplitude">
+            <label for="ch-amplitude"><strong>Amplitude</strong> — random volume per note</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="ch-panning">
+            <label for="ch-panning"><strong>Panning</strong> — random stereo placement</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Pitch settings -->
+      <div class="card-step" id="step-1">
+        <h3>Step 2: Set your pitch scale</h3>
+        <p>Choose which scale the composition will draw pitches from.</p>
+        
+        <div class="ctrl">
+          <label class="ctrl-lbl">Scale</label>
+          <div class="option-group">
+            <button class="option-btn selected" data-scale="major">C Major</button>
+            <button class="option-btn" data-scale="minor">C Minor</button>
+            <button class="option-btn" data-scale="pentatonic">C Pentatonic</button>
+            <button class="option-btn" data-scale="chromatic">Chromatic</button>
+            <button class="option-btn" data-scale="whole">Whole Tone</button>
+          </div>
+        </div>
+
+        <div class="ctrl">
+          <label class="ctrl-lbl" for="ch-octaves">Octave Range</label>
+          <input type="range" id="ch-octaves" min="1" max="4" value="2" step="1">
+          <span class="ctrl-val"><span id="ch-octaves-val">2</span> octaves</span>
+        </div>
+
+        <div class="ctrl">
+          <label class="ctrl-lbl" for="ch-base-freq">Base Frequency</label>
+          <input type="range" id="ch-base-freq" min="50" max="220" value="110" step="5">
+          <span class="ctrl-val"><span id="ch-base-freq-val">110</span> Hz (A)</span>
+        </div>
+      </div>
+
+      <!-- Step 3: Rhythm settings -->
+      <div class="card-step" id="step-2">
+        <h3>Step 3: Set your rhythm parameters</h3>
+        <p>Define how notes will be timed and how long they'll be.</p>
+
+        <div class="ctrl">
+          <label class="ctrl-lbl" for="ch-density">Note Density</label>
+          <input type="range" id="ch-density" min="0.1" max="1" value="0.5" step="0.1">
+          <span class="ctrl-val"><span id="ch-density-val">50</span>% (fewer / more notes)</span>
+        </div>
+
+        <div class="ctrl">
+          <label class="ctrl-lbl" for="ch-dur-min">Min Note Duration</label>
+          <input type="range" id="ch-dur-min" min="0.1" max="1" value="0.2" step="0.1">
+          <span class="ctrl-val"><span id="ch-dur-min-val">0.2</span>s</span>
+        </div>
+
+        <div class="ctrl">
+          <label class="ctrl-lbl" for="ch-dur-max">Max Note Duration</label>
+          <input type="range" id="ch-dur-max" min="0.5" max="4" value="2" step="0.1">
+          <span class="ctrl-val"><span id="ch-dur-max-val">2.0</span>s</span>
+        </div>
+
+        <div class="ctrl">
+          <label class="ctrl-lbl">Timing Method</label>
+          <div class="option-group">
+            <button class="option-btn selected" data-timing="sequential">Sequential</button>
+            <button class="option-btn" data-timing="random">Random Onset</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Other settings -->
+      <div class="card-step" id="step-3">
+        <h3>Step 4: Set remaining parameters</h3>
+        <p>Configure timbre, volume, and stereo placement if you enabled those elements.</p>
+
+        <div class="ctrl">
+          <label class="ctrl-lbl" for="ch-length">Total Duration</label>
+          <input type="range" id="ch-length" min="5" max="60" value="20" step="5">
+          <span class="ctrl-val"><span id="ch-length-val">20</span> seconds</span>
+        </div>
+
+        <div class="ctrl">
+          <label class="ctrl-lbl" for="ch-tempo">Generation Tempo</label>
+          <input type="range" id="ch-tempo" min="0.5" max="2" value="1" step="0.1">
+          <span class="ctrl-val"><span id="ch-tempo-val">1.0</span>×</span>
+        </div>
+
+        <div id="ch-timbre-ctrl" class="ctrl" style="display:none">
+          <label class="ctrl-lbl">Waveforms</label>
+          <div class="option-group">
+            <button class="option-btn selected" data-wave="sine">Sine</button>
+            <button class="option-btn" data-wave="triangle">Triangle</button>
+            <button class="option-btn" data-wave="sawtooth">Sawtooth</button>
+            <button class="option-btn" data-wave="square">Square</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5: Review and generate -->
+      <div class="card-step" id="step-4">
+        <h3>Step 5: Generate and play</h3>
+        <p>Review your settings and generate a composition using chance operations.</p>
+
+        <div class="summary-box">
+          <div class="summary-title">Composition Summary</div>
+          <div class="summary-row"><span>Elements:</span> <strong id="summary-elements">—</strong></div>
+          <div class="summary-row"><span>Scale:</span> <strong id="summary-scale">—</strong></div>
+          <div class="summary-row"><span>Duration:</span> <strong id="summary-duration">—</strong></div>
+          <div class="summary-row"><span>Density:</span> <strong id="summary-density">—</strong></div>
+        </div>
+
+        <div class="transport">
+          <button class="btn" id="ch-generate">Generate</button>
+          <button class="btn" id="ch-play" disabled>▶ Play</button>
+          <button class="btn" id="ch-stop" disabled>⏸ Stop</button>
+        </div>
+
+        <div class="export-row">
+          <span class="row-lbl">download →</span>
+          <select class="gen-select" id="ch-dl-format">
+            <option value="wav">WAV</option>
+            <option value="json">JSON (parameters)</option>
+          </select>
+          <button class="btn" id="ch-dl" disabled>Download</button>
+          <span class="dl-note" id="ch-dl-note">generate a composition first</span>
+          <span class="dl-prog" id="ch-dl-prog">rendering…</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Navigation buttons -->
+    <div class="step-buttons">
+      <button class="btn" id="btn-prev" style="display:none">← Previous</button>
+      <button class="btn primary" id="btn-next">Next →</button>
+    </div>
+
+  </div>
+
+  <!-- Instructions -->
+  <div class="instructions">
+
+    <h2>About John Cage and chance</h2>
+    <p>John Cage believed that music didn't need to express the composer's personal emotions or intentions. Instead, he used chance procedures — throwing dice, consulting the I Ching, or drawing random numbers — to make compositional decisions. This shifted control away from the composer and toward the unpredictability of the process itself.</p>
+
+    <h2>How to use this tool</h2>
+    <p>Select which musical parameters (pitch, rhythm, timbre, volume, panning) you want controlled by chance. Then set the ranges and options for each — the scale, note durations, total length, tempo, and more. When you click "Generate," the tool uses random numbers to create a unique composition within those constraints. The result is never quite what you expect, but always created according to rules you defined.</p>
+
+    <h2>Interpretations</h2>
+    <p>You can generate as many variations as you like. Each one is valid. Save them, listen to them in different contexts, share them. The point isn't perfection—it's to experience music as a process of constraints and emergence rather than intentional design.</p>
+
+    <h2>About the parameters</h2>
+    <p><strong>Density:</strong> How likely a note is to start at each rhythmic position. Higher density = more notes.<br>
+    <strong>Timing method:</strong> Sequential places notes one after another; random onset lets them appear unpredictably.<br>
+    <strong>Timbre:</strong> When enabled, waveforms are chosen randomly per note.<br>
+    <strong>Amplitude:</strong> Each note gets a random volume within a reasonable range.<br>
+    <strong>Panning:</strong> Notes are randomly placed in the stereo field.</p>
+
+  </div>
+
+</main>
+
+<footer>
+  <p>Jordan Elias Music Therapy · Berlin ·
+    <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a> ·
+    <a href="https://jordanelias.de/" target="_blank" rel="noopener">jordanelias.de</a>
+  </p>
+</footer>
+
+<script>
+(function(){
+'use strict';
+
+var audioCtx=null;
+function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function resumeCtx(){var c=getCtx();if(c.state==='suspended')c.resume();return c;}
+
+// State
+var currentStep=0;
+var state={
+  elements:{pitch:true,rhythm:true,timbre:false,amplitude:false,panning:false},
+  scale:'major',octaves:2,baseFreq:110,
+  density:0.5,durMin:0.2,durMax:2,timing:'sequential',
+  length:20,tempo:1,waveform:'sine'
+};
+var audioBuffer=null,isPlaying=false,src=null,gain=null;
+
+// Scales
+var SCALES={
+  major:[0,2,4,5,7,9,11],
+  minor:[0,2,3,5,7,8,10],
+  pentatonic:[0,2,4,7,9],
+  chromatic:[0,1,2,3,4,5,6,7,8,9,10,11],
+  whole:[0,2,4,6,8,10]
+};
+
+function midiToFreq(midi){return 440*Math.pow(2,(midi-69)/12);}
+function freqToMidi(freq){return 69+12*Math.log2(freq/440);}
+
+function generateScale(){
+  var baseMidi=freqToMidi(state.baseFreq);
+  var scale=[];
+  for(var oct=0;oct<state.octaves;oct++){
+    SCALES[state.scale].forEach(function(interval){
+      scale.push(midiToFreq(baseMidi+oct*12+interval));
+    });
+  }
+  return scale;
+}
+
+function audioBufferToWav(buf){
+  var nc=buf.numberOfChannels,sr=buf.sampleRate,len=buf.length,bps=2,dl=len*nc*bps;
+  var wav=new ArrayBuffer(44+dl),v=new DataView(wav);
+  function ws(o,s){for(var i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i));}
+  function cl(x){return Math.max(-1,Math.min(1,x));}
+  ws(0,'RIFF');v.setUint32(4,36+dl,true);ws(8,'WAVE');ws(12,'fmt ');
+  v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,nc,true);
+  v.setUint32(24,sr,true);v.setUint32(28,sr*nc*bps,true);
+  v.setUint16(32,nc*bps,true);v.setUint16(34,16,true);
+  ws(36,'data');v.setUint32(40,dl,true);
+  var off=44,chans=[];
+  for(var c=0;c<nc;c++)chans.push(buf.getChannelData(c));
+  for(var i=0;i<len;i++)for(var c=0;c<nc;c++){v.setInt16(off,Math.round(cl(chans[c][i])*32767),true);off+=2;}
+  return wav;
+}
+
+function triggerDownload(ab,name){
+  var b=new Blob([ab],{type:'audio/wav'}),u=URL.createObjectURL(b),a=document.createElement('a');
+  a.href=u;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);
+}
+
+function generateComposition(){
+  var scale=generateScale();
+  var sr=44100,len=Math.floor(sr*state.length);
+  var off=new OfflineAudioContext(2,len,sr);
+  var masterGain=off.createGain();masterGain.gain.value=0.8;masterGain.connect(off.destination);
+  
+  var time=0,noteIdx=0;
+  while(time<state.length){
+    var noteDur=state.durMin+Math.random()*(state.durMax-state.durMin);
+    noteDur/=state.tempo;
+    
+    if(Math.random()<state.density||noteIdx===0){
+      var freq=scale[Math.floor(Math.random()*scale.length)];
+      var waveform=state.timbre?['sine','triangle','sawtooth','square'][Math.floor(Math.random()*4)]:'sine';
+      var amp=state.amplitude?0.3+Math.random()*0.5:0.6;
+      var pan=state.panning?Math.random()*2-1:0;
+      
+      var osc=off.createOscillator();
+      osc.type=waveform;
+      osc.frequency.value=freq;
+      
+      var g=off.createGain();g.gain.value=amp;
+      var p=off.createStereoPanner();p.pan.value=pan;
+      
+      var env=Math.min(noteDur*0.1,0.05);
+      g.gain.setValueAtTime(0,time);
+      g.gain.linearRampToValueAtTime(amp,time+env);
+      g.gain.linearRampToValueAtTime(0,time+noteDur);
+      
+      osc.connect(g);g.connect(p);p.connect(masterGain);
+      osc.start(time);
+      osc.stop(time+noteDur);
+    }
+    
+    var stepDur=state.timing==='random'?Math.random()*state.durMax:state.durMin;
+    time+=stepDur/state.tempo;
+    noteIdx++;
+  }
+  
+  return off.startRendering().then(function(r){audioBuffer=r;return r;});
+}
+
+function play(){
+  if(!audioBuffer)return;
+  stop();resumeCtx();
+  var ctx=getCtx();
+  gain=ctx.createGain();gain.gain.value=0.8;gain.connect(ctx.destination);
+  src=ctx.createBufferSource();src.buffer=audioBuffer;src.connect(gain);
+  src.onended=function(){isPlaying=false;updatePlayBtn();};
+  src.start();isPlaying=true;updatePlayBtn();
+}
+
+function stop(){
+  if(src){try{src.stop();}catch(e){}src=null;}
+  if(gain){gain.disconnect();gain=null;}
+  isPlaying=false;updatePlayBtn();
+}
+
+function updatePlayBtn(){
+  document.getElementById('ch-play').disabled=!audioBuffer;
+  document.getElementById('ch-play').textContent=isPlaying?'⏸ Stop':'▶ Play';
+  document.getElementById('ch-play').classList.toggle('on',isPlaying);
+  document.getElementById('ch-stop').disabled=!isPlaying;
+}
+
+function updateSummary(){
+  var els=[];
+  if(state.elements.pitch)els.push('pitch');
+  if(state.elements.rhythm)els.push('rhythm');
+  if(state.elements.timbre)els.push('timbre');
+  if(state.elements.amplitude)els.push('amplitude');
+  if(state.elements.panning)els.push('panning');
+  
+  document.getElementById('summary-elements').textContent=els.join(', ');
+  document.getElementById('summary-scale').textContent=state.scale.charAt(0).toUpperCase()+state.scale.slice(1);
+  document.getElementById('summary-duration').textContent=state.length+'s';
+  document.getElementById('summary-density').textContent=Math.round(state.density*100)+'%';
+}
+
+function showStep(n){
+  document.querySelectorAll('.card-step').forEach(function(el,i){
+    el.classList.toggle('active',i===n);
+  });
+  document.querySelectorAll('.progress-dot').forEach(function(el,i){
+    el.classList.toggle('active',i===n);
+  });
+  document.getElementById('btn-prev').style.display=n>0?'inline-block':'none';
+  document.getElementById('btn-next').textContent=n===4?'Done':'Next →';
+  if(n===4)updateSummary();
+  currentStep=n;
+}
+
+// Event listeners
+document.getElementById('btn-next').addEventListener('click',function(){
+  if(currentStep<4)showStep(currentStep+1);
+});
+document.getElementById('btn-prev').addEventListener('click',function(){
+  if(currentStep>0)showStep(currentStep-1);
+});
+
+['ch-pitch','ch-rhythm','ch-timbre','ch-amplitude','ch-panning'].forEach(function(id){
+  var key=id.replace('ch-','');
+  document.getElementById(id).addEventListener('change',function(e){
+    state.elements[key]=e.target.checked;
+    document.getElementById('ch-timbre-ctrl').style.display=state.elements.timbre?'block':'none';
+  });
+});
+
+document.querySelectorAll('[data-scale]').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    state.scale=btn.getAttribute('data-scale');
+    document.querySelectorAll('[data-scale]').forEach(function(b){b.classList.toggle('selected',b===btn);});
+  });
+});
+
+document.getElementById('ch-octaves').addEventListener('input',function(e){
+  state.octaves=parseInt(e.target.value,10);
+  document.getElementById('ch-octaves-val').textContent=e.target.value;
+});
+
+document.getElementById('ch-base-freq').addEventListener('input',function(e){
+  state.baseFreq=parseInt(e.target.value,10);
+  document.getElementById('ch-base-freq-val').textContent=e.target.value;
+});
+
+document.getElementById('ch-density').addEventListener('input',function(e){
+  state.density=parseFloat(e.target.value);
+  document.getElementById('ch-density-val').textContent=Math.round(state.density*100);
+});
+
+document.getElementById('ch-dur-min').addEventListener('input',function(e){
+  state.durMin=parseFloat(e.target.value);
+  document.getElementById('ch-dur-min-val').textContent=e.target.value;
+});
+
+document.getElementById('ch-dur-max').addEventListener('input',function(e){
+  state.durMax=parseFloat(e.target.value);
+  document.getElementById('ch-dur-max-val').textContent=e.target.value;
+});
+
+document.querySelectorAll('[data-timing]').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    state.timing=btn.getAttribute('data-timing');
+    document.querySelectorAll('[data-timing]').forEach(function(b){b.classList.toggle('selected',b===btn);});
+  });
+});
+
+document.getElementById('ch-length').addEventListener('input',function(e){
+  state.length=parseInt(e.target.value,10);
+  document.getElementById('ch-length-val').textContent=e.target.value;
+});
+
+document.getElementById('ch-tempo').addEventListener('input',function(e){
+  state.tempo=parseFloat(e.target.value);
+  document.getElementById('ch-tempo-val').textContent=e.target.value;
+});
+
+document.querySelectorAll('[data-wave]').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    state.waveform=btn.getAttribute('data-wave');
+    document.querySelectorAll('[data-wave]').forEach(function(b){b.classList.toggle('selected',b===btn);});
+  });
+});
+
+document.getElementById('ch-generate').addEventListener('click',function(){
+  this.disabled=true;
+  document.getElementById('ch-dl-prog').style.display='inline';
+  generateComposition().then(function(){
+    document.getElementById('ch-generate').disabled=false;
+    document.getElementById('ch-dl-prog').style.display='none';
+    document.getElementById('ch-play').disabled=false;
+    document.getElementById('ch-dl').disabled=false;
+    document.getElementById('ch-dl-note').textContent='ready';
+    play();
+  }).catch(function(){
+    document.getElementById('ch-generate').disabled=false;
+    document.getElementById('ch-dl-prog').style.display='none';
+    document.getElementById('ch-dl-note').textContent='error';
+  });
+});
+
+document.getElementById('ch-play').addEventListener('click',function(){if(isPlaying)stop();else play();});
+document.getElementById('ch-stop').addEventListener('click',function(){stop();});
+
+document.getElementById('ch-dl').addEventListener('click',function(){
+  var format=document.getElementById('ch-dl-format').value;
+  if(format==='wav'){
+    triggerDownload(audioBufferToWav(audioBuffer),'chance-'+Date.now()+'.wav');
+  } else {
+    var json={
+      type:'chance-composition',
+      version:1,
+      created_at:new Date().toISOString(),
+      settings:state
+    };
+    var blob=new Blob([JSON.stringify(json,null,2)],{type:'application/json'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url;a.download='chance-'+Date.now()+'.json';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+});
+
+document.addEventListener('keydown',function(e){
+  if(e.code==='Space'){e.preventDefault();if(!e.repeat){if(isPlaying)stop();else if(audioBuffer)play();}}
+});
+
+showStep(0);
+}());
+
+// ─────────────────────────────────────────────────────────
+// HEADER BEHAVIOUR
+// ─────────────────────────────────────────────────────────
+const path = window.location.pathname.replace(/\/$/, '') || '/';
+document.querySelectorAll('.sil-header__nav a').forEach(a => {
+  const href = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
+  if (href === path) a.classList.add('sil-active');
+});
+
+const menuToggle = document.getElementById('silMenuToggle');
+const silNav     = document.getElementById('silNav');
+menuToggle.addEventListener('click', () => {
+  const open = silNav.classList.toggle('sil-open');
+  menuToggle.setAttribute('aria-expanded', open);
+});
+silNav.querySelectorAll('a').forEach(a =>
+  a.addEventListener('click', () => silNav.classList.remove('sil-open'))
+);
+
+async function getSupabase() {
+  if (window._supabase) return window._supabase;
+  const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+  return createClient(
+    'https://lrjuufvrgkuvfxcmybtf.supabase.co',
+    'sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1'
+  );
+}
+
+document.getElementById('silSignOut').addEventListener('click', async function () {
+  this.disabled = true;
+  this.textContent = 'Signing out…';
+  try {
+    const sb = await getSupabase();
+    await sb.auth.signOut();
+  } finally {
+    window.location.replace('/');
+  }
+});
+</script>
+
+</body>
+</html>
