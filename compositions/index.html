@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compositions</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Custom styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+        .breadcrumb {
+            padding: 10px 0;
+        }
+        .breadcrumb a {
+            text-decoration: none;
+            color: #4CAF50;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            border: 1px solid #4CAF50;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+            transition: transform 0.3s;
+        }
+        .card:hover {
+            transform: scale(1.05);
+        }
+        .card .tag {
+            background-color: #4CAF50;
+            color: white;
+            padding: 5px;
+            border-radius: 2px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 12px;
+        }
+        .icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        @media (max-width: 600px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="breadcrumb">
+        <a href="#">Home</a> &gt; <a href="#">Compositions</a>
+    </div>
+    <h1>Compositions</h1>
+    <div class="container">
+        <div class="card">
+            <div class="icon">🎛️</div>
+            <h2>Phase Machine (Reich)</h2>
+            <div class="tag">New</div>
+            <p>Explore the intricate rhythms and harmonies of Steve Reich's phase music.</p>
+        </div>
+        <div class="card">
+            <div class="icon">🏛️</div>
+            <h2>Rooms (Lucier)</h2>
+            <div class="tag">New</div>
+            <p>A sound installation that engages with the spatial acoustics of various rooms.</p>
+        </div>
+        <div class="card">
+            <div class="icon">🌊</div>
+            <h2>Waves (Radigue)</h2>
+            <div class="tag">New</div>
+            <p>Dive into the serene soundscapes created by Éliane Radigue's wave forms.</p>
+        </div>
+        <div class="card">
+            <div class="icon">🎲</div>
+            <h2>Chance (Cage)</h2>
+            <div class="tag">New</div>
+            <p>Engage with John Cage's philosophies of chance and indeterminacy in music.</p>
+        </div>
+    </div>
+</body>
+</html>
