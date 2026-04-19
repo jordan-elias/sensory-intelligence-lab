@@ -1,92 +1,359 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compositions</title>
-    <link rel="stylesheet" href="styles.css">
-    <style>
-        /* Custom styles */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #ffffff;
-            margin: 0;
-            padding: 20px;
-        }
-        .breadcrumb {
-            padding: 10px 0;
-        }
-        .breadcrumb a {
-            text-decoration: none;
-            color: #4CAF50;
-        }
-        .container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-        }
-        .card {
-            border: 1px solid #4CAF50;
-            border-radius: 8px;
-            padding: 15px;
-            text-align: center;
-            position: relative;
-            transition: transform 0.3s;
-        }
-        .card:hover {
-            transform: scale(1.05);
-        }
-        .card .tag {
-            background-color: #4CAF50;
-            color: white;
-            padding: 5px;
-            border-radius: 2px;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 12px;
-        }
-        .icon {
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
-        @media (max-width: 600px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Experimental Compositions — Sensory Intelligence Lab</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+  <script src="/dashboard/auth-guard.js" type="module"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --font-body:'Inter',sans-serif;
+      --font-heading:'Space Grotesk',sans-serif;
+      --bg:#fff;--surface:#f9f9f7;--border:#e5e5e0;
+      --text:#1a1a1a;--muted:#6b6b6b;
+      --accent:#2a5c45;--accent-light:#edf4f0;--accent-hover:#1e4433;
+    }
+    html{font-size:16px}
+    body{font-family:var(--font-body);color:var(--text);background:var(--bg);
+      min-height:100vh;display:flex;flex-direction:column;}
+
+    /* ══════════════════════════════════════
+       HEADER (Consistent with SIL)
+    ══════════════════════════════════════ */
+    .sil-header {
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg);
+      z-index: 100;
+      gap: 1rem;
+      width: 100%;
+    }
+
+    .sil-header__wordmark {
+      font-family: var(--font-heading);
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      flex-shrink: 0;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .sil-header__wordmark:hover { color: var(--accent); }
+
+    .sil-header__nav {
+      display: flex;
+      gap: 0.25rem;
+      align-items: center;
+    }
+
+    .sil-header__nav a {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-decoration: none;
+      color: var(--muted);
+      transition: color 0.15s;
+      white-space: nowrap;
+      padding: 0.3rem 0.65rem;
+    }
+    .sil-header__nav a:hover { color: var(--text); }
+    .sil-header__nav a.sil-active { color: var(--accent); font-weight: 600; }
+
+    .sil-header__signout {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--muted);
+      background: none;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      padding: 0.3rem 0.75rem;
+      transition: color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+      line-height: 1.6;
+    }
+    .sil-header__signout:hover { color: var(--text); border-color: var(--text); }
+    .sil-header__signout:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .sil-header__toggle {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      flex-shrink: 0;
+    }
+    .sil-header__toggle span { display: block; width: 20px; height: 2px; background: var(--text); }
+
+    @media (max-width: 700px) {
+      .sil-header { padding: 0 1rem; }
+      .sil-header__toggle { display: flex; }
+      .sil-header__nav {
+        display: none;
+        position: absolute;
+        top: 56px; left: 0; right: 0;
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0.75rem 1rem;
+        gap: 0;
+        z-index: 99;
+      }
+      .sil-header__nav.sil-open { display: flex; }
+      .sil-header__nav a,
+      .sil-header__signout { font-size: 0.875rem; padding: 0.55rem 0.5rem; }
+      .sil-header__signout { border: none; }
+    }
+
+    /* Breadcrumb */
+    .bc{padding:.75rem 1.5rem 0;max-width:1100px;margin:0 auto;width:100%}
+    .bc ol{list-style:none;display:flex;gap:.3rem;align-items:center;
+      font-size:.75rem;color:var(--muted);}
+    .bc li+li::before{content:'/';margin-right:.3rem;color:var(--border)}
+    .bc a{color:var(--muted);text-decoration:none;}
+    .bc a:hover{color:var(--accent);text-decoration:underline;}
+
+    /* Main */
+    main{max-width:1100px;margin:0 auto;padding:2rem 1.5rem 3rem;flex:1;width:100%;}
+    @media(max-width:600px){main{padding:1.5rem 1rem 3rem}}
+
+    /* Page header */
+    .page-header{margin-bottom:2.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
+    .page-header h1{font-family:var(--font-heading);font-size:1.75rem;font-weight:600;
+      letter-spacing:-.02em;line-height:1.2;margin-bottom:.5rem;}
+    .page-header p{font-size:.95rem;color:var(--muted);line-height:1.6;}
+
+    /* Cards Grid */
+    .compositions-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+      gap:1.5rem;
+      margin-bottom:2rem;
+    }
+
+    /* Card */
+    .composition-card{
+      border:1px solid var(--border);
+      background:var(--bg);
+      padding:1.5rem;
+      cursor:pointer;
+      transition:all 0.2s;
+      text-decoration:none;
+      color:inherit;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .composition-card:hover{
+      border-color:var(--accent);
+      box-shadow:0 4px 12px rgba(42,92,69,0.1);
+      transform:translateY(-2px);
+    }
+
+    .card-icon{
+      font-size:2rem;
+      margin-bottom:1rem;
+      line-height:1;
+    }
+
+    .card-title{
+      font-family:var(--font-heading);
+      font-size:1.1rem;
+      font-weight:600;
+      margin-bottom:.5rem;
+      color:var(--text);
+      letter-spacing:-.01em;
+    }
+
+    .card-description{
+      font-size:.9rem;
+      color:var(--muted);
+      line-height:1.6;
+      margin-bottom:1.25rem;
+      flex:1;
+    }
+
+    .card-artist{
+      font-family:var(--font-heading);
+      font-size:.7rem;
+      font-weight:600;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:var(--muted);
+      display:inline-block;
+      padding:.4rem .75rem;
+      background:var(--surface);
+      border:1px solid var(--border);
+    }
+
+    .card-arrow{
+      font-size:.9rem;
+      color:var(--accent);
+      margin-top:.75rem;
+      font-weight:600;
+    }
+
+    /* Footer */
+    footer{border-top:1px solid var(--border);padding:1.25rem 1.5rem;
+      text-align:center;font-size:.78rem;color:var(--muted);margin-top:auto;}
+    footer a{color:var(--muted);text-decoration:none;}
+    footer a:hover{color:var(--accent);}
+  </style>
 </head>
 <body>
-    <div class="breadcrumb">
-        <a href="#">Home</a> &gt; <a href="#">Compositions</a>
-    </div>
-    <h1>Compositions</h1>
-    <div class="container">
-        <div class="card">
-            <div class="icon">🎛️</div>
-            <h2>Phase Machine (Reich)</h2>
-            <div class="tag">New</div>
-            <p>Explore the intricate rhythms and harmonies of Steve Reich's phase music.</p>
-        </div>
-        <div class="card">
-            <div class="icon">🏛️</div>
-            <h2>Rooms (Lucier)</h2>
-            <div class="tag">New</div>
-            <p>A sound installation that engages with the spatial acoustics of various rooms.</p>
-        </div>
-        <div class="card">
-            <div class="icon">🌊</div>
-            <h2>Waves (Radigue)</h2>
-            <div class="tag">New</div>
-            <p>Dive into the serene soundscapes created by Éliane Radigue's wave forms.</p>
-        </div>
-        <div class="card">
-            <div class="icon">🎲</div>
-            <h2>Chance (Cage)</h2>
-            <div class="tag">New</div>
-            <p>Engage with John Cage's philosophies of chance and indeterminacy in music.</p>
-        </div>
-    </div>
+
+<!-- ══════════════════════════════════════
+     HEADER
+══════════════════════════════════════ -->
+<header class="sil-header">
+  <a class="sil-header__wordmark" href="/dashboard/">Sensory Intelligence Lab</a>
+  <button class="sil-header__toggle" id="silMenuToggle" aria-label="Toggle navigation" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <nav class="sil-header__nav" id="silNav">
+    <a href="/dashboard/">Dashboard</a>
+    <a href="/account/">Account</a>
+    <a href="/booking/">Book a session</a>
+    <button class="sil-header__signout" id="silSignOut">Sign out</button>
+  </nav>
+</header>
+
+<!-- Breadcrumb -->
+<nav aria-label="Breadcrumb" class="bc">
+  <ol>
+    <li><a href="/dashboard/">Dashboard</a></li>
+    <li>Experimental Compositions</li>
+  </ol>
+</nav>
+
+<!-- Main Content -->
+<main>
+
+  <div class="page-header">
+    <h1>Experimental Compositions</h1>
+    <p>Learn compositional techniques from experimental music pioneers. Each tool combines interactive sound design with education about a key work and artistic philosophy.</p>
+  </div>
+
+  <div class="compositions-grid">
+
+    <!-- Phase Machine / Reich -->
+    <a href="/compositions/phase-machine.html" class="composition-card">
+      <div class="card-icon">↔️</div>
+      <div class="card-title">Phase Machine</div>
+      <div class="card-description">
+        Explore tape phasing through two synchronized loops that gradually drift apart, creating emergent rhythmic patterns. Based on Steve Reich's "It's Gonna Rain."
+      </div>
+      <span class="card-artist">Steve Reich</span>
+      <div class="card-arrow">→</div>
+    </a>
+
+    <!-- Rooms / Lucier -->
+    <a href="/compositions/rooms.html" class="composition-card">
+      <div class="card-icon">📍</div>
+      <div class="card-title">Rooms</div>
+      <div class="card-description">
+        Iteratively process audio through acoustic room filters to watch how resonances emerge and evolve. Inspired by Alvin Lucier's "I Am Sitting in a Room."
+      </div>
+      <span class="card-artist">Alvin Lucier</span>
+      <div class="card-arrow">→</div>
+    </a>
+
+    <!-- Chance / Cage -->
+    <a href="/compositions/chance.html" class="composition-card">
+      <div class="card-icon">🎲</div>
+      <div class="card-title">Chance</div>
+      <div class="card-description">
+        Create indeterminate compositions using random number generators. Based on John Cage's philosophy of relinquishing control—no two pieces are ever the same.
+      </div>
+      <span class="card-artist">John Cage</span>
+      <div class="card-arrow">→</div>
+    </a>
+
+    <!-- Waves / Radigue -->
+    <a href="/compositions/waves.html" class="composition-card">
+      <div class="card-icon">〰️</div>
+      <div class="card-title">Waves</div>
+      <div class="card-description">
+        Compose slowly evolving drones using detuned oscillators and imperceptible drift. Inspired by Éliane Radigue's hypnotic, meditative synthesizer pieces.
+      </div>
+      <span class="card-artist">Éliane Radigue</span>
+      <div class="card-arrow">→</div>
+    </a>
+
+  </div>
+
+</main>
+
+<footer>
+  <p>Jordan Elias Music Therapy · Berlin ·
+    <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a> ·
+    <a href="https://jordanelias.de/" target="_blank" rel="noopener">jordanelias.de</a>
+  </p>
+</footer>
+
+<script type="module">
+// ─────────────────────────────────────────────────────────
+// HEADER BEHAVIOUR
+// ─────────────────────────────────────────────────────────
+const path = window.location.pathname.replace(/\/$/, '') || '/';
+document.querySelectorAll('.sil-header__nav a').forEach(a => {
+  const href = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
+  if (href === path) a.classList.add('sil-active');
+});
+
+const menuToggle = document.getElementById('silMenuToggle');
+const silNav = document.getElementById('silNav');
+menuToggle.addEventListener('click', () => {
+  const open = silNav.classList.toggle('sil-open');
+  menuToggle.setAttribute('aria-expanded', open);
+});
+silNav.querySelectorAll('a').forEach(a =>
+  a.addEventListener('click', () => silNav.classList.remove('sil-open'))
+);
+
+// ─────────────────────────────────────────────────────────
+// SUPABASE AUTH
+// ─────────────────────────────────────────────────────────
+async function getSupabase() {
+  if (window._supabase) return window._supabase;
+  const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+  return createClient(
+    'https://lrjuufvrgkuvfxcmybtf.supabase.co',
+    'sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1'
+  );
+}
+
+document.getElementById('silSignOut').addEventListener('click', async function () {
+  this.disabled = true;
+  this.textContent = 'Signing out…';
+  try {
+    const sb = await getSupabase();
+    await sb.auth.signOut();
+  } finally {
+    window.location.replace('/');
+  }
+});
+
+// Highlight current nav
+document.querySelectorAll('.sil-header__nav a').forEach(a => {
+  const href = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
+  if (href === path) a.classList.add('sil-active');
+});
+</script>
+
 </body>
 </html>
