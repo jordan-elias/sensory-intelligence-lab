@@ -35,7 +35,6 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      /* No margin or padding here — header must sit flush at top */
     }
 
     a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
@@ -58,7 +57,6 @@
       background: var(--bg);
       z-index: 100;
       gap: 1rem;
-      /* Full viewport width, no inherited constraints */
       width: 100%;
     }
 
@@ -97,7 +95,6 @@
       font-weight: 600;
     }
 
-    /* Sign out — bordered box */
     .sil-header__signout {
       font-family: var(--font-body);
       font-size: 0.8rem;
@@ -117,7 +114,6 @@
     }
     .sil-header__signout:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* Mobile hamburger */
     .sil-header__toggle {
       display: none;
       flex-direction: column;
@@ -261,13 +257,6 @@
     ══════════════════════════════════════ */
     .modules-section { margin-bottom: 2.75rem; }
 
-    /*
-      Key fix: use a fixed repeat count per section so partial rows
-      never produce dark/empty "ghost" cells.
-      Sections with 3 cards → 3 columns
-      Sections with 4 cards → 4 columns (wraps to 2+2 on medium screens)
-      auto-fill is NOT used — that's what was causing the dark gaps.
-    */
     .module-grid {
       display: grid;
       gap: 1px;
@@ -276,12 +265,8 @@
       overflow: hidden;
     }
 
-    /* Regulation: 3 cards */
     .module-grid--3 { grid-template-columns: repeat(3, 1fr); }
-    /* Perception: 2 cards */
     .module-grid--2 { grid-template-columns: repeat(2, 1fr); }
-    /* Creative: 2 cards */
-    /* Coming soon: 3 cards */
 
     @media (max-width: 860px) {
       .module-grid--3 { grid-template-columns: repeat(2, 1fr); }
@@ -352,6 +337,110 @@
     }
     .module-tag.coming-soon { color: var(--muted); background: var(--surface); }
     .module-tag.new { color: #6b3a1a; background: #fdf4ec; }
+
+    /* ── Free tier: limited preview tag style ── */
+    .module-tag.limited-preview {
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+
+    /* ══════════════════════════════════════
+       FEEDBACK FORM
+    ══════════════════════════════════════ */
+    .feedback-section {
+      margin-bottom: 2.75rem;
+      border: 1px solid var(--border);
+    }
+
+    .feedback-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      cursor: pointer;
+      user-select: none;
+      background: var(--surface);
+      gap: 1rem;
+    }
+    .feedback-toggle:hover { background: #f0f0ec; }
+
+    .feedback-toggle-label {
+      font-family: var(--font-heading);
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text);
+    }
+
+    .feedback-toggle-icon {
+      font-size: 0.75rem;
+      color: var(--muted);
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    .feedback-section.open .feedback-toggle-icon {
+      transform: rotate(180deg);
+    }
+
+    .feedback-body {
+      display: none;
+      padding: 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+    .feedback-section.open .feedback-body { display: block; }
+
+    .feedback-prompt {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 0.85rem;
+    }
+
+    .feedback-body textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem 0.9rem;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.12s;
+      margin-bottom: 0.75rem;
+    }
+    .feedback-body textarea:focus { border-color: var(--accent); }
+    .feedback-body textarea::placeholder { color: #c0c0bb; }
+
+    .feedback-submit {
+      font-family: var(--font-heading);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.6rem 1.5rem;
+      border: none;
+      background: var(--accent);
+      color: white;
+      cursor: pointer;
+      transition: background 0.15s;
+      letter-spacing: -0.01em;
+    }
+    .feedback-submit:hover { background: var(--accent-hover); }
+    .feedback-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .feedback-success {
+      display: none;
+      font-size: 0.82rem;
+      color: var(--accent);
+      background: var(--accent-light);
+      border: 1px solid #c0d9c8;
+      padding: 0.75rem 1rem;
+      margin-top: 0.75rem;
+      line-height: 1.5;
+    }
+    .feedback-success.visible { display: block; }
 
     /* ══════════════════════════════════════
        CRISIS FOOTER
@@ -499,14 +588,14 @@
           <span class="module-tag">Parasympathetic · HRV</span>
         </a>
 
-        <a class="module-card" href="/check-in/">
+        <a class="module-card" href="/check-in/" data-gated="true">
           <div class="module-top">
             <span class="module-icon">◑</span>
             <span class="module-arrow">→</span>
           </div>
           <h3>Check-In</h3>
           <p>Log your emotional state, energy, and sensory load. Track patterns across the day and over time.</p>
-          <span class="module-tag">Pattern tracking · Awareness</span>
+          <span class="module-tag" data-default-tag="Pattern tracking · Awareness">Pattern tracking · Awareness</span>
         </a>
 
       </div>
@@ -527,24 +616,24 @@
           <span class="module-tag">Intervals · Chords · Perception</span>
         </a>
 
-        <a class="module-card" href="/spatial-game/">
+        <a class="module-card" href="/spatial-game/" data-gated="true">
           <div class="module-top">
             <span class="module-icon">◇</span>
             <span class="module-arrow">→</span>
           </div>
           <h3>Spatial Awareness</h3>
           <p>Track moving sound sources in 3D space. Trains auditory attention, scene analysis, and sound localisation.</p>
-          <span class="module-tag">Attention · Localisation</span>
+          <span class="module-tag" data-default-tag="Attention · Localisation">Attention · Localisation</span>
         </a>
 
-        <a class="module-card" href="/cocktail-party-problem/">
+        <a class="module-card" href="/cocktail-party-problem/" data-gated="true">
           <div class="module-top">
             <span class="module-icon">◆</span>
             <span class="module-arrow">→</span>
           </div>
           <h3>Cocktail Party Problem</h3>
           <p>Learn about auditory scene analysis. Practice listening for target words in increasingly noisy environments.</p>
-          <span class="module-tag">Selective attention · Source separation</span>
+          <span class="module-tag" data-default-tag="Selective attention · Source separation">Selective attention · Source separation</span>
         </a>
 
       </div>
@@ -555,34 +644,34 @@
       <p class="section-label">Creative tools</p>
       <div class="module-grid module-grid--3">
 
-        <a class="module-card" href="/soundscape-machine/">
+        <a class="module-card" href="/soundscape-machine/" data-gated="true">
           <div class="module-top">
             <span class="module-icon">◻</span>
             <span class="module-arrow">→</span>
           </div>
           <h3>Soundscape Machine</h3>
           <p>Four-track tape composition tool. Upload or record audio, apply reverb, LFO filter, and tape degradation. Save and load sessions.</p>
-          <span class="module-tag">Field recording · Composition</span>
+          <span class="module-tag" data-default-tag="Field recording · Composition">Field recording · Composition</span>
         </a>
 
-        <a class="module-card" href="/journal/">
+        <a class="module-card" href="/journal/" data-gated="true">
           <div class="module-top">
             <span class="module-icon">◧</span>
             <span class="module-arrow">→</span>
           </div>
           <h3>Timed Journal</h3>
           <p>Set a timer, choose a soundscape and prompt, then write continuously. Entries are saved privately to your account.</p>
-          <span class="module-tag">Writing · Reflection</span>
+          <span class="module-tag" data-default-tag="Writing · Reflection">Writing · Reflection</span>
         </a>
 
-         <a class="module-card" href="/compositions/">
+        <a class="module-card" href="/compositions/" data-gated="true">
           <div class="module-top">
             <span class="module-icon">▣</span>
             <span class="module-arrow">→</span>
           </div>
           <h3>Compositions</h3>
           <p>Learn compositional techniques inspired by experimental composers. Interactive sound design tools with education about a key work and artistic philosophy.</p>
-          <span class="module-tag">Phasing · Chance · Synthesis</span>
+          <span class="module-tag" data-default-tag="Phasing · Chance · Synthesis">Phasing · Chance · Synthesis</span>
         </a>
 
       </div>
@@ -642,6 +731,42 @@
           <span class="module-tag coming-soon">In development</span>
         </div>
 
+      </div>
+    </div>
+
+    <!-- ── Feedback form ── -->
+    <div class="feedback-section" id="feedbackSection">
+      <div class="feedback-toggle" id="feedbackToggle" role="button" tabindex="0" aria-expanded="false">
+        <span class="feedback-toggle-label">Share your feedback</span>
+        <span class="feedback-toggle-icon">▾</span>
+      </div>
+      <div class="feedback-body">
+        <p class="feedback-prompt">What's working well? What could be better? What would you like to see next? — anything helps.</p>
+        <form
+          name="lab-feedback"
+          method="POST"
+          data-netlify="true"
+          netlify-honeypot="bot-field"
+          id="feedbackForm"
+        >
+          <!-- Netlify honeypot — hidden from real users -->
+          <p style="display:none">
+            <label>Don't fill this in: <input name="bot-field"></label>
+          </p>
+          <!-- Hidden field carries the user's email automatically -->
+          <input type="hidden" name="user-email" id="feedbackEmail">
+          <input type="hidden" name="form-name" value="lab-feedback">
+          <textarea
+            name="feedback"
+            id="feedbackText"
+            placeholder="Your thoughts…"
+            required
+          ></textarea>
+          <button type="submit" class="feedback-submit" id="feedbackSubmit">Send feedback</button>
+        </form>
+        <div class="feedback-success" id="feedbackSuccess">
+          Thank you — your feedback has been received.
+        </div>
       </div>
     </div>
 
@@ -781,6 +906,7 @@
   </footer>
 
   <script type="module">
+
     // ── Greeting ──
     function onAuthReady(cb) {
       if (window._currentUser) { cb(); return; }
@@ -793,6 +919,25 @@
       const firstName = name.split(' ')[0];
       if (firstName) {
         document.getElementById('greeting').textContent = `Welcome back, ${firstName}`;
+      }
+
+      // ── Set body access attribute for CSS ──
+      // auth-guard exposes window._accessTier as 'free' | 'lab' | 'call1' | 'call2' | 'beta'
+      const tier = window._accessTier || 'free';
+      document.body.setAttribute('data-access', tier);
+
+      // ── Swap tags on gated cards for free users ──
+      if (tier === 'free') {
+        document.querySelectorAll('.module-card[data-gated="true"] .module-tag').forEach(tag => {
+          tag.textContent = 'Limited preview';
+          tag.classList.add('limited-preview');
+        });
+      }
+
+      // ── Prefill feedback form email ──
+      const emailField = document.getElementById('feedbackEmail');
+      if (emailField && user?.email) {
+        emailField.value = user.email;
       }
     });
 
@@ -835,6 +980,53 @@
     );
     const promptEl = document.getElementById('dailyPrompt');
     if (promptEl) promptEl.textContent = PROMPTS[dayOfYear % PROMPTS.length];
+
+    // ── Feedback form ──
+    const feedbackSection = document.getElementById('feedbackSection');
+    const feedbackToggle  = document.getElementById('feedbackToggle');
+    const feedbackForm    = document.getElementById('feedbackForm');
+    const feedbackSuccess = document.getElementById('feedbackSuccess');
+
+    feedbackToggle.addEventListener('click', () => {
+      const open = feedbackSection.classList.toggle('open');
+      feedbackToggle.setAttribute('aria-expanded', open);
+    });
+
+    feedbackToggle.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); feedbackToggle.click(); }
+    });
+
+    feedbackForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submit = document.getElementById('feedbackSubmit');
+      const text   = document.getElementById('feedbackText').value.trim();
+      if (!text) return;
+
+      submit.disabled = true;
+      submit.textContent = 'Sending…';
+
+      try {
+        const formData = new FormData(feedbackForm);
+        const res = await fetch('/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams(formData).toString(),
+        });
+
+        if (res.ok) {
+          feedbackForm.style.display = 'none';
+          feedbackSuccess.classList.add('visible');
+        } else {
+          submit.disabled = false;
+          submit.textContent = 'Send feedback';
+          alert('Something went wrong. Please try again.');
+        }
+      } catch (err) {
+        submit.disabled = false;
+        submit.textContent = 'Send feedback';
+        alert('Something went wrong. Please try again.');
+      }
+    });
 
     // ── Crisis resources toggle ──
     const crisisToggle = document.getElementById('crisisToggle');
@@ -890,6 +1082,7 @@
         window.location.replace('/');
       }
     });
+
   </script>
 
 </body>
