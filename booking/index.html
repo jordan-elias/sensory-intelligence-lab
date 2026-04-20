@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Schedule a Session — Sensory Intelligence Lab</title>
 
-  <!-- Auth guard: checks session, sets window._supabase / window._currentUser, fires authReady -->
   <script src="/dashboard/auth-guard.js" type="module"></script>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet" />
@@ -158,38 +157,26 @@
     }
     .invitation-block h3 {
       font-family: var(--font-heading);
-      font-size: 1.25rem;
-      font-weight: 600;
-      letter-spacing: -.015em;
-      color: var(--text);
-      margin-bottom: .65rem;
-      line-height: 1.25;
+      font-size: 1.25rem; font-weight: 600;
+      letter-spacing: -.015em; color: var(--text);
+      margin-bottom: .65rem; line-height: 1.25;
     }
     .invitation-block p {
-      font-size: .875rem;
-      color: var(--muted);
-      line-height: 1.75;
-      margin-bottom: .6rem;
+      font-size: .875rem; color: var(--muted);
+      line-height: 1.75; margin-bottom: .6rem;
     }
     .invitation-block p:last-child { margin-bottom: 0; }
     .invitation-uses {
-      display: flex;
-      flex-direction: column;
-      gap: .45rem;
-      margin-top: .85rem;
+      display: flex; flex-direction: column;
+      gap: .45rem; margin-top: .85rem;
     }
     .invitation-use {
-      display: flex;
-      gap: .65rem;
-      font-size: .85rem;
-      color: var(--text);
-      line-height: 1.5;
+      display: flex; gap: .65rem;
+      font-size: .85rem; color: var(--text); line-height: 1.5;
     }
     .invitation-use::before {
-      content: '—';
-      color: var(--accent);
-      flex-shrink: 0;
-      font-weight: 500;
+      content: '—'; color: var(--accent);
+      flex-shrink: 0; font-weight: 500;
     }
 
     /* ── Section label ── */
@@ -247,6 +234,7 @@
       border: 1px solid currentColor;
     }
     .plan-badge.free    { color: var(--muted); border-color: var(--border); }
+    .plan-badge.beta    { color: #6b3a1a; border-color: #d4a87a; background: #fdf4ec; }
     .plan-badge.lab     { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
     .plan-badge.call1   { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
     .plan-badge.call2   { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
@@ -276,17 +264,13 @@
 
     /* ── Calendar section ── */
     .cal-section { margin-bottom: 2.5rem; }
-
     .cal-section-head {
       display: flex; align-items: baseline;
       justify-content: space-between; gap: 1rem;
       margin-bottom: 1rem; flex-wrap: wrap;
     }
-
     .cal-section-meta { font-size: .78rem; color: var(--muted); }
-    .cal-section-meta.included {
-      color: var(--accent); font-weight: 500;
-    }
+    .cal-section-meta.included { color: var(--accent); font-weight: 500; }
 
     /* Cal.com embed wrapper */
     .cal-embed-wrap {
@@ -295,12 +279,7 @@
       overflow: hidden;
       min-height: 500px;
     }
-
-    /* Cal.com injects an iframe — constrain it */
-    .cal-embed-wrap iframe {
-      width: 100% !important;
-      border: none !important;
-    }
+    .cal-embed-wrap iframe { width: 100% !important; border: none !important; }
 
     /* ── Session summary table ── */
     .info-rows { border: 1px solid var(--border); margin-bottom: 2rem; }
@@ -374,7 +353,6 @@
     </div>
   </div>
 
-  <!-- Populated by JS -->
   <div id="pageMsg" class="msg"></div>
   <div id="bookingRoot">
     <div class="loading-block">
@@ -449,39 +427,38 @@ function fmtDate(iso) {
   });
 }
 
-// Safe billing-period start: subtract one month without day-overflow
 function periodStartFromEnd(periodEnd) {
   const d = new Date(periodEnd);
   return new Date(d.getFullYear(), d.getMonth() - 1, d.getDate());
 }
 
 // ─────────────────────────────────────────────────────────
-// ENTITLEMENT LOGIC (inline — no separate module needed)
+// ENTITLEMENT LOGIC
 // ─────────────────────────────────────────────────────────
 async function getEntitlement(supabase, userId) {
 
-  // 1. Fetch profile
   const { data: profile, error: profileErr } = await supabase
     .from('profiles')
-    .select('plan, subscription_tier, subscription_status, current_period_end, intro_call_used, email')
+    .select('subscription_tier, subscription_status, current_period_end, intro_call_used, is_beta, email')
     .eq('id', userId)
     .single();
 
   if (profileErr) throw new Error('Could not load your profile: ' + profileErr.message);
 
-  const plan   = profile.subscription_tier || profile.plan || 'free';
-  const status = profile.subscription_status || 'free';
+  const tier   = profile.subscription_tier ?? 'free';
+  const status = profile.subscription_status ?? 'free';
+  const isBeta = profile.is_beta ?? false;
 
-  // Treat lapsed / past_due subs the same as free for booking purposes
   const isActive = status === 'active' || status === 'trialing';
 
-  // 2. Billing window
+  // Beta users have lab-level access but no included sessions
+  const effectiveTier = isBeta && !isActive ? 'lab' : tier;
+
   const periodEnd   = profile.current_period_end
     ? new Date(profile.current_period_end)
     : null;
   const periodStart = periodEnd ? periodStartFromEnd(periodEnd) : null;
 
-  // 3. Count included sessions used in this billing period
   let subscriberSessionsUsed = 0;
   if (isActive && periodStart && periodEnd) {
     const { data: bookings, error: bookErr } = await supabase
@@ -501,28 +478,20 @@ async function getEntitlement(supabase, userId) {
 
   const introUsed = !!profile.intro_call_used;
 
-  // 4. Build entitlement object
   const e = {
-    plan,
+    tier: effectiveTier,
     isActive,
     status,
+    isBeta,
     email: profile.email || '',
     periodStart,
     periodEnd,
-
-    // Intro (one-time, any plan)
     canBookIntro: !introUsed,
-
-    // Included sessions
     sessionsIncluded:  0,
     sessionsUsed:      subscriberSessionsUsed,
     sessionsRemaining: 0,
     canBookIncluded:   false,
-
-    // Paid session always available
     canBookPaid: true,
-
-    // Upgrade hints
     showUpgradeToCall1: false,
     showUpgradeToCall2: false,
   };
@@ -532,12 +501,11 @@ async function getEntitlement(supabase, userId) {
     return e;
   }
 
-  switch (plan) {
+  switch (effectiveTier) {
     case 'lab':
       e.sessionsIncluded   = 0;
       e.showUpgradeToCall1 = true;
       break;
-
     case 'call1':
       e.sessionsIncluded  = 1;
       e.sessionsUsed      = Math.min(subscriberSessionsUsed, 1);
@@ -545,14 +513,12 @@ async function getEntitlement(supabase, userId) {
       e.canBookIncluded   = subscriberSessionsUsed < 1;
       e.showUpgradeToCall2 = true;
       break;
-
     case 'call2':
       e.sessionsIncluded  = 2;
       e.sessionsUsed      = Math.min(subscriberSessionsUsed, 2);
       e.sessionsRemaining = Math.max(0, 2 - subscriberSessionsUsed);
       e.canBookIncluded   = subscriberSessionsUsed < 2;
       break;
-
     default:
       e.showUpgradeToCall1 = true;
       break;
@@ -566,6 +532,7 @@ async function getEntitlement(supabase, userId) {
 // ─────────────────────────────────────────────────────────
 const PLAN_LABELS = {
   free:  'Free access',
+  beta:  'Beta access',
   lab:   'Lab Access',
   call1: 'Lab + 1 session / month',
   call2: 'Lab + 2 sessions / month',
@@ -589,15 +556,19 @@ function render(ent) {
        </div>`
     : '';
 
-  const badgeClass = ['lab','call1','call2'].includes(ent.plan) && ent.isActive ? ent.plan : 'free';
-  const badgeLabel = ent.isActive && ent.plan !== 'free'
-    ? (PLAN_LABELS[ent.plan] || ent.plan)
+  // Badge class: beta gets its own style
+  const badgeClass = ent.isBeta ? 'beta'
+    : ['lab','call1','call2'].includes(ent.tier) && ent.isActive ? ent.tier
+    : 'free';
+
+  const badgeLabel = ent.isBeta ? 'Beta'
+    : ent.isActive && ent.tier !== 'free' ? (PLAN_LABELS[ent.tier] || ent.tier)
     : 'Free';
 
   planCard.innerHTML = `
     <div class="plan-card-left">
       <span class="plan-card-label">Your plan</span>
-      <span class="plan-card-name">${PLAN_LABELS[ent.plan] || 'Free access'}</span>
+      <span class="plan-card-name">${PLAN_LABELS[ent.isBeta ? 'beta' : ent.tier] || 'Free access'}</span>
       ${sessionsLine}
     </div>
     <span class="plan-badge ${badgeClass}">${badgeLabel}</span>
@@ -618,10 +589,10 @@ function render(ent) {
     root.appendChild(nudge);
   }
 
-  // ── Session sections to mount ──
+  // ── Session sections ──
   const sections = [];
 
-  // Intro (one-time)
+  // Intro (one-time, available to everyone)
   if (ent.canBookIntro) {
     sections.push({
       id:       'cal-intro',
@@ -657,7 +628,6 @@ function render(ent) {
       ],
     });
   } else if (ent.sessionsIncluded > 0 && !ent.canBookIncluded) {
-    // Has a plan with sessions but used them all — show a note
     const note = document.createElement('div');
     note.className = 'msg info show';
     note.style.marginBottom = '2rem';
@@ -665,7 +635,7 @@ function render(ent) {
     root.appendChild(note);
   }
 
-  // Single paid session (always shown)
+  // Single paid session (always available)
   sections.push({
     id:       'cal-paid',
     label:    'Single Session',
@@ -694,7 +664,6 @@ function render(ent) {
     `;
     wrap.appendChild(head);
 
-    // Info rows
     const infoRows = document.createElement('div');
     infoRows.className = 'info-rows';
     sec.rows.forEach(r => {
@@ -705,7 +674,6 @@ function render(ent) {
     });
     wrap.appendChild(infoRows);
 
-    // Cal embed target
     const calWrap = document.createElement('div');
     calWrap.className = 'cal-embed-wrap';
     calWrap.id = sec.id;
@@ -714,7 +682,6 @@ function render(ent) {
     root.appendChild(wrap);
   });
 
-  // Mount Cal.com once all DOM is ready
   loadAndMountCal(sections);
 }
 
@@ -732,7 +699,6 @@ function loadAndMountCal(sections) {
   const script = document.createElement('script');
   script.src = 'https://app.cal.com/embed/embed.js';
   script.async = true;
-
   script.onload = () => {
     if (typeof window.Cal === 'undefined') {
       showPageMsg('Cal.com embed could not load. Please refresh the page.', 'error');
@@ -740,11 +706,9 @@ function loadAndMountCal(sections) {
     }
     mountCalSections(sections);
   };
-
   script.onerror = () => {
     showPageMsg('Could not load the booking calendar. Please check your connection and refresh.', 'error');
   };
-
   document.body.appendChild(script);
 }
 
@@ -754,7 +718,6 @@ function mountCalSections(sections) {
     if (!el) return;
 
     window.Cal('init', sec.ns, { origin: 'https://app.cal.com' });
-
     window.Cal.ns[sec.ns]('inline', {
       elementOrSelector: `#${sec.id}`,
       calLink: sec.calLink,
@@ -763,7 +726,6 @@ function mountCalSections(sections) {
         useSlotsViewOnSmallScreen: true,
       },
     });
-
     window.Cal.ns[sec.ns]('ui', {
       layout: 'month_view',
       hideEventTypeDetails: false,
@@ -772,13 +734,10 @@ function mountCalSections(sections) {
 }
 
 // ─────────────────────────────────────────────────────────
-// INIT — wait for auth-guard to confirm session
+// INIT
 // ─────────────────────────────────────────────────────────
 function onAuthReady(cb) {
-  if (window._currentUser) {
-    cb();
-    return;
-  }
+  if (window._currentUser) { cb(); return; }
   window.addEventListener('authReady', cb, { once: true });
 }
 
