@@ -137,17 +137,24 @@
       letter-spacing:-.02em;line-height:1.2;margin-bottom:.4rem;}
     .page-header p{font-size:.9rem;color:var(--muted);line-height:1.6;}
 
-    /* Cards Grid */
+        /* Cards Grid */
     .compositions-grid{
       display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+      grid-template-columns:repeat(2,1fr);
       gap:1px;
       background:var(--border);
       border:1px solid var(--border);
       overflow:hidden;
       margin-bottom:2rem;
+      max-width:600px;
     }
 
+    @media(max-width:860px){
+      .compositions-grid{
+        grid-template-columns:1fr;
+      }
+    }
+    
     /* Card */
     .composition-card{
       border:none;
