@@ -7,6 +7,16 @@
 
   <script src="/dashboard/auth-guard.js" type="module"></script>
 
+  <script type="module">
+  import { applyMultipleGating } from '/assets/js/gating.js';
+  applyMultipleGating([
+    { targetSelector: '#stepProgress', moduleName: 'check-in' },
+    { targetSelector: '#step1',        moduleName: 'check-in' },
+    { targetSelector: '#step2',        moduleName: 'check-in' },
+    { targetSelector: '#step3',        moduleName: 'check-in' },
+  ]);
+</script>
+
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
 
   <!-- Chart.js for dashboard visualisations -->
