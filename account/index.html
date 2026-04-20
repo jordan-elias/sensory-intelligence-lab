@@ -106,35 +106,25 @@
 
     /* ── Subscription card ── */
     .plan-header {
-      display: flex;
-      align-items: center;
-      gap: .85rem;
-      margin-bottom: 1.1rem;
-      padding-bottom: 1.1rem;
-      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      gap: .85rem; margin-bottom: 1.1rem;
+      padding-bottom: 1.1rem; border-bottom: 1px solid var(--border);
     }
     .plan-icon {
       width: 36px; height: 36px;
       background: var(--accent-light);
       border: 1px solid #c0d9c8;
       display: flex; align-items: center; justify-content: center;
-      font-size: 1rem;
-      flex-shrink: 0;
+      font-size: 1rem; flex-shrink: 0;
     }
-    .plan-header-text {}
     .plan-header-name {
       font-family: var(--font-heading);
       font-size: .95rem; font-weight: 600;
-      letter-spacing: -.01em;
-      color: var(--text);
+      letter-spacing: -.01em; color: var(--text);
     }
-    .plan-header-status {
-      font-size: .72rem;
-      color: var(--muted);
-      margin-top: .05rem;
-    }
+    .plan-header-status { font-size: .72rem; color: var(--muted); margin-top: .05rem; }
     .plan-header-status .status-active { color: var(--accent); font-weight: 500; }
-    .plan-header-status .status-beta   { color: var(--accent); font-weight: 500; }
+    .plan-header-status .status-beta   { color: #6b3a1a; font-weight: 500; }
     .plan-header-status .status-free   { color: var(--muted); }
 
     .plan-badge {
@@ -143,8 +133,7 @@
       letter-spacing: .1em; text-transform: uppercase;
       padding: .2rem .55rem;
       border: 1px solid currentColor;
-      margin-left: auto;
-      flex-shrink: 0;
+      margin-left: auto; flex-shrink: 0;
     }
     .badge-free  { color: var(--muted); border-color: var(--border); }
     .badge-paid  { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
@@ -152,66 +141,47 @@
 
     /* What's included list */
     .includes-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: .4rem;
-      margin-bottom: 1.25rem;
+      list-style: none; display: flex;
+      flex-direction: column; gap: .4rem; margin-bottom: 1.25rem;
     }
     .includes-list li {
-      display: flex;
-      gap: .55rem;
-      font-size: .8rem;
-      color: var(--text);
-      line-height: 1.45;
+      display: flex; gap: .55rem;
+      font-size: .8rem; color: var(--text); line-height: 1.45;
     }
     .includes-list li::before { content: '—'; color: var(--accent); flex-shrink: 0; }
 
     /* Session usage bar */
     .session-usage {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: .75rem 1rem;
-      margin-bottom: 1.25rem;
+      background: var(--surface); border: 1px solid var(--border);
+      padding: .75rem 1rem; margin-bottom: 1.25rem;
     }
     .session-usage-label {
       font-size: .72rem; font-weight: 500; color: var(--muted);
-      text-transform: uppercase; letter-spacing: .08em;
-      margin-bottom: .5rem;
+      text-transform: uppercase; letter-spacing: .08em; margin-bottom: .5rem;
     }
-    .session-pips {
-      display: flex; gap: 6px; align-items: center;
-    }
+    .session-pips { display: flex; gap: 6px; align-items: center; }
     .session-pip {
-      width: 28px; height: 28px;
-      border: 1px solid var(--border);
+      width: 28px; height: 28px; border: 1px solid var(--border);
       background: var(--bg);
       display: flex; align-items: center; justify-content: center;
       font-size: .65rem; font-weight: 600; color: var(--muted);
     }
-    .session-pip.used { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+    .session-pip.used      { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
     .session-pip.available { background: var(--accent); border-color: var(--accent); color: white; }
-    .session-pip-label {
-      font-size: .72rem; color: var(--muted);
-      margin-left: .5rem;
-    }
+    .session-pip-label { font-size: .72rem; color: var(--muted); margin-left: .5rem; }
 
     /* Billing actions */
     .billing-actions {
       display: flex; gap: .65rem; flex-wrap: wrap;
-      padding-top: 1.1rem;
-      border-top: 1px solid var(--border);
+      padding-top: 1.1rem; border-top: 1px solid var(--border);
     }
     .billing-link {
       font-family: var(--font-heading);
       font-size: .78rem; font-weight: 600;
       padding: .58rem 1.35rem;
-      text-decoration: none;
-      display: inline-block;
-      transition: all .15s;
-      cursor: pointer;
-      border: none;
-      letter-spacing: -.01em;
+      text-decoration: none; display: inline-block;
+      transition: all .15s; cursor: pointer;
+      border: none; letter-spacing: -.01em;
     }
     .billing-link.primary { background: var(--accent); color: white; }
     .billing-link.primary:hover { background: var(--accent-hover); color: white; }
@@ -221,10 +191,8 @@
 
     /* ── Period info ── */
     .period-info {
-      font-size: .75rem;
-      color: var(--muted);
-      margin-top: .85rem;
-      line-height: 1.55;
+      font-size: .75rem; color: var(--muted);
+      margin-top: .85rem; line-height: 1.55;
     }
 
     /* ── Password reset banner ── */
@@ -240,6 +208,60 @@
     /* ── Loading ── */
     .page-loading { opacity: 0; transition: opacity .2s; }
     .page-loading.ready { opacity: 1; }
+
+    /* ── Header ── */
+    .sil-header {
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem; height: 56px;
+      display: flex; align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0; left: 0; right: 0;
+      background: var(--bg); z-index: 100;
+      gap: 1rem; width: 100%;
+    }
+    .sil-header__wordmark {
+      font-family: var(--font-heading); font-size: 1rem; font-weight: 600;
+      letter-spacing: -0.01em; white-space: nowrap; flex-shrink: 0;
+      text-decoration: none; color: var(--text);
+    }
+    .sil-header__wordmark:hover { color: var(--accent); }
+    .sil-header__nav { display: flex; gap: 0.25rem; align-items: center; }
+    .sil-header__nav a {
+      font-family: var(--font-body); font-size: 0.8rem; font-weight: 500;
+      text-decoration: none; color: var(--muted);
+      transition: color 0.15s; white-space: nowrap; padding: 0.3rem 0.65rem;
+    }
+    .sil-header__nav a:hover { color: var(--text); }
+    .sil-header__nav a.sil-active { color: var(--accent); font-weight: 600; }
+    .sil-header__signout {
+      font-family: var(--font-body); font-size: 0.8rem; font-weight: 500;
+      color: var(--muted); background: none; border: 1px solid var(--border);
+      cursor: pointer; padding: 0.3rem 0.75rem;
+      transition: color 0.15s, border-color 0.15s;
+      white-space: nowrap; line-height: 1.6;
+    }
+    .sil-header__signout:hover { color: var(--text); border-color: var(--text); }
+    .sil-header__signout:disabled { opacity: 0.5; cursor: not-allowed; }
+    .sil-header__toggle {
+      display: none; flex-direction: column; gap: 4px;
+      background: none; border: none; cursor: pointer; padding: 4px; flex-shrink: 0;
+    }
+    .sil-header__toggle span { display: block; width: 20px; height: 2px; background: var(--text); }
+    @media (max-width: 700px) {
+      .sil-header { padding: 0 1rem; }
+      .sil-header__toggle { display: flex; }
+      .sil-header__nav {
+        display: none; position: absolute;
+        top: 56px; left: 0; right: 0;
+        background: var(--bg); border-bottom: 1px solid var(--border);
+        flex-direction: column; align-items: flex-start;
+        padding: 0.75rem 1rem; gap: 0; z-index: 99;
+      }
+      .sil-header__nav.sil-open { display: flex; }
+      .sil-header__nav a,
+      .sil-header__signout { font-size: 0.875rem; padding: 0.55rem 0.5rem; }
+      .sil-header__signout { border: none; }
+    }
 
     /* ── Footer ── */
     footer { border-top: 1px solid var(--border); padding: 1.25rem 2rem; text-align: center; font-size: .78rem; color: var(--muted); }
@@ -260,7 +282,7 @@
 
 <main class="page-loading" id="mainContent">
 
-  <!-- Password reset banner -->
+  <!-- Password reset banner (shown when arriving via reset link) -->
   <div class="reset-banner" id="resetBanner" style="display:none">
     <h3>Set a new password</h3>
     <p>You followed a password reset link. Enter your new password below.</p>
@@ -271,7 +293,7 @@
     <p>Manage your profile, password, and subscription.</p>
   </div>
 
-  <!-- ── Password reset ── -->
+  <!-- ── Password reset (from email link) ── -->
   <div id="resetSection" style="display:none">
     <p class="sl">New password</p>
     <div class="card">
@@ -382,7 +404,6 @@
       <span class="plan-badge badge-free" id="planBadge">Free</span>
     </div>
     <div class="card-body" id="subscriptionBody">
-      <!-- Populated by JS -->
       <div style="font-size:.82rem;color:var(--muted);">Loading…</div>
     </div>
   </div>
@@ -411,6 +432,28 @@
 
 <script type="module">
 
+  // ─────────────────────────────────────────────────────────
+  // HEADER
+  // ─────────────────────────────────────────────────────────
+  const path = window.location.pathname.replace(/\/$/, '') || '/';
+  document.querySelectorAll('.sil-header__nav a').forEach(a => {
+    const href = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
+    if (href === path) a.classList.add('sil-active');
+  });
+
+  // Wire up header if using the shared header component
+  const menuToggle = document.getElementById('silMenuToggle');
+  const silNav     = document.getElementById('silNav');
+  if (menuToggle && silNav) {
+    menuToggle.addEventListener('click', () => {
+      const open = silNav.classList.toggle('sil-open');
+      menuToggle.setAttribute('aria-expanded', open);
+    });
+    silNav.querySelectorAll('a').forEach(a =>
+      a.addEventListener('click', () => silNav.classList.remove('sil-open'))
+    );
+  }
+
   function onAuthReady(cb) {
     if (window._currentUser) { cb(); return; }
     window.addEventListener('authReady', cb, { once: true });
@@ -432,7 +475,9 @@
   }
   function fmtDate(iso) {
     if (!iso) return '—';
-    return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    return new Date(iso).toLocaleDateString('en-GB', {
+      day: 'numeric', month: 'long', year: 'numeric',
+    });
   }
 
   // ── Password strength ──
@@ -460,6 +505,7 @@
       badgeClass: 'badge-free',
       icon: '◯',
       statusText: 'Free tier — no subscription',
+      statusClass: 'status-free',
       includes: [
         'Regulation Engine',
         'Breath Regulation',
@@ -472,6 +518,7 @@
       badgeClass: 'badge-beta',
       icon: '◈',
       statusText: 'Beta access — full Lab included',
+      statusClass: 'status-beta',
       includes: [
         'Full access to all modules',
         'Beta tester — thank you',
@@ -482,6 +529,7 @@
       badgeClass: 'badge-paid',
       icon: '◎',
       statusText: 'Active subscription',
+      statusClass: 'status-active',
       includes: [
         'Full access to all modules',
         'Check-In & journaling',
@@ -495,6 +543,7 @@
       badgeClass: 'badge-paid',
       icon: '◎',
       statusText: 'Active subscription',
+      statusClass: 'status-active',
       includes: [
         'Full access to all modules',
         '1 × 50-min video session / month',
@@ -506,6 +555,7 @@
       badgeClass: 'badge-paid',
       icon: '◎',
       statusText: 'Active subscription',
+      statusClass: 'status-active',
       includes: [
         'Full access to all modules',
         '2 × 50-min video sessions / month',
@@ -515,45 +565,44 @@
   };
 
   function renderSubscription(profile, bookingsUsed) {
-    const tier   = profile.subscription_tier || 'free';
-    const isBeta = !!profile.is_beta;
-    const key    = isBeta ? 'beta' : tier;
-    const cfg    = PLAN_CONFIG[key] || PLAN_CONFIG.free;
-    const isActive = ['active','trialing'].includes(profile.subscription_status);
+    const tier     = profile.subscription_tier ?? 'free';
+    const status   = profile.subscription_status ?? 'free';
+    const isBeta   = profile.is_beta ?? false;
+    const isActive = status === 'active' || status === 'trialing';
+
+    // Determine which config to display
+    const configKey = isBeta ? 'beta' : (isActive ? tier : 'free');
+    const cfg = PLAN_CONFIG[configKey] || PLAN_CONFIG.free;
 
     // Badge
     const badge = document.getElementById('planBadge');
     badge.textContent = cfg.label;
     badge.className = `plan-badge ${cfg.badgeClass}`;
 
-    // Build body HTML
     const periodEnd = profile.current_period_end ? fmtDate(profile.current_period_end) : null;
 
-    const statusClass = (isActive || isBeta) ? (isBeta ? 'status-beta' : 'status-active') : 'status-free';
-
+    // Session pips for call1/call2
     let sessionPipsHtml = '';
-    if (key === 'call1' || key === 'call2') {
-      const total = key === 'call1' ? 1 : 2;
+    if ((configKey === 'call1' || configKey === 'call2') && isActive) {
+      const total = configKey === 'call1' ? 1 : 2;
       const used  = Math.min(bookingsUsed || 0, total);
       const avail = total - used;
       let pips = '';
-      for (let i=0;i<used;i++)  pips += `<div class="session-pip used" title="Used">✓</div>`;
-      for (let i=0;i<avail;i++) pips += `<div class="session-pip available" title="Available">→</div>`;
+      for (let i = 0; i < used; i++)  pips += `<div class="session-pip used" title="Used">✓</div>`;
+      for (let i = 0; i < avail; i++) pips += `<div class="session-pip available" title="Available">→</div>`;
       const label = avail > 0
         ? `${avail} session${avail > 1 ? 's' : ''} remaining this period`
         : 'All sessions used this period';
       sessionPipsHtml = `
         <div class="session-usage">
           <div class="session-usage-label">Sessions this period</div>
-          <div class="session-pips">
-            ${pips}
-            <span class="session-pip-label">${label}</span>
-          </div>
+          <div class="session-pips">${pips}<span class="session-pip-label">${label}</span></div>
         </div>`;
     }
 
     const includesHtml = cfg.includes.map(f => `<li>${f}</li>`).join('');
 
+    // Billing actions
     const billingActionsHtml = (() => {
       if (isBeta) {
         return `<div class="billing-actions">
@@ -582,7 +631,9 @@
         <div class="plan-icon">${cfg.icon}</div>
         <div class="plan-header-text">
           <div class="plan-header-name">${cfg.label}</div>
-          <div class="plan-header-status"><span class="${statusClass}">${cfg.statusText}</span></div>
+          <div class="plan-header-status">
+            <span class="${cfg.statusClass}">${cfg.statusText}</span>
+          </div>
         </div>
       </div>
       ${sessionPipsHtml}
@@ -594,7 +645,7 @@
 
   // ── Stripe customer portal ──
   window.openPortal = async function() {
-    const sb = window._supabase;
+    const sb  = window._supabase;
     const btn = event?.target;
     if (btn) { btn.disabled = true; btn.textContent = 'Opening…'; }
 
@@ -621,10 +672,10 @@
     const supabase = window._supabase;
     const user     = window._currentUser;
 
-    document.getElementById('displayEmail').textContent = user.email || '—';
+    document.getElementById('displayEmail').textContent    = user.email || '—';
     document.getElementById('displayCreatedAt').textContent = fmtDate(user.created_at);
 
-    // Load profile
+    // Load profile using clean schema columns
     const { data: profile } = await supabase
       .from('profiles')
       .select('full_name, subscription_tier, subscription_status, is_beta, current_period_end')
@@ -633,14 +684,20 @@
 
     if (profile) {
       document.getElementById('displayName').textContent = profile.full_name || 'Not set';
-      document.getElementById('nameInput').value = profile.full_name || '';
+      document.getElementById('nameInput').value         = profile.full_name || '';
 
-      // Load session bookings for this period (for call1/call2)
+      // Load session bookings for call1/call2 users
       let bookingsUsed = 0;
-      const tier = profile.subscription_tier;
-      if (tier === 'call1' || tier === 'call2') {
+      const tier   = profile.subscription_tier ?? 'free';
+      const status = profile.subscription_status ?? 'free';
+      const isActive = status === 'active' || status === 'trialing';
+
+      if (isActive && (tier === 'call1' || tier === 'call2')) {
         const periodEnd   = profile.current_period_end ? new Date(profile.current_period_end) : null;
-        const periodStart = periodEnd ? new Date(periodEnd.getFullYear(), periodEnd.getMonth()-1, periodEnd.getDate()) : null;
+        const periodStart = periodEnd
+          ? new Date(periodEnd.getFullYear(), periodEnd.getMonth() - 1, periodEnd.getDate())
+          : null;
+
         if (periodStart && periodEnd) {
           const { data: bookings } = await supabase
             .from('bookings')
@@ -649,7 +706,7 @@
             .eq('event_type', 'subscriber-session')
             .gte('scheduled_at', periodStart.toISOString())
             .lte('scheduled_at', periodEnd.toISOString())
-            .in('status', ['scheduled','completed']);
+            .in('status', ['scheduled', 'completed']);
           bookingsUsed = (bookings || []).length;
         }
       }
@@ -657,11 +714,11 @@
       renderSubscription(profile, bookingsUsed);
     }
 
-    // Password reset token
+    // Password reset token check
     const hash   = window.location.hash;
-    const params = new URLSearchParams(hash.replace('#',''));
+    const params = new URLSearchParams(hash.replace('#', ''));
     if (params.get('type') === 'recovery') {
-      document.getElementById('resetBanner').style.display = 'block';
+      document.getElementById('resetBanner').style.display  = 'block';
       document.getElementById('resetSection').style.display = 'block';
       setTimeout(() => document.getElementById('resetBanner').scrollIntoView({ behavior: 'smooth' }), 300);
     }
@@ -673,23 +730,27 @@
   window.handleNameUpdate = async function() {
     clearMsg('nameMsg');
     const name = document.getElementById('nameInput').value.trim();
-    if (!name) { showMsg('nameMsg','Please enter a name.','error'); return; }
+    if (!name) { showMsg('nameMsg', 'Please enter a name.', 'error'); return; }
     setLoading('nameBtn', true, 'Save name');
-    const { error } = await window._supabase.from('profiles')
+    const { error } = await window._supabase
+      .from('profiles')
       .update({ full_name: name, updated_at: new Date().toISOString() })
       .eq('id', window._currentUser.id);
     setLoading('nameBtn', false, 'Save name');
     if (error) { showMsg('nameMsg', error.message, 'error'); return; }
     document.getElementById('displayName').textContent = name;
-    showMsg('nameMsg','Name updated.','success');
+    showMsg('nameMsg', 'Name updated.', 'success');
   };
 
   // ── Change email ──
   window.handleEmailChange = async function() {
     clearMsg('emailMsg');
     const email = document.getElementById('emailInput').value.trim();
-    if (!email) { showMsg('emailMsg','Please enter an email address.','error'); return; }
-    if (email === window._currentUser.email) { showMsg('emailMsg','That is your current email address.','warning'); return; }
+    if (!email) { showMsg('emailMsg', 'Please enter an email address.', 'error'); return; }
+    if (email === window._currentUser.email) {
+      showMsg('emailMsg', 'That is your current email address.', 'warning');
+      return;
+    }
     setLoading('emailBtn', true, 'Send confirmation');
     const { error } = await window._supabase.auth.updateUser(
       { email },
@@ -707,23 +768,31 @@
     const current = document.getElementById('currentPw').value;
     const next    = document.getElementById('newPw').value;
     const confirm = document.getElementById('newPwConfirm').value;
-    if (!current || !next || !confirm) { showMsg('passwordMsg','Please fill in all fields.','error'); return; }
-    if (next.length < 8) { showMsg('passwordMsg','New password must be at least 8 characters.','error'); return; }
-    if (next !== confirm) { showMsg('passwordMsg','New passwords do not match.','error'); return; }
+    if (!current || !next || !confirm) {
+      showMsg('passwordMsg', 'Please fill in all fields.', 'error'); return;
+    }
+    if (next.length < 8) {
+      showMsg('passwordMsg', 'New password must be at least 8 characters.', 'error'); return;
+    }
+    if (next !== confirm) {
+      showMsg('passwordMsg', 'New passwords do not match.', 'error'); return;
+    }
     setLoading('passwordBtn', true, 'Update password');
     const { error: reAuthError } = await window._supabase.auth.signInWithPassword({
       email: window._currentUser.email, password: current,
     });
     if (reAuthError) {
       setLoading('passwordBtn', false, 'Update password');
-      showMsg('passwordMsg','Current password is incorrect.','error');
+      showMsg('passwordMsg', 'Current password is incorrect.', 'error');
       return;
     }
     const { error } = await window._supabase.auth.updateUser({ password: next });
     setLoading('passwordBtn', false, 'Update password');
     if (error) { showMsg('passwordMsg', error.message, 'error'); return; }
-    showMsg('passwordMsg','Password updated successfully.','success');
-    ['currentPw','newPw','newPwConfirm'].forEach(id => document.getElementById(id).value = '');
+    showMsg('passwordMsg', 'Password updated successfully.', 'success');
+    ['currentPw', 'newPw', 'newPwConfirm'].forEach(id =>
+      document.getElementById(id).value = ''
+    );
   };
 
   // ── Password reset (from email link) ──
@@ -731,15 +800,15 @@
     clearMsg('resetMsg');
     const pw  = document.getElementById('resetPw').value;
     const pwc = document.getElementById('resetPwConfirm').value;
-    if (!pw || !pwc) { showMsg('resetMsg','Please fill in both fields.','error'); return; }
-    if (pw.length < 8) { showMsg('resetMsg','Password must be at least 8 characters.','error'); return; }
-    if (pw !== pwc) { showMsg('resetMsg','Passwords do not match.','error'); return; }
+    if (!pw || !pwc) { showMsg('resetMsg', 'Please fill in both fields.', 'error'); return; }
+    if (pw.length < 8) { showMsg('resetMsg', 'Password must be at least 8 characters.', 'error'); return; }
+    if (pw !== pwc) { showMsg('resetMsg', 'Passwords do not match.', 'error'); return; }
     setLoading('resetPwBtn', true, 'Save new password');
     const { error } = await window._supabase.auth.updateUser({ password: pw });
     setLoading('resetPwBtn', false, 'Save new password');
     if (error) { showMsg('resetMsg', error.message, 'error'); return; }
     history.replaceState(null, '', window.location.pathname);
-    showMsg('resetMsg','Password set successfully.','success');
+    showMsg('resetMsg', 'Password set successfully.', 'success');
     document.getElementById('resetBanner').style.display = 'none';
     setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 800);
   };
@@ -747,7 +816,7 @@
   // ── Sign out all ──
   window.handleSignOutAll = async function() {
     if (!window.confirm('This will sign you out on all devices. Continue?')) return;
-    showMsg('signoutMsg','Signing out everywhere…','warning');
+    showMsg('signoutMsg', 'Signing out everywhere…', 'warning');
     const { error } = await window._supabase.auth.signOut({ scope: 'global' });
     if (error) { showMsg('signoutMsg', error.message, 'error'); return; }
     window.location.replace('/');
