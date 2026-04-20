@@ -128,83 +128,88 @@
     .bc a:hover{color:var(--accent);text-decoration:underline;}
 
     /* Main */
-    main{max-width:1100px;margin:0 auto;padding:2rem 1.5rem 3rem;flex:1;width:100%;}
+    main{max-width:1100px;margin:0 auto;padding:2.5rem 1.5rem 4rem;flex:1;width:100%;}
     @media(max-width:600px){main{padding:1.5rem 1rem 3rem}}
 
     /* Page header */
-    .page-header{margin-bottom:2.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
-    .page-header h1{font-family:var(--font-heading);font-size:1.75rem;font-weight:600;
-      letter-spacing:-.02em;line-height:1.2;margin-bottom:.5rem;}
-    .page-header p{font-size:.95rem;color:var(--muted);line-height:1.6;}
+    .page-header{margin-bottom:2.5rem;padding-bottom:2rem;border-bottom:1px solid var(--border)}
+    .page-header h1{font-family:var(--font-heading);font-size:2rem;font-weight:600;
+      letter-spacing:-.02em;line-height:1.2;margin-bottom:.4rem;}
+    .page-header p{font-size:.9rem;color:var(--muted);line-height:1.6;}
 
     /* Cards Grid */
     .compositions-grid{
       display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-      gap:1.5rem;
+      grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+      gap:1px;
+      background:var(--border);
+      border:1px solid var(--border);
+      overflow:hidden;
       margin-bottom:2rem;
     }
 
     /* Card */
     .composition-card{
-      border:1px solid var(--border);
+      border:none;
       background:var(--bg);
-      padding:1.5rem;
+      padding:1.75rem;
       cursor:pointer;
-      transition:all 0.2s;
+      transition:all 0.15s;
       text-decoration:none;
       color:inherit;
       display:flex;
       flex-direction:column;
+      position:relative;
     }
 
     .composition-card:hover{
-      border-color:var(--accent);
-      box-shadow:0 4px 12px rgba(42,92,69,0.1);
-      transform:translateY(-2px);
+      background:var(--surface);
     }
+    .composition-card:hover .card-arrow { transform:translateX(3px);color:var(--accent); }
 
     .card-icon{
-      font-size:2rem;
+      font-size:1.3rem;
+      color:var(--accent);
       margin-bottom:1rem;
       line-height:1;
     }
 
     .card-title{
       font-family:var(--font-heading);
-      font-size:1.1rem;
+      font-size:1.05rem;
       font-weight:600;
-      margin-bottom:.5rem;
+      margin-bottom:.6rem;
       color:var(--text);
       letter-spacing:-.01em;
+      line-height:1.3;
     }
 
     .card-description{
-      font-size:.9rem;
+      font-size:.85rem;
       color:var(--muted);
-      line-height:1.6;
+      line-height:1.65;
       margin-bottom:1.25rem;
       flex:1;
     }
 
     .card-artist{
       font-family:var(--font-heading);
-      font-size:.7rem;
+      font-size:.68rem;
       font-weight:600;
-      letter-spacing:.12em;
+      letter-spacing:.08em;
       text-transform:uppercase;
-      color:var(--muted);
+      color:var(--accent);
+      background:var(--accent-light);
       display:inline-block;
-      padding:.4rem .75rem;
-      background:var(--surface);
-      border:1px solid var(--border);
+      padding:.3rem .65rem;
+      margin-bottom:.85rem;
     }
 
     .card-arrow{
       font-size:.9rem;
-      color:var(--accent);
-      margin-top:.75rem;
+      color:var(--border);
       font-weight:600;
+      transition:transform 0.15s,color 0.15s;
     }
 
     /* Footer */
@@ -252,7 +257,7 @@
 
     <!-- Phase Machine / Reich -->
     <a href="/compositions/phase-machine.html" class="composition-card">
-      <div class="card-icon">↔️</div>
+      <div class="card-icon">◈</div>
       <div class="card-title">Phase Machine</div>
       <div class="card-description">
         Explore tape phasing through two synchronized loops that gradually drift apart, creating emergent rhythmic patterns. Based on Steve Reich's "It's Gonna Rain."
@@ -263,7 +268,7 @@
 
     <!-- Rooms / Lucier -->
     <a href="/compositions/rooms.html" class="composition-card">
-      <div class="card-icon">📍</div>
+      <div class="card-icon">◇</div>
       <div class="card-title">Rooms</div>
       <div class="card-description">
         Iteratively process audio through acoustic room filters to watch how resonances emerge and evolve. Inspired by Alvin Lucier's "I Am Sitting in a Room."
@@ -274,7 +279,7 @@
 
     <!-- Chance / Cage -->
     <a href="/compositions/chance.html" class="composition-card">
-      <div class="card-icon">🎲</div>
+      <div class="card-icon">◑</div>
       <div class="card-title">Chance</div>
       <div class="card-description">
         Create indeterminate compositions using random number generators. Based on John Cage's philosophy of relinquishing control—no two pieces are ever the same.
@@ -285,7 +290,7 @@
 
     <!-- Waves / Radigue -->
     <a href="/compositions/waves.html" class="composition-card">
-      <div class="card-icon">〰️</div>
+      <div class="card-icon">◐</div>
       <div class="card-title">Waves</div>
       <div class="card-description">
         Compose slowly evolving drones using detuned oscillators and imperceptible drift. Inspired by Éliane Radigue's hypnotic, meditative synthesizer pieces.
@@ -346,12 +351,6 @@ document.getElementById('silSignOut').addEventListener('click', async function (
   } finally {
     window.location.replace('/');
   }
-});
-
-// Highlight current nav
-document.querySelectorAll('.sil-header__nav a').forEach(a => {
-  const href = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
-  if (href === path) a.classList.add('sil-active');
 });
 </script>
 
