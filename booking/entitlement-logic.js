@@ -31,11 +31,11 @@ export async function getBookingEntitlement(supabase, userId) {
   const { data: profile, error: profileErr } = await supabase
     .from('profiles')
     .select([
-      'plan',
       'subscription_tier',
       'subscription_status',
       'current_period_end',
       'intro_call_used',
+      'is_beta',
       'email',
     ].join(', '))
     .eq('id', userId)
@@ -43,12 +43,17 @@ export async function getBookingEntitlement(supabase, userId) {
 
   if (profileErr) throw new Error('Could not load profile: ' + profileErr.message);
 
-  // Normalise plan key — support both 'plan' and 'subscription_tier' columns
-  const plan   = profile.subscription_tier || profile.plan || 'free';
-  const status = profile.subscription_status || 'free';
+  const tier   = profile.subscription_tier ?? 'free';
+  const status = profile.subscription_status ?? 'free';
+  const isBeta = profile.is_beta ?? false;
 
   // Active means the subscription is current (not lapsed / canceled / past_due)
   const isActive = status === 'active' || status === 'trialing';
+
+  // Beta users get lab-level tool access but no included sessions —
+  // they must pay for video sessions like any free/lab user.
+  // So for booking purposes, beta is treated the same as 'lab' tier.
+  const effectiveTier = isBeta && !isActive ? 'lab' : tier;
 
   // ── 2. Billing window ──
   const periodEnd   = profile.current_period_end
@@ -69,7 +74,7 @@ export async function getBookingEntitlement(supabase, userId) {
       .in('status', ['scheduled', 'completed']);
 
     if (bookErr) {
-      // Non-fatal — log and continue; worst case user appears to have 0 sessions used
+      // Non-fatal — log and continue
       console.warn('Could not load bookings:', bookErr.message);
     }
 
@@ -83,14 +88,15 @@ export async function getBookingEntitlement(supabase, userId) {
   // ── 4. Base entitlement ──
   /** @type {Entitlement} */
   const ent = {
-    plan,
+    tier: effectiveTier,
     isActive,
     status,
+    isBeta,
     email:        profile.email || '',
     periodStart,
     periodEnd,
 
-    // Intro: one-time regardless of plan
+    // Intro: one-time for everyone regardless of plan
     canBookIntro: !introUsed,
 
     // Included sessions
@@ -99,7 +105,7 @@ export async function getBookingEntitlement(supabase, userId) {
     sessionsRemaining: 0,
     canBookIncluded:   false,
 
-    // Paid single session always available
+    // Paid single session always available to anyone
     canBookPaid: true,
 
     // Upgrade hints for UI
@@ -107,23 +113,23 @@ export async function getBookingEntitlement(supabase, userId) {
     showUpgradeToCall2: false,
   };
 
-  // If subscription is not active, treat as free
+  // If subscription is not active, treat as free for session purposes
   if (!isActive) {
     ent.showUpgradeToCall1 = true;
     return ent;
   }
 
   // ── 5. Plan-specific session limits ──
-  switch (plan) {
+  switch (effectiveTier) {
 
     case 'lab':
-      // €4 lab-only plan — no included sessions
-      ent.sessionsIncluded  = 0;
+      // Lab plan — no included sessions, suggest upgrade
+      ent.sessionsIncluded   = 0;
       ent.showUpgradeToCall1 = true;
       break;
 
     case 'call1':
-      // €60/month — 1 included session
+      // 1 included session per month
       ent.sessionsIncluded  = 1;
       ent.sessionsUsed      = Math.min(subscriberSessionsUsed, 1);
       ent.sessionsRemaining = Math.max(0, 1 - subscriberSessionsUsed);
@@ -132,7 +138,7 @@ export async function getBookingEntitlement(supabase, userId) {
       break;
 
     case 'call2':
-      // €110/month — 2 included sessions
+      // 2 included sessions per month
       ent.sessionsIncluded  = 2;
       ent.sessionsUsed      = Math.min(subscriberSessionsUsed, 2);
       ent.sessionsRemaining = Math.max(0, 2 - subscriberSessionsUsed);
@@ -150,9 +156,10 @@ export async function getBookingEntitlement(supabase, userId) {
 
 /**
  * @typedef {Object} Entitlement
- * @property {string}       plan
+ * @property {string}       tier
  * @property {boolean}      isActive
  * @property {string}       status
+ * @property {boolean}      isBeta
  * @property {string}       email
  * @property {Date|null}    periodStart
  * @property {Date|null}    periodEnd
