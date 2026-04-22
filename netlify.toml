@@ -3,6 +3,10 @@
 [build]
   publish = "."
 
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
 # ── Redirects ──
 # Netlify processes these top to bottom and stops at the first match.
 # Status 200 = rewrite (serve the file, keep the URL in the browser).
@@ -151,6 +155,55 @@
   to   = "/cocktail-party-problem/index.html"
   status = 200
 
+[[redirects]]
+  from = "/compositions"
+  to   = "/compositions/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/compositions/"
+  to   = "/compositions/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/waves"
+  to   = "/compositions/waves.html"
+  status = 200
+
+[[redirects]]
+  from = "/waves/"
+  to   = "/compositions/waves.html"
+  status = 200
+
+[[redirects]]
+  from = "/phase-machine"
+  to   = "/compositions/phase-machine.html"
+  status = 200
+
+[[redirects]]
+  from = "/phase-machine/"
+  to   = "/compositions/phase-machine.html"
+  status = 200
+
+[[redirects]]
+  from = "/rooms"
+  to   = "/compositions/rooms.html"
+  status = 200
+
+[[redirects]]
+  from = "/rooms/"
+  to   = "/compositions/rooms.html"
+  status = 200
+  
+[[redirects]]
+  from = "/chance"
+  to   = "/compositions/chance.html"
+  status = 200
+
+[[redirects]]
+  from = "/chance/"
+  to   = "/compositions/chance.html"
+  status = 200
   
 # ── Subscribe ──
 
