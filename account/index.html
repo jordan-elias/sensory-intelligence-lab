@@ -205,6 +205,26 @@
     .danger-zone .card-head { background: #fdf2f2; }
     .danger-zone .card-head h3 { color: var(--error); }
 
+    /*════════════════════════════════════════════════════
+  ADDITION 1: Add "delete-danger" CSS to the existing <style> block.
+  Place after the .danger-zone ruleset (~line 130):
+  ════════════════════════════════════════════════════
+ 
+    /* ── Delete confirmation input ── */
+    .delete-confirm-input {
+      width: 100%;
+      padding: .6rem .85rem;
+      border: 1px solid var(--error);
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: .875rem;
+      outline: none;
+      margin-bottom: .75rem;
+    }
+    .delete-confirm-input:focus { box-shadow: 0 0 0 3px rgba(192,57,43,.15); }
+ 
+
     /* ── Loading ── */
     .page-loading { opacity: 0; transition: opacity .2s; }
     .page-loading.ready { opacity: 1; }
@@ -420,6 +440,53 @@
       <button class="btn btn-danger" onclick="handleSignOutAll()">Sign out all sessions</button>
     </div>
   </div>
+
+
+  <!--ADDITION 2: Add the delete account card to the HTML.
+  Place AFTER the existing "Sign out everywhere" .card.danger-zone block,
+  just before </main>:-->
+ 
+  <p class="sl" style="margin-top:2rem;">Delete account</p>
+  <div class="card danger-zone" id="deleteAccountCard">
+    <div class="card-head"><h3>Delete my account</h3></div>
+    <div class="card-body">
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:1rem;line-height:1.6;">
+        Permanently deletes your account and all associated data — check-in history, journal entries,
+        recordings, and saved sessions. This cannot be undone.
+      </p>
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:1rem;line-height:1.6;">
+        If you have an active subscription, please cancel it from the
+        <a href="/account/#subscription" style="color:var(--error)">billing portal</a>
+        before deleting your account. Deleting your account does not automatically cancel your Stripe subscription.
+      </p>
+      <div class="msg" id="deleteMsg"></div>
+ 
+      <!-- Confirm by typing DELETE -->
+      <div id="deleteConfirmSection" style="display:none;margin-top:.75rem;">
+        <p style="font-size:.8rem;color:var(--error);font-weight:500;margin-bottom:.5rem;">
+          Type <strong>DELETE</strong> to confirm:
+        </p>
+        <input
+          type="text"
+          class="delete-confirm-input"
+          id="deleteConfirmInput"
+          placeholder="Type DELETE here"
+          autocomplete="off"
+        >
+        <div style="display:flex;gap:.65rem;flex-wrap:wrap;">
+          <button class="btn btn-danger" id="deleteConfirmBtn" onclick="handleDeleteAccount()">
+            Yes, permanently delete my account
+          </button>
+          <button class="btn btn-outline" onclick="cancelDeleteFlow()">Cancel</button>
+        </div>
+      </div>
+ 
+      <div id="deleteInitSection">
+        <button class="btn btn-danger" onclick="initiateDeleteFlow()">Delete my account…</button>
+      </div>
+    </div>
+  </div>
+ 
 
 </main>
 
@@ -820,6 +887,84 @@
     const { error } = await window._supabase.auth.signOut({ scope: 'global' });
     if (error) { showMsg('signoutMsg', error.message, 'error'); return; }
     window.location.replace('/');
+  };
+
+// ADDITION 3: Add these JS functions to the existing <script type="module"> block.
+// Place alongside the other window.handle* functions near the bottom:
+ 
+  window.initiateDeleteFlow = function() {
+    document.getElementById('deleteInitSection').style.display    = 'none';
+    document.getElementById('deleteConfirmSection').style.display = 'block';
+    document.getElementById('deleteConfirmInput').focus();
+    document.getElementById('deleteMsg').className = 'msg';
+  };
+ 
+  window.cancelDeleteFlow = function() {
+    document.getElementById('deleteInitSection').style.display    = 'block';
+    document.getElementById('deleteConfirmSection').style.display = 'none';
+    document.getElementById('deleteConfirmInput').value           = '';
+    document.getElementById('deleteMsg').className = 'msg';
+  };
+ 
+  window.handleDeleteAccount = async function() {
+    const input = document.getElementById('deleteConfirmInput').value.trim();
+    if (input !== 'DELETE') {
+      showMsg('deleteMsg', 'Please type DELETE exactly to confirm.', 'error');
+      return;
+    }
+ 
+    const btn = document.getElementById('deleteConfirmBtn');
+    btn.disabled    = true;
+    btn.textContent = 'Deleting…';
+ 
+    try {
+      const supabase = window._supabase;
+      const user     = window._currentUser;
+ 
+      if (!supabase || !user) throw new Error('Not signed in.');
+ 
+      // 1. Delete all user data from Supabase tables that cascade
+      //    (bookings, checkins, journal_entries, recordings, mixer_sessions).
+      //    Most are set up with ON DELETE CASCADE from auth.users,
+      //    but we delete profile-owned storage objects explicitly.
+ 
+      // Delete storage objects (recordings bucket)
+      const { data: storageFiles } = await supabase.storage
+        .from('recordings')
+        .list(user.id + '/');
+ 
+      if (storageFiles && storageFiles.length > 0) {
+        const paths = storageFiles.map(f => user.id + '/' + f.name);
+        await supabase.storage.from('recordings').remove(paths);
+      }
+ 
+      // 2. Call the Supabase admin delete-user edge function.
+      //    This requires a server-side call because client SDK deleteUser()
+      //    only works for the currently authenticated user via the admin API.
+      //    We use a Netlify function for this.
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch('/.netlify/functions/delete-account', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+ 
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || 'Account deletion failed. Please try again or contact support.');
+      }
+ 
+      // 3. Sign out locally and redirect
+      await supabase.auth.signOut();
+      window.location.replace('/?deleted=true');
+ 
+    } catch (err) {
+      showMsg('deleteMsg', err.message || 'Could not delete account. Please try again.', 'error');
+      btn.disabled    = false;
+      btn.textContent = 'Yes, permanently delete my account';
+    }
   };
 
 </script>
