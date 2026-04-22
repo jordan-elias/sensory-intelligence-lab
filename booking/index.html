@@ -211,6 +211,7 @@
     .msg.error   { background: var(--error-bg);   border-left: 3px solid var(--error);   color: var(--error);   }
     .msg.warning { background: var(--warning-bg);  border-left: 3px solid var(--warning);  color: var(--warning); }
     .msg.info    { background: var(--accent-light); border-left: 3px solid var(--accent);  color: var(--accent);  }
+    .msg.success { background: var(--accent-light); border-left: 3px solid var(--accent);  color: var(--accent-hover); }
 
     /* ── Plan status card ── */
     .plan-card {
@@ -280,6 +281,43 @@
       min-height: 500px;
     }
     .cal-embed-wrap iframe { width: 100% !important; border: none !important; }
+
+    /* ── Single session — payment gate ── */
+    .session-payment-gate {
+      border: 1px solid var(--border);
+      padding: 2rem;
+      background: var(--surface);
+      margin-bottom: 1rem;
+    }
+    .session-payment-gate h4 {
+      font-family: var(--font-heading);
+      font-size: 1rem; font-weight: 600;
+      margin-bottom: .5rem;
+    }
+    .session-payment-gate p {
+      font-size: .85rem; color: var(--muted);
+      line-height: 1.65; margin-bottom: 1.25rem;
+    }
+    .session-payment-gate .policy-note {
+      font-size: .78rem;
+      color: var(--muted);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: .75rem 1rem;
+      margin-bottom: 1.25rem;
+      line-height: 1.6;
+    }
+    .session-payment-gate .policy-note strong { color: var(--text); font-weight: 500; }
+    .pay-btn {
+      font-family: var(--font-heading);
+      font-size: .875rem; font-weight: 600;
+      padding: .75rem 2rem;
+      border: none; background: var(--accent); color: white;
+      cursor: pointer; transition: background .15s; letter-spacing: -.01em;
+      display: inline-block;
+    }
+    .pay-btn:hover { background: var(--accent-hover); }
+    .pay-btn:disabled { opacity: .5; cursor: not-allowed; }
 
     /* ── Session summary table ── */
     .info-rows { border: 1px solid var(--border); margin-bottom: 2rem; }
@@ -365,8 +403,7 @@
 
 <footer>
   <p>Jordan Elias Music Therapy · Berlin ·
-    <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a> ·
-    <a href="https://jordanelias.de/" target="_blank" rel="noopener">jordanelias.de</a>
+    <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a>
   </p>
 </footer>
 
@@ -433,6 +470,40 @@ function periodStartFromEnd(periodEnd) {
 }
 
 // ─────────────────────────────────────────────────────────
+// SINGLE SESSION STRIPE CHECKOUT
+// ─────────────────────────────────────────────────────────
+async function checkoutSingleSession(btn) {
+  const sb   = window._supabase;
+  const user = window._currentUser;
+  if (!sb || !user) { showPageMsg('Please sign in first.', 'error'); return; }
+
+  if (btn) { btn.disabled = true; btn.textContent = 'Redirecting to payment…'; }
+
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const res = await fetch('/.netlify/functions/create-single-session-checkout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || 'Payment setup failed.');
+    }
+
+    const { url } = await res.json();
+    window.location.href = url;
+
+  } catch (err) {
+    showPageMsg(err.message || 'Could not start payment. Please try again.', 'error');
+    if (btn) { btn.disabled = false; btn.textContent = 'Pay €75 and book'; }
+  }
+}
+
+// ─────────────────────────────────────────────────────────
 // ENTITLEMENT LOGIC
 // ─────────────────────────────────────────────────────────
 async function getEntitlement(supabase, userId) {
@@ -450,8 +521,6 @@ async function getEntitlement(supabase, userId) {
   const isBeta = profile.is_beta ?? false;
 
   const isActive = status === 'active' || status === 'trialing';
-
-  // Beta users have lab-level access but no included sessions
   const effectiveTier = isBeta && !isActive ? 'lab' : tier;
 
   const periodEnd   = profile.current_period_end
@@ -461,15 +530,13 @@ async function getEntitlement(supabase, userId) {
 
   let subscriberSessionsUsed = 0;
   if (isActive && periodStart && periodEnd) {
-    const { data: bookings, error: bookErr } = await supabase
+    const { data: bookings } = await supabase
       .from('bookings')
       .select('event_type, status, scheduled_at')
       .eq('user_id', userId)
       .gte('scheduled_at', periodStart.toISOString())
       .lte('scheduled_at', periodEnd.toISOString())
       .in('status', ['scheduled', 'completed']);
-
-    if (bookErr) console.warn('Could not load bookings:', bookErr.message);
 
     subscriberSessionsUsed = (bookings || []).filter(
       b => b.event_type === 'subscriber-session'
@@ -491,7 +558,7 @@ async function getEntitlement(supabase, userId) {
     sessionsUsed:      subscriberSessionsUsed,
     sessionsRemaining: 0,
     canBookIncluded:   false,
-    canBookPaid: true,
+    canBookPaid: true,       // single paid session is always available
     showUpgradeToCall1: false,
     showUpgradeToCall2: false,
   };
@@ -541,7 +608,7 @@ const PLAN_LABELS = {
 // ─────────────────────────────────────────────────────────
 // RENDER
 // ─────────────────────────────────────────────────────────
-function render(ent) {
+function render(ent, sessionJustPaid) {
   const root = document.getElementById('bookingRoot');
   root.innerHTML = '';
 
@@ -556,7 +623,6 @@ function render(ent) {
        </div>`
     : '';
 
-  // Badge class: beta gets its own style
   const badgeClass = ent.isBeta ? 'beta'
     : ['lab','call1','call2'].includes(ent.tier) && ent.isActive ? ent.tier
     : 'free';
@@ -589,10 +655,10 @@ function render(ent) {
     root.appendChild(nudge);
   }
 
-  // ── Session sections ──
+  // ── Build session sections ──
   const sections = [];
 
-  // Intro (one-time, available to everyone)
+  // Intro (one-time, available to everyone who hasn't used it)
   if (ent.canBookIntro) {
     sections.push({
       id:       'cal-intro',
@@ -607,6 +673,7 @@ function render(ent) {
         { label: 'Duration', val: '30 minutes' },
         { label: 'Format',   val: 'Video call' },
       ],
+      useCal: true,
     });
   }
 
@@ -626,6 +693,7 @@ function render(ent) {
         { label: 'Duration',  val: '50 minutes' },
         { label: 'Format',    val: 'Video call' },
       ],
+      useCal: true,
     });
   } else if (ent.sessionsIncluded > 0 && !ent.canBookIncluded) {
     const note = document.createElement('div');
@@ -635,9 +703,9 @@ function render(ent) {
     root.appendChild(note);
   }
 
-  // Single paid session (always available)
+  // Single paid session — always available, requires Stripe payment
   sections.push({
-    id:       'cal-paid',
+    id:       'single-session',
     label:    'Single Session',
     meta:     '€75 · Book anytime',
     metaClass: '',
@@ -649,9 +717,11 @@ function render(ent) {
       { label: 'Duration', val: '50 minutes' },
       { label: 'Format',   val: 'Video call' },
     ],
+    useCal: sessionJustPaid,  // show Cal embed only if payment just completed
+    usePaymentGate: !sessionJustPaid,
   });
 
-  // Build DOM for each section
+  // Build DOM
   sections.forEach(sec => {
     const wrap = document.createElement('div');
     wrap.className = 'cal-section';
@@ -674,15 +744,41 @@ function render(ent) {
     });
     wrap.appendChild(infoRows);
 
-    const calWrap = document.createElement('div');
-    calWrap.className = 'cal-embed-wrap';
-    calWrap.id = sec.id;
-    wrap.appendChild(calWrap);
+    if (sec.usePaymentGate) {
+      // Show payment gate instead of Cal embed
+      const gate = document.createElement('div');
+      gate.className = 'session-payment-gate';
+      gate.innerHTML = `
+        <h4>Book a single session</h4>
+        <p>Pay securely via Stripe, then choose your time on the next screen. You'll receive a confirmation and calendar invite by email.</p>
+        <div class="policy-note">
+          <strong>Cancellation policy:</strong> Full refund if you cancel more than 48 hours before your appointment.
+          Within 48 hours, sessions can be rescheduled but are non-refundable.
+          To reschedule or cancel, reply to your confirmation email.
+        </div>
+        <button class="pay-btn" id="singleSessionPayBtn">Pay €75 and book</button>
+      `;
+      wrap.appendChild(gate);
+
+      // Wire up payment button after DOM insertion
+      setTimeout(() => {
+        const btn = document.getElementById('singleSessionPayBtn');
+        if (btn) btn.addEventListener('click', () => checkoutSingleSession(btn));
+      }, 0);
+
+    } else {
+      // Show Cal.com embed
+      const calWrap = document.createElement('div');
+      calWrap.className = 'cal-embed-wrap';
+      calWrap.id = sec.id;
+      wrap.appendChild(calWrap);
+    }
 
     root.appendChild(wrap);
   });
 
-  loadAndMountCal(sections);
+  // Mount Cal.com embeds for sections that need them
+  loadAndMountCal(sections.filter(s => s.useCal));
 }
 
 // ─────────────────────────────────────────────────────────
@@ -750,9 +846,27 @@ onAuthReady(async () => {
     return;
   }
 
+  // Check URL params from Stripe redirect
+  const params = new URLSearchParams(window.location.search);
+  const sessionJustPaid   = params.get('session_paid') === 'true';
+  const sessionCanceled   = params.get('session_canceled') === 'true';
+
+  if (sessionJustPaid) {
+    showPageMsg(
+      'Payment received — please choose a date and time below to complete your booking.',
+      'success'
+    );
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+
+  if (sessionCanceled) {
+    showPageMsg('Payment was cancelled — no charge was made.', 'info');
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+
   try {
     const ent = await getEntitlement(supabase, user.id);
-    render(ent);
+    render(ent, sessionJustPaid);
   } catch (err) {
     console.error('Booking page error:', err);
     document.getElementById('bookingRoot').innerHTML = '';
