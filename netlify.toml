@@ -62,6 +62,18 @@
   to   = "/about/index.html"
   status = 200
 
+# ── About page ──
+
+[[redirects]]
+  from = "/privacy-policy"
+  to   = "/privacy-policy/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/privacy-policy/"
+  to   = "/privacy-policy/index.html"
+  status = 200
+
 # ── Module pages ──
 
 [[redirects]]
