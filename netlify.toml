@@ -62,7 +62,7 @@
   to   = "/about/index.html"
   status = 200
 
-# ── About page ──
+# ── Privacy policy ──
 
 [[redirects]]
   from = "/privacy-policy"
