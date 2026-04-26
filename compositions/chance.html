@@ -445,7 +445,6 @@
         <div class="transport">
           <button class="btn" id="ch-generate">Generate</button>
           <button class="btn" id="ch-play" disabled>▶ Play</button>
-          <button class="btn" id="ch-stop" disabled>⏸ Stop</button>
         </div>
 
         <div class="export-row">
@@ -620,11 +619,29 @@ function stop(){
   isPlaying=false;updatePlayBtn();
 }
 
+function restartWizard(){
+
+  // Stop audio if playing
+  stop();
+
+  // Clear generated audio
+  audioBuffer = null;
+
+  // Reset UI controls
+  document.getElementById('ch-play').disabled = true;
+  document.getElementById('ch-dl').disabled = true;
+  document.getElementById('ch-dl-note').textContent =
+    'generate a composition first';
+
+  // Return to step 1
+  showStep(0);
+
+}
+
 function updatePlayBtn(){
   document.getElementById('ch-play').disabled=!audioBuffer;
   document.getElementById('ch-play').textContent=isPlaying?'⏸ Stop':'▶ Play';
   document.getElementById('ch-play').classList.toggle('on',isPlaying);
-  document.getElementById('ch-stop').disabled=!isPlaying;
 }
 
 function updateSummary(){
@@ -649,14 +666,23 @@ function showStep(n){
     el.classList.toggle('active',i===n);
   });
   document.getElementById('btn-prev').style.display=n>0?'inline-block':'none';
-  document.getElementById('btn-next').textContent=n===4?'Done':'Next →';
+  document.getElementById('btn-next').textContent=n===4?'Restart':'Next →';
   if(n===4)updateSummary();
   currentStep=n;
 }
 
 // Event listeners
-document.getElementById('btn-next').addEventListener('click',function(){
-  if(currentStep<4)showStep(currentStep+1);
+document.getElementById('btn-next').addEventListener('click', function(){
+
+  // Normal navigation
+  if (currentStep < 4) {
+    showStep(currentStep + 1);
+    return;
+  }
+
+  // Restart flow
+  restartWizard();
+
 });
 document.getElementById('btn-prev').addEventListener('click',function(){
   if(currentStep>0)showStep(currentStep-1);
@@ -744,7 +770,7 @@ document.getElementById('ch-generate').addEventListener('click',function(){
 });
 
 document.getElementById('ch-play').addEventListener('click',function(){if(isPlaying)stop();else play();});
-document.getElementById('ch-stop').addEventListener('click',function(){stop();});
+});
 
 document.getElementById('ch-dl').addEventListener('click',function(){
   var format=document.getElementById('ch-dl-format').value;
