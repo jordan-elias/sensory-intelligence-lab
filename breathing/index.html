@@ -203,17 +203,12 @@
     .meta-sub{font-size:.68rem;font-weight:500;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin-top:.2rem}
 
     /* ── Session controls ── */
-    .session-controls{padding:.85rem 1.5rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem}
+    .session-controls{padding:.85rem 1.5rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:.75rem}
     .ppb{font-family:var(--font-heading);font-size:.8rem;font-weight:600;padding:.6rem 1.4rem;border:none;background:var(--accent);color:white;cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:.5rem;flex-shrink:0}
     .ppb:hover{background:var(--accent-hover)}
     .tri{width:0;height:0;border-left:9px solid white;border-top:5px solid transparent;border-bottom:5px solid transparent;display:inline-block;flex-shrink:0}
     .bars{display:inline-flex;gap:3px;align-items:center}
     .bars span{display:block;width:3px;height:11px;background:white}
-    .session-right{display:flex;align-items:center;gap:.75rem}
-    .db{font-family:var(--font-body);font-size:.8rem;font-weight:500;padding:.45rem 1.1rem;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer;transition:all .12s}
-    .db:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
-    .db:disabled{opacity:.45;cursor:not-allowed}
-    .rs{font-size:.75rem;color:var(--muted)}
 
     footer{border-top:1px solid var(--border);padding:1.5rem 2rem;text-align:center;font-size:.8rem;color:var(--muted);margin-top:auto}
     footer a{color:var(--muted);text-decoration:none;}
@@ -318,10 +313,6 @@
         <span id="icon" class="tri"></span>
         <span id="plabel">Play</span>
       </button>
-      <div class="session-right">
-        <span class="rs" id="rs">Rendering audio…</span>
-        <button class="db" id="dlbtn" disabled onclick="dlWav()">Download WAV</button>
-      </div>
     </div>
 
   </div>
@@ -491,7 +482,6 @@ const S = {
   isPlaying: false,
   started: false,
   liveCtx: null,
-  wavUrl: null,
   rafId: null,
   startWall: null,
   totalPausedMs: 0,
@@ -536,13 +526,12 @@ function selectPattern(key, btn) {
 // ─────────────────────────────────────────────────────────
 // START SESSION
 // ─────────────────────────────────────────────────────────
-async function startSession() {
+function startSession() {
   if (!S.pattern) return;
   const p = PATTERNS[S.pattern];
 
   if (S.liveCtx) { S.liveCtx.close(); S.liveCtx = null; }
   cancelAnimationFrame(S.rafId);
-  if (S.wavUrl) { URL.revokeObjectURL(S.wavUrl); S.wavUrl = null; }
 
   S.seed           = (Math.random()*0xFFFFFF|0);
   S.startWall      = performance.now();
@@ -563,28 +552,10 @@ async function startSession() {
   document.getElementById('totalBreaths').textContent = p.breaths;
   document.getElementById('breathCount').textContent = '—';
   document.getElementById('timeLeft').textContent = fmt(totalDuration(p));
-  document.getElementById('dlbtn').disabled = true;
-  document.getElementById('rs').textContent = 'Rendering audio…';
 
   setIcon(true);
   buildLive();
   S.rafId = requestAnimationFrame(tick);
-
-  try {
-    const rng2 = mkRng(S.seed);
-    const dur  = totalDuration(p);
-    const SR   = 44100;
-    const oCtx = new OfflineAudioContext(1, Math.ceil(dur*SR), SR);
-    buildGraph(oCtx, p, rng2, dur);
-    const buf  = await oCtx.startRendering();
-    const blob = toWav(buf);
-    S.wavUrl   = URL.createObjectURL(blob);
-    document.getElementById('dlbtn').disabled = false;
-    document.getElementById('rs').textContent = 'WAV ready';
-  } catch(e) {
-    document.getElementById('rs').textContent = 'Render failed';
-    console.error(e);
-  }
 }
 
 // ─────────────────────────────────────────────────────────
@@ -915,32 +886,6 @@ function buildGraph(ctx, pattern, rng, dur) {
 }
 
 // ─────────────────────────────────────────────────────────
-// WAV EXPORT
-// ─────────────────────────────────────────────────────────
-function toWav(buf) {
-  const ch=buf.numberOfChannels,sr=buf.sampleRate,len=buf.length;
-  const bps=16,bpsa=2,ba=ch*bpsa,ds=len*ba;
-  const ab=new ArrayBuffer(44+ds),v=new DataView(ab);
-  const ws=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i));};
-  ws(0,'RIFF');v.setUint32(4,36+ds,true);ws(8,'WAVE');
-  ws(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);
-  v.setUint16(22,ch,true);v.setUint32(24,sr,true);v.setUint32(28,sr*ba,true);
-  v.setUint16(32,ba,true);v.setUint16(34,bps,true);
-  ws(36,'data');v.setUint32(40,ds,true);
-  const d=buf.getChannelData(0); let o=44;
-  for(let i=0;i<len;i++){const s=Math.max(-1,Math.min(1,d[i]));v.setInt16(o,s<0?s*0x8000:s*0x7FFF,true);o+=2;}
-  return new Blob([ab],{type:'audio/wav'});
-}
-
-function dlWav() {
-  if (!S.wavUrl) return;
-  const a=document.createElement('a');
-  a.href=S.wavUrl;
-  a.download=`breath-${S.pattern}-${S.seed}.wav`;
-  a.click();
-}
-
-// ─────────────────────────────────────────────────────────
 // KEYBOARD
 // ─────────────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
@@ -954,7 +899,6 @@ document.addEventListener('keydown', e => {
 window.selectPattern = selectPattern;
 window.startSession  = startSession;
 window.togglePlay    = togglePlay;
-window.dlWav         = dlWav;
 
 </script>
 </body>
