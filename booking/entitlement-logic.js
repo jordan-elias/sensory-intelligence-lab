@@ -99,23 +99,22 @@ export async function getBookingEntitlement(supabase, userId) {
     // Intro: one-time for everyone regardless of plan
     canBookIntro: !introUsed,
 
-    // Included sessions
+    // Included sessions (only for call1/call2 tiers)
     sessionsIncluded:  0,
     sessionsUsed:      subscriberSessionsUsed,
     sessionsRemaining: 0,
     canBookIncluded:   false,
 
-    // Paid single session always available to anyone
+    // Paid single session always available to anyone via Cal.com
     canBookPaid: true,
 
-    // Upgrade hints for UI
-    showUpgradeToCall1: false,
-    showUpgradeToCall2: false,
+    // Upgrade hint for UI
+    showUpgradeNudge: false,
   };
 
   // If subscription is not active, treat as free for session purposes
   if (!isActive) {
-    ent.showUpgradeToCall1 = true;
+    ent.showUpgradeNudge = true;
     return ent;
   }
 
@@ -125,7 +124,7 @@ export async function getBookingEntitlement(supabase, userId) {
     case 'lab':
       // Lab plan — no included sessions, suggest upgrade
       ent.sessionsIncluded   = 0;
-      ent.showUpgradeToCall1 = true;
+      ent.showUpgradeNudge   = true;
       break;
 
     case 'call1':
@@ -134,7 +133,6 @@ export async function getBookingEntitlement(supabase, userId) {
       ent.sessionsUsed      = Math.min(subscriberSessionsUsed, 1);
       ent.sessionsRemaining = Math.max(0, 1 - subscriberSessionsUsed);
       ent.canBookIncluded   = subscriberSessionsUsed < 1;
-      ent.showUpgradeToCall2 = true;
       break;
 
     case 'call2':
@@ -143,11 +141,11 @@ export async function getBookingEntitlement(supabase, userId) {
       ent.sessionsUsed      = Math.min(subscriberSessionsUsed, 2);
       ent.sessionsRemaining = Math.max(0, 2 - subscriberSessionsUsed);
       ent.canBookIncluded   = subscriberSessionsUsed < 2;
-      // call2 is the highest tier — no further upgrade hint
       break;
 
     default:
-      ent.showUpgradeToCall1 = true;
+      // Free tier
+      ent.showUpgradeNudge = true;
       break;
   }
 
@@ -169,6 +167,5 @@ export async function getBookingEntitlement(supabase, userId) {
  * @property {number}       sessionsRemaining
  * @property {boolean}      canBookIncluded
  * @property {boolean}      canBookPaid
- * @property {boolean}      showUpgradeToCall1
- * @property {boolean}      showUpgradeToCall2
+ * @property {boolean}      showUpgradeNudge
  */
