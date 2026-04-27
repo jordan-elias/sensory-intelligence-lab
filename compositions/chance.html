@@ -194,7 +194,8 @@
       height:16px;border-radius:50%;background:var(--accent);cursor:pointer}
     .ctrl input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;
       background:var(--accent);border:none;cursor:pointer}
-    .ctrl-val{font-size:.85rem;color:var(--accent);font-weight:600}
+    .ctrl-val{font-size:.85rem;color:var(--accent);font-weight:600;
+      transition:color 0.15s;min-height:1.2em}
 
     /* Buttons */
     .btn{font-family:var(--font-heading);font-size:.78rem;font-weight:600;
@@ -235,7 +236,8 @@
 
     /* Transport */
     .transport{display:flex;align-items:center;gap:.75rem;margin-top:1rem;flex-wrap:wrap}
-    .transport button{min-width:90px}
+    .transport button{min-width:120px}
+    .transport .btn.primary{font-size:.85rem;padding:.65em 1.5em}
 
     .hint{font-family:var(--font-body);font-size:.8rem;color:var(--muted);margin-top:1em;text-align:center}
 
@@ -304,8 +306,6 @@
       <span class="progress-label">Settings</span>
       <div class="progress-dot" id="prog-2"></div>
       <span class="progress-label">Generate</span>
-      <div class="progress-dot" id="prog-3"></div>
-      <span class="progress-label">Listen</span>
     </div>
 
     <!-- Wizard container -->
@@ -340,17 +340,17 @@
         </div>
       </div>
 
-      <!-- Step 2: Pitch settings -->
+      <!-- Step 2: Pitch & Rhythm settings -->
       <div class="card-step" id="step-1">
-        <h3>Step 2: Set your pitch scale</h3>
-        <p>Choose which scale the composition will draw pitches from.</p>
+        <h3>Step 2: Configure pitch and rhythm</h3>
+        <p>Set the pitch scale and rhythmic parameters for your composition.</p>
         
         <div class="ctrl">
           <label class="ctrl-lbl">Scale</label>
           <div class="option-group">
-            <button class="option-btn selected" data-scale="major">C Major</button>
-            <button class="option-btn" data-scale="minor">C Minor</button>
-            <button class="option-btn" data-scale="pentatonic">C Pentatonic</button>
+            <button class="option-btn selected" data-scale="major">Major</button>
+            <button class="option-btn" data-scale="minor">Minor</button>
+            <button class="option-btn" data-scale="pentatonic">Pentatonic</button>
             <button class="option-btn" data-scale="chromatic">Chromatic</button>
             <button class="option-btn" data-scale="whole">Whole Tone</button>
           </div>
@@ -365,19 +365,13 @@
         <div class="ctrl">
           <label class="ctrl-lbl" for="ch-base-freq">Base Frequency</label>
           <input type="range" id="ch-base-freq" min="50" max="220" value="110" step="5">
-          <span class="ctrl-val"><span id="ch-base-freq-val">110</span> Hz (A)</span>
+          <span class="ctrl-val"><span id="ch-base-freq-val">110</span> Hz <span id="ch-base-note">(A)</span></span>
         </div>
-      </div>
-
-      <!-- Step 3: Rhythm settings -->
-      <div class="card-step" id="step-2">
-        <h3>Step 3: Set your rhythm parameters</h3>
-        <p>Define how notes will be timed and how long they'll be.</p>
 
         <div class="ctrl">
           <label class="ctrl-lbl" for="ch-density">Note Density</label>
           <input type="range" id="ch-density" min="0.1" max="1" value="0.5" step="0.1">
-          <span class="ctrl-val"><span id="ch-density-val">50</span>% (fewer / more notes)</span>
+          <span class="ctrl-val"><span id="ch-density-val">50</span>%</span>
         </div>
 
         <div class="ctrl">
@@ -401,10 +395,10 @@
         </div>
       </div>
 
-      <!-- Step 4: Other settings -->
-      <div class="card-step" id="step-3">
-        <h3>Step 4: Set remaining parameters</h3>
-        <p>Configure timbre, volume, and stereo placement if you enabled those elements.</p>
+      <!-- Step 3: Other settings & Generate -->
+      <div class="card-step" id="step-2">
+        <h3>Step 3: Final settings and generate</h3>
+        <p>Set the overall duration and timbre options, then generate your composition.</p>
 
         <div class="ctrl">
           <label class="ctrl-lbl" for="ch-length">Total Duration</label>
@@ -427,12 +421,6 @@
             <button class="option-btn" data-wave="square">Square</button>
           </div>
         </div>
-      </div>
-
-      <!-- Step 5: Review and generate -->
-      <div class="card-step" id="step-4">
-        <h3>Step 5: Generate and play</h3>
-        <p>Review your settings and generate a composition using chance operations.</p>
 
         <div class="summary-box">
           <div class="summary-title">Composition Summary</div>
@@ -443,13 +431,12 @@
         </div>
 
         <div class="transport">
-          <button class="btn" id="ch-generate">Generate</button>
+          <button class="btn primary" id="ch-generate">Generate Composition</button>
           <button class="btn" id="ch-play" disabled>▶ Play</button>
-          <button class="btn" id="ch-stop" disabled>⏸ Stop</button>
         </div>
 
         <div class="export-row">
-          <span class="row-lbl">download →</span>
+          <span class="row-lbl">Download →</span>
           <select class="gen-select" id="ch-dl-format">
             <option value="wav">WAV</option>
             <option value="json">JSON (parameters)</option>
@@ -477,7 +464,7 @@
     <p>John Cage believed that music didn't need to express the composer's personal emotions or intentions. Instead, he used chance procedures — throwing dice, consulting the I Ching, or drawing random numbers — to make compositional decisions. This shifted control away from the composer and toward the unpredictability of the process itself.</p>
 
     <h2>How to use this tool</h2>
-    <p>Select which musical parameters (pitch, rhythm, timbre, volume, panning) you want controlled by chance. Then set the ranges and options for each — the scale, note durations, total length, tempo, and more. When you click "Generate," the tool uses random numbers to create a unique composition within those constraints. The result is never quite what you expect, but always created according to rules you defined.</p>
+    <p>Select which musical parameters (pitch, rhythm, timbre, volume, panning) you want controlled by chance. Then set the ranges and options for each — the scale, note durations, total length, tempo, and more. When you click "Generate Composition," the tool uses random numbers to create a unique piece within those constraints. The result is never quite what you expect, but always created according to rules you defined.</p>
 
     <h2>Interpretations</h2>
     <p>You can generate as many variations as you like. Each one is valid. Save them, listen to them in different contexts, share them. The point isn't perfection—it's to experience music as a process of constraints and emergence rather than intentional design.</p>
@@ -517,6 +504,7 @@ var state={
   length:20,tempo:1,waveform:'sine'
 };
 var audioBuffer=null,isPlaying=false,src=null,gain=null;
+var updateTimeout=null;
 
 // Scales
 var SCALES={
@@ -527,8 +515,16 @@ var SCALES={
   whole:[0,2,4,6,8,10]
 };
 
+// Note names for frequency display
+var NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
 function midiToFreq(midi){return 440*Math.pow(2,(midi-69)/12);}
 function freqToMidi(freq){return 69+12*Math.log2(freq/440);}
+function freqToNoteName(freq){
+  var midi=freqToMidi(freq);
+  var noteNum=Math.round(midi)%12;
+  return NOTE_NAMES[noteNum];
+}
 
 function generateScale(){
   var baseMidi=freqToMidi(state.baseFreq);
@@ -575,9 +571,9 @@ function generateComposition(){
     
     if(Math.random()<state.density||noteIdx===0){
       var freq=scale[Math.floor(Math.random()*scale.length)];
-      var waveform=state.timbre?['sine','triangle','sawtooth','square'][Math.floor(Math.random()*4)]:'sine';
-      var amp=state.amplitude?0.3+Math.random()*0.5:0.6;
-      var pan=state.panning?Math.random()*2-1:0;
+      var waveform=state.elements.timbre?['sine','triangle','sawtooth','square'][Math.floor(Math.random()*4)]:'sine';
+      var amp=state.elements.amplitude?0.3+Math.random()*0.5:0.6;
+      var pan=state.elements.panning?Math.random()*2-1:0;
       
       var osc=off.createOscillator();
       osc.type=waveform;
@@ -606,7 +602,11 @@ function generateComposition(){
 
 function play(){
   if(!audioBuffer)return;
-  stop();resumeCtx();
+  if(isPlaying){
+    stop();
+    return;
+  }
+  resumeCtx();
   var ctx=getCtx();
   gain=ctx.createGain();gain.gain.value=0.8;gain.connect(ctx.destination);
   src=ctx.createBufferSource();src.buffer=audioBuffer;src.connect(gain);
@@ -621,10 +621,9 @@ function stop(){
 }
 
 function updatePlayBtn(){
-  document.getElementById('ch-play').disabled=!audioBuffer;
-  document.getElementById('ch-play').textContent=isPlaying?'⏸ Stop':'▶ Play';
-  document.getElementById('ch-play').classList.toggle('on',isPlaying);
-  document.getElementById('ch-stop').disabled=!isPlaying;
+  var btn=document.getElementById('ch-play');
+  btn.disabled=!audioBuffer;
+  btn.textContent=isPlaying?'⏸ Stop':'▶ Play';
 }
 
 function updateSummary(){
@@ -635,7 +634,7 @@ function updateSummary(){
   if(state.elements.amplitude)els.push('amplitude');
   if(state.elements.panning)els.push('panning');
   
-  document.getElementById('summary-elements').textContent=els.join(', ');
+  document.getElementById('summary-elements').textContent=els.join(', ')||'none';
   document.getElementById('summary-scale').textContent=state.scale.charAt(0).toUpperCase()+state.scale.slice(1);
   document.getElementById('summary-duration').textContent=state.length+'s';
   document.getElementById('summary-density').textContent=Math.round(state.density*100)+'%';
@@ -649,14 +648,25 @@ function showStep(n){
     el.classList.toggle('active',i===n);
   });
   document.getElementById('btn-prev').style.display=n>0?'inline-block':'none';
-  document.getElementById('btn-next').textContent=n===4?'Done':'Next →';
-  if(n===4)updateSummary();
+  document.getElementById('btn-next').style.display=n<2?'inline-block':'none';
+  if(n===2)updateSummary();
   currentStep=n;
+}
+
+// Debounced slider update function
+function debouncedUpdate(valueId,value,suffix){
+  if(updateTimeout)clearTimeout(updateTimeout);
+  updateTimeout=setTimeout(function(){
+    document.getElementById(valueId).textContent=value;
+    if(suffix&&document.getElementById(valueId).nextSibling){
+      // Already handled by direct DOM manipulation
+    }
+  },50);
 }
 
 // Event listeners
 document.getElementById('btn-next').addEventListener('click',function(){
-  if(currentStep<4)showStep(currentStep+1);
+  if(currentStep<2)showStep(currentStep+1);
 });
 document.getElementById('btn-prev').addEventListener('click',function(){
   if(currentStep>0)showStep(currentStep-1);
@@ -679,27 +689,29 @@ document.querySelectorAll('[data-scale]').forEach(function(btn){
 
 document.getElementById('ch-octaves').addEventListener('input',function(e){
   state.octaves=parseInt(e.target.value,10);
-  document.getElementById('ch-octaves-val').textContent=e.target.value;
+  debouncedUpdate('ch-octaves-val',e.target.value);
 });
 
 document.getElementById('ch-base-freq').addEventListener('input',function(e){
   state.baseFreq=parseInt(e.target.value,10);
-  document.getElementById('ch-base-freq-val').textContent=e.target.value;
+  var noteName=freqToNoteName(state.baseFreq);
+  debouncedUpdate('ch-base-freq-val',e.target.value);
+  document.getElementById('ch-base-note').textContent='('+noteName+')';
 });
 
 document.getElementById('ch-density').addEventListener('input',function(e){
   state.density=parseFloat(e.target.value);
-  document.getElementById('ch-density-val').textContent=Math.round(state.density*100);
+  debouncedUpdate('ch-density-val',Math.round(state.density*100));
 });
 
 document.getElementById('ch-dur-min').addEventListener('input',function(e){
   state.durMin=parseFloat(e.target.value);
-  document.getElementById('ch-dur-min-val').textContent=e.target.value;
+  debouncedUpdate('ch-dur-min-val',e.target.value);
 });
 
 document.getElementById('ch-dur-max').addEventListener('input',function(e){
   state.durMax=parseFloat(e.target.value);
-  document.getElementById('ch-dur-max-val').textContent=e.target.value;
+  debouncedUpdate('ch-dur-max-val',e.target.value);
 });
 
 document.querySelectorAll('[data-timing]').forEach(function(btn){
@@ -711,12 +723,12 @@ document.querySelectorAll('[data-timing]').forEach(function(btn){
 
 document.getElementById('ch-length').addEventListener('input',function(e){
   state.length=parseInt(e.target.value,10);
-  document.getElementById('ch-length-val').textContent=e.target.value;
+  debouncedUpdate('ch-length-val',e.target.value);
 });
 
 document.getElementById('ch-tempo').addEventListener('input',function(e){
   state.tempo=parseFloat(e.target.value);
-  document.getElementById('ch-tempo-val').textContent=e.target.value;
+  debouncedUpdate('ch-tempo-val',e.target.value);
 });
 
 document.querySelectorAll('[data-wave]').forEach(function(btn){
@@ -728,23 +740,26 @@ document.querySelectorAll('[data-wave]').forEach(function(btn){
 
 document.getElementById('ch-generate').addEventListener('click',function(){
   this.disabled=true;
+  this.textContent='Generating…';
   document.getElementById('ch-dl-prog').style.display='inline';
+  stop(); // Stop any playing audio
   generateComposition().then(function(){
     document.getElementById('ch-generate').disabled=false;
+    document.getElementById('ch-generate').textContent='Generate Composition';
     document.getElementById('ch-dl-prog').style.display='none';
     document.getElementById('ch-play').disabled=false;
     document.getElementById('ch-dl').disabled=false;
     document.getElementById('ch-dl-note').textContent='ready';
-    play();
+    play(); // Auto-play after generation
   }).catch(function(){
     document.getElementById('ch-generate').disabled=false;
+    document.getElementById('ch-generate').textContent='Generate Composition';
     document.getElementById('ch-dl-prog').style.display='none';
     document.getElementById('ch-dl-note').textContent='error';
   });
 });
 
-document.getElementById('ch-play').addEventListener('click',function(){if(isPlaying)stop();else play();});
-document.getElementById('ch-stop').addEventListener('click',function(){stop();});
+document.getElementById('ch-play').addEventListener('click',function(){play();});
 
 document.getElementById('ch-dl').addEventListener('click',function(){
   var format=document.getElementById('ch-dl-format').value;
