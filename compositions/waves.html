@@ -159,26 +159,37 @@
     .card-title{font-family:var(--font-heading);font-size:.67rem;font-weight:600;
       letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 1.25rem}
 
-    /* Frequency display */
-    .r-freqs{display:flex;gap:1.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
-    .r-freq-col{display:flex;flex-direction:column;gap:.35rem}
-    .r-freq-lbl{font-family:var(--font-body);font-size:.65rem;letter-spacing:.1em;
-      text-transform:uppercase;color:var(--muted)}
-    .r-freq-val{font-family:'Courier New','Lucida Console',monospace;font-size:1rem;
-      font-weight:600;color:var(--text);font-variant-numeric:tabular-nums}
+    /* Oscillator sections */
+    .osc-section{border:1px solid var(--border);padding:1rem;margin-bottom:1rem;
+      background:var(--surface);border-radius:2px}
+    .osc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
+    .osc-title{font-family:var(--font-heading);font-size:.7rem;font-weight:600;
+      letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+    .osc-freq-display{font-family:'Courier New','Lucida Console',monospace;
+      font-size:.9rem;font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums}
+    .osc-controls{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+    
+    /* Global controls */
+    .global-section{margin-bottom:1.5rem;padding-bottom:1.5rem;
+      border-bottom:1px solid var(--border)}
+    .global-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+      gap:1rem;margin-bottom:1rem}
 
     /* Sliders */
-    .sliders{display:flex;flex-direction:row;gap:1.5rem;margin-bottom:1.5rem}
-    .ctrl{flex:1;display:flex;flex-direction:column;gap:.65rem;min-width:120px}
+    .ctrl{display:flex;flex-direction:column;gap:.5rem}
     .ctrl-lbl{font-family:var(--font-body);font-size:.7rem;font-weight:600;
       letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
     .ctrl input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:3px;
-      background:var(--border);outline:none;cursor:pointer}
+      background:var(--border);outline:none;cursor:pointer;transition:background 0.15s}
+    .ctrl input[type=range]:hover{background:#d0d0cc}
     .ctrl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;
-      height:16px;border-radius:50%;background:var(--accent);cursor:pointer}
+      height:16px;border-radius:50%;background:var(--accent);cursor:pointer;transition:transform 0.1s}
+    .ctrl input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.1)}
     .ctrl input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;
-      background:var(--accent);border:none;cursor:pointer}
-    .ctrl-val{font-size:.8rem;color:var(--accent);font-weight:600}
+      background:var(--accent);border:none;cursor:pointer;transition:transform 0.1s}
+    .ctrl input[type=range]::-moz-range-thumb:hover{transform:scale(1.1)}
+    .ctrl-val{font-size:.8rem;color:var(--accent);font-weight:600;
+      transition:color 0.15s;min-height:1.1em}
 
     /* Row controls */
     .row{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap}
@@ -224,7 +235,8 @@
       -webkit-appearance:none;appearance:none;}
     .dl-prog{font-family:var(--font-body);font-size:.75rem;color:var(--muted);display:none}
 
-    .hint{font-family:var(--font-body);font-size:.8rem;color:var(--muted);margin-top:1em;text-align:center}
+    .hint{font-family:var(--font-body);font-size:.8rem;color:var(--muted);margin-top:1em;
+      text-align:center;line-height:1.5}
 
     /* Instructions */
     .instructions{font-size:.9rem;line-height:1.75;color:var(--text)}
@@ -240,8 +252,8 @@
     footer a:hover{color:var(--accent);}
 
     @media(max-width:700px){
-      .sliders{flex-direction:column;gap:1rem}
-      .r-freqs{flex-direction:column;gap:1rem}
+      .osc-controls{grid-template-columns:1fr}
+      .global-controls{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -283,62 +295,97 @@
   <div class="card">
     <p class="card-title">evolving drone</p>
 
-    <!-- Frequency display -->
-    <div class="r-freqs">
-      <div class="r-freq-col">
-        <span class="r-freq-lbl">oscillator 1</span>
-        <span class="r-freq-val" id="r-f1">110.0 Hz</span>
+    <!-- Global controls -->
+    <div class="global-section">
+      <div class="global-controls">
+        <div class="ctrl">
+          <label class="ctrl-lbl" for="r-drift">Drift Rate</label>
+          <input type="range" id="r-drift" min="0.01" max="0.3" value="0.07" step="0.01">
+          <span class="ctrl-val"><span id="r-drift-val">0.07</span></span>
+        </div>
+        <div class="ctrl">
+          <label class="ctrl-lbl" for="r-noise">Noise Floor</label>
+          <input type="range" id="r-noise" min="0" max="0.15" value="0.03" step="0.005">
+          <span class="ctrl-val"><span id="r-noise-val">low</span></span>
+        </div>
+        <div class="ctrl">
+          <label class="ctrl-lbl" for="r-master-vol">Master Volume</label>
+          <input type="range" id="r-master-vol" min="0" max="1" value="0.4" step="0.01">
+          <span class="ctrl-val"><span id="r-master-vol-val">40</span>%</span>
+        </div>
       </div>
-      <div class="r-freq-col">
-        <span class="r-freq-lbl">oscillator 2</span>
-        <span class="r-freq-val" id="r-f2">112.5 Hz</span>
-      </div>
-      <div class="r-freq-col">
-        <span class="r-freq-lbl">oscillator 3</span>
-        <span class="r-freq-val" id="r-f3">107.5 Hz</span>
+
+      <!-- Oscillator count -->
+      <div class="row">
+        <span class="row-lbl">oscillators →</span>
+        <button class="pill" data-oscs="2">2</button>
+        <button class="pill on" data-oscs="3">3</button>
       </div>
     </div>
 
-    <!-- Sliders -->
-    <div class="sliders">
-      <div class="ctrl">
-        <label class="ctrl-lbl" for="r-base">Base Freq</label>
-        <input type="range" id="r-base" min="40" max="300" value="110" step="1">
-        <span class="ctrl-val"><span id="r-base-val">110</span> Hz</span>
+    <!-- Oscillator 1 -->
+    <div class="osc-section" id="osc-1-section">
+      <div class="osc-header">
+        <span class="osc-title">Oscillator 1</span>
+        <span class="osc-freq-display" id="osc-1-freq">110.0 Hz</span>
       </div>
-      <div class="ctrl">
-        <label class="ctrl-lbl" for="r-detune">Detuning</label>
-        <input type="range" id="r-detune" min="0.5" max="8" value="2.5" step="0.5">
-        <span class="ctrl-val"><span id="r-detune-val">2.5</span> Hz</span>
-      </div>
-      <div class="ctrl">
-        <label class="ctrl-lbl" for="r-drift">Drift Rate</label>
-        <input type="range" id="r-drift" min="0.01" max="0.3" value="0.07" step="0.01">
-        <span class="ctrl-val"><span id="r-drift-val">0.07</span></span>
-      </div>
-      <div class="ctrl">
-        <label class="ctrl-lbl" for="r-noise">Noise Floor</label>
-        <input type="range" id="r-noise" min="0" max="0.15" value="0.03" step="0.005">
-        <span class="ctrl-val"><span id="r-noise-val">low</span></span>
-      </div>
-      <div class="ctrl">
-        <label class="ctrl-lbl" for="r-vol">Volume</label>
-        <input type="range" id="r-vol" min="0" max="1" value="0.4" step="0.01">
-        <span class="ctrl-val"><span id="r-vol-val">40</span>%</span>
+      <div class="osc-controls">
+        <div class="ctrl">
+          <label class="ctrl-lbl" for="osc-1-base">Frequency</label>
+          <input type="range" id="osc-1-base" min="40" max="300" value="107.5" step="0.5">
+          <span class="ctrl-val"><span id="osc-1-base-val">107.5</span> Hz</span>
+        </div>
+        <div class="ctrl">
+          <label class="ctrl-lbl" for="osc-1-vol">Volume</label>
+          <input type="range" id="osc-1-vol" min="0" max="1" value="0.33" step="0.01">
+          <span class="ctrl-val"><span id="osc-1-vol-val">33</span>%</span>
+        </div>
       </div>
     </div>
 
-    <!-- Oscillator count -->
-    <div class="row">
-      <span class="row-lbl">oscillators →</span>
-      <button class="pill" data-oscs="2">2</button>
-      <button class="pill on" data-oscs="3">3</button>
+    <!-- Oscillator 2 -->
+    <div class="osc-section" id="osc-2-section">
+      <div class="osc-header">
+        <span class="osc-title">Oscillator 2</span>
+        <span class="osc-freq-display" id="osc-2-freq">110.0 Hz</span>
+      </div>
+      <div class="osc-controls">
+        <div class="ctrl">
+          <label class="ctrl-lbl" for="osc-2-base">Frequency</label>
+          <input type="range" id="osc-2-base" min="40" max="300" value="110" step="0.5">
+          <span class="ctrl-val"><span id="osc-2-base-val">110.0</span> Hz</span>
+        </div>
+        <div class="ctrl">
+          <label class="ctrl-lbl" for="osc-2-vol">Volume</label>
+          <input type="range" id="osc-2-vol" min="0" max="1" value="0.33" step="0.01">
+          <span class="ctrl-val"><span id="osc-2-vol-val">33</span>%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Oscillator 3 -->
+    <div class="osc-section" id="osc-3-section">
+      <div class="osc-header">
+        <span class="osc-title">Oscillator 3</span>
+        <span class="osc-freq-display" id="osc-3-freq">112.5 Hz</span>
+      </div>
+      <div class="osc-controls">
+        <div class="ctrl">
+          <label class="ctrl-lbl" for="osc-3-base">Frequency</label>
+          <input type="range" id="osc-3-base" min="40" max="300" value="112.5" step="0.5">
+          <span class="ctrl-val"><span id="osc-3-base-val">112.5</span> Hz</span>
+        </div>
+        <div class="ctrl">
+          <label class="ctrl-lbl" for="osc-3-vol">Volume</label>
+          <input type="range" id="osc-3-vol" min="0" max="1" value="0.33" step="0.01">
+          <span class="ctrl-val"><span id="osc-3-vol-val">33</span>%</span>
+        </div>
+      </div>
     </div>
 
     <!-- Transport -->
     <div class="row">
-      <button class="btn" id="r-play">▶ play</button>
-      <button class="btn" id="r-stop" disabled>⏸ stop</button>
+      <button class="btn primary" id="r-play">▶ Play</button>
     </div>
 
     <!-- Presets -->
@@ -355,7 +402,7 @@
 
     <!-- Download -->
     <div class="dl-row">
-      <span class="row-lbl">download →</span>
+      <span class="row-lbl">Download →</span>
       <select class="gen-select" id="r-dl-dur">
         <option value="1">1 min (~5 MB)</option>
         <option value="3">3 min (~15 MB)</option>
@@ -367,32 +414,35 @@
       <span class="dl-prog" id="r-dl-prog">rendering…</span>
     </div>
 
-    <p class="hint">let the drone play for several minutes · changes are most perceptible at low volume · listen for the slow shifting of interference patterns</p>
+    <p class="hint">Let the drone play for several minutes — changes are most perceptible at low volume.<br>Listen for the slow shifting of interference patterns as the oscillators drift.</p>
   </div>
 
   <!-- Instructions -->
   <div class="instructions">
 
     <h2>About Éliane Radigue</h2>
-    <p>Éliane Radigue (1932–2016) was a pioneer of electronic music who worked with the ARP 2500 synthesizer in the 1970s and 1980s. Rather than working with conventional synthesis techniques, she used the instrument to create slowly evolving, hypnotic drones — pieces that could last 20, 30, or even 40 minutes with imperceptible changes accumulating across the duration. She believed in patience, in listening deeply to tiny variations, in music as a meditation.</p>
+    <p>Éliane Radigue (1932–2024) was a pioneer of electronic music who worked with the ARP 2500 synthesizer in the 1970s and 1980s. Rather than working with conventional synthesis techniques, she used the instrument to create slowly evolving, hypnotic drones — pieces that could last 20, 30, or even 40 minutes with imperceptible changes accumulating across the duration. She believed in patience, in listening deeply to tiny variations, in music as a meditation.</p>
 
     <h2>How this tool works</h2>
-    <p>Three sine wave oscillators are tuned slightly apart from each other. Because they're not perfectly in tune, they create "beating" patterns at their difference frequencies — you'll hear this as a slow wavering or shimmering effect. Each oscillator also has its own LFO (low-frequency oscillator) modulating its frequency slightly, causing the beating pattern to evolve over time.</p>
+    <p>Three sine wave oscillators run at slightly different frequencies. Because they're not perfectly in tune, they create "beating" patterns at their difference frequencies — you'll hear this as a slow wavering or shimmering effect. Each oscillator also has its own LFO (low-frequency oscillator) modulating its frequency slightly, causing the beating pattern to evolve over time.</p>
     <p>The drift rate controls how quickly the LFOs change the frequencies. Lower drift = very slow, almost imperceptible change. Higher drift = faster, more audible morphing.</p>
+
+    <h2>Individual oscillator control</h2>
+    <p>You now have complete control over each oscillator's frequency and volume. This allows you to create asymmetric relationships, explore specific intervals, or emphasize particular oscillators in the mix. Try setting one oscillator much lower in pitch and volume for a subtle undertone, or create tight frequency clusters for dense beating patterns.</p>
 
     <h2>Listening techniques</h2>
     <p><strong>Low volume:</strong> Play the drone very quietly. Many of Radigue's pieces are only fully appreciated at soft levels — tiny variations become audible when there's less absolute loudness.</p>
     <p><strong>Deep listening:</strong> Let the piece play for 5–10 minutes before deciding what you're hearing. The changes are gradual; it takes time for patterns to emerge.</p>
-    <p><strong>Find interference patterns:</strong> Listen for the rhythmic pulsing created by the three oscillators interfering with each other. As drift changes the frequencies, these patterns shift and evolve.</p>
+    <p><strong>Find interference patterns:</strong> Listen for the rhythmic pulsing created by the oscillators interfering with each other. As drift changes the frequencies, these patterns shift and evolve.</p>
 
     <h2>Parameter guide</h2>
-    <p><strong>Base Freq:</strong> The fundamental pitch. Try lower frequencies (60–100 Hz) for meditative drones; higher frequencies (150–200 Hz) for brighter, more tense pieces.</p>
-    <p><strong>Detuning:</strong> How far apart the oscillators are. Narrow detuning (0.5–1.5 Hz) = very subtle beating. Wide detuning (4–8 Hz) = more obvious, faster pulsing.</p>
+    <p><strong>Oscillator Frequency:</strong> The fundamental pitch of each oscillator. Lower frequencies (40–100 Hz) create deep, meditative drones; higher frequencies (150–300 Hz) produce brighter, more tense pieces. Experiment with intervals: perfect fifths (3:2 ratio), octaves (2:1), or very close frequencies (within 1–5 Hz) for pronounced beating.</p>
+    <p><strong>Oscillator Volume:</strong> Individual volume control for each oscillator. Equal volumes create balanced interference; unequal volumes can emphasize certain pitches or create subtle undertones.</p>
     <p><strong>Drift Rate:</strong> How quickly the LFOs modulate. Ultra-low (0.01–0.03) feels almost static. Medium (0.05–0.1) feels alive. High (0.2+) feels quite active.</p>
-    <p><strong>Noise Floor:</strong> A small amount of noise can add texture and prevent the piece from sounding too "synthetic." Try very small amounts (off to low).</p>
+    <p><strong>Noise Floor:</strong> A small amount of pink noise adds texture and prevents the piece from sounding too "synthetic." Try very small amounts (off to low).</p>
 
     <h2>Creating your own composition</h2>
-    <p>Experiment with combinations: a low base frequency with very narrow detuning and extremely slow drift can create almost meditative pieces. A higher base with wider detuning and faster drift can be more active and surprising. Save your favorite settings as presets for later exploration.</p>
+    <p>Experiment with combinations: tight frequency clusters with slow drift create hypnotic, pulsing textures. Wide intervals with faster drift feel more exploratory. Try detuning oscillators by exact intervals (perfect fifth = multiply base by 1.5, major third = multiply by 1.25) or by very small amounts (0.5–2 Hz) for slow beating. Save your favorite settings as presets for later exploration.</p>
 
     <h2>Download & use</h2>
     <p>Generate a 5, 10, or 20-minute version. These pieces work well as ambient background, as material for further sound design, or as a basis for improvisation or layering with other sounds.</p>
@@ -450,109 +500,251 @@ function triggerDownload(ab,name){
   a.href=u;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);
 }
 
-/* Radigue state */
-var R={base:110,det:2.5,drift:0.07,noise:0.03,oscs:3,vol:0.4,playing:false};
-var rO=[],rL=[],rMaster=null,rNSrc=null,rNGain=null,rTmr=null;
+/* State */
+var R={
+  oscs:3,
+  drift:0.07,
+  noise:0.03,
+  masterVol:0.4,
+  osc1:{freq:107.5,vol:0.33},
+  osc2:{freq:110,vol:0.33},
+  osc3:{freq:112.5,vol:0.33},
+  playing:false
+};
+
+var rO=[],rG=[],rL=[],rMaster=null,rNSrc=null,rNGain=null,rTmr=null;
 var presets=[];
+var updateTimeout=null;
+
+function noiseLabel(v){if(v<0.005)return'off';if(v<0.04)return'low';if(v<0.09)return'medium';return'high';}
+
+function debouncedUpdate(fn,delay){
+  if(updateTimeout)clearTimeout(updateTimeout);
+  updateTimeout=setTimeout(fn,delay||30);
+}
 
 function startR(){
-  stopR();var ctx=resumeCtx();
-  rMaster=ctx.createGain();rMaster.gain.value=R.vol;rMaster.connect(ctx.destination);
-  var freqs=R.oscs===2?[R.base-R.det/2,R.base+R.det/2]:[R.base-R.det,R.base,R.base+R.det];
-  freqs.forEach(function(f,i){
-    var o=ctx.createOscillator();o.type='sine';o.frequency.value=f;
-    var og=ctx.createGain();og.gain.value=1/R.oscs;o.connect(og);og.connect(rMaster);
-    var lf=ctx.createOscillator(),lg=ctx.createGain();
-    lf.type='sine';lf.frequency.value=R.drift*(0.6+i*0.35);lg.gain.value=R.det*0.4;
-    lf.connect(lg);lg.connect(o.frequency);o.start();lf.start();rO.push(o);rL.push(lf);
+  stopR();
+  var ctx=resumeCtx();
+  rMaster=ctx.createGain();
+  rMaster.gain.value=R.masterVol;
+  rMaster.connect(ctx.destination);
+  
+  var oscConfigs=[
+    {freq:R.osc1.freq,vol:R.osc1.vol},
+    {freq:R.osc2.freq,vol:R.osc2.vol},
+    {freq:R.osc3.freq,vol:R.osc3.vol}
+  ].slice(0,R.oscs);
+  
+  oscConfigs.forEach(function(cfg,i){
+    var o=ctx.createOscillator();
+    o.type='sine';
+    o.frequency.value=cfg.freq;
+    
+    var g=ctx.createGain();
+    g.gain.value=cfg.vol;
+    
+    var lf=ctx.createOscillator();
+    var lg=ctx.createGain();
+    lf.type='sine';
+    lf.frequency.value=R.drift*(0.6+i*0.35);
+    lg.gain.value=cfg.freq*0.015;
+    
+    lf.connect(lg);
+    lg.connect(o.frequency);
+    o.connect(g);
+    g.connect(rMaster);
+    
+    o.start();
+    lf.start();
+    
+    rO.push(o);
+    rG.push(g);
+    rL.push(lf);
   });
+  
   if(R.noise>0){
-    var nb=makePink(ctx);rNSrc=ctx.createBufferSource();rNSrc.buffer=nb;rNSrc.loop=true;
-    rNGain=ctx.createGain();rNGain.gain.value=R.noise;rNSrc.connect(rNGain);rNGain.connect(rMaster);rNSrc.start();
+    var nb=makePink(ctx);
+    rNSrc=ctx.createBufferSource();
+    rNSrc.buffer=nb;
+    rNSrc.loop=true;
+    rNGain=ctx.createGain();
+    rNGain.gain.value=R.noise;
+    rNSrc.connect(rNGain);
+    rNGain.connect(rMaster);
+    rNSrc.start();
   }
+  
   R.playing=true;
-  document.getElementById('r-play').textContent='⏸ stop';
+  document.getElementById('r-play').textContent='⏸ Stop';
   document.getElementById('r-play').classList.add('on');
-  document.getElementById('r-stop').disabled=false;
-  rTmr=setInterval(updateRDisp,250);updateRDisp();
+  
+  rTmr=setInterval(updateRDisp,200);
+  updateRDisp();
 }
 
 function stopR(){
-  rO.forEach(function(o){try{o.stop();}catch(e){}});rL.forEach(function(l){try{l.stop();}catch(e){}});
+  rO.forEach(function(o){try{o.stop();}catch(e){}});
+  rL.forEach(function(l){try{l.stop();}catch(e){}});
   if(rNSrc){try{rNSrc.stop();}catch(e){}rNSrc=null;rNGain=null;}
-  rO=[];rL=[];rMaster=null;
+  rO=[];rG=[];rL=[];rMaster=null;
   if(rTmr){clearInterval(rTmr);rTmr=null;}
+  
   R.playing=false;
-  document.getElementById('r-play').textContent='▶ play';
+  document.getElementById('r-play').textContent='▶ Play';
   document.getElementById('r-play').classList.remove('on');
-  document.getElementById('r-stop').disabled=true;
 }
 
 function updateRDisp(){
-  ['r-f1','r-f2','r-f3'].forEach(function(id,i){
-    var el=document.getElementById(id);if(!el)return;
-    el.textContent=rO[i]?rO[i].frequency.value.toFixed(1)+' Hz':'—';
-  });
+  if(rO[0])document.getElementById('osc-1-freq').textContent=rO[0].frequency.value.toFixed(1)+' Hz';
+  if(rO[1])document.getElementById('osc-2-freq').textContent=rO[1].frequency.value.toFixed(1)+' Hz';
+  if(rO[2]&&R.oscs===3)document.getElementById('osc-3-freq').textContent=rO[2].frequency.value.toFixed(1)+' Hz';
 }
 
 function restartR(){if(R.playing){stopR();startR();}}
 
-function noiseLabel(v){if(v<0.005)return'off';if(v<0.04)return'low';if(v<0.09)return'medium';return'high';}
+function updateOscParam(idx,param,value){
+  if(idx===0){
+    R.osc1[param]=value;
+    if(param==='freq'&&rO[0])rO[0].frequency.setTargetAtTime(value,getCtx().currentTime,0.015);
+    if(param==='vol'&&rG[0])rG[0].gain.setTargetAtTime(value,getCtx().currentTime,0.015);
+  }else if(idx===1){
+    R.osc2[param]=value;
+    if(param==='freq'&&rO[1])rO[1].frequency.setTargetAtTime(value,getCtx().currentTime,0.015);
+    if(param==='vol'&&rG[1])rG[1].gain.setTargetAtTime(value,getCtx().currentTime,0.015);
+  }else if(idx===2){
+    R.osc3[param]=value;
+    if(param==='freq'&&rO[2])rO[2].frequency.setTargetAtTime(value,getCtx().currentTime,0.015);
+    if(param==='vol'&&rG[2])rG[2].gain.setTargetAtTime(value,getCtx().currentTime,0.015);
+  }
+}
 
 function rDownload(){
   var mins=parseInt(document.getElementById('r-dl-dur').value,10);
   var secs=mins*60,sr=44100;
   var btn=document.getElementById('r-dl-btn'),prog=document.getElementById('r-dl-prog');
-  btn.disabled=true;prog.style.display='inline';
+  btn.disabled=true;
+  btn.textContent='Rendering…';
+  prog.style.display='inline';
+  
   var off=new OfflineAudioContext(2,sr*secs,sr);
-  var m=off.createGain();m.gain.value=R.vol;m.connect(off.destination);
-  var freqs=R.oscs===2?[R.base-R.det/2,R.base+R.det/2]:[R.base-R.det,R.base,R.base+R.det];
-  freqs.forEach(function(f,i){
-    var o=off.createOscillator();o.type='sine';o.frequency.value=f;
-    var og=off.createGain();og.gain.value=1/R.oscs;o.connect(og);og.connect(m);
-    var lf=off.createOscillator(),lg=off.createGain();
-    lf.type='sine';lf.frequency.value=R.drift*(0.6+i*0.35);lg.gain.value=R.det*0.4;
-    lf.connect(lg);lg.connect(o.frequency);o.start(0);lf.start(0);
+  var m=off.createGain();
+  m.gain.value=R.masterVol;
+  m.connect(off.destination);
+  
+  var oscConfigs=[
+    {freq:R.osc1.freq,vol:R.osc1.vol},
+    {freq:R.osc2.freq,vol:R.osc2.vol},
+    {freq:R.osc3.freq,vol:R.osc3.vol}
+  ].slice(0,R.oscs);
+  
+  oscConfigs.forEach(function(cfg,i){
+    var o=off.createOscillator();
+    o.type='sine';
+    o.frequency.value=cfg.freq;
+    
+    var g=off.createGain();
+    g.gain.value=cfg.vol;
+    
+    var lf=off.createOscillator();
+    var lg=off.createGain();
+    lf.type='sine';
+    lf.frequency.value=R.drift*(0.6+i*0.35);
+    lg.gain.value=cfg.freq*0.015;
+    
+    lf.connect(lg);
+    lg.connect(o.frequency);
+    o.connect(g);
+    g.connect(m);
+    
+    o.start(0);
+    lf.start(0);
   });
+  
   if(R.noise>0){
-    var nb=makePink(off);var ts=sr*secs;
+    var nb=makePink(off);
+    var ts=sr*secs;
     var fb=off.createBuffer(1,ts,sr),fd=fb.getChannelData(0),sd=nb.getChannelData(0);
     for(var i=0;i<ts;i++)fd[i]=sd[i%nb.length];
-    var ns=off.createBufferSource();ns.buffer=fb;
-    var ng=off.createGain();ng.gain.value=R.noise;ns.connect(ng);ng.connect(m);ns.start(0);
+    var ns=off.createBufferSource();
+    ns.buffer=fb;
+    var ng=off.createGain();
+    ng.gain.value=R.noise;
+    ns.connect(ng);
+    ng.connect(m);
+    ns.start(0);
   }
+  
   off.startRendering().then(function(r){
     triggerDownload(audioBufferToWav(r),'waves-'+mins+'min.wav');
-    btn.disabled=false;prog.style.display='none';
-  }).catch(function(){btn.disabled=false;prog.style.display='none';});
+    btn.disabled=false;
+    btn.textContent='Download WAV';
+    prog.style.display='none';
+  }).catch(function(){
+    btn.disabled=false;
+    btn.textContent='Download WAV';
+    prog.style.display='none';
+  });
 }
 
 function savePreset(){
   var name=document.getElementById('preset-name').value.trim();
   if(!name){alert('Enter a preset name');return;}
-  var preset={name:name,base:R.base,det:R.det,drift:R.drift,noise:R.noise,oscs:R.oscs,vol:R.vol};
+  var preset={
+    name:name,
+    oscs:R.oscs,
+    drift:R.drift,
+    noise:R.noise,
+    masterVol:R.masterVol,
+    osc1:{freq:R.osc1.freq,vol:R.osc1.vol},
+    osc2:{freq:R.osc2.freq,vol:R.osc2.vol},
+    osc3:{freq:R.osc3.freq,vol:R.osc3.vol}
+  };
   presets.push(preset);
   document.getElementById('preset-name').value='';
   renderPresets();
 }
 
 function loadPreset(idx){
-  if(presets[idx]){
-    R.base=presets[idx].base;R.det=presets[idx].det;R.drift=presets[idx].drift;
-    R.noise=presets[idx].noise;R.oscs=presets[idx].oscs;R.vol=presets[idx].vol;
-    document.getElementById('r-base').value=R.base;
-    document.getElementById('r-detune').value=R.det;
-    document.getElementById('r-drift').value=R.drift;
-    document.getElementById('r-noise').value=R.noise;
-    document.getElementById('r-vol').value=R.vol;
-    document.querySelectorAll('[data-oscs]').forEach(function(b){b.classList.toggle('on',parseInt(b.getAttribute('data-oscs'),10)===R.oscs);});
-    document.getElementById('r-base-val').textContent=R.base;
-    document.getElementById('r-detune-val').textContent=R.det;
-    document.getElementById('r-drift-val').textContent=R.drift.toFixed(2);
-    document.getElementById('r-noise-val').textContent=noiseLabel(R.noise);
-    document.getElementById('r-vol-val').textContent=Math.round(R.vol*100);
-    restartR();
-  }
+  if(!presets[idx])return;
+  var p=presets[idx];
+  R.oscs=p.oscs;
+  R.drift=p.drift;
+  R.noise=p.noise;
+  R.masterVol=p.masterVol;
+  R.osc1={freq:p.osc1.freq,vol:p.osc1.vol};
+  R.osc2={freq:p.osc2.freq,vol:p.osc2.vol};
+  R.osc3={freq:p.osc3.freq,vol:p.osc3.vol};
+  
+  document.getElementById('r-drift').value=R.drift;
+  document.getElementById('r-drift-val').textContent=R.drift.toFixed(2);
+  document.getElementById('r-noise').value=R.noise;
+  document.getElementById('r-noise-val').textContent=noiseLabel(R.noise);
+  document.getElementById('r-master-vol').value=R.masterVol;
+  document.getElementById('r-master-vol-val').textContent=Math.round(R.masterVol*100);
+  
+  document.getElementById('osc-1-base').value=R.osc1.freq;
+  document.getElementById('osc-1-base-val').textContent=R.osc1.freq;
+  document.getElementById('osc-1-vol').value=R.osc1.vol;
+  document.getElementById('osc-1-vol-val').textContent=Math.round(R.osc1.vol*100);
+  
+  document.getElementById('osc-2-base').value=R.osc2.freq;
+  document.getElementById('osc-2-base-val').textContent=R.osc2.freq;
+  document.getElementById('osc-2-vol').value=R.osc2.vol;
+  document.getElementById('osc-2-vol-val').textContent=Math.round(R.osc2.vol*100);
+  
+  document.getElementById('osc-3-base').value=R.osc3.freq;
+  document.getElementById('osc-3-base-val').textContent=R.osc3.freq;
+  document.getElementById('osc-3-vol').value=R.osc3.vol;
+  document.getElementById('osc-3-vol-val').textContent=Math.round(R.osc3.vol*100);
+  
+  document.querySelectorAll('[data-oscs]').forEach(function(b){
+    b.classList.toggle('on',parseInt(b.getAttribute('data-oscs'),10)===R.oscs);
+  });
+  
+  document.getElementById('osc-3-section').style.display=R.oscs===3?'block':'none';
+  
+  restartR();
 }
 
 function deletePreset(idx){
@@ -564,7 +756,7 @@ function renderPresets(){
   var list=document.getElementById('presets-list');
   if(presets.length===0){
     list.innerHTML='<div style="color:var(--muted);font-size:.8rem;padding:.5rem">No presets yet</div>';
-  } else {
+  }else{
     list.innerHTML=presets.map(function(p,i){
       return '<div class="preset-item"><span class="preset-name">'+p.name+'</span><div class="preset-actions"><button class="preset-btn" onclick="loadPreset('+i+')">Load</button><button class="preset-btn" onclick="deletePreset('+i+')" style="color:var(--muted)">Delete</button></div></div>';
     }).join('');
@@ -572,29 +764,119 @@ function renderPresets(){
 }
 
 /* Event listeners */
-document.getElementById('r-base').addEventListener('input',function(e){R.base=parseInt(e.target.value,10);document.getElementById('r-base-val').textContent=R.base;restartR();});
-document.getElementById('r-detune').addEventListener('input',function(e){R.det=parseFloat(e.target.value);document.getElementById('r-detune-val').textContent=R.det;restartR();});
-document.getElementById('r-drift').addEventListener('input',function(e){R.drift=parseFloat(e.target.value);document.getElementById('r-drift-val').textContent=R.drift.toFixed(2);restartR();});
-document.getElementById('r-noise').addEventListener('input',function(e){R.noise=parseFloat(e.target.value);document.getElementById('r-noise-val').textContent=noiseLabel(R.noise);restartR();});
-document.getElementById('r-vol').addEventListener('input',function(e){R.vol=parseFloat(e.target.value);document.getElementById('r-vol-val').textContent=Math.round(R.vol*100);if(rMaster)rMaster.gain.setValueAtTime(R.vol,getCtx().currentTime);});
+document.getElementById('r-drift').addEventListener('input',function(e){
+  R.drift=parseFloat(e.target.value);
+  debouncedUpdate(function(){
+    document.getElementById('r-drift-val').textContent=R.drift.toFixed(2);
+  });
+  if(R.playing){
+    rL.forEach(function(lf,i){
+      lf.frequency.setTargetAtTime(R.drift*(0.6+i*0.35),getCtx().currentTime,0.015);
+    });
+  }
+});
+
+document.getElementById('r-noise').addEventListener('input',function(e){
+  R.noise=parseFloat(e.target.value);
+  debouncedUpdate(function(){
+    document.getElementById('r-noise-val').textContent=noiseLabel(R.noise);
+  });
+  if(rNGain){
+    rNGain.gain.setTargetAtTime(R.noise,getCtx().currentTime,0.015);
+  }else if(R.noise>0&&R.playing){
+    restartR();
+  }
+});
+
+document.getElementById('r-master-vol').addEventListener('input',function(e){
+  R.masterVol=parseFloat(e.target.value);
+  debouncedUpdate(function(){
+    document.getElementById('r-master-vol-val').textContent=Math.round(R.masterVol*100);
+  });
+  if(rMaster){
+    rMaster.gain.setTargetAtTime(R.masterVol,getCtx().currentTime,0.015);
+  }
+});
+
+document.getElementById('osc-1-base').addEventListener('input',function(e){
+  var v=parseFloat(e.target.value);
+  debouncedUpdate(function(){
+    document.getElementById('osc-1-base-val').textContent=v;
+  });
+  updateOscParam(0,'freq',v);
+});
+
+document.getElementById('osc-1-vol').addEventListener('input',function(e){
+  var v=parseFloat(e.target.value);
+  debouncedUpdate(function(){
+    document.getElementById('osc-1-vol-val').textContent=Math.round(v*100);
+  });
+  updateOscParam(0,'vol',v);
+});
+
+document.getElementById('osc-2-base').addEventListener('input',function(e){
+  var v=parseFloat(e.target.value);
+  debouncedUpdate(function(){
+    document.getElementById('osc-2-base-val').textContent=v;
+  });
+  updateOscParam(1,'freq',v);
+});
+
+document.getElementById('osc-2-vol').addEventListener('input',function(e){
+  var v=parseFloat(e.target.value);
+  debouncedUpdate(function(){
+    document.getElementById('osc-2-vol-val').textContent=Math.round(v*100);
+  });
+  updateOscParam(1,'vol',v);
+});
+
+document.getElementById('osc-3-base').addEventListener('input',function(e){
+  var v=parseFloat(e.target.value);
+  debouncedUpdate(function(){
+    document.getElementById('osc-3-base-val').textContent=v;
+  });
+  updateOscParam(2,'freq',v);
+});
+
+document.getElementById('osc-3-vol').addEventListener('input',function(e){
+  var v=parseFloat(e.target.value);
+  debouncedUpdate(function(){
+    document.getElementById('osc-3-vol-val').textContent=Math.round(v*100);
+  });
+  updateOscParam(2,'vol',v);
+});
+
 document.querySelectorAll('[data-oscs]').forEach(function(btn){
   btn.addEventListener('click',function(){
     R.oscs=parseInt(btn.getAttribute('data-oscs'),10);
-    document.querySelectorAll('[data-oscs]').forEach(function(b){b.classList.toggle('on',b===btn);});
-    var f3=document.getElementById('r-f3');
-    if(f3)f3.closest('.r-freq-col').style.visibility=R.oscs===3?'visible':'hidden';
+    document.querySelectorAll('[data-oscs]').forEach(function(b){
+      b.classList.toggle('on',b===btn);
+    });
+    document.getElementById('osc-3-section').style.display=R.oscs===3?'block':'none';
     restartR();
   });
 });
-document.getElementById('r-play').addEventListener('click',function(){if(R.playing)stopR();else startR();});
-document.getElementById('r-stop').addEventListener('click',function(){stopR();});
+
+document.getElementById('r-play').addEventListener('click',function(){
+  if(R.playing)stopR();
+  else startR();
+});
+
 document.getElementById('r-dl-btn').addEventListener('click',rDownload);
 document.getElementById('preset-save').addEventListener('click',savePreset);
 
 document.addEventListener('keydown',function(e){
-  if(e.code==='Space'){e.preventDefault();if(!e.repeat){if(R.playing)stopR();else startR();}}
+  if(e.code==='Space'){
+    e.preventDefault();
+    if(!e.repeat){
+      if(R.playing)stopR();
+      else startR();
+    }
+  }
 });
 
+// Initialize
+document.getElementById('osc-3-section').style.display='block';
 renderPresets();
 }());
 
