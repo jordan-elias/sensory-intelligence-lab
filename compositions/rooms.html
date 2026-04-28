@@ -410,7 +410,7 @@
       <span class="dl-prog" id="l-dl-prog">rendering…</span>
     </div>
 
-    <p class="hint">plays continuously · each loop creates a new iteration through the room · use ← → to navigate iterations</p>
+    <p class="hint">press play to start · each iteration plays once, then automatically processes and plays the next · use ← → to jump between iterations</p>
   </div>
 
   <!-- Instructions -->
@@ -611,6 +611,15 @@ function lPlay(){
   if(L.iters.length===0)return;
   if(L.playing){lStop();return;}
   
+  L.playing=true;
+  setLPlayBtn(true);
+  playCurrentIteration();
+}
+
+function playCurrentIteration(){
+  if(!L.playing)return;
+  
+  lStop();
   var ctx=resumeCtx();
   lGain=ctx.createGain();
   lGain.gain.value=L.vol;
@@ -618,21 +627,28 @@ function lPlay(){
   
   lSrc=ctx.createBufferSource();
   lSrc.buffer=L.iters[L.cur];
-  lSrc.loop=L.autoIterate;
+  lSrc.loop=false;
   lSrc.connect(lGain);
   
   lSrc.onended=function(){
-    if(L.autoIterate && !L.processing){
+    if(!L.playing)return;
+    
+    // If there's a next iteration already built, play it
+    if(L.cur < L.iters.length-1){
+      L.cur++;
+      updateLDisplay();
+      updateNavButtons();
+      setLStatus('playing iteration '+L.cur);
+      playCurrentIteration();
+    }
+    // Otherwise, process the current one to create the next
+    else if(!L.processing){
       queueIteration();
-    }else{
-      L.playing=false;
-      setLPlayBtn(false);
     }
   };
   
   lSrc.start();
-  L.playing=true;
-  setLPlayBtn(true);
+  setLStatus('playing iteration '+L.cur);
 }
 
 function lStop(){
@@ -661,33 +677,40 @@ function queueIteration(){
     updateLDisplay();
     updateLSelects();
     updateNavButtons();
-    setLStatus('playing iteration '+L.cur);
     
     if(L.playing){
-      lPlay();
+      playCurrentIteration();
     }
   }).catch(function(){
     L.processing=false;
+    L.playing=false;
+    setLPlayBtn(false);
     setLStatus('error — playback stopped');
   });
 }
 
 function navPrev(){
   if(L.cur<=0)return;
+  var wasPlaying=L.playing;
   lStop();
   L.cur--;
   updateLDisplay();
   updateNavButtons();
-  lPlay();
+  if(wasPlaying){
+    playCurrentIteration();
+  }
 }
 
 function navNext(){
   if(L.cur>=L.iters.length-1)return;
+  var wasPlaying=L.playing;
   lStop();
   L.cur++;
   updateLDisplay();
   updateNavButtons();
-  lPlay();
+  if(wasPlaying){
+    playCurrentIteration();
+  }
 }
 
 function updateNavButtons(){
