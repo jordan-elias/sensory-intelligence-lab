@@ -162,33 +162,15 @@
     /* Status display */
     .iter-display{
       border:1px solid var(--border);
-      padding:.85em 1.25em;
-      margin-bottom:1.25em;
+      padding:.75em 1.25em;
+      margin-bottom:1em;
       display:flex;align-items:center;
       justify-content:space-between;flex-wrap:wrap;gap:.75em;
       background:var(--surface)
     }
-    .iter-count{font-family:var(--font-heading);font-size:1.1rem;font-weight:600;color:var(--text)}
-    .iter-sub{font-family:var(--font-body);font-size:.75rem;color:var(--muted);margin-top:.25rem}
+    .iter-count{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:var(--text)}
+    .iter-sub{font-family:var(--font-body);font-size:.75rem;color:var(--muted)}
     .iter-status{font-family:var(--font-body);font-size:.75rem;color:var(--muted);font-style:italic}
-
-    /* Waveform editor */
-    .waveform-editor{display:none;border:1px solid var(--border);padding:1.25rem;
-      margin-bottom:1.5rem;background:var(--surface)}
-    .waveform-editor.visible{display:block}
-    .waveform-header{display:flex;justify-content:space-between;align-items:center;
-      margin-bottom:1rem;flex-wrap:wrap;gap:.5rem}
-    .waveform-title{font-family:var(--font-heading);font-size:.7rem;font-weight:600;
-      letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-    .waveform-info{font-family:'Courier New',monospace;font-size:.72rem;color:var(--muted)}
-    .waveform-canvas-wrap{position:relative;height:100px;background:var(--bg);
-      border:1px solid var(--border);overflow-x:auto;overflow-y:hidden;cursor:crosshair}
-    .waveform-canvas-scroll{position:relative;height:100%}
-    .waveform-canvas{display:block;height:100%}
-    .waveform-controls{display:flex;gap:.65rem;align-items:center;flex-wrap:wrap;
-      margin-bottom:1rem}
-    .waveform-zoom{display:flex;gap:.5rem;align-items:center}
-    .waveform-actions{display:flex;gap:.5rem;flex-wrap:wrap}
 
     /* Buttons */
     .btn{font-family:var(--font-heading);font-size:.78rem;font-weight:600;
@@ -198,8 +180,6 @@
     .btn.on{background:var(--accent);color:white;border-color:var(--accent)}
     .btn.on:hover{background:var(--accent-hover)}
     .btn:disabled{opacity:.3;cursor:not-allowed;pointer-events:none}
-    .btn.primary{background:var(--accent);color:white;border-color:var(--accent)}
-    .btn.primary:hover{background:var(--accent-hover)}
 
     .pill{font-family:var(--font-body);font-size:.78rem;background:transparent;
       color:var(--text);border:1px solid var(--border);padding:3px 12px;cursor:pointer;
@@ -219,17 +199,6 @@
     .row-lbl{font-family:var(--font-body);font-size:.68rem;letter-spacing:.1em;
       text-transform:uppercase;color:var(--muted);margin-right:4px;white-space:nowrap}
     .rec-state{font-family:var(--font-body);font-size:.78rem;color:var(--muted);padding:3px 0}
-
-    /* Navigation controls */
-    .nav-controls{display:flex;align-items:center;gap:12px;margin-bottom:1.25em}
-    .nav-btn{font-family:var(--font-heading);font-size:.78rem;font-weight:600;
-      background:transparent;color:var(--text);border:1px solid var(--border);
-      padding:.4em .9em;cursor:pointer;transition:all .12s;min-width:50px}
-    .nav-btn:hover{background:var(--surface)}
-    .nav-btn:disabled{opacity:.3;cursor:not-allowed}
-    .iter-badge{font-family:var(--font-heading);font-size:.85rem;font-weight:600;
-      color:var(--accent);padding:.4em .8em;border:1px solid var(--border);
-      background:var(--accent-light);min-width:90px;text-align:center}
 
     /* Sliders */
     .sliders{display:flex;flex-direction:row;gap:24px;margin-bottom:1.25em}
@@ -280,7 +249,7 @@
 
 <!-- ══════════════════════════════════════
      HEADER
-══════════════════════════════════════ -->
+═════��════════════════════════════════ -->
 <header class="sil-header">
   <a class="sil-header__wordmark" href="/dashboard/">Sensory Intelligence Lab</a>
   <button class="sil-header__toggle" id="silMenuToggle" aria-label="Toggle navigation" aria-expanded="false">
@@ -312,7 +281,7 @@
   </div>
 
   <div class="card">
-    <p class="card-title">lucier machine</p>
+    <p class="card-title">tutorial</p>
 
     <!-- Status -->
     <div class="iter-display">
@@ -343,39 +312,6 @@
       <button class="pill" id="l-rec-new" style="display:none">record new</button>
     </div>
 
-    <!-- Waveform Editor -->
-    <div class="waveform-editor" id="waveform-editor">
-      <div class="waveform-header">
-        <span class="waveform-title">Waveform Editor</span>
-        <span class="waveform-info" id="wf-info">Selection: 0.00s - 0.00s (0.00s)</span>
-      </div>
-      <div class="waveform-canvas-wrap" id="wf-wrap">
-        <div class="waveform-canvas-scroll">
-          <canvas class="waveform-canvas" id="wf-canvas"></canvas>
-        </div>
-      </div>
-      <div class="waveform-controls">
-        <div class="waveform-zoom">
-          <span class="row-lbl">zoom →</span>
-          <button class="pill" id="wf-zoom-out">−</button>
-          <button class="pill" id="wf-zoom-in">+</button>
-          <button class="pill" id="wf-zoom-fit">Fit</button>
-        </div>
-        <div class="waveform-actions">
-          <button class="btn" id="wf-preview">▶ Preview</button>
-          <button class="btn primary" id="wf-use">Use Selection</button>
-          <button class="btn" id="wf-reset">Reset to Full</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Navigation -->
-    <div class="nav-controls">
-      <button class="nav-btn" id="l-prev" disabled>← Prev</button>
-      <span class="iter-badge" id="l-iter-badge">Iter 0</span>
-      <button class="nav-btn" id="l-next" disabled>Next →</button>
-    </div>
-
     <!-- Volume control -->
     <div class="row">
       <span class="row-lbl">volume →</span>
@@ -390,7 +326,9 @@
 
     <!-- Transport -->
     <div class="row">
-      <button class="btn on" id="l-play" style="min-width:90px">▶ play</button>
+      <button class="btn" id="l-play" style="min-width:80px">▶ play</button>
+      <button class="btn" id="l-loop" style="min-width:70px">loop</button>
+      <button class="btn" id="l-iterate">+ iterate</button>
       <button class="btn" id="l-reset" style="min-width:70px">reset</button>
     </div>
 
@@ -410,7 +348,7 @@
       <span class="dl-prog" id="l-dl-prog">rendering…</span>
     </div>
 
-    <p class="hint">press play to start · each iteration plays once, then automatically processes and plays the next · use ← → to jump between iterations</p>
+    <p class="hint">each iteration reinforces resonant frequencies of the room · changes become perceptible over 8-10 iterations</p>
   </div>
 
   <!-- Instructions -->
@@ -418,25 +356,22 @@
 
     <h2>How it works</h2>
     <p>In "I Am Sitting in a Room," Alvin Lucier repeatedly played his voice through a speaker and microphone, recording each iteration. Over time, the room's natural resonances—determined by its dimensions and materials—became more and more prominent, while his voice gradually disappeared.</p>
-    <p>This version plays continuously by default. Each time the audio loops, it's automatically processed through the room's resonances to create the next iteration. Use the ← → buttons to navigate between iterations and hear the transformation unfold.</p>
+    <p>Here, you choose a room (small room, bathroom, kitchen, or concert hall), each with different resonant frequencies. Upload a file, record yourself, or use a generated sample. Press <strong>+ iterate</strong> to process the current sound through the room's resonances. After several iterations, you'll hear the room's acoustic signature emerge.</p>
 
     <h2>Choosing a room</h2>
-    <p><strong>Small room</strong>: Tight resonances around 250-1000Hz. Creates a focused, boxy character.</p>
-    <p><strong>Bathroom</strong>: Bright reflections at 400-3000Hz. High frequencies amplified, distinctive tile acoustics.</p>
-    <p><strong>Kitchen</strong>: Mixed surfaces, balanced resonances 300-2000Hz. Subtle transformation.</p>
-    <p><strong>Concert hall</strong>: Large space, gentle resonances 150-2500Hz. Slow, gradual emergence.</p>
+    <p><strong>Small room</strong>: Lower resonances, tighter spaces. Faster emergence of acoustic character.</p>
+    <p><strong>Bathroom</strong>: Bright, reflective surfaces. Higher frequencies are amplified; creates a characteristic "bathroom" tone.</p>
+    <p><strong>Kitchen</strong>: Mixed hard and soft surfaces. Subtle, balanced resonances.</p>
+    <p><strong>Concert hall</strong>: Large space with gentle resonances. Slower, more gradual transformation.</p>
 
-    <h2>Using the waveform editor</h2>
-    <p>When you upload a file or record audio, a waveform editor appears. Drag the handles to select a region, then click "Use Selection" to crop. The zoom controls let you see fine detail. "Reset to Full" restores the original recording.</p>
-
-    <h2>Navigating iterations</h2>
-    <p>Press Play to start continuous playback. Each loop automatically creates a new iteration. Use ← → buttons to move between iterations and hear how the room's acoustic signature emerges gradually. The badge shows which iteration you're currently hearing.</p>
+    <h2>About the loop feature</h2>
+    <p>The <strong>loop</strong> button makes the current iteration repeat continuously. This lets you sit with a single iteration and listen for emerging patterns before deciding whether to process it further.</p>
 
     <h2>Downloading your work</h2>
-    <p>Export any range of iterations as a single WAV file. Select start and end iterations, choose number of loops, and download. This creates a composition showing the complete transformation from source to room resonance.</p>
+    <p>Use the download section to export any range of iterations as a single WAV file, optionally looped. Select a starting iteration, ending iteration, and number of loops. This lets you create a composition showing the complete progression from source to resonance.</p>
 
     <h2>Try it in a real room</h2>
-    <p>The physical version: record yourself speaking. Play it back through a speaker in a room and record it with a microphone placed elsewhere in the same room. Play that recording back and record again. Repeat 8-10 times to hear the room's resonances emerge.</p>
+    <p>The physical version is simple: record yourself speaking on one device. Play that recording back through a speaker in a real room and record it on a second device with the microphone placed in the room. Play that recording back and record again. Repeat 8-10 times to hear the room's resonances emerge.</p>
 
   </div>
 
@@ -457,32 +392,12 @@ var audioCtx=null;
 function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
 function resumeCtx(){var c=getCtx();if(c.state==='suspended')c.resume();return c;}
 
-// Enhanced room models with reverb characteristics
+// Room frequency presets (generative filters)
 var ROOMS={
-  small:{
-    freqs:[250,500,1000],
-    qs:[3,2.5,2],
-    gains:[4,3,2],
-    reverb:{decay:1.2,mix:0.15}
-  },
-  bathroom:{
-    freqs:[400,1200,3000],
-    qs:[4,3,2.5],
-    gains:[5,4,3],
-    reverb:{decay:0.8,mix:0.25}
-  },
-  kitchen:{
-    freqs:[300,800,2000],
-    qs:[2,1.5,1.2],
-    gains:[3,2,1.5],
-    reverb:{decay:1.0,mix:0.12}
-  },
-  hall:{
-    freqs:[150,600,2500],
-    qs:[2,2,2],
-    gains:[3,2.5,2],
-    reverb:{decay:2.5,mix:0.18}
-  }
+  small:{freqs:[250,500,1000],qs:[2,1.8,1.5],gains:[3,2,1.5]},
+  bathroom:{freqs:[400,1200,3000],qs:[3,2.5,2],gains:[4,3,2]},
+  kitchen:{freqs:[300,800,2000],qs:[1.5,1.2,0.8],gains:[2,1,0.5]},
+  hall:{freqs:[150,600,2500],qs:[1,1,1],gains:[2,1.5,1]}
 };
 var currentRoom='small';
 
@@ -516,145 +431,45 @@ function triggerDownload(ab,name){
   a.href=u;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);
 }
 
-/* Waveform state */
-var wfState={
-  fullBuffer:null,
-  selStart:0,
-  selEnd:1,
-  zoom:1,
-  scrollX:0,
-  dragging:null,
-  previewSrc:null
-};
-
 /* Lucier state */
-var L={
-  iters:[],
-  cur:0,
-  playing:false,
-  recording:false,
-  hasRec:false,
-  processing:false,
-  vol:0.8,
-  autoIterate:true
-};
+var L={iters:[],cur:0,playing:false,looping:false,recording:false,hasRec:false,processing:false,vol:0.8};
 var lSrc=null,lGain=null,mRec=null,recChunks=[];
 
-// Enhanced room filter with convolution reverb simulation
 function applyRoomFilters(inBuf){
   var sr=inBuf.sampleRate,len=inBuf.length;
-  var room=ROOMS[currentRoom];
-  
-  // Add slight length for reverb tail
-  var outLen=Math.floor(len + sr * room.reverb.decay);
-  var off=new OfflineAudioContext(1,outLen,sr);
-  
+  var off=new OfflineAudioContext(1,len,sr);
   var src=off.createBufferSource();
-  var c=off.createBuffer(1,len,sr);
-  c.getChannelData(0).set(inBuf.getChannelData(0));
+  var c=off.createBuffer(1,len,sr);c.getChannelData(0).set(inBuf.getChannelData(0));
   src.buffer=c;
+  var mg=off.createGain();mg.gain.value=1.0;mg.connect(off.destination);
   
-  // Create reverb impulse
-  var impLen=Math.floor(sr*room.reverb.decay);
-  var impBuf=off.createBuffer(1,impLen,sr);
-  var impData=impBuf.getChannelData(0);
-  for(var i=0;i<impLen;i++){
-    impData[i]=(Math.random()*2-1)*Math.pow(1-i/impLen,2.5)*0.3;
-  }
-  
-  var conv=off.createConvolver();
-  conv.buffer=impBuf;
-  
-  var dryGain=off.createGain();
-  dryGain.gain.value=1-room.reverb.mix;
-  
-  var wetGain=off.createGain();
-  wetGain.gain.value=room.reverb.mix;
-  
-  var mg=off.createGain();
-  mg.gain.value=1.0;
-  mg.connect(off.destination);
-  
-  // Bandpass filters for room resonances
+  var room=ROOMS[currentRoom];
   for(var i=0;i<room.freqs.length;i++){
     var fl=off.createBiquadFilter();
     fl.type='bandpass';
     fl.frequency.value=room.freqs[i];
     fl.Q.value=room.qs[i];
-    var flGain=off.createGain();
-    flGain.gain.value=room.gains[i]/10;
-    src.connect(fl);
-    fl.connect(flGain);
-    flGain.connect(mg);
+    src.connect(fl);fl.connect(mg);
   }
   
-  // Dry signal
-  src.connect(dryGain);
-  dryGain.connect(mg);
-  
-  // Wet (reverb) signal
-  src.connect(conv);
-  conv.connect(wetGain);
-  wetGain.connect(mg);
-  
   src.start(0);
-  return off.startRendering().then(function(r){
-    // Trim back to original length
-    var trimmed=off.createBuffer(1,len,sr);
-    trimmed.getChannelData(0).set(r.getChannelData(0).slice(0,len));
-    normalizeBuffer(trimmed,0.75);
-    return trimmed;
-  });
+  return off.startRendering().then(function(r){normalizeBuffer(r,0.78);return r;});
 }
 
 function lPlay(){
   if(L.iters.length===0)return;
-  if(L.playing){lStop();return;}
-  
-  L.playing=true;
-  setLPlayBtn(true);
-  playCurrentIteration();
-}
-
-function playCurrentIteration(){
-  if(!L.playing)return;
-  
   lStop();
   var ctx=resumeCtx();
-  lGain=ctx.createGain();
-  lGain.gain.value=L.vol;
-  lGain.connect(ctx.destination);
-  
-  lSrc=ctx.createBufferSource();
-  lSrc.buffer=L.iters[L.cur];
-  lSrc.loop=false;
+  lGain=ctx.createGain();lGain.gain.value=L.vol;lGain.connect(ctx.destination);
+  lSrc=ctx.createBufferSource();lSrc.buffer=L.iters[L.cur];lSrc.loop=L.looping;
   lSrc.connect(lGain);
-  
-  lSrc.onended=function(){
-    if(!L.playing)return;
-    
-    // If there's a next iteration already built, play it
-    if(L.cur < L.iters.length-1){
-      L.cur++;
-      updateLDisplay();
-      updateNavButtons();
-      setLStatus('playing iteration '+L.cur);
-      playCurrentIteration();
-    }
-    // Otherwise, process the current one to create the next
-    else if(!L.processing){
-      queueIteration();
-    }
-  };
-  
-  lSrc.start();
-  setLStatus('playing iteration '+L.cur);
+  lSrc.onended=function(){if(!L.looping){L.playing=false;setLPlayBtn(false);}};
+  lSrc.start();L.playing=true;setLPlayBtn(true);
 }
 
 function lStop(){
   if(lSrc){try{lSrc.stop();}catch(e){}lSrc=null;}
-  L.playing=false;
-  setLPlayBtn(false);
+  L.playing=false;setLPlayBtn(false);
 }
 
 function setLPlayBtn(on){
@@ -663,75 +478,28 @@ function setLPlayBtn(on){
   b.classList.toggle('on',on);
 }
 
-function queueIteration(){
+function lIterate(){
   if(L.processing||L.iters.length===0)return;
-  L.processing=true;
-  setLStatus('processing iteration '+(L.cur+1)+'…');
-  
+  lStop();L.processing=true;
+  setLStatus('processing…');
+  document.getElementById('l-iterate').disabled=true;
   applyRoomFilters(L.iters[L.cur]).then(function(r){
-    L.iters=L.iters.slice(0,L.cur+1);
-    L.iters.push(r);
-    L.cur=L.iters.length-1;
+    L.iters=L.iters.slice(0,L.cur+1);L.iters.push(r);L.cur=L.iters.length-1;
     L.processing=false;
-    
-    updateLDisplay();
-    updateLSelects();
-    updateNavButtons();
-    
-    if(L.playing){
-      playCurrentIteration();
-    }
+    document.getElementById('l-iterate').disabled=false;
+    updateLDisplay();updateLSelects();setLStatus('ready');
+    lPlay();
   }).catch(function(){
-    L.processing=false;
-    L.playing=false;
-    setLPlayBtn(false);
-    setLStatus('error — playback stopped');
+    L.processing=false;document.getElementById('l-iterate').disabled=false;setLStatus('error — try again');
   });
 }
 
-function navPrev(){
-  if(L.cur<=0)return;
-  var wasPlaying=L.playing;
-  lStop();
-  L.cur--;
-  updateLDisplay();
-  updateNavButtons();
-  if(wasPlaying){
-    playCurrentIteration();
-  }
-}
-
-function navNext(){
-  if(L.cur>=L.iters.length-1)return;
-  var wasPlaying=L.playing;
-  lStop();
-  L.cur++;
-  updateLDisplay();
-  updateNavButtons();
-  if(wasPlaying){
-    playCurrentIteration();
-  }
-}
-
-function updateNavButtons(){
-  document.getElementById('l-prev').disabled=L.cur<=0;
-  document.getElementById('l-next').disabled=L.cur>=L.iters.length-1;
-  document.getElementById('l-iter-badge').textContent='Iter '+L.cur;
-}
-
-function lReset(){
-  lStop();
-  L.cur=0;
-  updateLDisplay();
-  updateLSelects();
-  updateNavButtons();
-  setLStatus('reset to original');
-}
+function lReset(){lStop();L.cur=0;updateLDisplay();updateLSelects();setLStatus('reset');}
 
 function updateLDisplay(){
   var n=L.cur,tot=L.iters.length;
   document.getElementById('l-count').textContent='iteration '+n;
-  document.getElementById('l-sub').textContent=n===0?'original source · unprocessed':n+' of '+(tot-1)+' iteration'+(tot-1===1?'':'s')+' built';
+  document.getElementById('l-sub').textContent=n===0?'original source · unprocessed':n+' of '+(tot-1)+' iteration'+(tot-1===1?'':'s');
 }
 
 function setLStatus(m){document.getElementById('l-status').textContent=m;}
@@ -784,12 +552,9 @@ function lDownload(){
 
 function loadBuf(decoded,label){
   normalizeBuffer(decoded,0.78);
-  L.iters=[decoded];
-  L.cur=0;
-  updateLDisplay();
-  updateLSelects();
-  updateNavButtons();
-  setLStatus(label||'ready');
+  L.iters=[decoded];L.cur=0;
+  document.getElementById('l-iterate').disabled=false;
+  updateLDisplay();updateLSelects();setLStatus(label||'ready');
 }
 
 function loadFile(file){
@@ -797,15 +562,7 @@ function loadFile(file){
   var r=new FileReader();
   r.onload=function(e){
     getCtx().decodeAudioData(e.target.result,function(d){
-      wfState.fullBuffer=d;
-      wfState.selStart=0;
-      wfState.selEnd=1;
-      wfState.zoom=1;
-      wfState.scrollX=0;
-      showWaveformEditor();
-      drawWaveform();
-      loadBuf(d,'loaded: '+file.name.substring(0,24));
-      setLSrcUI('file');
+      loadBuf(d,'loaded: '+file.name.substring(0,24));setLSrcUI('file');
     },function(){setLStatus('could not decode file');});
   };
   r.readAsArrayBuffer(file);
@@ -822,29 +579,15 @@ function startRec(){
       var fr=new FileReader();
       fr.onload=function(ev){
         getCtx().decodeAudioData(ev.target.result,function(d){
-          normalizeBuffer(d,0.78);
-          wfState.fullBuffer=d;
-          wfState.selStart=0;
-          wfState.selEnd=1;
-          wfState.zoom=1;
-          wfState.scrollX=0;
-          showWaveformEditor();
-          drawWaveform();
-          L.iters=[d];
-          L.cur=0;
-          L.hasRec=true;
-          L.recording=false;
-          updateLDisplay();
-          updateLSelects();
-          updateNavButtons();
-          setRecState('has_rec');
-          setLStatus('ready');
+          normalizeBuffer(d,0.78);L.iters=[d];L.cur=0;L.hasRec=true;L.recording=false;
+          document.getElementById('l-iterate').disabled=false;
+          updateLDisplay();updateLSelects();setRecState('has_rec');setLStatus('ready');
         },function(){setLStatus('decode failed');});
       };
       fr.readAsArrayBuffer(blob);
     };
-    mRec.start();L.recording=true;setRecState('rec');setLStatus('recording… (max 10s)');
-    setTimeout(function(){if(L.recording)stopRec();},10000);
+    mRec.start();L.recording=true;setRecState('rec');setLStatus('recording… (max 6s)');
+    setTimeout(function(){if(L.recording)stopRec();},6000);
   }).catch(function(){setLStatus('mic access denied');});
 }
 
@@ -867,226 +610,6 @@ function setLSrcUI(t){
   if(showMic&&!L.hasRec)setRecState('idle');
 }
 
-/* Waveform editor */
-function showWaveformEditor(){
-  document.getElementById('waveform-editor').classList.add('visible');
-  setTimeout(function(){
-    var canvas=document.getElementById('wf-canvas');
-    var wrap=document.getElementById('wf-wrap');
-    canvas.width=wrap.clientWidth*devicePixelRatio;
-    canvas.height=100*devicePixelRatio;
-    drawWaveform();
-  },10);
-}
-
-function hideWaveformEditor(){
-  document.getElementById('waveform-editor').classList.remove('visible');
-}
-
-function drawWaveform(){
-  var canvas=document.getElementById('wf-canvas');
-  if(!canvas||!wfState.fullBuffer)return;
-  
-  var wrap=canvas.parentElement;
-  var data=wfState.fullBuffer.getChannelData(0);
-  var dur=wfState.fullBuffer.duration;
-  
-  var baseWidth=wrap.clientWidth*devicePixelRatio;
-  var W=baseWidth*wfState.zoom;
-  var H=100*devicePixelRatio;
-  
-  canvas.width=W;
-  canvas.height=H;
-  canvas.style.width=(W/devicePixelRatio)+'px';
-  
-  var ctx=canvas.getContext('2d');
-  ctx.clearRect(0,0,W,H);
-  
-  var visibleStart=wfState.scrollX;
-  var visibleEnd=Math.min(1,wfState.scrollX+(1/wfState.zoom));
-  
-  var startSample=Math.floor(visibleStart*data.length);
-  var endSample=Math.floor(visibleEnd*data.length);
-  var samplesPerPx=(endSample-startSample)/W;
-  
-  ctx.strokeStyle='#2a5c45';
-  ctx.lineWidth=1;
-  ctx.beginPath();
-  
-  for(var x=0;x<W;x++){
-    var s=Math.floor(startSample+x*samplesPerPx);
-    var e=Math.floor(s+samplesPerPx);
-    var min=1,max=-1;
-    for(var i=s;i<e&&i<data.length;i++){
-      if(data[i]<min)min=data[i];
-      if(data[i]>max)max=data[i];
-    }
-    var y1=H/2-(min*H/2);
-    var y2=H/2-(max*H/2);
-    if(x===0)ctx.moveTo(x,y1);
-    ctx.lineTo(x,y1);
-    ctx.lineTo(x,y2);
-  }
-  ctx.stroke();
-  
-  // Selection overlay
-  var selStartPx=((wfState.selStart-visibleStart)/(visibleEnd-visibleStart))*W;
-  var selEndPx=((wfState.selEnd-visibleStart)/(visibleEnd-visibleStart))*W;
-  
-  ctx.fillStyle='rgba(42,92,69,0.15)';
-  ctx.fillRect(selStartPx,0,selEndPx-selStartPx,H);
-  
-  // Handles
-  ctx.fillStyle='#2a5c45';
-  ctx.fillRect(selStartPx-2,0,4,H);
-  ctx.fillRect(selEndPx-2,0,4,H);
-  
-  updateWaveformInfo();
-}
-
-function updateWaveformInfo(){
-  if(!wfState.fullBuffer)return;
-  var dur=wfState.fullBuffer.duration;
-  var start=wfState.selStart*dur;
-  var end=wfState.selEnd*dur;
-  var len=end-start;
-  document.getElementById('wf-info').textContent='Selection: '+start.toFixed(2)+'s - '+end.toFixed(2)+'s ('+len.toFixed(2)+'s)';
-}
-
-function getWaveformX(e){
-  var canvas=document.getElementById('wf-canvas');
-  var rect=canvas.getBoundingClientRect();
-  var x=(e.clientX||e.touches[0].clientX)-rect.left;
-  return x/rect.width;
-}
-
-function waveformMouseDown(e){
-  e.preventDefault();
-  var x=getWaveformX(e);
-  var visibleStart=wfState.scrollX;
-  var visibleEnd=Math.min(1,wfState.scrollX+(1/wfState.zoom));
-  var pos=visibleStart+x*(visibleEnd-visibleStart);
-  
-  var canvas=document.getElementById('wf-canvas');
-  var threshold=8/canvas.offsetWidth;
-  
-  if(Math.abs(pos-wfState.selStart)<threshold){
-    wfState.dragging='start';
-  }else if(Math.abs(pos-wfState.selEnd)<threshold){
-    wfState.dragging='end';
-  }else{
-    wfState.dragging='region';
-    wfState.dragOffset=pos-wfState.selStart;
-  }
-}
-
-function waveformMouseMove(e){
-  if(!wfState.dragging)return;
-  e.preventDefault();
-  
-  var x=getWaveformX(e);
-  var visibleStart=wfState.scrollX;
-  var visibleEnd=Math.min(1,wfState.scrollX+(1/wfState.zoom));
-  var pos=visibleStart+x*(visibleEnd-visibleStart);
-  pos=Math.max(0,Math.min(1,pos));
-  
-  if(wfState.dragging==='start'){
-    wfState.selStart=Math.min(pos,wfState.selEnd-0.01);
-  }else if(wfState.dragging==='end'){
-    wfState.selEnd=Math.max(pos,wfState.selStart+0.01);
-  }else if(wfState.dragging==='region'){
-    var len=wfState.selEnd-wfState.selStart;
-    wfState.selStart=pos-wfState.dragOffset;
-    wfState.selEnd=wfState.selStart+len;
-    if(wfState.selStart<0){wfState.selStart=0;wfState.selEnd=len;}
-    if(wfState.selEnd>1){wfState.selEnd=1;wfState.selStart=1-len;}
-  }
-  
-  drawWaveform();
-}
-
-function waveformMouseUp(e){
-  wfState.dragging=null;
-}
-
-function zoomIn(){
-  wfState.zoom=Math.min(wfState.zoom*1.5,10);
-  drawWaveform();
-  var wrap=document.getElementById('wf-wrap');
-  var canvas=document.getElementById('wf-canvas');
-  wrap.scrollLeft=(wfState.scrollX/(1/wfState.zoom))*canvas.offsetWidth;
-}
-
-function zoomOut(){
-  wfState.zoom=Math.max(wfState.zoom/1.5,1);
-  wfState.scrollX=0;
-  drawWaveform();
-}
-
-function zoomFit(){
-  wfState.zoom=1;
-  wfState.scrollX=0;
-  drawWaveform();
-}
-
-function previewSelection(){
-  if(wfState.previewSrc){
-    try{wfState.previewSrc.stop();}catch(e){}
-    wfState.previewSrc=null;
-    document.getElementById('wf-preview').textContent='▶ Preview';
-    return;
-  }
-  
-  var ctx=resumeCtx();
-  var dur=wfState.fullBuffer.duration;
-  var start=wfState.selStart*dur;
-  var end=wfState.selEnd*dur;
-  
-  var g=ctx.createGain();
-  g.gain.value=0.7;
-  g.connect(ctx.destination);
-  
-  wfState.previewSrc=ctx.createBufferSource();
-  wfState.previewSrc.buffer=wfState.fullBuffer;
-  wfState.previewSrc.connect(g);
-  wfState.previewSrc.onended=function(){
-    wfState.previewSrc=null;
-    document.getElementById('wf-preview').textContent='▶ Preview';
-  };
-  
-  document.getElementById('wf-preview').textContent='⏸ Stop';
-  wfState.previewSrc.start(ctx.currentTime,start,end-start);
-}
-
-function useSelection(){
-  if(!wfState.fullBuffer)return;
-  var dur=wfState.fullBuffer.duration;
-  var sr=wfState.fullBuffer.sampleRate;
-  var start=Math.floor(wfState.selStart*dur*sr);
-  var end=Math.floor(wfState.selEnd*dur*sr);
-  var len=end-start;
-  
-  var newBuf=getCtx().createBuffer(1,len,sr);
-  var newData=newBuf.getChannelData(0);
-  var oldData=wfState.fullBuffer.getChannelData(0);
-  
-  for(var i=0;i<len;i++){
-    newData[i]=oldData[start+i];
-  }
-  
-  loadBuf(newBuf,'cropped selection');
-}
-
-function resetToFull(){
-  if(!wfState.fullBuffer)return;
-  wfState.selStart=0;
-  wfState.selEnd=1;
-  wfState.zoom=1;
-  wfState.scrollX=0;
-  drawWaveform();
-  loadBuf(wfState.fullBuffer,'reset to full');
-}
-
 /* Init */
 document.querySelectorAll('[data-room]').forEach(function(btn){
   btn.addEventListener('click',function(){
@@ -1097,28 +620,23 @@ document.querySelectorAll('[data-room]').forEach(function(btn){
 
 document.getElementById('l-file').addEventListener('change',function(e){if(e.target.files&&e.target.files[0])loadFile(e.target.files[0]);});
 document.getElementById('l-src-mic').addEventListener('click',function(){
-  L.hasRec=false;setLSrcUI('mic');lStop();L.iters=[];
-  updateLDisplay();updateLSelects();updateNavButtons();
-  setLStatus('press record and speak');hideWaveformEditor();
+  L.hasRec=false;setLSrcUI('mic');lStop();L.iters=[];updateLDisplay();updateLSelects();setLStatus('press record and speak');
 });
 document.getElementById('l-record').addEventListener('click',startRec);
 document.getElementById('l-rec-new').addEventListener('click',function(){
-  L.hasRec=false;L.iters=[];lStop();
-  updateLDisplay();updateLSelects();updateNavButtons();
-  setRecState('idle');setLStatus('press record and speak');hideWaveformEditor();
+  L.hasRec=false;L.iters=[];lStop();updateLDisplay();updateLSelects();setRecState('idle');setLStatus('press record and speak');
 });
-
 document.getElementById('l-play').addEventListener('click',function(){if(L.playing)lStop();else lPlay();});
-document.getElementById('l-prev').addEventListener('click',navPrev);
-document.getElementById('l-next').addEventListener('click',navNext);
+document.getElementById('l-loop').addEventListener('click',function(){
+  L.looping=!L.looping;this.classList.toggle('on',L.looping);if(lSrc)lSrc.loop=L.looping;
+});
+document.getElementById('l-iterate').addEventListener('click',lIterate);
 document.getElementById('l-reset').addEventListener('click',lReset);
-
 document.getElementById('l-vol').addEventListener('input',function(e){
   L.vol=parseFloat(e.target.value);
   document.getElementById('l-vol-val').textContent=Math.round(L.vol*100)+'%';
   if(lGain)lGain.gain.setValueAtTime(L.vol,getCtx().currentTime);
 });
-
 document.getElementById('l-dl-btn').addEventListener('click',lDownload);
 ['l-dl-from','l-dl-to','l-dl-loops'].forEach(function(id){
   document.getElementById(id).addEventListener('change',function(){
@@ -1126,41 +644,12 @@ document.getElementById('l-dl-btn').addEventListener('click',lDownload);
   });
 });
 
-// Waveform editor events
-var canvas=document.getElementById('wf-canvas');
-var wrap=document.getElementById('wf-wrap');
-
-canvas.addEventListener('mousedown',waveformMouseDown);
-canvas.addEventListener('touchstart',waveformMouseDown);
-document.addEventListener('mousemove',waveformMouseMove);
-document.addEventListener('touchmove',waveformMouseMove);
-document.addEventListener('mouseup',waveformMouseUp);
-document.addEventListener('touchend',waveformMouseUp);
-
-wrap.addEventListener('scroll',function(){
-  var canvas=document.getElementById('wf-canvas');
-  var maxScroll=canvas.offsetWidth-wrap.clientWidth;
-  if(maxScroll>0){
-    wfState.scrollX=(wrap.scrollLeft/maxScroll)*(1-1/wfState.zoom);
-  }
-});
-
-document.getElementById('wf-zoom-in').addEventListener('click',zoomIn);
-document.getElementById('wf-zoom-out').addEventListener('click',zoomOut);
-document.getElementById('wf-zoom-fit').addEventListener('click',zoomFit);
-document.getElementById('wf-preview').addEventListener('click',previewSelection);
-document.getElementById('wf-use').addEventListener('click',useSelection);
-document.getElementById('wf-reset').addEventListener('click',resetToFull);
-
 /* Spacebar play/pause */
 document.addEventListener('keydown',function(e){
   if(e.code==='Space'){e.preventDefault();if(!e.repeat){if(L.playing)lStop();else lPlay();}}
-  if(e.code==='ArrowLeft'){e.preventDefault();if(!e.repeat)navPrev();}
-  if(e.code==='ArrowRight'){e.preventDefault();if(!e.repeat)navNext();}
 });
 
 updateLSelects();
-updateNavButtons();
 }());
 
 // ─────────────────────────────────────────────────────────
