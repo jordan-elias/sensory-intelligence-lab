@@ -223,12 +223,30 @@
     .track-select-btn:hover{border-color:var(--accent);color:var(--accent);}
     .track-select-btn.loaded{color:var(--accent);border-color:var(--accent);}
 
+    /* Waveform editor section */
+    .track-wave-section{display:none;background:var(--surface);border-bottom:1px solid var(--border);
+      padding:1rem;flex-direction:column;gap:.75rem;}
+    .track-wave-section.visible{display:flex;}
+    .wave-editor-header{display:flex;justify-content:space-between;align-items:center;
+      margin-bottom:.5rem;flex-wrap:wrap;gap:.5rem;}
+    .wave-editor-title{font-family:var(--font-heading);font-size:.7rem;font-weight:600;
+      letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+    .wave-editor-info{font-family:'Courier New',monospace;font-size:.72rem;color:var(--muted);}
+    .wave-canvas-wrap{position:relative;height:100px;background:var(--bg);
+      border:1px solid var(--border);overflow-x:auto;overflow-y:hidden;cursor:crosshair;}
+    .wave-canvas-scroll{position:relative;height:100%;}
+    .wave-canvas{display:block;height:100%;}
+    .wave-playhead{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);
+      pointer-events:none;opacity:0.8;display:none;}
+    .wave-playhead.visible{display:block;}
+    .wave-editor-controls{display:flex;gap:.65rem;align-items:center;flex-wrap:wrap;}
+    .wave-zoom-controls{display:flex;gap:.4rem;align-items:center;}
+    .wave-actions{display:flex;gap:.4rem;flex-wrap:wrap;}
+
     /* Waveform canvas */
     .track-wave{height:44px;background:var(--surface);border-bottom:1px solid var(--border);
       position:relative;cursor:default;}
     .track-wave canvas{width:100%;height:100%;display:block;}
-    .wave-playhead{position:absolute;top:0;bottom:0;width:1px;
-      background:var(--accent);pointer-events:none;left:0%;}
 
     /* Controls grid */
     .track-controls{
@@ -328,7 +346,7 @@
     /* Empty state */
     .lib-empty{padding:2rem;text-align:center;font-size:.82rem;color:var(--muted);}
 
-    /* ── Crop modal ── */
+    /* ── Modals ── */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);
       z-index:200;display:none;align-items:center;justify-content:center;padding:1rem;}
     .modal-overlay.open{display:flex;}
@@ -343,12 +361,6 @@
     .modal-body{padding:1.1rem;}
     .modal-footer{padding:.85rem 1.1rem;border-top:1px solid var(--border);
       display:flex;gap:.65rem;justify-content:flex-end;}
-
-    /* Crop waveform */
-    #cropCanvas{width:100%;height:80px;display:block;
-      border:1px solid var(--border);cursor:crosshair;background:var(--surface);}
-    .crop-handles{display:flex;justify-content:space-between;margin-top:.5rem;
-      font-size:.72rem;color:var(--muted);}
 
     /* Rename input */
     .modal-input{width:100%;padding:.6rem .85rem;border:1px solid var(--border);
@@ -461,32 +473,6 @@
 
 </main>
 
-<!-- Crop modal -->
-<div class="modal-overlay" id="cropModal">
-  <div class="modal">
-    <div class="modal-head">
-      <h3>Crop recording</h3>
-      <button class="modal-close" onclick="closeModal('cropModal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <p style="font-size:.8rem;color:var(--muted);margin-bottom:.85rem;">
-        Drag the start and end markers to set the crop region.
-      </p>
-      <canvas id="cropCanvas"></canvas>
-      <div class="crop-handles">
-        <span>Start: <strong id="cropStartLabel">0.00s</strong></span>
-        <span>End: <strong id="cropEndLabel">0.00s</strong></span>
-        <span>Duration: <strong id="cropDurLabel">0.00s</strong></span>
-      </div>
-      <div class="msg" id="cropMsg" style="margin-top:.75rem;"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="sbtn" onclick="closeModal('cropModal')">Cancel</button>
-      <button class="sbtn primary" onclick="applyCrop()" id="applyCropBtn">Apply crop</button>
-    </div>
-  </div>
-</div>
-
 <!-- Rename modal -->
 <div class="modal-overlay" id="renameModal">
   <div class="modal">
@@ -596,8 +582,13 @@ const tracks = Array.from({length:N_TRACKS}, (_,i) => ({
   id: i,
   name: TRACK_NAMES[i],
   buffer: null,
+  fullBuffer: null,
   fileName: null,
   recordingId: null,
+  selStart: 0,
+  selEnd: 1,
+  zoom: 1,
+  scrollX: 0,
   sourceNode: null,
   gainNode: null,
   panNode: null,
@@ -607,6 +598,10 @@ const tracks = Array.from({length:N_TRACKS}, (_,i) => ({
   dryGain: null,
   lfoOsc: null,
   lfoGain: null,
+  tapeWowOsc: null,
+  tapeFlutterOsc: null,
+  tapeWowGain: null,
+  tapeFlutterGain: null,
   volume: 0.8,
   pan: 0,
   speed: 1.0,
@@ -622,6 +617,7 @@ const tracks = Array.from({length:N_TRACKS}, (_,i) => ({
   tapeRate: 0.05,
   tapeLoopCount: 0,
   playheadPct: 0,
+  dragging: null,
 }));
 
 // ─────────────────────────────────────────────────────────
@@ -663,11 +659,33 @@ function buildTrackGraph(t) {
   src.playbackRate.value = t.speed;
   src.loop = t.loop;
 
+  // Tape degradation filter
   const tapeFilter = AC.createBiquadFilter();
   tapeFilter.type = 'lowpass';
   tapeFilter.frequency.value = Math.max(400, 20000 * Math.pow(1 - t.tapeDegradation, 2));
-  tapeFilter.Q.value = 0.5;
+  tapeFilter.Q.value = 0.5 + (t.tapeDegradation * 1.5);
 
+  // Tape wow (slow warble ~0.5-2Hz)
+  const tapeWowOsc = AC.createOscillator();
+  const tapeWowGain = AC.createGain();
+  tapeWowOsc.type = 'sine';
+  tapeWowOsc.frequency.value = 0.8 + Math.random() * 0.7;
+  tapeWowGain.gain.value = t.tapeEnabled ? (t.tapeDegradation * 15) : 0;
+  tapeWowOsc.connect(tapeWowGain);
+  tapeWowGain.connect(src.playbackRate);
+  tapeWowOsc.start();
+
+  // Tape flutter (fast warble ~5-12Hz)
+  const tapeFlutterOsc = AC.createOscillator();
+  const tapeFlutterGain = AC.createGain();
+  tapeFlutterOsc.type = 'sine';
+  tapeFlutterOsc.frequency.value = 7 + Math.random() * 4;
+  tapeFlutterGain.gain.value = t.tapeEnabled ? (t.tapeDegradation * 0.008) : 0;
+  tapeFlutterOsc.connect(tapeFlutterGain);
+  tapeFlutterGain.connect(src.playbackRate);
+  tapeFlutterOsc.start();
+
+  // Tape noise
   let tapeNoiseGain = null;
   if (t.tapeEnabled && t.tapeDegradation > 0.05) {
     const nLen = Math.min(AC.sampleRate * 4, 176400);
@@ -684,13 +702,14 @@ function buildTrackGraph(t) {
     const nSrc=AC.createBufferSource();
     nSrc.buffer=nBuf;nSrc.loop=true;
     tapeNoiseGain=AC.createGain();
-    tapeNoiseGain.gain.value = t.tapeEnabled ? t.tapeDegradation * 0.06 : 0;
+    tapeNoiseGain.gain.value = t.tapeDegradation * 0.08;
     nSrc.connect(tapeNoiseGain);
     tapeNoiseGain.connect(masterGain);
     nSrc.start();
     t._tapeNoiseSrc = nSrc;
   }
 
+  // LFO modulation
   const lfoOsc  = AC.createOscillator();
   const lfoGain = AC.createGain();
   lfoOsc.type = t.lfoShape;
@@ -738,15 +757,22 @@ function buildTrackGraph(t) {
   t.dryGain     = dryGain;
   t.lfoOsc      = lfoOsc;
   t.lfoGain     = lfoGain;
+  t.tapeWowOsc  = tapeWowOsc;
+  t.tapeFlutterOsc = tapeFlutterOsc;
+  t.tapeWowGain = tapeWowGain;
+  t.tapeFlutterGain = tapeFlutterGain;
 }
 
 function teardownTrackGraph(t) {
   try { t.sourceNode && t.sourceNode.stop(); } catch(e){}
   try { t.lfoOsc    && t.lfoOsc.stop();    } catch(e){}
+  try { t.tapeWowOsc && t.tapeWowOsc.stop(); } catch(e){}
+  try { t.tapeFlutterOsc && t.tapeFlutterOsc.stop(); } catch(e){}
   try { t._tapeNoiseSrc && t._tapeNoiseSrc.stop(); } catch(e){}
   t.sourceNode = t.gainNode = t.panNode = t.filterNode = null;
   t.tapeFilter = t.reverbNode = t.reverbGain = t.dryGain = null;
   t.lfoOsc = t.lfoGain = t._tapeNoiseSrc = null;
+  t.tapeWowOsc = t.tapeFlutterOsc = t.tapeWowGain = t.tapeFlutterGain = null;
 }
 
 // ─────────────────────────────────────────────────────────
@@ -784,6 +810,7 @@ function transportStop() {
     teardownTrackGraph(t);
     t.playheadPct = 0;
     drawWaveform(t);
+    updateWaveEditorPlayhead(t);
   });
 
   document.getElementById('transportTime').textContent = '0:00.0';
@@ -804,19 +831,24 @@ function transportTick() {
   tracks.forEach(t => {
     if (!t.buffer || !t.sourceNode) return;
     const dur = t.buffer.duration / t.speed;
-    const pos = (elapsed % dur) / dur;
+    const pos = t.loop ? (elapsed % dur) / dur : Math.min(elapsed / dur, 1);
     t.playheadPct = pos;
-    drawPlayhead(t);
+    drawWaveform(t);
+    updateWaveEditorPlayhead(t);
 
     if (t.tapeEnabled && t.loop) {
       const loopCount = Math.floor(elapsed / dur);
       if (loopCount > (t.tapeLoopCountLast || 0)) {
         t.tapeLoopCountLast = loopCount;
         t.tapeDegradation = Math.min(1, t.tapeDegradation + t.tapeRate);
+        
         if (t.tapeFilter) {
-          t.tapeFilter.frequency.value =
-            Math.max(400, 20000 * Math.pow(1 - t.tapeDegradation, 2));
+          t.tapeFilter.frequency.value = Math.max(400, 20000 * Math.pow(1 - t.tapeDegradation, 2));
+          t.tapeFilter.Q.value = 0.5 + (t.tapeDegradation * 1.5);
         }
+        if (t.tapeWowGain) t.tapeWowGain.gain.value = t.tapeDegradation * 15;
+        if (t.tapeFlutterGain) t.tapeFlutterGain.gain.value = t.tapeDegradation * 0.008;
+        
         updateTapeMeter(t);
       }
     }
@@ -917,22 +949,288 @@ function drawWaveform(t) {
     ctx.fillRect(x, y1, 1, y2-y1);
   }
   ctx.stroke();
+
+  // Draw playhead for active buffer
+  if (isPlaying && t.sourceNode) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth   = 2 * devicePixelRatio;
+    ctx.globalAlpha = 0.9;
+    ctx.beginPath();
+    ctx.moveTo(t.playheadPct * W, 0);
+    ctx.lineTo(t.playheadPct * W, H);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
 }
 
-function drawPlayhead(t) {
-  const canvas = document.getElementById(`wave-${t.id}`);
-  if (!canvas) return;
-  drawWaveform(t);
+// ─────────────────────────────────────────────────────────
+// WAVEFORM EDITOR
+// ─────────────────────────────────────────────────────────
+function drawWaveEditor(t) {
+  const canvas = document.getElementById(`wave-editor-${t.id}`);
+  if (!canvas || !t.fullBuffer) return;
+  
+  const wrap = canvas.parentElement;
+  const data = t.fullBuffer.getChannelData(0);
+  const dur = t.fullBuffer.duration;
+  
+  const baseWidth = wrap.clientWidth * devicePixelRatio;
+  const W = baseWidth * t.zoom;
+  const H = 100 * devicePixelRatio;
+  
+  canvas.width = W;
+  canvas.height = H;
+  canvas.style.width = (W / devicePixelRatio) + 'px';
+  
   const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+  
+  const visibleStart = t.scrollX;
+  const visibleEnd = Math.min(1, t.scrollX + (1 / t.zoom));
+  
+  const startSample = Math.floor(visibleStart * data.length);
+  const endSample = Math.floor(visibleEnd * data.length);
+  const samplesPerPx = (endSample - startSample) / W;
+  
   ctx.strokeStyle = TRACK_COLORS[t.id];
-  ctx.lineWidth   = 2 * devicePixelRatio;
-  ctx.globalAlpha = 0.9;
+  ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(t.playheadPct * W, 0);
-  ctx.lineTo(t.playheadPct * W, H);
+  
+  for (let x = 0; x < W; x++) {
+    const s = Math.floor(startSample + x * samplesPerPx);
+    const e = Math.floor(s + samplesPerPx);
+    let min = 1, max = -1;
+    for (let i = s; i < e && i < data.length; i++) {
+      if (data[i] < min) min = data[i];
+      if (data[i] > max) max = data[i];
+    }
+    const y1 = H/2 - (min * H/2);
+    const y2 = H/2 - (max * H/2);
+    if (x === 0) ctx.moveTo(x, y1);
+    ctx.lineTo(x, y1);
+    ctx.lineTo(x, y2);
+  }
   ctx.stroke();
-  ctx.globalAlpha = 1;
+  
+  // Selection overlay
+  const selStartPx = ((t.selStart - visibleStart) / (visibleEnd - visibleStart)) * W;
+  const selEndPx = ((t.selEnd - visibleStart) / (visibleEnd - visibleStart)) * W;
+  
+  ctx.fillStyle = 'rgba(42, 92, 69, 0.15)';
+  ctx.fillRect(selStartPx, 0, selEndPx - selStartPx, H);
+  
+  // Selection handles
+  ctx.fillStyle = TRACK_COLORS[t.id];
+  ctx.fillRect(selStartPx - 2, 0, 4, H);
+  ctx.fillRect(selEndPx - 2, 0, 4, H);
+  
+  updateWaveEditorInfo(t);
+}
+
+function updateWaveEditorInfo(t) {
+  if (!t.fullBuffer) return;
+  const dur = t.fullBuffer.duration;
+  const start = t.selStart * dur;
+  const end = t.selEnd * dur;
+  const len = end - start;
+  const info = document.getElementById(`wave-info-${t.id}`);
+  if (info) {
+    info.textContent = `Selection: ${start.toFixed(2)}s - ${end.toFixed(2)}s (${len.toFixed(2)}s)`;
+  }
+}
+
+function updateWaveEditorPlayhead(t) {
+  const playhead = document.getElementById(`wave-playhead-${t.id}`);
+  if (!playhead || !t.buffer) return;
+  
+  if (isPlaying && t.sourceNode) {
+    playhead.classList.add('visible');
+    const pct = t.playheadPct * (t.selEnd - t.selStart) + t.selStart;
+    const canvas = document.getElementById(`wave-editor-${t.id}`);
+    if (!canvas) return;
+    
+    const wrap = canvas.parentElement;
+    const visibleStart = t.scrollX;
+    const visibleEnd = Math.min(1, t.scrollX + (1 / t.zoom));
+    
+    if (pct >= visibleStart && pct <= visibleEnd) {
+      const x = ((pct - visibleStart) / (visibleEnd - visibleStart)) * (canvas.width / devicePixelRatio);
+      playhead.style.left = x + 'px';
+    } else {
+      playhead.classList.remove('visible');
+    }
+  } else {
+    playhead.classList.remove('visible');
+  }
+}
+
+function getWaveEditorX(e, t) {
+  const canvas = document.getElementById(`wave-editor-${t.id}`);
+  const rect = canvas.getBoundingClientRect();
+  const x = (e.clientX || e.touches[0].clientX) - rect.left;
+  return x / rect.width;
+}
+
+function waveEditorMouseDown(e, t) {
+  e.preventDefault();
+  const x = getWaveEditorX(e, t);
+  const visibleStart = t.scrollX;
+  const visibleEnd = Math.min(1, t.scrollX + (1 / t.zoom));
+  const pos = visibleStart + x * (visibleEnd - visibleStart);
+  
+  const threshold = 8 / document.getElementById(`wave-editor-${t.id}`).offsetWidth;
+  
+  if (Math.abs(pos - t.selStart) < threshold) {
+    t.dragging = 'start';
+  } else if (Math.abs(pos - t.selEnd) < threshold) {
+    t.dragging = 'end';
+  } else {
+    t.dragging = 'region';
+    t.dragOffset = pos - t.selStart;
+  }
+}
+
+function waveEditorMouseMove(e, t) {
+  if (!t.dragging) return;
+  e.preventDefault();
+  
+  const x = getWaveEditorX(e, t);
+  const visibleStart = t.scrollX;
+  const visibleEnd = Math.min(1, t.scrollX + (1 / t.zoom));
+  let pos = visibleStart + x * (visibleEnd - visibleStart);
+  pos = Math.max(0, Math.min(1, pos));
+  
+  if (t.dragging === 'start') {
+    t.selStart = Math.min(pos, t.selEnd - 0.01);
+  } else if (t.dragging === 'end') {
+    t.selEnd = Math.max(pos, t.selStart + 0.01);
+  } else if (t.dragging === 'region') {
+    const len = t.selEnd - t.selStart;
+    t.selStart = pos - t.dragOffset;
+    t.selEnd = t.selStart + len;
+    if (t.selStart < 0) { t.selStart = 0; t.selEnd = len; }
+    if (t.selEnd > 1) { t.selEnd = 1; t.selStart = 1 - len; }
+  }
+  
+  drawWaveEditor(t);
+}
+
+function waveEditorMouseUp(e, t) {
+  t.dragging = null;
+}
+
+function zoomWaveEditor(t, delta) {
+  const oldZoom = t.zoom;
+  t.zoom = Math.max(1, Math.min(10, t.zoom + delta));
+  
+  if (t.zoom === 1) {
+    t.scrollX = 0;
+  } else {
+    // Adjust scroll to keep center roughly in view
+    const oldVisibleWidth = 1 / oldZoom;
+    const newVisibleWidth = 1 / t.zoom;
+    const centerPoint = t.scrollX + oldVisibleWidth / 2;
+    t.scrollX = Math.max(0, Math.min(1 - newVisibleWidth, centerPoint - newVisibleWidth / 2));
+  }
+  
+  drawWaveEditor(t);
+  
+  // Update scroll container
+  const wrap = document.getElementById(`wave-editor-${t.id}`).parentElement;
+  const canvas = document.getElementById(`wave-editor-${t.id}`);
+  wrap.scrollLeft = (t.scrollX / (1 / t.zoom)) * canvas.offsetWidth;
+}
+
+function previewSelection(t) {
+  if (t._previewSrc) {
+    try { t._previewSrc.stop(); } catch(e) {}
+    t._previewSrc = null;
+    document.getElementById(`preview-btn-${t.id}`).textContent = '▶ Preview';
+    return;
+  }
+  
+  if (!AC) initAudio();
+  if (AC.state === 'suspended') AC.resume();
+  
+  const dur = t.fullBuffer.duration;
+  const start = t.selStart * dur;
+  const end = t.selEnd * dur;
+  
+  const g = AC.createGain();
+  g.gain.value = 0.7;
+  g.connect(AC.destination);
+  
+  t._previewSrc = AC.createBufferSource();
+  t._previewSrc.buffer = t.fullBuffer;
+  t._previewSrc.connect(g);
+  t._previewSrc.onended = () => {
+    t._previewSrc = null;
+    document.getElementById(`preview-btn-${t.id}`).textContent = '▶ Preview';
+  };
+  
+  document.getElementById(`preview-btn-${t.id}`).textContent = '⏸ Stop';
+  t._previewSrc.start(AC.currentTime, start, end - start);
+}
+
+function useSelection(t) {
+  if (!t.fullBuffer) return;
+  const dur = t.fullBuffer.duration;
+  const sr = t.fullBuffer.sampleRate;
+  const start = Math.floor(t.selStart * dur * sr);
+  const end = Math.floor(t.selEnd * dur * sr);
+  const len = end - start;
+  
+  const newBuf = AC.createBuffer(1, len, sr);
+  const newData = newBuf.getChannelData(0);
+  const oldData = t.fullBuffer.getChannelData(0);
+  
+  for (let i = 0; i < len; i++) {
+    newData[i] = oldData[start + i];
+  }
+  
+  t.buffer = newBuf;
+  document.getElementById(`tfile-${t.id}`).textContent = 
+    `${t.fileName || 'Untitled'} (cropped)`;
+  
+  if (isPlaying) {
+    transportStop();
+  }
+  
+  drawWaveform(t);
+  showGlobalMsg('Selection applied. Track updated.', 'success');
+}
+
+function resetToFull(t) {
+  if (!t.fullBuffer) return;
+  t.buffer = t.fullBuffer;
+  t.selStart = 0;
+  t.selEnd = 1;
+  t.zoom = 1;
+  t.scrollX = 0;
+  
+  document.getElementById(`tfile-${t.id}`).textContent = t.fileName || 'Untitled';
+  drawWaveEditor(t);
+  drawWaveform(t);
+  
+  if (isPlaying) {
+    transportStop();
+  }
+  
+  showGlobalMsg('Reset to full recording.', 'success');
+}
+
+function toggleWaveEditor(t) {
+  const section = document.getElementById(`wave-editor-section-${t.id}`);
+  const isVisible = section.classList.contains('visible');
+  
+  if (isVisible) {
+    section.classList.remove('visible');
+  } else {
+    section.classList.add('visible');
+    setTimeout(() => {
+      drawWaveEditor(t);
+    }, 10);
+  }
 }
 
 // ─────────────────────────────────────────────────────────
@@ -956,7 +1254,35 @@ function buildTrackEl(t) {
       <button class="track-select-btn ${t.buffer?'loaded':''}" onclick="openAddToTrackFromTrack(${t.id})">
         ${t.buffer ? '⟳ Change' : '+ Load file'}
       </button>
+      ${t.fullBuffer ? `<button class="sbtn" onclick="toggleWaveEditor(tracks[${t.id}])" style="margin-left:.5rem">Edit</button>` : ''}
     </div>
+    
+    <div class="track-wave-section" id="wave-editor-section-${t.id}">
+      <div class="wave-editor-header">
+        <span class="wave-editor-title">Waveform Editor</span>
+        <span class="wave-editor-info" id="wave-info-${t.id}">—</span>
+      </div>
+      <div class="wave-canvas-wrap" id="wave-wrap-${t.id}">
+        <div class="wave-canvas-scroll">
+          <canvas class="wave-canvas" id="wave-editor-${t.id}"></canvas>
+          <div class="wave-playhead" id="wave-playhead-${t.id}"></div>
+        </div>
+      </div>
+      <div class="wave-editor-controls">
+        <div class="wave-zoom-controls">
+          <span class="row-lbl">zoom →</span>
+          <button class="pill" onclick="zoomWaveEditor(tracks[${t.id}], -0.5)">−</button>
+          <button class="pill" onclick="zoomWaveEditor(tracks[${t.id}], 0.5)">+</button>
+          <button class="pill" onclick="zoomWaveEditor(tracks[${t.id}], -tracks[${t.id}].zoom + 1)">Fit</button>
+        </div>
+        <div class="wave-actions">
+          <button class="sbtn" id="preview-btn-${t.id}" onclick="previewSelection(tracks[${t.id}])">▶ Preview</button>
+          <button class="sbtn primary" onclick="useSelection(tracks[${t.id}])">Use Selection</button>
+          <button class="sbtn" onclick="resetToFull(tracks[${t.id}])">Reset to Full</button>
+        </div>
+      </div>
+    </div>
+    
     <div class="track-wave">
       <canvas id="wave-${t.id}"></canvas>
     </div>
@@ -1034,7 +1360,30 @@ function buildTrackEl(t) {
     </div>
   `;
 
-  setTimeout(() => drawWaveform(t), 10);
+  setTimeout(() => {
+    drawWaveform(t);
+    if (t.fullBuffer) {
+      const canvas = document.getElementById(`wave-editor-${t.id}`);
+      const wrap = document.getElementById(`wave-wrap-${t.id}`);
+      
+      canvas.addEventListener('mousedown', e => waveEditorMouseDown(e, t));
+      canvas.addEventListener('touchstart', e => waveEditorMouseDown(e, t));
+      
+      document.addEventListener('mousemove', e => waveEditorMouseMove(e, t));
+      document.addEventListener('touchmove', e => waveEditorMouseMove(e, t));
+      
+      document.addEventListener('mouseup', e => waveEditorMouseUp(e, t));
+      document.addEventListener('touchend', e => waveEditorMouseUp(e, t));
+      
+      wrap.addEventListener('scroll', () => {
+        const maxScroll = canvas.offsetWidth - wrap.clientWidth;
+        if (maxScroll > 0) {
+          t.scrollX = (wrap.scrollLeft / maxScroll) * (1 - 1/t.zoom);
+        }
+      });
+    }
+  }, 10);
+  
   return div;
 }
 
@@ -1085,6 +1434,8 @@ window.setTrackEffect = function(id, effect, enabled) {
         ? Math.max(400, 20000 * Math.pow(1 - t.tapeDegradation, 2))
         : 20000;
     }
+    if (t.tapeWowGain) t.tapeWowGain.gain.value = enabled ? (t.tapeDegradation * 15) : 0;
+    if (t.tapeFlutterGain) t.tapeFlutterGain.gain.value = enabled ? (t.tapeDegradation * 0.008) : 0;
   }
 };
 
@@ -1113,9 +1464,17 @@ window.resetTape = function(id) {
   const t = tracks[id];
   t.tapeDegradation = 0;
   t.tapeLoopCountLast = 0;
-  if (t.tapeFilter) t.tapeFilter.frequency.value = 20000;
+  if (t.tapeFilter) {
+    t.tapeFilter.frequency.value = 20000;
+    t.tapeFilter.Q.value = 0.5;
+  }
+  if (t.tapeWowGain) t.tapeWowGain.gain.value = 0;
+  if (t.tapeFlutterGain) t.tapeFlutterGain.gain.value = 0;
   updateTapeMeter(t);
 };
+
+window.toggleWaveEditor = toggleWaveEditor;
+window.tracks = tracks;
 
 // ─────────────────────────────────────────────────────────
 // LIBRARY — SUPABASE + FILE MANAGEMENT
@@ -1152,7 +1511,6 @@ function renderLibrary() {
       <div class="lib-item-actions">
         <button class="lib-action add-to" onclick="openAddToTrack('${r.id}')">Add to track</button>
         <button class="lib-action" onclick="openRename('${r.id}')">Rename</button>
-        <button class="lib-action" onclick="openCrop('${r.id}')">Crop</button>
         <button class="lib-action danger" onclick="deleteRecording('${r.id}')">Delete</button>
       </div>
     </div>
@@ -1313,13 +1671,24 @@ window.loadRecordingToTrackById = async function(recId, trackId) {
   const t = tracks[trackId];
   showGlobalMsg('Loading audio…','success');
   try {
-    t.buffer     = await loadRecordingBuffer(rec);
+    const buf = await loadRecordingBuffer(rec);
+    t.buffer     = buf;
+    t.fullBuffer = buf;
     t.fileName   = rec.title || 'Untitled';
     t.recordingId = rec.id;
+    t.selStart = 0;
+    t.selEnd = 1;
+    t.zoom = 1;
+    t.scrollX = 0;
+    
     document.getElementById(`tfile-${trackId}`).textContent = t.fileName;
     document.getElementById(`track-${trackId}`).classList.add('has-audio');
     const btn = document.querySelector(`#track-${trackId} .track-select-btn`);
     if (btn) { btn.textContent = '⟳ Change'; btn.classList.add('loaded'); }
+    
+    // Re-render track to add Edit button
+    renderTracks();
+    
     drawWaveform(t);
     document.getElementById('playBtn').disabled = false;
     showGlobalMsg('','');
@@ -1342,7 +1711,7 @@ window.deleteRecording = async function(recId) {
   tracks.forEach(t => {
     if (t.recordingId === recId) {
       teardownTrackGraph(t);
-      t.buffer = null; t.fileName = null; t.recordingId = null;
+      t.buffer = null; t.fullBuffer = null; t.fileName = null; t.recordingId = null;
       document.getElementById(`tfile-${t.id}`).textContent = 'No file loaded';
       document.getElementById(`track-${t.id}`).classList.remove('has-audio');
       drawWaveform(t);
@@ -1350,6 +1719,7 @@ window.deleteRecording = async function(recId) {
   });
 
   await loadLibrary();
+  renderTracks();
 };
 
 let _renameId = null;
@@ -1385,117 +1755,6 @@ window.applyRename = async function() {
       document.getElementById(`tfile-${t.id}`).textContent = name;
     }
   });
-};
-
-let _cropId   = null;
-let _cropBuf  = null;
-let _cropStart = 0;
-let _cropEnd   = 1;
-let _cropDragging = null;
-
-window.openCrop = async function(recId) {
-  _cropId   = recId;
-  _cropStart = 0;
-  _cropEnd   = 1;
-  const rec = recordings.find(r => r.id === recId);
-  showGlobalMsg('Loading audio for crop…','success');
-  try {
-    _cropBuf = await loadRecordingBuffer(rec);
-    showGlobalMsg('','');
-  } catch(e) { showGlobalMsg('Could not load audio for crop.','error'); return; }
-  drawCropCanvas();
-  openModal('cropModal');
-};
-
-function drawCropCanvas() {
-  const canvas = document.getElementById('cropCanvas');
-  const W = canvas.width  = canvas.offsetWidth  * devicePixelRatio || 500;
-  const H = canvas.height = 80 * devicePixelRatio;
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0,0,W,H);
-
-  if (!_cropBuf) return;
-  const data = _cropBuf.getChannelData(0);
-  const step = Math.ceil(data.length / W);
-
-  ctx.strokeStyle = '#2a5c45';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  for (let x=0;x<W;x++) {
-    let max=0,min=0;
-    for (let j=0;j<step;j++){ const s=data[x*step+j]||0; if(s>max)max=s; if(s<min)min=s; }
-    ctx.moveTo(x,(1-max)*H/2);
-    ctx.lineTo(x,(1-min)*H/2);
-  }
-  ctx.stroke();
-
-  ctx.fillStyle = 'rgba(0,0,0,0.25)';
-  ctx.fillRect(0, 0, _cropStart*W, H);
-  ctx.fillRect(_cropEnd*W, 0, W-_cropEnd*W, H);
-
-  ctx.strokeStyle = '#2a5c45';
-  ctx.lineWidth = 2 * devicePixelRatio;
-  [_cropStart, _cropEnd].forEach(pos => {
-    ctx.beginPath();
-    ctx.moveTo(pos*W, 0);
-    ctx.lineTo(pos*W, H);
-    ctx.stroke();
-  });
-
-  const dur = _cropBuf.duration;
-  document.getElementById('cropStartLabel').textContent = (_cropStart*dur).toFixed(2)+'s';
-  document.getElementById('cropEndLabel').textContent   = (_cropEnd*dur).toFixed(2)+'s';
-  document.getElementById('cropDurLabel').textContent   = ((_cropEnd-_cropStart)*dur).toFixed(2)+'s';
-}
-
-const cropCanvas = document.getElementById('cropCanvas');
-cropCanvas.addEventListener('mousedown', e => {
-  const r   = cropCanvas.getBoundingClientRect();
-  const pos = (e.clientX - r.left) / r.width;
-  const dS  = Math.abs(pos - _cropStart);
-  const dE  = Math.abs(pos - _cropEnd);
-  _cropDragging = dS < dE ? 'start' : 'end';
-});
-cropCanvas.addEventListener('mousemove', e => {
-  if (!_cropDragging) return;
-  const r   = cropCanvas.getBoundingClientRect();
-  const pos = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
-  if (_cropDragging === 'start') _cropStart = Math.min(pos, _cropEnd - 0.01);
-  else                           _cropEnd   = Math.max(pos, _cropStart + 0.01);
-  drawCropCanvas();
-});
-cropCanvas.addEventListener('mouseup', () => { _cropDragging = null; });
-cropCanvas.addEventListener('mouseleave', () => { _cropDragging = null; });
-
-window.applyCrop = async function() {
-  if (!_cropBuf) return;
-  document.getElementById('applyCropBtn').disabled = true;
-
-  const startSample = Math.floor(_cropStart * _cropBuf.length);
-  const endSample   = Math.floor(_cropEnd   * _cropBuf.length);
-  const newLen      = endSample - startSample;
-  const newBuf      = AC.createBuffer(_cropBuf.numberOfChannels, newLen, _cropBuf.sampleRate);
-
-  for (let c=0;c<_cropBuf.numberOfChannels;c++) {
-    newBuf.copyToChannel(
-      _cropBuf.getChannelData(c).slice(startSample, endSample), c
-    );
-  }
-
-  const wavBlob = audioBufferToWav(newBuf);
-  const rec     = recordings.find(r => r.id === _cropId);
-  const file    = new File([wavBlob], (rec?.title || 'Cropped') + '.wav', { type:'audio/wav' });
-
-  const sb = window._supabase;
-  if (rec?.storage_path) {
-    await sb.storage.from('recordings').remove([rec.storage_path]);
-  }
-  await uploadFile(file);
-  await sb.from('recordings').delete().eq('id', _cropId);
-
-  document.getElementById('applyCropBtn').disabled = false;
-  closeModal('cropModal');
-  await loadLibrary();
 };
 
 // ─────────────────────────────────────────────────────────
