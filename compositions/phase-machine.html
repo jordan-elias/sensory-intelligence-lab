@@ -162,6 +162,26 @@
     .card-title{font-family:var(--font-heading);font-size:.67rem;font-weight:600;
       letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 1.25rem}
 
+    /* Waveform editor */
+    .waveform-editor{display:none;border:1px solid var(--border);padding:1.25rem;
+      margin-bottom:1.5rem;background:var(--surface)}
+    .waveform-editor.visible{display:block}
+    .waveform-header{display:flex;justify-content:space-between;align-items:center;
+      margin-bottom:1rem;flex-wrap:wrap;gap:.5rem}
+    .waveform-title{font-family:var(--font-heading);font-size:.75rem;font-weight:600;
+      letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+    .waveform-info{font-family:'Courier New',monospace;font-size:.75rem;color:var(--muted)}
+    .waveform-canvas-wrap{position:relative;height:120px;background:var(--bg);
+      border:1px solid var(--border);margin-bottom:1rem;overflow:hidden;cursor:crosshair}
+    .waveform-canvas{display:block;width:100%;height:100%}
+    .waveform-playhead{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);
+      pointer-events:none;opacity:0.8;display:none}
+    .waveform-playhead.visible{display:block}
+    .waveform-controls{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;
+      margin-bottom:1rem}
+    .waveform-zoom{display:flex;gap:.5rem;align-items:center}
+    .waveform-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+
     /* Tape display */
     .tape-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.25em}
     .tape-card{border:1px solid var(--border);padding:1em;background:var(--surface)}
@@ -187,6 +207,8 @@
     .btn.on{background:var(--accent);color:white;border-color:var(--accent)}
     .btn.on:hover{background:var(--accent-hover)}
     .btn:disabled{opacity:.3;cursor:not-allowed;pointer-events:none}
+    .btn.primary{background:var(--accent);color:white;border-color:var(--accent)}
+    .btn.primary:hover{background:var(--accent-hover)}
 
     .pill{font-family:var(--font-body);font-size:.78rem;background:transparent;
       color:var(--text);border:1px solid var(--border);padding:3px 12px;cursor:pointer;
@@ -237,6 +259,14 @@
     /* Loop length */
     .loop-info{font-family:'Courier New',monospace;font-size:.8rem;color:var(--muted);
       margin-bottom:1em}
+
+    /* Download section */
+    .dl-section{border-top:1px solid var(--border);padding-top:1.5rem;margin-top:1.5rem}
+    .dl-row{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+    .gen-select{font-family:var(--font-body);font-size:.8rem;background:transparent;
+      color:var(--text);border:1px solid var(--border);padding:.4rem .7rem;cursor:pointer;
+      -webkit-appearance:none;appearance:none;}
+    .dl-prog{font-family:var(--font-body);font-size:.75rem;color:var(--muted);display:none}
 
     /* Instructions */
     .instructions{font-size:.9rem;line-height:1.75;color:var(--text)}
@@ -293,13 +323,7 @@
   </div>
 
   <div class="card">
-    <p class="card-title">tutorial</p>
-
-    <!-- Step indicator -->
-    <div class="row" style="margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)">
-      <span class="row-lbl" style="margin-right:auto">step</span>
-      <span style="font-family:var(--font-heading);font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)" id="step-indicator">1. Choose a source</span>
-    </div>
+    <p class="card-title">phase machine</p>
 
     <!-- Source -->
     <div class="row">
@@ -311,6 +335,31 @@
       <button class="btn" id="pm-rec" style="display:none;min-width:80px">⏺ record</button>
       <span   class="rec-state" id="pm-rec-state" style="display:none"></span>
       <button class="pill" id="pm-rec-new" style="display:none">record new</button>
+    </div>
+
+    <!-- Waveform Editor -->
+    <div class="waveform-editor" id="waveform-editor">
+      <div class="waveform-header">
+        <span class="waveform-title">Waveform Editor</span>
+        <span class="waveform-info" id="wf-info">Selection: 0.000 s - 0.000 s (0.000 s)</span>
+      </div>
+      <div class="waveform-canvas-wrap" id="wf-wrap">
+        <canvas class="waveform-canvas" id="wf-canvas"></canvas>
+        <div class="waveform-playhead" id="wf-playhead"></div>
+      </div>
+      <div class="waveform-controls">
+        <div class="waveform-zoom">
+          <span class="row-lbl">zoom →</span>
+          <button class="pill" id="wf-zoom-out">−</button>
+          <button class="pill" id="wf-zoom-in">+</button>
+          <button class="pill" id="wf-zoom-fit">Fit</button>
+        </div>
+        <div class="waveform-actions">
+          <button class="btn" id="wf-preview">▶ Preview Selection</button>
+          <button class="btn primary" id="wf-use">Use Selection</button>
+          <button class="btn" id="wf-reset">Reset to Full</button>
+        </div>
+      </div>
     </div>
 
     <div class="loop-info" id="loop-info">loop: — s</div>
@@ -338,8 +387,8 @@
 
     <!-- Transport -->
     <div class="row">
-      <button class="btn" id="pm-play" style="min-width:80px">▶ play</button>
-      <button class="btn" id="pm-reset" style="min-width:80px">reset</button>
+      <button class="btn primary" id="pm-play" style="min-width:80px">▶ Play</button>
+      <button class="btn" id="pm-reset" style="min-width:80px">Reset</button>
     </div>
 
     <!-- Sliders -->
@@ -374,6 +423,21 @@
       <span class="sync-desc">hold K (or press and hold this button) to run both tapes at the same speed · release to resume drift</span>
     </div>
 
+    <!-- Download -->
+    <div class="dl-section">
+      <div class="dl-row">
+        <span class="row-lbl">Download →</span>
+        <select class="gen-select" id="dl-dur">
+          <option value="1">1 min</option>
+          <option value="2">2 min</option>
+          <option value="3" selected>3 min</option>
+          <option value="5">5 min</option>
+        </select>
+        <button class="btn primary" id="dl-btn" disabled style="min-width:120px">Download WAV</button>
+        <span class="dl-prog" id="dl-prog">rendering…</span>
+      </div>
+    </div>
+
     <p class="hint">tape A plays at normal speed · tape B runs slightly faster · hold K to freeze the offset</p>
   </div>
 
@@ -382,6 +446,9 @@
     <h2>How it works</h2>
     <p>Two identical copies of the same loop play simultaneously. Tape A runs at normal speed. Tape B runs slightly faster — the percentage set by the drift slider. As they play, the offset between them gradually increases, creating subtle rhythmic and melodic transformations.</p>
     <p>Use any of the three sources: the built-in default loop (a short rhythmic pattern designed to make phasing effects immediately audible), an uploaded audio file in any browser-supported format, or record your own voice or instrument through your microphone.</p>
+
+    <h2>Waveform editor</h2>
+    <p>When you upload a file or record audio, a waveform editor appears. Drag the handles at either end of the waveform to select the region you want to use as your loop. The selection shows in real-time with start time, end time, and duration. Click "Preview Selection" to hear just that portion, or "Use Selection" to crop the audio to that range. "Reset to Full" restores the original uncropped audio.</p>
 
     <h2>Sync hold</h2>
     <p>Hold the K key on your keyboard (or press and hold the K button on mobile) to momentarily run both tapes at the same rate. While held, the offset freezes. Release to resume drift from wherever you held it.</p>
@@ -393,8 +460,11 @@
     <h2>Loop length matters</h2>
     <p>Shorter loops phase faster and produce more rapid rhythmic changes. Longer loops drift slowly, with transformations taking several minutes to complete. Try the same drift rate with recordings of different lengths to hear how duration affects the perceptual outcome.</p>
 
-    <h2>Keyboard shortcut</h2>
-    <p>Press and hold the <strong>K</strong> key to engage sync hold. Release to resume phasing. This works on desktop browsers.</p>
+    <h2>Download phased output</h2>
+    <p>Generate a WAV file of the phased result. Choose your duration (1-5 minutes) and click Download. The file will contain both tapes phasing according to your current drift rate setting.</p>
+
+    <h2>Keyboard shortcuts</h2>
+    <p>Press <strong>Space</strong> to play/pause. Hold <strong>K</strong> to engage sync hold.</p>
   </div>
 
 </main>
@@ -414,9 +484,14 @@ var audioCtx=null;
 function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
 function resumeCtx(){var c=getCtx();if(c.state==='suspended')c.resume();return c;}
 
-var state={buffer:null,playing:false,driftPct:1.0,volA:0.75,volB:0.75,synced:false,startTime:0,offsetA:0,offsetB:0};
-var srcA=null,srcB=null,gainA=null,gainB=null,masterGain=null,dispTimer=null;
+var state={
+  buffer:null,fullBuffer:null,playing:false,driftPct:1.0,volA:0.75,volB:0.75,
+  synced:false,startTime:0,offsetA:0,offsetB:0,
+  selStart:0,selEnd:1,zoom:1,scrollX:0,dragging:null,previewSrc:null
+};
+var srcA=null,srcB=null,gainA=null,gainB=null,masterGain=null,dispTimer=null,playheadTimer=null;
 var mediaRec=null,recChunks=[],isRecording=false,hasRec=false;
+var canvas=null,ctx2d=null,wfWrap=null,playhead=null;
 
 function rateB(){return state.synced?1.0:1.0+state.driftPct/100;}
 
@@ -447,22 +522,22 @@ function stopNodes(){
 function togglePlay(){
   if(!state.buffer)return;
   if(state.playing){
-    state.playing=false;stopNodes();stopDisp();setPlayBtn(false);
+    state.playing=false;stopNodes();stopDisp();setPlayBtn(false);stopPlayhead();
   } else {
-    state.playing=true;startPlay(0,0);startDisp();setPlayBtn(true);
+    state.playing=true;startPlay(0,0);startDisp();setPlayBtn(true);startPlayhead();
   }
 }
 
 function resetMachine(){
-  var was=state.playing;state.playing=false;stopNodes();stopDisp();
+  var was=state.playing;state.playing=false;stopNodes();stopDisp();stopPlayhead();
   state.offsetA=0;state.offsetB=0;
-  if(was&&state.buffer){state.playing=true;startPlay(0,0);startDisp();}
+  if(was&&state.buffer){state.playing=true;startPlay(0,0);startDisp();startPlayhead();}
   updateDisp(0,0);setPlayBtn(state.playing);
 }
 
 function setPlayBtn(on){
   var b=document.getElementById('pm-play');
-  b.textContent=on?'⏸ stop':'▶ play';
+  b.textContent=on?'⏸ Stop':'▶ Play';
   b.classList.toggle('on',on);
 }
 
@@ -500,19 +575,47 @@ function updateDisp(pA,pB){
   document.getElementById('pm-pct').textContent=pct.toFixed(0)+'%';
 }
 
+function startPlayhead(){
+  stopPlayhead();
+  playheadTimer=setInterval(tickPlayhead,30);
+  playhead.classList.add('visible');
+}
+function stopPlayhead(){
+  if(playheadTimer){clearInterval(playheadTimer);playheadTimer=null;}
+  playhead.classList.remove('visible');
+}
+
+function tickPlayhead(){
+  if(!state.playing||!state.buffer)return;
+  var t=posA();
+  var dur=state.buffer.duration;
+  var pct=(t/dur)*100;
+  var w=wfWrap.clientWidth;
+  var x=(pct/100)*w*state.zoom - state.scrollX*w;
+  playhead.style.left=x+'px';
+}
+
 function normalize(buf){
   var d=buf.getChannelData(0),peak=0;
   for(var i=0;i<d.length;i++){var a=Math.abs(d[i]);if(a>peak)peak=a;}
   if(peak>0.001){var s=0.78/peak;for(var i=0;i<d.length;i++)d[i]*=s;}
 }
 
-function loadBuf(buf){
+function loadBuf(buf,showEditor){
   normalize(buf);
-  var was=state.playing;state.playing=false;stopNodes();stopDisp();
-  state.buffer=buf;state.offsetA=0;state.offsetB=0;
+  var was=state.playing;state.playing=false;stopNodes();stopDisp();stopPlayhead();
+  state.buffer=buf;state.fullBuffer=buf;state.offsetA=0;state.offsetB=0;
+  state.selStart=0;state.selEnd=1;state.zoom=1;state.scrollX=0;
   document.getElementById('pm-play').disabled=false;
+  document.getElementById('dl-btn').disabled=false;
   document.getElementById('loop-info').textContent='loop: '+buf.duration.toFixed(3)+' s';
   setPlayBtn(false);updateDisp(0,0);
+  if(showEditor){
+    showWaveformEditor();
+    drawWaveform();
+  }else{
+    hideWaveformEditor();
+  }
 }
 
 function genDefault(){
@@ -529,7 +632,7 @@ function genDefault(){
 }
 
 function loadDefault(){
-  setSrcUI('default');loadBuf(genDefault());
+  setSrcUI('default');loadBuf(genDefault(),false);
   document.getElementById('loop-info').textContent='loop: 1.600 s (generated)';
 }
 
@@ -537,7 +640,7 @@ function loadFile(file){
   setSrcUI('file');
   var r=new FileReader();
   r.onload=function(e){
-    getCtx().decodeAudioData(e.target.result,function(d){loadBuf(d);},function(){});
+    getCtx().decodeAudioData(e.target.result,function(d){loadBuf(d,true);},function(){});
   };
   r.readAsArrayBuffer(file);
 }
@@ -553,13 +656,13 @@ function startRec(){
       var fr=new FileReader();
       fr.onload=function(ev){
         getCtx().decodeAudioData(ev.target.result,function(d){
-          isRecording=false;hasRec=true;loadBuf(d);setRecUI('has_rec');
+          isRecording=false;hasRec=true;loadBuf(d,true);setRecUI('has_rec');
         },function(){});
       };
       fr.readAsArrayBuffer(blob);
     };
     mediaRec.start();isRecording=true;setRecUI('rec');
-    setTimeout(function(){if(isRecording)stopRec();},6000);
+    setTimeout(function(){if(isRecording)stopRec();},10000);
   }).catch(function(){});
 }
 
@@ -583,17 +686,316 @@ function setSrcUI(t){
   if(sm&&!hasRec)setRecUI('idle');
 }
 
+/* Waveform editor */
+function showWaveformEditor(){
+  document.getElementById('waveform-editor').classList.add('visible');
+  setTimeout(function(){
+    canvas.width=wfWrap.clientWidth;
+    canvas.height=wfWrap.clientHeight;
+    drawWaveform();
+  },10);
+}
+
+function hideWaveformEditor(){
+  document.getElementById('waveform-editor').classList.remove('visible');
+}
+
+function drawWaveform(){
+  if(!state.fullBuffer||!canvas)return;
+  var w=canvas.width,h=canvas.height;
+  ctx2d.fillStyle='#fff';
+  ctx2d.fillRect(0,0,w,h);
+  
+  var data=state.fullBuffer.getChannelData(0);
+  var dur=state.fullBuffer.duration;
+  var sr=state.fullBuffer.sampleRate;
+  
+  var visibleStart=state.scrollX;
+  var visibleEnd=state.scrollX+(1/state.zoom);
+  visibleStart=Math.max(0,Math.min(1,visibleStart));
+  visibleEnd=Math.max(0,Math.min(1,visibleEnd));
+  
+  var startSample=Math.floor(visibleStart*data.length);
+  var endSample=Math.floor(visibleEnd*data.length);
+  var samplesPerPx=(endSample-startSample)/w;
+  
+  ctx2d.strokeStyle='#2a5c45';
+  ctx2d.lineWidth=1;
+  ctx2d.beginPath();
+  
+  for(var x=0;x<w;x++){
+    var s=Math.floor(startSample+x*samplesPerPx);
+    var e=Math.floor(s+samplesPerPx);
+    e=Math.min(e,data.length);
+    var min=1,max=-1;
+    for(var i=s;i<e;i++){
+      if(data[i]<min)min=data[i];
+      if(data[i]>max)max=data[i];
+    }
+    var y1=h/2-(min*h/2);
+    var y2=h/2-(max*h/2);
+    if(x===0)ctx2d.moveTo(x,y1);
+    ctx2d.lineTo(x,y1);
+    ctx2d.lineTo(x,y2);
+  }
+  ctx2d.stroke();
+  
+  // Selection overlay
+  var selStartPx=((state.selStart-visibleStart)/(visibleEnd-visibleStart))*w;
+  var selEndPx=((state.selEnd-visibleStart)/(visibleEnd-visibleStart))*w;
+  
+  ctx2d.fillStyle='rgba(42,92,69,0.15)';
+  ctx2d.fillRect(selStartPx,0,selEndPx-selStartPx,h);
+  
+  // Selection handles
+  ctx2d.fillStyle='#2a5c45';
+  ctx2d.fillRect(selStartPx-2,0,4,h);
+  ctx2d.fillRect(selEndPx-2,0,4,h);
+  
+  updateSelectionInfo();
+}
+
+function updateSelectionInfo(){
+  if(!state.fullBuffer)return;
+  var dur=state.fullBuffer.duration;
+  var start=state.selStart*dur;
+  var end=state.selEnd*dur;
+  var len=end-start;
+  document.getElementById('wf-info').textContent='Selection: '+start.toFixed(3)+' s - '+end.toFixed(3)+' s ('+len.toFixed(3)+' s)';
+}
+
+function getWaveformX(e){
+  var rect=wfWrap.getBoundingClientRect();
+  var x=e.clientX||e.touches[0].clientX;
+  return(x-rect.left)/rect.width;
+}
+
+function waveformMouseDown(e){
+  e.preventDefault();
+  var x=getWaveformX(e);
+  var visibleStart=state.scrollX;
+  var visibleEnd=state.scrollX+(1/state.zoom);
+  var t=visibleStart+x*(visibleEnd-visibleStart);
+  
+  var selStartPx=state.selStart;
+  var selEndPx=state.selEnd;
+  var threshold=8/wfWrap.clientWidth;
+  
+  if(Math.abs(t-selStartPx)<threshold){
+    state.dragging='start';
+  }else if(Math.abs(t-selEndPx)<threshold){
+    state.dragging='end';
+  }else{
+    state.dragging='region';
+    state.dragOffset=t-selStartPx;
+  }
+}
+
+function waveformMouseMove(e){
+  if(!state.dragging)return;
+  e.preventDefault();
+  var x=getWaveformX(e);
+  var visibleStart=state.scrollX;
+  var visibleEnd=state.scrollX+(1/state.zoom);
+  var t=visibleStart+x*(visibleEnd-visibleStart);
+  t=Math.max(0,Math.min(1,t));
+  
+  if(state.dragging==='start'){
+    state.selStart=Math.min(t,state.selEnd-0.01);
+  }else if(state.dragging==='end'){
+    state.selEnd=Math.max(t,state.selStart+0.01);
+  }else if(state.dragging==='region'){
+    var len=state.selEnd-state.selStart;
+    state.selStart=t-state.dragOffset;
+    state.selEnd=state.selStart+len;
+    if(state.selStart<0){state.selStart=0;state.selEnd=len;}
+    if(state.selEnd>1){state.selEnd=1;state.selStart=1-len;}
+  }
+  drawWaveform();
+}
+
+function waveformMouseUp(e){
+  state.dragging=null;
+}
+
+function zoomIn(){
+  state.zoom=Math.min(state.zoom*1.5,10);
+  drawWaveform();
+}
+
+function zoomOut(){
+  state.zoom=Math.max(state.zoom/1.5,1);
+  state.scrollX=0;
+  drawWaveform();
+}
+
+function zoomFit(){
+  state.zoom=1;
+  state.scrollX=0;
+  drawWaveform();
+}
+
+function previewSelection(){
+  if(state.previewSrc){
+    try{state.previewSrc.stop();}catch(e){}
+    state.previewSrc=null;
+    document.getElementById('wf-preview').textContent='▶ Preview Selection';
+    return;
+  }
+  
+  var ctx=resumeCtx();
+  var dur=state.fullBuffer.duration;
+  var start=state.selStart*dur;
+  var end=state.selEnd*dur;
+  
+  var g=ctx.createGain();
+  g.gain.value=0.7;
+  g.connect(ctx.destination);
+  
+  state.previewSrc=ctx.createBufferSource();
+  state.previewSrc.buffer=state.fullBuffer;
+  state.previewSrc.connect(g);
+  state.previewSrc.onended=function(){
+    state.previewSrc=null;
+    document.getElementById('wf-preview').textContent='▶ Preview Selection';
+  };
+  
+  document.getElementById('wf-preview').textContent='⏸ Stop Preview';
+  state.previewSrc.start(ctx.currentTime,start,end-start);
+}
+
+function useSelection(){
+  if(!state.fullBuffer)return;
+  var dur=state.fullBuffer.duration;
+  var sr=state.fullBuffer.sampleRate;
+  var start=Math.floor(state.selStart*dur*sr);
+  var end=Math.floor(state.selEnd*dur*sr);
+  var len=end-start;
+  
+  var newBuf=getCtx().createBuffer(1,len,sr);
+  var newData=newBuf.getChannelData(0);
+  var oldData=state.fullBuffer.getChannelData(0);
+  
+  for(var i=0;i<len;i++){
+    newData[i]=oldData[start+i];
+  }
+  
+  state.buffer=newBuf;
+  document.getElementById('loop-info').textContent='loop: '+newBuf.duration.toFixed(3)+' s';
+  
+  if(state.playing){
+    state.playing=false;
+    stopNodes();
+    stopDisp();
+    stopPlayhead();
+    setPlayBtn(false);
+  }
+  updateDisp(0,0);
+}
+
+function resetToFull(){
+  if(!state.fullBuffer)return;
+  state.buffer=state.fullBuffer;
+  state.selStart=0;
+  state.selEnd=1;
+  document.getElementById('loop-info').textContent='loop: '+state.buffer.duration.toFixed(3)+' s';
+  drawWaveform();
+  
+  if(state.playing){
+    state.playing=false;
+    stopNodes();
+    stopDisp();
+    stopPlayhead();
+    setPlayBtn(false);
+  }
+  updateDisp(0,0);
+}
+
+/* Download WAV */
+function audioBufferToWav(buf){
+  var nc=buf.numberOfChannels,sr=buf.sampleRate,len=buf.length,bps=2,dl=len*nc*bps;
+  var wav=new ArrayBuffer(44+dl),v=new DataView(wav);
+  function ws(o,s){for(var i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i));}
+  function cl(x){return Math.max(-1,Math.min(1,x));}
+  ws(0,'RIFF');v.setUint32(4,36+dl,true);ws(8,'WAVE');ws(12,'fmt ');
+  v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,nc,true);
+  v.setUint32(24,sr,true);v.setUint32(28,sr*nc*bps,true);
+  v.setUint16(32,nc*bps,true);v.setUint16(34,16,true);
+  ws(36,'data');v.setUint32(40,dl,true);
+  var off=44,chans=[];
+  for(var c=0;c<nc;c++)chans.push(buf.getChannelData(c));
+  for(var i=0;i<len;i++)for(var c=0;c<nc;c++){v.setInt16(off,Math.round(cl(chans[c][i])*32767),true);off+=2;}
+  return wav;
+}
+
+function triggerDownload(ab,name){
+  var b=new Blob([ab],{type:'audio/wav'}),u=URL.createObjectURL(b),a=document.createElement('a');
+  a.href=u;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);
+}
+
+function downloadPhased(){
+  if(!state.buffer)return;
+  var mins=parseInt(document.getElementById('dl-dur').value,10);
+  var secs=mins*60,sr=44100;
+  var btn=document.getElementById('dl-btn'),prog=document.getElementById('dl-prog');
+  
+  btn.disabled=true;
+  btn.textContent='Rendering…';
+  prog.style.display='inline';
+  
+  var off=new OfflineAudioContext(2,sr*secs,sr);
+  var m=off.createGain();
+  m.gain.value=0.85;
+  m.connect(off.destination);
+  
+  var gA=off.createGain();
+  gA.gain.value=state.volA;
+  gA.connect(m);
+  
+  var gB=off.createGain();
+  gB.gain.value=state.volB;
+  gB.connect(m);
+  
+  var oA=off.createBufferSource();
+  oA.buffer=state.buffer;
+  oA.loop=true;
+  oA.playbackRate.value=1.0;
+  oA.connect(gA);
+  
+  var oB=off.createBufferSource();
+  oB.buffer=state.buffer;
+  oB.loop=true;
+  oB.playbackRate.value=1.0+state.driftPct/100;
+  oB.connect(gB);
+  
+  oA.start(0);
+  oB.start(0);
+  
+  off.startRendering().then(function(r){
+    triggerDownload(audioBufferToWav(r),'phase-'+mins+'min.wav');
+    btn.disabled=false;
+    btn.textContent='Download WAV';
+    prog.style.display='none';
+  }).catch(function(){
+    btn.disabled=false;
+    btn.textContent='Download WAV';
+    prog.style.display='none';
+  });
+}
+
 /* Wire up */
 document.getElementById('src-default').addEventListener('click',loadDefault);
 document.getElementById('src-mic').addEventListener('click',function(){
-  hasRec=false;setSrcUI('mic');state.playing=false;stopNodes();stopDisp();
-  state.buffer=null;document.getElementById('pm-play').disabled=true;setRecUI('idle');
+  hasRec=false;setSrcUI('mic');state.playing=false;stopNodes();stopDisp();stopPlayhead();
+  state.buffer=null;document.getElementById('pm-play').disabled=true;
+  document.getElementById('dl-btn').disabled=true;setRecUI('idle');hideWaveformEditor();
 });
 document.getElementById('pm-file').addEventListener('change',function(e){if(e.target.files&&e.target.files[0])loadFile(e.target.files[0]);});
 document.getElementById('pm-rec').addEventListener('click',startRec);
 document.getElementById('pm-rec-new').addEventListener('click',function(){
-  hasRec=false;state.playing=false;stopNodes();stopDisp();state.buffer=null;
-  document.getElementById('pm-play').disabled=true;setRecUI('idle');
+  hasRec=false;state.playing=false;stopNodes();stopDisp();stopPlayhead();state.buffer=null;
+  document.getElementById('pm-play').disabled=true;
+  document.getElementById('dl-btn').disabled=true;setRecUI('idle');
 });
 document.getElementById('pm-play').addEventListener('click',togglePlay);
 document.getElementById('pm-reset').addEventListener('click',resetMachine);
@@ -615,6 +1017,28 @@ document.getElementById('pm-vol-b').addEventListener('input',function(e){
   document.getElementById('pm-vol-b-val').textContent=Math.round(state.volB*100)+'%';
   if(gainB)gainB.gain.setValueAtTime(state.volB,getCtx().currentTime);
 });
+
+/* Waveform editor events */
+canvas=document.getElementById('wf-canvas');
+ctx2d=canvas.getContext('2d');
+wfWrap=document.getElementById('wf-wrap');
+playhead=document.getElementById('wf-playhead');
+
+wfWrap.addEventListener('mousedown',waveformMouseDown);
+wfWrap.addEventListener('touchstart',waveformMouseDown);
+document.addEventListener('mousemove',waveformMouseMove);
+document.addEventListener('touchmove',waveformMouseMove);
+document.addEventListener('mouseup',waveformMouseUp);
+document.addEventListener('touchend',waveformMouseUp);
+
+document.getElementById('wf-zoom-in').addEventListener('click',zoomIn);
+document.getElementById('wf-zoom-out').addEventListener('click',zoomOut);
+document.getElementById('wf-zoom-fit').addEventListener('click',zoomFit);
+document.getElementById('wf-preview').addEventListener('click',previewSelection);
+document.getElementById('wf-use').addEventListener('click',useSelection);
+document.getElementById('wf-reset').addEventListener('click',resetToFull);
+
+document.getElementById('dl-btn').addEventListener('click',downloadPhased);
 
 /* Spacebar play/pause */
 document.addEventListener('keydown',function(e){
