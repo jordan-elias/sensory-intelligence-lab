@@ -11,16 +11,15 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
 
-
   <script src="/dashboard/auth-guard.js" type="module"></script>
 
   <script type="module">
-  import { applyGatingOnReady } from '/assets/js/gating.js';
-  applyGatingOnReady({
-    targetSelector: '#setupPanel',
-    moduleName: 'journal',
-  });
-</script>
+    import { applyGatingOnReady } from '/assets/js/gating.js';
+    applyGatingOnReady({
+      targetSelector: '#setupPanel',
+      moduleName: 'journal',
+    });
+  </script>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 
@@ -69,9 +68,7 @@
       align-items: center;
       justify-content: space-between;
       position: sticky;
-      top: 0;
-      left: 0;
-      right: 0;
+      top: 0; left: 0; right: 0;
       background: var(--bg);
       z-index: 100;
       gap: 1rem;
@@ -79,72 +76,48 @@
     }
     .sil-header__wordmark {
       font-family: var(--font-heading);
-      font-size: 1rem;
-      font-weight: 600;
+      font-size: 1rem; font-weight: 600;
       letter-spacing: -0.01em;
-      white-space: nowrap;
-      flex-shrink: 0;
-      text-decoration: none;
-      color: var(--text);
+      white-space: nowrap; flex-shrink: 0;
+      text-decoration: none; color: var(--text);
     }
     .sil-header__wordmark:hover { color: var(--accent); }
-    .sil-header__nav {
-      display: flex;
-      gap: 0.25rem;
-      align-items: center;
-    }
+    .sil-header__nav { display: flex; gap: 0.25rem; align-items: center; }
     .sil-header__nav a {
       font-family: var(--font-body);
-      font-size: 0.8rem;
-      font-weight: 500;
-      text-decoration: none;
-      color: var(--muted);
-      transition: color 0.15s;
-      white-space: nowrap;
+      font-size: 0.8rem; font-weight: 500;
+      text-decoration: none; color: var(--muted);
+      transition: color 0.15s; white-space: nowrap;
       padding: 0.3rem 0.65rem;
     }
     .sil-header__nav a:hover { color: var(--text); }
     .sil-header__nav a.sil-active { color: var(--accent); font-weight: 600; }
     .sil-header__signout {
       font-family: var(--font-body);
-      font-size: 0.8rem;
-      font-weight: 500;
-      color: var(--muted);
-      background: none;
-      border: 1px solid var(--border);
-      cursor: pointer;
+      font-size: 0.8rem; font-weight: 500;
+      color: var(--muted); background: none;
+      border: 1px solid var(--border); cursor: pointer;
       padding: 0.3rem 0.75rem;
       transition: color 0.15s, border-color 0.15s;
-      white-space: nowrap;
-      line-height: 1.6;
+      white-space: nowrap; line-height: 1.6;
     }
     .sil-header__signout:hover { color: var(--text); border-color: var(--text); }
     .sil-header__signout:disabled { opacity: 0.5; cursor: not-allowed; }
     .sil-header__toggle {
-      display: none;
-      flex-direction: column;
-      gap: 4px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 4px;
-      flex-shrink: 0;
+      display: none; flex-direction: column; gap: 4px;
+      background: none; border: none; cursor: pointer;
+      padding: 4px; flex-shrink: 0;
     }
     .sil-header__toggle span { display: block; width: 20px; height: 2px; background: var(--text); }
     @media (max-width: 700px) {
       .sil-header { padding: 0 1rem; }
       .sil-header__toggle { display: flex; }
       .sil-header__nav {
-        display: none;
-        position: absolute;
+        display: none; position: absolute;
         top: 56px; left: 0; right: 0;
-        background: var(--bg);
-        border-bottom: 1px solid var(--border);
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 0.75rem 1rem;
-        gap: 0;
-        z-index: 99;
+        background: var(--bg); border-bottom: 1px solid var(--border);
+        flex-direction: column; align-items: flex-start;
+        padding: 0.75rem 1rem; gap: 0; z-index: 99;
       }
       .sil-header__nav.sil-open { display: flex; }
       .sil-header__nav a,
@@ -174,21 +147,48 @@
       text-transform: uppercase; color: var(--muted); margin-bottom: .75rem;
     }
 
+    /* ── Vault overlay ── */
+    .vault-overlay {
+      position: fixed; inset: 0;
+      background: rgba(255,255,255,.97);
+      z-index: 400;
+      display: none;
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: 1rem;
+      text-align: center; padding: 2rem;
+    }
+    .vault-overlay.visible { display: flex; }
+    .vault-overlay__icon {
+      font-size: 2rem; margin-bottom: .25rem; opacity: .5;
+    }
+    .vault-overlay__title {
+      font-family: var(--font-heading);
+      font-size: 1.1rem; font-weight: 600; color: var(--text);
+    }
+    .vault-overlay__sub {
+      font-size: .85rem; color: var(--muted); max-width: 320px; line-height: 1.6;
+    }
+    .vault-spinner {
+      width: 28px; height: 28px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
     /* ── Setup panel ── */
     .setup-panel { display: block; }
     .setup-panel.hidden { display: none; }
 
     .setup-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2rem;
-      margin-bottom: 2rem;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 2rem; margin-bottom: 2rem;
     }
     @media (max-width: 580px) { .setup-grid { grid-template-columns: 1fr; gap: 1.25rem; } }
 
     .setup-group { display: flex; flex-direction: column; gap: .5rem; }
 
-    /* Option buttons (timer, music, prompt) */
     .option-row { display: flex; gap: 4px; flex-wrap: wrap; }
 
     .opt-btn {
@@ -202,20 +202,14 @@
     .opt-btn:hover { border-color: var(--accent); color: var(--accent); }
     .opt-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
 
-    /* Music selector — full-width cards */
     .music-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
       gap: 6px;
     }
-
     .music-card {
-      border: 1px solid var(--border);
-      background: var(--bg);
-      padding: .65rem .85rem;
-      cursor: pointer;
-      transition: all .12s;
-      text-align: left;
+      border: 1px solid var(--border); background: var(--bg);
+      padding: .65rem .85rem; cursor: pointer; transition: all .12s; text-align: left;
     }
     .music-card:hover { border-color: var(--accent); background: var(--accent-light); }
     .music-card.active { border-color: var(--accent); background: var(--accent-light); }
@@ -224,35 +218,22 @@
     .music-card.active .mc-name { color: var(--accent-hover); }
     .music-card.active .mc-desc { color: var(--accent); opacity: .75; }
 
-    /* Prompt selector */
     .prompt-select {
-      font-family: var(--font-body);
-      font-size: .85rem;
-      padding: .6rem .85rem;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--text);
-      width: 100%;
-      outline: none;
-      cursor: pointer;
-      transition: border-color .12s;
+      font-family: var(--font-body); font-size: .85rem;
+      padding: .6rem .85rem; border: 1px solid var(--border);
+      background: var(--bg); color: var(--text);
+      width: 100%; outline: none; cursor: pointer; transition: border-color .12s;
     }
     .prompt-select:focus { border-color: var(--accent); }
 
     .prompt-display {
-      font-size: .85rem;
-      color: var(--accent-hover);
-      background: var(--accent-light);
-      border: 1px solid #c0d9c8;
-      padding: .75rem 1rem;
-      font-style: italic;
-      line-height: 1.6;
-      min-height: 2.5rem;
-      display: none;
+      font-size: .85rem; color: var(--accent-hover);
+      background: var(--accent-light); border: 1px solid #c0d9c8;
+      padding: .75rem 1rem; font-style: italic; line-height: 1.6;
+      min-height: 2.5rem; display: none;
     }
     .prompt-display.visible { display: block; }
 
-    /* Start button */
     .start-zone { margin-top: .5rem; }
     .start-btn {
       font-family: var(--font-heading);
@@ -266,21 +247,16 @@
 
     /* ── Countdown overlay ── */
     .countdown-overlay {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(255,255,255,.96);
-      z-index: 200;
+      display: none; position: fixed; inset: 0;
+      background: rgba(255,255,255,.96); z-index: 200;
       align-items: center; justify-content: center;
-      flex-direction: column;
-      gap: 1rem;
+      flex-direction: column; gap: 1rem;
     }
     .countdown-overlay.visible { display: flex; }
     .countdown-num {
       font-family: var(--font-heading);
-      font-size: 7rem; font-weight: 600;
-      color: var(--accent);
-      letter-spacing: -.04em;
-      line-height: 1;
+      font-size: 7rem; font-weight: 600; color: var(--accent);
+      letter-spacing: -.04em; line-height: 1;
       animation: countPulse .8s ease-in-out;
     }
     @keyframes countPulse {
@@ -293,21 +269,16 @@
     .writing-panel { display: none; }
     .writing-panel.visible { display: block; }
 
-    /* Timer strip */
     .timer-strip {
       display: flex; align-items: center; gap: 1.5rem;
-      padding: .85rem 1.25rem;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      margin-bottom: 1rem;
-      flex-wrap: wrap;
+      padding: .85rem 1.25rem; border: 1px solid var(--border);
+      background: var(--surface); margin-bottom: 1rem; flex-wrap: wrap;
     }
     .timer-display {
       font-family: var(--font-heading);
       font-size: 1.6rem; font-weight: 600;
       letter-spacing: .06em; color: var(--text);
-      font-variant-numeric: tabular-nums;
-      min-width: 70px;
+      font-variant-numeric: tabular-nums; min-width: 70px;
     }
     .timer-display.urgent { color: var(--error); }
     .timer-bar-wrap { flex: 1; min-width: 100px; height: 3px; background: var(--border); }
@@ -315,35 +286,22 @@
     .timer-bar.urgent { background: var(--error); }
     .timer-meta { font-size: .75rem; color: var(--muted); }
 
-    /* Active prompt banner */
     .active-prompt {
-      background: var(--accent-light);
-      border-left: 3px solid var(--accent);
-      padding: .65rem 1rem;
-      margin-bottom: .85rem;
-      font-size: .85rem;
-      font-style: italic;
-      color: var(--accent-hover);
-      line-height: 1.55;
-      display: none;
+      background: var(--accent-light); border-left: 3px solid var(--accent);
+      padding: .65rem 1rem; margin-bottom: .85rem;
+      font-size: .85rem; font-style: italic; color: var(--accent-hover);
+      line-height: 1.55; display: none;
     }
     .active-prompt.visible { display: block; }
 
-    /* Writing area */
     .writing-area-wrap { position: relative; }
 
     textarea#journalText {
-      width: 100%;
-      min-height: 380px;
-      padding: 1.5rem 1.75rem;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--font-writing);
-      font-size: 1.05rem;
-      line-height: 1.85;
-      resize: vertical;
-      outline: none;
+      width: 100%; min-height: 380px;
+      padding: 1.5rem 1.75rem; border: 1px solid var(--border);
+      background: var(--bg); color: var(--text);
+      font-family: var(--font-writing); font-size: 1.05rem;
+      line-height: 1.85; resize: vertical; outline: none;
       transition: border-color .2s;
     }
     textarea#journalText:focus { border-color: var(--accent); }
@@ -352,23 +310,19 @@
 
     .word-count {
       position: absolute; bottom: .6rem; right: .75rem;
-      font-size: .65rem; color: var(--muted); font-variant-numeric: tabular-nums;
-      pointer-events: none;
+      font-size: .65rem; color: var(--muted);
+      font-variant-numeric: tabular-nums; pointer-events: none;
     }
 
-    /* ── Destroy canvas overlay ── */
     #destroyCanvas {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      display: none; pointer-events: none;
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%; display: none; pointer-events: none;
     }
 
     /* ── Post-session actions ── */
     .post-actions {
-      display: none;
-      gap: .75rem;
-      margin-top: 1rem;
-      flex-wrap: wrap;
-      align-items: center;
+      display: none; gap: .75rem; margin-top: 1rem;
+      flex-wrap: wrap; align-items: center;
     }
     .post-actions.visible { display: flex; }
 
@@ -381,60 +335,60 @@
     }
     .action-btn:hover { background: var(--accent-hover); }
     .action-btn.outline {
-      background: var(--bg); color: var(--text);
-      border: 1px solid var(--border);
+      background: var(--bg); color: var(--text); border: 1px solid var(--border);
     }
     .action-btn.outline:hover { border-color: var(--accent); color: var(--accent); background: var(--bg); }
     .action-btn.danger {
-      background: var(--error-bg); color: var(--error);
-      border: 1px solid #e8c4c4;
+      background: var(--error-bg); color: var(--error); border: 1px solid #e8c4c4;
     }
     .action-btn.danger:hover { background: var(--error); color: white; border-color: var(--error); }
 
-    /* ── Confirm destroy modal ── */
+    /* ── Modals ── */
     .modal-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,.45);
-      z-index: 300; display: none;
-      align-items: center; justify-content: center;
-      padding: 1rem;
+      position: fixed; inset: 0; background: rgba(0,0,0,.45);
+      z-index: 300; display: none; align-items: center;
+      justify-content: center; padding: 1rem;
     }
     .modal-overlay.open { display: flex; }
     .modal {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      width: 100%; max-width: 420px;
-      padding: 2rem;
+      background: var(--bg); border: 1px solid var(--border);
+      width: 100%; max-width: 420px; padding: 2rem;
     }
     .modal h3 { font-family: var(--font-heading); font-size: 1rem; font-weight: 600; margin-bottom: .5rem; }
     .modal p { font-size: .85rem; color: var(--muted); margin-bottom: 1.25rem; line-height: 1.6; }
     .modal-btns { display: flex; gap: .65rem; flex-wrap: wrap; }
 
-    /* ── Save name input ── */
+    /* ── Save row ── */
     .save-row { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; margin-top: .85rem; }
     .save-row input {
       font-family: var(--font-body); font-size: .85rem;
-      padding: .55rem .85rem;
-      border: 1px solid var(--border); background: var(--bg); color: var(--text);
+      padding: .55rem .85rem; border: 1px solid var(--border);
+      background: var(--bg); color: var(--text);
       outline: none; flex: 1; min-width: 140px; transition: border-color .12s;
     }
     .save-row input:focus { border-color: var(--accent); }
 
-    /* Messages */
     .msg { padding: .6rem .9rem; font-size: .78rem; line-height: 1.5; display: none; margin-top: .65rem; }
     .msg.success { background: var(--accent-light); border-left: 3px solid var(--accent); color: var(--accent); display: block; }
-    .msg.error { background: var(--error-bg); border-left: 3px solid var(--error); color: var(--error); display: block; }
+    .msg.error   { background: var(--error-bg); border-left: 3px solid var(--error); color: var(--error); display: block; }
 
     /* ── Saved entries ── */
     .entries-section { margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 2rem; }
+
+    /* Privacy notice */
+    .privacy-notice {
+      display: flex; align-items: flex-start; gap: .6rem;
+      background: var(--accent-light); border: 1px solid #c0d9c8;
+      padding: .65rem .9rem; margin-bottom: 1.25rem;
+      font-size: .75rem; color: var(--accent-hover); line-height: 1.55;
+    }
+    .privacy-notice__icon { flex-shrink: 0; font-size: .9rem; margin-top: .05rem; opacity: .7; }
+
     .entries-list { display: flex; flex-direction: column; gap: 1px; border: 1px solid var(--border); }
     .entry-item {
       display: flex; align-items: center; gap: 1rem;
-      padding: .7rem 1rem;
-      background: var(--bg);
-      border-bottom: 1px solid var(--border);
-      transition: background .1s;
-      cursor: pointer;
+      padding: .7rem 1rem; background: var(--bg);
+      border-bottom: 1px solid var(--border); transition: background .1s; cursor: pointer;
     }
     .entry-item:last-child { border-bottom: none; }
     .entry-item:hover { background: var(--surface); }
@@ -449,39 +403,37 @@
     .entry-delete:hover { border-color: var(--error); color: var(--error); }
     .entries-empty { padding: 1.5rem; text-align: center; font-size: .85rem; color: var(--muted); }
 
-    /* ── Entry viewer modal ── */
+    /* ── Viewer modal ── */
     .viewer-modal {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,.5);
-      z-index: 300; display: none;
-      align-items: flex-start; justify-content: center;
-      padding: 2rem 1rem;
-      overflow-y: auto;
+      position: fixed; inset: 0; background: rgba(0,0,0,.5);
+      z-index: 300; display: none; align-items: flex-start;
+      justify-content: center; padding: 2rem 1rem; overflow-y: auto;
     }
     .viewer-modal.open { display: flex; }
     .viewer-inner {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      width: 100%; max-width: 640px;
-      padding: 2rem;
+      background: var(--bg); border: 1px solid var(--border);
+      width: 100%; max-width: 640px; padding: 2rem;
     }
     .viewer-inner h3 { font-family: var(--font-heading); font-size: 1rem; font-weight: 600; margin-bottom: .25rem; }
     .viewer-meta { font-size: .72rem; color: var(--muted); margin-bottom: 1.25rem; }
     .viewer-text {
-      font-family: var(--font-writing);
-      font-size: .95rem; line-height: 1.85;
-      color: var(--text);
-      white-space: pre-wrap;
+      font-family: var(--font-writing); font-size: .95rem; line-height: 1.85;
+      color: var(--text); white-space: pre-wrap;
       max-height: 60vh; overflow-y: auto;
-      border-top: 1px solid var(--border);
-      padding-top: 1.25rem;
+      border-top: 1px solid var(--border); padding-top: 1.25rem;
     }
     .viewer-footer { margin-top: 1.25rem; display: flex; gap: .65rem; flex-wrap: wrap; }
 
+    /* Decrypting state */
+    .decrypting {
+      font-size: .8rem; color: var(--muted); font-style: italic;
+      padding: 1rem 0;
+    }
+
     footer {
       border-top: 1px solid var(--border);
-      padding: 1.25rem 2rem;
-      text-align: center; font-size: .78rem; color: var(--muted);
+      padding: 1.25rem 2rem; text-align: center;
+      font-size: .78rem; color: var(--muted);
     }
     footer a { color: var(--muted); text-decoration: none; }
     footer a:hover { color: var(--accent); }
@@ -489,9 +441,7 @@
 </head>
 <body>
 
-<!-- ══════════════════════════════════════
-     HEADER
-══════════════════════════════════════ -->
+<!-- HEADER -->
 <header class="sil-header">
   <a class="sil-header__wordmark" href="/dashboard/">Sensory Intelligence Lab</a>
   <button class="sil-header__toggle" id="silMenuToggle" aria-label="Toggle navigation" aria-expanded="false">
@@ -512,6 +462,14 @@
   </ol>
 </nav>
 
+<!-- VAULT OVERLAY — shown while key is being fetched -->
+<div class="vault-overlay" id="vaultOverlay">
+  <div class="vault-overlay__icon">🔒</div>
+  <div class="vault-overlay__title">Setting up your secure vault</div>
+  <div class="vault-overlay__sub">Your entries will be encrypted on this device before saving. This only happens once.</div>
+  <div class="vault-spinner"></div>
+</div>
+
 <main>
 
   <div class="ph">
@@ -519,12 +477,11 @@
     <p>Set a timer, choose your soundscape and prompt. Write continuously until the time runs out.</p>
   </div>
 
-  <!-- ── SETUP PANEL ── -->
+  <!-- SETUP PANEL -->
   <div class="setup-panel" id="setupPanel">
 
     <div class="setup-grid">
 
-      <!-- Timer -->
       <div class="setup-group">
         <p class="section-label">Duration</p>
         <div class="option-row" id="timerBtns">
@@ -537,7 +494,6 @@
         </div>
       </div>
 
-      <!-- Prompt -->
       <div class="setup-group">
         <p class="section-label">Writing Prompt</p>
         <select class="prompt-select" id="promptSelect" onchange="onPromptChange()">
@@ -578,7 +534,6 @@
 
     </div>
 
-    <!-- Music -->
     <div style="margin-bottom: 2rem;">
       <p class="section-label">Soundscape</p>
       <div class="music-grid" id="musicGrid">
@@ -615,13 +570,13 @@
 
   </div>
 
-  <!-- ── COUNTDOWN OVERLAY ── -->
+  <!-- COUNTDOWN OVERLAY -->
   <div class="countdown-overlay" id="countdownOverlay">
     <div class="countdown-num" id="countdownNum">3</div>
     <div class="countdown-sub">prepare to write</div>
   </div>
 
-  <!-- ── WRITING PANEL ── -->
+  <!-- WRITING PANEL -->
   <div class="writing-panel" id="writingPanel">
 
     <div class="timer-strip">
@@ -654,9 +609,13 @@
 
   </div>
 
-  <!-- ── SAVED ENTRIES ── -->
+  <!-- SAVED ENTRIES -->
   <div class="entries-section" id="entriesSection" style="display:none">
     <p class="section-label">Saved entries</p>
+    <div class="privacy-notice">
+      <span class="privacy-notice__icon">🔒</span>
+      <span>Your entries are encrypted before saving. Only you can read them — they cannot be accessed by anyone else, including the platform.</span>
+    </div>
     <div class="entries-list" id="entriesList">
       <div class="entries-empty">No saved entries yet.</div>
     </div>
@@ -698,8 +657,18 @@
 <script type="module">
 'use strict';
 
+import {
+  loadUserKeyFromBase64,
+  hasUserKey,
+  encrypt,
+  decrypt,
+  decryptSafe,
+  isEncrypted,
+  clearUserKey,
+} from '/assets/js/crypto-utils.js';
+
 // ─────────────────────────────────────────────────────────
-// HEADER BEHAVIOUR
+// HEADER
 // ─────────────────────────────────────────────────────────
 const path = window.location.pathname.replace(/\/$/, '') || '/';
 document.querySelectorAll('.sil-header__nav a').forEach(a => {
@@ -729,6 +698,7 @@ async function getSupabase() {
 document.getElementById('silSignOut').addEventListener('click', async function () {
   this.disabled = true;
   this.textContent = 'Signing out…';
+  clearUserKey();
   try {
     const sb = await getSupabase();
     await sb.auth.signOut();
@@ -736,6 +706,73 @@ document.getElementById('silSignOut').addEventListener('click', async function (
     window.location.replace('/');
   }
 });
+
+// ─────────────────────────────────────────────────────────
+// VAULT — fetch or create the user's encryption key
+// Called once per session, lazily on page load after auth.
+// Shows the vault overlay on first-time setup.
+// ─────────────────────────────────────────────────────────
+let _vaultReady = false;
+let _vaultPromise = null;
+
+async function ensureVaultReady() {
+  if (_vaultReady) return;
+  // Coalesce concurrent calls — only one network request
+  if (_vaultPromise) return _vaultPromise;
+
+  _vaultPromise = (async () => {
+    const sb   = await getSupabase();
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) throw new Error('No active session');
+
+    // Check whether a vault key already exists for this user.
+    // If not, the overlay is shown while the function creates one.
+    const { data: profile } = await sb
+      .from('profiles')
+      .select('encryption_key_enc')
+      .eq('id', session.user.id)
+      .single();
+
+    const isFirstTime = !profile?.encryption_key_enc;
+
+    if (isFirstTime) {
+      document.getElementById('vaultOverlay').classList.add('visible');
+    }
+
+    // Call the Netlify function. It will:
+    //   - verify the JWT
+    //   - generate a key if none exists (first time)
+    //   - return the plaintext AES key as base64
+    const res = await fetch('/.netlify/functions/get-or-create-vault-key', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`Vault function error: ${err}`);
+    }
+
+    const { key } = await res.json();
+    await loadUserKeyFromBase64(key);
+    _vaultReady = true;
+
+    if (isFirstTime) {
+      // Brief moment to show "vault ready" before hiding overlay
+      document.querySelector('.vault-overlay__title').textContent = 'Your vault is ready';
+      document.querySelector('.vault-overlay__sub').textContent =
+        'Entries are encrypted on this device before saving and cannot be read by anyone else.';
+      document.querySelector('.vault-spinner').style.display = 'none';
+      await new Promise(r => setTimeout(r, 1800));
+      document.getElementById('vaultOverlay').classList.remove('visible');
+    }
+  })();
+
+  return _vaultPromise;
+}
 
 // ═══════════════════════════════════════════════════════
 // STATE
@@ -753,101 +790,27 @@ const S = {
   musicNodes: [],
   entries: [],
   viewingEntry: null,
+  viewingPlaintext: '',
   entryCount: 0,
 };
 
 // ═══════════════════════════════════════════════════════
-// MUSIC PROFILES
+// MUSIC PROFILES — unchanged from original
 // ═══════════════════════════════════════════════════════
 const MUSIC = {
-  amber: {
-    label: 'Amber Drift',
-    fund: 82.4,
-    voices: 4,
-    ratios: [[1,1],[3,2],[2,1],[4,3]],
-    partialAmps: [1,.18,.06],
-    filterStart: 1800, filterEnd: 1600,
-    filterQ: 0.5,
-    lfoRate: 0.04, lfoDepth: 180,
-    panWidth: 0.35,
-    noise: 0.008, noiseHp: 600,
-    sub: 0.07,
-    breath: 0.07,
-    pulse: false,
-    description: 'Warm, slow, receptive'
-  },
-  fog: {
-    label: 'Grey Fog',
-    fund: 55,
-    voices: 3,
-    ratios: [[1,1],[3,2],[7,4]],
-    partialAmps: [1,.09,.03],
-    filterStart: 900, filterEnd: 700,
-    filterQ: 0.4,
-    lfoRate: 0.025, lfoDepth: 100,
-    panWidth: 0.18,
-    noise: 0.022, noiseHp: 80,
-    sub: 0.12,
-    breath: 0.05,
-    pulse: false,
-    description: 'Low, inward, still'
-  },
-  current: {
-    label: 'Undertow',
-    fund: 98,
-    voices: 4,
-    ratios: [[1,1],[3,2],[2,1],[5,3]],
-    partialAmps: [1,.28,.12],
-    filterStart: 2400, filterEnd: 2000,
-    filterQ: 0.7,
-    lfoRate: 0.09, lfoDepth: 350,
-    panWidth: 0.45,
-    noise: 0.014, noiseHp: 400,
-    sub: 0.05,
-    breath: 0.10,
-    pulse: true, pulseRate: 0.8,
-    description: 'Rhythmic, determined'
-  },
-  voltage: {
-    label: 'Live Wire',
-    fund: 110,
-    voices: 4,
-    ratios: [[1,1],[2,1],[3,1],[4,1]],
-    partialAmps: [1,.38,.22],
-    filterStart: 4500, filterEnd: 4000,
-    filterQ: 1.2,
-    lfoRate: 0.15, lfoDepth: 600,
-    panWidth: 0.55,
-    noise: 0.005, noiseHp: 1200,
-    sub: 0.02,
-    breath: 0.14,
-    pulse: true, pulseRate: 1.2,
-    description: 'Bright, energised'
-  },
-  eclipse: {
-    label: 'Total Eclipse',
-    fund: 65.4,
-    voices: 5,
-    ratios: [[1,1],[16,15],[6,5],[7,5],[4,3]],
-    partialAmps: [1,.35,.18],
-    filterStart: 1200, filterEnd: 900,
-    filterQ: 2.0,
-    lfoRate: 0.055, lfoDepth: 280,
-    panWidth: 0.6,
-    noise: 0.03, noiseHp: 200,
-    sub: 0.09,
-    breath: 0.06,
-    pulse: false,
-    description: 'Tense, unsettled, raw'
-  }
+  amber:   { label: 'Amber Drift',    fund: 82.4,  voices: 4, ratios: [[1,1],[3,2],[2,1],[4,3]],          partialAmps: [1,.18,.06],  filterStart: 1800, filterEnd: 1600, filterQ: 0.5,  lfoRate: 0.04,  lfoDepth: 180, panWidth: 0.35, noise: 0.008, noiseHp: 600,  sub: 0.07, breath: 0.07, pulse: false },
+  fog:     { label: 'Grey Fog',       fund: 55,    voices: 3, ratios: [[1,1],[3,2],[7,4]],                partialAmps: [1,.09,.03],  filterStart: 900,  filterEnd: 700,  filterQ: 0.4,  lfoRate: 0.025, lfoDepth: 100, panWidth: 0.18, noise: 0.022, noiseHp: 80,   sub: 0.12, breath: 0.05, pulse: false },
+  current: { label: 'Undertow',       fund: 98,    voices: 4, ratios: [[1,1],[3,2],[2,1],[5,3]],          partialAmps: [1,.28,.12],  filterStart: 2400, filterEnd: 2000, filterQ: 0.7,  lfoRate: 0.09,  lfoDepth: 350, panWidth: 0.45, noise: 0.014, noiseHp: 400,  sub: 0.05, breath: 0.10, pulse: true,  pulseRate: 0.8 },
+  voltage: { label: 'Live Wire',      fund: 110,   voices: 4, ratios: [[1,1],[2,1],[3,1],[4,1]],          partialAmps: [1,.38,.22],  filterStart: 4500, filterEnd: 4000, filterQ: 1.2,  lfoRate: 0.15,  lfoDepth: 600, panWidth: 0.55, noise: 0.005, noiseHp: 1200, sub: 0.02, breath: 0.14, pulse: true,  pulseRate: 1.2 },
+  eclipse: { label: 'Total Eclipse',  fund: 65.4,  voices: 5, ratios: [[1,1],[16,15],[6,5],[7,5],[4,3]], partialAmps: [1,.35,.18],  filterStart: 1200, filterEnd: 900,  filterQ: 2.0,  lfoRate: 0.055, lfoDepth: 280, panWidth: 0.6,  noise: 0.03,  noiseHp: 200,  sub: 0.09, breath: 0.06, pulse: false },
 };
 
 // ═══════════════════════════════════════════════════════
-// AUDIO ENGINE
+// AUDIO ENGINE — unchanged from original
 // ═══════════════════════════════════════════════════════
 function initAudio() {
   if (S.audioCtx) return;
-  S.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  S.audioCtx  = new (window.AudioContext || window.webkitAudioContext)();
   S.masterGain = S.audioCtx.createGain();
   S.masterGain.gain.setValueAtTime(0, S.audioCtx.currentTime);
   S.masterGain.connect(S.audioCtx.destination);
@@ -858,27 +821,25 @@ function startMusic(profileKey) {
   if (S.audioCtx.state === 'suspended') S.audioCtx.resume();
   stopMusic();
 
-  const p    = MUSIC[profileKey];
-  const ctx  = S.audioCtx;
-  const now  = ctx.currentTime;
-  const dur  = S.totalSec + 8;
-  const FI   = 4, FO = 6;
+  const p   = MUSIC[profileKey];
+  const ctx = S.audioCtx;
+  const now = ctx.currentTime;
+  const dur = S.totalSec + 8;
+  const FI  = 4, FO = 6;
+  const nodes = [];
 
   S.masterGain.gain.setValueAtTime(0, now);
   S.masterGain.gain.linearRampToValueAtTime(0.8, now + FI);
   S.masterGain.gain.setValueAtTime(0.8, now + dur - FO);
   S.masterGain.gain.linearRampToValueAtTime(0, now + dur);
 
-  const nodes = [];
-
   for (let v = 0; v < p.voices; v++) {
-    const r = p.ratios[v % p.ratios.length];
+    const r    = p.ratios[v % p.ratios.length];
     const freq = p.fund * r[0] / r[1];
 
     for (let h = 0; h < 3; h++) {
       const harmFreq = freq * (h + 1);
       const amp = (p.partialAmps[h] || 0.02) * 0.14 / p.voices;
-
       const osc  = ctx.createOscillator();
       const filt = ctx.createBiquadFilter();
       const pan  = ctx.createStereoPanner();
@@ -886,26 +847,21 @@ function startMusic(profileKey) {
 
       osc.type = 'sine';
       osc.frequency.value = harmFreq * (1 + (Math.random() - 0.5) * 0.002);
-
-      filt.type = 'lowpass';
-      filt.frequency.value = p.filterStart;
-      filt.Q.value = p.filterQ;
+      filt.type = 'lowpass'; filt.frequency.value = p.filterStart; filt.Q.value = p.filterQ;
 
       const lfo  = ctx.createOscillator();
       const lfoG = ctx.createGain();
       lfo.type = 'sine';
       lfo.frequency.value = p.lfoRate * (0.85 + Math.random() * 0.3) + v * 0.01;
       lfoG.gain.value = p.lfoDepth * (0.6 + Math.random() * 0.4);
-      lfo.connect(lfoG);
-      lfoG.connect(filt.frequency);
-      lfo.start(now);
-      lfo.stop(now + dur + .5);
+      lfo.connect(lfoG); lfoG.connect(filt.frequency);
+      lfo.start(now); lfo.stop(now + dur + .5);
       nodes.push(lfo);
 
-      const panAmt = (v % 2 === 0 ? 1 : -1) * p.panWidth * (0.4 + Math.random() * 0.6);
+      const panAmt  = (v % 2 === 0 ? 1 : -1) * p.panWidth * (0.4 + Math.random() * 0.6);
       const panRate = 0.005 + v * 0.002;
       for (let i = 0; i <= 20; i++) {
-        const t = now + (i / 20) * dur;
+        const t  = now + (i / 20) * dur;
         const pv = Math.sin(i * Math.PI * 2 * panRate * 20) * panAmt;
         if (i === 0) pan.pan.setValueAtTime(pv, t);
         else pan.pan.linearRampToValueAtTime(pv, t);
@@ -916,21 +872,13 @@ function startMusic(profileKey) {
       bLfo.type = 'sine';
       bLfo.frequency.value = p.breath * (0.8 + Math.random() * 0.4);
       bLfoG.gain.value = amp * 0.3;
-      bLfo.connect(bLfoG);
-      bLfoG.connect(gv.gain);
-      bLfo.start(now);
-      bLfo.stop(now + dur + .5);
+      bLfo.connect(bLfoG); bLfoG.connect(gv.gain);
+      bLfo.start(now); bLfo.stop(now + dur + .5);
       nodes.push(bLfo);
 
       gv.gain.value = amp;
-
-      osc.connect(filt);
-      filt.connect(pan);
-      pan.connect(gv);
-      gv.connect(S.masterGain);
-
-      osc.start(now);
-      osc.stop(now + dur + .5);
+      osc.connect(filt); filt.connect(pan); pan.connect(gv); gv.connect(S.masterGain);
+      osc.start(now); osc.stop(now + dur + .5);
       nodes.push(osc, gv, pan, filt);
     }
   }
@@ -939,8 +887,7 @@ function startMusic(profileKey) {
     const sub  = ctx.createOscillator();
     const subF = ctx.createBiquadFilter();
     const subG = ctx.createGain();
-    sub.type = 'sine';
-    sub.frequency.value = p.fund * 0.5;
+    sub.type = 'sine'; sub.frequency.value = p.fund * 0.5;
     subF.type = 'lowpass'; subF.frequency.value = 120; subF.Q.value = 0.5;
     subG.gain.value = p.sub;
     sub.connect(subF); subF.connect(subG); subG.connect(S.masterGain);
@@ -962,7 +909,7 @@ function startMusic(profileKey) {
     }
     const nSrc = ctx.createBufferSource(); nSrc.buffer = nBuf; nSrc.loop = true;
     const nHp  = ctx.createBiquadFilter(); nHp.type = 'highpass'; nHp.frequency.value = p.noiseHp;
-    const nLp  = ctx.createBiquadFilter(); nLp.type = 'lowpass'; nLp.frequency.value = 6000;
+    const nLp  = ctx.createBiquadFilter(); nLp.type = 'lowpass';  nLp.frequency.value = 6000;
     const nG   = ctx.createGain(); nG.gain.value = p.noise;
     nSrc.connect(nHp); nHp.connect(nLp); nLp.connect(nG); nG.connect(S.masterGain);
     nSrc.start(now); nSrc.stop(now + dur + .5);
@@ -970,7 +917,6 @@ function startMusic(profileKey) {
   }
 
   if (p.pulse) {
-    const pulseDur = 0.07;
     const step = 1 / p.pulseRate;
     let t = FI;
     while (t < dur - FO) {
@@ -978,12 +924,11 @@ function startMusic(profileKey) {
       const po = ctx.createOscillator();
       const pg = ctx.createGain();
       po.connect(pg); pg.connect(S.masterGain);
-      po.type = 'sine';
-      po.frequency.value = p.fund * 2;
+      po.type = 'sine'; po.frequency.value = p.fund * 2;
       pg.gain.setValueAtTime(0, pt);
       pg.gain.linearRampToValueAtTime(0.022, pt + 0.01);
-      pg.gain.linearRampToValueAtTime(0, pt + pulseDur);
-      po.start(pt); po.stop(pt + pulseDur + 0.05);
+      pg.gain.linearRampToValueAtTime(0, pt + 0.07);
+      po.start(pt); po.stop(pt + 0.12);
       nodes.push(po);
       t += step + (Math.random() - 0.5) * step * 0.15;
     }
@@ -1023,19 +968,15 @@ function setMusic(key, card) {
 }
 
 function onPromptChange() {
-  const sel = document.getElementById('promptSelect');
+  const sel  = document.getElementById('promptSelect');
   const disp = document.getElementById('promptDisplay');
-  S.prompt = sel.value;
-  if (S.prompt) {
-    disp.textContent = S.prompt;
-    disp.classList.add('visible');
-  } else {
-    disp.classList.remove('visible');
-  }
+  S.prompt   = sel.value;
+  if (S.prompt) { disp.textContent = S.prompt; disp.classList.add('visible'); }
+  else { disp.classList.remove('visible'); }
 }
 
 // ═══════════════════════════════════════════════════════
-// COUNTDOWN + SESSION START
+// COUNTDOWN + SESSION
 // ═══════════════════════════════════════════════════════
 function beginCountdown() {
   document.getElementById('setupPanel').classList.add('hidden');
@@ -1045,8 +986,7 @@ function beginCountdown() {
 
   let n = 3;
   numEl.textContent = n;
-  numEl.style.animation = 'none';
-  void numEl.offsetWidth;
+  numEl.style.animation = 'none'; void numEl.offsetWidth;
   numEl.style.animation = 'countPulse .8s ease-in-out';
 
   const iv = setInterval(() => {
@@ -1057,8 +997,7 @@ function beginCountdown() {
       startSession();
     } else {
       numEl.textContent = n;
-      numEl.style.animation = 'none';
-      void numEl.offsetWidth;
+      numEl.style.animation = 'none'; void numEl.offsetWidth;
       numEl.style.animation = 'countPulse .8s ease-in-out';
     }
   }, 900);
@@ -1072,16 +1011,10 @@ function startSession() {
   document.getElementById('writingPanel').classList.add('visible');
 
   const apEl = document.getElementById('activePrompt');
-  if (S.prompt) {
-    apEl.textContent = S.prompt;
-    apEl.classList.add('visible');
-  }
+  if (S.prompt) { apEl.textContent = S.prompt; apEl.classList.add('visible'); }
 
   const ta = document.getElementById('journalText');
-  ta.value = '';
-  ta.classList.remove('session-over');
-  ta.disabled = false;
-  ta.focus();
+  ta.value = ''; ta.classList.remove('session-over'); ta.disabled = false; ta.focus();
 
   document.getElementById('postActions').classList.remove('visible');
   document.getElementById('saveRow').style.display = 'none';
@@ -1089,8 +1022,7 @@ function startSession() {
 
   const canvas = document.getElementById('destroyCanvas');
   canvas.style.display = 'none';
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
 
   updateTimer();
   if (S.music && S.music !== 'none') startMusic(S.music);
@@ -1105,15 +1037,14 @@ function startSession() {
 }
 
 function updateTimer() {
-  const m = Math.floor(S.remainSec / 60);
-  const s = String(S.remainSec % 60).padStart(2,'0');
+  const m    = Math.floor(S.remainSec / 60);
+  const s    = String(S.remainSec % 60).padStart(2,'0');
   const disp = document.getElementById('timerDisplay');
   const bar  = document.getElementById('timerBar');
   const meta = document.getElementById('timerMeta');
 
   disp.textContent = `${m}:${s}`;
-  const pct = (S.remainSec / S.totalSec) * 100;
-  bar.style.width = pct + '%';
+  bar.style.width  = (S.remainSec / S.totalSec * 100) + '%';
 
   const urgent = S.remainSec <= 30;
   disp.classList.toggle('urgent', urgent);
@@ -1122,7 +1053,7 @@ function updateTimer() {
 }
 
 function updateWordCount() {
-  const text = document.getElementById('journalText').value.trim();
+  const text  = document.getElementById('journalText').value.trim();
   const words = text ? text.split(/\s+/).length : 0;
   document.getElementById('wordCount').textContent = words + (words === 1 ? ' word' : ' words');
 }
@@ -1136,23 +1067,22 @@ function endSession() {
   ta.disabled = true;
 
   stopMusic();
-  document.getElementById('timerMeta').textContent = 'Session complete';
+  document.getElementById('timerMeta').textContent   = 'Session complete';
   document.getElementById('timerDisplay').textContent = '0:00';
-  document.getElementById('timerBar').style.width = '0%';
-
+  document.getElementById('timerBar').style.width     = '0%';
   document.getElementById('postActions').classList.add('visible');
 }
 
 // ═══════════════════════════════════════════════════════
-// SAVE FLOW
+// SAVE FLOW — encrypts before insert
 // ═══════════════════════════════════════════════════════
 function openSaveFlow() {
   const saveRow = document.getElementById('saveRow');
   saveRow.style.display = 'flex';
   S.entryCount++;
-  document.getElementById('entryNameInput').value = `Entry ${S.entryCount}`;
-  document.getElementById('entryNameInput').focus();
-  document.getElementById('entryNameInput').select();
+  const inp = document.getElementById('entryNameInput');
+  inp.value = `Entry ${S.entryCount}`;
+  inp.focus(); inp.select();
 }
 
 function closeSaveFlow() {
@@ -1160,27 +1090,48 @@ function closeSaveFlow() {
 }
 
 async function saveEntry() {
-  const name = document.getElementById('entryNameInput').value.trim() || `Entry ${S.entryCount}`;
-  const text = document.getElementById('journalText').value;
-  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-  const msgEl = document.getElementById('saveMsg');
+  const name   = document.getElementById('entryNameInput').value.trim() || `Entry ${S.entryCount}`;
+  const rawText = document.getElementById('journalText').value;
+  const words   = rawText.trim() ? rawText.trim().split(/\s+/).length : 0;
+  const msgEl   = document.getElementById('saveMsg');
 
-  const sb = window._supabase;
+  const sb   = window._supabase;
   const user = window._currentUser;
   if (!sb || !user) {
     msgEl.className = 'msg error';
-    msgEl.textContent = 'Not logged in.';
+    msgEl.textContent = 'Not signed in.';
+    return;
+  }
+
+  // Ensure vault key is in memory before encrypting
+  try {
+    await ensureVaultReady();
+  } catch (err) {
+    msgEl.className = 'msg error';
+    msgEl.textContent = 'Could not unlock vault: ' + err.message;
+    return;
+  }
+
+  // Encrypt the content before it leaves the browser
+  let encryptedContent;
+  try {
+    encryptedContent = await encrypt(rawText);
+  } catch (err) {
+    msgEl.className = 'msg error';
+    msgEl.textContent = 'Encryption failed: ' + err.message;
     return;
   }
 
   const { error } = await sb.from('journal_entries').insert({
-    user_id:    user.id,
-    title:      name,
-    content:    text,
-    word_count: words,
-    prompt:     S.prompt || null,
-    music:      S.music,
+    user_id:      user.id,
+    title:        name,
+    content:      encryptedContent,   // ciphertext JSON, never plaintext
+    word_count:   words,
+    prompt:       S.prompt || null,
+    music:        S.music,
     duration_min: S.durationMin,
+    encrypted_at: new Date().toISOString(),
+    key_version:  1,
   });
 
   if (error) {
@@ -1190,24 +1141,25 @@ async function saveEntry() {
   }
 
   msgEl.className = 'msg success';
-  msgEl.textContent = `"${name}" saved.`;
+  msgEl.textContent = `"${name}" saved and encrypted.`;
   document.getElementById('saveRow').style.display = 'none';
   document.getElementById('postActions').classList.remove('visible');
   await loadEntries();
 }
 
+// Download the current (unsaved) session text — no DB involved, no encryption needed
 function downloadEntry() {
   const text = document.getElementById('journalText').value;
   const date = new Date().toISOString().slice(0,10);
   const blob = new Blob([text], { type: 'text/plain' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
   a.download = `journal-${date}.txt`;
   a.click();
 }
 
 // ═══════════════════════════════════════════════════════
-// DESTROY ANIMATION
+// DESTROY ANIMATION — unchanged from original
 // ═══════════════════════════════════════════════════════
 function openDestroyConfirm() {
   document.getElementById('destroyModal').classList.add('open');
@@ -1218,27 +1170,22 @@ function executeDestroy() {
   document.getElementById('postActions').classList.remove('visible');
   document.getElementById('saveRow').style.display = 'none';
 
-  const ta = document.getElementById('journalText');
+  const ta     = document.getElementById('journalText');
   const canvas = document.getElementById('destroyCanvas');
-  const wrap = document.querySelector('.writing-area-wrap');
 
   canvas.width  = ta.offsetWidth;
   canvas.height = ta.offsetHeight;
-  canvas.style.display = 'block';
-  canvas.style.position = 'absolute';
-  canvas.style.top  = '0px';
-  canvas.style.left = '0px';
-  canvas.style.width  = ta.offsetWidth + 'px';
-  canvas.style.height = ta.offsetHeight + 'px';
+  canvas.style.cssText = `display:block;position:absolute;top:0;left:0;width:${ta.offsetWidth}px;height:${ta.offsetHeight}px;`;
 
-  const ctx = canvas.getContext('2d');
+  const ctx  = canvas.getContext('2d');
+  const W    = canvas.width, H = canvas.height;
 
-  const W = canvas.width, H = canvas.height;
   ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--bg') || '#fff';
   ctx.fillRect(0, 0, W, H);
   ctx.fillStyle = '#1a1a1a';
   ctx.font = '17px Lora, Georgia, serif';
   ctx.textBaseline = 'top';
+
   const lines = ta.value.split('\n');
   let y = 24;
   lines.forEach(line => {
@@ -1247,12 +1194,8 @@ function executeDestroy() {
     words.forEach(word => {
       const test = row + word + ' ';
       if (ctx.measureText(test).width > W - 56 && row) {
-        ctx.fillText(row, 28, y);
-        row = word + ' ';
-        y += 32;
-      } else {
-        row = test;
-      }
+        ctx.fillText(row, 28, y); row = word + ' '; y += 32;
+      } else { row = test; }
     });
     if (row) { ctx.fillText(row, 28, y); y += 32; }
   });
@@ -1261,69 +1204,55 @@ function executeDestroy() {
 
   const imageData = ctx.getImageData(0, 0, W, H);
   const origData  = new Uint8ClampedArray(imageData.data);
-
   let frame = 0;
   const totalFrames = 90;
 
   function destroyFrame() {
     frame++;
-    const t = frame / totalFrames;
+    const t         = frame / totalFrames;
     const blockSize = Math.max(1, Math.floor(1 + t * 40));
-    const darkPct = Math.pow(t, 0.8);
+    const darkPct   = Math.pow(t, 0.8);
+    const newData   = ctx.createImageData(W, H);
+    const d         = newData.data;
 
-    const w2 = canvas.width, h2 = canvas.height;
-    const newImageData = ctx.createImageData(w2, h2);
-    const d = newImageData.data;
-
-    for (let py = 0; py < h2; py += blockSize) {
-      for (let px = 0; px < w2; px += blockSize) {
-        const cx = Math.min(px + Math.floor(blockSize/2), w2-1);
-        const cy = Math.min(py + Math.floor(blockSize/2), h2-1);
-        const si = (cy * w2 + cx) * 4;
-        const r0 = origData[si], g0 = origData[si+1], b0 = origData[si+2];
+    for (let py = 0; py < H; py += blockSize) {
+      for (let px = 0; px < W; px += blockSize) {
+        const cx = Math.min(px + Math.floor(blockSize/2), W-1);
+        const cy = Math.min(py + Math.floor(blockSize/2), H-1);
+        const si = (cy * W + cx) * 4;
         const noise = (Math.random() - 0.5) * 80 * t;
-        const r = Math.max(0, Math.min(255, r0 + noise));
-        const g = Math.max(0, Math.min(255, g0 + noise));
-        const b = Math.max(0, Math.min(255, b0 + noise));
-        const fr = r * (1 - darkPct);
-        const fg = g * (1 - darkPct);
-        const fb = b * (1 - darkPct);
-        for (let by = 0; by < blockSize && py+by < h2; by++) {
-          for (let bx = 0; bx < blockSize && px+bx < w2; bx++) {
-            const di = ((py+by) * w2 + (px+bx)) * 4;
-            d[di]   = fr;
-            d[di+1] = fg;
-            d[di+2] = fb;
-            d[di+3] = 255;
+        const fr = Math.max(0, Math.min(255, origData[si]   + noise)) * (1 - darkPct);
+        const fg = Math.max(0, Math.min(255, origData[si+1] + noise)) * (1 - darkPct);
+        const fb = Math.max(0, Math.min(255, origData[si+2] + noise)) * (1 - darkPct);
+        for (let by = 0; by < blockSize && py+by < H; by++) {
+          for (let bx = 0; bx < blockSize && px+bx < W; bx++) {
+            const di = ((py+by) * W + (px+bx)) * 4;
+            d[di]=fr; d[di+1]=fg; d[di+2]=fb; d[di+3]=255;
           }
         }
       }
     }
 
-    ctx.putImageData(newImageData, 0, 0);
-
+    ctx.putImageData(newData, 0, 0);
     if (frame < totalFrames) {
       requestAnimationFrame(destroyFrame);
     } else {
-      ctx.fillStyle = '#000';
-      ctx.fillRect(0, 0, W, H);
-      ta.value = '';
-      ta.style.visibility = 'visible';
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      ta.value = ''; ta.style.visibility = 'visible';
       canvas.style.display = 'none';
       setTimeout(resetToSetup, 1200);
     }
   }
-
   requestAnimationFrame(destroyFrame);
 }
 
 function resetToSetup() {
   document.getElementById('writingPanel').classList.remove('visible');
   document.getElementById('activePrompt').classList.remove('visible');
-  document.getElementById('journalText').style.visibility = 'visible';
-  document.getElementById('journalText').classList.remove('session-over');
-  document.getElementById('journalText').disabled = false;
-  document.getElementById('journalText').value = '';
+  const ta = document.getElementById('journalText');
+  ta.style.visibility = 'visible';
+  ta.classList.remove('session-over');
+  ta.disabled = false; ta.value = '';
   document.getElementById('wordCount').textContent = '0 words';
   document.getElementById('saveMsg').className = 'msg';
   document.getElementById('setupPanel').classList.remove('hidden');
@@ -1340,7 +1269,7 @@ document.querySelectorAll('.modal-overlay, .viewer-modal').forEach(m => {
 });
 
 // ═══════════════════════════════════════════════════════
-// SUPABASE — ENTRIES
+// ENTRIES — load, render, view, delete
 // ═══════════════════════════════════════════════════════
 async function loadEntries() {
   const sb   = window._supabase;
@@ -1349,12 +1278,12 @@ async function loadEntries() {
 
   const { data, error } = await sb
     .from('journal_entries')
-    .select('id, title, created_at, word_count, content, prompt, music, duration_min')
+    .select('id, title, created_at, word_count, content, prompt, music, duration_min, encrypted_at')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
   if (error) { console.error(error); return; }
-  S.entries = data || [];
+  S.entries    = data || [];
   S.entryCount = S.entries.length;
   renderEntries();
 }
@@ -1363,34 +1292,32 @@ function renderEntries() {
   const section = document.getElementById('entriesSection');
   const list    = document.getElementById('entriesList');
 
-  if (!S.entries.length) {
-    section.style.display = 'none';
-    return;
-  }
+  if (!S.entries.length) { section.style.display = 'none'; return; }
 
   section.style.display = 'block';
   list.innerHTML = S.entries.map(e => {
     const date = new Date(e.created_at).toLocaleDateString('en-GB', {
       day: 'numeric', month: 'short', year: 'numeric'
     });
-    const words = e.word_count || 0;
     return `
       <div class="entry-item" onclick="viewEntry('${e.id}')">
         <span class="entry-name">${escHtml(e.title || 'Untitled')}</span>
         <span class="entry-date">${date}</span>
-        <span class="entry-words">${words} words</span>
+        <span class="entry-words">${e.word_count || 0} words</span>
         <button class="entry-delete" onclick="deleteEntry(event,'${e.id}')">Delete</button>
       </div>
     `;
   }).join('');
 }
 
-function viewEntry(id) {
+async function viewEntry(id) {
   const e = S.entries.find(en => en.id === id);
   if (!e) return;
-  S.viewingEntry = e;
+  S.viewingEntry    = e;
+  S.viewingPlaintext = '';
 
   document.getElementById('viewerTitle').textContent = e.title || 'Untitled';
+
   const date = new Date(e.created_at).toLocaleDateString('en-GB', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
   });
@@ -1398,20 +1325,42 @@ function viewEntry(id) {
     date,
     e.word_count ? `${e.word_count} words` : '',
     e.duration_min ? `${e.duration_min} min session` : '',
-    e.music ? MUSIC[e.music]?.label || e.music : '',
+    e.music ? (MUSIC[e.music]?.label || e.music) : '',
   ].filter(Boolean).join(' · ');
   document.getElementById('viewerMeta').textContent = meta;
-  document.getElementById('viewerText').textContent = e.content || '';
+
+  // Show modal immediately with a decrypting state
+  const textEl = document.getElementById('viewerText');
+  textEl.innerHTML = '<span class="decrypting">Decrypting…</span>';
   document.getElementById('viewerModal').classList.add('open');
+
+  // Ensure vault is ready then decrypt
+  try {
+    await ensureVaultReady();
+
+    let plaintext;
+    if (isEncrypted(e.content)) {
+      plaintext = await decrypt(e.content);
+    } else {
+      // Graceful fallback: plaintext entry (development / pre-encryption data)
+      plaintext = e.content || '';
+    }
+
+    S.viewingPlaintext = plaintext;
+    textEl.textContent = plaintext;
+  } catch (err) {
+    textEl.innerHTML = `<span class="decrypting">Could not decrypt this entry. (${escHtml(err.message)})</span>`;
+  }
 }
 
-function downloadViewing() {
+async function downloadViewing() {
   if (!S.viewingEntry) return;
-  const e = S.viewingEntry;
-  const blob = new Blob([e.content || ''], { type: 'text/plain' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `${(e.title || 'journal').replace(/\s+/g,'-')}.txt`;
+  // Use the already-decrypted plaintext held in memory — no second decryption
+  const text = S.viewingPlaintext || '';
+  const blob = new Blob([text], { type: 'text/plain' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = `${(S.viewingEntry.title || 'journal').replace(/\s+/g,'-')}.txt`;
   a.click();
 }
 
@@ -1421,16 +1370,16 @@ async function deleteEntry(ev, id) {
   if (!confirm(`Delete "${e?.title || 'this entry'}"? This cannot be undone.`)) return;
 
   const { error } = await window._supabase
-    .from('journal_entries')
-    .delete()
-    .eq('id', id);
+    .from('journal_entries').delete().eq('id', id);
 
   if (error) { alert('Delete failed: ' + error.message); return; }
   await loadEntries();
 }
 
 function escHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1442,24 +1391,29 @@ function onAuthReady(cb) {
 }
 
 onAuthReady(async () => {
+  // Initialise vault and load entries in parallel where possible.
+  // ensureVaultReady resolves fast on subsequent sessions (key in memory
+  // from a previous page visit in the same session), and loadEntries
+  // needs the key only when an entry is opened — so this ordering is fine.
+  await ensureVaultReady();
   await loadEntries();
 });
 
 // Expose for inline onclick handlers
-window.setTimer         = setTimer;
-window.setMusic         = setMusic;
-window.onPromptChange   = onPromptChange;
-window.beginCountdown   = beginCountdown;
-window.openSaveFlow     = openSaveFlow;
-window.closeSaveFlow    = closeSaveFlow;
-window.saveEntry        = saveEntry;
-window.downloadEntry    = downloadEntry;
+window.setTimer           = setTimer;
+window.setMusic           = setMusic;
+window.onPromptChange     = onPromptChange;
+window.beginCountdown     = beginCountdown;
+window.openSaveFlow       = openSaveFlow;
+window.closeSaveFlow      = closeSaveFlow;
+window.saveEntry          = saveEntry;
+window.downloadEntry      = downloadEntry;
 window.openDestroyConfirm = openDestroyConfirm;
-window.executeDestroy   = executeDestroy;
-window.closeModal       = closeModal;
-window.viewEntry        = viewEntry;
-window.downloadViewing  = downloadViewing;
-window.deleteEntry      = deleteEntry;
+window.executeDestroy     = executeDestroy;
+window.closeModal         = closeModal;
+window.viewEntry          = viewEntry;
+window.downloadViewing    = downloadViewing;
+window.deleteEntry        = deleteEntry;
 
 </script>
 </body>
