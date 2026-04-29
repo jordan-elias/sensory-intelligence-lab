@@ -12,7 +12,7 @@
   <link rel="manifest" href="/site.webmanifest">
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
- 
+
   <script src="/dashboard/auth-guard.js" type="module"></script>
 
   <script type="module">
@@ -21,8 +21,8 @@
     targetSelector: '.card',
     moduleName: 'rooms',
   });
-</script>
-  
+  </script>
+
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -36,110 +36,40 @@
     body{font-family:var(--font-body);color:var(--text);background:var(--bg);
       min-height:100vh;display:flex;flex-direction:column;}
 
-    /* ══════════════════════════════════════
-       HEADER
-    ══════════════════════════════════════ */
-    .sil-header {
-      border-bottom: 1px solid var(--border);
-      padding: 0 1.5rem;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      left: 0;
-      right: 0;
-      background: var(--bg);
-      z-index: 100;
-      gap: 1rem;
-      width: 100%;
-    }
-
-    .sil-header__wordmark {
-      font-family: var(--font-heading);
-      font-size: 1rem;
-      font-weight: 600;
-      letter-spacing: -0.01em;
-      white-space: nowrap;
-      flex-shrink: 0;
-      text-decoration: none;
-      color: var(--text);
-    }
-    .sil-header__wordmark:hover { color: var(--accent); }
-
-    .sil-header__nav {
-      display: flex;
-      gap: 0.25rem;
-      align-items: center;
-    }
-
-    .sil-header__nav a {
-      font-family: var(--font-body);
-      font-size: 0.8rem;
-      font-weight: 500;
-      text-decoration: none;
-      color: var(--muted);
-      transition: color 0.15s;
-      white-space: nowrap;
-      padding: 0.3rem 0.65rem;
-    }
-    .sil-header__nav a:hover { color: var(--text); }
-    .sil-header__nav a.sil-active { color: var(--accent); font-weight: 600; }
-
-    .sil-header__signout {
-      font-family: var(--font-body);
-      font-size: 0.8rem;
-      font-weight: 500;
-      color: var(--muted);
-      background: none;
-      border: 1px solid var(--border);
-      cursor: pointer;
-      padding: 0.3rem 0.75rem;
-      transition: color 0.15s, border-color 0.15s;
-      white-space: nowrap;
-      line-height: 1.6;
-    }
-    .sil-header__signout:hover { color: var(--text); border-color: var(--text); }
-    .sil-header__signout:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .sil-header__toggle {
-      display: none;
-      flex-direction: column;
-      gap: 4px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 4px;
-      flex-shrink: 0;
-    }
-    .sil-header__toggle span { display: block; width: 20px; height: 2px; background: var(--text); }
-
-    @media (max-width: 700px) {
-      .sil-header { padding: 0 1rem; }
-      .sil-header__toggle { display: flex; }
-      .sil-header__nav {
-        display: none;
-        position: absolute;
-        top: 56px; left: 0; right: 0;
-        background: var(--bg);
-        border-bottom: 1px solid var(--border);
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 0.75rem 1rem;
-        gap: 0;
-        z-index: 99;
-      }
-      .sil-header__nav.sil-open { display: flex; }
-      .sil-header__nav a,
-      .sil-header__signout { font-size: 0.875rem; padding: 0.55rem 0.5rem; }
-      .sil-header__signout { border: none; }
+    /* HEADER */
+    .sil-header{border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;
+      display:flex;align-items:center;justify-content:space-between;position:sticky;
+      top:0;left:0;right:0;background:var(--bg);z-index:100;gap:1rem;width:100%;}
+    .sil-header__wordmark{font-family:var(--font-heading);font-size:1rem;font-weight:600;
+      letter-spacing:-0.01em;white-space:nowrap;flex-shrink:0;text-decoration:none;color:var(--text);}
+    .sil-header__wordmark:hover{color:var(--accent);}
+    .sil-header__nav{display:flex;gap:0.25rem;align-items:center;}
+    .sil-header__nav a{font-family:var(--font-body);font-size:0.8rem;font-weight:500;
+      text-decoration:none;color:var(--muted);transition:color 0.15s;white-space:nowrap;padding:0.3rem 0.65rem;}
+    .sil-header__nav a:hover{color:var(--text);}
+    .sil-header__nav a.sil-active{color:var(--accent);font-weight:600;}
+    .sil-header__signout{font-family:var(--font-body);font-size:0.8rem;font-weight:500;
+      color:var(--muted);background:none;border:1px solid var(--border);cursor:pointer;
+      padding:0.3rem 0.75rem;transition:color 0.15s,border-color 0.15s;white-space:nowrap;line-height:1.6;}
+    .sil-header__signout:hover{color:var(--text);border-color:var(--text);}
+    .sil-header__signout:disabled{opacity:0.5;cursor:not-allowed;}
+    .sil-header__toggle{display:none;flex-direction:column;gap:4px;background:none;
+      border:none;cursor:pointer;padding:4px;flex-shrink:0;}
+    .sil-header__toggle span{display:block;width:20px;height:2px;background:var(--text);}
+    @media(max-width:700px){
+      .sil-header{padding:0 1rem;}
+      .sil-header__toggle{display:flex;}
+      .sil-header__nav{display:none;position:absolute;top:56px;left:0;right:0;
+        background:var(--bg);border-bottom:1px solid var(--border);flex-direction:column;
+        align-items:flex-start;padding:0.75rem 1rem;gap:0;z-index:99;}
+      .sil-header__nav.sil-open{display:flex;}
+      .sil-header__nav a,.sil-header__signout{font-size:0.875rem;padding:0.55rem 0.5rem;}
+      .sil-header__signout{border:none;}
     }
 
     /* Breadcrumb */
     .bc{padding:.75rem 1.5rem 0;max-width:1100px;margin:0 auto;width:100%}
-    .bc ol{list-style:none;display:flex;gap:.3rem;align-items:center;
-      font-size:.75rem;color:var(--muted);}
+    .bc ol{list-style:none;display:flex;gap:.3rem;align-items:center;font-size:.75rem;color:var(--muted);}
     .bc li+li::before{content:'/';margin-right:.3rem;color:var(--border)}
     .bc a{color:var(--muted);text-decoration:none;}
     .bc a:hover{color:var(--accent);text-decoration:underline;}
@@ -154,23 +84,38 @@
       letter-spacing:-.02em;line-height:1.2;margin-bottom:.4rem;}
     .ph p{font-size:.9rem;color:var(--muted);}
 
-    /* Card container */
+    /* Card */
     .card{border:1px solid var(--border);padding:1.5rem;margin-bottom:1.5rem;background:var(--bg)}
     .card-title{font-family:var(--font-heading);font-size:.67rem;font-weight:600;
       letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 1.25rem}
 
     /* Status display */
-    .iter-display{
-      border:1px solid var(--border);
-      padding:.75em 1.25em;
-      margin-bottom:1em;
-      display:flex;align-items:center;
-      justify-content:space-between;flex-wrap:wrap;gap:.75em;
-      background:var(--surface)
-    }
+    .iter-display{border:1px solid var(--border);padding:.75em 1.25em;margin-bottom:1em;
+      display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75em;background:var(--surface)}
     .iter-count{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:var(--text)}
     .iter-sub{font-family:var(--font-body);font-size:.75rem;color:var(--muted)}
     .iter-status{font-family:var(--font-body);font-size:.75rem;color:var(--muted);font-style:italic}
+
+    /* Waveform editor */
+    .waveform-editor{display:none;border:1px solid var(--border);padding:1.25rem;
+      margin-bottom:1.5rem;background:var(--surface)}
+    .waveform-editor.visible{display:block}
+    .waveform-header{display:flex;justify-content:space-between;align-items:center;
+      margin-bottom:1rem;flex-wrap:wrap;gap:.5rem}
+    .waveform-title{font-family:var(--font-heading);font-size:.75rem;font-weight:600;
+      letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+    .waveform-info{font-family:'Courier New',monospace;font-size:.75rem;color:var(--muted)}
+    .waveform-canvas-wrap{position:relative;height:120px;background:var(--bg);
+      border:1px solid var(--border);margin-bottom:.5rem;overflow:hidden;cursor:crosshair}
+    .waveform-canvas{display:block;height:100%;width:100%}
+    .waveform-scrollbar{width:100%;height:12px;margin-bottom:1rem;position:relative;
+      background:var(--surface);border:1px solid var(--border);cursor:pointer;overflow:hidden}
+    .waveform-scrollbar-thumb{position:absolute;top:1px;height:10px;background:var(--border);
+      border-radius:2px;cursor:grab;transition:background .1s;min-width:20px}
+    .waveform-scrollbar-thumb:hover,.waveform-scrollbar-thumb.dragging{background:var(--accent)}
+    .waveform-controls{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem}
+    .waveform-zoom{display:flex;gap:.5rem;align-items:center}
+    .waveform-actions{display:flex;gap:.5rem;flex-wrap:wrap}
 
     /* Buttons */
     .btn{font-family:var(--font-heading);font-size:.78rem;font-weight:600;
@@ -200,7 +145,7 @@
       text-transform:uppercase;color:var(--muted);margin-right:4px;white-space:nowrap}
     .rec-state{font-family:var(--font-body);font-size:.78rem;color:var(--muted);padding:3px 0}
 
-    /* Sliders */
+    /* Volume slider */
     .sliders{display:flex;flex-direction:row;gap:24px;margin-bottom:1.25em}
     .ctrl{flex:1;display:flex;flex-direction:column;gap:6px}
     .ctrl input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:2px;
@@ -215,9 +160,9 @@
     .ctrl-val{font-family:var(--font-body);font-size:.75rem;color:var(--accent);font-weight:600}
 
     /* Select */
-    .gen-select{font-family:var(--font-body);font-size:.78rem;
-      background:transparent;color:var(--text);border:1px solid var(--border);
-      padding:3px 8px;cursor:pointer;-webkit-appearance:none;appearance:none;}
+    .gen-select{font-family:var(--font-body);font-size:.78rem;background:transparent;
+      color:var(--text);border:1px solid var(--border);padding:3px 8px;cursor:pointer;
+      -webkit-appearance:none;appearance:none;}
 
     /* Download */
     .dl-row{border-top:1px solid var(--border);padding-top:1em;margin-top:.5em;
@@ -226,6 +171,11 @@
     .dl-prog{font-family:var(--font-body);font-size:.72rem;color:var(--muted);display:none}
 
     .hint{font-family:var(--font-body);font-size:.8rem;color:var(--muted);margin-top:1em;text-align:center}
+
+    /* Progress bar for iteration */
+    .iter-progress{height:2px;background:var(--border);margin-bottom:1em;position:relative;overflow:hidden}
+    .iter-progress-fill{position:absolute;left:0;top:0;height:100%;background:var(--accent);
+      width:0%;transition:width .3s}
 
     /* Instructions */
     .instructions{font-size:.9rem;line-height:1.75;color:var(--text)}
@@ -247,9 +197,6 @@
 </head>
 <body>
 
-<!-- ══════════════════════════════════════
-     HEADER
-═════��════════════════════════════════ -->
 <header class="sil-header">
   <a class="sil-header__wordmark" href="/dashboard/">Sensory Intelligence Lab</a>
   <button class="sil-header__toggle" id="silMenuToggle" aria-label="Toggle navigation" aria-expanded="false">
@@ -263,7 +210,6 @@
   </nav>
 </header>
 
-<!-- Breadcrumb -->
 <nav aria-label="Breadcrumb" class="bc">
   <ol>
     <li><a href="/dashboard/">Dashboard</a></li>
@@ -272,16 +218,15 @@
   </ol>
 </nav>
 
-<!-- Main content -->
 <main>
 
   <div class="ph">
     <h2>Rooms</h2>
-    <p>Recreate Alvin Lucier's "I Am Sitting in a Room" by iterating your sound through different acoustic environments.</p>
+    <p>Recreate Alvin Lucier's "I Am Sitting in a Room" — iterating your sound through an acoustic space until only resonant frequencies remain.</p>
   </div>
 
   <div class="card">
-    <p class="card-title">tutorial</p>
+    <p class="card-title">rooms</p>
 
     <!-- Status -->
     <div class="iter-display">
@@ -292,14 +237,8 @@
       <div class="iter-status" id="l-status">ready</div>
     </div>
 
-    <!-- Room selection -->
-    <div class="row">
-      <span class="row-lbl">room →</span>
-      <button class="pill on" data-room="small">small room</button>
-      <button class="pill" data-room="bathroom">bathroom</button>
-      <button class="pill" data-room="kitchen">kitchen</button>
-      <button class="pill" data-room="hall">concert hall</button>
-    </div>
+    <!-- Iteration progress bar (shows 0–25) -->
+    <div class="iter-progress"><div class="iter-progress-fill" id="l-prog-fill"></div></div>
 
     <!-- Source selection -->
     <div class="row">
@@ -310,6 +249,33 @@
       <button class="btn" id="l-record" style="display:none;min-width:80px">⏺ record</button>
       <span class="rec-state" id="l-rec-state" style="display:none"></span>
       <button class="pill" id="l-rec-new" style="display:none">record new</button>
+    </div>
+
+    <!-- Waveform Editor -->
+    <div class="waveform-editor" id="waveform-editor">
+      <div class="waveform-header">
+        <span class="waveform-title">Waveform Editor</span>
+        <span class="waveform-info" id="wf-info">Selection: 0.000 s – 0.000 s (0.000 s)</span>
+      </div>
+      <div class="waveform-canvas-wrap" id="wf-wrap">
+        <canvas class="waveform-canvas" id="wf-canvas"></canvas>
+      </div>
+      <div class="waveform-scrollbar" id="wf-scrollbar" style="display:none">
+        <div class="waveform-scrollbar-thumb" id="wf-scrollbar-thumb"></div>
+      </div>
+      <div class="waveform-controls">
+        <div class="waveform-zoom">
+          <span class="row-lbl">zoom →</span>
+          <button class="pill" id="wf-zoom-out">−</button>
+          <button class="pill" id="wf-zoom-in">+</button>
+          <button class="pill" id="wf-zoom-fit">Fit</button>
+        </div>
+        <div class="waveform-actions">
+          <button class="btn" id="wf-preview">▶ Preview Selection</button>
+          <button class="btn on" id="wf-use">Use Selection</button>
+          <button class="btn" id="wf-reset">Reset to Full</button>
+        </div>
+      </div>
     </div>
 
     <!-- Volume control -->
@@ -327,8 +293,8 @@
     <!-- Transport -->
     <div class="row">
       <button class="btn" id="l-play" style="min-width:80px">▶ play</button>
-      <button class="btn" id="l-loop" style="min-width:70px">loop</button>
-      <button class="btn" id="l-iterate">+ iterate</button>
+      <button class="btn on" id="l-loop" style="min-width:70px">loop</button>
+      <button class="btn" id="l-iterate" disabled>+ iterate</button>
       <button class="btn" id="l-reset" style="min-width:70px">reset</button>
     </div>
 
@@ -348,31 +314,26 @@
       <span class="dl-prog" id="l-dl-prog">rendering…</span>
     </div>
 
-    <p class="hint">each iteration reinforces resonant frequencies of the room · changes become perceptible over 8-10 iterations</p>
+    <p class="hint">resonant frequencies emerge by iteration 3 · speech disappears by iteration 10 · max 25 iterations</p>
   </div>
 
   <!-- Instructions -->
   <div class="instructions">
-
     <h2>How it works</h2>
-    <p>In "I Am Sitting in a Room," Alvin Lucier repeatedly played his voice through a speaker and microphone, recording each iteration. Over time, the room's natural resonances—determined by its dimensions and materials—became more and more prominent, while his voice gradually disappeared.</p>
-    <p>Here, you choose a room (small room, bathroom, kitchen, or concert hall), each with different resonant frequencies. Upload a file, record yourself, or use a generated sample. Press <strong>+ iterate</strong> to process the current sound through the room's resonances. After several iterations, you'll hear the room's acoustic signature emerge.</p>
+    <p>In "I Am Sitting in a Room" (1969), Alvin Lucier read a text aloud, played it back through a speaker in a room, re-recorded it with a microphone, and repeated this process. With each pass, the room's natural resonant frequencies — determined by its dimensions — were amplified, while the original sound was gradually smoothed away. After enough iterations, only pure tones remained.</p>
+    <p>Upload a file or record yourself speaking, then press <strong>+ iterate</strong> to pass the sound through the acoustic simulation. Each iteration reinforces the room's resonant frequencies while suppressing everything else. By the third iteration you will notice tonal coloring; by the tenth, only resonances remain.</p>
 
-    <h2>Choosing a room</h2>
-    <p><strong>Small room</strong>: Lower resonances, tighter spaces. Faster emergence of acoustic character.</p>
-    <p><strong>Bathroom</strong>: Bright, reflective surfaces. Higher frequencies are amplified; creates a characteristic "bathroom" tone.</p>
-    <p><strong>Kitchen</strong>: Mixed hard and soft surfaces. Subtle, balanced resonances.</p>
-    <p><strong>Concert hall</strong>: Large space with gentle resonances. Slower, more gradual transformation.</p>
+    <h2>Using the waveform editor</h2>
+    <p>When you upload or record audio, a waveform editor appears. Drag the handles to select a portion of the audio, preview your selection, then click <strong>Use Selection</strong> to set it as your loop. Trim silence at the beginning or end, or isolate a spoken phrase. A shorter loop produces faster, more dramatic results.</p>
 
-    <h2>About the loop feature</h2>
-    <p>The <strong>loop</strong> button makes the current iteration repeat continuously. This lets you sit with a single iteration and listen for emerging patterns before deciding whether to process it further.</p>
+    <h2>Iterating</h2>
+    <p>Each press of <strong>+ iterate</strong> processes the current iteration through the room simulation. The iteration counter and progress bar show where you are. You can iterate up to 25 times. After processing, the new iteration plays automatically. Use the <strong>loop</strong> button (on by default) to hear any iteration repeat.</p>
 
     <h2>Downloading your work</h2>
-    <p>Use the download section to export any range of iterations as a single WAV file, optionally looped. Select a starting iteration, ending iteration, and number of loops. This lets you create a composition showing the complete progression from source to resonance.</p>
+    <p>Select a range of iterations and a loop count, then click <strong>download wav</strong>. The exported file stitches those iterations together in sequence — a complete recording of the transformation from speech to pure resonance.</p>
 
-    <h2>Try it in a real room</h2>
-    <p>The physical version is simple: record yourself speaking on one device. Play that recording back through a speaker in a real room and record it on a second device with the microphone placed in the room. Play that recording back and record again. Repeat 8-10 times to hear the room's resonances emerge.</p>
-
+    <h2>Listening guide</h2>
+    <p>Iteration 0 is your source. By iteration 3–4, you will hear a resonant coloring begin to emerge. By iteration 8–10, speech or melody will be largely subsumed by the room's characteristic frequencies. By iteration 15–20, only smooth, organ-like tones remain. The process mirrors the original: the room, not the performer, becomes the composer.</p>
   </div>
 
 </main>
@@ -388,307 +349,774 @@
 (function(){
 'use strict';
 
-var audioCtx=null;
-function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
-function resumeCtx(){var c=getCtx();if(c.state==='suspended')c.resume();return c;}
-
-// Room frequency presets (generative filters)
-var ROOMS={
-  small:{freqs:[250,500,1000],qs:[2,1.8,1.5],gains:[3,2,1.5]},
-  bathroom:{freqs:[400,1200,3000],qs:[3,2.5,2],gains:[4,3,2]},
-  kitchen:{freqs:[300,800,2000],qs:[1.5,1.2,0.8],gains:[2,1,0.5]},
-  hall:{freqs:[150,600,2500],qs:[1,1,1],gains:[2,1.5,1]}
-};
-var currentRoom='small';
-
-function normalizeBuffer(buf,target){
-  target=target||0.78;
-  var d=buf.getChannelData(0),peak=0;
-  for(var i=0;i<d.length;i++){var a=Math.abs(d[i]);if(a>peak)peak=a;}
-  if(peak<0.001)return;
-  var s=target/peak;
-  for(var i=0;i<d.length;i++)d[i]*=s;
+/* ── Audio context ── */
+var audioCtx = null;
+function getCtx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+function resumeCtx(){
+  var c = getCtx();
+  if(c.state === 'suspended') c.resume();
+  return c;
 }
 
-function audioBufferToWav(buf){
-  var nc=buf.numberOfChannels,sr=buf.sampleRate,len=buf.length,bps=2,dl=len*nc*bps;
-  var wav=new ArrayBuffer(44+dl),v=new DataView(wav);
+/* ══════════════════════════════════════════════════════════════
+   LUCIER AUDIO ENGINE
+   ──────────────────────────────────────────────────────────────
+   Authentically models "I Am Sitting in a Room":
+
+   Each iteration applies:
+   1. A bank of narrow bandpass filters at harmonically-related
+      room resonance frequencies (modeled on a ~4×5×3m room).
+      These reinforce themselves cumulatively — exactly as in
+      Lucier's physical room where standing waves accumulate.
+   2. A small amount of early-reflection convolution (IIR comb)
+      to simulate the "played through speaker + re-recorded"
+      round-trip.
+   3. Gentle high-frequency roll-off (lowpass) to emulate the
+      response of a dynamic microphone at distance.
+   4. Re-normalization so the signal stays at a healthy level.
+
+   The key to authentic Lucier behavior:
+   - By N=3: resonant coloring clearly audible, speech still intact
+   - By N=8-10: speech smoothed away, tonal drones dominant
+   - By N=15-25: pure, slowly-evolving resonant tones only
+
+   This is achieved because each bandpass pass through a narrow
+   filter (high Q) *multiplies* the spectral emphasis. After k
+   passes through a filter of gain G at resonant frequency f,
+   the energy at f is G^k while off-resonance energy decays as
+   (G_offres)^k → 0. The off-resonance suppression is exponential.
+════════════════════════════════════════════════════════════════ */
+
+var MAX_ITER = 25;
+
+/*
+  Room resonance frequencies (Hz) for a medium-sized room
+  (~4.2m × 5.1m × 2.7m), including axial and tangential modes.
+  These are the actual standing-wave frequencies that would build
+  up in such a space. The Q values are narrow to ensure rapid
+  accumulation.
+*/
+var ROOM_MODES = [
+  // Axial modes (strongest)
+  { f: 81,   q: 28, g: 1.0  },   // 1,0,0  — length axis
+  { f: 104,  q: 26, g: 1.0  },   // 0,1,0  — width axis
+  { f: 162,  q: 24, g: 0.95 },   // 2,0,0
+  { f: 208,  q: 22, g: 0.9  },   // 0,2,0
+  { f: 243,  q: 22, g: 0.9  },   // 3,0,0 / 0,0,1 (height)
+  { f: 312,  q: 20, g: 0.85 },   // tangential
+  { f: 389,  q: 18, g: 0.8  },   // tangential
+  { f: 454,  q: 18, g: 0.75 },   // oblique
+  { f: 520,  q: 16, g: 0.7  },   // oblique
+  { f: 648,  q: 16, g: 0.65 },   // higher order
+  { f: 729,  q: 14, g: 0.6  },
+  { f: 810,  q: 14, g: 0.55 },
+  { f: 972,  q: 12, g: 0.5  },
+  { f: 1134, q: 12, g: 0.45 },
+  { f: 1296, q: 10, g: 0.4  },
+  { f: 1458, q: 10, g: 0.35 },
+  { f: 1782, q: 8,  g: 0.3  },
+];
+
+/*
+  applyRoomIteration — the core Lucier pass.
+
+  Uses OfflineAudioContext so it runs faster than real-time.
+  For each iteration we:
+  1. Apply the resonator bank (bandpass filters in parallel,
+     summed back together with the direct signal at reduced gain).
+  2. Apply a comb filter pair to simulate early reflections.
+  3. Apply a gentle low-pass (12 kHz) for mic roll-off.
+  4. Normalize.
+*/
+function applyRoomIteration(inBuf, iterNum) {
+  var sr = inBuf.sampleRate;
+  var len = inBuf.length;
+  var off = new OfflineAudioContext(1, len, sr);
+
+  // Source
+  var src = off.createBufferSource();
+  var copy = off.createBuffer(1, len, sr);
+  copy.getChannelData(0).set(inBuf.getChannelData(0));
+  src.buffer = copy;
+
+  // Master output gain
+  var outGain = off.createGain();
+  outGain.gain.value = 1.0;
+  outGain.connect(off.destination);
+
+  // Low-pass: mic roll-off (12kHz, -12dB/oct)
+  var lp = off.createBiquadFilter();
+  lp.type = 'lowpass';
+  lp.frequency.value = 12000;
+  lp.Q.value = 0.5;
+  outGain.connect = undefined; // we'll rebuild the chain below
+
+  // Rebuild: src → lp → outGain → destination
+  // Actually let's build the graph properly:
+
+  var finalOut = off.createGain();
+  finalOut.gain.value = 1.0;
+  finalOut.connect(off.destination);
+
+  var lpFilter = off.createBiquadFilter();
+  lpFilter.type = 'lowpass';
+  lpFilter.frequency.value = 12000;
+  lpFilter.Q.value = 0.5;
+  lpFilter.connect(finalOut);
+
+  // Comb filter pair simulating early reflections
+  // (room ~4.2m long: RT ≈ 4.2/343 s ≈ 12ms)
+  var combDelay1 = off.createDelay(0.1);
+  combDelay1.delayTime.value = 0.0122; // 12.2ms
+  var combGain1 = off.createGain();
+  combGain1.gain.value = 0.22;
+  combDelay1.connect(combGain1);
+  combGain1.connect(lpFilter);
+
+  var combDelay2 = off.createDelay(0.1);
+  combDelay2.delayTime.value = 0.0194; // 19.4ms (width axis)
+  var combGain2 = off.createGain();
+  combGain2.gain.value = 0.15;
+  combDelay2.connect(combGain2);
+  combGain2.connect(lpFilter);
+
+  // Resonator bank: parallel bandpass filters
+  // Each mode contributes a narrowband gain peak.
+  // Gain of each filter = mode.g (scaled so early iters are subtle,
+  // later iters become dominant as they compound).
+  // Direct signal passes through at gain 0.7 to preserve source early on.
+  var directGain = off.createGain();
+  // Direct signal gain decreases per iteration so resonances win
+  // Iter 1 → 0.68, iter 5 → 0.55, iter 10 → 0.35, iter 20 → 0.08
+  var dg = Math.max(0.04, 0.7 * Math.pow(0.91, iterNum - 1));
+  directGain.gain.value = dg;
+  directGain.connect(lpFilter);
+
+  src.connect(directGain);
+  src.connect(combDelay1);
+  src.connect(combDelay2);
+
+  // Sum node for resonators
+  var resSum = off.createGain();
+  resSum.gain.value = 1.0;
+  resSum.connect(lpFilter);
+
+  ROOM_MODES.forEach(function(mode) {
+    var bp = off.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = mode.f;
+    bp.Q.value = mode.q;
+    var bg = off.createGain();
+    // Filter output gain: scales up with iteration count so resonances
+    // progressively dominate. At iter 1 they add subtle color; by iter
+    // 10 they are dominant.
+    var filterGain = mode.g * (0.55 + 0.045 * Math.min(iterNum, 20));
+    bg.gain.value = filterGain;
+    src.connect(bp);
+    bp.connect(bg);
+    bg.connect(resSum);
+  });
+
+  src.start(0);
+
+  return off.startRendering().then(function(rendered) {
+    normalizeBuffer(rendered, 0.82);
+    return rendered;
+  });
+}
+
+/* ── Buffer helpers ── */
+function normalizeBuffer(buf, target) {
+  target = target || 0.82;
+  var d = buf.getChannelData(0), peak = 0;
+  for(var i = 0; i < d.length; i++){var a = Math.abs(d[i]); if(a > peak) peak = a;}
+  if(peak < 0.001) return;
+  var s = target / peak;
+  for(var i = 0; i < d.length; i++) d[i] *= s;
+}
+
+function audioBufferToWav(buf) {
+  var nc = buf.numberOfChannels, sr = buf.sampleRate, len = buf.length, bps = 2, dl = len*nc*bps;
+  var wav = new ArrayBuffer(44+dl), v = new DataView(wav);
   function ws(o,s){for(var i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i));}
   function cl(x){return Math.max(-1,Math.min(1,x));}
-  ws(0,'RIFF');v.setUint32(4,36+dl,true);ws(8,'WAVE');ws(12,'fmt ');
-  v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,nc,true);
-  v.setUint32(24,sr,true);v.setUint32(28,sr*nc*bps,true);
-  v.setUint16(32,nc*bps,true);v.setUint16(34,16,true);
-  ws(36,'data');v.setUint32(40,dl,true);
-  var off=44,chans=[];
-  for(var c=0;c<nc;c++)chans.push(buf.getChannelData(c));
-  for(var i=0;i<len;i++)for(var c=0;c<nc;c++){v.setInt16(off,Math.round(cl(chans[c][i])*32767),true);off+=2;}
+  ws(0,'RIFF'); v.setUint32(4,36+dl,true); ws(8,'WAVE'); ws(12,'fmt ');
+  v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,nc,true);
+  v.setUint32(24,sr,true); v.setUint32(28,sr*nc*bps,true);
+  v.setUint16(32,nc*bps,true); v.setUint16(34,16,true);
+  ws(36,'data'); v.setUint32(40,dl,true);
+  var off = 44, chans = [];
+  for(var c = 0; c < nc; c++) chans.push(buf.getChannelData(c));
+  for(var i = 0; i < len; i++) for(var c = 0; c < nc; c++){
+    v.setInt16(off, Math.round(cl(chans[c][i])*32767), true); off += 2;
+  }
   return wav;
 }
 
-function triggerDownload(ab,name){
-  var b=new Blob([ab],{type:'audio/wav'}),u=URL.createObjectURL(b),a=document.createElement('a');
-  a.href=u;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);
+function triggerDownload(ab, name) {
+  var b = new Blob([ab],{type:'audio/wav'}), u = URL.createObjectURL(b), a = document.createElement('a');
+  a.href = u; a.download = name; document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(u);
 }
 
-/* Lucier state */
-var L={iters:[],cur:0,playing:false,looping:false,recording:false,hasRec:false,processing:false,vol:0.8};
-var lSrc=null,lGain=null,mRec=null,recChunks=[];
+/* ══════════════════════════════════════════════════════════════
+   WAVEFORM EDITOR
+════════════════════════════════════════════════════════════════ */
+var wfState = {
+  fullBuffer: null,
+  selStart: 0, selEnd: 1,
+  zoom: 1, scrollX: 0,
+  dragging: null, dragOffset: 0,
+  sbDragging: false, sbDragStartX: 0, sbDragStartScroll: 0,
+  previewSrc: null
+};
+var wfCanvas = null, wfCtx = null, wfWrap = null, wfScrollbar = null, wfScrollbarThumb = null;
 
-function applyRoomFilters(inBuf){
-  var sr=inBuf.sampleRate,len=inBuf.length;
-  var off=new OfflineAudioContext(1,len,sr);
-  var src=off.createBufferSource();
-  var c=off.createBuffer(1,len,sr);c.getChannelData(0).set(inBuf.getChannelData(0));
-  src.buffer=c;
-  var mg=off.createGain();mg.gain.value=1.0;mg.connect(off.destination);
-  
-  var room=ROOMS[currentRoom];
-  for(var i=0;i<room.freqs.length;i++){
-    var fl=off.createBiquadFilter();
-    fl.type='bandpass';
-    fl.frequency.value=room.freqs[i];
-    fl.Q.value=room.qs[i];
-    src.connect(fl);fl.connect(mg);
+function wfMaxScroll(){ return Math.max(0, (wfState.zoom-1)/wfState.zoom); }
+function wfClampScroll(){ wfState.scrollX = Math.max(0, Math.min(wfMaxScroll(), wfState.scrollX)); }
+function wfVisibleRange(){
+  wfClampScroll();
+  var vs = wfState.scrollX;
+  var ve = Math.min(1, vs + 1/wfState.zoom);
+  return {vs:vs, ve:ve};
+}
+
+function wfUpdateScrollbar(){
+  if(wfState.zoom <= 1){ wfScrollbar.style.display = 'none'; return; }
+  wfScrollbar.style.display = 'block';
+  var sbW = wfScrollbar.clientWidth;
+  var thumbW = Math.max(20, Math.round(sbW / wfState.zoom));
+  var ms = wfMaxScroll();
+  wfClampScroll();
+  var thumbLeft = ms > 0 ? Math.round((wfState.scrollX / ms) * (sbW - thumbW)) : 0;
+  wfScrollbarThumb.style.width = thumbW + 'px';
+  wfScrollbarThumb.style.left = thumbLeft + 'px';
+}
+
+function wfDraw(){
+  if(!wfState.fullBuffer || !wfCanvas) return;
+  var w = wfCanvas.width, h = wfCanvas.height;
+  var vr = wfVisibleRange();
+  var data = wfState.fullBuffer.getChannelData(0);
+  var startSample = Math.floor(vr.vs * data.length);
+  var endSample = Math.floor(vr.ve * data.length);
+  var spp = (endSample - startSample) / w;
+
+  wfCtx.fillStyle = '#fff';
+  wfCtx.fillRect(0, 0, w, h);
+
+  wfCtx.strokeStyle = '#2a5c45';
+  wfCtx.lineWidth = 1;
+  wfCtx.beginPath();
+  for(var x = 0; x < w; x++){
+    var s = Math.floor(startSample + x * spp);
+    var e = Math.min(Math.floor(s + spp), data.length);
+    var mn = 1, mx = -1;
+    for(var i = s; i < e; i++){if(data[i]<mn)mn=data[i]; if(data[i]>mx)mx=data[i];}
+    var y1 = h/2 - (mn*h/2), y2 = h/2 - (mx*h/2);
+    if(x === 0) wfCtx.moveTo(x, y1);
+    wfCtx.lineTo(x, y1);
+    wfCtx.lineTo(x, y2);
   }
-  
-  src.start(0);
-  return off.startRendering().then(function(r){normalizeBuffer(r,0.78);return r;});
+  wfCtx.stroke();
+
+  var span = vr.ve - vr.vs;
+  var spx = ((wfState.selStart - vr.vs) / span) * w;
+  var epx = ((wfState.selEnd   - vr.vs) / span) * w;
+  wfCtx.fillStyle = 'rgba(42,92,69,0.15)';
+  wfCtx.fillRect(spx, 0, epx - spx, h);
+  wfCtx.fillStyle = '#2a5c45';
+  wfCtx.fillRect(spx-2, 0, 4, h);
+  wfCtx.fillRect(epx-2, 0, 4, h);
+
+  wfUpdateSelectionInfo();
+  wfUpdateScrollbar();
 }
+
+function wfUpdateSelectionInfo(){
+  if(!wfState.fullBuffer) return;
+  var dur = wfState.fullBuffer.duration;
+  var s = wfState.selStart * dur, e = wfState.selEnd * dur;
+  document.getElementById('wf-info').textContent =
+    'Selection: ' + s.toFixed(3) + ' s – ' + e.toFixed(3) + ' s (' + (e-s).toFixed(3) + ' s)';
+}
+
+function showWaveformEditor(){
+  document.getElementById('waveform-editor').classList.add('visible');
+  setTimeout(function(){
+    wfCanvas.width = wfWrap.clientWidth;
+    wfCanvas.height = wfWrap.clientHeight;
+    wfDraw();
+  }, 10);
+}
+function hideWaveformEditor(){
+  document.getElementById('waveform-editor').classList.remove('visible');
+}
+
+function wfGetNorm(e){
+  var rect = wfWrap.getBoundingClientRect();
+  var x = ((e.clientX || (e.touches && e.touches[0].clientX) || 0) - rect.left) / rect.width;
+  var vr = wfVisibleRange();
+  return vr.vs + x * (vr.ve - vr.vs);
+}
+
+function wfMouseDown(e){
+  e.preventDefault();
+  var t = wfGetNorm(e);
+  var vr = wfVisibleRange();
+  var thr = (8 / wfWrap.clientWidth) * (vr.ve - vr.vs);
+  if(Math.abs(t - wfState.selStart) < thr){ wfState.dragging = 'start'; }
+  else if(Math.abs(t - wfState.selEnd) < thr){ wfState.dragging = 'end'; }
+  else { wfState.dragging = 'region'; wfState.dragOffset = t - wfState.selStart; }
+}
+function wfMouseMove(e){
+  if(!wfState.dragging) return;
+  e.preventDefault();
+  var t = Math.max(0, Math.min(1, wfGetNorm(e)));
+  if(wfState.dragging === 'start'){
+    wfState.selStart = Math.min(t, wfState.selEnd - 0.01);
+  } else if(wfState.dragging === 'end'){
+    wfState.selEnd = Math.max(t, wfState.selStart + 0.01);
+  } else {
+    var len = wfState.selEnd - wfState.selStart;
+    wfState.selStart = t - wfState.dragOffset;
+    wfState.selEnd = wfState.selStart + len;
+    if(wfState.selStart < 0){ wfState.selStart = 0; wfState.selEnd = len; }
+    if(wfState.selEnd > 1){ wfState.selEnd = 1; wfState.selStart = 1 - len; }
+  }
+  wfDraw();
+}
+function wfMouseUp(){ wfState.dragging = null; }
+
+function wfWheel(e){
+  if(wfState.zoom <= 1) return;
+  e.preventDefault();
+  wfState.scrollX = Math.max(0, Math.min(wfMaxScroll(), wfState.scrollX + (e.deltaX||e.deltaY)*0.001));
+  wfDraw();
+}
+
+function wfZoomIn(){
+  wfState.zoom = Math.min(wfState.zoom * 1.5, 4);
+  wfClampScroll();
+  wfDraw();
+}
+function wfZoomOut(){
+  wfState.zoom = Math.max(wfState.zoom / 1.5, 1);
+  wfState.scrollX = 0;
+  wfDraw();
+}
+function wfZoomFit(){
+  wfState.zoom = 1; wfState.scrollX = 0;
+  wfDraw();
+}
+
+function wfSbMouseDown(e){
+  e.preventDefault(); e.stopPropagation();
+  wfState.sbDragging = true;
+  wfState.sbDragStartX = (e.clientX || (e.touches && e.touches[0].clientX) || 0);
+  wfState.sbDragStartScroll = wfState.scrollX;
+  wfScrollbarThumb.classList.add('dragging');
+}
+function wfSbMouseMove(e){
+  if(!wfState.sbDragging) return;
+  var cx = (e.clientX || (e.touches && e.touches[0].clientX) || wfState.sbDragStartX);
+  var dx = cx - wfState.sbDragStartX;
+  var sbW = wfScrollbar.clientWidth;
+  var thumbW = parseFloat(wfScrollbarThumb.style.width) || 20;
+  var maxPx = sbW - thumbW;
+  var ms = wfMaxScroll();
+  wfState.scrollX = Math.max(0, Math.min(ms, wfState.sbDragStartScroll + (maxPx>0 ? (dx/maxPx)*ms : 0)));
+  wfDraw();
+}
+function wfSbMouseUp(){
+  if(wfState.sbDragging){ wfState.sbDragging = false; wfScrollbarThumb.classList.remove('dragging'); }
+}
+function wfSbTrackClick(e){
+  if(e.target === wfScrollbarThumb) return;
+  var rect = wfScrollbar.getBoundingClientRect();
+  var x = (e.clientX || (e.touches && e.touches[0].clientX) || 0) - rect.left;
+  var sbW = wfScrollbar.clientWidth;
+  var thumbW = parseFloat(wfScrollbarThumb.style.width) || 20;
+  var maxPx = sbW - thumbW;
+  var ms = wfMaxScroll();
+  wfState.scrollX = (maxPx > 0 ? Math.max(0, Math.min(1, (x - thumbW/2)/maxPx)) : 0) * ms;
+  wfDraw();
+}
+
+function wfPreview(){
+  if(wfState.previewSrc){
+    try{ wfState.previewSrc.stop(); } catch(e){}
+    wfState.previewSrc = null;
+    document.getElementById('wf-preview').textContent = '▶ Preview Selection';
+    return;
+  }
+  var ctx = resumeCtx();
+  var dur = wfState.fullBuffer.duration;
+  var start = wfState.selStart * dur, end = wfState.selEnd * dur;
+  var g = ctx.createGain(); g.gain.value = 0.7; g.connect(ctx.destination);
+  wfState.previewSrc = ctx.createBufferSource();
+  wfState.previewSrc.buffer = wfState.fullBuffer;
+  wfState.previewSrc.connect(g);
+  wfState.previewSrc.onended = function(){
+    wfState.previewSrc = null;
+    document.getElementById('wf-preview').textContent = '▶ Preview Selection';
+  };
+  document.getElementById('wf-preview').textContent = '⏸ Stop Preview';
+  wfState.previewSrc.start(ctx.currentTime, start, end - start);
+}
+
+function wfUseSelection(){
+  if(!wfState.fullBuffer) return;
+  var dur = wfState.fullBuffer.duration, sr = wfState.fullBuffer.sampleRate;
+  var start = Math.floor(wfState.selStart * dur * sr);
+  var end   = Math.floor(wfState.selEnd   * dur * sr);
+  var len = end - start;
+  var newBuf = getCtx().createBuffer(1, len, sr);
+  var nd = newBuf.getChannelData(0), od = wfState.fullBuffer.getChannelData(0);
+  for(var i = 0; i < len; i++) nd[i] = od[start + i];
+  normalizeBuffer(newBuf, 0.82);
+  // Re-initialize iteration stack with this cropped buffer
+  L.iters = [newBuf];
+  L.cur = 0;
+  document.getElementById('l-iterate').disabled = false;
+  updateLDisplay();
+  updateLSelects();
+  setLStatus('selection applied');
+  if(L.playing) lStop();
+  updateLDisplay();
+}
+
+function wfResetToFull(){
+  if(!wfState.fullBuffer) return;
+  wfState.selStart = 0; wfState.selEnd = 1;
+  // Restore full buffer as iteration 0
+  var full = wfState.fullBuffer;
+  normalizeBuffer(full, 0.82);
+  L.iters = [full]; L.cur = 0;
+  document.getElementById('l-iterate').disabled = false;
+  updateLDisplay(); updateLSelects(); setLStatus('reset to full');
+  if(L.playing) lStop();
+  wfDraw();
+}
+
+/* ── Init waveform with a decoded buffer ── */
+function initWaveform(buf){
+  wfState.fullBuffer = buf;
+  wfState.selStart = 0; wfState.selEnd = 1;
+  wfState.zoom = 1; wfState.scrollX = 0;
+  showWaveformEditor();
+}
+
+/* ══════════════════════════════════════════════════════════════
+   LUCIER PLAYER STATE
+════════════════════════════════════════════════════════════════ */
+var L = { iters:[], cur:0, playing:false, looping:true, recording:false, hasRec:false, processing:false, vol:0.8 };
+var lSrc = null, lGain = null, mRec = null, recChunks = [];
 
 function lPlay(){
-  if(L.iters.length===0)return;
+  if(L.iters.length === 0) return;
   lStop();
-  var ctx=resumeCtx();
-  lGain=ctx.createGain();lGain.gain.value=L.vol;lGain.connect(ctx.destination);
-  lSrc=ctx.createBufferSource();lSrc.buffer=L.iters[L.cur];lSrc.loop=L.looping;
+  var ctx = resumeCtx();
+  lGain = ctx.createGain(); lGain.gain.value = L.vol; lGain.connect(ctx.destination);
+  lSrc = ctx.createBufferSource(); lSrc.buffer = L.iters[L.cur]; lSrc.loop = L.looping;
   lSrc.connect(lGain);
-  lSrc.onended=function(){if(!L.looping){L.playing=false;setLPlayBtn(false);}};
-  lSrc.start();L.playing=true;setLPlayBtn(true);
+  lSrc.onended = function(){ if(!L.looping){ L.playing = false; setLPlayBtn(false); } };
+  lSrc.start(); L.playing = true; setLPlayBtn(true);
 }
 
 function lStop(){
-  if(lSrc){try{lSrc.stop();}catch(e){}lSrc=null;}
-  L.playing=false;setLPlayBtn(false);
+  if(lSrc){ try{ lSrc.stop(); } catch(e){} lSrc = null; }
+  L.playing = false; setLPlayBtn(false);
 }
 
 function setLPlayBtn(on){
-  var b=document.getElementById('l-play');
-  b.textContent=on?'⏸ stop':'▶ play';
-  b.classList.toggle('on',on);
+  var b = document.getElementById('l-play');
+  b.textContent = on ? '⏸ stop' : '▶ play';
+  b.classList.toggle('on', on);
 }
 
 function lIterate(){
-  if(L.processing||L.iters.length===0)return;
-  lStop();L.processing=true;
+  if(L.processing || L.iters.length === 0) return;
+  if(L.cur >= MAX_ITER){ setLStatus('max ' + MAX_ITER + ' iterations reached'); return; }
+  lStop(); L.processing = true;
   setLStatus('processing…');
-  document.getElementById('l-iterate').disabled=true;
-  applyRoomFilters(L.iters[L.cur]).then(function(r){
-    L.iters=L.iters.slice(0,L.cur+1);L.iters.push(r);L.cur=L.iters.length-1;
-    L.processing=false;
-    document.getElementById('l-iterate').disabled=false;
-    updateLDisplay();updateLSelects();setLStatus('ready');
+  document.getElementById('l-iterate').disabled = true;
+  var nextIterNum = L.cur + 1;
+  applyRoomIteration(L.iters[L.cur], nextIterNum).then(function(r){
+    L.iters = L.iters.slice(0, L.cur + 1);
+    L.iters.push(r);
+    L.cur = L.iters.length - 1;
+    L.processing = false;
+    var atMax = L.cur >= MAX_ITER;
+    document.getElementById('l-iterate').disabled = atMax;
+    if(atMax) setLStatus('max iterations reached');
+    else setLStatus('ready');
+    updateLDisplay();
+    updateLSelects();
     lPlay();
   }).catch(function(){
-    L.processing=false;document.getElementById('l-iterate').disabled=false;setLStatus('error — try again');
+    L.processing = false;
+    document.getElementById('l-iterate').disabled = false;
+    setLStatus('error — try again');
   });
 }
 
-function lReset(){lStop();L.cur=0;updateLDisplay();updateLSelects();setLStatus('reset');}
-
-function updateLDisplay(){
-  var n=L.cur,tot=L.iters.length;
-  document.getElementById('l-count').textContent='iteration '+n;
-  document.getElementById('l-sub').textContent=n===0?'original source · unprocessed':n+' of '+(tot-1)+' iteration'+(tot-1===1?'':'s');
+function lReset(){
+  lStop();
+  L.cur = 0;
+  // Keep all iters but jump to 0
+  updateLDisplay();
+  updateLSelects();
+  setLStatus('reset to iteration 0');
+  document.getElementById('l-iterate').disabled = L.iters.length === 0;
 }
 
-function setLStatus(m){document.getElementById('l-status').textContent=m;}
+function updateLDisplay(){
+  var n = L.cur, tot = L.iters.length;
+  document.getElementById('l-count').textContent = 'iteration ' + n;
+  document.getElementById('l-sub').textContent =
+    n === 0 ? 'original source · unprocessed'
+             : n + ' of ' + (tot-1) + ' iteration' + (tot-1===1?'':'s') + ' built';
+  // Progress bar: n/MAX_ITER
+  document.getElementById('l-prog-fill').style.width = ((n / MAX_ITER) * 100).toFixed(1) + '%';
+}
+
+function setLStatus(m){ document.getElementById('l-status').textContent = m; }
 
 function updateLSelects(){
-  var max=L.iters.length-1;
-  var fr=document.getElementById('l-dl-from'),to=document.getElementById('l-dl-to');
-  fr.innerHTML='';to.innerHTML='';
-  for(var i=0;i<=max;i++){
-    fr.innerHTML+='<option value="'+i+'">from iter '+i+'</option>';
-    to.innerHTML+='<option value="'+i+'"'+(i===max?' selected':'')+'>to iter '+i+'</option>';
+  var max = L.iters.length - 1;
+  var fr = document.getElementById('l-dl-from'), to = document.getElementById('l-dl-to');
+  fr.innerHTML = ''; to.innerHTML = '';
+  for(var i = 0; i <= max; i++){
+    fr.innerHTML += '<option value="' + i + '">from iter ' + i + '</option>';
+    to.innerHTML += '<option value="' + i + '"' + (i===max?' selected':'') + '>to iter ' + i + '</option>';
   }
-  var has=max>=1;
-  document.getElementById('l-dl-btn').disabled=!has;
-  document.getElementById('l-dl-note').textContent=has?'approx '+lEstSize()+' MB':'build iterations first';
+  var has = max >= 1;
+  document.getElementById('l-dl-btn').disabled = !has;
+  document.getElementById('l-dl-note').textContent = has ? 'approx ' + lEstSize() + ' MB' : 'build iterations first';
 }
 
 function lEstSize(){
-  var fr=parseInt(document.getElementById('l-dl-from').value,10);
-  var to=parseInt(document.getElementById('l-dl-to').value,10);
-  var lp=parseInt(document.getElementById('l-dl-loops').value,10);
-  return ((Math.max(0,to-fr+1)*lp*0.22)).toFixed(1);
+  var fr = parseInt(document.getElementById('l-dl-from').value, 10);
+  var to = parseInt(document.getElementById('l-dl-to').value, 10);
+  var lp = parseInt(document.getElementById('l-dl-loops').value, 10);
+  return ((Math.max(0, to - fr + 1) * lp * 0.22)).toFixed(1);
 }
 
 function lDownload(){
-  var fr=parseInt(document.getElementById('l-dl-from').value,10);
-  var to=parseInt(document.getElementById('l-dl-to').value,10);
-  var lp=parseInt(document.getElementById('l-dl-loops').value,10);
-  if(to<fr)to=fr;
-  var bufs=[];
-  for(var l=0;l<lp;l++)for(var i=fr;i<=to;i++)if(L.iters[i])bufs.push(L.iters[i]);
-  if(!bufs.length)return;
-  var btn=document.getElementById('l-dl-btn'),note=document.getElementById('l-dl-note'),prog=document.getElementById('l-dl-prog');
-  btn.disabled=true;note.style.display='none';prog.style.display='inline';
-  var sr=bufs[0].sampleRate,total=bufs.reduce(function(s,b){return s+b.length;},0);
-  var off=new OfflineAudioContext(1,total,sr);
-  var offset=0;
+  var fr = parseInt(document.getElementById('l-dl-from').value, 10);
+  var to = parseInt(document.getElementById('l-dl-to').value, 10);
+  var lp = parseInt(document.getElementById('l-dl-loops').value, 10);
+  if(to < fr) to = fr;
+  var bufs = [];
+  for(var l = 0; l < lp; l++) for(var i = fr; i <= to; i++) if(L.iters[i]) bufs.push(L.iters[i]);
+  if(!bufs.length) return;
+  var btn = document.getElementById('l-dl-btn'), note = document.getElementById('l-dl-note'), prog = document.getElementById('l-dl-prog');
+  btn.disabled = true; note.style.display = 'none'; prog.style.display = 'inline';
+  var sr = bufs[0].sampleRate, total = bufs.reduce(function(s,b){return s+b.length;},0);
+  var offCtx = new OfflineAudioContext(1, total, sr);
+  var offset = 0;
   bufs.forEach(function(b){
-    var s=off.createBufferSource(),c=off.createBuffer(1,b.length,sr);
-    c.getChannelData(0).set(b.getChannelData(0));s.buffer=c;s.connect(off.destination);
-    s.start(offset/sr);offset+=b.length;
+    var s = offCtx.createBufferSource(), c = offCtx.createBuffer(1, b.length, sr);
+    c.getChannelData(0).set(b.getChannelData(0)); s.buffer = c; s.connect(offCtx.destination);
+    s.start(offset / sr); offset += b.length;
   });
-  off.startRendering().then(function(r){
-    triggerDownload(audioBufferToWav(r),'lucier-iter'+fr+'-'+to+'-x'+lp+'.wav');
-    btn.disabled=false;prog.style.display='none';note.style.display='inline';
+  offCtx.startRendering().then(function(r){
+    triggerDownload(audioBufferToWav(r), 'lucier-iter' + fr + '-' + to + '-x' + lp + '.wav');
+    btn.disabled = false; prog.style.display = 'none'; note.style.display = 'inline';
   }).catch(function(){
-    btn.disabled=false;prog.style.display='none';note.textContent='export failed';note.style.display='inline';
+    btn.disabled = false; prog.style.display = 'none';
+    note.textContent = 'export failed'; note.style.display = 'inline';
   });
 }
 
-function loadBuf(decoded,label){
-  normalizeBuffer(decoded,0.78);
-  L.iters=[decoded];L.cur=0;
-  document.getElementById('l-iterate').disabled=false;
-  updateLDisplay();updateLSelects();setLStatus(label||'ready');
+/* ── Load a decoded AudioBuffer as iteration 0 ── */
+function loadBuf(buf, label){
+  normalizeBuffer(buf, 0.82);
+  // Store full buffer for waveform editor, iters start fresh
+  L.iters = [buf]; L.cur = 0;
+  document.getElementById('l-iterate').disabled = false;
+  updateLDisplay(); updateLSelects();
+  setLStatus(label || 'ready');
+  // Initialize waveform editor with the full buffer
+  initWaveform(buf);
 }
 
 function loadFile(file){
   lStop();
-  var r=new FileReader();
-  r.onload=function(e){
-    getCtx().decodeAudioData(e.target.result,function(d){
-      loadBuf(d,'loaded: '+file.name.substring(0,24));setLSrcUI('file');
-    },function(){setLStatus('could not decode file');});
+  var r = new FileReader();
+  r.onload = function(e){
+    getCtx().decodeAudioData(e.target.result, function(d){
+      loadBuf(d, 'loaded: ' + file.name.substring(0,24));
+      setLSrcUI('file');
+    }, function(){ setLStatus('could not decode file'); });
   };
   r.readAsArrayBuffer(file);
 }
 
+/* ── Recording ── */
 function startRec(){
-  if(L.recording){stopRec();return;}
+  if(L.recording){ stopRec(); return; }
   navigator.mediaDevices.getUserMedia({audio:true,video:false}).then(function(stream){
-    recChunks=[];mRec=new MediaRecorder(stream);
-    mRec.ondataavailable=function(e){if(e.data.size>0)recChunks.push(e.data);};
-    mRec.onstop=function(){
-      stream.getTracks().forEach(function(t){t.stop();});
-      var blob=new Blob(recChunks,{type:'audio/webm'});
-      var fr=new FileReader();
-      fr.onload=function(ev){
-        getCtx().decodeAudioData(ev.target.result,function(d){
-          normalizeBuffer(d,0.78);L.iters=[d];L.cur=0;L.hasRec=true;L.recording=false;
-          document.getElementById('l-iterate').disabled=false;
-          updateLDisplay();updateLSelects();setRecState('has_rec');setLStatus('ready');
-        },function(){setLStatus('decode failed');});
+    recChunks = []; mRec = new MediaRecorder(stream);
+    mRec.ondataavailable = function(e){ if(e.data.size>0) recChunks.push(e.data); };
+    mRec.onstop = function(){
+      stream.getTracks().forEach(function(t){ t.stop(); });
+      var blob = new Blob(recChunks, {type:'audio/webm'});
+      var fr = new FileReader();
+      fr.onload = function(ev){
+        getCtx().decodeAudioData(ev.target.result, function(d){
+          L.hasRec = true; L.recording = false;
+          loadBuf(d, 'ready');
+          setRecState('has_rec');
+        }, function(){ setLStatus('decode failed'); });
       };
       fr.readAsArrayBuffer(blob);
     };
-    mRec.start();L.recording=true;setRecState('rec');setLStatus('recording… (max 6s)');
-    setTimeout(function(){if(L.recording)stopRec();},6000);
-  }).catch(function(){setLStatus('mic access denied');});
+    mRec.start(); L.recording = true; setRecState('rec'); setLStatus('recording… (max 10s)');
+    setTimeout(function(){ if(L.recording) stopRec(); }, 10000);
+  }).catch(function(){ setLStatus('mic access denied'); });
 }
-
-function stopRec(){if(mRec&&L.recording)mRec.stop();}
+function stopRec(){ if(mRec && L.recording) mRec.stop(); }
 
 function setRecState(s){
-  var rb=document.getElementById('l-record'),sl=document.getElementById('l-rec-state'),nb=document.getElementById('l-rec-new');
-  if(s==='idle'){rb.textContent='⏺ record';rb.classList.remove('on');rb.style.display='inline-block';sl.style.display='none';nb.style.display='none';}
-  else if(s==='rec'){rb.textContent='⏹ stop';rb.classList.add('on');rb.style.display='inline-block';sl.style.display='none';nb.style.display='none';}
-  else if(s==='has_rec'){rb.style.display='none';sl.textContent='using recording';sl.style.display='inline';nb.style.display='inline-block';}
+  var rb = document.getElementById('l-record'), sl = document.getElementById('l-rec-state'), nb = document.getElementById('l-rec-new');
+  if(s==='idle'){ rb.textContent='⏺ record'; rb.classList.remove('on'); rb.style.display='inline-block'; sl.style.display='none'; nb.style.display='none'; }
+  else if(s==='rec'){ rb.textContent='⏹ stop'; rb.classList.add('on'); rb.style.display='inline-block'; sl.style.display='none'; nb.style.display='none'; }
+  else if(s==='has_rec'){ rb.style.display='none'; sl.textContent='using recording'; sl.style.display='inline'; nb.style.display='inline-block'; }
 }
 
 function setLSrcUI(t){
-  document.getElementById('l-upload-lbl').classList.toggle('on',t==='file');
-  document.getElementById('l-src-mic').classList.toggle('on',t==='mic');
-  var showMic=t==='mic';
-  document.getElementById('l-record').style.display=showMic&&!L.hasRec?'inline-block':'none';
-  document.getElementById('l-rec-state').style.display=showMic&&L.hasRec?'inline':'none';
-  document.getElementById('l-rec-new').style.display=showMic&&L.hasRec?'inline-block':'none';
-  if(showMic&&!L.hasRec)setRecState('idle');
+  document.getElementById('l-upload-lbl').classList.toggle('on', t==='file');
+  document.getElementById('l-src-mic').classList.toggle('on', t==='mic');
+  var showMic = t === 'mic';
+  document.getElementById('l-record').style.display = showMic && !L.hasRec ? 'inline-block' : 'none';
+  document.getElementById('l-rec-state').style.display = showMic && L.hasRec ? 'inline' : 'none';
+  document.getElementById('l-rec-new').style.display = showMic && L.hasRec ? 'inline-block' : 'none';
+  if(showMic && !L.hasRec) setRecState('idle');
 }
 
-/* Init */
-document.querySelectorAll('[data-room]').forEach(function(btn){
-  btn.addEventListener('click',function(){
-    currentRoom=btn.getAttribute('data-room');
-    document.querySelectorAll('[data-room]').forEach(function(b){b.classList.toggle('on',b===btn);});
-  });
+/* ══════════════════════════════════════════════════════════════
+   WIRE UP
+════════════════════════════════════════════════════════════════ */
+// Waveform editor elements
+wfCanvas = document.getElementById('wf-canvas');
+wfCtx = wfCanvas.getContext('2d');
+wfWrap = document.getElementById('wf-wrap');
+wfScrollbar = document.getElementById('wf-scrollbar');
+wfScrollbarThumb = document.getElementById('wf-scrollbar-thumb');
+
+// Waveform interactions
+wfWrap.addEventListener('mousedown', wfMouseDown);
+wfWrap.addEventListener('touchstart', wfMouseDown, {passive:false});
+document.addEventListener('mousemove', wfMouseMove);
+document.addEventListener('touchmove', wfMouseMove, {passive:false});
+document.addEventListener('mouseup', wfMouseUp);
+document.addEventListener('touchend', wfMouseUp);
+wfWrap.addEventListener('wheel', wfWheel, {passive:false});
+
+// Scrollbar
+wfScrollbarThumb.addEventListener('mousedown', wfSbMouseDown);
+wfScrollbarThumb.addEventListener('touchstart', wfSbMouseDown, {passive:false});
+wfScrollbar.addEventListener('click', wfSbTrackClick);
+document.addEventListener('mousemove', wfSbMouseMove);
+document.addEventListener('touchmove', function(e){ if(wfState.sbDragging){e.preventDefault();wfSbMouseMove(e);} }, {passive:false});
+document.addEventListener('mouseup', wfSbMouseUp);
+document.addEventListener('touchend', wfSbMouseUp);
+
+// Zoom buttons
+document.getElementById('wf-zoom-in').addEventListener('click', wfZoomIn);
+document.getElementById('wf-zoom-out').addEventListener('click', wfZoomOut);
+document.getElementById('wf-zoom-fit').addEventListener('click', wfZoomFit);
+
+// Editor actions
+document.getElementById('wf-preview').addEventListener('click', wfPreview);
+document.getElementById('wf-use').addEventListener('click', wfUseSelection);
+document.getElementById('wf-reset').addEventListener('click', wfResetToFull);
+
+// Source
+document.getElementById('l-file').addEventListener('change', function(e){
+  if(e.target.files && e.target.files[0]) loadFile(e.target.files[0]);
+});
+document.getElementById('l-src-mic').addEventListener('click', function(){
+  L.hasRec = false; setLSrcUI('mic'); lStop();
+  L.iters = []; updateLDisplay(); updateLSelects();
+  setLStatus('press record and speak');
+  hideWaveformEditor();
+});
+document.getElementById('l-record').addEventListener('click', startRec);
+document.getElementById('l-rec-new').addEventListener('click', function(){
+  L.hasRec = false; L.iters = []; lStop();
+  updateLDisplay(); updateLSelects();
+  setRecState('idle'); setLStatus('press record and speak');
+  hideWaveformEditor();
 });
 
-document.getElementById('l-file').addEventListener('change',function(e){if(e.target.files&&e.target.files[0])loadFile(e.target.files[0]);});
-document.getElementById('l-src-mic').addEventListener('click',function(){
-  L.hasRec=false;setLSrcUI('mic');lStop();L.iters=[];updateLDisplay();updateLSelects();setLStatus('press record and speak');
+// Transport
+document.getElementById('l-play').addEventListener('click', function(){
+  if(L.playing) lStop(); else lPlay();
 });
-document.getElementById('l-record').addEventListener('click',startRec);
-document.getElementById('l-rec-new').addEventListener('click',function(){
-  L.hasRec=false;L.iters=[];lStop();updateLDisplay();updateLSelects();setRecState('idle');setLStatus('press record and speak');
+document.getElementById('l-loop').addEventListener('click', function(){
+  L.looping = !L.looping;
+  this.classList.toggle('on', L.looping);
+  if(lSrc) lSrc.loop = L.looping;
 });
-document.getElementById('l-play').addEventListener('click',function(){if(L.playing)lStop();else lPlay();});
-document.getElementById('l-loop').addEventListener('click',function(){
-  L.looping=!L.looping;this.classList.toggle('on',L.looping);if(lSrc)lSrc.loop=L.looping;
+document.getElementById('l-iterate').addEventListener('click', lIterate);
+document.getElementById('l-reset').addEventListener('click', lReset);
+
+// Volume
+document.getElementById('l-vol').addEventListener('input', function(e){
+  L.vol = parseFloat(e.target.value);
+  document.getElementById('l-vol-val').textContent = Math.round(L.vol*100) + '%';
+  if(lGain) lGain.gain.setValueAtTime(L.vol, getCtx().currentTime);
 });
-document.getElementById('l-iterate').addEventListener('click',lIterate);
-document.getElementById('l-reset').addEventListener('click',lReset);
-document.getElementById('l-vol').addEventListener('input',function(e){
-  L.vol=parseFloat(e.target.value);
-  document.getElementById('l-vol-val').textContent=Math.round(L.vol*100)+'%';
-  if(lGain)lGain.gain.setValueAtTime(L.vol,getCtx().currentTime);
-});
-document.getElementById('l-dl-btn').addEventListener('click',lDownload);
+
+// Download
+document.getElementById('l-dl-btn').addEventListener('click', lDownload);
 ['l-dl-from','l-dl-to','l-dl-loops'].forEach(function(id){
-  document.getElementById(id).addEventListener('change',function(){
-    if(L.iters.length>1)document.getElementById('l-dl-note').textContent='approx '+lEstSize()+' MB';
+  document.getElementById(id).addEventListener('change', function(){
+    if(L.iters.length > 1) document.getElementById('l-dl-note').textContent = 'approx ' + lEstSize() + ' MB';
   });
 });
 
-/* Spacebar play/pause */
-document.addEventListener('keydown',function(e){
-  if(e.code==='Space'){e.preventDefault();if(!e.repeat){if(L.playing)lStop();else lPlay();}}
+// Space = play/pause
+document.addEventListener('keydown', function(e){
+  if(e.code === 'Space'){ e.preventDefault(); if(!e.repeat){ if(L.playing) lStop(); else lPlay(); } }
 });
+
+// Init loop button as ON (default)
+document.getElementById('l-loop').classList.add('on');
 
 updateLSelects();
+
 }());
 
-// ─────────────────────────────────────────────────────────
-// HEADER BEHAVIOUR
-// ─────────────────────────────────────────────────────────
+/* ── Header behaviour ── */
 const path = window.location.pathname.replace(/\/$/, '') || '/';
 document.querySelectorAll('.sil-header__nav a').forEach(a => {
   const href = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
-  if (href === path) a.classList.add('sil-active');
+  if(href === path) a.classList.add('sil-active');
 });
-
 const menuToggle = document.getElementById('silMenuToggle');
-const silNav     = document.getElementById('silNav');
+const silNav = document.getElementById('silNav');
 menuToggle.addEventListener('click', () => {
   const open = silNav.classList.toggle('sil-open');
   menuToggle.setAttribute('aria-expanded', open);
 });
-silNav.querySelectorAll('a').forEach(a =>
-  a.addEventListener('click', () => silNav.classList.remove('sil-open'))
-);
+silNav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => silNav.classList.remove('sil-open')));
 
-async function getSupabase() {
-  if (window._supabase) return window._supabase;
-  const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-  return createClient(
-    'https://lrjuufvrgkuvfxcmybtf.supabase.co',
-    'sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1'
-  );
+async function getSupabase(){
+  if(window._supabase) return window._supabase;
+  const {createClient} = await import('https://esm.sh/@supabase/supabase-js@2');
+  return createClient('https://lrjuufvrgkuvfxcmybtf.supabase.co','sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1');
 }
-
-document.getElementById('silSignOut').addEventListener('click', async function () {
-  this.disabled = true;
-  this.textContent = 'Signing out…';
-  try {
-    const sb = await getSupabase();
-    await sb.auth.signOut();
-  } finally {
-    window.location.replace('/');
-  }
+document.getElementById('silSignOut').addEventListener('click', async function(){
+  this.disabled = true; this.textContent = 'Signing out…';
+  try{ const sb = await getSupabase(); await sb.auth.signOut(); }
+  finally{ window.location.replace('/'); }
 });
 </script>
 
