@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neural Synthesis — Sensory Intelligence Lab</title>
+
+  <link rel="icon" href="/images/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --font-body:'Inter',sans-serif;
+      --font-heading:'Space Grotesk',sans-serif;
+      --bg:#fff;--surface:#f9f9f7;--border:#e5e5e0;
+      --text:#1a1a1a;--muted:#6b6b6b;
+      --accent:#2a5c45;--accent-light:#edf4f0;--accent-hover:#1e4433;
+    }
+    html{font-size:16px}
+    body{font-family:var(--font-body);color:var(--text);background:var(--bg);
+      min-height:100vh;display:flex;flex-direction:column;}
+
+    /* HEADER */
+    .sil-header{border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;
+      display:flex;align-items:center;justify-content:space-between;position:sticky;
+      top:0;left:0;right:0;background:var(--bg);z-index:100;gap:1rem;width:100%;}
+    .sil-header__wordmark{font-family:var(--font-heading);font-size:1rem;font-weight:600;
+      letter-spacing:-0.01em;white-space:nowrap;flex-shrink:0;text-decoration:none;color:var(--text);}
+    .sil-header__wordmark:hover{color:var(--accent);}
+    .sil-header__nav{display:flex;gap:0.25rem;align-items:center;}
+    .sil-header__nav a{font-family:var(--font-body);font-size:0.8rem;font-weight:500;
+      text-decoration:none;color:var(--muted);transition:color 0.15s;white-space:nowrap;padding:0.3rem 0.65rem;}
+    .sil-header__nav a:hover{color:var(--text);}
+    .sil-header__nav a.sil-active{color:var(--accent);font-weight:600;}
+    .sil-header__signout{font-family:var(--font-body);font-size:0.8rem;font-weight:500;
+      color:var(--muted);background:none;border:1px solid var(--border);cursor:pointer;
+      padding:0.3rem 0.75rem;transition:color 0.15s,border-color 0.15s;white-space:nowrap;line-height:1.6;}
+    .sil-header__signout:hover{color:var(--text);border-color:var(--text);}
+    .sil-header__signout:disabled{opacity:0.5;cursor:not-allowed;}
+    .sil-header__toggle{display:none;flex-direction:column;gap:4px;background:none;
+      border:none;cursor:pointer;padding:4px;flex-shrink:0;}
+    .sil-header__toggle span{display:block;width:20px;height:2px;background:var(--text);}
+    @media(max-width:700px){
+      .sil-header{padding:0 1rem;}
+      .sil-header__toggle{display:flex;}
+      .sil-header__nav{display:none;position:absolute;top:56px;left:0;right:0;
+        background:var(--bg);border-bottom:1px solid var(--border);flex-direction:column;
+        align-items:flex-start;padding:0.75rem 1rem;gap:0;z-index:99;}
+      .sil-header__nav.sil-open{display:flex;}
+      .sil-header__nav a,.sil-header__signout{font-size:0.875rem;padding:0.55rem 0.5rem;}
+      .sil-header__signout{border:none;}
+    }
+
+    /* Breadcrumb */
+    .bc{padding:.75rem 1.5rem 0;max-width:1100px;margin:0 auto;width:100%}
+    .bc ol{list-style:none;display:flex;gap:.3rem;align-items:center;font-size:.75rem;color:var(--muted);}
+    .bc li+li::before{content:'/';margin-right:.3rem;color:var(--border)}
+    .bc a{color:var(--muted);text-decoration:none;}
+    .bc a:hover{color:var(--accent);text-decoration:underline;}
+
+    /* Main */
+    main{max-width:1100px;margin:0 auto;padding:2.5rem 1.5rem 4rem;flex:1;width:100%;}
+    @media(max-width:600px){main{padding:1.5rem 1rem 3rem}}
+
+    /* Page header */
+    .ph{margin-bottom:2.5rem;padding-bottom:2rem;border-bottom:1px solid var(--border);}
+    .ph h2{font-family:var(--font-heading);font-size:1.5rem;font-weight:600;
+      letter-spacing:-.02em;line-height:1.2;margin-bottom:.4rem;}
+    .ph p{font-size:.9rem;color:var(--muted);}
+
+    /* Card */
+    .card{border:1px solid var(--border);padding:1.5rem;margin-bottom:1.5rem;background:var(--bg)}
+    .card-title{font-family:var(--font-heading);font-size:.67rem;font-weight:600;
+      letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 1.25rem}
+
+    /* Network canvas */
+    .network-wrap{position:relative;width:100%;height:380px;background:var(--surface);
+      border:1px solid var(--border);margin-bottom:1em;overflow:hidden;cursor:crosshair}
+    #ns-canvas{display:block;width:100%;height:100%}
+    .network-overlay{position:absolute;bottom:8px;right:10px;
+      font-family:var(--font-body);font-size:.7rem;color:var(--muted);
+      pointer-events:none;letter-spacing:.05em}
+
+    /* Status display */
+    .iter-display{border:1px solid var(--border);padding:.75em 1.25em;margin-bottom:1em;
+      display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75em;background:var(--surface)}
+    .iter-count{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:var(--text)}
+    .iter-sub{font-family:var(--font-body);font-size:.75rem;color:var(--muted)}
+    .iter-status{font-family:var(--font-body);font-size:.75rem;color:var(--muted);font-style:italic}
+
+    /* Energy bar */
+    .iter-progress{height:2px;background:var(--border);margin-bottom:1em;position:relative;overflow:hidden}
+    .iter-progress-fill{position:absolute;left:0;top:0;height:100%;background:var(--accent);
+      width:0%;transition:width .2s}
+
+    /* Rows */
+    .row{display:flex;align-items:center;gap:8px;margin-bottom:1em;flex-wrap:wrap}
+    .row-lbl{font-family:var(--font-body);font-size:.68rem;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--muted);margin-right:4px;white-space:nowrap}
+
+    /* Buttons */
+    .btn{font-family:var(--font-heading);font-size:.78rem;font-weight:600;
+      background:transparent;color:var(--text);border:1px solid var(--border);
+      padding:.5em 1.2em;cursor:pointer;white-space:nowrap;transition:all .12s}
+    .btn:hover{background:var(--accent);color:white;border-color:var(--accent)}
+    .btn.on{background:var(--accent);color:white;border-color:var(--accent)}
+    .btn.on:hover{background:var(--accent-hover)}
+    .btn:disabled{opacity:.3;cursor:not-allowed;pointer-events:none}
+
+    .pill{font-family:var(--font-body);font-size:.78rem;background:transparent;
+      color:var(--text);border:1px solid var(--border);padding:3px 12px;cursor:pointer;
+      transition:all .12s}
+    .pill:hover{background:var(--accent);color:white;border-color:var(--accent)}
+    .pill.on{background:var(--accent);color:white;border-color:var(--accent)}
+
+    /* Sliders */
+    .sliders{display:flex;flex-direction:row;gap:24px;margin-bottom:1.25em}
+    .ctrl{flex:1;display:flex;flex-direction:column;gap:6px}
+    .ctrl input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:2px;
+      background:var(--border);outline:none;cursor:pointer}
+    .ctrl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;
+      height:14px;border-radius:50%;background:var(--accent);cursor:pointer}
+    .ctrl input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;
+      background:var(--accent);border:none;cursor:pointer}
+    .ctrl-bot{display:flex;justify-content:space-between;align-items:baseline}
+    .ctrl-lbl{font-family:var(--font-body);font-size:.68rem;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--muted)}
+    .ctrl-val{font-family:var(--font-body);font-size:.75rem;color:var(--accent);font-weight:600}
+
+    /* Select */
+    .gen-select{font-family:var(--font-body);font-size:.78rem;background:transparent;
+      color:var(--text);border:1px solid var(--border);padding:3px 8px;cursor:pointer;
+      -webkit-appearance:none;appearance:none;}
+
+    /* Node info panel */
+    .node-info{border:1px solid var(--border);padding:.75em 1.25em;margin-bottom:1em;
+      background:var(--surface);display:none;font-size:.8rem;}
+    .node-info.visible{display:block}
+    .node-info-title{font-family:var(--font-heading);font-size:.67rem;font-weight:600;
+      letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.5em}
+    .node-info-grid{display:flex;gap:1.5em;flex-wrap:wrap}
+    .node-info-item{display:flex;flex-direction:column;gap:2px}
+    .node-info-key{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+    .node-info-val{font-family:var(--font-heading);font-size:.85rem;font-weight:600;color:var(--text)}
+
+    .hint{font-family:var(--font-body);font-size:.8rem;color:var(--muted);margin-top:1em;text-align:center}
+
+    /* Instructions */
+    .instructions{font-size:.9rem;line-height:1.75;color:var(--text)}
+    .instructions h2{font-family:var(--font-heading);font-size:1rem;font-weight:600;
+      letter-spacing:-.01em;margin:1.5rem 0 .4rem;margin-top:0}
+    .instructions h2:first-child{margin-top:0}
+    .instructions a{color:var(--accent);text-decoration:underline}
+    .instructions a:hover{color:var(--accent-hover)}
+
+    footer{border-top:1px solid var(--border);padding:1.25rem 1.5rem;
+      text-align:center;font-size:.78rem;color:var(--muted);}
+    footer a{color:var(--muted);text-decoration:none;}
+    footer a:hover{color:var(--accent);}
+
+    @media(max-width:600px){
+      .sliders{flex-direction:column;gap:16px}
+      .network-wrap{height:280px}
+    }
+  </style>
+</head>
+<body>
+
+<header class="sil-header">
+  <a class="sil-header__wordmark" href="/dashboard/">Sensory Intelligence Lab</a>
+  <button class="sil-header__toggle" id="silMenuToggle" aria-label="Toggle navigation" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <nav class="sil-header__nav" id="silNav">
+    <a href="/dashboard/">Dashboard</a>
+    <a href="/account/">Account</a>
+    <a href="/booking/">Book a session</a>
+    <button class="sil-header__signout" id="silSignOut">Sign out</button>
+  </nav>
+</header>
+
+<nav aria-label="Breadcrumb" class="bc">
+  <ol>
+    <li><a href="/dashboard/">Dashboard</a></li>
+    <li><a href="/compositions/">Compositions</a></li>
+    <li>Neural Synthesis</li>
+  </ol>
+</nav>
+
+<main>
+
+  <div class="ph">
+    <h2>Neural Synthesis</h2>
+    <p>A self-organizing sonic network — nodes generate sound, connections transmit signals, weights evolve through learning. Sound emerges from interaction, not composition.</p>
+  </div>
+
+  <div class="card">
+    <p class="card-title">neural synthesis</p>
+
+    <!-- Status bar -->
+    <div class="iter-display">
+      <div>
+        <div class="iter-count" id="ns-count">network idle</div>
+        <div class="iter-sub" id="ns-sub">12 nodes · 0 active connections</div>
+      </div>
+      <div class="iter-status" id="ns-status">stopped</div>
+    </div>
+
+    <!-- Energy bar -->
+    <div class="iter-progress"><div class="iter-progress-fill" id="ns-energy-fill"></div></div>
+
+    <!-- Network canvas -->
+    <div class="network-wrap" id="ns-wrap">
+      <canvas id="ns-canvas"></canvas>
+      <div class="network-overlay" id="ns-overlay">click node to inject · drag to connect</div>
+    </div>
+
+    <!-- Node info panel (shown when node selected) -->
+    <div class="node-info" id="ns-node-info">
+      <div class="node-info-title">selected node</div>
+      <div class="node-info-grid">
+        <div class="node-info-item"><span class="node-info-key">type</span><span class="node-info-val" id="ni-type">—</span></div>
+        <div class="node-info-item"><span class="node-info-key">frequency</span><span class="node-info-val" id="ni-freq">—</span></div>
+        <div class="node-info-item"><span class="node-info-key">activation</span><span class="node-info-val" id="ni-act">—</span></div>
+        <div class="node-info-item"><span class="node-info-key">amplitude</span><span class="node-info-val" id="ni-amp">—</span></div>
+        <div class="node-info-item"><span class="node-info-key">connections</span><span class="node-info-val" id="ni-conn">—</span></div>
+      </div>
+    </div>
+
+    <!-- Transport -->
+    <div class="row">
+      <button class="btn" id="ns-start" style="min-width:80px">▶ start</button>
+      <button class="btn" id="ns-stop" style="min-width:80px" disabled>■ stop</button>
+      <button class="btn" id="ns-mutate" disabled>↯ mutate</button>
+      <button class="btn" id="ns-rewire" disabled>⇄ rewire</button>
+      <button class="btn" id="ns-reset">reset</button>
+    </div>
+
+    <!-- Modes -->
+    <div class="row">
+      <span class="row-lbl">topology →</span>
+      <button class="pill on" id="ns-mode-random" data-mode="random">random</button>
+      <button class="pill" id="ns-mode-ring" data-mode="ring">ring</button>
+      <button class="pill" id="ns-mode-cluster" data-mode="cluster">cluster</button>
+      <button class="pill" id="ns-mode-chain" data-mode="chain">chain</button>
+    </div>
+
+    <!-- Parameter sliders -->
+    <div class="sliders">
+      <div class="ctrl">
+        <input type="range" id="ns-temp" min="0" max="1" value="0.4" step="0.01">
+        <div class="ctrl-bot">
+          <span class="ctrl-lbl">temperature</span>
+          <span class="ctrl-val" id="ns-temp-val">40%</span>
+        </div>
+      </div>
+      <div class="ctrl">
+        <input type="range" id="ns-feedback" min="0" max="1" value="0.5" step="0.01">
+        <div class="ctrl-bot">
+          <span class="ctrl-lbl">feedback</span>
+          <span class="ctrl-val" id="ns-feedback-val">50%</span>
+        </div>
+      </div>
+      <div class="ctrl">
+        <input type="range" id="ns-nonlin" min="0" max="1" value="0.35" step="0.01">
+        <div class="ctrl-bot">
+          <span class="ctrl-lbl">nonlinearity</span>
+          <span class="ctrl-val" id="ns-nonlin-val">35%</span>
+        </div>
+      </div>
+      <div class="ctrl">
+        <input type="range" id="ns-vol" min="0" max="1" value="0.7" step="0.01">
+        <div class="ctrl-bot">
+          <span class="ctrl-lbl">volume</span>
+          <span class="ctrl-val" id="ns-vol-val">70%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Learning row -->
+    <div class="row">
+      <span class="row-lbl">learning →</span>
+      <button class="pill on" id="ns-hebbian">hebbian</button>
+      <button class="pill on" id="ns-drift">frequency drift</button>
+      <button class="pill" id="ns-spatial">spatial pan</button>
+    </div>
+
+    <p class="hint">nodes pulse with amplitude · color maps to frequency · connections glow with signal energy · click any node to inject energy</p>
+  </div>
+
+  <!-- Instructions -->
+  <div class="instructions">
+    <h2>How it works</h2>
+    <p>Neural Synthesis models a small network of sound-generating and signal-processing nodes connected by weighted edges. When the network runs, each node sums its incoming signals, passes them through a nonlinear activation function, and emits an audio output that flows to neighboring nodes. No sound is pre-composed — it emerges from the interaction of the system with itself.</p>
+    <p>The design follows David Tudor's approach in works like <em>Rainforest</em>: circuits that listen to each other, feeding back, accumulating instability, then resolving into unexpected textures. Paired with Hebbian learning — "neurons that fire together wire together" — the network's behavior slowly changes over time as active connections strengthen and quiet ones fade.</p>
+
+    <h2>Node types</h2>
+    <p>The network contains four kinds of nodes. <strong>Oscillator nodes</strong> generate continuous tones — sine, triangle, or chaotic waveforms — whose frequency drifts slowly if drift is enabled. <strong>Filter nodes</strong> shape incoming signals with low-pass or bandpass filters, carving the spectrum. <strong>Nonlinear nodes</strong> apply functions like tanh, wave-folding, or sigmoid to their input, introducing harmonic complexity and instability. <strong>Delay nodes</strong> hold signal in memory, creating echoes, rhythmic patterns, and phase relationships between distant parts of the network.</p>
+
+    <h2>Temperature</h2>
+    <p>The temperature slider is the primary expressive control. At low values the network settles into stable drones — slow, organ-like tones reminiscent of Eliane Radigue's long-form works. At high values feedback accumulates faster, nonlinear nodes begin to saturate, and the system produces chaotic bursts and unstable resonance. The sweet spot around 40–60% produces slow evolution with occasional turbulence.</p>
+
+    <h2>Injecting energy</h2>
+    <p>Click any node in the visualization to inject a pulse of energy directly into it. The network responds — neighboring nodes light up, connections glow, and the sonic texture shifts. This is the most immediate way to disturb the system and hear it recover. Try clicking the same node repeatedly to force a feedback loop, or click different nodes to set multiple regions of the network into activity.</p>
+
+    <h2>Mutate and rewire</h2>
+    <p>Press <strong>↯ mutate</strong> to randomly shift node frequencies, weights, and activation functions — producing a new sonic species without stopping the network. Press <strong>⇄ rewire</strong> to randomly add and remove connections, changing the network's topology while it runs. Together these tools let you evolve the system continuously, never returning to the same configuration twice.</p>
+
+    <h2>Topology modes</h2>
+    <p>The topology selector changes how nodes are connected when you reset. <strong>Random</strong> connects nodes at chance, producing unpredictable behavior. <strong>Ring</strong> arranges nodes in a loop — signal circulates continuously. <strong>Cluster</strong> creates two groups with sparse inter-group connections, producing two interacting ecosystems. <strong>Chain</strong> passes signal through nodes in sequence, like a physical room with multiple chambers.</p>
+  </div>
+
+</main>
+
+<footer>
+  <p>Jordan Elias Music Therapy · Berlin ·
+    <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a> ·
+    <a href="https://jordanelias.de/" target="_blank" rel="noopener">jordanelias.de</a>
+  </p>
+</footer>
+
+<script>
+(function(){
+'use strict';
+
+/* ══════════════════════════════════════════════════════════════
+   NEURAL SYNTHESIS ENGINE
+   Inspired by David Tudor's Rainforest and Hebbian neural networks.
+
+   Architecture:
+   - 12 nodes (oscillator, filter, nonlinear, delay types)
+   - Weighted directed graph connections
+   - Per-tick signal propagation through activation functions
+   - Hebbian learning: active connection weights grow, inactive decay
+   - AudioWorklet-style processing via ScriptProcessor fallback
+   - Force-directed layout with collision
+════════════════════════════════════════════════════════════════ */
+
+var audioCtx = null;
+var masterGain = null;
+var masterLimiter = null;
+var isRunning = false;
+var animFrame = null;
+
+function getCtx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+function resumeCtx(){
+  var c = getCtx();
+  if(c.state === 'suspended') c.resume();
+  return c;
+}
+
+/* ── Network state ── */
+var NS = {
+  nodes: [],
+  edges: [],
+  selectedNode: null,
+  topology: 'random',
+  temperature: 0.4,
+  feedback: 0.5,
+  nonlinearity: 0.35,
+  volume: 0.7,
+  hebbianOn: true,
+  driftOn: true,
+  spatialOn: false,
+  time: 0,
+  energyLevel: 0,
+  totalEnergy: 0,
+  activeConns: 0
+};
+
+/* ── Node types and activation functions ── */
+var NODE_TYPES = ['oscillator','oscillator','oscillator','oscillator',
+                  'filter','filter','filter',
+                  'nonlinear','nonlinear','nonlinear',
+                  'delay','delay'];
+
+var ACTIVATION_NAMES = ['tanh','sin','fold','sigmoid','relu','abs'];
+function applyActivation(x, fn, strength){
+  var s = strength || 1;
+  switch(fn){
+    case 'tanh':    return Math.tanh(x * s * 2);
+    case 'sin':     return Math.sin(x * s * Math.PI);
+    case 'fold':    var v = x * s; return v > 1 ? 2 - v : v < -1 ? -2 - v : v;
+    case 'sigmoid': return 2/(1+Math.exp(-x*s*3)) - 1;
+    case 'relu':    return Math.max(0, x * s);
+    case 'abs':     return Math.abs(x * s) * Math.sign(x);
+    default:        return Math.tanh(x);
+  }
+}
+
+/* ── Harmonic series for musical coherence ── */
+var BASE_HZ = 55; // A1
+var HARMONICS = [1,2,3,4,5,6,7,8,9,10,12,15,16,18,20,24];
+
+function harmonicFreq(idx){
+  return BASE_HZ * HARMONICS[idx % HARMONICS.length];
+}
+
+/* ── Color mapping: frequency → hue ── */
+function freqToHue(hz){
+  // Map 55–880 Hz to 160–340 (green→blue→purple range, fitting accent palette)
+  var min = 55, max = 880;
+  var t = Math.max(0, Math.min(1, (Math.log(hz/min)) / Math.log(max/min)));
+  return 160 + t * 180;
+}
+
+/* ── Build network ── */
+function buildNetwork(topology){
+  // Stop existing audio nodes
+  NS.nodes.forEach(function(n){ if(n.osc){ try{n.osc.stop();}catch(e){} n.osc=null; } });
+  NS.edges = [];
+  NS.nodes = [];
+  NS.selectedNode = null;
+  hideNodeInfo();
+
+  var types = NODE_TYPES.slice();
+  var W = canvas.clientWidth || 600, H = canvas.clientHeight || 380;
+  var cx = W/2, cy = H/2, r = Math.min(W,H)*0.35;
+
+  for(var i = 0; i < 12; i++){
+    var angle = (i / 12) * Math.PI * 2 - Math.PI/2;
+    var px = cx + Math.cos(angle) * r * (0.7 + Math.random()*0.3);
+    var py = cy + Math.sin(angle) * r * (0.7 + Math.random()*0.3);
+
+    NS.nodes.push({
+      id: i,
+      type: types[i],
+      x: px, y: py,
+      vx: 0, vy: 0,
+      freq: harmonicFreq(i),
+      targetFreq: harmonicFreq(i),
+      activation: ACTIVATION_NAMES[i % ACTIVATION_NAMES.length],
+      output: 0,
+      prevOutput: 0,
+      energy: 0,
+      bias: (Math.random() - 0.5) * 0.1,
+      learningRate: 0.001 + Math.random() * 0.002,
+      delay: [],
+      delayIdx: 0,
+      delayLen: Math.floor((0.01 + Math.random()*0.04) * 44100 / 100), // in ticks
+      osc: null,
+      oscGain: null,
+      panNode: null,
+      phase: Math.random() * Math.PI * 2,
+      color: freqToHue(harmonicFreq(i))
+    });
+  }
+
+  // Create edges by topology
+  if(topology === 'random'){
+    for(var i = 0; i < 12; i++){
+      var numConns = 2 + Math.floor(Math.random() * 2);
+      for(var k = 0; k < numConns; k++){
+        var j = Math.floor(Math.random() * 12);
+        if(j !== i) addEdge(i, j, (Math.random()*0.8 - 0.1));
+      }
+    }
+  } else if(topology === 'ring'){
+    for(var i = 0; i < 12; i++){
+      addEdge(i, (i+1)%12, 0.6 + Math.random()*0.3);
+      if(Math.random() < 0.3) addEdge(i, (i+3)%12, 0.2 + Math.random()*0.3);
+    }
+    // A few backward connections
+    for(var i = 0; i < 3; i++){
+      var a = Math.floor(Math.random()*12), b = Math.floor(Math.random()*12);
+      if(a!==b) addEdge(a,b,-0.3 - Math.random()*0.3);
+    }
+  } else if(topology === 'cluster'){
+    // Two clusters of 6, with sparse inter-cluster
+    for(var i = 0; i < 6; i++){
+      for(var j = 0; j < 6; j++){
+        if(i!==j && Math.random()<0.4) addEdge(i,j,0.3+Math.random()*0.5);
+      }
+    }
+    for(var i = 6; i < 12; i++){
+      for(var j = 6; j < 12; j++){
+        if(i!==j && Math.random()<0.4) addEdge(i,j,0.3+Math.random()*0.5);
+      }
+    }
+    // Inter-cluster bridges
+    for(var k = 0; k < 3; k++){
+      addEdge(Math.floor(Math.random()*6), 6+Math.floor(Math.random()*6), 0.15+Math.random()*0.25);
+    }
+  } else if(topology === 'chain'){
+    for(var i = 0; i < 11; i++){
+      addEdge(i, i+1, 0.55 + Math.random()*0.3);
+    }
+    addEdge(11, 0, 0.3 + Math.random()*0.2); // feedback to start
+    for(var k = 0; k < 4; k++){
+      var a = Math.floor(Math.random()*12), b = Math.floor(Math.random()*12);
+      if(a!==b) addEdge(a,b,0.1+Math.random()*0.2);
+    }
+  }
+
+  updateStatus();
+}
+
+function addEdge(from, to, weight){
+  // Avoid duplicate
+  for(var i = 0; i < NS.edges.length; i++){
+    if(NS.edges[i].from===from && NS.edges[i].to===to) return;
+  }
+  NS.edges.push({
+    from: from, to: to,
+    weight: weight !== undefined ? weight : (Math.random()*1.0 - 0.2),
+    signal: 0,
+    age: 0
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════
+   AUDIO ENGINE
+   Uses Web Audio oscillators per node, modulated by the
+   network state on each animation frame.
+════════════════════════════════════════════════════════════════ */
+
+function startAudio(){
+  var ctx = resumeCtx();
+
+  // Master chain: gain → compressor → destination
+  masterGain = ctx.createGain();
+  masterGain.gain.value = NS.volume;
+
+  masterLimiter = ctx.createDynamicsCompressor();
+  masterLimiter.threshold.value = -6;
+  masterLimiter.knee.value = 3;
+  masterLimiter.ratio.value = 20;
+  masterLimiter.attack.value = 0.003;
+  masterLimiter.release.value = 0.1;
+  masterGain.connect(masterLimiter);
+  masterLimiter.connect(ctx.destination);
+
+  // Create oscillators and gains for each oscillator node
+  NS.nodes.forEach(function(n){
+    if(n.type === 'oscillator'){
+      n.osc = ctx.createOscillator();
+      n.osc.type = 'sine';
+      n.osc.frequency.value = n.freq;
+
+      n.oscGain = ctx.createGain();
+      n.oscGain.gain.value = 0;
+
+      n.panNode = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+
+      n.osc.connect(n.oscGain);
+      if(n.panNode){
+        n.oscGain.connect(n.panNode);
+        n.panNode.connect(masterGain);
+      } else {
+        n.oscGain.connect(masterGain);
+      }
+      n.osc.start();
+    }
+  });
+}
+
+function stopAudio(){
+  NS.nodes.forEach(function(n){
+    if(n.osc){ try{n.osc.stop();}catch(e){} n.osc=null; }
+    n.oscGain = null; n.panNode = null;
+  });
+  if(masterGain){ masterGain.disconnect(); masterGain=null; }
+  if(masterLimiter){ masterLimiter.disconnect(); masterLimiter=null; }
+}
+
+/* ── Network tick: propagate signals, apply learning ── */
+var TICK_INTERVAL = 50; // ms between network updates
+var lastTick = 0;
+
+function networkTick(now){
+  if(now - lastTick < TICK_INTERVAL) return;
+  lastTick = now;
+  NS.time++;
+
+  var temp = NS.temperature;
+  var fbk = NS.feedback;
+  var nl = NS.nonlinearity;
+
+  // Compute new outputs
+  var newOutputs = new Array(12).fill(0);
+  var totalE = 0;
+  var activeC = 0;
+
+  NS.nodes.forEach(function(n){
+    var inp = n.bias;
+
+    // Sum weighted inputs from edges
+    NS.edges.forEach(function(e){
+      if(e.to === n.id){
+        var sig = NS.nodes[e.from].output * e.weight;
+        inp += sig;
+        e.signal = Math.abs(sig);
+        if(e.signal > 0.01) activeC++;
+      }
+    });
+
+    var rawOut;
+    if(n.type === 'oscillator'){
+      // Oscillator: self-generates + influenced by inputs
+      n.phase += (n.freq / 44100) * 2 * Math.PI * TICK_INTERVAL;
+      rawOut = Math.sin(n.phase) + inp * fbk;
+    } else if(n.type === 'filter'){
+      // Filter: smooth input with memory
+      rawOut = n.prevOutput * (0.7 - fbk * 0.3) + inp * (0.3 + fbk * 0.3);
+    } else if(n.type === 'delay'){
+      // Delay: use ring buffer
+      n.delay[n.delayIdx] = inp;
+      n.delayIdx = (n.delayIdx + 1) % n.delayLen;
+      rawOut = n.delay[n.delayIdx] || 0;
+    } else {
+      // Nonlinear: pure transform
+      rawOut = inp;
+    }
+
+    // Apply activation with nonlinearity control
+    var activated = applyActivation(rawOut, n.activation, 0.5 + nl * 2);
+
+    // Temperature adds noise
+    var noise = (Math.random() - 0.5) * temp * 0.3;
+    activated += noise;
+
+    // Soft clip
+    activated = Math.tanh(activated);
+
+    newOutputs[n.id] = activated;
+    n.prevOutput = n.output;
+
+    // Energy tracking
+    n.energy = Math.abs(activated);
+    totalE += n.energy;
+  });
+
+  // Apply new outputs
+  NS.nodes.forEach(function(n){ n.output = newOutputs[n.id]; });
+
+  // Hebbian learning
+  if(NS.hebbianOn){
+    NS.edges.forEach(function(e){
+      var a = NS.nodes[e.from].output, b = NS.nodes[e.to].output;
+      var hebb = a * b * NS.nodes[e.to].learningRate * 0.5;
+      e.weight += hebb;
+      e.weight *= (1 - 0.0005); // decay
+      // Clamp
+      e.weight = Math.max(-1.5, Math.min(1.5, e.weight));
+    });
+  }
+
+  // Frequency drift
+  if(NS.driftOn){
+    NS.nodes.forEach(function(n){
+      if(n.type === 'oscillator'){
+        n.freq += (Math.random() - 0.5) * 0.08 * NS.temperature;
+        // Attract toward nearest harmonic
+        var nearest = HARMONICS.reduce(function(best, h){
+          var f = BASE_HZ * h;
+          return Math.abs(f - n.freq) < Math.abs(best - n.freq) ? f : best;
+        }, BASE_HZ);
+        n.freq += (nearest - n.freq) * 0.001;
+        n.freq = Math.max(40, Math.min(1200, n.freq));
+        n.color = freqToHue(n.freq);
+      }
+    });
+  }
+
+  // Update audio from network state
+  if(audioCtx){
+    NS.nodes.forEach(function(n){
+      if(n.type === 'oscillator' && n.osc && n.oscGain){
+        // Smooth frequency update
+        n.osc.frequency.setTargetAtTime(n.freq, audioCtx.currentTime, 0.1);
+        // Amplitude from energy
+        var amp = Math.max(0, Math.min(1, n.energy * 0.6));
+        n.oscGain.gain.setTargetAtTime(amp, audioCtx.currentTime, 0.05);
+        // Spatial pan from x position
+        if(NS.spatialOn && n.panNode){
+          var canvas = document.getElementById('ns-canvas');
+          var pan = ((n.x / (canvas.clientWidth||600)) * 2 - 1) * 0.8;
+          n.panNode.pan.setTargetAtTime(pan, audioCtx.currentTime, 0.2);
+        }
+      }
+    });
+  }
+
+  // Update global state
+  NS.energyLevel = Math.min(1, totalE / 6);
+  NS.activeConns = Math.floor(activeC / 2);
+  NS.totalEnergy = totalE;
+
+  document.getElementById('ns-energy-fill').style.width = (NS.energyLevel * 100).toFixed(1) + '%';
+  updateStatus();
+}
+
+/* ── Inject energy into a node ── */
+function injectNode(nodeId){
+  var n = NS.nodes[nodeId];
+  if(!n) return;
+  // Spike the output
+  n.output = 0.8 + Math.random() * 0.2;
+  n.energy = 1;
+  // Flash
+  n._flash = 1.0;
+  setStatus('energy injected → ' + n.type + ' node ' + nodeId);
+}
+
+/* ── Mutate ── */
+function mutate(){
+  // Shift weights
+  NS.edges.forEach(function(e){
+    e.weight += (Math.random() - 0.5) * 0.4 * NS.temperature;
+    e.weight = Math.max(-1.5, Math.min(1.5, e.weight));
+  });
+  // Shift frequencies
+  NS.nodes.forEach(function(n){
+    if(n.type === 'oscillator'){
+      var harm = HARMONICS[Math.floor(Math.random()*HARMONICS.length)];
+      n.freq = BASE_HZ * harm;
+      n.color = freqToHue(n.freq);
+    }
+    // Randomize activation for nonlinear nodes
+    if(n.type === 'nonlinear'){
+      n.activation = ACTIVATION_NAMES[Math.floor(Math.random()*ACTIVATION_NAMES.length)];
+    }
+  });
+  setStatus('mutated');
+}
+
+/* ── Rewire ── */
+function rewire(){
+  // Remove a random edge
+  if(NS.edges.length > 6){
+    NS.edges.splice(Math.floor(Math.random()*NS.edges.length), 1);
+  }
+  // Add new random edges
+  var n = Math.floor(Math.random() * 3) + 1;
+  for(var k = 0; k < n; k++){
+    var a = Math.floor(Math.random()*12), b = Math.floor(Math.random()*12);
+    if(a !== b) addEdge(a, b, (Math.random()*1.0 - 0.2));
+  }
+  setStatus('rewired · ' + NS.edges.length + ' connections');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   VISUALIZATION
+════════════════════════════════════════════════════════════════ */
+
+var canvas, ctx2d;
+var dragNode = null, dragConnStart = null;
+var mouseX = 0, mouseY = 0;
+
+var NODE_TYPE_SYMBOLS = {oscillator:'○', filter:'◈', nonlinear:'◆', delay:'◫'};
+var NODE_RADIUS = 22;
+
+function initCanvas(){
+  canvas = document.getElementById('ns-canvas');
+  ctx2d = canvas.getContext('2d');
+  var wrap = document.getElementById('ns-wrap');
+
+  function resize(){
+    canvas.width = wrap.clientWidth;
+    canvas.height = wrap.clientHeight;
+  }
+  resize();
+  window.addEventListener('resize', function(){
+    resize();
+    if(!isRunning) drawNetwork();
+  });
+
+  // Mouse / touch events
+  canvas.addEventListener('mousedown', onCanvasDown);
+  canvas.addEventListener('mousemove', onCanvasMove);
+  canvas.addEventListener('mouseup', onCanvasUp);
+  canvas.addEventListener('click', onCanvasClick);
+  canvas.addEventListener('touchstart', function(e){ e.preventDefault(); onCanvasDown(e.touches[0]); }, {passive:false});
+  canvas.addEventListener('touchmove', function(e){ e.preventDefault(); onCanvasMove(e.touches[0]); }, {passive:false});
+  canvas.addEventListener('touchend', function(e){ e.preventDefault(); onCanvasUp(e.touches[0]||e.changedTouches[0]); }, {passive:false});
+}
+
+function getNodeAt(x, y){
+  for(var i = NS.nodes.length-1; i >= 0; i--){
+    var n = NS.nodes[i];
+    var dx = n.x - x, dy = n.y - y;
+    if(Math.sqrt(dx*dx+dy*dy) < NODE_RADIUS + 4) return n;
+  }
+  return null;
+}
+
+function onCanvasDown(e){
+  var r = canvas.getBoundingClientRect();
+  var x = (e.clientX||0) - r.left, y = (e.clientY||0) - r.top;
+  var n = getNodeAt(x, y);
+  if(n){
+    dragNode = n;
+    dragConnStart = null;
+  }
+}
+function onCanvasMove(e){
+  var r = canvas.getBoundingClientRect();
+  mouseX = (e.clientX||0) - r.left;
+  mouseY = (e.clientY||0) - r.top;
+  if(dragNode){
+    dragNode.x = mouseX;
+    dragNode.y = mouseY;
+    dragNode.vx = 0; dragNode.vy = 0;
+  }
+}
+function onCanvasUp(e){
+  dragNode = null;
+}
+function onCanvasClick(e){
+  var r = canvas.getBoundingClientRect();
+  var x = (e.clientX||0) - r.left, y = (e.clientY||0) - r.top;
+  var n = getNodeAt(x, y);
+  if(n){
+    NS.selectedNode = n.id;
+    showNodeInfo(n);
+    if(isRunning) injectNode(n.id);
+  } else {
+    NS.selectedNode = null;
+    hideNodeInfo();
+  }
+}
+
+function showNodeInfo(n){
+  document.getElementById('ns-node-info').classList.add('visible');
+  document.getElementById('ni-type').textContent = n.type;
+  document.getElementById('ni-freq').textContent = n.type === 'oscillator' ? n.freq.toFixed(1) + ' Hz' : '—';
+  document.getElementById('ni-act').textContent = n.activation;
+  document.getElementById('ni-amp').textContent = n.energy.toFixed(3);
+  var conns = NS.edges.filter(function(e){ return e.from===n.id || e.to===n.id; }).length;
+  document.getElementById('ni-conn').textContent = conns;
+}
+function hideNodeInfo(){
+  document.getElementById('ns-node-info').classList.remove('visible');
+}
+function updateNodeInfo(){
+  if(NS.selectedNode === null) return;
+  var n = NS.nodes[NS.selectedNode];
+  if(!n) return;
+  document.getElementById('ni-freq').textContent = n.type === 'oscillator' ? n.freq.toFixed(1) + ' Hz' : '—';
+  document.getElementById('ni-amp').textContent = n.energy.toFixed(3);
+}
+
+/* ── Force-directed layout nudge (gentle) ── */
+function applyForces(){
+  var repulse = 1800, attract = 0.04;
+  for(var i = 0; i < NS.nodes.length; i++){
+    if(NS.nodes[i] === dragNode) continue;
+    NS.nodes[i].vx *= 0.85; NS.nodes[i].vy *= 0.85;
+    // Repulsion between nodes
+    for(var j = 0; j < NS.nodes.length; j++){
+      if(i===j) continue;
+      var dx = NS.nodes[i].x - NS.nodes[j].x;
+      var dy = NS.nodes[i].y - NS.nodes[j].y;
+      var d2 = dx*dx + dy*dy + 1;
+      NS.nodes[i].vx += (dx / d2) * repulse;
+      NS.nodes[i].vy += (dy / d2) * repulse;
+    }
+    // Attraction toward center
+    var cx = canvas.width/2, cy = canvas.height/2;
+    NS.nodes[i].vx += (cx - NS.nodes[i].x) * 0.005;
+    NS.nodes[i].vy += (cy - NS.nodes[i].y) * 0.005;
+  }
+  // Edge spring attraction
+  NS.edges.forEach(function(e){
+    var a = NS.nodes[e.from], b = NS.nodes[e.to];
+    if(!a||!b||a===dragNode||b===dragNode) return;
+    var dx = b.x - a.x, dy = b.y - a.y;
+    var d = Math.sqrt(dx*dx+dy*dy) || 1;
+    var f = (d - 120) * attract;
+    var fx = (dx/d)*f, fy = (dy/d)*f;
+    a.vx += fx; a.vy += fy;
+    b.vx -= fx; b.vy -= fy;
+  });
+  // Apply velocity, clamp to canvas
+  NS.nodes.forEach(function(n){
+    if(n === dragNode) return;
+    n.x += Math.max(-8, Math.min(8, n.vx));
+    n.y += Math.max(-8, Math.min(8, n.vy));
+    n.x = Math.max(NODE_RADIUS+4, Math.min(canvas.width - NODE_RADIUS - 4, n.x));
+    n.y = Math.max(NODE_RADIUS+4, Math.min(canvas.height - NODE_RADIUS - 4, n.y));
+  });
+}
+
+function drawNetwork(timestamp){
+  if(!ctx2d) return;
+  var W = canvas.width, H = canvas.height;
+
+  ctx2d.clearRect(0, 0, W, H);
+
+  // Background
+  ctx2d.fillStyle = '#f9f9f7';
+  ctx2d.fillRect(0, 0, W, H);
+
+  // Draw edges
+  NS.edges.forEach(function(e){
+    var a = NS.nodes[e.from], b = NS.nodes[e.to];
+    if(!a||!b) return;
+
+    var sig = Math.min(1, Math.abs(e.signal) * 2);
+    var wt = Math.abs(e.weight);
+
+    // Line color: accent when active, border when quiet
+    var alpha = 0.12 + sig * 0.6;
+    var r = sig > 0.1 ? 42 : 180, g = sig > 0.1 ? 92 : 180, bl = sig > 0.1 ? 69 : 176;
+    ctx2d.beginPath();
+    ctx2d.strokeStyle = 'rgba(' + r + ',' + g + ',' + bl + ',' + alpha + ')';
+    ctx2d.lineWidth = 0.5 + wt * 1.5 + sig * 2;
+
+    // Curved line for aesthetics
+    var mx = (a.x + b.x)/2 + (b.y - a.y) * 0.15;
+    var my = (a.y + b.y)/2 - (b.x - a.x) * 0.15;
+    ctx2d.moveTo(a.x, a.y);
+    ctx2d.quadraticCurveTo(mx, my, b.x, b.y);
+    ctx2d.stroke();
+
+    // Direction arrowhead
+    var t = 0.72;
+    var ax = (1-t)*(1-t)*a.x + 2*(1-t)*t*mx + t*t*b.x;
+    var ay = (1-t)*(1-t)*a.y + 2*(1-t)*t*my + t*t*b.y;
+    var tx2 = 2*(1-t)*(mx-a.x) + 2*t*(b.x-mx);
+    var ty2 = 2*(1-t)*(my-a.y) + 2*t*(b.y-my);
+    var ang = Math.atan2(ty2, tx2);
+    var as = 5 + sig * 3;
+    ctx2d.beginPath();
+    ctx2d.fillStyle = 'rgba(' + r + ',' + g + ',' + bl + ',' + (alpha*0.8) + ')';
+    ctx2d.moveTo(ax + Math.cos(ang)*as, ay + Math.sin(ang)*as);
+    ctx2d.lineTo(ax + Math.cos(ang+2.4)*as*0.5, ay + Math.sin(ang+2.4)*as*0.5);
+    ctx2d.lineTo(ax + Math.cos(ang-2.4)*as*0.5, ay + Math.sin(ang-2.4)*as*0.5);
+    ctx2d.closePath();
+    ctx2d.fill();
+
+    // Weight label for selected edges
+    if(NS.selectedNode !== null && (e.from===NS.selectedNode||e.to===NS.selectedNode)){
+      ctx2d.fillStyle = 'rgba(107,107,107,0.7)';
+      ctx2d.font = '9px Inter, sans-serif';
+      ctx2d.fillText(e.weight.toFixed(2), mx, my);
+    }
+  });
+
+  // Draw nodes
+  NS.nodes.forEach(function(n){
+    var hue = n.color || 180;
+    var amp = Math.min(1, n.energy);
+    var flash = n._flash || 0;
+    if(flash > 0) n._flash = Math.max(0, flash - 0.08);
+
+    var pulse = NODE_RADIUS + amp * 8 + flash * 10;
+    var selected = NS.selectedNode === n.id;
+
+    // Outer glow ring when energy high
+    if(amp > 0.1 || flash > 0){
+      ctx2d.beginPath();
+      ctx2d.arc(n.x, n.y, pulse + 4, 0, Math.PI*2);
+      ctx2d.fillStyle = 'hsla(' + hue + ',40%,60%,' + (amp * 0.15 + flash * 0.25) + ')';
+      ctx2d.fill();
+    }
+
+    // Main circle
+    ctx2d.beginPath();
+    ctx2d.arc(n.x, n.y, pulse, 0, Math.PI*2);
+
+    // Fill: surface with hue tint
+    var sat = 20 + amp * 30;
+    var lgt = selected ? 82 : 90 - amp * 15;
+    ctx2d.fillStyle = 'hsl(' + hue + ',' + sat + '%,' + lgt + '%)';
+    ctx2d.fill();
+
+    // Border
+    ctx2d.strokeStyle = selected
+      ? '#2a5c45'
+      : ('hsla(' + hue + ',35%,' + (50 - amp*15) + '%,' + (0.4 + amp*0.5) + ')');
+    ctx2d.lineWidth = selected ? 2 : (1 + amp * 1.5);
+    ctx2d.stroke();
+
+    // Symbol
+    ctx2d.fillStyle = selected ? '#2a5c45' : ('hsl(' + hue + ',30%,35%)');
+    ctx2d.font = 'bold ' + (10 + amp*3) + 'px Space Grotesk, sans-serif';
+    ctx2d.textAlign = 'center';
+    ctx2d.textBaseline = 'middle';
+    ctx2d.fillText(NODE_TYPE_SYMBOLS[n.type] || '○', n.x, n.y - 2);
+
+    // Node id label
+    ctx2d.fillStyle = 'rgba(107,107,107,0.6)';
+    ctx2d.font = '8px Inter, sans-serif';
+    ctx2d.fillText(n.id, n.x, n.y + 9);
+  });
+
+  ctx2d.textAlign = 'left';
+  ctx2d.textBaseline = 'alphabetic';
+}
+
+/* ── Main loop ── */
+function loop(timestamp){
+  if(!isRunning) return;
+  applyForces();
+  networkTick(timestamp);
+  drawNetwork(timestamp);
+  if(NS.selectedNode !== null) updateNodeInfo();
+  animFrame = requestAnimationFrame(loop);
+}
+
+/* ── Idle draw loop (not running) ── */
+var idleFrame = null;
+function idleLoop(timestamp){
+  applyForces();
+  drawNetwork(timestamp);
+  idleFrame = requestAnimationFrame(idleLoop);
+}
+function stopIdleLoop(){
+  if(idleFrame){ cancelAnimationFrame(idleFrame); idleFrame=null; }
+}
+
+/* ── Status helpers ── */
+function updateStatus(){
+  var n = NS.nodes.length;
+  var activeConns = NS.edges.filter(function(e){ return e.signal > 0.01; }).length;
+  document.getElementById('ns-count').textContent = isRunning ? 'network active' : 'network idle';
+  document.getElementById('ns-sub').textContent =
+    n + ' nodes · ' + NS.edges.length + ' connections · ' + activeConns + ' active';
+  document.getElementById('ns-status').textContent = isRunning ? 'running' : 'stopped';
+}
+function setStatus(m){ document.getElementById('ns-status').textContent = m; }
+
+/* ══════════════════════════════════════════════════════════════
+   WIRE UP
+════════════════════════════════════════════════════════════════ */
+
+initCanvas();
+buildNetwork('random');
+idleLoop(0);
+
+/* Start */
+document.getElementById('ns-start').addEventListener('click', function(){
+  if(isRunning) return;
+  stopIdleLoop();
+  startAudio();
+  isRunning = true;
+  this.disabled = true;
+  document.getElementById('ns-stop').disabled = false;
+  document.getElementById('ns-mutate').disabled = false;
+  document.getElementById('ns-rewire').disabled = false;
+  setStatus('running');
+  // Inject initial energy into first oscillator
+  injectNode(0);
+  animFrame = requestAnimationFrame(loop);
+});
+
+/* Stop */
+document.getElementById('ns-stop').addEventListener('click', function(){
+  if(!isRunning) return;
+  isRunning = false;
+  if(animFrame){ cancelAnimationFrame(animFrame); animFrame=null; }
+  stopAudio();
+  this.disabled = true;
+  document.getElementById('ns-start').disabled = false;
+  document.getElementById('ns-mutate').disabled = true;
+  document.getElementById('ns-rewire').disabled = true;
+  document.getElementById('ns-energy-fill').style.width = '0%';
+  updateStatus();
+  idleLoop(0);
+});
+
+/* Mutate */
+document.getElementById('ns-mutate').addEventListener('click', mutate);
+
+/* Rewire */
+document.getElementById('ns-rewire').addEventListener('click', rewire);
+
+/* Reset */
+document.getElementById('ns-reset').addEventListener('click', function(){
+  var wasRunning = isRunning;
+  if(wasRunning){
+    isRunning = false;
+    if(animFrame){ cancelAnimationFrame(animFrame); animFrame=null; }
+    stopIdleLoop();
+    stopAudio();
+  }
+  buildNetwork(NS.topology);
+  if(wasRunning){
+    startAudio();
+    isRunning = true;
+    injectNode(0);
+    animFrame = requestAnimationFrame(loop);
+  } else {
+    stopIdleLoop();
+    idleLoop(0);
+  }
+  updateStatus();
+});
+
+/* Topology pills */
+document.querySelectorAll('[data-mode]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    NS.topology = this.dataset.mode;
+    document.querySelectorAll('[data-mode]').forEach(function(b){ b.classList.remove('on'); });
+    this.classList.add('on');
+    // Auto-rebuild
+    var wasRunning = isRunning;
+    if(wasRunning){
+      isRunning = false;
+      if(animFrame){ cancelAnimationFrame(animFrame); animFrame=null; }
+      stopIdleLoop();
+      stopAudio();
+    }
+    buildNetwork(NS.topology);
+    if(wasRunning){
+      startAudio();
+      isRunning = true;
+      injectNode(0);
+      animFrame = requestAnimationFrame(loop);
+    } else {
+      stopIdleLoop();
+      idleLoop(0);
+    }
+  });
+});
+
+/* Sliders */
+document.getElementById('ns-temp').addEventListener('input', function(){
+  NS.temperature = parseFloat(this.value);
+  document.getElementById('ns-temp-val').textContent = Math.round(NS.temperature*100) + '%';
+});
+document.getElementById('ns-feedback').addEventListener('input', function(){
+  NS.feedback = parseFloat(this.value);
+  document.getElementById('ns-feedback-val').textContent = Math.round(NS.feedback*100) + '%';
+});
+document.getElementById('ns-nonlin').addEventListener('input', function(){
+  NS.nonlinearity = parseFloat(this.value);
+  document.getElementById('ns-nonlin-val').textContent = Math.round(NS.nonlinearity*100) + '%';
+});
+document.getElementById('ns-vol').addEventListener('input', function(){
+  NS.volume = parseFloat(this.value);
+  document.getElementById('ns-vol-val').textContent = Math.round(NS.volume*100) + '%';
+  if(masterGain) masterGain.gain.setValueAtTime(NS.volume, audioCtx.currentTime);
+});
+
+/* Learning toggles */
+document.getElementById('ns-hebbian').addEventListener('click', function(){
+  NS.hebbianOn = !NS.hebbianOn;
+  this.classList.toggle('on', NS.hebbianOn);
+});
+document.getElementById('ns-drift').addEventListener('click', function(){
+  NS.driftOn = !NS.driftOn;
+  this.classList.toggle('on', NS.driftOn);
+});
+document.getElementById('ns-spatial').addEventListener('click', function(){
+  NS.spatialOn = !NS.spatialOn;
+  this.classList.toggle('on', NS.spatialOn);
+});
+
+/* Space bar = inject energy into random node */
+document.addEventListener('keydown', function(e){
+  if(e.code === 'Space' && isRunning){
+    e.preventDefault();
+    if(!e.repeat) injectNode(Math.floor(Math.random()*12));
+  }
+});
+
+}());
+
+/* ── Header behaviour ── */
+const path = window.location.pathname.replace(/\/$/, '') || '/';
+document.querySelectorAll('.sil-header__nav a').forEach(a => {
+  const href = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
+  if(href === path) a.classList.add('sil-active');
+});
+const menuToggle = document.getElementById('silMenuToggle');
+const silNav = document.getElementById('silNav');
+menuToggle.addEventListener('click', () => {
+  const open = silNav.classList.toggle('sil-open');
+  menuToggle.setAttribute('aria-expanded', open);
+});
+silNav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => silNav.classList.remove('sil-open')));
+
+async function getSupabase(){
+  if(window._supabase) return window._supabase;
+  const {createClient} = await import('https://esm.sh/@supabase/supabase-js@2');
+  return createClient('https://lrjuufvrgkuvfxcmybtf.supabase.co','sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1');
+}
+document.getElementById('silSignOut').addEventListener('click', async function(){
+  this.disabled = true; this.textContent = 'Signing out…';
+  try{ const sb = await getSupabase(); await sb.auth.signOut(); }
+  finally{ window.location.replace('/'); }
+});
+</script>
+
+</body>
+</html>
