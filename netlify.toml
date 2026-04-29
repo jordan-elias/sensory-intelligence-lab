@@ -216,6 +216,16 @@
   from = "/chance/"
   to   = "/compositions/chance.html"
   status = 200
+
+[[redirects]]
+  from = "/neural-synthesis"
+  to   = "/compositions/neural-synthesis.html"
+  status = 200
+
+[[redirects]]
+  from = "/neural-synthesis/"
+  to   = "/compositions/neural-synthesis.html"
+  status = 200
   
 # ── Subscribe ──
 
