@@ -11,6 +11,14 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
 
+  <script type="module">
+  import { applyGatingOnReady } from '/assets/js/gating.js';
+  applyGatingOnReady({
+    targetSelector: '.row',
+    moduleName: 'neural-synthesis',
+  });
+</script>
+
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
 
   <style>
