@@ -26,48 +26,52 @@
 // ─────────────────────────────────────────────────────────
 const MODULE_MESSAGES = {
   'spatial-game': {
-    heading: 'Spatial Awareness is part of the Lab',
+    heading: 'Spatial Awareness is part of the lab',
     body: 'Training your auditory attention and sound localisation is a core part of the Lab experience. Subscribe to unlock this and every other tool.',
   },
   'cocktail-party': {
-    heading: 'The Cocktail Party Problem is part of the Lab',
+    heading: 'The Cocktail Party Problem is part of the lab',
     body: 'Selective listening training takes time and repeated practice. Subscribe to track your progress and access all perception exercises.',
   },
   'soundscape-machine': {
-    heading: 'The Soundscape Machine is part of the Lab',
+    heading: 'The Soundscape Machine is part of the lab',
     body: 'Four-track tape composition with field recordings is waiting for you. Subscribe to start building your own soundscapes.',
   },
   'journal': {
-    heading: 'The Timed Journal is part of the Lab',
+    heading: 'The Timed Journal is part of the lab',
     body: 'Writing with intention and sound is a powerful practice. Subscribe to save your entries and explore the full journaling experience.',
   },
   'check-in': {
-    heading: 'Check-In is part of the Lab',
+    heading: 'Check-In is part of the lab',
     body: 'Tracking your emotional state and sensory load over time reveals patterns that are hard to see day to day. Subscribe to start logging.',
   },
   'compositions': {
-    heading: 'Experimental Compositions are part of the Lab',
+    heading: 'Experimental Compositions are part of the lab',
     body: 'These interactive tools let you learn from and work with techniques from experimental music pioneers. Subscribe to explore them.',
   },
   'phase-machine': {
-    heading: 'The Phase Machine is part of the Lab',
+    heading: 'The Phase Machine is part of the lab',
     body: "Steve Reich's phasing technique is best understood by doing it yourself. Subscribe to use this tool and all the other composition instruments.",
   },
   'rooms': {
-    heading: 'Rooms is part of the Lab',
+    heading: 'Rooms is part of the lab',
     body: "Alvin Lucier's iterative resonance process is available to you as an interactive tool. Subscribe to explore it and the rest of the Lab.",
   },
   'waves': {
-    heading: 'Waves is part of the Lab',
+    heading: 'Waves is part of the lab',
     body: "Compose slowly evolving drones in the tradition of Éliane Radigue. Subscribe to access this and every other tool in the Lab.",
   },
   'chance': {
-    heading: 'Chance is part of the Lab',
+    heading: 'Chance is part of the lab',
     body: "John Cage's indeterminate composition methods are here for you to explore. Subscribe to use this tool and everything else the Lab offers.",
+  },
+   'neural-synthesis': {
+    heading: 'Neural synthesis is part of the lab',
+    body: "Tudor inspired neural feedback networks for generating sound. Subscribe to use this tool and everything else the Lab offers.",
   },
   // Fallback for any module name not listed above
   'default': {
-    heading: 'This feature is part of the Lab',
+    heading: 'This feature is part of the lab',
     body: 'Subscribe to unlock full access to every tool, instrument, and module in the Sensory Intelligence Lab.',
   },
 };
