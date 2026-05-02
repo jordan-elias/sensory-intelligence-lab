@@ -50,302 +50,167 @@
     a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
     a:hover { color: var(--accent-hover); }
 
-    /* ══════════════════════════════════════
-       HEADER
-    ══════════════════════════════════════ */
     .sil-header {
       border-bottom: 1px solid var(--border);
-      padding: 0 1.5rem;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      background: var(--bg);
-      z-index: 100;
-      gap: 1rem;
+      padding: 0 1.5rem; height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; background: var(--bg); z-index: 100; gap: 1rem;
     }
     .sil-header__wordmark {
-      font-family: var(--font-heading);
-      font-size: 1rem; font-weight: 600;
-      letter-spacing: -0.01em;
-      text-decoration: none; color: var(--text);
-      flex-shrink: 0;
+      font-family: var(--font-heading); font-size: 1rem; font-weight: 600;
+      letter-spacing: -0.01em; text-decoration: none; color: var(--text); flex-shrink: 0;
     }
     .sil-header__wordmark:hover { color: var(--accent); }
-    .sil-header__nav { display: flex; gap: 0.25rem; align-items: center; }
-    .sil-header__nav a {
-      font-size: 0.8rem; font-weight: 500;
-      text-decoration: none; color: var(--muted);
-      padding: 0.3rem 0.65rem; transition: color 0.15s;
-      white-space: nowrap;
-    }
-    .sil-header__nav a:hover { color: var(--text); }
 
-    /* ══════════════════════════════════════
-       LAYOUT
-    ══════════════════════════════════════ */
     .page-wrap {
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 3rem 2rem 6rem;
-      flex: 1;
-      width: 100%;
-      display: grid;
-      grid-template-columns: 220px 1fr;
-      gap: 4rem;
-      align-items: start;
+      max-width: 1120px; margin: 0 auto;
+      padding: 3rem 2rem 6rem; flex: 1; width: 100%;
+      display: grid; grid-template-columns: 220px 1fr;
+      gap: 4rem; align-items: start;
     }
     @media (max-width: 860px) {
       .page-wrap { grid-template-columns: 1fr; gap: 2rem; padding: 2rem 1.25rem 4rem; }
     }
 
-    /* ══════════════════════════════════════
-       SIDEBAR NAV
-    ══════════════════════════════════════ */
-    .sidebar {
-      position: sticky;
-      top: 72px;
-    }
+    .sidebar { position: sticky; top: 72px; }
     @media (max-width: 860px) { .sidebar { position: static; } }
 
     .sidebar__label {
-      font-family: var(--font-heading);
-      font-size: .6rem; font-weight: 600;
-      letter-spacing: .14em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: .75rem;
+      font-family: var(--font-heading); font-size: .6rem; font-weight: 600;
+      letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: .75rem;
     }
     .sidebar__nav { display: flex; flex-direction: column; gap: 2px; }
     .sidebar__nav a {
-      font-size: .78rem; color: var(--muted);
-      text-decoration: none; padding: .3rem .5rem;
-      border-left: 2px solid transparent;
+      font-size: .78rem; color: var(--muted); text-decoration: none;
+      padding: .3rem .5rem; border-left: 2px solid transparent;
       transition: all .15s; line-height: 1.45;
     }
-    .sidebar__nav a:hover {
-      color: var(--accent); border-left-color: var(--accent-mid);
-    }
-    .sidebar__nav a.active {
-      color: var(--accent); border-left-color: var(--accent);
-      font-weight: 500;
-    }
+    .sidebar__nav a:hover { color: var(--accent); border-left-color: var(--accent-mid); }
+    .sidebar__nav a.active { color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
     .sidebar__updated {
       margin-top: 1.5rem; font-size: .7rem; color: var(--muted);
       padding-top: 1rem; border-top: 1px solid var(--border);
     }
 
-    /* ══════════════════════════════════════
-       HERO
-    ══════════════════════════════════════ */
-    .hero {
-      margin-bottom: 3rem;
-      padding-bottom: 2.5rem;
-      border-bottom: 1px solid var(--border);
-    }
+    .hero { margin-bottom: 3rem; padding-bottom: 2.5rem; border-bottom: 1px solid var(--border); }
     .hero__eyebrow {
-      font-family: var(--font-heading);
-      font-size: .65rem; font-weight: 600;
-      letter-spacing: .14em; text-transform: uppercase;
-      color: var(--accent); margin-bottom: .75rem;
+      font-family: var(--font-heading); font-size: .65rem; font-weight: 600;
+      letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: .75rem;
     }
     .hero__title {
-      font-family: var(--font-heading);
-      font-size: 2.4rem; font-weight: 700;
-      letter-spacing: -.03em; line-height: 1.15;
-      margin-bottom: 1rem; color: var(--text);
+      font-family: var(--font-heading); font-size: 2.4rem; font-weight: 700;
+      letter-spacing: -.03em; line-height: 1.15; margin-bottom: 1rem; color: var(--text);
     }
     .hero__intro {
-      font-family: var(--font-prose);
-      font-size: 1.05rem; line-height: 1.8;
+      font-family: var(--font-prose); font-size: 1.05rem; line-height: 1.8;
       color: var(--text); max-width: 680px;
     }
     .hero__intro + .hero__intro { margin-top: .9rem; }
 
-    /* ══════════════════════════════════════
-       SECTIONS
-    ══════════════════════════════════════ */
     .section { margin-bottom: 3.5rem; scroll-margin-top: 80px; }
-
     .section__title {
-      font-family: var(--font-heading);
-      font-size: 1.25rem; font-weight: 600;
-      letter-spacing: -.02em; color: var(--text);
-      margin-bottom: 1.25rem;
-      padding-bottom: .6rem;
-      border-bottom: 1px solid var(--border);
+      font-family: var(--font-heading); font-size: 1.25rem; font-weight: 600;
+      letter-spacing: -.02em; color: var(--text); margin-bottom: 1.25rem;
+      padding-bottom: .6rem; border-bottom: 1px solid var(--border);
     }
-
     .section__sub {
-      font-family: var(--font-heading);
-      font-size: .9rem; font-weight: 600;
+      font-family: var(--font-heading); font-size: .9rem; font-weight: 600;
       color: var(--text); margin: 1.5rem 0 .6rem;
     }
-
-    .prose {
-      font-family: var(--font-prose);
-      font-size: .95rem; line-height: 1.85;
-      color: var(--text);
-    }
+    .prose { font-family: var(--font-prose); font-size: .95rem; line-height: 1.85; color: var(--text); }
     .prose + .prose { margin-top: .9rem; }
     .prose strong { font-weight: 600; font-family: var(--font-body); }
 
-    /* ══════════════════════════════════════
-       CALLOUT BOXES
-    ══════════════════════════════════════ */
     .callout {
-      padding: 1rem 1.25rem;
-      margin: 1.25rem 0;
-      font-size: .88rem; line-height: 1.7;
-      border-left: 3px solid;
+      padding: 1rem 1.25rem; margin: 1.25rem 0;
+      font-size: .88rem; line-height: 1.7; border-left: 3px solid;
     }
-    .callout--green {
-      background: var(--accent-light);
-      border-color: var(--accent);
-      color: var(--accent-hover);
-    }
-    .callout--amber {
-      background: var(--warn-bg);
-      border-color: var(--warn-border);
-      color: var(--warn);
-    }
+    .callout--green { background: var(--accent-light); border-color: var(--accent); color: var(--accent-hover); }
+    .callout--amber { background: var(--warn-bg); border-color: var(--warn-border); color: var(--warn); }
     .callout__label {
-      font-family: var(--font-heading);
-      font-size: .65rem; font-weight: 600;
-      letter-spacing: .1em; text-transform: uppercase;
-      display: block; margin-bottom: .35rem;
-      opacity: .7;
+      font-family: var(--font-heading); font-size: .65rem; font-weight: 600;
+      letter-spacing: .1em; text-transform: uppercase; display: block; margin-bottom: .35rem; opacity: .7;
     }
 
-    /* ══════════════════════════════════════
-       CODE / TECHNICAL BLOCKS
-    ══════════════════════════════════════ */
     .tech-block {
-      background: var(--code-bg);
-      border: 1px solid var(--border);
-      padding: 1.1rem 1.25rem;
-      margin: 1rem 0;
-      font-size: .82rem;
-      line-height: 1.7;
+      background: var(--code-bg); border: 1px solid var(--border);
+      padding: 1.1rem 1.25rem; margin: 1rem 0; font-size: .82rem; line-height: 1.7;
     }
     .tech-block__label {
-      font-family: var(--font-heading);
-      font-size: .6rem; font-weight: 600;
+      font-family: var(--font-heading); font-size: .6rem; font-weight: 600;
       letter-spacing: .12em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: .6rem;
-      display: block;
+      color: var(--muted); margin-bottom: .6rem; display: block;
     }
     .tech-block p { font-family: var(--font-body); color: var(--muted); margin-bottom: .35rem; }
     .tech-block p:last-child { margin-bottom: 0; }
     .tech-block strong { color: var(--text); font-weight: 600; }
     code {
-      font-family: 'Menlo', 'Monaco', 'Consolas', monospace;
-      font-size: .82em;
-      background: var(--code-bg);
-      border: 1px solid var(--border);
-      padding: .1em .35em;
-      color: var(--accent-hover);
+      font-family: 'Menlo', 'Monaco', 'Consolas', monospace; font-size: .82em;
+      background: var(--code-bg); border: 1px solid var(--border);
+      padding: .1em .35em; color: var(--accent-hover);
     }
 
-    /* ══════════════════════════════════════
-       TABLE
-    ══════════════════════════════════════ */
-    .data-table {
-      width: 100%; border-collapse: collapse;
-      margin: 1.25rem 0; font-size: .82rem;
-    }
+    .data-table { width: 100%; border-collapse: collapse; margin: 1.25rem 0; font-size: .82rem; }
     .data-table th {
-      font-family: var(--font-heading);
-      font-size: .65rem; font-weight: 600;
-      letter-spacing: .08em; text-transform: uppercase;
-      color: var(--muted); text-align: left;
-      padding: .5rem .75rem; border-bottom: 2px solid var(--border);
+      font-family: var(--font-heading); font-size: .65rem; font-weight: 600;
+      letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+      text-align: left; padding: .5rem .75rem; border-bottom: 2px solid var(--border);
       background: var(--surface);
     }
     .data-table td {
       padding: .6rem .75rem; border-bottom: 1px solid var(--border);
-      vertical-align: top; line-height: 1.55;
-      font-family: var(--font-body); color: var(--text);
+      vertical-align: top; line-height: 1.55; font-family: var(--font-body); color: var(--text);
     }
     .data-table tr:last-child td { border-bottom: none; }
     .data-table tr:hover td { background: var(--surface); }
     .td-mono { font-family: 'Menlo', 'Monaco', monospace; font-size: .78rem; color: var(--accent-hover); }
-    .td-muted { color: var(--muted); }
     .badge {
       display: inline-block; font-size: .65rem; font-weight: 600;
       font-family: var(--font-heading); letter-spacing: .06em;
       text-transform: uppercase; padding: .15rem .45rem;
-      border-radius: 0;
     }
-    .badge--enc { background: var(--accent-light); color: var(--accent); border: 1px solid var(--accent-mid); }
+    .badge--enc  { background: var(--accent-light); color: var(--accent); border: 1px solid var(--accent-mid); }
     .badge--plain { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
     .badge--stripe { background: #f0f4ff; color: #3d5af1; border: 1px solid #c5d0f7; }
-    .badge--none { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
+    .badge--zero { background: #1a1a1a; color: #fff; border: 1px solid #1a1a1a; }
 
-    /* ══════════════════════════════════════
-       FAQ
-    ══════════════════════════════════════ */
     .faq-list { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); }
     .faq-item { border-bottom: 1px solid var(--border); }
     .faq-item:last-child { border-bottom: none; }
     .faq-q {
-      width: 100%; text-align: left; background: none;
-      border: none; cursor: pointer; padding: 1rem 1.1rem;
-      display: flex; justify-content: space-between; align-items: center;
-      gap: 1rem;
-      font-family: var(--font-heading); font-size: .88rem; font-weight: 600;
+      width: 100%; text-align: left; background: none; border: none; cursor: pointer;
+      padding: 1rem 1.1rem; display: flex; justify-content: space-between; align-items: center;
+      gap: 1rem; font-family: var(--font-heading); font-size: .88rem; font-weight: 600;
       color: var(--text); transition: background .1s;
     }
     .faq-q:hover { background: var(--surface); }
     .faq-q[aria-expanded="true"] { color: var(--accent); }
-    .faq-arrow {
-      flex-shrink: 0; width: 16px; height: 16px;
-      transition: transform .2s; color: var(--muted);
-    }
+    .faq-arrow { flex-shrink: 0; width: 16px; height: 16px; transition: transform .2s; color: var(--muted); }
     .faq-q[aria-expanded="true"] .faq-arrow { transform: rotate(180deg); }
     .faq-a {
       max-height: 0; overflow: hidden;
-      transition: max-height .3s ease, padding .3s ease;
-      padding: 0 1.1rem;
+      transition: max-height .3s ease, padding .3s ease; padding: 0 1.1rem;
     }
     .faq-a.open { max-height: 600px; padding: 0 1.1rem 1rem; }
-    .faq-a p {
-      font-family: var(--font-prose); font-size: .88rem;
-      line-height: 1.8; color: var(--muted);
-    }
+    .faq-a p { font-family: var(--font-prose); font-size: .88rem; line-height: 1.8; color: var(--muted); }
     .faq-a p + p { margin-top: .6rem; }
 
-    /* ══════════════════════════════════════
-       CONTACT BLOCK
-    ══════════════════════════════════════ */
     .contact-block {
-      border: 1px solid var(--border);
-      padding: 1.5rem;
-      display: flex; gap: 1.25rem; align-items: flex-start;
-      margin-top: 1rem;
+      border: 1px solid var(--border); padding: 1.5rem;
+      display: flex; gap: 1.25rem; align-items: flex-start; margin-top: 1rem;
     }
     .contact-block__icon { font-size: 1.4rem; flex-shrink: 0; margin-top: .1rem; opacity: .5; }
-    .contact-block__name {
-      font-family: var(--font-heading); font-size: .95rem; font-weight: 600;
-      margin-bottom: .2rem;
-    }
+    .contact-block__name { font-family: var(--font-heading); font-size: .95rem; font-weight: 600; margin-bottom: .2rem; }
     .contact-block__role { font-size: .8rem; color: var(--muted); margin-bottom: .5rem; }
     .contact-block__email { font-size: .88rem; }
 
-    /* ══════════════════════════════════════
-       FOOTER
-    ══════════════════════════════════════ */
     footer {
-      border-top: 1px solid var(--border);
-      padding: 1.25rem 2rem; text-align: center;
-      font-size: .78rem; color: var(--muted);
+      border-top: 1px solid var(--border); padding: 1.25rem 2rem;
+      text-align: center; font-size: .78rem; color: var(--muted);
     }
     footer a { color: var(--muted); text-decoration: none; }
     footer a:hover { color: var(--accent); }
 
-    /* ══════════════════════════════════════
-       RESPONSIVE
-    ══════════════════════════════════════ */
     @media (max-width: 600px) {
       .hero__title { font-size: 1.75rem; }
       .data-table { display: block; overflow-x: auto; }
@@ -354,50 +219,43 @@
 </head>
 <body>
 
-<!-- HEADER -->
 <header class="sil-header">
   <a class="sil-header__wordmark" href="https://lab.jordanelias.de">Sensory Intelligence Lab</a>
 </header>
 
 <div class="page-wrap">
 
-  <!-- ══════════════════════════════════════
-       SIDEBAR
-  ══════════════════════════════════════ -->
   <aside class="sidebar">
     <p class="sidebar__label">On this page</p>
     <nav class="sidebar__nav" id="sidebarNav">
       <a href="#who-we-are">Who made this</a>
       <a href="#what-this-is">What this platform is</a>
+      <a href="#your-content">Your content &amp; privacy</a>
       <a href="#encryption">How encryption works</a>
       <a href="#data-stored">What is stored</a>
-      <a href="#supabase">Supabase & database</a>
+      <a href="#supabase">Supabase &amp; database</a>
       <a href="#data-collected">Data we collect</a>
       <a href="#data-sharing">Data sharing</a>
-      <a href="#payments">Payments & Stripe</a>
+      <a href="#payments">Payments &amp; Stripe</a>
       <a href="#gdpr">Your GDPR rights</a>
       <a href="#account-deletion">Deleting your account</a>
       <a href="#crisis">Crisis disclaimer</a>
       <a href="#faq">FAQ</a>
       <a href="#contact">Contact</a>
     </nav>
-    <p class="sidebar__updated">Last updated<br>April 2026<br>Version 1.0</p>
+    <p class="sidebar__updated">Last updated<br>May 2025<br>Version 1.1</p>
   </aside>
 
-  <!-- ══════════════════════════════════════
-       MAIN CONTENT
-  ══════════════════════════════════════ -->
   <main>
 
-    <!-- HERO -->
     <div class="hero">
       <p class="hero__eyebrow">Privacy Policy</p>
       <h1 class="hero__title">Your data belongs to you.</h1>
       <p class="hero__intro">
-        Privacy is not a feature added at the end — it is the starting point of how this platform was built.
-        This document explains in plain language what data is collected, how it is stored, how it is protected,
-        and what you can do with it. Technical detail is included deliberately, because vague reassurances
-        are not reassuring.
+        Privacy is not a feature added at the end — it is the starting point of how this platform
+        was built. This document explains in plain language what data is collected, how it is stored,
+        how it is protected, and what you can do with it. Technical detail is included deliberately,
+        because vague reassurances are not reassuring.
       </p>
       <p class="hero__intro">
         If something here is unclear, or if you have a question not answered below, write to
@@ -405,17 +263,14 @@
       </p>
     </div>
 
-    <!-- ── WHO MADE THIS ── -->
+    <!-- WHO MADE THIS -->
     <section class="section" id="who-we-are">
       <h2 class="section__title">Who made this</h2>
       <p class="prose">
         The Sensory Intelligence Lab was built by Jordan Elias, a music therapist based in Berlin.
-        
-      </p>
-      <p class="prose">
-        This project is an attempt to build something that could hold continuity
-        between sessions, support self-directed practice, and make music therapy tools accessible to
-        people who cannot easily access in-person care.
+        This project is an attempt to build something that could hold continuity between sessions,
+        support self-directed practice, and make music therapy tools accessible to people who cannot
+        easily access in-person care.
       </p>
       <p class="prose">
         Jordan Elias is the data controller for this platform. All questions, requests, and concerns
@@ -423,15 +278,15 @@
       </p>
     </section>
 
-    <!-- ── WHAT THIS IS ── -->
+    <!-- WHAT THIS IS -->
     <section class="section" id="what-this-is">
       <h2 class="section__title">What this platform is — and is not</h2>
 
       <div class="callout callout--green">
         <span class="callout__label">What it is</span>
         A self-directed wellness tool offering music therapy–informed exercises, a timed journal,
-        check-in tracking, breathing and regulation tools, and — for subscribers with video sessions —
-        a therapeutic relationship with Jordan Elias.
+        check-in tracking, breathing and regulation tools, therapeutic worksheets, and — for
+        subscribers with video sessions — a therapeutic relationship with Jordan Elias.
       </div>
 
       <div class="callout callout--amber">
@@ -444,21 +299,58 @@
       </div>
 
       <p class="prose">
-        The platform has two distinct modes. The <strong>Lab</strong> is a self-directed space available
-        to all subscribers — no clinical relationship is assumed or implied. The <strong>Session</strong>
-        tiers involve a direct therapeutic relationship with Jordan Elias, which is governed by a
-        separate therapy agreement completed before the first session.
+        The platform has two distinct modes. The <strong>Lab</strong> is a self-directed space
+        available to all subscribers — no clinical relationship is assumed or implied. The
+        <strong>Session</strong> tiers involve a direct therapeutic relationship with Jordan Elias,
+        governed by a separate therapy agreement completed before the first session.
       </p>
     </section>
 
-    <!-- ── ENCRYPTION ── -->
+    <!-- YOUR CONTENT & PRIVACY -->
+    <section class="section" id="your-content">
+      <h2 class="section__title">Your content and your privacy</h2>
+      <p class="prose">
+        The journal, check-in notes, and worksheets are personal tools. The platform is built
+        around a simple principle: <strong>nothing is recorded unless you actively choose to save it.</strong>
+        You are always in control of what happens to what you write.
+      </p>
+
+      <div class="callout callout--green">
+        <span class="callout__label">The three options — and what each means for your data</span>
+        <strong>Save encrypted</strong> — your entry is encrypted in your browser before being sent
+        to the server. The platform stores ciphertext only. Only you can decrypt and read it in a
+        future session.<br><br>
+        <strong>Download as a file</strong> — your entry is written directly to a file on your own
+        device. Nothing is sent to any server at any point. The platform has no record that you
+        wrote anything. The file belongs entirely to you.<br><br>
+        <strong>Delete / Destroy</strong> — the text is permanently erased from the page and from
+        memory. Nothing is sent anywhere. Nothing is logged. It is gone completely.
+      </div>
+
+      <p class="prose">
+        Writing, downloading, and deleting are completely private in every case. No data is
+        collected during the writing process. No drafts are auto-saved to the server. No keystroke
+        or word count data is transmitted while you are writing. The only moment any content leaves
+        your browser is when you explicitly press Save — and at that point it is already encrypted.
+      </p>
+
+      <h3 class="section__sub">Sharing with your therapist</h3>
+      <p class="prose">
+        If you work with Jordan Elias in a session tier and want to share something you have written
+        or worked on, the simplest and most private method is to <strong>download the file and send
+        it by email</strong> to <a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a>.
+        You choose exactly what to share, when, and how. The platform plays no role in that
+        exchange and has no record of it. Nothing is ever shared without your deliberate action.
+      </p>
+    </section>
+
+    <!-- ENCRYPTION -->
     <section class="section" id="encryption">
       <h2 class="section__title">How encryption works</h2>
       <p class="prose">
-        Sensitive content you create on this platform — journal entries and check-in notes — is
-        encrypted in your browser before it is sent to any server. What is stored in the database
-        is ciphertext: scrambled data that cannot be read without the correct key. This section
-        explains the method in detail.
+        When you choose to save content, it is encrypted in your browser before it is sent to any
+        server. What is stored in the database is ciphertext: scrambled data that cannot be read
+        without the correct key.
       </p>
 
       <h3 class="section__sub">The encryption standard</h3>
@@ -473,72 +365,63 @@
         <span class="tech-block__label">Technical specification</span>
         <p><strong>Algorithm:</strong> AES-256-GCM</p>
         <p><strong>Key length:</strong> 256 bits (32 bytes)</p>
-        <p><strong>IV (Initialisation Vector):</strong> 96 bits (12 bytes), randomly generated per encryption operation</p>
+        <p><strong>IV (Initialisation Vector):</strong> 96 bits (12 bytes), randomly generated per encryption operation — every save produces a unique ciphertext even for identical content</p>
         <p><strong>Implementation:</strong> Web Crypto API (<code>window.crypto.subtle</code>) — browser-native, no external libraries</p>
         <p><strong>Storage format:</strong> JSON object containing base64-encoded IV and ciphertext, stored as a text column in Supabase</p>
+        <p><strong>When encryption happens:</strong> In your browser, before any data is transmitted. Plaintext never travels over the network.</p>
       </div>
 
       <h3 class="section__sub">Your encryption key</h3>
       <p class="prose">
-        Each account has a unique AES-256 encryption key, generated randomly when you first visit
-        the journal or check-in page. This key is generated on our server (a Netlify serverless
-        function) and returned to your browser over HTTPS, where it is held in memory for the
-        duration of your session. It is never written to <code>localStorage</code>, cookies, or
-        any other persistent browser storage. When you sign out or close the tab, the key is gone
-        from your device.
+        Each account has a unique AES-256 encryption key, generated when you first visit a module
+        that uses encryption (journal, check-in notes, worksheets). This key is generated on our
+        server and returned to your browser over HTTPS, where it is held in memory for the duration
+        of your session only. It is never written to <code>localStorage</code>, cookies, or any
+        other persistent browser storage. When you sign out or close the tab, the key is gone from
+        your device.
       </p>
       <p class="prose">
-        The key itself is stored in the database in an encrypted form. It is wrapped using a
-        key derived from a <strong>platform secret</strong> — a random value stored only in our
-        server environment variables, never in the database. When you sign in, our server verifies
-        your identity using your Supabase session token, then uses the platform secret to unwrap
-        your encryption key and return it to your browser.
+        The key is stored in the database in an encrypted form, wrapped using a key derived from a
+        <strong>platform secret</strong> — a random value stored only in our server environment
+        variables, never in the database. When you sign in, our server verifies your identity and
+        uses the platform secret to unwrap your key and return it to your browser.
       </p>
 
       <h3 class="section__sub">What this means honestly</h3>
       <div class="callout callout--amber">
         <span class="callout__label">Honest limitation</span>
-        This model protects your data against database breaches — if someone obtained a copy of the
-        database, they would see only ciphertext that they cannot decrypt without also compromising
-        the server environment. However, as the platform operator, Jordan Elias has access to the
-        platform secret. This means that, in theory, an operator with access to both the database
-        and the server environment could decrypt your content. This is disclosed because honest
-        privacy policy matters more than false reassurance. Nothing is stored until you decide to save it though. The safest and most protected option is to download the file yourself, or delete it afterward. Nothing gets stored at all in those cases. 
+        This model protects saved data against database breaches — if someone obtained a copy of
+        the database, they would see only ciphertext that cannot be decrypted without also
+        compromising the server environment. However, as the platform operator, Jordan Elias has
+        access to the platform secret. This means that, in theory, someone with access to both
+        the database and the server environment could decrypt saved content.<br><br>
+        This is disclosed because honest privacy policy matters more than false reassurance.
+        If you want absolute certainty that no one can read what you write, use the download
+        or delete options — in both cases nothing is stored anywhere.
       </div>
+
       <div class="callout callout--green">
         <span class="callout__label">What this protects against</span>
-        Database breaches or leaks where only database content is exposed will not expose your
-        journal entries or check-in notes — they are ciphertext without the server secret.
-        Your data is never stored or logged in plaintext anywhere in the system.
+        A database breach alone cannot expose your saved entries. They are ciphertext without the
+        server secret. Your data is never stored or logged in plaintext anywhere in the system.
       </div>
 
       <h3 class="section__sub">The future upgrade path</h3>
       <p class="prose">
         The architecture is designed to support an upgrade to <strong>true end-to-end encryption</strong>
-        in a future version, where your key would be derived from a passphrase only you know, making
-        decryption impossible even for the platform operator. This upgrade path is built into the
-        codebase but not yet activated. It will be announced clearly when available, and upgrading
-        will be opt-in.
-      </p>
-
-      <h3 class="section__sub">Sharing with your therapist</h3>
-      <p class="prose">
-        If you choose to share a journal entry, check-in summary, worksheet, or audio file with
-        your therapist, that item is <strong>re-encrypted</strong> using the practice's RSA-OAEP
-        public key before being sent. This is a form of hybrid encryption: a one-time AES session
-        key encrypts the content, and that session key is encrypted with the RSA public key. Only
-        the practice's private key — held by the therapist and never stored on any server — can
-        decrypt the session key and therefore the content. Sharing is always an explicit, deliberate
-        action. Nothing is shared automatically.
+        in a future version, where your key would be derived from a passphrase only you know —
+        making decryption impossible even for the platform operator. This upgrade path is built
+        into the codebase but not yet activated. It will be announced clearly when available,
+        and upgrading will be opt-in with no loss of existing data.
       </p>
     </section>
 
-    <!-- ── WHAT IS STORED ── -->
+    <!-- WHAT IS STORED -->
     <section class="section" id="data-stored">
       <h2 class="section__title">What is stored and how</h2>
       <p class="prose">
-        The table below covers every category of data stored by this platform, where it lives,
-        how it is protected, and who can access it.
+        The table below covers every category of data stored by this platform. Anything you
+        download or delete does not appear here — it is never stored.
       </p>
 
       <table class="data-table">
@@ -570,7 +453,7 @@
             <td>You. Platform operator. Used for access gating.</td>
           </tr>
           <tr>
-            <td>Journal entry content and title</td>
+            <td>Saved journal entry content and title</td>
             <td class="td-mono">journal_entries</td>
             <td><span class="badge badge--enc">AES-256-GCM encrypted</span></td>
             <td>You only (decrypted in your browser). Platform operator has theoretical access via server secret.</td>
@@ -580,6 +463,12 @@
             <td class="td-mono">journal_entries</td>
             <td><span class="badge badge--plain">Plaintext</span></td>
             <td>You. Platform operator.</td>
+          </tr>
+          <tr>
+            <td>Downloaded or deleted journal entries</td>
+            <td class="td-mono">—</td>
+            <td><span class="badge badge--zero">Not stored</span></td>
+            <td>No one. Nothing is recorded.</td>
           </tr>
           <tr>
             <td>Check-in numeric scores (arousal, valence, sensory load)</td>
@@ -594,28 +483,34 @@
             <td>You. Platform operator.</td>
           </tr>
           <tr>
-            <td>Check-in written notes</td>
+            <td>Check-in written notes (if saved)</td>
             <td class="td-mono">checkins</td>
             <td><span class="badge badge--enc">AES-256-GCM encrypted</span></td>
             <td>You only (decrypted in your browser). Platform operator has theoretical access via server secret.</td>
           </tr>
           <tr>
+            <td>Saved worksheet content</td>
+            <td class="td-mono">worksheets</td>
+            <td><span class="badge badge--enc">AES-256-GCM encrypted</span></td>
+            <td>You only (decrypted in your browser). Platform operator has theoretical access via server secret.</td>
+          </tr>
+          <tr>
+            <td>Downloaded or deleted worksheets</td>
+            <td class="td-mono">—</td>
+            <td><span class="badge badge--zero">Not stored</span></td>
+            <td>No one. Nothing is recorded.</td>
+          </tr>
+          <tr>
             <td>Encryption key (wrapped)</td>
             <td class="td-mono">profiles</td>
             <td><span class="badge badge--enc">Encrypted with platform secret</span></td>
-            <td>No one in plaintext form. Server unwraps it only to return to your browser during your session.</td>
-          </tr>
-          <tr>
-            <td>Shared items (content shared with therapist)</td>
-            <td class="td-mono">shared_items</td>
-            <td><span class="badge badge--enc">RSA-OAEP + AES-256-GCM</span></td>
-            <td>You and your therapist only. Content is re-encrypted for the practice's public key before storage.</td>
+            <td>No one in plaintext form. Server unwraps it only during your active session.</td>
           </tr>
           <tr>
             <td>Audio recordings / compositions</td>
             <td class="td-mono">Supabase Storage</td>
             <td><span class="badge badge--plain">Plaintext audio file</span></td>
-            <td>You. Accessible only via authenticated signed URLs, not public links.</td>
+            <td>You. Accessible only via authenticated signed URLs, never public links.</td>
           </tr>
           <tr>
             <td>Payment information (card details)</td>
@@ -635,68 +530,59 @@
       <h3 class="section__sub">Identity separation</h3>
       <p class="prose">
         Your identity — email address and name — is stored separately from your content.
-        Supabase maintains a dedicated <code>auth.users</code> table for authentication data
-        (email, hashed password, session tokens). This table is managed directly by Supabase's
-        authentication service and is separate from the <code>profiles</code> table and all
-        content tables (<code>journal_entries</code>, <code>checkins</code>, etc.).
-      </p>
-      <p class="prose">
-        All content tables reference you only by a <strong>UUID (universally unique identifier)</strong>
-        — a random string like <code>a3f2c1d4-...</code> — not by your name or email. This means
-        that even within the database, your journal entries are not directly labelled with your
-        name. They are linked to an opaque identifier that maps to your identity only via the
-        authentication layer. Someone who obtained only the content tables would see encrypted
-        ciphertext attached to anonymous UUIDs.
+        Supabase maintains a dedicated <code>auth.users</code> table for authentication data,
+        separate from all content tables. All content tables reference you only by a
+        <strong>UUID</strong> — a random string like <code>a3f2c1d4-...</code> — not by your
+        name or email. Someone who obtained only the content tables would see encrypted ciphertext
+        attached to anonymous identifiers.
       </p>
     </section>
 
-    <!-- ── SUPABASE ── -->
+    <!-- SUPABASE -->
     <section class="section" id="supabase">
       <h2 class="section__title">Supabase and the database</h2>
       <p class="prose">
         This platform uses <a href="https://supabase.com" target="_blank" rel="noopener">Supabase</a>
-        as its database and authentication provider. Supabase is an open-source Firebase alternative
-        built on PostgreSQL, hosted on AWS infrastructure. The database is hosted in the
-        <strong>EU West (Frankfurt)</strong> region, keeping data within the European Union.
+        as its database and authentication provider — an open-source alternative to Firebase, built
+        on PostgreSQL and hosted on AWS. The database is in the
+        <strong>EU West (Frankfurt)</strong> region, keeping all stored data within the European Union.
       </p>
 
       <h3 class="section__sub">Row Level Security (RLS)</h3>
       <p class="prose">
-        Every table in the database has Row Level Security enabled. RLS is a PostgreSQL feature
-        that enforces access control at the database level — not just in application code. This
-        means that even if there were a bug in the application layer, the database itself would
-        refuse to return data that the requesting user is not authorised to see.
+        Every table has Row Level Security enabled. RLS is a PostgreSQL feature that enforces
+        access control at the database level — not just in application code. Even if there were
+        a bug in the application, the database itself would refuse to return data the requesting
+        user is not authorised to see.
       </p>
 
       <div class="tech-block">
         <span class="tech-block__label">RLS policy structure</span>
-        <p><strong>journal_entries:</strong> Users can only read, create, and delete rows where <code>user_id = auth.uid()</code>. No other user, including the platform operator querying via the application, can read another user's rows via the standard API.</p>
+        <p><strong>journal_entries:</strong> Users can only read, create, and delete rows where <code>user_id = auth.uid()</code>. No other user can access another user's entries via the API.</p>
         <p><strong>checkins:</strong> Same pattern — rows are visible only to the user who created them.</p>
-        <p><strong>profiles:</strong> Users can read and update their own profile row. Practice members (therapists) can read a restricted view of client profiles that excludes encryption key columns.</p>
-        <p><strong>shared_items:</strong> Users control their own shared items. Practice members with therapist role can read items shared with their practice. The mark-as-viewed operation runs via a database function that restricts what can be modified.</p>
+        <p><strong>worksheets:</strong> Same pattern — each worksheet row is locked to its creator's user ID.</p>
+        <p><strong>profiles:</strong> Users can read and update only their own profile row. Encryption key columns cannot be read by any application-layer query other than the dedicated vault server function.</p>
       </div>
 
       <h3 class="section__sub">The service role key</h3>
       <p class="prose">
-        Supabase provides two API keys: an <strong>anon key</strong> (safe to use in the browser,
-        subject to RLS) and a <strong>service role key</strong> (bypasses RLS, for server-side use only).
-        The service role key is stored only in Netlify environment variables and is never exposed
-        to the browser or included in client-side code. The vault function that handles encryption
-        keys uses the service role key to read and write the wrapped key — this is the only server-side
-        operation that bypasses RLS, and it does so only after verifying the user's JWT.
+        Supabase provides two API keys: an <strong>anon key</strong> (used in the browser, subject
+        to RLS) and a <strong>service role key</strong> (bypasses RLS, for server use only). The
+        service role key is stored only in Netlify environment variables and is never exposed to
+        the browser. The vault function that handles encryption keys uses the service role key
+        only after verifying the user's session token.
       </p>
 
       <h3 class="section__sub">Supabase's own privacy commitments</h3>
       <p class="prose">
-        Supabase is SOC 2 Type 2 compliant and GDPR-ready. Their infrastructure runs on AWS with
-        encryption at rest and in transit. You can read Supabase's privacy policy at
+        Supabase is SOC 2 Type 2 compliant and GDPR-ready, with encryption at rest and in transit.
+        Read their privacy policy at
         <a href="https://supabase.com/privacy" target="_blank" rel="noopener">supabase.com/privacy</a>.
-        As the data controller, Jordan Elias is the party responsible for how your data is used —
-        Supabase acts as a data processor.
+        Jordan Elias is the data controller — Supabase acts as a data processor.
       </p>
     </section>
 
-    <!-- ── DATA COLLECTED ── -->
+    <!-- DATA COLLECTED -->
     <section class="section" id="data-collected">
       <h2 class="section__title">Data we collect</h2>
       <p class="prose">
@@ -707,45 +593,47 @@
       <h3 class="section__sub">Account data</h3>
       <p class="prose">
         When you create an account: your email address (required for authentication), your chosen
-        display name (required for personalisation), and your password (hashed by Supabase's
-        authentication service — we never see it in plaintext).
+        display name, and your password (hashed by Supabase — we never see it in plaintext).
       </p>
 
-      <h3 class="section__sub">Content you create</h3>
+      <h3 class="section__sub">Content you choose to save</h3>
       <p class="prose">
-        Journal entries, check-in responses, audio recordings, and any other content you create
-        using the platform tools. This content is created entirely by you and is stored as
-        described in the data table above.
+        Journal entries, check-in responses, and worksheets that you explicitly choose to save.
+        Downloaded or deleted content is never recorded. The platform has no knowledge of writing
+        that is not saved.
+      </p>
+
+      <h3 class="section__sub">Audio recordings</h3>
+      <p class="prose">
+        Audio files you create and choose to save, stored in Supabase Storage and accessible only
+        via authenticated signed URLs — never publicly accessible.
       </p>
 
       <h3 class="section__sub">Session and technical data</h3>
       <p class="prose">
-        Supabase automatically logs authentication events (sign-ins, token refreshes) for security
-        purposes. These logs include timestamps and are retained for a limited period by Supabase.
-        We do not run additional analytics or tracking scripts. There are no third-party marketing
-        trackers, no pixels, no fingerprinting.
+        Supabase automatically logs authentication events (sign-ins, token refreshes) for security.
+        We do not run additional analytics or tracking scripts. There are no marketing trackers,
+        no pixels, no fingerprinting.
       </p>
 
       <h3 class="section__sub">Booking data</h3>
       <p class="prose">
-        If you book a video session, booking data (your name, email, selected time, and any notes
-        you add) is processed by <a href="https://cal.com" target="_blank" rel="noopener">Cal.com</a>.
-        This data is shared with Jordan Elias for session preparation. Cal.com's own privacy policy
-        governs their handling of this data.
+        If you book a video session, booking data is processed by
+        <a href="https://cal.com" target="_blank" rel="noopener">Cal.com</a> and shared with
+        Jordan Elias for session preparation. Cal.com's own privacy policy governs their handling.
       </p>
 
       <h3 class="section__sub">Intake form data</h3>
       <p class="prose">
-        If you book a video session, you will be asked to complete an intake form covering
-        presenting concerns, health history, medications, and emergency contacts. This data is
-        stored in a dedicated <code>intake_forms</code> table in Supabase. Unlike journal entries,
-        intake form data is <strong>not encrypted with your personal vault key</strong> — because
-        your therapist needs to be able to read it. It is protected by RLS policies that restrict
-        access to you and your assigned therapist, and is transmitted over HTTPS.
+        If you book a video session you will be asked to complete an intake form covering
+        presenting concerns, health history, medications, and emergency contacts. This is stored
+        in a dedicated table, protected by RLS, and accessible only to you and Jordan Elias.
+        Unlike journal content, intake form data is not encrypted with your vault key — because
+        your therapist needs to be able to read it.
       </p>
     </section>
 
-    <!-- ── DATA SHARING ── -->
+    <!-- DATA SHARING -->
     <section class="section" id="data-sharing">
       <h2 class="section__title">Data sharing</h2>
       <p class="prose">
@@ -754,19 +642,10 @@
       </p>
 
       <h3 class="section__sub">Third-party services used</h3>
-      <p class="prose">
-        The following third parties process data as part of platform operation. Each is a data
-        processor — they handle data on our behalf, under our instructions, and are bound by
-        GDPR-compliant data processing agreements.
-      </p>
 
       <table class="data-table">
         <thead>
-          <tr>
-            <th>Service</th>
-            <th>Purpose</th>
-            <th>Data shared</th>
-          </tr>
+          <tr><th>Service</th><th>Purpose</th><th>Data shared</th></tr>
         </thead>
         <tbody>
           <tr>
@@ -797,147 +676,105 @@
         </tbody>
       </table>
 
-      <h3 class="section__sub">Legal disclosure</h3>
+      <h3 class="section__sub">Sharing with your therapist</h3>
       <p class="prose">
-        We may be required to disclose data in response to a valid legal request from law
-        enforcement or a court order. If this happens, we will notify you unless we are legally
-        prohibited from doing so.
+        The platform does not have a built-in sharing mechanism. If you want to share something
+        with Jordan Elias, download the file and send it by email to
+        <a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a>. You decide what to share,
+        when, and in what form. The platform plays no role in that exchange and has no record of it.
       </p>
 
-      <h3 class="section__sub">Voluntary sharing with your therapist</h3>
+      <h3 class="section__sub">Legal disclosure</h3>
       <p class="prose">
-        Any data shared with your therapist is shared by your own explicit action — a "Share with
-        therapist" button that requires confirmation before anything is sent. Nothing is shared
-        automatically. You can see everything you have shared and when.
+        We may be required to disclose data in response to a valid legal request or court order.
+        If this happens, we will notify you unless legally prohibited from doing so.
       </p>
     </section>
 
-    <!-- ── PAYMENTS ── -->
+    <!-- PAYMENTS -->
     <section class="section" id="payments">
       <h2 class="section__title">Payments and Stripe</h2>
       <p class="prose">
         Subscriptions and payments are processed by
         <a href="https://stripe.com" target="_blank" rel="noopener">Stripe</a>, a PCI DSS Level 1
-        certified payment processor. When you enter card details, you are entering them directly
-        into Stripe's interface — your card number, CVC, and expiry date never reach our servers
-        or our database.
-      </p>
-      <p class="prose">
-        What we store: your <strong>Stripe Customer ID</strong> (a reference string like
-        <code>cus_abc123...</code>) in your profile row, and your current subscription tier and
-        status. We use this to determine which features you can access. We do not store card
-        numbers, bank account details, or any other payment instrument data.
+        certified payment processor. When you enter card details, you enter them directly into
+        Stripe's interface — your card number, CVC, and expiry date never reach our servers
+        or our database. We store only your Stripe Customer ID and subscription status.
       </p>
 
       <h3 class="section__sub">Cancellation</h3>
       <p class="prose">
         You can cancel your subscription at any time from the Account page. Cancellation takes
-        effect at the end of your current billing period — you retain access until then. We do
-        not offer refunds for partial periods, but if you believe there has been an error, contact
-        <a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a> and it will be reviewed.
+        effect at the end of your current billing period. We do not offer refunds for partial
+        periods, but if you believe there has been an error, contact
+        <a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a>.
       </p>
 
       <h3 class="section__sub">Subscription tiers</h3>
       <p class="prose">
-        The platform currently offers a free tier (limited access) and paid Lab and Session tiers.
-        Pricing and tier details are shown on the account and booking pages. Prices may change —
-        existing subscribers will receive at least 30 days notice before any price increase takes
-        effect on their subscription.
+        Pricing and tier details are shown on the account and booking pages. Existing subscribers
+        will receive at least 30 days notice before any price increase takes effect.
       </p>
     </section>
 
-    <!-- ── GDPR ── -->
+    <!-- GDPR -->
     <section class="section" id="gdpr">
       <h2 class="section__title">Your rights under GDPR</h2>
       <p class="prose">
-        As a resident of the European Union (or the UK, Switzerland, or another jurisdiction with
-        equivalent data protection law), you have the following rights regarding your personal data.
-        To exercise any of them, write to <a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a>.
-        We will respond within 30 days.
+        As a resident of the EU, UK, Switzerland, or another jurisdiction with equivalent data
+        protection law, you have the following rights. To exercise any of them, write to
+        <a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a>. We will respond within 30 days.
       </p>
 
       <h3 class="section__sub">Right of access</h3>
-      <p class="prose">
-        You have the right to request a copy of the personal data we hold about you and information
-        about how it is used. Most of your data is already visible to you within the platform.
-      </p>
+      <p class="prose">Most of your data is already visible within the platform. You can also request a full copy.</p>
 
       <h3 class="section__sub">Right to rectification</h3>
-      <p class="prose">
-        If any data we hold about you is inaccurate, you have the right to have it corrected.
-        You can update your name and email directly from the Account page. For other data,
-        contact us.
-      </p>
+      <p class="prose">You can update your name and email from the Account page. For anything else, contact us.</p>
 
       <h3 class="section__sub">Right to erasure</h3>
-      <p class="prose">
-        You have the right to request deletion of your personal data. You can delete individual
-        journal entries and check-ins from within the platform. For full account deletion, see
-        the section below.
-      </p>
+      <p class="prose">You can delete individual entries and worksheets from within the platform. For full account deletion, see below.</p>
 
       <h3 class="section__sub">Right to data portability</h3>
-      <p class="prose">
-        You have the right to receive your data in a structured, machine-readable format.
-        Journal entries can be downloaded as <code>.txt</code> files from within the platform.
-        For a full export of all your data, contact us and we will prepare one.
-      </p>
+      <p class="prose">Journal entries and worksheets can be downloaded as files. For a full export of all stored data, contact us.</p>
 
       <h3 class="section__sub">Right to object / restrict processing</h3>
-      <p class="prose">
-        You have the right to object to certain types of processing or to request that processing
-        be restricted while a dispute is resolved. Contact us to discuss.
-      </p>
+      <p class="prose">Contact us to discuss any concerns about how your data is being processed.</p>
 
       <h3 class="section__sub">Lawful basis for processing</h3>
       <p class="prose">
-        We process your data on the following legal bases under GDPR Article 6:
-        <strong>performance of a contract</strong> (providing the service you subscribed to);
-        <strong>legitimate interests</strong> (security logging, fraud prevention);
-        and <strong>consent</strong> (for any processing not covered by the above, you will be
-        asked explicitly). Health-related data (where applicable under Article 9) is processed
-        with your explicit consent.
+        We process your data under GDPR Article 6 on the bases of
+        <strong>performance of a contract</strong> (providing the service),
+        <strong>legitimate interests</strong> (security logging, fraud prevention),
+        and <strong>consent</strong> (for any processing not covered by the above).
+        Health-related data under Article 9 is processed with your explicit consent.
       </p>
     </section>
 
-    <!-- ── ACCOUNT DELETION ── -->
+    <!-- ACCOUNT DELETION -->
     <section class="section" id="account-deletion">
       <h2 class="section__title">Deleting your account</h2>
       <p class="prose">
-        You can request full deletion of your account and all associated data at any time by
-        writing to <a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a> with the subject
-        line <strong>"Account deletion request"</strong>.
+        To request full deletion, write to
+        <a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a> with the subject line
+        <strong>"Account deletion request"</strong>. We will delete your authentication record,
+        all content rows associated with your user ID, all stored audio files, and your Stripe
+        subscription and customer record. We will confirm within 14 days.
       </p>
       <p class="prose">
-        On receiving your request, we will:
-      </p>
-      <p class="prose">
-        Delete your account from Supabase authentication, which removes your email and
-        authentication credentials. Delete all rows in <code>profiles</code>,
-        <code>journal_entries</code>, <code>checkins</code>, <code>shared_items</code>,
-        and any other content tables associated with your user ID. Delete any audio files
-        stored in Supabase Storage under your user ID. Cancel your Stripe subscription if
-        active, and delete your Stripe customer record.
-      </p>
-      <p class="prose">
-        Because your journal content is encrypted with a key tied to your account, deletion of
-        the account also renders any remaining ciphertext permanently undecryptable — even if
-        database backups exist.
-      </p>
-      <p class="prose">
-        We will confirm deletion within 14 days. If you have an active session tier subscription,
-        please also cancel it from the Account page before requesting deletion to avoid further charges.
+        Because your saved content is encrypted with a key tied to your account, deletion also
+        renders any remaining ciphertext permanently undecryptable — even if database backups exist.
       </p>
 
       <div class="callout callout--amber">
         <span class="callout__label">Important</span>
-        Account deletion is permanent and cannot be undone. All your journal entries,
-        check-in history, and saved content will be permanently deleted. Download anything
-        you want to keep before making this request.
+        Deletion is permanent and cannot be undone. Download anything you want to keep before
+        making this request. If you have an active subscription, please cancel it from the
+        Account page first.
       </div>
     </section>
 
-    <!-- ── CRISIS ── -->
+    <!-- CRISIS -->
     <section class="section" id="crisis">
       <h2 class="section__title">Crisis disclaimer</h2>
 
@@ -947,11 +784,6 @@
         in immediate danger, experiencing a mental health emergency, or having thoughts of
         suicide or self-harm, please do not rely on this platform for support.
       </div>
-
-      <p class="prose">
-        Contact your local emergency services (in Germany: <strong>112</strong> for medical
-        emergencies) or one of the following crisis lines:
-      </p>
 
       <table class="data-table" style="margin-top:1rem;">
         <thead><tr><th>Service</th><th>Contact</th><th>Availability</th></tr></thead>
@@ -975,24 +807,54 @@
       </table>
 
       <p class="prose" style="margin-top:1rem;">
-        If you are working with Jordan Elias in a session tier and experience a crisis between
-        sessions, please contact emergency services first. Jordan will have shared a safety plan
-        and out-of-hours contact protocol with you as part of the therapy agreement.
+        If you work with Jordan Elias in a session tier and experience a crisis between sessions,
+        please contact emergency services first. Jordan will have shared a safety plan and
+        out-of-hours contact protocol as part of the therapy agreement.
       </p>
     </section>
 
-    <!-- ── FAQ ── -->
+    <!-- FAQ -->
     <section class="section" id="faq">
       <h2 class="section__title">Frequently asked questions</h2>
-      <div class="faq-list" id="faqList">
+      <div class="faq-list">
 
         <div class="faq-item">
           <button class="faq-q" aria-expanded="false">
-            Can Jordan read my journal entries?
+            Can Jordan read my journal entries or worksheets?
             <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
           </button>
           <div class="faq-a">
-            <p>In practice, no. Your journal entries are encrypted in your browser before saving. What is stored in the database is ciphertext. However, as the platform operator, Jordan has access to the server secret used to wrap your encryption key. This means decryption is theoretically possible with access to both the database and the server environment. This is disclosed honestly in the encryption section above. Future versions of the platform will offer true end-to-end encryption that closes this gap. This only applies to saved entries though; no data is collected about downloaded and deleted entries.</p>
+            <p>Not in any practical sense. For entries you download or delete, the answer is an unqualified no — those are never stored anywhere. For entries you choose to save, the content is encrypted in your browser before it reaches the server. As the platform operator, Jordan has access to the server secret used to wrap your key, meaning decryption is theoretically possible with access to both the database and the server environment. This is disclosed honestly above. If you want absolute certainty, use the download or delete options.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">
+            Is anything recorded while I am writing?
+            <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
+          </button>
+          <div class="faq-a">
+            <p>No. Nothing is transmitted to any server during the writing process. No drafts are auto-saved. No keystroke data, word counts, or progress is recorded until you explicitly press Save. The writing space is entirely local to your browser until you make a deliberate choice about what to do with it.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">
+            If I download a file, does the platform keep a copy?
+            <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
+          </button>
+          <div class="faq-a">
+            <p>No. Downloading writes the file directly to your device. Nothing is sent to the server. The platform has no record that the entry existed, no copy of the content, and no log of the download. The file belongs entirely to you.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">
+            How do I share something with my therapist?
+            <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
+          </button>
+          <div class="faq-a">
+            <p>Download the file and email it to hello@jordanelias.de. That is the simplest and most private method — you control exactly what is shared and when, and the platform plays no role in the exchange and keeps no record of it. There is currently no in-platform sharing mechanism.</p>
           </div>
         </div>
 
@@ -1002,17 +864,7 @@
             <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
           </button>
           <div class="faq-a">
-            <p>Cancelling your subscription removes access to paid features but does not delete your data. Your account, journal entries, and check-in history remain intact. You can request full account deletion at any time separately. If you re-subscribe later, your data will still be there.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-q" aria-expanded="false">
-            Is the platform HIPAA compliant?
-            <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
-          </button>
-          <div class="faq-a">
-            <p>HIPAA applies to US-based covered entities and their business associates. This platform is based in Germany and operates under EU data protection law (GDPR), not HIPAA. If you are a US-based user with specific HIPAA concerns, please contact hello@jordanelias.de to discuss.</p>
+            <p>Cancelling removes access to paid features but does not delete your data. Your saved entries, check-in history, and worksheets remain intact. You can request full account deletion separately at any time.</p>
           </div>
         </div>
 
@@ -1022,7 +874,7 @@
             <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
           </button>
           <div class="faq-a">
-            <p>Supabase handles password reset via a link sent to your email address. Resetting your password does not affect your encrypted data — your vault key is wrapped with a platform secret, not your password, so a password change does not lock you out of your entries. This is different from true end-to-end encrypted systems where forgetting a passphrase can result in permanent data loss.</p>
+            <p>Supabase handles password reset via a link sent to your email. Resetting your password does not affect your encrypted data — your vault key is wrapped with a platform secret, not your password, so a password change does not lock you out of your saved entries.</p>
           </div>
         </div>
 
@@ -1042,7 +894,7 @@
             <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
           </button>
           <div class="faq-a">
-            <p>No. Your data — including journal entries, check-ins, and any other content you create — will never be used to train AI models, sold to AI companies, or used for any purpose other than providing you with the platform service. This is a firm commitment, not a policy subject to change without explicit notice and consent.</p>
+            <p>No. Your data will never be used to train AI models, sold to AI companies, or used for any purpose other than providing you with the platform service. This is a firm commitment.</p>
           </div>
         </div>
 
@@ -1052,17 +904,7 @@
             <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
           </button>
           <div class="faq-a">
-            <p>The Supabase database is hosted in the EU West (Frankfurt, Germany) AWS region. Netlify hosts the website and serverless functions on infrastructure that may include US-based servers, but no persistent data is stored on Netlify — it is used only for serving the website and running short-lived functions. Stripe and Cal.com have their own infrastructure and data locations, described in their respective privacy policies.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-q" aria-expanded="false">
-            I shared something with my therapist. Can I un-share it?
-            <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
-          </button>
-          <div class="faq-a">
-            <p>You can delete a shared item from your shared items list, which removes it from the database. However, if your therapist has already viewed and noted the content, deletion from the database does not remove it from their memory or any notes they may have made. Treat sharing as you would sharing anything in a therapeutic relationship — thoughtfully and deliberately.</p>
+            <p>The Supabase database is hosted in the EU West (Frankfurt, Germany) AWS region. Netlify hosts the website and serverless functions; no persistent data is stored on Netlify. Stripe and Cal.com have their own infrastructure and data locations, described in their respective privacy policies.</p>
           </div>
         </div>
 
@@ -1072,19 +914,18 @@
             <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
           </button>
           <div class="faq-a">
-            <p>In the event that the platform is discontinued, all users will be given at least 90 days notice and a mechanism to export their data before closure. Data will not be transferred to a third party as part of any sale or closure — it will be deleted. This commitment is made in good faith and will be honoured.</p>
+            <p>All users will be given at least 90 days notice and a mechanism to export their data before closure. Data will not be transferred to a third party — it will be deleted. This commitment is made in good faith and will be honoured.</p>
           </div>
         </div>
 
       </div>
     </section>
 
-    <!-- ── CONTACT ── -->
+    <!-- CONTACT -->
     <section class="section" id="contact">
       <h2 class="section__title">Contact</h2>
       <p class="prose">
-        For any questions about this privacy policy, to exercise your rights, or to make a
-        complaint about how your data is handled, contact:
+        For questions about this privacy policy, to exercise your rights, or to make a complaint:
       </p>
 
       <div class="contact-block">
@@ -1100,9 +941,8 @@
 
       <p class="prose" style="margin-top:1.25rem;">
         If you are not satisfied with the response to a complaint, you have the right to lodge a
-        complaint with the relevant data protection authority. In Germany, this is the
+        complaint with the relevant supervisory authority. In Germany, this is the
         <a href="https://www.bfdi.bund.de" target="_blank" rel="noopener">Bundesbeauftragte für den Datenschutz und die Informationsfreiheit (BfDI)</a>.
-        If you are in another EU member state, your national supervisory authority has jurisdiction.
       </p>
     </section>
 
@@ -1119,18 +959,14 @@
 <script>
 'use strict';
 
-// ── FAQ accordion ──
 document.querySelectorAll('.faq-q').forEach(btn => {
   btn.addEventListener('click', () => {
     const answer   = btn.nextElementSibling;
     const expanded = btn.getAttribute('aria-expanded') === 'true';
-
-    // Close all others
     document.querySelectorAll('.faq-q').forEach(b => {
       b.setAttribute('aria-expanded', 'false');
       b.nextElementSibling.classList.remove('open');
     });
-
     if (!expanded) {
       btn.setAttribute('aria-expanded', 'true');
       answer.classList.add('open');
@@ -1138,7 +974,6 @@ document.querySelectorAll('.faq-q').forEach(btn => {
   });
 });
 
-// ── Sidebar active state on scroll ──
 const sections = document.querySelectorAll('.section[id]');
 const navLinks  = document.querySelectorAll('.sidebar__nav a');
 
