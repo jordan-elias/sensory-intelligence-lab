@@ -12,18 +12,19 @@
   <link rel="manifest" href="/site.webmanifest">
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
-  
+
   <script src="/dashboard/auth-guard.js" type="module"></script>
 
   <script type="module">
-  import { applyMultipleGating } from '/assets/js/gating.js';
-  applyMultipleGating([
-    { targetSelector: '.transport',  moduleName: 'soundscape-machine' },
-    { targetSelector: '#tracksContainer', moduleName: 'soundscape-machine' },
-    { targetSelector: '.library',    moduleName: 'soundscape-machine' },
-  ]);
-</script>
-  
+    import { applyMultipleGating } from '/assets/js/gating.js';
+    applyMultipleGating([
+      { targetSelector: '.transport',        moduleName: 'tape-laboratory' },
+      { targetSelector: '#tracksContainer',  moduleName: 'tape-laboratory' },
+      { targetSelector: '.ratio-panel',      moduleName: 'tape-laboratory' },
+      { targetSelector: '.library',          moduleName: 'tape-laboratory' },
+    ]);
+  </script>
+
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -33,115 +34,46 @@
       --text:#1a1a1a;--muted:#6b6b6b;
       --accent:#2a5c45;--accent-light:#edf4f0;--accent-hover:#1e4433;
       --error:#c0392b;--error-bg:#fdf2f2;
-      --track-h:210px;
+      --ring:#7b3f9e;--ring-light:#f5eefa;
     }
     html{font-size:16px}
     body{font-family:var(--font-body);color:var(--text);background:var(--bg);
       min-height:100vh;display:flex;flex-direction:column;}
 
-    /* ══════════════════════════════════════
-       HEADER
-    ══════════════════════════════════════ */
-    .sil-header {
-      border-bottom: 1px solid var(--border);
-      padding: 0 1.5rem;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      left: 0;
-      right: 0;
-      background: var(--bg);
-      z-index: 100;
-      gap: 1rem;
-      width: 100%;
+    /* ── HEADER ── */
+    .sil-header{border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;
+      display:flex;align-items:center;justify-content:space-between;position:sticky;
+      top:0;background:var(--bg);z-index:100;gap:1rem;width:100%;}
+    .sil-header__wordmark{font-family:var(--font-heading);font-size:1rem;font-weight:600;
+      letter-spacing:-0.01em;white-space:nowrap;flex-shrink:0;text-decoration:none;color:var(--text);}
+    .sil-header__wordmark:hover{color:var(--accent);}
+    .sil-header__nav{display:flex;gap:.25rem;align-items:center;}
+    .sil-header__nav a{font-family:var(--font-body);font-size:.8rem;font-weight:500;
+      text-decoration:none;color:var(--muted);transition:color .15s;white-space:nowrap;padding:.3rem .65rem;}
+    .sil-header__nav a:hover{color:var(--text);}
+    .sil-header__nav a.sil-active{color:var(--accent);font-weight:600;}
+    .sil-header__signout{font-family:var(--font-body);font-size:.8rem;font-weight:500;
+      color:var(--muted);background:none;border:1px solid var(--border);cursor:pointer;
+      padding:.3rem .75rem;transition:color .15s,border-color .15s;white-space:nowrap;line-height:1.6;}
+    .sil-header__signout:hover{color:var(--text);border-color:var(--text);}
+    .sil-header__signout:disabled{opacity:.5;cursor:not-allowed;}
+    .sil-header__toggle{display:none;flex-direction:column;gap:4px;background:none;
+      border:none;cursor:pointer;padding:4px;flex-shrink:0;}
+    .sil-header__toggle span{display:block;width:20px;height:2px;background:var(--text);}
+    @media(max-width:700px){
+      .sil-header{padding:0 1rem;}
+      .sil-header__toggle{display:flex;}
+      .sil-header__nav{display:none;position:absolute;top:56px;left:0;right:0;
+        background:var(--bg);border-bottom:1px solid var(--border);flex-direction:column;
+        align-items:flex-start;padding:.75rem 1rem;gap:0;z-index:99;}
+      .sil-header__nav.sil-open{display:flex;}
+      .sil-header__nav a,.sil-header__signout{font-size:.875rem;padding:.55rem .5rem;}
+      .sil-header__signout{border:none;}
     }
 
-    .sil-header__wordmark {
-      font-family: var(--font-heading);
-      font-size: 1rem;
-      font-weight: 600;
-      letter-spacing: -0.01em;
-      white-space: nowrap;
-      flex-shrink: 0;
-      text-decoration: none;
-      color: var(--text);
-    }
-    .sil-header__wordmark:hover { color: var(--accent); }
-
-    .sil-header__nav {
-      display: flex;
-      gap: 0.25rem;
-      align-items: center;
-    }
-
-    .sil-header__nav a {
-      font-family: var(--font-body);
-      font-size: 0.8rem;
-      font-weight: 500;
-      text-decoration: none;
-      color: var(--muted);
-      transition: color 0.15s;
-      white-space: nowrap;
-      padding: 0.3rem 0.65rem;
-    }
-    .sil-header__nav a:hover { color: var(--text); }
-    .sil-header__nav a.sil-active { color: var(--accent); font-weight: 600; }
-
-    .sil-header__signout {
-      font-family: var(--font-body);
-      font-size: 0.8rem;
-      font-weight: 500;
-      color: var(--muted);
-      background: none;
-      border: 1px solid var(--border);
-      cursor: pointer;
-      padding: 0.3rem 0.75rem;
-      transition: color 0.15s, border-color 0.15s;
-      white-space: nowrap;
-      line-height: 1.6;
-    }
-    .sil-header__signout:hover { color: var(--text); border-color: var(--text); }
-    .sil-header__signout:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .sil-header__toggle {
-      display: none;
-      flex-direction: column;
-      gap: 4px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 4px;
-      flex-shrink: 0;
-    }
-    .sil-header__toggle span { display: block; width: 20px; height: 2px; background: var(--text); }
-
-    @media (max-width: 700px) {
-      .sil-header { padding: 0 1rem; }
-      .sil-header__toggle { display: flex; }
-      .sil-header__nav {
-        display: none;
-        position: absolute;
-        top: 56px; left: 0; right: 0;
-        background: var(--bg);
-        border-bottom: 1px solid var(--border);
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 0.75rem 1rem;
-        gap: 0;
-        z-index: 99;
-      }
-      .sil-header__nav.sil-open { display: flex; }
-      .sil-header__nav a,
-      .sil-header__signout { font-size: 0.875rem; padding: 0.55rem 0.5rem; }
-      .sil-header__signout { border: none; }
-    }
-
-    .bc{padding:.75rem 1.5rem 0;max-width:1100px;margin:0 auto}
-    .bc ol{list-style:none;display:flex;gap:.3rem;align-items:center;
-      font-size:.75rem;color:var(--muted);}
+    /* ── LAYOUT ── */
+    .bc{padding:.75rem 1.5rem 0;max-width:1100px;margin:0 auto;width:100%}
+    .bc ol{list-style:none;display:flex;gap:.3rem;align-items:center;font-size:.75rem;color:var(--muted);}
     .bc li+li::before{content:'/';margin-right:.3rem;color:var(--border)}
     .bc a{color:var(--muted);text-decoration:none;}
     .bc a:hover{color:var(--accent);text-decoration:underline;}
@@ -149,14 +81,14 @@
     main{max-width:1100px;margin:0 auto;padding:1.5rem 1.5rem 4rem;flex:1;width:100%;}
     @media(max-width:600px){main{padding:1rem .75rem 3rem}}
 
-    /* ── Page header ── */
+    /* ── PAGE HEADER ── */
     .ph{margin-bottom:1.5rem;padding-bottom:1.25rem;border-bottom:1px solid var(--border);
       display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
     .ph-left h2{font-family:var(--font-heading);font-size:1.5rem;font-weight:600;
       letter-spacing:-.02em;line-height:1.2;margin-bottom:.2rem;}
     .ph-left p{font-size:.82rem;color:var(--muted);}
 
-    /* ── Session bar ── */
+    /* ── SESSION BAR ── */
     .session-bar{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;}
     .session-bar label{font-size:.75rem;font-weight:500;color:var(--muted);}
     select.session-select{font-family:var(--font-body);font-size:.8rem;
@@ -171,12 +103,38 @@
     .sbtn.primary:hover{background:var(--accent-hover);}
     .sbtn:disabled{opacity:.45;cursor:not-allowed;}
 
-    /* ── Transport bar ── */
-    .transport{
-      display:flex;align-items:center;gap:.75rem;
-      padding:.85rem 1rem;border:1px solid var(--border);
-      background:var(--surface);margin-bottom:1rem;flex-wrap:wrap;
-    }
+    /* ── FREQUENCY RATIO PANEL ── */
+    .ratio-panel{border:1px solid var(--border);background:var(--surface);
+      margin-bottom:1rem;padding:.85rem 1rem;}
+    .ratio-panel-head{display:flex;align-items:center;justify-content:space-between;
+      margin-bottom:.85rem;flex-wrap:wrap;gap:.5rem;}
+    .ratio-panel-title{font-family:var(--font-heading);font-size:.67rem;font-weight:600;
+      letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+    .ratio-lock-row{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;}
+    .ratio-lock-label{font-size:.75rem;color:var(--muted);}
+    .ratio-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;}
+    @media(max-width:600px){.ratio-grid{grid-template-columns:repeat(2,1fr);}}
+    .ratio-cell{background:var(--bg);border:1px solid var(--border);padding:.6rem .75rem;}
+    .ratio-cell-label{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;
+      color:var(--muted);margin-bottom:.4rem;}
+    .ratio-cell-main{display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem;}
+    .ratio-num{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:var(--text);}
+    .ratio-slash{color:var(--muted);font-size:.9rem;}
+    .ratio-input{font-family:var(--font-heading);font-size:.85rem;font-weight:600;
+      width:36px;padding:.15rem .3rem;border:1px solid var(--border);background:var(--bg);
+      color:var(--text);text-align:center;outline:none;}
+    .ratio-input:focus{border-color:var(--accent);}
+    .ratio-cell-freq{font-size:.7rem;color:var(--accent);font-weight:600;
+      font-variant-numeric:tabular-nums;}
+    .ratio-cell-pitch{font-size:.68rem;color:var(--muted);}
+    .ratio-apply{font-family:var(--font-heading);font-size:.72rem;font-weight:600;
+      padding:.35rem .85rem;border:1px solid var(--accent);background:transparent;
+      color:var(--accent);cursor:pointer;transition:all .12s;}
+    .ratio-apply:hover{background:var(--accent);color:white;}
+
+    /* ── TRANSPORT ── */
+    .transport{display:flex;align-items:center;gap:.75rem;padding:.85rem 1rem;
+      border:1px solid var(--border);background:var(--surface);margin-bottom:1rem;flex-wrap:wrap;}
     .t-btn{font-family:var(--font-heading);font-size:.78rem;font-weight:600;
       padding:.55rem 1.25rem;border:none;cursor:pointer;transition:all .12s;
       display:flex;align-items:center;gap:.45rem;letter-spacing:-.01em;}
@@ -189,10 +147,8 @@
     .t-btn.record.active{animation:recPulse 1s infinite;}
     @keyframes recPulse{0%,100%{opacity:1}50%{opacity:.6}}
     .t-btn:disabled{opacity:.4;cursor:not-allowed;}
-
     .transport-time{font-family:var(--font-heading);font-size:.85rem;font-weight:600;
-      color:var(--text);letter-spacing:.04em;font-variant-numeric:tabular-nums;
-      margin-left:.25rem;}
+      color:var(--text);letter-spacing:.04em;font-variant-numeric:tabular-nums;margin-left:.25rem;}
     .transport-right{margin-left:auto;display:flex;align-items:center;gap:.65rem;}
     .dl-mix-btn{font-family:var(--font-heading);font-size:.72rem;font-weight:600;
       padding:.38rem .9rem;border:1px solid var(--border);background:var(--bg);
@@ -200,70 +156,52 @@
     .dl-mix-btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent);}
     .dl-mix-btn:disabled{opacity:.4;cursor:not-allowed;}
 
-    /* ── Four tracks ── */
+    /* ── TRACKS ── */
     .tracks{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem;}
-
     .track{border:1px solid var(--border);background:var(--bg);}
     .track.has-audio{border-color:#c8ddd4;}
-    .track.playing .track-head{background:#edf4f0;}
-
-    .track-head{
-      display:flex;align-items:center;gap:.65rem;
-      padding:.6rem .85rem;border-bottom:1px solid var(--border);
-      background:var(--surface);flex-wrap:wrap;
-    }
+    .track.osc-mode{border-color:#d4c8dd;}
+    .track-head{display:flex;align-items:center;gap:.65rem;padding:.6rem .85rem;
+      border-bottom:1px solid var(--border);background:var(--surface);flex-wrap:wrap;}
     .track-num{font-family:var(--font-heading);font-size:.7rem;font-weight:600;
       letter-spacing:.08em;color:var(--muted);flex-shrink:0;width:20px;}
     .track-name{font-size:.8rem;font-weight:500;color:var(--text);flex:1;min-width:80px;}
     .track-file-info{font-size:.72rem;color:var(--muted);flex:2;min-width:100px;
       overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .track-source-btns{display:flex;gap:.35rem;flex-shrink:0;}
     .track-select-btn{font-family:var(--font-heading);font-size:.68rem;font-weight:600;
       padding:.3rem .75rem;border:1px solid var(--border);background:var(--bg);
-      color:var(--muted);cursor:pointer;transition:all .12s;white-space:nowrap;flex-shrink:0;}
+      color:var(--muted);cursor:pointer;transition:all .12s;white-space:nowrap;}
     .track-select-btn:hover{border-color:var(--accent);color:var(--accent);}
     .track-select-btn.loaded{color:var(--accent);border-color:var(--accent);}
+    .track-osc-btn{font-family:var(--font-heading);font-size:.68rem;font-weight:600;
+      padding:.3rem .75rem;border:1px solid var(--border);background:var(--bg);
+      color:var(--muted);cursor:pointer;transition:all .12s;white-space:nowrap;}
+    .track-osc-btn:hover{border-color:var(--ring);color:var(--ring);}
+    .track-osc-btn.active{background:var(--ring);color:white;border-color:var(--ring);}
 
-    /* Waveform editor section */
-    .track-wave-section{display:none;background:var(--surface);border-bottom:1px solid var(--border);
-      padding:1rem;flex-direction:column;gap:.75rem;}
-    .track-wave-section.visible{display:flex;}
-    .wave-editor-header{display:flex;justify-content:space-between;align-items:center;
-      margin-bottom:.5rem;flex-wrap:wrap;gap:.5rem;}
-    .wave-editor-title{font-family:var(--font-heading);font-size:.7rem;font-weight:600;
-      letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
-    .wave-editor-info{font-family:'Courier New',monospace;font-size:.72rem;color:var(--muted);}
-    .wave-canvas-wrap{position:relative;height:100px;background:var(--bg);
-      border:1px solid var(--border);overflow-x:auto;overflow-y:hidden;cursor:crosshair;}
-    .wave-canvas-scroll{position:relative;height:100%;}
-    .wave-canvas{display:block;height:100%;}
-    .wave-playhead{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);
-      pointer-events:none;opacity:0.8;display:none;}
-    .wave-playhead.visible{display:block;}
-    .wave-editor-controls{display:flex;gap:.65rem;align-items:center;flex-wrap:wrap;}
-    .wave-zoom-controls{display:flex;gap:.4rem;align-items:center;}
-    .wave-actions{display:flex;gap:.4rem;flex-wrap:wrap;}
-
-    /* Waveform canvas */
+    /* Waveform mini */
     .track-wave{height:44px;background:var(--surface);border-bottom:1px solid var(--border);
-      position:relative;cursor:default;}
+      position:relative;}
     .track-wave canvas{width:100%;height:100%;display:block;}
 
-    /* Controls grid */
-    .track-controls{
-      display:grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap:0;
-    }
+    /* Osc visualizer */
+    .osc-vis{height:44px;background:var(--surface);border-bottom:1px solid var(--border);
+      position:relative;display:flex;align-items:center;justify-content:center;}
+    .osc-vis canvas{width:100%;height:100%;display:block;}
+
+    /* ── CONTROLS GRID ── */
+    .track-controls{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:0;}
     .ctrl-group{padding:.6rem .75rem;border-right:1px solid var(--border);
       border-bottom:1px solid var(--border);}
     .ctrl-group:last-child{border-right:none;}
     .ctrl-label{font-size:.62rem;font-weight:600;letter-spacing:.1em;
       text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;
-      display:flex;align-items:center;justify-content:space-between;}
-    .ctrl-val{font-size:.7rem;font-weight:600;color:var(--accent);
-      font-variant-numeric:tabular-nums;}
+      display:flex;align-items:center;justify-content:space-between;gap:.25rem;flex-wrap:wrap;}
+    .ctrl-val{font-size:.7rem;font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums;}
+    .ctrl-val.ring{color:var(--ring);}
 
-    /* Toggle switches */
+    /* Toggle */
     .toggle-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem;}
     .toggle{position:relative;width:32px;height:18px;flex-shrink:0;}
     .toggle input{opacity:0;width:0;height:0;position:absolute;}
@@ -271,48 +209,41 @@
       cursor:pointer;border-radius:18px;transition:background .15s;}
     .toggle-slider::before{content:'';position:absolute;width:12px;height:12px;
       left:3px;top:3px;background:white;border-radius:50%;transition:transform .15s;}
-    .toggle input:checked + .toggle-slider{background:var(--accent);}
-    .toggle input:checked + .toggle-slider::before{transform:translateX(14px);}
+    .toggle input:checked+.toggle-slider{background:var(--accent);}
+    .toggle input:checked+.toggle-slider::before{transform:translateX(14px);}
+    .toggle.ring-toggle input:checked+.toggle-slider{background:var(--ring);}
     .toggle-label{font-size:.72rem;font-weight:500;color:var(--muted);}
 
     /* Sliders */
-    input[type=range]{
-      -webkit-appearance:none;width:100%;height:3px;
-      background:var(--border);outline:none;cursor:pointer;
-    }
-    input[type=range]::-webkit-slider-thumb{
-      -webkit-appearance:none;width:13px;height:13px;border-radius:50%;
-      background:var(--accent);cursor:pointer;
-    }
-    input[type=range]::-moz-range-thumb{
-      width:13px;height:13px;border-radius:50%;
-      background:var(--accent);cursor:pointer;border:none;
-    }
+    input[type=range]{-webkit-appearance:none;width:100%;height:3px;
+      background:var(--border);outline:none;cursor:pointer;}
+    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;
+      border-radius:50%;background:var(--accent);cursor:pointer;}
+    input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;
+      background:var(--accent);cursor:pointer;border:none;}
+    input[type=range].ring-range::-webkit-slider-thumb{background:var(--ring);}
+    input[type=range].ring-range::-moz-range-thumb{background:var(--ring);}
 
-    /* LFO shape selector */
-    .lfo-shapes{display:flex;gap:4px;margin-top:.3rem;}
-    .lfo-shape-btn{font-size:.62rem;padding:.2rem .4rem;border:1px solid var(--border);
-      background:var(--bg);color:var(--muted);cursor:pointer;transition:all .1s;}
-    .lfo-shape-btn.active{background:var(--accent);color:white;border-color:var(--accent);}
+    /* Ring modulator sub-display */
+    .ring-freqs{font-size:.65rem;color:var(--ring);margin-top:.3rem;line-height:1.5;
+      font-variant-numeric:tabular-nums;}
 
-    /* Tape degradation meter */
+    /* Tape meter */
     .tape-meter{height:3px;background:var(--border);margin-top:.4rem;position:relative;}
-    .tape-meter-fill{height:100%;width:0%;background:var(--accent);
-      transition:width .5s,background .5s;}
+    .tape-meter-fill{height:100%;width:0%;background:var(--accent);transition:width .5s,background .5s;}
 
-    /* ── Library panel ── */
+    /* Pitch display under speed */
+    .pitch-label{font-size:.65rem;color:var(--muted);margin-top:.2rem;}
+
+    /* ── LIBRARY ── */
     .library{border:1px solid var(--border);margin-bottom:1rem;}
     .library-head{padding:.7rem 1rem;border-bottom:1px solid var(--border);
       background:var(--surface);display:flex;align-items:center;
       justify-content:space-between;gap:.75rem;flex-wrap:wrap;}
     .library-head h3{font-family:var(--font-heading);font-size:.82rem;font-weight:600;}
-    .library-actions{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;}
-
     .storage-bar-wrap{display:flex;align-items:center;gap:.6rem;font-size:.7rem;color:var(--muted);}
     .storage-bar{width:80px;height:4px;background:var(--border);}
     .storage-bar-fill{height:100%;background:var(--accent);transition:width .3s;}
-
-    /* Upload / record controls */
     .library-upload-row{padding:.6rem 1rem;border-bottom:1px solid var(--border);
       display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;background:#fafaf8;}
     .file-input-label{font-family:var(--font-heading);font-size:.72rem;font-weight:600;
@@ -326,8 +257,6 @@
     .rec-btn:hover{background:#c0392b;color:white;}
     .rec-btn.active{background:#c0392b;color:white;animation:recPulse 1s infinite;}
     .upload-status{font-size:.72rem;color:var(--muted);}
-
-    /* File list */
     .library-list{max-height:260px;overflow-y:auto;}
     .lib-item{display:flex;align-items:center;gap:.6rem;padding:.55rem 1rem;
       border-bottom:1px solid var(--border);transition:background .1s;}
@@ -342,11 +271,9 @@
     .lib-action:hover{border-color:var(--accent);color:var(--accent);}
     .lib-action.danger:hover{border-color:var(--error);color:var(--error);}
     .lib-action.add-to{font-weight:600;border-color:#c8ddd4;color:var(--accent);}
-
-    /* Empty state */
     .lib-empty{padding:2rem;text-align:center;font-size:.82rem;color:var(--muted);}
 
-    /* ── Modals ── */
+    /* ── MODALS ── */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);
       z-index:200;display:none;align-items:center;justify-content:center;padding:1rem;}
     .modal-overlay.open{display:flex;}
@@ -361,30 +288,57 @@
     .modal-body{padding:1.1rem;}
     .modal-footer{padding:.85rem 1.1rem;border-top:1px solid var(--border);
       display:flex;gap:.65rem;justify-content:flex-end;}
-
-    /* Rename input */
     .modal-input{width:100%;padding:.6rem .85rem;border:1px solid var(--border);
       font-family:var(--font-body);font-size:.875rem;color:var(--text);
       background:var(--bg);outline:none;}
     .modal-input:focus{border-color:var(--accent);}
 
-    .msg{padding:.65rem .9rem;font-size:.78rem;line-height:1.5;
-      margin-bottom:.8rem;display:none;}
+    /* ── MESSAGES ── */
+    .msg{padding:.65rem .9rem;font-size:.78rem;line-height:1.5;margin-bottom:.8rem;display:none;}
     .msg.error{background:var(--error-bg);border-left:3px solid var(--error);color:var(--error);}
     .msg.success{background:var(--accent-light);border-left:3px solid var(--accent);color:var(--accent);}
     .msg.show{display:block;}
+    #renameMsg{margin:0 0 .8rem;}
+
+    /* ── INSTRUCTIONS + ESSAY ── */
+    .instructions{font-size:.9rem;line-height:1.75;color:var(--text);margin-top:2.5rem;
+      padding-top:2rem;border-top:1px solid var(--border);}
+    .instructions h2{font-family:var(--font-heading);font-size:1rem;font-weight:600;
+      letter-spacing:-.01em;margin:1.5rem 0 .4rem;}
+    .instructions h2:first-child{margin-top:0;}
+    .instructions p+p{margin-top:.75rem;}
+    .instructions em{font-style:italic;}
+    .instructions strong{font-weight:600;}
+    .instructions a{color:var(--accent);text-decoration:underline;}
+
+    /* Essay divider */
+    .essay-divider{display:flex;align-items:center;gap:1rem;margin:2.5rem 0 2rem;}
+    .essay-divider-line{flex:1;height:1px;background:var(--border);}
+    .essay-divider-label{font-family:var(--font-heading);font-size:.67rem;font-weight:600;
+      letter-spacing:.14em;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+
+    /* Pull quote */
+    .pull-quote{border-left:3px solid var(--accent);padding:.75rem 1rem;margin:1.25rem 0;
+      background:var(--surface);}
+    .pull-quote p{font-size:.88rem;color:var(--text);font-style:italic;line-height:1.65;}
+    .pull-quote cite{display:block;font-size:.72rem;color:var(--muted);
+      font-style:normal;margin-top:.35rem;}
 
     footer{border-top:1px solid var(--border);padding:1.25rem 2rem;
       text-align:center;font-size:.78rem;color:var(--muted);margin-top:1rem;}
     footer a{color:var(--muted);text-decoration:none;}
     footer a:hover{color:var(--accent);}
+
+    @media(max-width:600px){
+      .track-controls{grid-template-columns:repeat(2,1fr);}
+      .ratio-grid{grid-template-columns:repeat(2,1fr);}
+      .ph{flex-direction:column;}
+      .session-bar{width:100%;}
+    }
   </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════
-     HEADER
-══════════════════════════════════════ -->
 <header class="sil-header">
   <a class="sil-header__wordmark" href="/dashboard/">Sensory Intelligence Lab</a>
   <button class="sil-header__toggle" id="silMenuToggle" aria-label="Toggle navigation" aria-expanded="false">
@@ -401,25 +355,44 @@
 <nav aria-label="Breadcrumb" class="bc">
   <ol>
     <li><a href="/dashboard/">Dashboard</a></li>
-    <li>Soundscape Machine</li>
+    <li><a href="/compositions/">Compositions</a></li>
+    <li>Tape Laboratory</li>
   </ol>
 </nav>
 
 <main>
-  <!-- Page header + session management -->
+
   <div class="ph">
     <div class="ph-left">
-      <h2>Soundscape Machine</h2>
-      <p>Four-track tape composition with field recordings.</p>
+      <h2>Tape Laboratory</h2>
+      <p>Four-track tape manipulation with ring modulation and serial frequency structures — after Delia Derbyshire.</p>
     </div>
     <div class="session-bar">
       <label for="sessionSelect">Session</label>
       <select class="session-select" id="sessionSelect">
-        <option value="">New session…</option>
+        <option value="">— New session —</option>
       </select>
-      <button class="sbtn" id="saveSessionBtn" onclick="saveSession()">Save</button>
-      <button class="sbtn" id="saveAsBtn" onclick="saveSessionAs()">Save as…</button>
-      <button class="sbtn" id="deleteSessionBtn" onclick="deleteSession()" style="color:var(--error)">Delete</button>
+      <button class="sbtn" onclick="saveSession()">Save</button>
+      <button class="sbtn" onclick="saveSessionAs()">Save as…</button>
+      <button class="sbtn" onclick="deleteSession()" style="color:var(--error)">Delete</button>
+    </div>
+  </div>
+
+  <!-- Frequency ratio panel -->
+  <div class="ratio-panel">
+    <div class="ratio-panel-head">
+      <span class="ratio-panel-title">frequency ratios &amp; serial structure</span>
+      <div class="ratio-lock-row">
+        <span class="ratio-lock-label">lock ratios to track 1</span>
+        <label class="toggle">
+          <input type="checkbox" id="ratioLock" onchange="toggleRatioLock(this.checked)">
+          <span class="toggle-slider"></span>
+        </label>
+        <button class="ratio-apply" onclick="applyRatios()">apply ratios</button>
+      </div>
+    </div>
+    <div class="ratio-grid" id="ratioGrid">
+      <!-- populated by JS -->
     </div>
   </div>
 
@@ -433,7 +406,7 @@
       <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg>
       Stop
     </button>
-    <button class="t-btn record" id="mixRecordBtn" onclick="toggleMixRecord()" disabled title="Record the mixed output as WAV">
+    <button class="t-btn record" id="mixRecordBtn" onclick="toggleMixRecord()" disabled>
       <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg>
       Rec mix
     </button>
@@ -450,11 +423,9 @@
   <div class="library">
     <div class="library-head">
       <h3>Recordings library</h3>
-      <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
-        <div class="storage-bar-wrap">
-          <div class="storage-bar"><div class="storage-bar-fill" id="storageFill"></div></div>
-          <span id="storageLabel">— / 25 MB</span>
-        </div>
+      <div class="storage-bar-wrap">
+        <div class="storage-bar"><div class="storage-bar-fill" id="storageFill"></div></div>
+        <span id="storageLabel">— / 25 MB</span>
       </div>
     </div>
     <div class="library-upload-row">
@@ -468,8 +439,68 @@
     </div>
   </div>
 
-  <!-- Global message -->
   <div class="msg" id="globalMsg"></div>
+
+  <!-- ── INSTRUCTIONS ── -->
+  <div class="instructions">
+
+    <h2>How to use the Tape Laboratory</h2>
+    <p>Each of the four tracks can be loaded with a recording from your library, or switched to oscillator mode to generate a pure tone directly — just as Derbyshire combined field recordings with tones produced by the BBC Radiophonic Workshop's test-tone generators. Use the speed controls to shift pitch exactly as she did: slowing tape by half drops the sound exactly one octave, doubling it raises one octave. The pitch interval is displayed alongside the multiplier so the mathematical relationship is always visible.</p>
+
+    <h2>Ring modulator</h2>
+    <p>Each track has a ring modulator — a carrier oscillator whose signal is multiplied against the track audio. Multiplication produces the sum and difference of the two frequencies: if your track has a tone at 220 Hz and the carrier is at 150 Hz, the output contains 370 Hz and 70 Hz, and neither of the originals. This is the source of Derbyshire's characteristic metallic, inharmonic timbre. The sum and difference frequencies are displayed in real time beneath the carrier slider. Try setting the carrier to a simple harmonic ratio of your source frequency — 3:2, 5:4 — for more musical results, or to something irrational for the alien sound she favoured.</p>
+
+    <h2>Serial frequency structures</h2>
+    <p>The ratio panel above the tracks lets you define integer relationships between all four tracks, relative to track 1. Set the numerator and denominator for each track — 1:1, 2:1, 3:2, 5:4 — and press <strong>apply ratios</strong> to automatically set track speeds to maintain those relationships. With <strong>lock ratios</strong> enabled, changing track 1's speed rescales all other tracks proportionally, preserving the harmonic structure. This is a direct implementation of the compositional method Derbyshire used in her later notebooks: treating frequency ratios as architectural material, not as melody.</p>
+
+    <h2>Tape degradation</h2>
+    <p>Enable tape degradation on any looping track to simulate the physical deterioration of a real tape loop — the filter closes, wow and flutter increase, and noise accumulates with each pass. Derbyshire worked with tape loops constantly; physical degradation was not an artifact to be avoided but a natural evolution of the material. The degradation meter shows accumulated wear; press reset tape to return the track to clean condition.</p>
+
+    <h2>Oscillator mode</h2>
+    <p>Press the <strong>oscillator</strong> button on any track to replace the file player with a tone generator. Set the waveform (sine, triangle, square, or filtered noise) and frequency. In oscillator mode, the ring modulator applies to the generated tone, and the frequency ratio panel locks this track's frequency to the defined ratio. This is the closest approximation to Derbyshire's actual working method available in a browser.</p>
+
+    <!-- ── ESSAY DIVIDER ── -->
+    <div class="essay-divider">
+      <div class="essay-divider-line"></div>
+      <span class="essay-divider-label">Delia Derbyshire — Life &amp; Work</span>
+      <div class="essay-divider-line"></div>
+    </div>
+
+    <h2>The woman from Coventry</h2>
+    <p>Delia Derbyshire was born in Coventry in 1937, and the city's wartime bombing shaped her relationship to sound before she had the vocabulary to describe it. She later recalled the all-clear siren sounding after raids — a pure, sustained tone floating over rubble, sound completely detached from its source, from instrument, from player, from intention. She heard it not as music but as something more fundamental: organised frequency. That early impression became a kind of compass for the rest of her life.</p>
+    <p>She read mathematics and music at Girton College, Cambridge, graduating in 1959 — one of the few women in either department. Mathematics gave her a way of thinking about sound structurally, as relationships between quantities rather than as expression. When she applied for a job at Decca Records shortly after graduation, she was told the studio was not a place for women. The BBC, less overtly, was not much different — but it had the Radiophonic Workshop.</p>
+
+    <h2>The BBC Radiophonic Workshop</h2>
+    <p>The Radiophonic Workshop was established in 1958 to produce sound effects and incidental music for BBC radio programmes. It was not considered a prestigious posting. Composers and musicians in the BBC's mainstream departments generally regarded it as a technical backwater; the Workshop's staff were not permitted to claim composer credits for many years. Derbyshire joined in 1962 and stayed until 1973. During that decade, working without synthesisers, she produced some of the most significant electronic music of the twentieth century — though she would not be widely recognised for it until long after she left.</p>
+    <p>Her tools were tape, scissors, splicing blocks, variable-speed playback decks, ring modulators, filters, and oscillators that produced test tones. To transpose a sound up a major third, she sped up the tape. To create a chord, she recorded and layered individual notes. Every texture, every rhythm, every timbral transformation required physical intervention — cutting, splicing, re-recording. The studio was as much a craft workshop as a music room.</p>
+
+    <div class="pull-quote">
+      <p>I could hear sounds in my head that I couldn't produce on any instrument. The tape gave me a way to reach them — but it cost you. Every second of music might take a day of cutting.</p>
+      <cite>— Delia Derbyshire, from an interview, c. 1996</cite>
+    </div>
+
+    <h2>The Doctor Who theme</h2>
+    <p>In 1963 Derbyshire realised Ron Grainer's sketch for the <em>Doctor Who</em> theme — the first piece of electronic music to reach a truly mass audience. She began with white noise and individual notes plucked from a single string of a plucked instrument, chose specific recordings from among dozens based on their overtone character, then cut, transposed, and assembled them on tape. The bass line was filtered noise. The melody was a combination of oscillator tones and tape-manipulated recordings of a single plucked string, each note cut from a different region of the recording to vary timbre slightly. The whole was assembled in segments and layered by bouncing between tape machines.</p>
+    <p>When Grainer heard the result, he reportedly asked, "Did I write that?" She replied, "Most of it." She received no composer credit. The BBC's policy at the time was that Workshop staff produced sound effects rather than compositions, and the distinction was administrative rather than aesthetic. The theme was revised numerous times by subsequent producers; Derbyshire's original realisation was not broadcast again after 1980.</p>
+
+    <h2>Ring modulation and the Delian mode</h2>
+    <p>Ring modulation — multiplying two audio signals to produce sum and difference frequencies — was a technique Derbyshire returned to throughout her career. The BBC Workshop had a hardware ring modulator, a circuit whose output contained none of the original frequencies but only their mathematical combinations. The effect is immediately distinctive: harmonic, metallic, hovering outside conventional musical scales. Derbyshire used it to transform recordings of everyday objects into sounds that had no origin in the physical world — or seemed not to.</p>
+    <p>She spoke of a "Delian mode" — her own term for a kind of non-tonal, frequency-space harmony that existed outside equal temperament. The ring modulator was its primary instrument: by choosing carrier and source frequencies whose sum and difference fell into specific arithmetic relationships, she could construct chords and textures that had the internal consistency of tonal music without any of its referents. It was harmony derived from mathematics rather than from tradition.</p>
+
+    <h2>The notebooks: serial structure and number</h2>
+    <p>Among the materials found in Derbyshire's attic after her death in 2001 were dozens of notebooks — grids of numbers, frequency ratios, integer sequences mapped to pitch, duration, and dynamics. She had been working with serial compositional methods, but not in the twelve-tone tradition of Schoenberg or Webern. Her serial structures were arithmetical: she would choose a set of integer ratios — 1:2:3:5:8, or 4:7:11:13 — and use them to determine the frequency relationships between layers, the timing of entries, the modulation depths of filters.</p>
+    <p>The unrealised work <em>Amor Dei</em> (begun c. 1971) shows this most clearly: a large-scale structure in which theological texts were mapped to frequency grids derived from number sequences, the proportions of Gregorian chant intervals converted into ratios governing the electronic texture. It was never completed. The notebooks show a composer working at the intersection of mathematics, theology, and acoustics — a convergence that had no obvious audience in 1971, and perhaps not much larger an audience now, but whose internal rigour is undeniable.</p>
+
+    <h2>Departure and rediscovery</h2>
+    <p>By 1973 the BBC had acquired the first commercially available synthesisers. Derbyshire left the Workshop that year, reportedly feeling that the instrument had made her painstaking methods — and the particular sensibility they produced — redundant overnight. A synthesiser could produce in seconds sounds that had taken her days to construct by hand. The comparison was not entirely fair: the sounds were not equivalent, and much of what she heard in her tapes came precisely from the resistance of the physical process. But the institutional enthusiasm for the new technology left little room for that argument.</p>
+    <p>She spent the following decades largely outside music — at one point working in a record shop in Coventry — while her work at the Radiophonic Workshop became increasingly canonical in the histories being written around her. The BBC radiophonic archive was not systematically preserved; significant quantities of tape from the Workshop's early years were reused or destroyed.</p>
+    <p>In the late 1990s a new generation of electronic musicians — working in ambient, techno, and experimental music — began to rediscover the Workshop's output, and Derbyshire's name in particular. She gave a handful of interviews and appeared at a small number of events. She was working on new music when she died in July 2001, aged 64. The notebooks, tapes, and recordings found in her home in Northampton subsequently became the Delia Derbyshire Archive, held at the University of Manchester. Researchers, musicians, and sound artists continue to work with this material; new pieces continue to be completed from her sketches.</p>
+
+    <h2>What she contributed</h2>
+    <p>Derbyshire's contribution to the field of electronic music is threefold. First, she demonstrated — on a programme watched by millions — that electronic sound could carry melody, rhythm, and emotion as effectively as any acoustic instrument, at a moment when this was genuinely contested. Second, she developed a compositional practice that treated the physical properties of tape — speed, splice, layering — as primary musical parameters, anticipating by decades the aesthetic of music made from recorded material. Third, her use of mathematics as compositional structure — ratio, sequence, arithmetic proportion — offered a model for electronic music that was neither the serialism of the academy nor the improvisation of popular music, but something more quietly rigorous: number as the grammar of sound.</p>
+    <p>She did this largely without credit, without institutional support, and without synthesisers, in a decade when the technology available to her was a tape recorder, a pair of scissors, and a ring modulator. The sounds she made from those materials remain, fifty years later, essentially inimitable.</p>
+
+  </div>
 
 </main>
 
@@ -482,10 +513,8 @@
     </div>
     <div class="modal-body">
       <div class="msg" id="renameMsg"></div>
-      <div style="margin-bottom:.85rem;">
-        <label style="font-size:.78rem;font-weight:500;display:block;margin-bottom:.3rem;">Name</label>
-        <input type="text" class="modal-input" id="renameInput" placeholder="Recording name">
-      </div>
+      <label style="font-size:.78rem;font-weight:500;display:block;margin-bottom:.3rem;">Name</label>
+      <input type="text" class="modal-input" id="renameInput" placeholder="Recording name">
     </div>
     <div class="modal-footer">
       <button class="sbtn" onclick="closeModal('renameModal')">Cancel</button>
@@ -498,11 +527,11 @@
 <div class="modal-overlay" id="addToTrackModal">
   <div class="modal">
     <div class="modal-head">
-      <h3>Add to track</h3>
+      <h3 id="addToTrackTitle">Add to track</h3>
       <button class="modal-close" onclick="closeModal('addToTrackModal')">✕</button>
     </div>
     <div class="modal-body">
-      <p style="font-size:.8rem;color:var(--muted);margin-bottom:1rem;">Select a track to load this recording into.</p>
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:1rem;">Select a recording to load.</p>
       <div id="trackSelectList" style="display:flex;flex-direction:column;gap:.5rem;"></div>
     </div>
   </div>
@@ -517,15 +546,14 @@
 
 <script type="module">
 
-// ─────────────────────────────────────────────────────────
-// HEADER BEHAVIOUR
-// ─────────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════════════════════ */
 const path = window.location.pathname.replace(/\/$/, '') || '/';
 document.querySelectorAll('.sil-header__nav a').forEach(a => {
   const href = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
   if (href === path) a.classList.add('sil-active');
 });
-
 const menuToggle = document.getElementById('silMenuToggle');
 const silNav     = document.getElementById('silNav');
 menuToggle.addEventListener('click', () => {
@@ -544,55 +572,80 @@ async function getSupabase() {
     'sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1'
   );
 }
-
 document.getElementById('silSignOut').addEventListener('click', async function () {
-  this.disabled = true;
-  this.textContent = 'Signing out…';
-  try {
-    const sb = await getSupabase();
-    await sb.auth.signOut();
-  } finally {
-    window.location.replace('/');
-  }
+  this.disabled = true; this.textContent = 'Signing out…';
+  try { const sb = await getSupabase(); await sb.auth.signOut(); }
+  finally { window.location.replace('/'); }
 });
 
-// ─────────────────────────────────────────────────────────
-// CONSTANTS
-// ─────────────────────────────────────────────────────────
-const QUOTA_BYTES  = 26214400; // 25 MB
-const N_TRACKS     = 4;
-const TRACK_COLORS = ['#2a5c45','#1a4d6b','#6b3a1a','#4a1a6b'];
-const TRACK_NAMES  = ['Track 1','Track 2','Track 3','Track 4'];
+/* ═══════════════════════════════════════════════════════════
+   CONSTANTS
+═══════════════════════════════════════════════════════════ */
+const QUOTA_BYTES   = 26214400; // 25 MB
+const N_TRACKS      = 4;
+const TRACK_COLORS  = ['#2a5c45', '#1a4d6b', '#6b3a1a', '#4a1a6b'];
+const TRACK_NAMES   = ['Track 1', 'Track 2', 'Track 3', 'Track 4'];
+const BASE_FREQ     = 220; // A3 — reference pitch for oscillator mode
 
-// ─────────────────────────────────────────────────────────
-// AUDIO ENGINE STATE
-// ─────────────────────────────────────────────────────────
-let AC = null;
-let masterGain = null;
-let masterDest = null;
-let mixRecorder = null;
-let mixChunks   = [];
+/* ═══════════════════════════════════════════════════════════
+   AUDIO ENGINE STATE
+═══════════════════════════════════════════════════════════ */
+let AC           = null;
+let masterGain   = null;
+let masterDest   = null;
+let mixRecorder  = null;
+let mixChunks    = [];
 let mixRecording = false;
-let isPlaying   = false;
-let startTime   = 0;
-let wallStart   = 0;
-let timerRaf    = null;
+let isPlaying    = false;
+let wallStart    = 0;
+let timerRaf     = null;
 
-const tracks = Array.from({length:N_TRACKS}, (_,i) => ({
+/* ── Ratio lock state ── */
+let ratioLocked = false;
+
+/* ── Track model ── */
+const tracks = Array.from({ length: N_TRACKS }, (_, i) => ({
   id: i,
   name: TRACK_NAMES[i],
+  // File mode
   buffer: null,
   fullBuffer: null,
   fileName: null,
   recordingId: null,
-  selStart: 0,
-  selEnd: 1,
-  zoom: 1,
-  scrollX: 0,
+  selStart: 0, selEnd: 1,
+  zoom: 1, scrollX: 0,
+  // Oscillator mode
+  oscMode: false,
+  oscType: 'sine',       // sine | triangle | square | noise
+  oscFreq: BASE_FREQ,
+  // Common params
+  volume: 0.75,
+  pan: 0,
+  speed: 1.0,
+  loop: true,
+  reverbEnabled: false,
+  reverbAmount: 0.3,
+  lfoEnabled: false,
+  lfoRate: 0.5,
+  lfoDepth: 800,
+  lfoShape: 'sine',
+  tapeEnabled: false,
+  tapeDegradation: 0,
+  tapeRate: 0.05,
+  // Ring mod
+  ringEnabled: false,
+  ringCarrier: 150,
+  // Ratio panel
+  ratioNum: i === 0 ? 1 : (i === 1 ? 2 : (i === 2 ? 3 : 4)),
+  ratioDen: 1,
+  // Audio nodes (runtime)
   sourceNode: null,
+  oscNode: null,
+  noiseNode: null,
   gainNode: null,
   panNode: null,
   filterNode: null,
+  tapeFilter: null,
   reverbNode: null,
   reverbGain: null,
   dryGain: null,
@@ -602,32 +655,25 @@ const tracks = Array.from({length:N_TRACKS}, (_,i) => ({
   tapeFlutterOsc: null,
   tapeWowGain: null,
   tapeFlutterGain: null,
-  volume: 0.8,
-  pan: 0,
-  speed: 1.0,
-  loop: false,
-  reverbEnabled: false,
-  lfoEnabled: false,
-  tapeEnabled: false,
-  reverbAmount: 0.3,
-  lfoRate: 0.5,
-  lfoDepth: 800,
-  lfoShape: 'sine',
-  tapeDegradation: 0,
-  tapeRate: 0.05,
-  tapeLoopCount: 0,
+  ringOsc: null,
+  ringGainPos: null,
+  ringGainNeg: null,
+  // Vis
   playheadPct: 0,
   dragging: null,
+  dragOffset: 0,
+  tapeLoopCountLast: 0,
+  _previewSrc: null,
 }));
 
-// ─────────────────────────────────────────────────────────
-// INIT AUDIO
-// ─────────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════════
+   AUDIO INIT
+═══════════════════════════════════════════════════════════ */
 function initAudio() {
   if (AC) return;
   AC = new (window.AudioContext || window.webkitAudioContext)();
   masterGain = AC.createGain();
-  masterGain.gain.value = 0.85;
+  masterGain.gain.value = 0.82;
   masterDest = AC.createMediaStreamDestination();
   masterGain.connect(AC.destination);
   masterGain.connect(masterDest);
@@ -637,79 +683,94 @@ function initAudio() {
 async function createReverbImpulse() {
   const len = AC.sampleRate * 2.8;
   const buf = AC.createBuffer(2, len, AC.sampleRate);
-  for (let c=0;c<2;c++) {
+  for (let c = 0; c < 2; c++) {
     const d = buf.getChannelData(c);
-    for (let i=0;i<len;i++) {
-      d[i] = (Math.random()*2-1) * Math.pow(1 - i/len, 2.2);
-    }
+    for (let i = 0; i < len; i++)
+      d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.2);
   }
   return buf;
 }
 
-// ─────────────────────────────────────────────────────────
-// TRACK NODE GRAPH
-// ─────────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════════
+   TRACK AUDIO GRAPH
+═══════════════════════════════════════════════════════════ */
 function buildTrackGraph(t) {
   if (!AC) initAudio();
   teardownTrackGraph(t);
-  if (!t.buffer) return;
+  if (!t.buffer && !t.oscMode) return;
 
-  const src = AC.createBufferSource();
-  src.buffer = t.buffer;
-  src.playbackRate.value = t.speed;
-  src.loop = t.loop;
+  const now = AC.currentTime;
 
-  // Tape degradation filter
-  const tapeFilter = AC.createBiquadFilter();
-  tapeFilter.type = 'lowpass';
-  tapeFilter.frequency.value = Math.max(400, 20000 * Math.pow(1 - t.tapeDegradation, 2));
-  tapeFilter.Q.value = 0.5 + (t.tapeDegradation * 1.5);
+  /* ── Source ── */
+  let sourceNode = null;
 
-  // Tape wow (slow warble ~0.5-2Hz)
-  const tapeWowOsc = AC.createOscillator();
-  const tapeWowGain = AC.createGain();
-  tapeWowOsc.type = 'sine';
-  tapeWowOsc.frequency.value = 0.8 + Math.random() * 0.7;
-  tapeWowGain.gain.value = t.tapeEnabled ? (t.tapeDegradation * 15) : 0;
-  tapeWowOsc.connect(tapeWowGain);
-  tapeWowGain.connect(src.playbackRate);
-  tapeWowOsc.start();
-
-  // Tape flutter (fast warble ~5-12Hz)
-  const tapeFlutterOsc = AC.createOscillator();
-  const tapeFlutterGain = AC.createGain();
-  tapeFlutterOsc.type = 'sine';
-  tapeFlutterOsc.frequency.value = 7 + Math.random() * 4;
-  tapeFlutterGain.gain.value = t.tapeEnabled ? (t.tapeDegradation * 0.008) : 0;
-  tapeFlutterOsc.connect(tapeFlutterGain);
-  tapeFlutterGain.connect(src.playbackRate);
-  tapeFlutterOsc.start();
-
-  // Tape noise
-  let tapeNoiseGain = null;
-  if (t.tapeEnabled && t.tapeDegradation > 0.05) {
-    const nLen = Math.min(AC.sampleRate * 4, 176400);
-    const nBuf = AC.createBuffer(1, nLen, AC.sampleRate);
-    const nd   = nBuf.getChannelData(0);
-    let b0=0,b1=0,b2=0;
-    for (let i=0;i<nLen;i++){
-      const w=Math.random()*2-1;
-      b0=.99886*b0+w*.0555179;
-      b1=.99332*b1+w*.0750759;
-      b2=.96900*b2+w*.1538520;
-      nd[i]=(b0+b1+b2)*0.2;
+  if (t.oscMode) {
+    if (t.oscType === 'noise') {
+      // Pink-ish noise via buffer source
+      const nLen = AC.sampleRate * 4;
+      const nBuf = AC.createBuffer(1, nLen, AC.sampleRate);
+      const nd = nBuf.getChannelData(0);
+      let b0=0,b1=0,b2=0;
+      for (let i = 0; i < nLen; i++) {
+        const w = Math.random() * 2 - 1;
+        b0 = .99886*b0 + w*.0555179;
+        b1 = .99332*b1 + w*.0750759;
+        b2 = .96900*b2 + w*.1538520;
+        nd[i] = (b0+b1+b2) * 0.18;
+      }
+      const nSrc = AC.createBufferSource();
+      nSrc.buffer = nBuf;
+      nSrc.loop = true;
+      t.noiseNode = nSrc;
+      sourceNode = nSrc;
+    } else {
+      const osc = AC.createOscillator();
+      osc.type = t.oscType;
+      osc.frequency.value = t.oscFreq;
+      t.oscNode = osc;
+      sourceNode = osc;
     }
-    const nSrc=AC.createBufferSource();
-    nSrc.buffer=nBuf;nSrc.loop=true;
-    tapeNoiseGain=AC.createGain();
-    tapeNoiseGain.gain.value = t.tapeDegradation * 0.08;
-    nSrc.connect(tapeNoiseGain);
-    tapeNoiseGain.connect(masterGain);
-    nSrc.start();
-    t._tapeNoiseSrc = nSrc;
+  } else {
+    const src = AC.createBufferSource();
+    src.buffer = t.buffer;
+    src.playbackRate.value = t.speed;
+    src.loop = t.loop;
+    t.sourceNode = src;
+    sourceNode = src;
   }
 
-  // LFO modulation
+  /* ── Tape degradation filter ── */
+  const tapeFilter = AC.createBiquadFilter();
+  tapeFilter.type = 'lowpass';
+  tapeFilter.frequency.value = t.tapeEnabled
+    ? Math.max(400, 20000 * Math.pow(1 - t.tapeDegradation, 2))
+    : 20000;
+  tapeFilter.Q.value = 0.5 + (t.tapeDegradation * 1.5);
+
+  /* ── Tape wow / flutter (only for file mode) ── */
+  let tapeWowOsc = null, tapeWowGain = null;
+  let tapeFlutterOsc = null, tapeFlutterGain = null;
+  if (!t.oscMode && t.sourceNode) {
+    tapeWowOsc = AC.createOscillator();
+    tapeWowGain = AC.createGain();
+    tapeWowOsc.type = 'sine';
+    tapeWowOsc.frequency.value = 0.8 + Math.random() * 0.7;
+    tapeWowGain.gain.value = t.tapeEnabled ? t.tapeDegradation * 15 : 0;
+    tapeWowOsc.connect(tapeWowGain);
+    tapeWowGain.connect(t.sourceNode.playbackRate);
+    tapeWowOsc.start();
+
+    tapeFlutterOsc = AC.createOscillator();
+    tapeFlutterGain = AC.createGain();
+    tapeFlutterOsc.type = 'sine';
+    tapeFlutterOsc.frequency.value = 7 + Math.random() * 4;
+    tapeFlutterGain.gain.value = t.tapeEnabled ? t.tapeDegradation * 0.008 : 0;
+    tapeFlutterOsc.connect(tapeFlutterGain);
+    tapeFlutterGain.connect(t.sourceNode.playbackRate);
+    tapeFlutterOsc.start();
+  }
+
+  /* ── LFO → filter frequency ── */
   const lfoOsc  = AC.createOscillator();
   const lfoGain = AC.createGain();
   lfoOsc.type = t.lfoShape;
@@ -719,27 +780,68 @@ function buildTrackGraph(t) {
   lfoGain.connect(tapeFilter.frequency);
   lfoOsc.start();
 
-  const mainFilter = AC.createBiquadFilter();
-  mainFilter.type = 'lowpass';
-  mainFilter.frequency.value = 18000;
-  mainFilter.Q.value = 0.7;
+  /* ── Ring modulator ──────────────────────────────────────
+     Classic implementation:
+       ringOsc × input signal
+     Using two gain nodes with +1 and -1 to emulate
+     bipolar multiplication via a WaveShaperNode trick.
+     Simpler correct approach: use AudioWorklet or
+     simply multiply via a GainNode modulated at audio rate.
+  ─────────────────────────────────────────────────────── */
+  const ringMix  = AC.createGain();
+  ringMix.gain.value = 1;
 
+  const preRingGain = AC.createGain();
+  preRingGain.gain.value = t.ringEnabled ? 0 : 1; // dry when ring off
+
+  const ringOsc = AC.createOscillator();
+  ringOsc.type = 'sine';
+  ringOsc.frequency.value = t.ringCarrier;
+  ringOsc.start();
+
+  // Ring mod: multiply source by carrier
+  // Method: source → ringModGain (gain = 0), carrier → ringModGain.gain
+  // This makes ringModGain output = source × carrier
+  const ringModGain = AC.createGain();
+  ringModGain.gain.value = 0;     // carrier will drive this
+
+  const ringWet = AC.createGain();
+  ringWet.gain.value = t.ringEnabled ? 1 : 0;
+
+  const ringDry = AC.createGain();
+  ringDry.gain.value = t.ringEnabled ? 0 : 1;
+
+  /* ── Main chain ── */
   const gainNode = AC.createGain();
   gainNode.gain.value = t.volume;
 
   const panNode = AC.createStereoPanner();
   panNode.pan.value = t.pan;
 
-  const dryGain  = AC.createGain();
+  const dryGain   = AC.createGain();
   const reverbGain = AC.createGain();
-  const convolver = AC.createConvolver();
+  const convolver  = AC.createConvolver();
   if (window._reverbIR) convolver.buffer = window._reverbIR;
   dryGain.gain.value   = t.reverbEnabled ? 1 - t.reverbAmount : 1;
-  reverbGain.gain.value = t.reverbEnabled ? t.reverbAmount    : 0;
+  reverbGain.gain.value = t.reverbEnabled ? t.reverbAmount : 0;
 
-  src.connect(tapeFilter);
-  tapeFilter.connect(mainFilter);
-  mainFilter.connect(gainNode);
+  /* ── Connect graph ── */
+  // Source → tape filter → [ring mod] → gain → pan → reverb split → master
+  sourceNode.connect(tapeFilter);
+
+  // Ring mod path: source goes into ringModGain as signal,
+  // carrier oscillator controls the gain
+  sourceNode.connect(ringModGain);
+  ringOsc.connect(ringModGain.gain);  // carrier at audio rate modulates gain = multiplication
+  ringModGain.connect(ringWet);
+
+  // Dry path (ring off)
+  tapeFilter.connect(ringDry);
+
+  // Mix ring wet + dry
+  ringWet.connect(gainNode);
+  ringDry.connect(gainNode);
+
   gainNode.connect(panNode);
   panNode.connect(dryGain);
   panNode.connect(convolver);
@@ -747,86 +849,85 @@ function buildTrackGraph(t) {
   convolver.connect(reverbGain);
   reverbGain.connect(masterGain);
 
-  t.sourceNode  = src;
-  t.gainNode    = gainNode;
-  t.panNode     = panNode;
-  t.filterNode  = mainFilter;
-  t.tapeFilter  = tapeFilter;
-  t.reverbNode  = convolver;
-  t.reverbGain  = reverbGain;
-  t.dryGain     = dryGain;
-  t.lfoOsc      = lfoOsc;
-  t.lfoGain     = lfoGain;
-  t.tapeWowOsc  = tapeWowOsc;
-  t.tapeFlutterOsc = tapeFlutterOsc;
-  t.tapeWowGain = tapeWowGain;
+  /* ── Store refs ── */
+  t.gainNode        = gainNode;
+  t.panNode         = panNode;
+  t.filterNode      = tapeFilter;
+  t.tapeFilter      = tapeFilter;
+  t.reverbNode      = convolver;
+  t.reverbGain      = reverbGain;
+  t.dryGain         = dryGain;
+  t.lfoOsc          = lfoOsc;
+  t.lfoGain         = lfoGain;
+  t.tapeWowOsc      = tapeWowOsc;
+  t.tapeFlutterOsc  = tapeFlutterOsc;
+  t.tapeWowGain     = tapeWowGain;
   t.tapeFlutterGain = tapeFlutterGain;
+  t.ringOsc         = ringOsc;
+  t.ringModGain     = ringModGain;
+  t.ringWet         = ringWet;
+  t.ringDry         = ringDry;
 }
 
 function teardownTrackGraph(t) {
-  try { t.sourceNode && t.sourceNode.stop(); } catch(e){}
-  try { t.lfoOsc    && t.lfoOsc.stop();    } catch(e){}
-  try { t.tapeWowOsc && t.tapeWowOsc.stop(); } catch(e){}
-  try { t.tapeFlutterOsc && t.tapeFlutterOsc.stop(); } catch(e){}
-  try { t._tapeNoiseSrc && t._tapeNoiseSrc.stop(); } catch(e){}
-  t.sourceNode = t.gainNode = t.panNode = t.filterNode = null;
-  t.tapeFilter = t.reverbNode = t.reverbGain = t.dryGain = null;
-  t.lfoOsc = t.lfoGain = t._tapeNoiseSrc = null;
-  t.tapeWowOsc = t.tapeFlutterOsc = t.tapeWowGain = t.tapeFlutterGain = null;
+  const tryStop = n => { try { n && n.stop(); } catch(e){} };
+  tryStop(t.sourceNode);
+  tryStop(t.oscNode);
+  tryStop(t.noiseNode);
+  tryStop(t.lfoOsc);
+  tryStop(t.tapeWowOsc);
+  tryStop(t.tapeFlutterOsc);
+  tryStop(t.ringOsc);
+  tryStop(t._tapeNoiseSrc);
+  [
+    'sourceNode','oscNode','noiseNode','gainNode','panNode','filterNode','tapeFilter',
+    'reverbNode','reverbGain','dryGain','lfoOsc','lfoGain','tapeWowOsc','tapeFlutterOsc',
+    'tapeWowGain','tapeFlutterGain','ringOsc','ringModGain','ringWet','ringDry','_tapeNoiseSrc'
+  ].forEach(k => { t[k] = null; });
 }
 
-// ─────────────────────────────────────────────────────────
-// TRANSPORT
-// ─────────────────────────────────────────────────────────
-function transportPlay() {
+/* ═══════════════════════════════════════════════════════════
+   TRANSPORT
+═══════════════════════════════════════════════════════════ */
+window.transportPlay = function() {
   if (!AC) initAudio();
   if (AC.state === 'suspended') AC.resume();
   if (isPlaying) return;
-
-  const hasAny = tracks.some(t => t.buffer);
+  const hasAny = tracks.some(t => t.buffer || t.oscMode);
   if (!hasAny) return;
-
-  isPlaying  = true;
-  startTime  = AC.currentTime;
-  wallStart  = performance.now();
-
+  isPlaying = true;
+  wallStart = performance.now();
   tracks.forEach(t => {
-    if (!t.buffer) return;
+    if (!t.buffer && !t.oscMode) return;
     buildTrackGraph(t);
-    t.sourceNode.start(0);
+    const node = t.oscNode || t.noiseNode || t.sourceNode;
+    if (node) node.start(0);
     t.tapeLoopCountLast = 0;
   });
-
   updateTransportUI(true);
   timerRaf = requestAnimationFrame(transportTick);
-}
+};
 
-function transportStop() {
+window.transportStop = function() {
   if (!isPlaying) return;
   isPlaying = false;
   cancelAnimationFrame(timerRaf);
-
   tracks.forEach(t => {
     teardownTrackGraph(t);
     t.playheadPct = 0;
     drawWaveform(t);
-    updateWaveEditorPlayhead(t);
   });
-
   document.getElementById('transportTime').textContent = '0:00.0';
   updateTransportUI(false);
-
   if (mixRecording) stopMixRecord();
-}
+};
 
 function transportTick() {
   if (!isPlaying) return;
   const elapsed = (performance.now() - wallStart) / 1000;
-
-  const m = Math.floor(elapsed/60);
-  const s = (elapsed%60).toFixed(1);
-  document.getElementById('transportTime').textContent =
-    `${m}:${s.padStart(4,'0')}`;
+  const m = Math.floor(elapsed / 60);
+  const s = (elapsed % 60).toFixed(1);
+  document.getElementById('transportTime').textContent = `${m}:${s.padStart(4,'0')}`;
 
   tracks.forEach(t => {
     if (!t.buffer || !t.sourceNode) return;
@@ -834,26 +935,23 @@ function transportTick() {
     const pos = t.loop ? (elapsed % dur) / dur : Math.min(elapsed / dur, 1);
     t.playheadPct = pos;
     drawWaveform(t);
-    updateWaveEditorPlayhead(t);
 
-    if (t.tapeEnabled && t.loop) {
+    // Tape degradation per loop
+    if (t.tapeEnabled && t.loop && dur > 0) {
       const loopCount = Math.floor(elapsed / dur);
-      if (loopCount > (t.tapeLoopCountLast || 0)) {
+      if (loopCount > t.tapeLoopCountLast) {
         t.tapeLoopCountLast = loopCount;
         t.tapeDegradation = Math.min(1, t.tapeDegradation + t.tapeRate);
-        
         if (t.tapeFilter) {
           t.tapeFilter.frequency.value = Math.max(400, 20000 * Math.pow(1 - t.tapeDegradation, 2));
-          t.tapeFilter.Q.value = 0.5 + (t.tapeDegradation * 1.5);
+          t.tapeFilter.Q.value = 0.5 + t.tapeDegradation * 1.5;
         }
-        if (t.tapeWowGain) t.tapeWowGain.gain.value = t.tapeDegradation * 15;
+        if (t.tapeWowGain)     t.tapeWowGain.gain.value     = t.tapeDegradation * 15;
         if (t.tapeFlutterGain) t.tapeFlutterGain.gain.value = t.tapeDegradation * 0.008;
-        
         updateTapeMeter(t);
       }
     }
   });
-
   timerRaf = requestAnimationFrame(transportTick);
 }
 
@@ -861,99 +959,116 @@ function updateTransportUI(playing) {
   document.getElementById('playBtn').disabled  = playing;
   document.getElementById('stopBtn').disabled  = !playing;
   document.getElementById('mixRecordBtn').disabled = !playing;
-  const hasAny = tracks.some(t => t.buffer);
-  document.getElementById('playBtn').disabled  = !hasAny && !playing;
+  if (!playing) {
+    const hasAny = tracks.some(t => t.buffer || t.oscMode);
+    document.getElementById('playBtn').disabled = !hasAny;
+  }
 }
 
-// ─────────────────────────────────────────────────────────
-// MIX RECORDING
-// ─────────────────────────────────────────────────────────
-function toggleMixRecord() {
-  if (!mixRecording) startMixRecord();
-  else               stopMixRecord();
-}
-
+/* ═══════════════════════════════════════════════════════════
+   MIX RECORD
+═══════════════════════════════════════════════════════════ */
+window.toggleMixRecord = function() {
+  if (!mixRecording) startMixRecord(); else stopMixRecord();
+};
 function startMixRecord() {
-  if (!masterDest) return;
-  mixChunks   = [];
+  mixChunks = [];
   mixRecorder = new MediaRecorder(masterDest.stream);
-  mixRecorder.ondataavailable = e => { if (e.data.size>0) mixChunks.push(e.data); };
+  mixRecorder.ondataavailable = e => { if (e.data.size > 0) mixChunks.push(e.data); };
   mixRecorder.onstop = onMixRecordStop;
   mixRecorder.start();
   mixRecording = true;
   document.getElementById('mixRecordBtn').classList.add('active');
 }
-
 function stopMixRecord() {
   if (!mixRecorder) return;
   mixRecorder.stop();
   mixRecording = false;
   document.getElementById('mixRecordBtn').classList.remove('active');
 }
-
 function onMixRecordStop() {
   const blob = new Blob(mixChunks, { type: 'audio/webm' });
   const url  = URL.createObjectURL(blob);
-  const dlBtn = document.getElementById('dlMixBtn');
-  dlBtn.disabled = false;
-  dlBtn._url = url;
-  showGlobalMsg('Mix recording ready — click "Download mix WAV" to save.','success');
+  const btn  = document.getElementById('dlMixBtn');
+  btn.disabled = false;
+  btn._url = url;
+  showGlobalMsg('Mix recording ready — click Download mix WAV to save.', 'success');
 }
-
-function downloadMix() {
+window.downloadMix = function() {
   const btn = document.getElementById('dlMixBtn');
   if (!btn._url) return;
   const a = document.createElement('a');
-  a.href = btn._url;
-  a.download = `mix-${Date.now()}.webm`;
-  a.click();
-}
+  a.href = btn._url; a.download = `tape-lab-mix-${Date.now()}.webm`; a.click();
+};
 
-// ─────────────────────────────────────────────────────────
-// WAVEFORM DRAWING
-// ─────────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════════
+   WAVEFORM DRAW
+═══════════════════════════════════════════════════════════ */
 function drawWaveform(t) {
   const canvas = document.getElementById(`wave-${t.id}`);
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  const W = canvas.width = canvas.offsetWidth * devicePixelRatio;
-  const H = canvas.height = 44 * devicePixelRatio;
-  ctx.clearRect(0,0,W,H);
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width  = canvas.offsetWidth * dpr;
+  canvas.height = 44 * dpr;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  if (!t.buffer) {
-    ctx.fillStyle = '#e5e5e0';
-    ctx.fillRect(0, H/2-1, W, 2);
+  if (t.oscMode) {
+    // Draw simple oscilloscope line for osc mode
+    const W = canvas.width, H = canvas.height;
+    const color = TRACK_COLORS[t.id];
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    const freq = t.oscType === 'noise' ? 30 : t.oscFreq;
+    const cycles = Math.min(8, freq / 20);
+    for (let x = 0; x < W; x++) {
+      const phase = (x / W) * cycles * Math.PI * 2;
+      const amp = t.oscType === 'noise'
+        ? (Math.sin(phase * 3.7) * 0.5 + Math.sin(phase * 7.3) * 0.3) * 0.6
+        : t.oscType === 'square' ? Math.sign(Math.sin(phase)) * 0.7
+        : t.oscType === 'triangle'
+          ? (2 / Math.PI) * Math.asin(Math.sin(phase)) * 0.75
+          : Math.sin(phase) * 0.75;
+      const y = H / 2 - amp * (H / 2 - 4);
+      x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.stroke();
     return;
   }
 
-  const data   = t.buffer.getChannelData(0);
-  const step   = Math.ceil(data.length / W);
-  const color  = TRACK_COLORS[t.id];
+  if (!t.buffer) {
+    ctx.fillStyle = '#e5e5e0';
+    ctx.fillRect(0, canvas.height / 2 - 1, canvas.width, 2);
+    return;
+  }
 
+  const data  = t.buffer.getChannelData(0);
+  const W = canvas.width, H = canvas.height;
+  const step = Math.ceil(data.length / W);
+  const color = TRACK_COLORS[t.id];
   ctx.fillStyle = color + '28';
   ctx.strokeStyle = color;
   ctx.lineWidth = 1;
   ctx.beginPath();
-
-  for (let x=0;x<W;x++) {
-    let max=0, min=0;
-    for (let j=0;j<step;j++) {
-      const s = data[x*step+j] || 0;
-      if (s>max) max=s;
-      if (s<min) min=s;
+  for (let x = 0; x < W; x++) {
+    let max = 0, min = 0;
+    for (let j = 0; j < step; j++) {
+      const s = data[x * step + j] || 0;
+      if (s > max) max = s;
+      if (s < min) min = s;
     }
-    const y1 = (1-max)*H/2;
-    const y2 = (1-min)*H/2;
-    if (x===0) ctx.moveTo(x,y1);
-    else        ctx.lineTo(x,y1);
-    ctx.fillRect(x, y1, 1, y2-y1);
+    const y1 = (1 - max) * H / 2;
+    const y2 = (1 - min) * H / 2;
+    if (x === 0) ctx.moveTo(x, y1); else ctx.lineTo(x, y1);
+    ctx.fillRect(x, y1, 1, y2 - y1);
   }
   ctx.stroke();
 
-  // Draw playhead for active buffer
+  // Playhead
   if (isPlaying && t.sourceNode) {
     ctx.strokeStyle = color;
-    ctx.lineWidth   = 2 * devicePixelRatio;
+    ctx.lineWidth = 2 * dpr;
     ctx.globalAlpha = 0.9;
     ctx.beginPath();
     ctx.moveTo(t.playheadPct * W, 0);
@@ -963,479 +1078,72 @@ function drawWaveform(t) {
   }
 }
 
-// ─────────────────────────────────────────────────────────
-// WAVEFORM EDITOR
-// ─────────────────────────────────────────────────────────
-function drawWaveEditor(t) {
-  const canvas = document.getElementById(`wave-editor-${t.id}`);
-  if (!canvas || !t.fullBuffer) return;
-  
-  const wrap = canvas.parentElement;
-  const data = t.fullBuffer.getChannelData(0);
-  const dur = t.fullBuffer.duration;
-  
-  const baseWidth = wrap.clientWidth * devicePixelRatio;
-  const W = baseWidth * t.zoom;
-  const H = 100 * devicePixelRatio;
-  
-  canvas.width = W;
-  canvas.height = H;
-  canvas.style.width = (W / devicePixelRatio) + 'px';
-  
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, W, H);
-  
-  const visibleStart = t.scrollX;
-  const visibleEnd = Math.min(1, t.scrollX + (1 / t.zoom));
-  
-  const startSample = Math.floor(visibleStart * data.length);
-  const endSample = Math.floor(visibleEnd * data.length);
-  const samplesPerPx = (endSample - startSample) / W;
-  
-  ctx.strokeStyle = TRACK_COLORS[t.id];
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  
-  for (let x = 0; x < W; x++) {
-    const s = Math.floor(startSample + x * samplesPerPx);
-    const e = Math.floor(s + samplesPerPx);
-    let min = 1, max = -1;
-    for (let i = s; i < e && i < data.length; i++) {
-      if (data[i] < min) min = data[i];
-      if (data[i] > max) max = data[i];
-    }
-    const y1 = H/2 - (min * H/2);
-    const y2 = H/2 - (max * H/2);
-    if (x === 0) ctx.moveTo(x, y1);
-    ctx.lineTo(x, y1);
-    ctx.lineTo(x, y2);
-  }
-  ctx.stroke();
-  
-  // Selection overlay
-  const selStartPx = ((t.selStart - visibleStart) / (visibleEnd - visibleStart)) * W;
-  const selEndPx = ((t.selEnd - visibleStart) / (visibleEnd - visibleStart)) * W;
-  
-  ctx.fillStyle = 'rgba(42, 92, 69, 0.15)';
-  ctx.fillRect(selStartPx, 0, selEndPx - selStartPx, H);
-  
-  // Selection handles
-  ctx.fillStyle = TRACK_COLORS[t.id];
-  ctx.fillRect(selStartPx - 2, 0, 4, H);
-  ctx.fillRect(selEndPx - 2, 0, 4, H);
-  
-  updateWaveEditorInfo(t);
-}
-
-function updateWaveEditorInfo(t) {
-  if (!t.fullBuffer) return;
-  const dur = t.fullBuffer.duration;
-  const start = t.selStart * dur;
-  const end = t.selEnd * dur;
-  const len = end - start;
-  const info = document.getElementById(`wave-info-${t.id}`);
-  if (info) {
-    info.textContent = `Selection: ${start.toFixed(2)}s - ${end.toFixed(2)}s (${len.toFixed(2)}s)`;
-  }
-}
-
-function updateWaveEditorPlayhead(t) {
-  const playhead = document.getElementById(`wave-playhead-${t.id}`);
-  if (!playhead || !t.buffer) return;
-  
-  if (isPlaying && t.sourceNode) {
-    playhead.classList.add('visible');
-    const pct = t.playheadPct * (t.selEnd - t.selStart) + t.selStart;
-    const canvas = document.getElementById(`wave-editor-${t.id}`);
-    if (!canvas) return;
-    
-    const wrap = canvas.parentElement;
-    const visibleStart = t.scrollX;
-    const visibleEnd = Math.min(1, t.scrollX + (1 / t.zoom));
-    
-    if (pct >= visibleStart && pct <= visibleEnd) {
-      const x = ((pct - visibleStart) / (visibleEnd - visibleStart)) * (canvas.width / devicePixelRatio);
-      playhead.style.left = x + 'px';
-    } else {
-      playhead.classList.remove('visible');
-    }
-  } else {
-    playhead.classList.remove('visible');
-  }
-}
-
-function getWaveEditorX(e, t) {
-  const canvas = document.getElementById(`wave-editor-${t.id}`);
-  const rect = canvas.getBoundingClientRect();
-  const x = (e.clientX || e.touches[0].clientX) - rect.left;
-  return x / rect.width;
-}
-
-function waveEditorMouseDown(e, t) {
-  e.preventDefault();
-  const x = getWaveEditorX(e, t);
-  const visibleStart = t.scrollX;
-  const visibleEnd = Math.min(1, t.scrollX + (1 / t.zoom));
-  const pos = visibleStart + x * (visibleEnd - visibleStart);
-  
-  const threshold = 8 / document.getElementById(`wave-editor-${t.id}`).offsetWidth;
-  
-  if (Math.abs(pos - t.selStart) < threshold) {
-    t.dragging = 'start';
-  } else if (Math.abs(pos - t.selEnd) < threshold) {
-    t.dragging = 'end';
-  } else {
-    t.dragging = 'region';
-    t.dragOffset = pos - t.selStart;
-  }
-}
-
-function waveEditorMouseMove(e, t) {
-  if (!t.dragging) return;
-  e.preventDefault();
-  
-  const x = getWaveEditorX(e, t);
-  const visibleStart = t.scrollX;
-  const visibleEnd = Math.min(1, t.scrollX + (1 / t.zoom));
-  let pos = visibleStart + x * (visibleEnd - visibleStart);
-  pos = Math.max(0, Math.min(1, pos));
-  
-  if (t.dragging === 'start') {
-    t.selStart = Math.min(pos, t.selEnd - 0.01);
-  } else if (t.dragging === 'end') {
-    t.selEnd = Math.max(pos, t.selStart + 0.01);
-  } else if (t.dragging === 'region') {
-    const len = t.selEnd - t.selStart;
-    t.selStart = pos - t.dragOffset;
-    t.selEnd = t.selStart + len;
-    if (t.selStart < 0) { t.selStart = 0; t.selEnd = len; }
-    if (t.selEnd > 1) { t.selEnd = 1; t.selStart = 1 - len; }
-  }
-  
-  drawWaveEditor(t);
-}
-
-function waveEditorMouseUp(e, t) {
-  t.dragging = null;
-}
-
-function zoomWaveEditor(t, delta) {
-  const oldZoom = t.zoom;
-  t.zoom = Math.max(1, Math.min(10, t.zoom + delta));
-  
-  if (t.zoom === 1) {
-    t.scrollX = 0;
-  } else {
-    // Adjust scroll to keep center roughly in view
-    const oldVisibleWidth = 1 / oldZoom;
-    const newVisibleWidth = 1 / t.zoom;
-    const centerPoint = t.scrollX + oldVisibleWidth / 2;
-    t.scrollX = Math.max(0, Math.min(1 - newVisibleWidth, centerPoint - newVisibleWidth / 2));
-  }
-  
-  drawWaveEditor(t);
-  
-  // Update scroll container
-  const wrap = document.getElementById(`wave-editor-${t.id}`).parentElement;
-  const canvas = document.getElementById(`wave-editor-${t.id}`);
-  wrap.scrollLeft = (t.scrollX / (1 / t.zoom)) * canvas.offsetWidth;
-}
-
-function previewSelection(t) {
-  if (t._previewSrc) {
-    try { t._previewSrc.stop(); } catch(e) {}
-    t._previewSrc = null;
-    document.getElementById(`preview-btn-${t.id}`).textContent = '▶ Preview';
-    return;
-  }
-  
-  if (!AC) initAudio();
-  if (AC.state === 'suspended') AC.resume();
-  
-  const dur = t.fullBuffer.duration;
-  const start = t.selStart * dur;
-  const end = t.selEnd * dur;
-  
-  const g = AC.createGain();
-  g.gain.value = 0.7;
-  g.connect(AC.destination);
-  
-  t._previewSrc = AC.createBufferSource();
-  t._previewSrc.buffer = t.fullBuffer;
-  t._previewSrc.connect(g);
-  t._previewSrc.onended = () => {
-    t._previewSrc = null;
-    document.getElementById(`preview-btn-${t.id}`).textContent = '▶ Preview';
-  };
-  
-  document.getElementById(`preview-btn-${t.id}`).textContent = '⏸ Stop';
-  t._previewSrc.start(AC.currentTime, start, end - start);
-}
-
-function useSelection(t) {
-  if (!t.fullBuffer) return;
-  const dur = t.fullBuffer.duration;
-  const sr = t.fullBuffer.sampleRate;
-  const start = Math.floor(t.selStart * dur * sr);
-  const end = Math.floor(t.selEnd * dur * sr);
-  const len = end - start;
-  
-  const newBuf = AC.createBuffer(1, len, sr);
-  const newData = newBuf.getChannelData(0);
-  const oldData = t.fullBuffer.getChannelData(0);
-  
-  for (let i = 0; i < len; i++) {
-    newData[i] = oldData[start + i];
-  }
-  
-  t.buffer = newBuf;
-  document.getElementById(`tfile-${t.id}`).textContent = 
-    `${t.fileName || 'Untitled'} (cropped)`;
-  
-  if (isPlaying) {
-    transportStop();
-  }
-  
-  drawWaveform(t);
-  showGlobalMsg('Selection applied. Track updated.', 'success');
-}
-
-function resetToFull(t) {
-  if (!t.fullBuffer) return;
-  t.buffer = t.fullBuffer;
-  t.selStart = 0;
-  t.selEnd = 1;
-  t.zoom = 1;
-  t.scrollX = 0;
-  
-  document.getElementById(`tfile-${t.id}`).textContent = t.fileName || 'Untitled';
-  drawWaveEditor(t);
-  drawWaveform(t);
-  
-  if (isPlaying) {
-    transportStop();
-  }
-  
-  showGlobalMsg('Reset to full recording.', 'success');
-}
-
-function toggleWaveEditor(t) {
-  const section = document.getElementById(`wave-editor-section-${t.id}`);
-  const isVisible = section.classList.contains('visible');
-  
-  if (isVisible) {
-    section.classList.remove('visible');
-  } else {
-    section.classList.add('visible');
-    setTimeout(() => {
-      drawWaveEditor(t);
-    }, 10);
-  }
-}
-
-// ─────────────────────────────────────────────────────────
-// TRACK UI RENDER
-// ─────────────────────────────────────────────────────────
-function renderTracks() {
-  const container = document.getElementById('tracksContainer');
-  container.innerHTML = '';
-  tracks.forEach(t => container.appendChild(buildTrackEl(t)));
-}
-
-function buildTrackEl(t) {
-  const div = document.createElement('div');
-  div.className = 'track';
-  div.id = `track-${t.id}`;
-  div.innerHTML = `
-    <div class="track-head">
-      <span class="track-num">T${t.id+1}</span>
-      <span class="track-name">${t.name}</span>
-      <span class="track-file-info" id="tfile-${t.id}">${t.fileName || 'No file loaded'}</span>
-      <button class="track-select-btn ${t.buffer?'loaded':''}" onclick="openAddToTrackFromTrack(${t.id})">
-        ${t.buffer ? '⟳ Change' : '+ Load file'}
-      </button>
-      ${t.fullBuffer ? `<button class="sbtn" onclick="toggleWaveEditor(tracks[${t.id}])" style="margin-left:.5rem">Edit</button>` : ''}
-    </div>
-    
-    <div class="track-wave-section" id="wave-editor-section-${t.id}">
-      <div class="wave-editor-header">
-        <span class="wave-editor-title">Waveform Editor</span>
-        <span class="wave-editor-info" id="wave-info-${t.id}">—</span>
-      </div>
-      <div class="wave-canvas-wrap" id="wave-wrap-${t.id}">
-        <div class="wave-canvas-scroll">
-          <canvas class="wave-canvas" id="wave-editor-${t.id}"></canvas>
-          <div class="wave-playhead" id="wave-playhead-${t.id}"></div>
-        </div>
-      </div>
-      <div class="wave-editor-controls">
-        <div class="wave-zoom-controls">
-          <span class="row-lbl">zoom →</span>
-          <button class="pill" onclick="zoomWaveEditor(tracks[${t.id}], -0.5)">−</button>
-          <button class="pill" onclick="zoomWaveEditor(tracks[${t.id}], 0.5)">+</button>
-          <button class="pill" onclick="zoomWaveEditor(tracks[${t.id}], -tracks[${t.id}].zoom + 1)">Fit</button>
-        </div>
-        <div class="wave-actions">
-          <button class="sbtn" id="preview-btn-${t.id}" onclick="previewSelection(tracks[${t.id}])">▶ Preview</button>
-          <button class="sbtn primary" onclick="useSelection(tracks[${t.id}])">Use Selection</button>
-          <button class="sbtn" onclick="resetToFull(tracks[${t.id}])">Reset to Full</button>
-        </div>
-      </div>
-    </div>
-    
-    <div class="track-wave">
-      <canvas id="wave-${t.id}"></canvas>
-    </div>
-    <div class="track-controls">
-      <div class="ctrl-group">
-        <div class="ctrl-label">Volume <span class="ctrl-val" id="vol-label-${t.id}">${Math.round(t.volume*100)}%</span></div>
-        <input type="range" min="0" max="1" step="0.01" value="${t.volume}"
-          oninput="setTrackParam(${t.id},'volume',+this.value);document.getElementById('vol-label-${t.id}').textContent=Math.round(this.value*100)+'%'">
-      </div>
-      <div class="ctrl-group">
-        <div class="ctrl-label">Pan <span class="ctrl-val" id="pan-label-${t.id}">${t.pan===0?'C':t.pan>0?'R'+Math.round(t.pan*100):'L'+Math.round(Math.abs(t.pan)*100)}</span></div>
-        <input type="range" min="-1" max="1" step="0.01" value="${t.pan}"
-          oninput="setTrackParam(${t.id},'pan',+this.value);updatePanLabel(${t.id},+this.value)">
-      </div>
-      <div class="ctrl-group">
-        <div class="ctrl-label">Speed <span class="ctrl-val" id="spd-label-${t.id}">${t.speed.toFixed(2)}×</span></div>
-        <input type="range" min="0.25" max="3" step="0.01" value="${t.speed}"
-          oninput="setTrackParam(${t.id},'speed',+this.value);document.getElementById('spd-label-${t.id}').textContent=parseFloat(this.value).toFixed(2)+'×'">
-      </div>
-      <div class="ctrl-group">
-        <div class="ctrl-label">Loop</div>
-        <div class="toggle-row">
-          <label class="toggle">
-            <input type="checkbox" ${t.loop?'checked':''} onchange="setTrackParam(${t.id},'loop',this.checked)">
-            <span class="toggle-slider"></span>
-          </label>
-          <span class="toggle-label">${t.loop?'On':'Off'}</span>
-        </div>
-      </div>
-      <div class="ctrl-group">
-        <div class="ctrl-label">Reverb
-          <label class="toggle" style="margin-left:.3rem">
-            <input type="checkbox" ${t.reverbEnabled?'checked':''} onchange="setTrackEffect(${t.id},'reverbEnabled',this.checked)">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <input type="range" min="0" max="1" step="0.01" value="${t.reverbAmount}" ${t.reverbEnabled?'':'disabled'}
-          id="reverb-slider-${t.id}"
-          oninput="setTrackParam(${t.id},'reverbAmount',+this.value)">
-      </div>
-      <div class="ctrl-group">
-        <div class="ctrl-label">LFO → filter
-          <label class="toggle" style="margin-left:.3rem">
-            <input type="checkbox" ${t.lfoEnabled?'checked':''} onchange="setTrackEffect(${t.id},'lfoEnabled',this.checked)">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <input type="range" min="0.05" max="8" step="0.05" value="${t.lfoRate}" ${t.lfoEnabled?'':'disabled'}
-          id="lfo-rate-${t.id}"
-          oninput="setTrackParam(${t.id},'lfoRate',+this.value)">
-        <div class="lfo-shapes" id="lfo-shapes-${t.id}">
-          ${['sine','triangle','sawtooth','square'].map(s =>
-            `<button class="lfo-shape-btn ${t.lfoShape===s?'active':''}" ${t.lfoEnabled?'':'disabled'}
-              onclick="setLfoShape(${t.id},'${s}')">${s[0].toUpperCase()}</button>`
-          ).join('')}
-        </div>
-      </div>
-      <div class="ctrl-group">
-        <div class="ctrl-label">Tape degradation
-          <label class="toggle" style="margin-left:.3rem">
-            <input type="checkbox" ${t.tapeEnabled?'checked':''} onchange="setTrackEffect(${t.id},'tapeEnabled',this.checked)">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <input type="range" min="0.01" max="0.3" step="0.01" value="${t.tapeRate}" ${t.tapeEnabled?'':'disabled'}
-          id="tape-rate-${t.id}"
-          title="Degradation rate per loop"
-          oninput="setTrackParam(${t.id},'tapeRate',+this.value)">
-        <div class="tape-meter" title="Current degradation level">
-          <div class="tape-meter-fill" id="tape-meter-${t.id}" style="width:${t.tapeDegradation*100}%"></div>
-        </div>
-        <button class="lib-action" style="margin-top:.35rem;font-size:.62rem;"
-          onclick="resetTape(${t.id})">Reset tape</button>
-      </div>
-    </div>
-  `;
-
-  setTimeout(() => {
-    drawWaveform(t);
-    if (t.fullBuffer) {
-      const canvas = document.getElementById(`wave-editor-${t.id}`);
-      const wrap = document.getElementById(`wave-wrap-${t.id}`);
-      
-      canvas.addEventListener('mousedown', e => waveEditorMouseDown(e, t));
-      canvas.addEventListener('touchstart', e => waveEditorMouseDown(e, t));
-      
-      document.addEventListener('mousemove', e => waveEditorMouseMove(e, t));
-      document.addEventListener('touchmove', e => waveEditorMouseMove(e, t));
-      
-      document.addEventListener('mouseup', e => waveEditorMouseUp(e, t));
-      document.addEventListener('touchend', e => waveEditorMouseUp(e, t));
-      
-      wrap.addEventListener('scroll', () => {
-        const maxScroll = canvas.offsetWidth - wrap.clientWidth;
-        if (maxScroll > 0) {
-          t.scrollX = (wrap.scrollLeft / maxScroll) * (1 - 1/t.zoom);
-        }
-      });
-    }
-  }, 10);
-  
-  return div;
-}
-
-// ─────────────────────────────────────────────────────────
-// TRACK PARAM SETTERS
-// ─────────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════════
+   TRACK PARAM SETTERS
+═══════════════════════════════════════════════════════════ */
 window.setTrackParam = function(id, param, value) {
   const t = tracks[id];
   t[param] = value;
-  if (!t.sourceNode) return;
-  if (param === 'volume' && t.gainNode) t.gainNode.gain.value = value;
-  if (param === 'pan'    && t.panNode)  t.panNode.pan.value   = value;
-  if (param === 'speed'  && t.sourceNode) t.sourceNode.playbackRate.value = value;
-  if (param === 'loop'   && t.sourceNode) t.sourceNode.loop = value;
-  if (param === 'reverbAmount') {
-    if (t.reverbGain) t.reverbGain.gain.value = t.reverbEnabled ? value : 0;
-    if (t.dryGain)    t.dryGain.gain.value    = t.reverbEnabled ? 1-value : 1;
+  if (!t.gainNode) return; // not currently playing
+
+  if (param === 'volume' && t.gainNode)   t.gainNode.gain.setTargetAtTime(value, AC.currentTime, 0.05);
+  if (param === 'pan'    && t.panNode)    t.panNode.pan.setTargetAtTime(value, AC.currentTime, 0.05);
+  if (param === 'speed'  && t.sourceNode) {
+    t.sourceNode.playbackRate.setTargetAtTime(value, AC.currentTime, 0.05);
+    // If ratio-locked, propagate to other tracks
+    if (ratioLocked && id === 0) applyRatiosFromTrack0Speed(value);
   }
-  if (param === 'lfoRate' && t.lfoOsc) t.lfoOsc.frequency.value = value;
+  if (param === 'loop' && t.sourceNode)  t.sourceNode.loop = value;
+  if (param === 'reverbAmount') {
+    if (t.reverbGain) t.reverbGain.gain.setTargetAtTime(t.reverbEnabled ? value : 0, AC.currentTime, 0.05);
+    if (t.dryGain)    t.dryGain.gain.setTargetAtTime(t.reverbEnabled ? 1-value : 1, AC.currentTime, 0.05);
+  }
+  if (param === 'lfoRate' && t.lfoOsc)    t.lfoOsc.frequency.setTargetAtTime(value, AC.currentTime, 0.05);
+  if (param === 'ringCarrier' && t.ringOsc) {
+    t.ringOsc.frequency.setTargetAtTime(value, AC.currentTime, 0.05);
+    updateRingFreqDisplay(id);
+  }
+  if (param === 'oscFreq' && t.oscNode) {
+    t.oscNode.frequency.setTargetAtTime(value, AC.currentTime, 0.05);
+    updateRingFreqDisplay(id);
+  }
 };
 
 window.setTrackEffect = function(id, effect, enabled) {
   const t = tracks[id];
   t[effect] = enabled;
+
+  // Enable/disable related sliders in UI
   const sliderMap = {
     reverbEnabled: `reverb-slider-${id}`,
     lfoEnabled:    `lfo-rate-${id}`,
     tapeEnabled:   `tape-rate-${id}`,
+    ringEnabled:   `ring-carrier-${id}`,
   };
   const slider = document.getElementById(sliderMap[effect]);
   if (slider) slider.disabled = !enabled;
 
   if (effect === 'lfoEnabled') {
-    document.querySelectorAll(`#lfo-shapes-${id} .lfo-shape-btn`)
-      .forEach(b => b.disabled = !enabled);
+    document.querySelectorAll(`#lfo-shapes-${id} .lfo-shape-btn`).forEach(b => b.disabled = !enabled);
+    if (t.lfoGain) t.lfoGain.gain.setTargetAtTime(enabled ? t.lfoDepth : 0, AC.currentTime, 0.05);
   }
-
   if (effect === 'reverbEnabled') {
-    if (t.reverbGain) t.reverbGain.gain.value = enabled ? t.reverbAmount : 0;
-    if (t.dryGain)    t.dryGain.gain.value    = enabled ? 1-t.reverbAmount : 1;
-  }
-  if (effect === 'lfoEnabled') {
-    if (t.lfoGain) t.lfoGain.gain.value = enabled ? t.lfoDepth : 0;
+    if (t.reverbGain) t.reverbGain.gain.setTargetAtTime(enabled ? t.reverbAmount : 0, AC.currentTime, 0.05);
+    if (t.dryGain)    t.dryGain.gain.setTargetAtTime(enabled ? 1-t.reverbAmount : 1, AC.currentTime, 0.05);
   }
   if (effect === 'tapeEnabled') {
     if (t.tapeFilter) {
-      t.tapeFilter.frequency.value = enabled
-        ? Math.max(400, 20000 * Math.pow(1 - t.tapeDegradation, 2))
-        : 20000;
+      t.tapeFilter.frequency.setTargetAtTime(enabled ? Math.max(400, 20000 * Math.pow(1-t.tapeDegradation,2)) : 20000, AC.currentTime, 0.1);
     }
-    if (t.tapeWowGain) t.tapeWowGain.gain.value = enabled ? (t.tapeDegradation * 15) : 0;
-    if (t.tapeFlutterGain) t.tapeFlutterGain.gain.value = enabled ? (t.tapeDegradation * 0.008) : 0;
+    if (t.tapeWowGain)     t.tapeWowGain.gain.setTargetAtTime(enabled ? t.tapeDegradation*15 : 0, AC.currentTime, 0.1);
+    if (t.tapeFlutterGain) t.tapeFlutterGain.gain.setTargetAtTime(enabled ? t.tapeDegradation*0.008 : 0, AC.currentTime, 0.1);
+  }
+  if (effect === 'ringEnabled') {
+    if (t.ringWet) t.ringWet.gain.setTargetAtTime(enabled ? 1 : 0, AC.currentTime, 0.05);
+    if (t.ringDry) t.ringDry.gain.setTargetAtTime(enabled ? 0 : 1, AC.currentTime, 0.05);
+    // Update display
+    const display = document.getElementById(`ring-freqs-${id}`);
+    if (display) display.style.opacity = enabled ? '1' : '0.4';
   }
 };
 
@@ -1444,7 +1152,25 @@ window.setLfoShape = function(id, shape) {
   t.lfoShape = shape;
   if (t.lfoOsc) t.lfoOsc.type = shape;
   document.querySelectorAll(`#lfo-shapes-${id} .lfo-shape-btn`)
-    .forEach(b => b.classList.toggle('active', b.textContent.trim().toLowerCase() === shape[0].toLowerCase()));
+    .forEach(b => b.classList.toggle('active', b.dataset.shape === shape));
+};
+
+window.setOscType = function(id, type) {
+  const t = tracks[id];
+  t.oscType = type;
+  document.querySelectorAll(`#osc-type-btns-${id} .lfo-shape-btn`)
+    .forEach(b => b.classList.toggle('active', b.dataset.type === type));
+  drawWaveform(t);
+  // Rebuild if playing
+  if (isPlaying) { teardownTrackGraph(t); buildTrackGraph(t); const node = t.oscNode||t.noiseNode; if(node) node.start(0); }
+};
+
+window.toggleOscMode = function(id) {
+  const t = tracks[id];
+  if (isPlaying) transportStop();
+  t.oscMode = !t.oscMode;
+  renderTracks();
+  updatePlayBtn();
 };
 
 window.updatePanLabel = function(id, val) {
@@ -1452,10 +1178,37 @@ window.updatePanLabel = function(id, val) {
     val === 0 ? 'C' : val > 0 ? 'R'+Math.round(val*100) : 'L'+Math.round(Math.abs(val)*100);
 };
 
+/* ── Pitch interval display ── */
+function speedToPitch(speed) {
+  if (speed === 1) return 'original';
+  const semis = Math.round(Math.log2(speed) * 12);
+  if (semis === 0) return 'original';
+  const abs = Math.abs(semis);
+  const dir = semis > 0 ? '↑' : '↓';
+  const names = ['','m2','M2','m3','M3','P4','A4','P5','m6','M6','m7','M7','P8'];
+  if (abs <= 12) return dir + (names[abs] || abs + 'st');
+  const oct = Math.floor(abs/12);
+  const rem = abs % 12;
+  return dir + oct + 'oct' + (rem ? '+'+rem+'st' : '');
+}
+
+/* ── Ring mod freq display ── */
+function updateRingFreqDisplay(id) {
+  const t = tracks[id];
+  const display = document.getElementById(`ring-freqs-${id}`);
+  if (!display) return;
+  const srcFreq = t.oscMode ? t.oscFreq : (BASE_FREQ * t.speed);
+  const carrier = t.ringCarrier;
+  const sum  = Math.round(srcFreq + carrier);
+  const diff = Math.round(Math.abs(srcFreq - carrier));
+  display.textContent = `carrier: ${carrier} Hz · sum: ${sum} Hz · diff: ${diff} Hz`;
+}
+
+/* ── Tape meter ── */
 function updateTapeMeter(t) {
   const fill = document.getElementById(`tape-meter-${t.id}`);
   if (!fill) return;
-  fill.style.width = (t.tapeDegradation*100)+'%';
+  fill.style.width = (t.tapeDegradation * 100) + '%';
   fill.style.background = t.tapeDegradation > 0.7 ? '#c0392b'
     : t.tapeDegradation > 0.4 ? '#e67e22' : 'var(--accent)';
 }
@@ -1464,34 +1217,300 @@ window.resetTape = function(id) {
   const t = tracks[id];
   t.tapeDegradation = 0;
   t.tapeLoopCountLast = 0;
-  if (t.tapeFilter) {
-    t.tapeFilter.frequency.value = 20000;
-    t.tapeFilter.Q.value = 0.5;
-  }
+  if (t.tapeFilter) { t.tapeFilter.frequency.value = 20000; t.tapeFilter.Q.value = 0.5; }
   if (t.tapeWowGain) t.tapeWowGain.gain.value = 0;
   if (t.tapeFlutterGain) t.tapeFlutterGain.gain.value = 0;
   updateTapeMeter(t);
 };
 
-window.toggleWaveEditor = toggleWaveEditor;
-window.tracks = tracks;
+/* ═══════════════════════════════════════════════════════════
+   FREQUENCY RATIO PANEL
+═══════════════════════════════════════════════════════════ */
+function renderRatioGrid() {
+  const grid = document.getElementById('ratioGrid');
+  grid.innerHTML = tracks.map(t => {
+    const effectiveFreq = t.oscMode
+      ? (t.oscFreq * t.ratioNum / t.ratioDen).toFixed(1)
+      : (BASE_FREQ * t.speed * t.ratioNum / t.ratioDen).toFixed(1);
+    const pitch = speedToPitch(t.speed);
+    return `<div class="ratio-cell" id="ratio-cell-${t.id}">
+      <div class="ratio-cell-label">Track ${t.id+1}</div>
+      <div class="ratio-cell-main">
+        <input class="ratio-input" type="number" min="1" max="32" value="${t.ratioNum}"
+          id="ratio-num-${t.id}" onchange="updateRatio(${t.id})">
+        <span class="ratio-slash">:</span>
+        <input class="ratio-input" type="number" min="1" max="32" value="${t.ratioDen}"
+          id="ratio-den-${t.id}" onchange="updateRatio(${t.id})">
+      </div>
+      <div class="ratio-cell-freq" id="ratio-freq-${t.id}">${effectiveFreq} Hz</div>
+      <div class="ratio-cell-pitch" id="ratio-pitch-${t.id}">${pitch}</div>
+    </div>`;
+  }).join('');
+}
 
-// ─────────────────────────────────────────────────────────
-// LIBRARY — SUPABASE + FILE MANAGEMENT
-// ─────────────────────────────────────────────────────────
-let recordings = [];
+window.updateRatio = function(id) {
+  const t = tracks[id];
+  const num = parseInt(document.getElementById(`ratio-num-${id}`).value) || 1;
+  const den = parseInt(document.getElementById(`ratio-den-${id}`).value) || 1;
+  t.ratioNum = Math.max(1, Math.min(32, num));
+  t.ratioDen = Math.max(1, Math.min(32, den));
+};
+
+window.applyRatios = function() {
+  const t0 = tracks[0];
+  const baseSpeed = t0.speed;
+  const baseFreq  = t0.oscMode ? t0.oscFreq : BASE_FREQ * baseSpeed;
+
+  tracks.forEach((t, i) => {
+    const ratio = t.ratioNum / t.ratioDen;
+    if (t.oscMode) {
+      t.oscFreq = parseFloat((baseFreq * ratio).toFixed(2));
+      if (t.oscNode) t.oscNode.frequency.setTargetAtTime(t.oscFreq, AC.currentTime, 0.1);
+      document.getElementById(`osc-freq-${t.id}`).value = t.oscFreq;
+    } else {
+      // Set speed to achieve the ratio
+      const newSpeed = (baseFreq * ratio) / BASE_FREQ;
+      t.speed = parseFloat(Math.max(0.1, Math.min(4, newSpeed)).toFixed(3));
+      if (t.sourceNode) t.sourceNode.playbackRate.setTargetAtTime(t.speed, AC.currentTime, 0.1);
+      // Update slider and labels
+      const spd = document.getElementById(`spd-slider-${t.id}`);
+      if (spd) { spd.value = t.speed; }
+      document.getElementById(`spd-label-${t.id}`).textContent = t.speed.toFixed(2) + '×';
+      document.getElementById(`spd-pitch-${t.id}`).textContent = speedToPitch(t.speed);
+    }
+    // Update ratio display
+    document.getElementById(`ratio-freq-${t.id}`).textContent =
+      (t.oscMode ? t.oscFreq : BASE_FREQ * t.speed).toFixed(1) + ' Hz';
+    document.getElementById(`ratio-pitch-${t.id}`).textContent = speedToPitch(t.speed);
+    // Update ring display
+    updateRingFreqDisplay(t.id);
+  });
+  showGlobalMsg('Ratios applied to all tracks.', 'success');
+};
+
+window.toggleRatioLock = function(locked) {
+  ratioLocked = locked;
+};
+
+function applyRatiosFromTrack0Speed(newSpeed) {
+  const baseFreq = BASE_FREQ * newSpeed;
+  tracks.forEach((t, i) => {
+    if (i === 0) return;
+    const ratio = t.ratioNum / t.ratioDen;
+    const targetFreq = baseFreq * ratio;
+    t.speed = parseFloat(Math.max(0.1, Math.min(4, targetFreq / BASE_FREQ)).toFixed(3));
+    if (t.sourceNode) t.sourceNode.playbackRate.setTargetAtTime(t.speed, AC.currentTime, 0.1);
+    const spd = document.getElementById(`spd-slider-${t.id}`);
+    if (spd) spd.value = t.speed;
+    const lbl = document.getElementById(`spd-label-${t.id}`);
+    if (lbl) lbl.textContent = t.speed.toFixed(2) + '×';
+    const pch = document.getElementById(`spd-pitch-${t.id}`);
+    if (pch) pch.textContent = speedToPitch(t.speed);
+  });
+}
+
+function updatePlayBtn() {
+  const hasAny = tracks.some(t => t.buffer || t.oscMode);
+  document.getElementById('playBtn').disabled = !hasAny;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TRACK UI RENDER
+═══════════════════════════════════════════════════════════ */
+function renderTracks() {
+  const container = document.getElementById('tracksContainer');
+  container.innerHTML = '';
+  tracks.forEach(t => container.appendChild(buildTrackEl(t)));
+  tracks.forEach(t => { drawWaveform(t); updateRingFreqDisplay(t.id); });
+}
+
+function buildTrackEl(t) {
+  const id = t.id;
+  const color = TRACK_COLORS[id];
+  const div = document.createElement('div');
+  div.className = `track${t.buffer ? ' has-audio' : ''}${t.oscMode ? ' osc-mode' : ''}`;
+  div.id = `track-${id}`;
+
+  /* Speed label formatted */
+  const spdLabel = t.speed.toFixed(2) + '×';
+  const pitchLbl = speedToPitch(t.speed);
+
+  /* Pan label */
+  const panLbl = t.pan === 0 ? 'C' : t.pan > 0 ? 'R'+Math.round(t.pan*100) : 'L'+Math.round(Math.abs(t.pan)*100);
+
+  /* Ring freq (static render) */
+  const srcFreq = t.oscMode ? t.oscFreq : BASE_FREQ * t.speed;
+  const rSum  = Math.round(srcFreq + t.ringCarrier);
+  const rDiff = Math.round(Math.abs(srcFreq - t.ringCarrier));
+
+  div.innerHTML = `
+    <div class="track-head">
+      <span class="track-num">T${id+1}</span>
+      <span class="track-name">${t.name}</span>
+      <span class="track-file-info" id="tfile-${id}">
+        ${t.oscMode ? 'oscillator mode — ' + t.oscType : (t.fileName || 'No file loaded')}
+      </span>
+      <div class="track-source-btns">
+        <button class="track-osc-btn ${t.oscMode?'active':''}" onclick="toggleOscMode(${id})">
+          ${t.oscMode ? '◉ oscillator' : '○ oscillator'}
+        </button>
+        ${!t.oscMode ? `<button class="track-select-btn ${t.buffer?'loaded':''}" onclick="openLoadForTrack(${id})">
+          ${t.buffer ? '⟳ change' : '+ load file'}
+        </button>` : ''}
+      </div>
+    </div>
+
+    <!-- Waveform / osc vis -->
+    <div class="track-wave" id="track-wave-wrap-${id}">
+      <canvas id="wave-${id}"></canvas>
+    </div>
+
+    <!-- Controls grid -->
+    <div class="track-controls">
+
+      <!-- Volume -->
+      <div class="ctrl-group">
+        <div class="ctrl-label">Volume
+          <span class="ctrl-val" id="vol-label-${id}">${Math.round(t.volume*100)}%</span>
+        </div>
+        <input type="range" min="0" max="1" step="0.01" value="${t.volume}"
+          oninput="setTrackParam(${id},'volume',+this.value);document.getElementById('vol-label-${id}').textContent=Math.round(this.value*100)+'%'">
+      </div>
+
+      <!-- Pan -->
+      <div class="ctrl-group">
+        <div class="ctrl-label">Pan
+          <span class="ctrl-val" id="pan-label-${id}">${panLbl}</span>
+        </div>
+        <input type="range" min="-1" max="1" step="0.01" value="${t.pan}"
+          oninput="setTrackParam(${id},'pan',+this.value);updatePanLabel(${id},+this.value)">
+      </div>
+
+      ${t.oscMode ? `
+      <!-- Oscillator controls -->
+      <div class="ctrl-group">
+        <div class="ctrl-label">Frequency
+          <span class="ctrl-val" id="osc-freq-label-${id}">${t.oscFreq.toFixed(1)} Hz</span>
+        </div>
+        <input type="range" min="20" max="2000" step="0.5" value="${t.oscFreq}" id="osc-freq-${id}"
+          oninput="setTrackParam(${id},'oscFreq',+this.value);document.getElementById('osc-freq-label-${id}').textContent=parseFloat(this.value).toFixed(1)+' Hz'">
+      </div>
+      <div class="ctrl-group">
+        <div class="ctrl-label">Waveform</div>
+        <div class="lfo-shapes" id="osc-type-btns-${id}">
+          ${['sine','triangle','square','noise'].map(tp =>
+            `<button class="lfo-shape-btn ${t.oscType===tp?'active':''}" data-type="${tp}"
+              onclick="setOscType(${id},'${tp}')">${tp[0].toUpperCase()}</button>`).join('')}
+        </div>
+      </div>
+      ` : `
+      <!-- Speed / pitch -->
+      <div class="ctrl-group">
+        <div class="ctrl-label">Speed
+          <span class="ctrl-val" id="spd-label-${id}">${spdLabel}</span>
+        </div>
+        <input type="range" min="0.1" max="4" step="0.01" value="${t.speed}" id="spd-slider-${id}"
+          oninput="setTrackParam(${id},'speed',+this.value);document.getElementById('spd-label-${id}').textContent=parseFloat(this.value).toFixed(2)+'×';document.getElementById('spd-pitch-${id}').textContent=speedToPitch(+this.value)">
+        <div class="pitch-label" id="spd-pitch-${id}">${pitchLbl}</div>
+      </div>
+      <!-- Loop -->
+      <div class="ctrl-group">
+        <div class="ctrl-label">Loop</div>
+        <div class="toggle-row">
+          <label class="toggle">
+            <input type="checkbox" ${t.loop?'checked':''} onchange="setTrackParam(${id},'loop',this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="toggle-label">${t.loop?'On':'Off'}</span>
+        </div>
+      </div>
+      `}
+
+      <!-- Ring modulator -->
+      <div class="ctrl-group">
+        <div class="ctrl-label">Ring mod
+          <label class="toggle ring-toggle" style="margin-left:.2rem">
+            <input type="checkbox" ${t.ringEnabled?'checked':''} onchange="setTrackEffect(${id},'ringEnabled',this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <input type="range" class="ring-range" min="10" max="2000" step="1" value="${t.ringCarrier}"
+          id="ring-carrier-${id}" ${t.ringEnabled?'':'disabled'}
+          oninput="setTrackParam(${id},'ringCarrier',+this.value)">
+        <div class="ring-freqs" id="ring-freqs-${id}" style="opacity:${t.ringEnabled?1:.4}">
+          carrier: ${t.ringCarrier} Hz · sum: ${rSum} Hz · diff: ${rDiff} Hz
+        </div>
+      </div>
+
+      <!-- Reverb -->
+      <div class="ctrl-group">
+        <div class="ctrl-label">Reverb
+          <label class="toggle" style="margin-left:.2rem">
+            <input type="checkbox" ${t.reverbEnabled?'checked':''} onchange="setTrackEffect(${id},'reverbEnabled',this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <input type="range" min="0" max="1" step="0.01" value="${t.reverbAmount}"
+          id="reverb-slider-${id}" ${t.reverbEnabled?'':'disabled'}
+          oninput="setTrackParam(${id},'reverbAmount',+this.value)">
+      </div>
+
+      <!-- LFO -->
+      <div class="ctrl-group">
+        <div class="ctrl-label">LFO → filter
+          <label class="toggle" style="margin-left:.2rem">
+            <input type="checkbox" ${t.lfoEnabled?'checked':''} onchange="setTrackEffect(${id},'lfoEnabled',this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <input type="range" min="0.05" max="8" step="0.05" value="${t.lfoRate}"
+          id="lfo-rate-${id}" ${t.lfoEnabled?'':'disabled'}
+          oninput="setTrackParam(${id},'lfoRate',+this.value)">
+        <div class="lfo-shapes" id="lfo-shapes-${id}">
+          ${['sine','triangle','sawtooth','square'].map(s =>
+            `<button class="lfo-shape-btn ${t.lfoShape===s?'active':''}" data-shape="${s}"
+              ${t.lfoEnabled?'':'disabled'} onclick="setLfoShape(${id},'${s}')">${s[0].toUpperCase()}</button>`).join('')}
+        </div>
+      </div>
+
+      <!-- Tape degradation (file mode only) -->
+      ${!t.oscMode ? `
+      <div class="ctrl-group">
+        <div class="ctrl-label">Tape
+          <label class="toggle" style="margin-left:.2rem">
+            <input type="checkbox" ${t.tapeEnabled?'checked':''} onchange="setTrackEffect(${id},'tapeEnabled',this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <input type="range" min="0.01" max="0.3" step="0.01" value="${t.tapeRate}"
+          id="tape-rate-${id}" ${t.tapeEnabled?'':'disabled'}
+          oninput="setTrackParam(${id},'tapeRate',+this.value)">
+        <div class="tape-meter"><div class="tape-meter-fill" id="tape-meter-${id}"
+          style="width:${t.tapeDegradation*100}%"></div></div>
+        <button class="lib-action" style="margin-top:.35rem;font-size:.62rem;"
+          onclick="resetTape(${id})">Reset tape</button>
+      </div>
+      ` : ''}
+
+    </div>
+  `;
+
+  return div;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LIBRARY
+═══════════════════════════════════════════════════════════ */
+let recordings   = [];
 let libRecStream = null;
-let libRecMediaRec = null;
-let libRecChunks  = [];
-let libRecording  = false;
+let libRecMR     = null;
+let libRecChunks = [];
+let libRecording = false;
 
 async function loadLibrary() {
   const sb = window._supabase;
   if (!sb) return;
-  const { data, error } = await sb
-    .from('recordings')
-    .select('*')
-    .order('created_at', { ascending: false });
+  const { data, error } = await sb.from('recordings').select('*').order('created_at', { ascending: false });
   if (error) { console.error(error); return; }
   recordings = data || [];
   renderLibrary();
@@ -1513,28 +1532,24 @@ function renderLibrary() {
         <button class="lib-action" onclick="openRename('${r.id}')">Rename</button>
         <button class="lib-action danger" onclick="deleteRecording('${r.id}')">Delete</button>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
 function updateStorageBar() {
-  const used  = recordings.reduce((s,r) => s+(r.file_size||0), 0);
-  const pct   = Math.min(100, (used/QUOTA_BYTES)*100);
-  document.getElementById('storageFill').style.width = pct+'%';
-  document.getElementById('storageLabel').textContent =
-    `${formatBytes(used)} / 25 MB`;
+  const used = recordings.reduce((s, r) => s + (r.file_size || 0), 0);
+  const pct  = Math.min(100, (used / QUOTA_BYTES) * 100);
+  document.getElementById('storageFill').style.width = pct + '%';
+  document.getElementById('storageLabel').textContent = `${formatBytes(used)} / 25 MB`;
 }
 
-document.getElementById('fileUploadInput').addEventListener('change', async function() {
+document.getElementById('fileUploadInput').addEventListener('change', async function () {
   const files = Array.from(this.files);
   if (!files.length) return;
   const status = document.getElementById('uploadStatus');
-
   for (const file of files) {
-    const used = recordings.reduce((s,r) => s+(r.file_size||0), 0);
+    const used = recordings.reduce((s, r) => s + (r.file_size || 0), 0);
     if (used + file.size > QUOTA_BYTES) {
-      showGlobalMsg('Storage limit reached (25 MB). Delete some recordings first.','error');
-      break;
+      showGlobalMsg('Storage limit reached (25 MB). Delete some recordings first.', 'error'); break;
     }
     status.textContent = `Uploading ${file.name}…`;
     await uploadFile(file);
@@ -1545,10 +1560,10 @@ document.getElementById('fileUploadInput').addEventListener('change', async func
 });
 
 async function uploadFile(file) {
-  const sb   = window._supabase;
-  const uid  = window._currentUser.id;
+  const sb  = window._supabase;
+  const uid = window._currentUser.id;
   const ext  = file.name.split('.').pop();
-  const path = `${uid}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const fpath = `${uid}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
   let duration_s = null;
   try {
@@ -1559,45 +1574,36 @@ async function uploadFile(file) {
     tmp.close();
   } catch(e) {}
 
-  const { error: upErr } = await sb.storage
-    .from('recordings')
-    .upload(path, file, { contentType: file.type, upsert: false });
+  const { error: upErr } = await sb.storage.from('recordings').upload(fpath, file, { contentType: file.type, upsert: false });
   if (upErr) { showGlobalMsg('Upload failed: ' + upErr.message, 'error'); return; }
 
-  const { data: urlData } = await sb.storage
-    .from('recordings')
-    .createSignedUrl(path, 3600 * 24 * 7);
-
+  const { data: urlData } = await sb.storage.from('recordings').createSignedUrl(fpath, 3600 * 24 * 7);
   const name = file.name.replace(/\.[^.]+$/, '');
   await sb.from('recordings').insert({
-    user_id:      uid,
-    title:        name,
-    file_url:     urlData?.signedUrl || '',
-    storage_path: path,
-    file_size:    file.size,
-    duration_s,
-    mime_type:    file.type,
+    user_id: uid, title: name,
+    file_url: urlData?.signedUrl || '',
+    storage_path: fpath,
+    file_size: file.size,
+    duration_s, mime_type: file.type,
   });
 }
 
-window.toggleLibRecord = async function() {
+window.toggleLibRecord = async function () {
   if (!libRecording) {
     try {
       libRecStream = await navigator.mediaDevices.getUserMedia({ audio: true });
       libRecChunks = [];
-      libRecMediaRec = new MediaRecorder(libRecStream);
-      libRecMediaRec.ondataavailable = e => { if(e.data.size>0) libRecChunks.push(e.data); };
-      libRecMediaRec.onstop = onLibRecStop;
-      libRecMediaRec.start();
+      libRecMR = new MediaRecorder(libRecStream);
+      libRecMR.ondataavailable = e => { if (e.data.size > 0) libRecChunks.push(e.data); };
+      libRecMR.onstop = onLibRecStop;
+      libRecMR.start();
       libRecording = true;
       document.getElementById('libRecBtn').classList.add('active');
       document.getElementById('libRecBtn').textContent = '⏹ Stop';
       document.getElementById('uploadStatus').textContent = 'Recording…';
-    } catch(e) {
-      showGlobalMsg('Microphone access denied.','error');
-    }
+    } catch(e) { showGlobalMsg('Microphone access denied.', 'error'); }
   } else {
-    libRecMediaRec.stop();
+    libRecMR.stop();
     libRecStream.getTracks().forEach(t => t.stop());
     libRecording = false;
     document.getElementById('libRecBtn').classList.remove('active');
@@ -1617,9 +1623,7 @@ async function onLibRecStop() {
 
 async function getSignedUrl(rec) {
   const sb = window._supabase;
-  const { data } = await sb.storage
-    .from('recordings')
-    .createSignedUrl(rec.storage_path, 3600);
+  const { data } = await sb.storage.from('recordings').createSignedUrl(rec.storage_path, 3600);
   return data?.signedUrl || rec.file_url;
 }
 
@@ -1631,37 +1635,37 @@ async function loadRecordingBuffer(rec) {
   return await AC.decodeAudioData(ab);
 }
 
+/* ── Open load modal for a specific track ── */
+window.openLoadForTrack = function(trackId) {
+  window._targetTrackId = trackId;
+  const list = document.getElementById('trackSelectList');
+  document.getElementById('addToTrackTitle').textContent = `Load file into Track ${trackId + 1}`;
+  list.innerHTML = recordings.length
+    ? recordings.map(r => `
+        <button class="sbtn" style="width:100%;text-align:left;padding:.5rem .85rem;"
+          onclick="loadRecordingToTrackById('${r.id}',${trackId})">
+          ${r.title || 'Untitled'} · ${formatDur(r.duration_s)}
+        </button>`).join('')
+    : '<p style="font-size:.8rem;color:var(--muted)">No recordings yet. Upload one first.</p>';
+  openModal('addToTrackModal');
+};
+
+/* ── Open from library ── */
 window.openAddToTrack = function(recId) {
   window._pendingRecId = recId;
+  document.getElementById('addToTrackTitle').textContent = 'Add to track';
   const list = document.getElementById('trackSelectList');
   list.innerHTML = tracks.map(t => `
     <button class="sbtn" style="width:100%;text-align:left;padding:.5rem .85rem;"
       onclick="loadRecordingToTrack(${t.id})">
       Track ${t.id+1} — ${t.fileName || 'empty'}
-    </button>
-  `).join('');
-  openModal('addToTrackModal');
-};
-
-window.openAddToTrackFromTrack = function(trackId) {
-  window._targetTrackId = trackId;
-  const list = document.getElementById('trackSelectList');
-  list.innerHTML = recordings.length
-    ? recordings.map(r => `
-        <button class="sbtn" style="width:100%;text-align:left;padding:.5rem .85rem;"
-          onclick="loadRecordingToTrackById('${r.id}', ${trackId})">
-          ${r.title || 'Untitled'} · ${formatDur(r.duration_s)}
-        </button>
-      `).join('')
-    : '<p style="font-size:.8rem;color:var(--muted)">No recordings in library yet.</p>';
-  document.querySelector('#addToTrackModal .modal-head h3').textContent = `Load file into Track ${trackId+1}`;
+    </button>`).join('');
   openModal('addToTrackModal');
 };
 
 window.loadRecordingToTrack = async function(trackId) {
   closeModal('addToTrackModal');
-  const recId = window._pendingRecId;
-  await loadRecordingToTrackById(recId, trackId);
+  await loadRecordingToTrackById(window._pendingRecId, trackId);
 };
 
 window.loadRecordingToTrackById = async function(recId, trackId) {
@@ -1669,57 +1673,37 @@ window.loadRecordingToTrackById = async function(recId, trackId) {
   const rec = recordings.find(r => r.id === recId);
   if (!rec) return;
   const t = tracks[trackId];
-  showGlobalMsg('Loading audio…','success');
+  showGlobalMsg('Loading audio…', 'success');
   try {
     const buf = await loadRecordingBuffer(rec);
-    t.buffer     = buf;
-    t.fullBuffer = buf;
-    t.fileName   = rec.title || 'Untitled';
+    t.buffer      = buf;
+    t.fullBuffer  = buf;
+    t.fileName    = rec.title || 'Untitled';
     t.recordingId = rec.id;
-    t.selStart = 0;
-    t.selEnd = 1;
-    t.zoom = 1;
-    t.scrollX = 0;
-    
-    document.getElementById(`tfile-${trackId}`).textContent = t.fileName;
-    document.getElementById(`track-${trackId}`).classList.add('has-audio');
-    const btn = document.querySelector(`#track-${trackId} .track-select-btn`);
-    if (btn) { btn.textContent = '⟳ Change'; btn.classList.add('loaded'); }
-    
-    // Re-render track to add Edit button
+    t.oscMode     = false;
+    t.selStart = 0; t.selEnd = 1;
     renderTracks();
-    
-    drawWaveform(t);
-    document.getElementById('playBtn').disabled = false;
-    showGlobalMsg('','');
-  } catch(e) {
-    showGlobalMsg('Failed to load audio: ' + e.message, 'error');
-  }
+    updatePlayBtn();
+    showGlobalMsg('', '');
+  } catch(e) { showGlobalMsg('Failed to load audio: ' + e.message, 'error'); }
 };
 
 window.deleteRecording = async function(recId) {
   const rec = recordings.find(r => r.id === recId);
   if (!rec) return;
-  if (!confirm(`Delete "${rec.title || 'Untitled'}"? This cannot be undone.`)) return;
-
+  if (!confirm(`Delete "${rec.title || 'Untitled'}"?`)) return;
   const sb = window._supabase;
-  if (rec.storage_path) {
-    await sb.storage.from('recordings').remove([rec.storage_path]);
-  }
+  if (rec.storage_path) await sb.storage.from('recordings').remove([rec.storage_path]);
   await sb.from('recordings').delete().eq('id', recId);
-
   tracks.forEach(t => {
     if (t.recordingId === recId) {
       teardownTrackGraph(t);
       t.buffer = null; t.fullBuffer = null; t.fileName = null; t.recordingId = null;
-      document.getElementById(`tfile-${t.id}`).textContent = 'No file loaded';
-      document.getElementById(`track-${t.id}`).classList.remove('has-audio');
-      drawWaveform(t);
     }
   });
-
   await loadLibrary();
   renderTracks();
+  updatePlayBtn();
 };
 
 let _renameId = null;
@@ -1730,42 +1714,34 @@ window.openRename = function(recId) {
   document.getElementById('renameMsg').className = 'msg';
   openModal('renameModal');
 };
-
 window.applyRename = async function() {
   const name = document.getElementById('renameInput').value.trim();
   if (!name) {
     document.getElementById('renameMsg').textContent = 'Please enter a name.';
-    document.getElementById('renameMsg').className = 'msg error show';
-    return;
+    document.getElementById('renameMsg').className = 'msg error show'; return;
   }
-  const sb = window._supabase;
-  const { error } = await sb.from('recordings')
-    .update({ title: name, updated_at: new Date().toISOString() })
-    .eq('id', _renameId);
+  const { error } = await window._supabase.from('recordings')
+    .update({ title: name, updated_at: new Date().toISOString() }).eq('id', _renameId);
   if (error) {
     document.getElementById('renameMsg').textContent = error.message;
-    document.getElementById('renameMsg').className = 'msg error show';
-    return;
+    document.getElementById('renameMsg').className = 'msg error show'; return;
   }
   closeModal('renameModal');
   await loadLibrary();
   tracks.forEach(t => {
-    if (t.recordingId === _renameId) {
-      t.fileName = name;
-      document.getElementById(`tfile-${t.id}`).textContent = name;
-    }
+    if (t.recordingId === _renameId) { t.fileName = name; }
   });
+  renderTracks();
 };
 
-// ─────────────────────────────────────────────────────────
-// MIXER SESSION SAVE / LOAD
-// ─────────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════════
+   SESSIONS
+═══════════════════════════════════════════════════════════ */
 let sessions = [];
 
 async function loadSessions() {
   const sb = window._supabase;
-  const { data } = await sb.from('mixer_sessions')
-    .select('*').order('updated_at', { ascending: false });
+  const { data } = await sb.from('mixer_sessions').select('*').order('updated_at', { ascending: false });
   sessions = data || [];
   renderSessionDropdown();
 }
@@ -1781,40 +1757,35 @@ function renderSessionDropdown() {
 function getTrackState() {
   return tracks.map(t => ({
     volume: t.volume, pan: t.pan, speed: t.speed, loop: t.loop,
+    oscMode: t.oscMode, oscType: t.oscType, oscFreq: t.oscFreq,
     reverbEnabled: t.reverbEnabled, reverbAmount: t.reverbAmount,
     lfoEnabled: t.lfoEnabled, lfoRate: t.lfoRate, lfoDepth: t.lfoDepth, lfoShape: t.lfoShape,
     tapeEnabled: t.tapeEnabled, tapeRate: t.tapeRate, tapeDegradation: t.tapeDegradation,
-    recordingId: t.recordingId, fileName: t.fileName, selStart: t.selStart, selEnd: t.selEnd,
+    ringEnabled: t.ringEnabled, ringCarrier: t.ringCarrier,
+    ratioNum: t.ratioNum, ratioDen: t.ratioDen,
+    recordingId: t.recordingId, fileName: t.fileName,
   }));
 }
 
 window.saveSession = async function() {
   const sel = document.getElementById('sessionSelect');
   const id  = sel.value;
-  const sb  = window._supabase;
-  const state = { tracks: getTrackState() };
-
   if (!id) { saveSessionAs(); return; }
-
-  const { error } = await sb.from('mixer_sessions')
-    .update({ state, updated_at: new Date().toISOString() })
-    .eq('id', id);
-  if (error) { showGlobalMsg(error.message,'error'); return; }
-  showGlobalMsg('Session saved.','success');
+  const { error } = await window._supabase.from('mixer_sessions')
+    .update({ state: { tracks: getTrackState() }, updated_at: new Date().toISOString() }).eq('id', id);
+  if (error) { showGlobalMsg(error.message, 'error'); return; }
+  showGlobalMsg('Session saved.', 'success');
   await loadSessions();
 };
 
 window.saveSessionAs = async function() {
   const name = prompt('Session name:', `Session ${sessions.length+1}`);
   if (!name) return;
-  const sb  = window._supabase;
   const uid = window._currentUser.id;
-  const state = { tracks: getTrackState() };
-  const { data, error } = await sb.from('mixer_sessions')
-    .insert({ user_id: uid, name, state })
-    .select().single();
-  if (error) { showGlobalMsg(error.message,'error'); return; }
-  showGlobalMsg('Session saved as "'+name+'".','success');
+  const { data, error } = await window._supabase.from('mixer_sessions')
+    .insert({ user_id: uid, name, state: { tracks: getTrackState() } }).select().single();
+  if (error) { showGlobalMsg(error.message, 'error'); return; }
+  showGlobalMsg('Session saved as "' + name + '".', 'success');
   await loadSessions();
   document.getElementById('sessionSelect').value = data.id;
 };
@@ -1833,79 +1804,43 @@ document.getElementById('sessionSelect').addEventListener('change', async functi
   if (!id) return;
   const session = sessions.find(s => s.id === id);
   if (!session?.state?.tracks) return;
-
   session.state.tracks.forEach((saved, i) => {
-    const t = tracks[i];
-    Object.assign(t, saved);
-    t.buffer = null;
+    Object.assign(tracks[i], saved);
+    tracks[i].buffer = null;
   });
-
   renderTracks();
-
+  renderRatioGrid();
   for (const t of tracks) {
-    if (t.recordingId) {
+    if (t.recordingId && !t.oscMode) {
       const rec = recordings.find(r => r.id === t.recordingId);
       if (rec) {
-        try {
-          t.buffer = await loadRecordingBuffer(rec);
-          document.getElementById(`tfile-${t.id}`).textContent = t.fileName || rec.title;
-          document.getElementById(`track-${t.id}`).classList.add('has-audio');
-          drawWaveform(t);
-        } catch(e) {}
+        try { t.buffer = await loadRecordingBuffer(rec); drawWaveform(t); } catch(e){}
       }
     }
   }
-  const hasAny = tracks.some(t => t.buffer);
-  document.getElementById('playBtn').disabled = !hasAny;
+  updatePlayBtn();
 });
 
-// ─────────────────────────────────────────────────────────
-// WAV EXPORT UTILITY
-// ─────────────────────────────────────────────────────────
-function audioBufferToWav(buf) {
-  const len = buf.length, sr = buf.sampleRate, ch = buf.numberOfChannels;
-  const bytesPerSample = 2, byteRate = sr * ch * bytesPerSample;
-  const dataLen = len * ch * bytesPerSample;
-  const ab = new ArrayBuffer(44 + dataLen);
-  const v  = new DataView(ab);
-  const ws = (o, s) => { for(let i=0;i<s.length;i++) v.setUint8(o+i, s.charCodeAt(i)); };
-  ws(0,'RIFF'); v.setUint32(4,36+dataLen,true); ws(8,'WAVE');
-  ws(12,'fmt '); v.setUint32(16,16,true); v.setUint16(20,1,true);
-  v.setUint16(22,ch,true); v.setUint32(24,sr,true); v.setUint32(28,byteRate,true);
-  v.setUint16(32,ch*bytesPerSample,true); v.setUint16(34,16,true);
-  ws(36,'data'); v.setUint32(40,dataLen,true);
-  let offset = 44;
-  for (let i=0;i<len;i++) {
-    for (let c=0;c<ch;c++) {
-      const s = Math.max(-1,Math.min(1,(buf.getChannelData(c)[i]||0)));
-      v.setInt16(offset, s<0?s*0x8000:s*0x7FFF, true);
-      offset += 2;
-    }
-  }
-  return new Blob([ab], { type:'audio/wav' });
-}
-
-// ─────────────────────────────────────────────────────────
-// MODAL HELPERS
-// ─────────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════════
+   MODAL HELPERS
+═══════════════════════════════════════════════════════════ */
 window.openModal  = id => document.getElementById(id).classList.add('open');
 window.closeModal = id => document.getElementById(id).classList.remove('open');
-document.querySelectorAll('.modal-overlay').forEach(m => {
-  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
-});
+document.querySelectorAll('.modal-overlay').forEach(m =>
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); })
+);
 
-// ─────────────────────────────────────────────────────────
-// UTILITIES
-// ─────────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════════════════════════ */
 function formatBytes(b) {
   if (!b) return '0 KB';
-  if (b < 1024*1024) return (b/1024).toFixed(0)+' KB';
-  return (b/(1024*1024)).toFixed(1)+' MB';
+  return b < 1024*1024 ? (b/1024).toFixed(0)+' KB' : (b/(1024*1024)).toFixed(1)+' MB';
 }
 function formatDur(s) {
   if (!s) return '—';
   const m = Math.floor(s/60), sec = (s%60).toFixed(1);
-  return m>0 ? `${m}:${sec.padStart(4,'0')}` : `${sec}s`;
+  return m > 0 ? `${m}:${sec.padStart(4,'0')}` : `${sec}s`;
 }
 function showGlobalMsg(text, type) {
   const el = document.getElementById('globalMsg');
@@ -1914,9 +1849,12 @@ function showGlobalMsg(text, type) {
   el.className = `msg ${type} show`;
 }
 
-// ─────────────────────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────────────────────
+/* speedToPitch needs to be globally available for inline handlers */
+window.speedToPitch = speedToPitch;
+
+/* ═══════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════ */
 function onAuthReady(cb) {
   if (window._currentUser) { cb(); return; }
   window.addEventListener('authReady', cb, { once: true });
@@ -1924,6 +1862,7 @@ function onAuthReady(cb) {
 
 onAuthReady(async () => {
   renderTracks();
+  renderRatioGrid();
   await loadLibrary();
   await loadSessions();
 });
