@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Check-In — Sensory Intelligence Lab</title>
+  <title>Privacy Policy — Sensory Intelligence Lab</title>
 
   <link rel="icon" href="/images/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
@@ -11,23 +11,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
 
-
-  <script src="/dashboard/auth-guard.js" type="module"></script>
-
-  <script type="module">
-  import { applyMultipleGating } from '/assets/js/gating.js';
-  applyMultipleGating([
-    { targetSelector: '#stepProgress', moduleName: 'check-in' },
-    { targetSelector: '#step1',        moduleName: 'check-in' },
-    { targetSelector: '#step2',        moduleName: 'check-in' },
-    { targetSelector: '#step3',        moduleName: 'check-in' },
-  ]);
-</script>
-
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
-
-  <!-- Chart.js for dashboard visualisations -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -35,6 +19,7 @@
     :root {
       --font-body: 'Inter', sans-serif;
       --font-heading: 'Space Grotesk', sans-serif;
+      --font-prose: 'Lora', Georgia, serif;
       --bg: #ffffff;
       --surface: #f9f9f7;
       --border: #e5e5e0;
@@ -43,19 +28,14 @@
       --accent: #2a5c45;
       --accent-light: #edf4f0;
       --accent-hover: #1e4433;
-      --error: #c0392b;
-      --error-bg: #fdf2f2;
-
-      /* Scale colours */
-      --arousal-lo: #4a90d9;
-      --arousal-hi: #e8833a;
-      --valence-lo: #8a8a8a;
-      --valence-hi: #2a5c45;
-      --sensory-lo: #2a5c45;
-      --sensory-hi: #c0392b;
+      --accent-mid: #c0d9c8;
+      --warn: #7a4f1a;
+      --warn-bg: #fdf6ed;
+      --warn-border: #e8d4b0;
+      --code-bg: #f3f3f0;
     }
 
-    html { font-size: 16px; }
+    html { font-size: 16px; scroll-behavior: smooth; }
 
     body {
       font-family: var(--font-body);
@@ -67,2119 +47,948 @@
       flex-direction: column;
     }
 
-    a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
-    a:hover { color: var(--accent); }
+    a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+    a:hover { color: var(--accent-hover); }
 
-    /* ══════════════════════════════════════
-       HEADER
-    ══════════════════════════════════════ */
     .sil-header {
       border-bottom: 1px solid var(--border);
-      padding: 0 1.5rem;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0; left: 0; right: 0;
-      background: var(--bg);
-      z-index: 100;
-      gap: 1rem;
-      width: 100%;
+      padding: 0 1.5rem; height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; background: var(--bg); z-index: 100; gap: 1rem;
     }
     .sil-header__wordmark {
-      font-family: var(--font-heading);
-      font-size: 1rem; font-weight: 600;
-      letter-spacing: -0.01em;
-      white-space: nowrap; flex-shrink: 0;
-      text-decoration: none; color: var(--text);
+      font-family: var(--font-heading); font-size: 1rem; font-weight: 600;
+      letter-spacing: -0.01em; text-decoration: none; color: var(--text); flex-shrink: 0;
     }
     .sil-header__wordmark:hover { color: var(--accent); }
-    .sil-header__nav { display: flex; gap: 0.25rem; align-items: center; }
-    .sil-header__nav a {
-      font-family: var(--font-body);
-      font-size: 0.8rem; font-weight: 500;
-      text-decoration: none; color: var(--muted);
-      transition: color 0.15s; white-space: nowrap;
-      padding: 0.3rem 0.65rem;
+
+    .page-wrap {
+      max-width: 1120px; margin: 0 auto;
+      padding: 3rem 2rem 6rem; flex: 1; width: 100%;
+      display: grid; grid-template-columns: 220px 1fr;
+      gap: 4rem; align-items: start;
     }
-    .sil-header__nav a:hover { color: var(--text); }
-    .sil-header__nav a.sil-active { color: var(--accent); font-weight: 600; }
-    .sil-header__signout {
-      font-family: var(--font-body);
-      font-size: 0.8rem; font-weight: 500;
-      color: var(--muted); background: none;
-      border: 1px solid var(--border); cursor: pointer;
-      padding: 0.3rem 0.75rem;
-      transition: color 0.15s, border-color 0.15s;
-      white-space: nowrap; line-height: 1.6;
-    }
-    .sil-header__signout:hover { color: var(--text); border-color: var(--text); }
-    .sil-header__signout:disabled { opacity: 0.5; cursor: not-allowed; }
-    .sil-header__toggle {
-      display: none; flex-direction: column;
-      gap: 4px; background: none; border: none;
-      cursor: pointer; padding: 4px; flex-shrink: 0;
-    }
-    .sil-header__toggle span { display: block; width: 20px; height: 2px; background: var(--text); }
-    @media (max-width: 700px) {
-      .sil-header { padding: 0 1rem; }
-      .sil-header__toggle { display: flex; }
-      .sil-header__nav {
-        display: none; position: absolute;
-        top: 56px; left: 0; right: 0;
-        background: var(--bg);
-        border-bottom: 1px solid var(--border);
-        flex-direction: column; align-items: flex-start;
-        padding: 0.75rem 1rem; gap: 0; z-index: 99;
-      }
-      .sil-header__nav.sil-open { display: flex; }
-      .sil-header__nav a,
-      .sil-header__signout { font-size: 0.875rem; padding: 0.55rem 0.5rem; }
-      .sil-header__signout { border: none; }
+    @media (max-width: 860px) {
+      .page-wrap { grid-template-columns: 1fr; gap: 2rem; padding: 2rem 1.25rem 4rem; }
     }
 
-    /* ── Breadcrumb ── */
-    .bc { padding: .75rem 1.5rem 0; max-width: 860px; margin: 0 auto; width: 100%; }
-    .bc ol { list-style: none; display: flex; gap: .3rem; align-items: center; font-size: .75rem; color: var(--muted); flex-wrap: wrap; }
-    .bc li + li::before { content: '/'; margin-right: .3rem; color: var(--border); }
-    .bc a { color: var(--muted); text-decoration: none; }
-    .bc a:hover { color: var(--accent); text-decoration: underline; }
+    .sidebar { position: sticky; top: 72px; }
+    @media (max-width: 860px) { .sidebar { position: static; } }
 
-    /* ── Main ── */
-    main { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; flex: 1; width: 100%; }
-    @media (max-width: 600px) { main { padding: 1.5rem 1rem 3rem; } }
-
-    /* ── Page header ── */
-    .ph { margin-bottom: 2rem; padding-bottom: 1.75rem; border-bottom: 1px solid var(--border); }
-    .ph h2 { font-family: var(--font-heading); font-size: 2rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; margin-bottom: .4rem; }
-    .ph p { font-size: .9rem; color: var(--muted); }
-
-    /* ── Section label ── */
-    .sl {
-      font-family: var(--font-heading);
-      font-size: .65rem; font-weight: 600;
-      letter-spacing: .14em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: .75rem;
-      display: block;
+    .sidebar__label {
+      font-family: var(--font-heading); font-size: .6rem; font-weight: 600;
+      letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: .75rem;
+    }
+    .sidebar__nav { display: flex; flex-direction: column; gap: 2px; }
+    .sidebar__nav a {
+      font-size: .78rem; color: var(--muted); text-decoration: none;
+      padding: .3rem .5rem; border-left: 2px solid transparent;
+      transition: all .15s; line-height: 1.45;
+    }
+    .sidebar__nav a:hover { color: var(--accent); border-left-color: var(--accent-mid); }
+    .sidebar__nav a.active { color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+    .sidebar__updated {
+      margin-top: 1.5rem; font-size: .7rem; color: var(--muted);
+      padding-top: 1rem; border-top: 1px solid var(--border);
     }
 
-    /* ══════════════════════════════════════
-       STEP PROGRESS
-    ══════════════════════════════════════ */
-    .step-progress {
-      display: flex;
-      align-items: center;
-      gap: 0;
-      margin-bottom: 2.25rem;
+    .hero { margin-bottom: 3rem; padding-bottom: 2.5rem; border-bottom: 1px solid var(--border); }
+    .hero__eyebrow {
+      font-family: var(--font-heading); font-size: .65rem; font-weight: 600;
+      letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: .75rem;
     }
-    .step-dot {
-      display: flex;
-      align-items: center;
-      gap: .55rem;
-      flex-shrink: 0;
+    .hero__title {
+      font-family: var(--font-heading); font-size: 2.4rem; font-weight: 700;
+      letter-spacing: -.03em; line-height: 1.15; margin-bottom: 1rem; color: var(--text);
     }
-    .step-dot__circle {
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      display: flex; align-items: center; justify-content: center;
-      font-family: var(--font-heading);
-      font-size: .7rem; font-weight: 600;
-      color: var(--muted);
-      transition: all .2s;
-      flex-shrink: 0;
+    .hero__intro {
+      font-family: var(--font-prose); font-size: 1.05rem; line-height: 1.8;
+      color: var(--text); max-width: 680px;
     }
-    .step-dot__label {
-      font-size: .72rem; font-weight: 500;
-      color: var(--muted);
-      transition: color .2s;
-      white-space: nowrap;
-    }
-    .step-dot.active .step-dot__circle {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: white;
-    }
-    .step-dot.active .step-dot__label { color: var(--accent); font-weight: 600; }
-    .step-dot.done .step-dot__circle {
-      background: var(--accent-light);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-    .step-dot.done .step-dot__label { color: var(--muted); }
-    .step-line {
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-      margin: 0 .65rem;
-      min-width: 20px;
-    }
-    .step-line.done { background: var(--accent); opacity: .3; }
+    .hero__intro + .hero__intro { margin-top: .9rem; }
 
-    @media (max-width: 500px) {
-      .step-dot__label { display: none; }
-      .step-line { min-width: 12px; }
+    .section { margin-bottom: 3.5rem; scroll-margin-top: 80px; }
+    .section__title {
+      font-family: var(--font-heading); font-size: 1.25rem; font-weight: 600;
+      letter-spacing: -.02em; color: var(--text); margin-bottom: 1.25rem;
+      padding-bottom: .6rem; border-bottom: 1px solid var(--border);
+    }
+    .section__sub {
+      font-family: var(--font-heading); font-size: .9rem; font-weight: 600;
+      color: var(--text); margin: 1.5rem 0 .6rem;
+    }
+    .prose { font-family: var(--font-prose); font-size: .95rem; line-height: 1.85; color: var(--text); }
+    .prose + .prose { margin-top: .9rem; }
+    .prose strong { font-weight: 600; font-family: var(--font-body); }
+
+    .callout {
+      padding: 1rem 1.25rem; margin: 1.25rem 0;
+      font-size: .88rem; line-height: 1.7; border-left: 3px solid;
+    }
+    .callout--green { background: var(--accent-light); border-color: var(--accent); color: var(--accent-hover); }
+    .callout--amber { background: var(--warn-bg); border-color: var(--warn-border); color: var(--warn); }
+    .callout__label {
+      font-family: var(--font-heading); font-size: .65rem; font-weight: 600;
+      letter-spacing: .1em; text-transform: uppercase; display: block; margin-bottom: .35rem; opacity: .7;
     }
 
-    /* ══════════════════════════════════════
-       STEP PANELS
-    ══════════════════════════════════════ */
-    .step-panel { display: none; }
-    .step-panel.active { display: block; animation: stepIn .18s ease-out; }
-    @keyframes stepIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to   { opacity: 1; transform: translateY(0); }
+    .tech-block {
+      background: var(--code-bg); border: 1px solid var(--border);
+      padding: 1.1rem 1.25rem; margin: 1rem 0; font-size: .82rem; line-height: 1.7;
+    }
+    .tech-block__label {
+      font-family: var(--font-heading); font-size: .6rem; font-weight: 600;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: .6rem; display: block;
+    }
+    .tech-block p { font-family: var(--font-body); color: var(--muted); margin-bottom: .35rem; }
+    .tech-block p:last-child { margin-bottom: 0; }
+    .tech-block strong { color: var(--text); font-weight: 600; }
+    code {
+      font-family: 'Menlo', 'Monaco', 'Consolas', monospace; font-size: .82em;
+      background: var(--code-bg); border: 1px solid var(--border);
+      padding: .1em .35em; color: var(--accent-hover);
     }
 
-    /* ══════════════════════════════════════
-       CUSTOM SCALE SLIDERS
-    ══════════════════════════════════════ */
-    .scales-stack { display: flex; flex-direction: column; gap: 2.5rem; margin-bottom: 2rem; }
-
-    .scale-block {}
-    .scale-header {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      margin-bottom: 1rem;
-    }
-    .scale-name {
-      font-family: var(--font-heading);
-      font-size: .88rem; font-weight: 600;
-      color: var(--text);
-    }
-    .scale-value-display {
-      font-family: var(--font-heading);
-      font-size: 1.1rem; font-weight: 600;
-      color: var(--accent);
-      min-width: 1.5rem;
-      text-align: right;
-      transition: color .2s;
-    }
-    .scale-desc { font-size: .75rem; color: var(--muted); margin-top: .1rem; }
-
-    .scale-track-wrap {
-      position: relative;
-      height: 44px;
-      display: flex;
-      align-items: center;
-    }
-    .scale-track {
-      position: relative;
-      width: 100%;
-      height: 8px;
-      border-radius: 4px;
-      background: var(--border);
-      cursor: pointer;
-    }
-    .scale-fill {
-      position: absolute;
-      top: 0; left: 0;
-      height: 100%;
-      border-radius: 4px;
-      width: 0%;
-      transition: width .05s, background .3s;
-      pointer-events: none;
-    }
-    .scale-thumb {
-      position: absolute;
-      top: 50%;
-      width: 22px; height: 22px;
-      border-radius: 50%;
-      background: white;
-      border: 2px solid var(--accent);
-      transform: translate(-50%, -50%);
-      cursor: grab;
-      transition: transform .1s, box-shadow .1s, border-color .3s;
-      box-shadow: 0 1px 6px rgba(0,0,0,.18);
-      z-index: 2;
-    }
-    .scale-thumb:active { cursor: grabbing; transform: translate(-50%, -50%) scale(1.15); box-shadow: 0 2px 10px rgba(0,0,0,.22); }
-    .scale-labels {
-      display: flex;
-      justify-content: space-between;
-      margin-top: .55rem;
-      font-size: .68rem;
-      color: var(--muted);
-    }
-
-    /* ══════════════════════════════════════
-       EMOTION WORD GRID
-    ══════════════════════════════════════ */
-    .emotion-section { margin-bottom: 2rem; }
-    .emotion-quadrants { display: flex; flex-direction: column; gap: 1.25rem; }
-
-    .emotion-quadrant {}
-    .emotion-quadrant-label {
-      font-size: .62rem; font-weight: 600;
-      letter-spacing: .1em; text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: .5rem;
-      display: flex; align-items: center; gap: .5rem;
-    }
-    .emotion-quadrant-label::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-    .emotion-words {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .emotion-word {
-      font-family: var(--font-body);
-      font-size: .8rem; font-weight: 500;
-      padding: .35rem .85rem;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--muted);
-      cursor: pointer;
-      transition: all .12s;
-      user-select: none;
-    }
-    .emotion-word:hover { border-color: var(--accent); color: var(--accent); }
-    .emotion-word.selected {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: white;
-    }
-
-    /* Quadrant accent colours */
-    .emotion-word.q-ha-p:hover     { border-color: #e8833a; color: #e8833a; }
-    .emotion-word.q-ha-p.selected  { background: #e8833a; border-color: #e8833a; color: white; }
-    .emotion-word.q-ha-n:hover     { border-color: #c0392b; color: #c0392b; }
-    .emotion-word.q-ha-n.selected  { background: #c0392b; border-color: #c0392b; color: white; }
-    .emotion-word.q-la-p:hover     { border-color: #2a5c45; color: #2a5c45; }
-    .emotion-word.q-la-p.selected  { background: #2a5c45; border-color: #2a5c45; color: white; }
-    .emotion-word.q-la-n:hover     { border-color: #4a5568; color: #4a5568; }
-    .emotion-word.q-la-n.selected  { background: #4a5568; border-color: #4a5568; color: white; }
-
-    .emotion-hint { font-size: .73rem; color: var(--muted); margin-top: .75rem; }
-
-    /* ══════════════════════════════════════
-       NOTE GRID (new)
-    ══════════════════════════════════════ */
-    .note-section {
-      margin-top: 1.75rem;
-      border-top: 1px solid var(--border);
-      padding-top: 1.5rem;
-    }
-
-    .note-section-toggle {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      user-select: none;
-      margin-bottom: 0;
-    }
-    .note-section-toggle:hover .note-toggle-label { color: var(--accent); }
-
-    .note-toggle-label {
-      font-family: var(--font-heading);
-      font-size: .82rem; font-weight: 600;
-      color: var(--muted);
-      letter-spacing: -.01em;
-      transition: color .15s;
-    }
-
-    .note-toggle-icon {
-      font-size: .75rem;
-      color: var(--muted);
-      transition: transform .2s;
-    }
-    .note-section.open .note-toggle-icon { transform: rotate(180deg); }
-
-    .note-section-body {
-      display: none;
-      padding-top: 1.25rem;
-    }
-    .note-section.open .note-section-body { display: block; }
-
-    .note-guidance {
-      font-size: .82rem;
-      color: var(--muted);
-      line-height: 1.65;
-      margin-bottom: 1.25rem;
-      padding: .85rem 1rem;
-      background: var(--surface);
-      border-left: 3px solid var(--border);
-    }
-    .note-guidance strong { color: var(--text); font-weight: 500; }
-
-    /* Two-row chromatic grid */
-    .note-grid-wrap { margin-bottom: 1rem; }
-
-    .note-row-label {
-      font-size: .6rem;
-      font-weight: 600;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: .4rem;
-    }
-
-    .note-row {
-      display: flex;
-      gap: 4px;
-      flex-wrap: wrap;
-      margin-bottom: .65rem;
-    }
-
-    .note-btn {
-      font-family: var(--font-heading);
-      font-size: .72rem;
-      font-weight: 600;
-      padding: .45rem .6rem;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--muted);
-      cursor: pointer;
-      transition: all .12s;
-      min-width: 38px;
-      text-align: center;
-      letter-spacing: 0;
-      line-height: 1.2;
-      user-select: none;
-    }
-
-    /* Natural notes — slightly wider */
-    .note-btn.natural {
-      min-width: 42px;
-    }
-
-    /* Accidentals (flats) — accent tint */
-    .note-btn.flat {
-      background: var(--surface);
-      font-size: .65rem;
-    }
-
-    .note-btn:hover:not(.selected) {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: var(--accent-light);
-    }
-
-    .note-btn.selected {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: white;
-    }
-
-    .note-btn.selected.flat {
-      background: var(--accent-hover);
-    }
-
-    /* Chord readout */
-    .chord-readout {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: .85rem 1rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      margin-bottom: 1rem;
-      min-height: 52px;
-      flex-wrap: wrap;
-    }
-
-    .chord-name-display {
-      font-family: var(--font-heading);
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--text);
-      letter-spacing: -.01em;
-      flex: 1;
-      min-width: 120px;
-    }
-    .chord-name-display.empty { color: var(--muted); font-weight: 400; font-size: .85rem; }
-
-    .chord-notes-display {
-      font-size: .72rem;
-      color: var(--muted);
-      flex-shrink: 0;
-    }
-
-    /* Note grid controls */
-    .note-controls {
-      display: flex;
-      gap: .5rem;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .note-ctrl-btn {
-      font-family: var(--font-heading);
-      font-size: .78rem;
-      font-weight: 600;
-      padding: .55rem 1.25rem;
-      border: none;
-      cursor: pointer;
-      transition: all .15s;
-      letter-spacing: -.01em;
-    }
-
-    .note-ctrl-btn.play {
-      background: var(--accent);
-      color: white;
-    }
-    .note-ctrl-btn.play:hover { background: var(--accent-hover); }
-    .note-ctrl-btn.play:disabled { opacity: .4; cursor: not-allowed; }
-
-    .note-ctrl-btn.clear {
-      background: var(--bg);
-      color: var(--muted);
-      border: 1px solid var(--border);
-    }
-    .note-ctrl-btn.clear:hover { border-color: var(--accent); color: var(--accent); }
-    .note-ctrl-btn.clear:disabled { opacity: .4; cursor: not-allowed; }
-
-    /* ══════════════════════════════════════
-       LOCATION TAGS
-    ══════════════════════════════════════ */
-    .location-section { margin-bottom: 2rem; }
-    .location-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .location-tag {
-      font-family: var(--font-body);
-      font-size: .8rem; font-weight: 500;
-      padding: .38rem 1rem;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--muted);
-      cursor: pointer;
-      transition: all .12s;
-      display: flex; align-items: center; gap: .4rem;
-    }
-    .location-tag:hover { border-color: var(--accent); color: var(--accent); }
-    .location-tag.selected {
-      background: var(--accent-light);
-      border-color: var(--accent);
-      color: var(--accent);
-      font-weight: 600;
-    }
-    .location-tag__icon { font-size: .85rem; }
-
-    /* ══════════════════════════════════════
-       NOTES
-    ══════════════════════════════════════ */
-    .notes-section { margin-bottom: 2rem; }
-    textarea#checkinNotes {
-      width: 100%;
-      min-height: 90px;
-      padding: .85rem 1rem;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--font-body);
-      font-size: .875rem;
-      line-height: 1.65;
-      resize: vertical;
-      outline: none;
-      transition: border-color .15s;
-    }
-    textarea#checkinNotes:focus { border-color: var(--accent); }
-    textarea#checkinNotes::placeholder { color: #c0c0bb; }
-
-    /* ══════════════════════════════════════
-       NAVIGATION BUTTONS
-    ══════════════════════════════════════ */
-    .step-nav {
-      display: flex;
-      align-items: center;
-      gap: .65rem;
-      margin-top: 2rem;
-    }
-    .btn-next, .btn-back, .btn-submit {
-      font-family: var(--font-heading);
-      font-size: .875rem; font-weight: 600;
-      padding: .75rem 2rem;
-      border: none;
-      cursor: pointer;
-      transition: background .15s;
-      letter-spacing: -.01em;
-    }
-    .btn-next, .btn-submit {
-      background: var(--accent);
-      color: white;
-    }
-    .btn-next:hover, .btn-submit:hover { background: var(--accent-hover); }
-    .btn-next:disabled, .btn-submit:disabled { opacity: .4; cursor: not-allowed; }
-    .btn-back {
-      background: var(--bg);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-    .btn-back:hover { border-color: var(--accent); color: var(--accent); }
-    .btn-submit { min-width: 160px; }
-
-    /* ══════════════════════════════════════
-       CONFIRMATION
-    ══════════════════════════════════════ */
-    .confirm-panel {
-      display: none;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      padding: 2rem;
-      margin-bottom: 2rem;
-    }
-    .confirm-panel.visible { display: block; animation: stepIn .25s ease-out; }
-    .confirm-icon { font-size: 1.5rem; margin-bottom: .65rem; }
-    .confirm-panel h3 {
-      font-family: var(--font-heading);
-      font-size: 1rem; font-weight: 600;
-      margin-bottom: .4rem;
-    }
-    .confirm-panel p { font-size: .85rem; color: var(--muted); margin-bottom: 1.25rem; }
-    .confirm-summary {
-      display: flex;
-      gap: 1.5rem;
-      flex-wrap: wrap;
-      padding: 1rem 0;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 1.25rem;
-    }
-    .confirm-item { text-align: center; }
-    .confirm-item__val {
-      font-family: var(--font-heading);
-      font-size: 1.5rem; font-weight: 600;
-      color: var(--text);
-      line-height: 1;
-    }
-    .confirm-item__label { font-size: .65rem; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; margin-top: .2rem; }
-    .confirm-words {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-      margin-bottom: .75rem;
-    }
-    .confirm-word-tag {
-      font-size: .72rem; font-weight: 500;
-      padding: .2rem .6rem;
-      background: var(--accent-light);
-      color: var(--accent-hover);
-      border: 1px solid #c0d9c8;
-    }
-    .confirm-chord-tag {
-      font-family: var(--font-heading);
-      font-size: .85rem; font-weight: 600;
-      padding: .3rem .8rem;
-      background: var(--surface);
-      color: var(--text);
-      border: 1px solid var(--border);
-      margin-bottom: .75rem;
-      display: inline-block;
-    }
-    .btn-new-checkin {
-      font-family: var(--font-heading);
-      font-size: .82rem; font-weight: 600;
-      padding: .65rem 1.5rem;
-      border: none;
-      background: var(--accent);
-      color: white;
-      cursor: pointer;
-      transition: background .15s;
-    }
-    .btn-new-checkin:hover { background: var(--accent-hover); }
-
-    /* ══════════════════════════════════════
-       DASHBOARD
-    ══════════════════════════════════════ */
-    .dashboard-section {
-      margin-top: 3rem;
-      border-top: 1px solid var(--border);
-      padding-top: 2rem;
-    }
-    .dashboard-header {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      margin-bottom: 1.75rem;
-      flex-wrap: wrap;
-      gap: .5rem;
-    }
-    .dashboard-header h3 {
-      font-family: var(--font-heading);
-      font-size: 1.05rem; font-weight: 600;
-      letter-spacing: -.01em;
-    }
-    .dashboard-period {
-      display: flex;
-      gap: 4px;
-    }
-    .period-btn {
-      font-family: var(--font-heading);
-      font-size: .68rem; font-weight: 600;
-      padding: .28rem .7rem;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--muted);
-      cursor: pointer;
-      transition: all .12s;
-    }
-    .period-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
-    .period-btn:not(.active):hover { border-color: var(--accent); color: var(--accent); }
-
-    /* Summary row */
-    .summary-row {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1px;
-      background: var(--border);
-      border: 1px solid var(--border);
-      margin-bottom: 1.5rem;
-    }
-    @media (max-width: 580px) { .summary-row { grid-template-columns: repeat(2, 1fr); } }
-    .summary-cell {
-      background: var(--surface);
-      padding: 1rem 1.25rem;
-    }
-    .summary-cell__label {
-      font-size: .62rem; font-weight: 600;
-      letter-spacing: .1em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: .35rem;
-    }
-    .summary-cell__val {
-      font-family: var(--font-heading);
-      font-size: 1.4rem; font-weight: 600;
-      color: var(--text); line-height: 1;
-    }
-    .summary-cell__delta { font-size: .68rem; margin-top: .2rem; }
-    .delta-up   { color: var(--accent); }
-    .delta-down { color: var(--error); }
-    .delta-flat { color: var(--muted); }
-
-    /* Chart blocks */
-    .chart-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1px;
-      background: var(--border);
-      border: 1px solid var(--border);
-      margin-bottom: 1.5rem;
-    }
-    @media (max-width: 640px) { .chart-grid { grid-template-columns: 1fr; } }
-
-    .chart-block {
-      background: var(--bg);
-      padding: 1.25rem;
-    }
-    .chart-block.full-width { grid-column: 1 / -1; }
-    .chart-block__title {
-      font-size: .62rem;
-      font-weight: 600;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 1rem;
-    }
-    .chart-block canvas { display: block; width: 100% !important; }
-
-    /* Emotion frequency */
-    .emotion-freq-grid { display: flex; flex-direction: column; gap: .45rem; }
-    .emotion-freq-item { display: flex; align-items: center; gap: .65rem; }
-    .emotion-freq-name { font-size: .78rem; font-weight: 500; color: var(--text); width: 90px; flex-shrink: 0; }
-    .emotion-freq-bar-wrap { flex: 1; height: 6px; background: var(--border); }
-    .emotion-freq-bar { height: 100%; background: var(--accent); transition: width .4s ease; }
-    .emotion-freq-count { font-size: .7rem; color: var(--muted); width: 24px; text-align: right; flex-shrink: 0; }
-
-    /* Time-of-day chart */
-    .tod-grid { display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px; margin-bottom: .5rem; }
-    .tod-col { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-    .tod-cell { width: 100%; aspect-ratio: 1; border-radius: 2px; background: var(--border); }
-    .tod-label-row { display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px; }
-    .tod-hour-label { font-size: .5rem; color: var(--muted); text-align: center; overflow: hidden; }
-
-    /* ══════════════════════════════════════
-       CHORD HISTORY (new)
-    ══════════════════════════════════════ */
-    .chord-history-section {
-      background: var(--bg);
-      padding: 1.25rem;
-    }
-
-    .chord-history-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1rem;
-      flex-wrap: wrap;
-      gap: .75rem;
-    }
-
-    .chord-history-controls {
-      display: flex;
-      align-items: center;
-      gap: .65rem;
-      flex-wrap: wrap;
-    }
-
-    .tempo-control {
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-      font-size: .72rem;
-      color: var(--muted);
-    }
-    .tempo-control input[type=range] {
-      width: 80px;
-      -webkit-appearance: none;
-      height: 3px;
-      background: var(--border);
-      outline: none;
-      cursor: pointer;
-    }
-    .tempo-control input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 13px; height: 13px;
-      border-radius: 50%;
-      background: var(--accent);
-      cursor: pointer;
-    }
-    .tempo-control input[type=range]::-moz-range-thumb {
-      width: 13px; height: 13px;
-      border-radius: 50%;
-      background: var(--accent);
-      border: none;
-      cursor: pointer;
-    }
-    .tempo-val { font-weight: 600; color: var(--accent); min-width: 30px; }
-
-    .play-progression-btn {
-      font-family: var(--font-heading);
-      font-size: .75rem; font-weight: 600;
-      padding: .45rem 1.1rem;
-      border: none;
-      background: var(--accent);
-      color: white;
-      cursor: pointer;
-      transition: background .15s;
-      letter-spacing: -.01em;
-    }
-    .play-progression-btn:hover { background: var(--accent-hover); }
-    .play-progression-btn:disabled { opacity: .4; cursor: not-allowed; }
-
-    .chord-history-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-      border: 1px solid var(--border);
-    }
-
-    .chord-history-item {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: .6rem 1rem;
-      background: var(--bg);
-      border-bottom: 1px solid var(--border);
-      transition: background .1s;
-    }
-    .chord-history-item:last-child { border-bottom: none; }
-
-    .chord-history-name {
-      font-family: var(--font-heading);
-      font-size: .9rem; font-weight: 600;
-      color: var(--text);
-      min-width: 80px;
-      flex-shrink: 0;
-    }
-    .chord-history-name.unnamed { color: var(--muted); font-weight: 400; font-size: .78rem; }
-
-    .chord-history-notes {
-      font-size: .72rem;
-      color: var(--muted);
-      flex: 1;
-    }
-
-    .chord-history-date {
-      font-size: .7rem;
-      color: var(--muted);
-      flex-shrink: 0;
-      white-space: nowrap;
-    }
-
-    .chord-play-btn {
-      font-size: .65rem;
-      padding: .25rem .6rem;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--muted);
-      cursor: pointer;
-      transition: all .1s;
-      flex-shrink: 0;
-      font-family: var(--font-body);
-      font-weight: 500;
-    }
-    .chord-play-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-    .chord-history-empty {
-      padding: 2rem;
-      text-align: center;
-      font-size: .82rem;
-      color: var(--muted);
-    }
-
-    /* Empty state */
-    .dash-empty {
-      padding: 3rem 2rem;
-      text-align: center;
-      border: 1px solid var(--border);
+    .data-table { width: 100%; border-collapse: collapse; margin: 1.25rem 0; font-size: .82rem; }
+    .data-table th {
+      font-family: var(--font-heading); font-size: .65rem; font-weight: 600;
+      letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+      text-align: left; padding: .5rem .75rem; border-bottom: 2px solid var(--border);
       background: var(--surface);
     }
-    .dash-empty p { font-size: .85rem; color: var(--muted); }
-    .dash-empty p strong { color: var(--text); font-weight: 500; }
+    .data-table td {
+      padding: .6rem .75rem; border-bottom: 1px solid var(--border);
+      vertical-align: top; line-height: 1.55; font-family: var(--font-body); color: var(--text);
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: var(--surface); }
+    .td-mono { font-family: 'Menlo', 'Monaco', monospace; font-size: .78rem; color: var(--accent-hover); }
+    .badge {
+      display: inline-block; font-size: .65rem; font-weight: 600;
+      font-family: var(--font-heading); letter-spacing: .06em;
+      text-transform: uppercase; padding: .15rem .45rem;
+    }
+    .badge--enc  { background: var(--accent-light); color: var(--accent); border: 1px solid var(--accent-mid); }
+    .badge--plain { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
+    .badge--stripe { background: #f0f4ff; color: #3d5af1; border: 1px solid #c5d0f7; }
+    .badge--zero { background: #1a1a1a; color: #fff; border: 1px solid #1a1a1a; }
 
-    /* Message */
-    .msg { padding: .7rem .95rem; font-size: .78rem; line-height: 1.5; margin-bottom: .85rem; display: none; }
-    .msg.error   { background: var(--error-bg); border-left: 3px solid var(--error); color: var(--error); display: block; }
-    .msg.success { background: var(--accent-light); border-left: 3px solid var(--accent); color: var(--accent); display: block; }
+    .faq-list { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); }
+    .faq-item { border-bottom: 1px solid var(--border); }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-q {
+      width: 100%; text-align: left; background: none; border: none; cursor: pointer;
+      padding: 1rem 1.1rem; display: flex; justify-content: space-between; align-items: center;
+      gap: 1rem; font-family: var(--font-heading); font-size: .88rem; font-weight: 600;
+      color: var(--text); transition: background .1s;
+    }
+    .faq-q:hover { background: var(--surface); }
+    .faq-q[aria-expanded="true"] { color: var(--accent); }
+    .faq-arrow { flex-shrink: 0; width: 16px; height: 16px; transition: transform .2s; color: var(--muted); }
+    .faq-q[aria-expanded="true"] .faq-arrow { transform: rotate(180deg); }
+    .faq-a {
+      max-height: 0; overflow: hidden;
+      transition: max-height .3s ease, padding .3s ease; padding: 0 1.1rem;
+    }
+    .faq-a.open { max-height: 600px; padding: 0 1.1rem 1rem; }
+    .faq-a p { font-family: var(--font-prose); font-size: .88rem; line-height: 1.8; color: var(--muted); }
+    .faq-a p + p { margin-top: .6rem; }
 
-    /* Footer */
-    footer { border-top: 1px solid var(--border); padding: 1.25rem 2rem; text-align: center; font-size: .78rem; color: var(--muted); }
+    .contact-block {
+      border: 1px solid var(--border); padding: 1.5rem;
+      display: flex; gap: 1.25rem; align-items: flex-start; margin-top: 1rem;
+    }
+    .contact-block__icon { font-size: 1.4rem; flex-shrink: 0; margin-top: .1rem; opacity: .5; }
+    .contact-block__name { font-family: var(--font-heading); font-size: .95rem; font-weight: 600; margin-bottom: .2rem; }
+    .contact-block__role { font-size: .8rem; color: var(--muted); margin-bottom: .5rem; }
+    .contact-block__email { font-size: .88rem; }
+
+    footer {
+      border-top: 1px solid var(--border); padding: 1.25rem 2rem;
+      text-align: center; font-size: .78rem; color: var(--muted);
+    }
     footer a { color: var(--muted); text-decoration: none; }
     footer a:hover { color: var(--accent); }
 
-    /* Loading spinner */
-    .dash-loading { display: flex; align-items: center; gap: .65rem; padding: 1.5rem 0; color: var(--muted); font-size: .82rem; }
-    .spin { width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .6s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (max-width: 600px) {
+      .hero__title { font-size: 1.75rem; }
+      .data-table { display: block; overflow-x: auto; }
+    }
   </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════
-     HEADER
-══════════════════════════════════════ -->
 <header class="sil-header">
-  <a class="sil-header__wordmark" href="/dashboard/">Sensory Intelligence Lab</a>
-  <button class="sil-header__toggle" id="silMenuToggle" aria-label="Toggle navigation" aria-expanded="false">
-    <span></span><span></span><span></span>
-  </button>
-  <nav class="sil-header__nav" id="silNav">
-    <a href="/dashboard/">Dashboard</a>
-    <a href="/account/">Account</a>
-    <a href="/booking/">Book a session</a>
-    <button class="sil-header__signout" id="silSignOut">Sign out</button>
-  </nav>
+  <a class="sil-header__wordmark" href="https://lab.jordanelias.de">Sensory Intelligence Lab</a>
 </header>
 
-<nav aria-label="Breadcrumb" class="bc">
-  <ol>
-    <li><a href="/dashboard/">Dashboard</a></li>
-    <li>Check-In</li>
-  </ol>
-</nav>
+<div class="page-wrap">
 
-<main>
+  <aside class="sidebar">
+    <p class="sidebar__label">On this page</p>
+    <nav class="sidebar__nav" id="sidebarNav">
+      <a href="#who-we-are">Who made this</a>
+      <a href="#what-this-is">What this platform is</a>
+      <a href="#your-content">Your content &amp; privacy</a>
+      <a href="#encryption">How encryption works</a>
+      <a href="#data-stored">What is stored</a>
+      <a href="#supabase">Supabase &amp; database</a>
+      <a href="#data-collected">Data we collect</a>
+      <a href="#data-sharing">Data sharing</a>
+      <a href="#payments">Payments &amp; Stripe</a>
+      <a href="#gdpr">Your GDPR rights</a>
+      <a href="#account-deletion">Deleting your account</a>
+      <a href="#crisis">Crisis disclaimer</a>
+      <a href="#faq">FAQ</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <p class="sidebar__updated">Last updated<br>May 2025<br>Version 1.1</p>
+  </aside>
 
-  <div class="ph">
-    <h2>Check-In</h2>
-    <p>A brief record of how you are right now. Takes about 30 seconds.</p>
-  </div>
+  <main>
 
-  <!-- Step progress -->
-  <div class="step-progress" id="stepProgress">
-    <div class="step-dot active" id="stepDot1">
-      <div class="step-dot__circle" id="stepCircle1">1</div>
-      <span class="step-dot__label">How you feel</span>
+    <div class="hero">
+      <p class="hero__eyebrow">Privacy Policy</p>
+      <h1 class="hero__title">Your data belongs to you.</h1>
+      <p class="hero__intro">
+        Privacy is not a feature added at the end — it is the starting point of how this platform
+        was built. This document explains in plain language what data is collected, how it is stored,
+        how it is protected, and what you can do with it. Technical detail is included deliberately,
+        because vague reassurances are not reassuring.
+      </p>
+      <p class="hero__intro">
+        If something here is unclear, or if you have a question not answered below, write to
+        <a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a>. You will get a direct reply.
+      </p>
     </div>
-    <div class="step-line" id="stepLine1"></div>
-    <div class="step-dot" id="stepDot2">
-      <div class="step-dot__circle" id="stepCircle2">2</div>
-      <span class="step-dot__label">Emotions</span>
-    </div>
-    <div class="step-line" id="stepLine2"></div>
-    <div class="step-dot" id="stepDot3">
-      <div class="step-dot__circle" id="stepCircle3">3</div>
-      <span class="step-dot__label">Context</span>
-    </div>
-  </div>
 
-  <!-- Global message -->
-  <div class="msg" id="globalMsg"></div>
+    <!-- WHO MADE THIS -->
+    <section class="section" id="who-we-are">
+      <h2 class="section__title">Who made this</h2>
+      <p class="prose">
+        The Sensory Intelligence Lab was built by Jordan Elias, a music therapist based in Berlin.
+        This project is an attempt to build something that could hold continuity between sessions,
+        support self-directed practice, and make music therapy tools accessible to people who cannot
+        easily access in-person care.
+      </p>
+      <p class="prose">
+        Jordan Elias is the data controller for this platform. All questions, requests, and concerns
+        go directly to one person, not a support team.
+      </p>
+    </section>
 
-  <!-- ══════════════════════════════════════
-       CONFIRMATION PANEL (shown after submit)
-  ══════════════════════════════════════ -->
-  <div class="confirm-panel" id="confirmPanel">
-    <div class="confirm-icon">✓</div>
-    <h3>Check-in saved</h3>
-    <p>Logged at <span id="confirmTime">—</span></p>
-    <div class="confirm-summary" id="confirmSummary"></div>
-    <div class="confirm-words" id="confirmWords"></div>
-    <div id="confirmChordWrap" style="display:none">
-      <span class="confirm-chord-tag" id="confirmChord"></span>
-    </div>
-    <button class="btn-new-checkin" onclick="resetToStep1()">New check-in</button>
-  </div>
+    <!-- WHAT THIS IS -->
+    <section class="section" id="what-this-is">
+      <h2 class="section__title">What this platform is — and is not</h2>
 
-  <!-- ══════════════════════════════════════
-       STEP 1 — SCALES
-  ══════════════════════════════════════ -->
-  <div class="step-panel active" id="step1">
+      <div class="callout callout--green">
+        <span class="callout__label">What it is</span>
+        A self-directed wellness tool offering music therapy–informed exercises, a timed journal,
+        check-in tracking, breathing and regulation tools, therapeutic worksheets, and — for
+        subscribers with video sessions — a therapeutic relationship with Jordan Elias.
+      </div>
 
-    <div class="scales-stack">
+      <div class="callout callout--amber">
+        <span class="callout__label">What it is not</span>
+        This platform is not a crisis service. It is not a substitute for emergency mental health
+        support. It is not monitored in real time. If you are in immediate danger or experiencing
+        a mental health emergency, please contact your local emergency services or a crisis line.
+        In Germany: <strong>Telefonseelsorge 0800 111 0 111</strong> (free, 24/7).
+        Internationally: <a href="https://findahelpline.com" target="_blank" rel="noopener">findahelpline.com</a>.
+      </div>
 
-      <!-- Arousal -->
-      <div class="scale-block">
-        <div class="scale-header">
-          <div>
-            <div class="scale-name">Energy / Arousal</div>
-            <div class="scale-desc">How activated or alert do you feel?</div>
+      <p class="prose">
+        The platform has two distinct modes. The <strong>Lab</strong> is a self-directed space
+        available to all subscribers — no clinical relationship is assumed or implied. The
+        <strong>Session</strong> tiers involve a direct therapeutic relationship with Jordan Elias,
+        governed by a separate therapy agreement completed before the first session.
+      </p>
+    </section>
+
+    <!-- YOUR CONTENT & PRIVACY -->
+    <section class="section" id="your-content">
+      <h2 class="section__title">Your content and your privacy</h2>
+      <p class="prose">
+        The journal, check-in notes, and worksheets are personal tools. The platform is built
+        around a simple principle: <strong>nothing is recorded unless you actively choose to save it.</strong>
+        You are always in control of what happens to what you write.
+      </p>
+
+      <div class="callout callout--green">
+        <span class="callout__label">The three options — and what each means for your data</span>
+        <strong>Save encrypted</strong> — your entry is encrypted in your browser before being sent
+        to the server. The platform stores ciphertext only. Only you can decrypt and read it in a
+        future session.<br><br>
+        <strong>Download as a file</strong> — your entry is written directly to a file on your own
+        device. Nothing is sent to any server at any point. The platform has no record that you
+        wrote anything. The file belongs entirely to you.<br><br>
+        <strong>Delete / Destroy</strong> — the text is permanently erased from the page and from
+        memory. Nothing is sent anywhere. Nothing is logged. It is gone completely.
+      </div>
+
+      <p class="prose">
+        Writing, downloading, and deleting are completely private in every case. No data is
+        collected during the writing process. No drafts are auto-saved to the server. No keystroke
+        or word count data is transmitted while you are writing. The only moment any content leaves
+        your browser is when you explicitly press Save — and at that point it is already encrypted.
+      </p>
+
+      <h3 class="section__sub">Sharing with your therapist</h3>
+      <p class="prose">
+        If you work with Jordan Elias in a session tier and want to share something you have written
+        or worked on, the simplest and most private method is to <strong>download the file and send
+        it by email</strong> to <a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a>.
+        You choose exactly what to share, when, and how. The platform plays no role in that
+        exchange and has no record of it. Nothing is ever shared without your deliberate action.
+      </p>
+    </section>
+
+    <!-- ENCRYPTION -->
+    <section class="section" id="encryption">
+      <h2 class="section__title">How encryption works</h2>
+      <p class="prose">
+        When you choose to save content, it is encrypted in your browser before it is sent to any
+        server. What is stored in the database is ciphertext: scrambled data that cannot be read
+        without the correct key.
+      </p>
+
+      <h3 class="section__sub">The encryption standard</h3>
+      <p class="prose">
+        All content encryption uses <strong>AES-256-GCM</strong> (Advanced Encryption Standard,
+        256-bit key, Galois/Counter Mode). This is the same standard used by banks, governments,
+        and end-to-end encrypted messaging applications. GCM mode provides both confidentiality
+        (the content cannot be read) and integrity (any tampering with the ciphertext is detectable).
+      </p>
+
+      <div class="tech-block">
+        <span class="tech-block__label">Technical specification</span>
+        <p><strong>Algorithm:</strong> AES-256-GCM</p>
+        <p><strong>Key length:</strong> 256 bits (32 bytes)</p>
+        <p><strong>IV (Initialisation Vector):</strong> 96 bits (12 bytes), randomly generated per encryption operation — every save produces a unique ciphertext even for identical content</p>
+        <p><strong>Implementation:</strong> Web Crypto API (<code>window.crypto.subtle</code>) — browser-native, no external libraries</p>
+        <p><strong>Storage format:</strong> JSON object containing base64-encoded IV and ciphertext, stored as a text column in Supabase</p>
+        <p><strong>When encryption happens:</strong> In your browser, before any data is transmitted. Plaintext never travels over the network.</p>
+      </div>
+
+      <h3 class="section__sub">Your encryption key</h3>
+      <p class="prose">
+        Each account has a unique AES-256 encryption key, generated when you first visit a module
+        that uses encryption (journal, check-in notes, worksheets). This key is generated on our
+        server and returned to your browser over HTTPS, where it is held in memory for the duration
+        of your session only. It is never written to <code>localStorage</code>, cookies, or any
+        other persistent browser storage. When you sign out or close the tab, the key is gone from
+        your device.
+      </p>
+      <p class="prose">
+        The key is stored in the database in an encrypted form, wrapped using a key derived from a
+        <strong>platform secret</strong> — a random value stored only in our server environment
+        variables, never in the database. When you sign in, our server verifies your identity and
+        uses the platform secret to unwrap your key and return it to your browser.
+      </p>
+
+      <h3 class="section__sub">What this means honestly</h3>
+      <div class="callout callout--amber">
+        <span class="callout__label">Honest limitation</span>
+        This model protects saved data against database breaches — if someone obtained a copy of
+        the database, they would see only ciphertext that cannot be decrypted without also
+        compromising the server environment. However, as the platform operator, Jordan Elias has
+        access to the platform secret. This means that, in theory, someone with access to both
+        the database and the server environment could decrypt saved content.<br><br>
+        This is disclosed because honest privacy policy matters more than false reassurance.
+        If you want absolute certainty that no one can read what you write, use the download
+        or delete options — in both cases nothing is stored anywhere.
+      </div>
+
+      <div class="callout callout--green">
+        <span class="callout__label">What this protects against</span>
+        A database breach alone cannot expose your saved entries. They are ciphertext without the
+        server secret. Your data is never stored or logged in plaintext anywhere in the system.
+      </div>
+
+      <h3 class="section__sub">The future upgrade path</h3>
+      <p class="prose">
+        The architecture is designed to support an upgrade to <strong>true end-to-end encryption</strong>
+        in a future version, where your key would be derived from a passphrase only you know —
+        making decryption impossible even for the platform operator. This upgrade path is built
+        into the codebase but not yet activated. It will be announced clearly when available,
+        and upgrading will be opt-in with no loss of existing data.
+      </p>
+    </section>
+
+    <!-- WHAT IS STORED -->
+    <section class="section" id="data-stored">
+      <h2 class="section__title">What is stored and how</h2>
+      <p class="prose">
+        The table below covers every category of data stored by this platform. Anything you
+        download or delete does not appear here — it is never stored.
+      </p>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Table</th>
+            <th>State</th>
+            <th>Who can read it</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Email address</td>
+            <td class="td-mono">auth.users</td>
+            <td><span class="badge badge--plain">Plaintext</span></td>
+            <td>You. Platform operator. Supabase service role.</td>
+          </tr>
+          <tr>
+            <td>Display name (chosen name)</td>
+            <td class="td-mono">profiles</td>
+            <td><span class="badge badge--plain">Plaintext</span></td>
+            <td>You. Platform operator via admin access.</td>
+          </tr>
+          <tr>
+            <td>Subscription tier and status</td>
+            <td class="td-mono">profiles</td>
+            <td><span class="badge badge--plain">Plaintext</span></td>
+            <td>You. Platform operator. Used for access gating.</td>
+          </tr>
+          <tr>
+            <td>Saved journal entry content and title</td>
+            <td class="td-mono">journal_entries</td>
+            <td><span class="badge badge--enc">AES-256-GCM encrypted</span></td>
+            <td>You only (decrypted in your browser). Platform operator has theoretical access via server secret.</td>
+          </tr>
+          <tr>
+            <td>Journal metadata (word count, duration, soundscape, prompt, date)</td>
+            <td class="td-mono">journal_entries</td>
+            <td><span class="badge badge--plain">Plaintext</span></td>
+            <td>You. Platform operator.</td>
+          </tr>
+          <tr>
+            <td>Downloaded or deleted journal entries</td>
+            <td class="td-mono">—</td>
+            <td><span class="badge badge--zero">Not stored</span></td>
+            <td>No one. Nothing is recorded.</td>
+          </tr>
+          <tr>
+            <td>Check-in numeric scores (arousal, valence, sensory load)</td>
+            <td class="td-mono">checkins</td>
+            <td><span class="badge badge--plain">Plaintext</span></td>
+            <td>You. Platform operator. Used for dashboard charting.</td>
+          </tr>
+          <tr>
+            <td>Check-in emotion words</td>
+            <td class="td-mono">checkins</td>
+            <td><span class="badge badge--plain">Plaintext</span></td>
+            <td>You. Platform operator.</td>
+          </tr>
+          <tr>
+            <td>Check-in written notes (if saved)</td>
+            <td class="td-mono">checkins</td>
+            <td><span class="badge badge--enc">AES-256-GCM encrypted</span></td>
+            <td>You only (decrypted in your browser). Platform operator has theoretical access via server secret.</td>
+          </tr>
+          <tr>
+            <td>Saved worksheet content</td>
+            <td class="td-mono">worksheets</td>
+            <td><span class="badge badge--enc">AES-256-GCM encrypted</span></td>
+            <td>You only (decrypted in your browser). Platform operator has theoretical access via server secret.</td>
+          </tr>
+          <tr>
+            <td>Downloaded or deleted worksheets</td>
+            <td class="td-mono">—</td>
+            <td><span class="badge badge--zero">Not stored</span></td>
+            <td>No one. Nothing is recorded.</td>
+          </tr>
+          <tr>
+            <td>Encryption key (wrapped)</td>
+            <td class="td-mono">profiles</td>
+            <td><span class="badge badge--enc">Encrypted with platform secret</span></td>
+            <td>No one in plaintext form. Server unwraps it only during your active session.</td>
+          </tr>
+          <tr>
+            <td>Audio recordings / compositions</td>
+            <td class="td-mono">Supabase Storage</td>
+            <td><span class="badge badge--plain">Plaintext audio file</span></td>
+            <td>You. Accessible only via authenticated signed URLs, never public links.</td>
+          </tr>
+          <tr>
+            <td>Payment information (card details)</td>
+            <td class="td-mono">Stripe (external)</td>
+            <td><span class="badge badge--stripe">Stripe-managed, PCI-DSS</span></td>
+            <td>Stripe only. We never see or store card numbers. We store only a Stripe customer ID.</td>
+          </tr>
+          <tr>
+            <td>Booking data</td>
+            <td class="td-mono">Cal.com (external)</td>
+            <td><span class="badge badge--plain">Plaintext</span></td>
+            <td>You and Jordan Elias via Cal.com. Governed by Cal.com's privacy policy.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 class="section__sub">Identity separation</h3>
+      <p class="prose">
+        Your identity — email address and name — is stored separately from your content.
+        Supabase maintains a dedicated <code>auth.users</code> table for authentication data,
+        separate from all content tables. All content tables reference you only by a
+        <strong>UUID</strong> — a random string like <code>a3f2c1d4-...</code> — not by your
+        name or email. Someone who obtained only the content tables would see encrypted ciphertext
+        attached to anonymous identifiers.
+      </p>
+    </section>
+
+    <!-- SUPABASE -->
+    <section class="section" id="supabase">
+      <h2 class="section__title">Supabase and the database</h2>
+      <p class="prose">
+        This platform uses <a href="https://supabase.com" target="_blank" rel="noopener">Supabase</a>
+        as its database and authentication provider — an open-source alternative to Firebase, built
+        on PostgreSQL and hosted on AWS. The database is in the
+        <strong>EU West (Frankfurt)</strong> region, keeping all stored data within the European Union.
+      </p>
+
+      <h3 class="section__sub">Row Level Security (RLS)</h3>
+      <p class="prose">
+        Every table has Row Level Security enabled. RLS is a PostgreSQL feature that enforces
+        access control at the database level — not just in application code. Even if there were
+        a bug in the application, the database itself would refuse to return data the requesting
+        user is not authorised to see.
+      </p>
+
+      <div class="tech-block">
+        <span class="tech-block__label">RLS policy structure</span>
+        <p><strong>journal_entries:</strong> Users can only read, create, and delete rows where <code>user_id = auth.uid()</code>. No other user can access another user's entries via the API.</p>
+        <p><strong>checkins:</strong> Same pattern — rows are visible only to the user who created them.</p>
+        <p><strong>worksheets:</strong> Same pattern — each worksheet row is locked to its creator's user ID.</p>
+        <p><strong>profiles:</strong> Users can read and update only their own profile row. Encryption key columns cannot be read by any application-layer query other than the dedicated vault server function.</p>
+      </div>
+
+      <h3 class="section__sub">The service role key</h3>
+      <p class="prose">
+        Supabase provides two API keys: an <strong>anon key</strong> (used in the browser, subject
+        to RLS) and a <strong>service role key</strong> (bypasses RLS, for server use only). The
+        service role key is stored only in Netlify environment variables and is never exposed to
+        the browser. The vault function that handles encryption keys uses the service role key
+        only after verifying the user's session token.
+      </p>
+
+      <h3 class="section__sub">Supabase's own privacy commitments</h3>
+      <p class="prose">
+        Supabase is SOC 2 Type 2 compliant and GDPR-ready, with encryption at rest and in transit.
+        Read their privacy policy at
+        <a href="https://supabase.com/privacy" target="_blank" rel="noopener">supabase.com/privacy</a>.
+        Jordan Elias is the data controller — Supabase acts as a data processor.
+      </p>
+    </section>
+
+    <!-- DATA COLLECTED -->
+    <section class="section" id="data-collected">
+      <h2 class="section__title">Data we collect</h2>
+      <p class="prose">
+        We collect only what is needed for the platform to function. There is no advertising,
+        no third-party tracking, no analytics that profile your behaviour for commercial purposes.
+      </p>
+
+      <h3 class="section__sub">Account data</h3>
+      <p class="prose">
+        When you create an account: your email address (required for authentication), your chosen
+        display name, and your password (hashed by Supabase — we never see it in plaintext).
+      </p>
+
+      <h3 class="section__sub">Content you choose to save</h3>
+      <p class="prose">
+        Journal entries, check-in responses, and worksheets that you explicitly choose to save.
+        Downloaded or deleted content is never recorded. The platform has no knowledge of writing
+        that is not saved.
+      </p>
+
+      <h3 class="section__sub">Audio recordings</h3>
+      <p class="prose">
+        Audio files you create and choose to save, stored in Supabase Storage and accessible only
+        via authenticated signed URLs — never publicly accessible.
+      </p>
+
+      <h3 class="section__sub">Session and technical data</h3>
+      <p class="prose">
+        Supabase automatically logs authentication events (sign-ins, token refreshes) for security.
+        We do not run additional analytics or tracking scripts. There are no marketing trackers,
+        no pixels, no fingerprinting.
+      </p>
+
+      <h3 class="section__sub">Booking data</h3>
+      <p class="prose">
+        If you book a video session, booking data is processed by
+        <a href="https://cal.com" target="_blank" rel="noopener">Cal.com</a> and shared with
+        Jordan Elias for session preparation. Cal.com's own privacy policy governs their handling.
+      </p>
+
+      <h3 class="section__sub">Intake form data</h3>
+      <p class="prose">
+        If you book a video session you will be asked to complete an intake form covering
+        presenting concerns, health history, medications, and emergency contacts. This is stored
+        in a dedicated table, protected by RLS, and accessible only to you and Jordan Elias.
+        Unlike journal content, intake form data is not encrypted with your vault key — because
+        your therapist needs to be able to read it.
+      </p>
+    </section>
+
+    <!-- DATA SHARING -->
+    <section class="section" id="data-sharing">
+      <h2 class="section__title">Data sharing</h2>
+      <p class="prose">
+        Your data is not sold, rented, or shared with third parties for commercial purposes.
+        Full stop.
+      </p>
+
+      <h3 class="section__sub">Third-party services used</h3>
+
+      <table class="data-table">
+        <thead>
+          <tr><th>Service</th><th>Purpose</th><th>Data shared</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Supabase</strong></td>
+            <td>Database and authentication hosting</td>
+            <td>All data stored on the platform (encrypted where applicable)</td>
+          </tr>
+          <tr>
+            <td><strong>Stripe</strong></td>
+            <td>Payment processing</td>
+            <td>Email address, name, subscription tier. Card data never reaches us.</td>
+          </tr>
+          <tr>
+            <td><strong>Cal.com</strong></td>
+            <td>Session booking</td>
+            <td>Name, email, availability, booking details</td>
+          </tr>
+          <tr>
+            <td><strong>Netlify</strong></td>
+            <td>Website hosting and serverless functions</td>
+            <td>HTTP request data (processed in transit, not stored by us)</td>
+          </tr>
+          <tr>
+            <td><strong>Google Fonts</strong></td>
+            <td>Typography</td>
+            <td>IP address in font request (standard browser behaviour)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 class="section__sub">Sharing with your therapist</h3>
+      <p class="prose">
+        The platform does not have a built-in sharing mechanism. If you want to share something
+        with Jordan Elias, download the file and send it by email to
+        <a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a>. You decide what to share,
+        when, and in what form. The platform plays no role in that exchange and has no record of it.
+      </p>
+
+      <h3 class="section__sub">Legal disclosure</h3>
+      <p class="prose">
+        We may be required to disclose data in response to a valid legal request or court order.
+        If this happens, we will notify you unless legally prohibited from doing so.
+      </p>
+    </section>
+
+    <!-- PAYMENTS -->
+    <section class="section" id="payments">
+      <h2 class="section__title">Payments and Stripe</h2>
+      <p class="prose">
+        Subscriptions and payments are processed by
+        <a href="https://stripe.com" target="_blank" rel="noopener">Stripe</a>, a PCI DSS Level 1
+        certified payment processor. When you enter card details, you enter them directly into
+        Stripe's interface — your card number, CVC, and expiry date never reach our servers
+        or our database. We store only your Stripe Customer ID and subscription status.
+      </p>
+
+      <h3 class="section__sub">Cancellation</h3>
+      <p class="prose">
+        You can cancel your subscription at any time from the Account page. Cancellation takes
+        effect at the end of your current billing period. We do not offer refunds for partial
+        periods, but if you believe there has been an error, contact
+        <a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a>.
+      </p>
+
+      <h3 class="section__sub">Subscription tiers</h3>
+      <p class="prose">
+        Pricing and tier details are shown on the account and booking pages. Existing subscribers
+        will receive at least 30 days notice before any price increase takes effect.
+      </p>
+    </section>
+
+    <!-- GDPR -->
+    <section class="section" id="gdpr">
+      <h2 class="section__title">Your rights under GDPR</h2>
+      <p class="prose">
+        As a resident of the EU, UK, Switzerland, or another jurisdiction with equivalent data
+        protection law, you have the following rights. To exercise any of them, write to
+        <a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a>. We will respond within 30 days.
+      </p>
+
+      <h3 class="section__sub">Right of access</h3>
+      <p class="prose">Most of your data is already visible within the platform. You can also request a full copy.</p>
+
+      <h3 class="section__sub">Right to rectification</h3>
+      <p class="prose">You can update your name and email from the Account page. For anything else, contact us.</p>
+
+      <h3 class="section__sub">Right to erasure</h3>
+      <p class="prose">You can delete individual entries and worksheets from within the platform. For full account deletion, see below.</p>
+
+      <h3 class="section__sub">Right to data portability</h3>
+      <p class="prose">Journal entries and worksheets can be downloaded as files. For a full export of all stored data, contact us.</p>
+
+      <h3 class="section__sub">Right to object / restrict processing</h3>
+      <p class="prose">Contact us to discuss any concerns about how your data is being processed.</p>
+
+      <h3 class="section__sub">Lawful basis for processing</h3>
+      <p class="prose">
+        We process your data under GDPR Article 6 on the bases of
+        <strong>performance of a contract</strong> (providing the service),
+        <strong>legitimate interests</strong> (security logging, fraud prevention),
+        and <strong>consent</strong> (for any processing not covered by the above).
+        Health-related data under Article 9 is processed with your explicit consent.
+      </p>
+    </section>
+
+    <!-- ACCOUNT DELETION -->
+    <section class="section" id="account-deletion">
+      <h2 class="section__title">Deleting your account</h2>
+      <p class="prose">
+        To request full deletion, write to
+        <a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a> with the subject line
+        <strong>"Account deletion request"</strong>. We will delete your authentication record,
+        all content rows associated with your user ID, all stored audio files, and your Stripe
+        subscription and customer record. We will confirm within 14 days.
+      </p>
+      <p class="prose">
+        Because your saved content is encrypted with a key tied to your account, deletion also
+        renders any remaining ciphertext permanently undecryptable — even if database backups exist.
+      </p>
+
+      <div class="callout callout--amber">
+        <span class="callout__label">Important</span>
+        Deletion is permanent and cannot be undone. Download anything you want to keep before
+        making this request. If you have an active subscription, please cancel it from the
+        Account page first.
+      </div>
+    </section>
+
+    <!-- CRISIS -->
+    <section class="section" id="crisis">
+      <h2 class="section__title">Crisis disclaimer</h2>
+
+      <div class="callout callout--amber">
+        <span class="callout__label">Please read this</span>
+        This platform is not a crisis service and is not monitored in real time. If you are
+        in immediate danger, experiencing a mental health emergency, or having thoughts of
+        suicide or self-harm, please do not rely on this platform for support.
+      </div>
+
+      <table class="data-table" style="margin-top:1rem;">
+        <thead><tr><th>Service</th><th>Contact</th><th>Availability</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Telefonseelsorge (Germany)</td>
+            <td class="td-mono">0800 111 0 111 or 0800 111 0 222</td>
+            <td>Free, 24/7</td>
+          </tr>
+          <tr>
+            <td>Crisis Text Line (UK)</td>
+            <td class="td-mono">Text HELLO to 85258</td>
+            <td>Free, 24/7</td>
+          </tr>
+          <tr>
+            <td>International directory</td>
+            <td><a href="https://findahelpline.com" target="_blank" rel="noopener">findahelpline.com</a></td>
+            <td>Worldwide</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="prose" style="margin-top:1rem;">
+        If you work with Jordan Elias in a session tier and experience a crisis between sessions,
+        please contact emergency services first. Jordan will have shared a safety plan and
+        out-of-hours contact protocol as part of the therapy agreement.
+      </p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section" id="faq">
+      <h2 class="section__title">Frequently asked questions</h2>
+      <div class="faq-list">
+
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">
+            Can Jordan read my journal entries or worksheets?
+            <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
+          </button>
+          <div class="faq-a">
+            <p>Not in any practical sense. For entries you download or delete, the answer is an unqualified no — those are never stored anywhere. For entries you choose to save, the content is encrypted in your browser before it reaches the server. As the platform operator, Jordan has access to the server secret used to wrap your key, meaning decryption is theoretically possible with access to both the database and the server environment. This is disclosed honestly above. If you want absolute certainty, use the download or delete options.</p>
           </div>
-          <div class="scale-value-display" id="arousalDisplay">5</div>
         </div>
-        <div class="scale-track-wrap">
-          <div class="scale-track" id="arousalTrack">
-            <div class="scale-fill" id="arousalFill"></div>
-            <div class="scale-thumb" id="arousalThumb"></div>
+
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">
+            Is anything recorded while I am writing?
+            <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
+          </button>
+          <div class="faq-a">
+            <p>No. Nothing is transmitted to any server during the writing process. No drafts are auto-saved. No keystroke data, word counts, or progress is recorded until you explicitly press Save. The writing space is entirely local to your browser until you make a deliberate choice about what to do with it.</p>
           </div>
         </div>
-        <div class="scale-labels">
-          <span>Very low energy</span>
-          <span>Very high energy</span>
+
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">
+            If I download a file, does the platform keep a copy?
+            <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
+          </button>
+          <div class="faq-a">
+            <p>No. Downloading writes the file directly to your device. Nothing is sent to the server. The platform has no record that the entry existed, no copy of the content, and no log of the download. The file belongs entirely to you.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">
+            How do I share something with my therapist?
+            <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
+          </button>
+          <div class="faq-a">
+            <p>Download the file and email it to hello@jordanelias.de. That is the simplest and most private method — you control exactly what is shared and when, and the platform plays no role in the exchange and keeps no record of it. There is currently no in-platform sharing mechanism.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">
+            What happens to my data if I cancel my subscription?
+            <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
+          </button>
+          <div class="faq-a">
+            <p>Cancelling removes access to paid features but does not delete your data. Your saved entries, check-in history, and worksheets remain intact. You can request full account deletion separately at any time.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">
+            What if I forget my password?
+            <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
+          </button>
+          <div class="faq-a">
+            <p>Supabase handles password reset via a link sent to your email. Resetting your password does not affect your encrypted data — your vault key is wrapped with a platform secret, not your password, so a password change does not lock you out of your saved entries.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">
+            Do you use cookies or tracking scripts?
+            <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
+          </button>
+          <div class="faq-a">
+            <p>Supabase uses session cookies to maintain your authenticated session — these are necessary for the platform to function. There are no advertising cookies, no third-party tracking pixels, no analytics that profile your behaviour. Google Fonts requests your browser's IP address to serve fonts, which is standard browser behaviour. That is the full extent of third-party data exposure on page load.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">
+            Will my data be used to train AI models?
+            <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
+          </button>
+          <div class="faq-a">
+            <p>No. Your data will never be used to train AI models, sold to AI companies, or used for any purpose other than providing you with the platform service. This is a firm commitment.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">
+            Where is my data stored geographically?
+            <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
+          </button>
+          <div class="faq-a">
+            <p>The Supabase database is hosted in the EU West (Frankfurt, Germany) AWS region. Netlify hosts the website and serverless functions; no persistent data is stored on Netlify. Stripe and Cal.com have their own infrastructure and data locations, described in their respective privacy policies.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-q" aria-expanded="false">
+            What happens to my data if the platform closes?
+            <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
+          </button>
+          <div class="faq-a">
+            <p>All users will be given at least 90 days notice and a mechanism to export their data before closure. Data will not be transferred to a third party — it will be deleted. This commitment is made in good faith and will be honoured.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="section" id="contact">
+      <h2 class="section__title">Contact</h2>
+      <p class="prose">
+        For questions about this privacy policy, to exercise your rights, or to make a complaint:
+      </p>
+
+      <div class="contact-block">
+        <div class="contact-block__icon">✉️</div>
+        <div>
+          <div class="contact-block__name">Jordan Elias</div>
+          <div class="contact-block__role">Data Controller · Music Therapist · Berlin, Germany</div>
+          <div class="contact-block__email">
+            <a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a>
+          </div>
         </div>
       </div>
 
-      <!-- Valence -->
-      <div class="scale-block">
-        <div class="scale-header">
-          <div>
-            <div class="scale-name">Mood / Valence</div>
-            <div class="scale-desc">How pleasant or unpleasant does it feel?</div>
-          </div>
-          <div class="scale-value-display" id="valenceDisplay">5</div>
-        </div>
-        <div class="scale-track-wrap">
-          <div class="scale-track" id="valenceTrack">
-            <div class="scale-fill" id="valenceFill"></div>
-            <div class="scale-thumb" id="valenceThumb"></div>
-          </div>
-        </div>
-        <div class="scale-labels">
-          <span>Very unpleasant</span>
-          <span>Very pleasant</span>
-        </div>
-      </div>
+      <p class="prose" style="margin-top:1.25rem;">
+        If you are not satisfied with the response to a complaint, you have the right to lodge a
+        complaint with the relevant supervisory authority. In Germany, this is the
+        <a href="https://www.bfdi.bund.de" target="_blank" rel="noopener">Bundesbeauftragte für den Datenschutz und die Informationsfreiheit (BfDI)</a>.
+      </p>
+    </section>
 
-      <!-- Sensory load -->
-      <div class="scale-block">
-        <div class="scale-header">
-          <div>
-            <div class="scale-name">Sensory Load</div>
-            <div class="scale-desc">How much sensory input are you dealing with?</div>
-          </div>
-          <div class="scale-value-display" id="sensoryDisplay">5</div>
-        </div>
-        <div class="scale-track-wrap">
-          <div class="scale-track" id="sensoryTrack">
-            <div class="scale-fill" id="sensoryFill"></div>
-            <div class="scale-thumb" id="sensoryThumb"></div>
-          </div>
-        </div>
-        <div class="scale-labels">
-          <span>Very low</span>
-          <span>Overwhelming</span>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="step-nav">
-      <button class="btn-next" onclick="goToStep(2)">Next</button>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════
-       STEP 2 — EMOTION WORDS + NOTE GRID
-  ══════════════════════════════════════ -->
-  <div class="step-panel" id="step2">
-
-    <div class="emotion-section">
-      <span class="sl">Select any words that fit — or skip if none apply</span>
-
-      <div class="emotion-quadrants">
-
-        <div class="emotion-quadrant">
-          <div class="emotion-quadrant-label">High energy · pleasant</div>
-          <div class="emotion-words">
-            <button class="emotion-word q-ha-p" data-word="excited">Excited</button>
-            <button class="emotion-word q-ha-p" data-word="energised">Energised</button>
-            <button class="emotion-word q-ha-p" data-word="inspired">Inspired</button>
-            <button class="emotion-word q-ha-p" data-word="playful">Playful</button>
-            <button class="emotion-word q-ha-p" data-word="hopeful">Hopeful</button>
-          </div>
-        </div>
-
-        <div class="emotion-quadrant">
-          <div class="emotion-quadrant-label">High energy · unpleasant</div>
-          <div class="emotion-words">
-            <button class="emotion-word q-ha-n" data-word="anxious">Anxious</button>
-            <button class="emotion-word q-ha-n" data-word="overwhelmed">Overwhelmed</button>
-            <button class="emotion-word q-ha-n" data-word="irritable">Irritable</button>
-            <button class="emotion-word q-ha-n" data-word="restless">Restless</button>
-            <button class="emotion-word q-ha-n" data-word="frustrated">Frustrated</button>
-          </div>
-        </div>
-
-        <div class="emotion-quadrant">
-          <div class="emotion-quadrant-label">Low energy · pleasant</div>
-          <div class="emotion-words">
-            <button class="emotion-word q-la-p" data-word="calm">Calm</button>
-            <button class="emotion-word q-la-p" data-word="content">Content</button>
-            <button class="emotion-word q-la-p" data-word="grateful">Grateful</button>
-            <button class="emotion-word q-la-p" data-word="grounded">Grounded</button>
-            <button class="emotion-word q-la-p" data-word="tender">Tender</button>
-          </div>
-        </div>
-
-        <div class="emotion-quadrant">
-          <div class="emotion-quadrant-label">Low energy · unpleasant</div>
-          <div class="emotion-words">
-            <button class="emotion-word q-la-n" data-word="tired">Tired</button>
-            <button class="emotion-word q-la-n" data-word="withdrawn">Withdrawn</button>
-            <button class="emotion-word q-la-n" data-word="flat">Flat</button>
-            <button class="emotion-word q-la-n" data-word="heavy">Heavy</button>
-            <button class="emotion-word q-la-n" data-word="melancholic">Melancholic</button>
-          </div>
-        </div>
-
-      </div>
-
-      <p class="emotion-hint">You can select more than one. None is also fine.</p>
-    </div>
-
-    <!-- ── Note grid ── -->
-    <div class="note-section" id="noteSection">
-      <div class="note-section-toggle" id="noteSectionToggle">
-        <span class="note-toggle-label">Words not capturing it? Try notes instead.</span>
-        <span class="note-toggle-icon">▾</span>
-      </div>
-
-      <div class="note-section-body">
-
-        <div class="note-guidance">
-          <strong>Select any notes that feel like where you are right now.</strong>
-          There's no right answer — this is about resonance, not theory. Tap notes to hear them individually, then press Play chord to hear them together. The combination will be saved with your check-in.
-        </div>
-
-        <div class="note-grid-wrap">
-          <div class="note-row-label">Lower octave</div>
-          <div class="note-row" id="noteRowLow"></div>
-          <div class="note-row-label">Upper octave</div>
-          <div class="note-row" id="noteRowHigh"></div>
-        </div>
-
-        <div class="chord-readout">
-          <div class="chord-name-display empty" id="chordNameDisplay">Select notes to see the chord</div>
-          <div class="chord-notes-display" id="chordNotesDisplay"></div>
-        </div>
-
-        <div class="note-controls">
-          <button class="note-ctrl-btn play" id="playChordBtn" disabled onclick="handlePlayChord()">▶ Play chord</button>
-          <button class="note-ctrl-btn clear" id="clearNotesBtn" disabled onclick="handleClearNotes()">Clear</button>
-        </div>
-
-      </div>
-    </div>
-
-    <div class="step-nav">
-      <button class="btn-next" onclick="goToStep(3)">Next</button>
-      <button class="btn-back" onclick="goToStep(1)">Back</button>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════
-       STEP 3 — CONTEXT + NOTES
-  ══════════════════════════════════════ -->
-  <div class="step-panel" id="step3">
-
-    <div class="location-section">
-      <span class="sl">Where are you?</span>
-      <div class="location-tags">
-        <button class="location-tag" data-loc="home">
-          <span class="location-tag__icon">⌂</span> Home
-        </button>
-        <button class="location-tag" data-loc="work">
-          <span class="location-tag__icon">◻</span> Work
-        </button>
-        <button class="location-tag" data-loc="transit">
-          <span class="location-tag__icon">◈</span> Transit
-        </button>
-        <button class="location-tag" data-loc="outside">
-          <span class="location-tag__icon">◯</span> Outside
-        </button>
-        <button class="location-tag" data-loc="social">
-          <span class="location-tag__icon">◇</span> Social
-        </button>
-        <button class="location-tag" data-loc="other">
-          <span class="location-tag__icon">—</span> Other
-        </button>
-      </div>
-    </div>
-
-    <div class="notes-section">
-      <span class="sl">Notes <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:.72rem;color:var(--muted);margin-left:.3rem">optional</span></span>
-      <textarea id="checkinNotes" placeholder="Anything worth noting about how you're feeling right now…" maxlength="500"></textarea>
-    </div>
-
-    <div class="step-nav">
-      <button class="btn-submit" id="submitBtn" onclick="submitCheckin()">Save check-in</button>
-      <button class="btn-back" onclick="goToStep(2)">Back</button>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════
-       DASHBOARD
-  ══════════════════════════════════════ -->
-  <div class="dashboard-section" id="dashboardSection">
-    <div class="dashboard-header">
-      <h3>Your patterns</h3>
-      <div class="dashboard-period">
-        <button class="period-btn active" data-days="7" onclick="setPeriod(7, this)">7 days</button>
-        <button class="period-btn" data-days="30" onclick="setPeriod(30, this)">30 days</button>
-        <button class="period-btn" data-days="90" onclick="setPeriod(90, this)">90 days</button>
-      </div>
-    </div>
-
-    <div id="dashboardContent">
-      <div class="dash-loading"><div class="spin"></div> Loading your check-ins…</div>
-    </div>
-  </div>
-
-</main>
+  </main>
+</div>
 
 <footer>
-  <p>Jordan Elias Music Therapy · Berlin ·
-    <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a>
+  <p>
+    Jordan Elias Music Therapy · Berlin ·
+    <a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a>
   </p>
 </footer>
 
-<script type="module">
+<script>
 'use strict';
 
-import {
-  identifyChord,
-  playNote,
-  playChord,
-  getNoteName,
-} from '/assets/js/chord-engine.js';
-
-// ─────────────────────────────────────────────────────────
-// HEADER
-// ─────────────────────────────────────────────────────────
-const _path = window.location.pathname.replace(/\/$/, '') || '/';
-document.querySelectorAll('.sil-header__nav a').forEach(a => {
-  const href = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
-  if (href === _path) a.classList.add('sil-active');
-});
-
-const menuToggle = document.getElementById('silMenuToggle');
-const silNav     = document.getElementById('silNav');
-menuToggle.addEventListener('click', () => {
-  const open = silNav.classList.toggle('sil-open');
-  menuToggle.setAttribute('aria-expanded', open);
-});
-silNav.querySelectorAll('a').forEach(a =>
-  a.addEventListener('click', () => silNav.classList.remove('sil-open'))
-);
-
-async function getSupabase() {
-  if (window._supabase) return window._supabase;
-  const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-  return createClient(
-    'https://lrjuufvrgkuvfxcmybtf.supabase.co',
-    'sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1'
-  );
-}
-
-document.getElementById('silSignOut').addEventListener('click', async function () {
-  this.disabled = true;
-  this.textContent = 'Signing out…';
-  try {
-    const sb = await getSupabase();
-    await sb.auth.signOut();
-  } finally {
-    window.location.replace('/');
-  }
-});
-
-// ═══════════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════════
-const S = {
-  arousal: 5,
-  valence: 5,
-  sensory: 5,
-  emotions: new Set(),
-  location: null,
-  notes: '',
-  currentStep: 1,
-  submitting: false,
-  dashPeriod: 7,
-  allCheckins: [],
-  charts: {},
-  // Note grid state
-  // Each selection: { pitchClass, octave, key }
-  // key = `${pitchClass}-${octave}` for deduplication
-  selectedNotes: new Map(), // key → {pitchClass, octave}
-  currentChordResult: null,
-  progressionPlaying: false,
-  progressionTimer: null,
-  chordDuration: 2.0, // seconds per chord in progression
-};
-
-// ═══════════════════════════════════════════════════════
-// CHROMATIC NOTE DEFINITIONS
-// pitchClass 0–11, two octaves (4 and 5)
-// ═══════════════════════════════════════════════════════
-const CHROMATIC_NOTES = [
-  { pc: 0,  name: 'C',  flat: false },
-  { pc: 1,  name: 'D♭', flat: true  },
-  { pc: 2,  name: 'D',  flat: false },
-  { pc: 3,  name: 'E♭', flat: true  },
-  { pc: 4,  name: 'E',  flat: false },
-  { pc: 5,  name: 'F',  flat: false },
-  { pc: 6,  name: 'G♭', flat: true  },
-  { pc: 7,  name: 'G',  flat: false },
-  { pc: 8,  name: 'A♭', flat: true  },
-  { pc: 9,  name: 'A',  flat: false },
-  { pc: 10, name: 'B♭', flat: true  },
-  { pc: 11, name: 'B',  flat: false },
-];
-
-// ═══════════════════════════════════════════════════════
-// BUILD NOTE GRID
-// ═══════════════════════════════════════════════════════
-function buildNoteGrid() {
-  const rowLow  = document.getElementById('noteRowLow');
-  const rowHigh = document.getElementById('noteRowHigh');
-
-  [4, 5].forEach(octave => {
-    const row = octave === 4 ? rowLow : rowHigh;
-    CHROMATIC_NOTES.forEach(({ pc, name, flat }) => {
-      const btn = document.createElement('button');
-      btn.className = `note-btn${flat ? ' flat' : ' natural'}`;
-      btn.textContent = name;
-      btn.dataset.pc     = pc;
-      btn.dataset.octave = octave;
-      btn.dataset.key    = `${pc}-${octave}`;
-
-      btn.addEventListener('click', () => handleNoteToggle(btn, pc, octave));
-      row.appendChild(btn);
-    });
-  });
-}
-
-// ═══════════════════════════════════════════════════════
-// NOTE TOGGLE + PLAYBACK
-// ═══════════════════════════════════════════════════════
-function handleNoteToggle(btn, pc, octave) {
-  const key = `${pc}-${octave}`;
-
-  if (S.selectedNotes.has(key)) {
-    S.selectedNotes.delete(key);
-    btn.classList.remove('selected');
-  } else {
-    S.selectedNotes.set(key, { pitchClass: pc, octave });
-    btn.classList.add('selected');
-    // Play the note immediately on selection
-    playNote(pc, octave, { velocity: 0.65, duration: 1.2 });
-  }
-
-  updateChordDisplay();
-  updateNoteControlStates();
-}
-
-function updateNoteControlStates() {
-  const hasNotes = S.selectedNotes.size > 0;
-  document.getElementById('playChordBtn').disabled  = !hasNotes;
-  document.getElementById('clearNotesBtn').disabled = !hasNotes;
-}
-
-function handlePlayChord() {
-  if (S.selectedNotes.size === 0) return;
-  const notes = Array.from(S.selectedNotes.values());
-  playChord(notes, { duration: S.chordDuration });
-}
-
-function handleClearNotes() {
-  S.selectedNotes.clear();
-  S.currentChordResult = null;
-  document.querySelectorAll('.note-btn.selected').forEach(b => b.classList.remove('selected'));
-  updateChordDisplay();
-  updateNoteControlStates();
-}
-
-// ═══════════════════════════════════════════════════════
-// CHORD IDENTIFICATION + DISPLAY
-// ═══════════════════════════════════════════════════════
-function updateChordDisplay() {
-  const nameEl  = document.getElementById('chordNameDisplay');
-  const notesEl = document.getElementById('chordNotesDisplay');
-
-  if (S.selectedNotes.size === 0) {
-    nameEl.textContent = 'Select notes to see the chord';
-    nameEl.classList.add('empty');
-    notesEl.textContent = '';
-    S.currentChordResult = null;
-    return;
-  }
-
-  // Extract unique pitch classes for identification
-  const pitchClasses = [...new Set(
-    Array.from(S.selectedNotes.values()).map(n => n.pitchClass)
-  )].sort((a, b) => a - b);
-
-  const result = identifyChord(pitchClasses);
-  S.currentChordResult = result;
-
-  nameEl.classList.remove('empty');
-
-  if (result.name) {
-    nameEl.textContent = result.name;
-  } else {
-    nameEl.textContent = result.notes.join(' ');
-  }
-
-  // Show selected note names
-  const noteNames = Array.from(S.selectedNotes.values())
-    .sort((a, b) => a.octave !== b.octave ? a.octave - b.octave : a.pitchClass - b.pitchClass)
-    .map(n => getNoteName(n.pitchClass) + n.octave);
-  notesEl.textContent = noteNames.join(' · ');
-}
-
-// ═══════════════════════════════════════════════════════
-// NOTE SECTION TOGGLE
-// ═══════════════════════════════════════════════════════
-document.getElementById('noteSectionToggle').addEventListener('click', () => {
-  document.getElementById('noteSection').classList.toggle('open');
-});
-
-// ═══════════════════════════════════════════════════════
-// SCALE SETUP
-// ═══════════════════════════════════════════════════════
-const SCALES = [
-  {
-    id: 'arousal',
-    trackId: 'arousalTrack',
-    fillId: 'arousalFill',
-    thumbId: 'arousalThumb',
-    displayId: 'arousalDisplay',
-    colorLo: [74, 144, 217],
-    colorHi: [232, 131, 58],
-  },
-  {
-    id: 'valence',
-    trackId: 'valenceTrack',
-    fillId: 'valenceFill',
-    thumbId: 'valenceThumb',
-    displayId: 'valenceDisplay',
-    colorLo: [138, 138, 138],
-    colorHi: [42, 92, 69],
-  },
-  {
-    id: 'sensory',
-    trackId: 'sensoryTrack',
-    fillId: 'sensoryFill',
-    thumbId: 'sensoryThumb',
-    displayId: 'sensoryDisplay',
-    colorLo: [42, 92, 69],
-    colorHi: [192, 57, 43],
-  },
-];
-
-function lerpColor(lo, hi, t) {
-  return [
-    Math.round(lo[0] + (hi[0] - lo[0]) * t),
-    Math.round(lo[1] + (hi[1] - lo[1]) * t),
-    Math.round(lo[2] + (hi[2] - lo[2]) * t),
-  ];
-}
-
-function initScale(scale) {
-  const track = document.getElementById(scale.trackId);
-  const fill  = document.getElementById(scale.fillId);
-  const thumb = document.getElementById(scale.thumbId);
-  const disp  = document.getElementById(scale.displayId);
-
-  function updateVisuals(val) {
-    const pct = (val - 1) / 9;
-    fill.style.width = (pct * 100) + '%';
-    thumb.style.left = (pct * 100) + '%';
-    const col = lerpColor(scale.colorLo, scale.colorHi, pct);
-    const colStr = `rgb(${col[0]},${col[1]},${col[2]})`;
-    fill.style.background = colStr;
-    thumb.style.borderColor = colStr;
-    disp.textContent = val;
-    disp.style.color = colStr;
-  }
-
-  function getValFromX(clientX) {
-    const rect = track.getBoundingClientRect();
-    const pct  = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-    return Math.max(1, Math.min(10, Math.round(pct * 9 + 1)));
-  }
-
-  function onMove(clientX) {
-    const val = getValFromX(clientX);
-    S[scale.id] = val;
-    updateVisuals(val);
-  }
-
-  let dragging = false;
-  track.addEventListener('mousedown', e => { dragging = true; onMove(e.clientX); });
-  window.addEventListener('mousemove', e => { if (!dragging) return; onMove(e.clientX); });
-  window.addEventListener('mouseup', () => { dragging = false; });
-  track.addEventListener('touchstart', e => { dragging = true; onMove(e.touches[0].clientX); e.preventDefault(); }, { passive: false });
-  window.addEventListener('touchmove', e => { if (!dragging) return; onMove(e.touches[0].clientX); e.preventDefault(); }, { passive: false });
-  window.addEventListener('touchend', () => { dragging = false; });
-
-  updateVisuals(5);
-}
-
-SCALES.forEach(initScale);
-
-// ═══════════════════════════════════════════════════════
-// EMOTION WORDS
-// ═══════════════════════════════════════════════════════
-document.querySelectorAll('.emotion-word').forEach(btn => {
+document.querySelectorAll('.faq-q').forEach(btn => {
   btn.addEventListener('click', () => {
-    const word = btn.dataset.word;
-    if (S.emotions.has(word)) {
-      S.emotions.delete(word);
-      btn.classList.remove('selected');
-    } else {
-      S.emotions.add(word);
-      btn.classList.add('selected');
+    const answer   = btn.nextElementSibling;
+    const expanded = btn.getAttribute('aria-expanded') === 'true';
+    document.querySelectorAll('.faq-q').forEach(b => {
+      b.setAttribute('aria-expanded', 'false');
+      b.nextElementSibling.classList.remove('open');
+    });
+    if (!expanded) {
+      btn.setAttribute('aria-expanded', 'true');
+      answer.classList.add('open');
     }
   });
 });
 
-// ═══════════════════════════════════════════════════════
-// LOCATION TAGS
-// ═══════════════════════════════════════════════════════
-document.querySelectorAll('.location-tag').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.location-tag').forEach(b => b.classList.remove('selected'));
-    if (S.location === btn.dataset.loc) {
-      S.location = null;
-    } else {
-      S.location = btn.dataset.loc;
-      btn.classList.add('selected');
+const sections = document.querySelectorAll('.section[id]');
+const navLinks  = document.querySelectorAll('.sidebar__nav a');
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.getAttribute('id');
+      navLinks.forEach(a => {
+        a.classList.toggle('active', a.getAttribute('href') === `#${id}`);
+      });
     }
   });
-});
+}, { rootMargin: '-20% 0px -70% 0px' });
 
-// ═══════════════════════════════════════════════════════
-// STEP NAVIGATION
-// ═══════════════════════════════════════════════════════
-window.goToStep = function(n) {
-  document.getElementById('step' + S.currentStep).classList.remove('active');
-  S.currentStep = n;
-  document.getElementById('step' + n).classList.add('active');
-  updateStepProgress(n);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-};
-
-function updateStepProgress(current) {
-  for (let i = 1; i <= 3; i++) {
-    const dot    = document.getElementById('stepDot' + i);
-    const circle = document.getElementById('stepCircle' + i);
-    dot.classList.remove('active', 'done');
-    if (i < current) {
-      dot.classList.add('done');
-      circle.textContent = '✓';
-    } else if (i === current) {
-      dot.classList.add('active');
-      circle.textContent = i;
-    } else {
-      circle.textContent = i;
-    }
-    if (i < 3) {
-      const line = document.getElementById('stepLine' + i);
-      line.classList.toggle('done', i < current);
-    }
-  }
-}
-
-// ═══════════════════════════════════════════════════════
-// SUBMIT
-// ═══════════════════════════════════════════════════════
-window.submitCheckin = async function() {
-  if (S.submitting) return;
-  S.submitting = true;
-
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true;
-  btn.textContent = 'Saving…';
-
-  const sb   = window._supabase;
-  const user = window._currentUser;
-
-  if (!sb || !user) {
-    showMsg('Not logged in.', 'error');
-    btn.disabled = false;
-    btn.textContent = 'Save check-in';
-    S.submitting = false;
-    return;
-  }
-
-  const notes = document.getElementById('checkinNotes').value.trim() || null;
-
-  // Prepare note data
-  const selectedPitchClasses = S.selectedNotes.size > 0
-    ? [...new Set(Array.from(S.selectedNotes.values()).map(n => n.pitchClass))].sort((a,b) => a-b)
-    : null;
-
-  const chordName = S.currentChordResult?.name || null;
-
-  const { error } = await sb.from('checkins').insert({
-    user_id:        user.id,
-    arousal:        S.arousal,
-    valence:        S.valence,
-    sensory_load:   S.sensory,
-    emotion_words:  S.emotions.size > 0 ? Array.from(S.emotions) : [],
-    location_tag:   S.location,
-    notes,
-    selected_notes: selectedPitchClasses,
-    chord_name:     chordName,
-  });
-
-  S.submitting = false;
-  btn.disabled = false;
-  btn.textContent = 'Save check-in';
-
-  if (error) {
-    showMsg('Could not save: ' + error.message, 'error');
-    return;
-  }
-
-  showConfirmation();
-  await loadCheckins();
-};
-
-function showConfirmation() {
-  document.getElementById('step3').classList.remove('active');
-  document.getElementById('stepProgress').style.display = 'none';
-  document.getElementById('confirmPanel').classList.add('visible');
-
-  const now = new Date();
-  document.getElementById('confirmTime').textContent = now.toLocaleTimeString('en-GB', {
-    hour: '2-digit', minute: '2-digit',
-  }) + ', ' + now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-
-  const summary = document.getElementById('confirmSummary');
-  summary.innerHTML = [
-    { label: 'Energy', val: S.arousal },
-    { label: 'Mood',   val: S.valence },
-    { label: 'Sensory', val: S.sensory },
-  ].map(({ label, val }) => `
-    <div class="confirm-item">
-      <div class="confirm-item__val">${val}</div>
-      <div class="confirm-item__label">${label}</div>
-    </div>
-  `).join('');
-
-  const wordsEl = document.getElementById('confirmWords');
-  wordsEl.innerHTML = S.emotions.size > 0
-    ? Array.from(S.emotions).map(w => `<span class="confirm-word-tag">${w}</span>`).join('')
-    : '';
-
-  // Show chord if selected
-  const chordWrap = document.getElementById('confirmChordWrap');
-  const chordEl   = document.getElementById('confirmChord');
-  if (S.currentChordResult?.name) {
-    chordEl.textContent = S.currentChordResult.name;
-    chordWrap.style.display = 'block';
-  } else {
-    chordWrap.style.display = 'none';
-  }
-}
-
-window.resetToStep1 = function() {
-  S.arousal = 5; S.valence = 5; S.sensory = 5;
-  S.emotions.clear();
-  S.location = null;
-  S.currentStep = 1;
-  S.selectedNotes.clear();
-  S.currentChordResult = null;
-
-  SCALES.forEach(scale => {
-    const fill  = document.getElementById(scale.fillId);
-    const thumb = document.getElementById(scale.thumbId);
-    const disp  = document.getElementById(scale.displayId);
-    const col = lerpColor(scale.colorLo, scale.colorHi, 4/9);
-    const colStr = `rgb(${col[0]},${col[1]},${col[2]})`;
-    fill.style.width = '44.4%';
-    thumb.style.left = '44.4%';
-    fill.style.background = colStr;
-    thumb.style.borderColor = colStr;
-    disp.textContent = '5';
-    disp.style.color = colStr;
-  });
-
-  document.querySelectorAll('.emotion-word').forEach(b => b.classList.remove('selected'));
-  document.querySelectorAll('.location-tag').forEach(b => b.classList.remove('selected'));
-  document.querySelectorAll('.note-btn').forEach(b => b.classList.remove('selected'));
-  document.getElementById('checkinNotes').value = '';
-  document.getElementById('noteSection').classList.remove('open');
-  updateChordDisplay();
-  updateNoteControlStates();
-
-  document.getElementById('confirmPanel').classList.remove('visible');
-  document.getElementById('stepProgress').style.display = '';
-  updateStepProgress(1);
-  document.getElementById('step1').classList.add('active');
-  document.getElementById('globalMsg').className = 'msg';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-};
-
-// ═══════════════════════════════════════════════════════
-// MESSAGES
-// ═══════════════════════════════════════════════════════
-function showMsg(text, type) {
-  const el = document.getElementById('globalMsg');
-  el.textContent = text;
-  el.className = `msg ${type}`;
-}
-
-// ═══════════════════════════════════════════════════════
-// DASHBOARD — DATA LOADING
-// ═══════════════════════════════════════════════════════
-async function loadCheckins() {
-  const sb   = window._supabase;
-  const user = window._currentUser;
-  if (!sb || !user) return;
-
-  const since = new Date();
-  since.setDate(since.getDate() - 90);
-
-  const { data, error } = await sb
-    .from('checkins')
-    .select('id, created_at, arousal, valence, sensory_load, emotion_words, location_tag, selected_notes, chord_name')
-    .eq('user_id', user.id)
-    .gte('created_at', since.toISOString())
-    .order('created_at', { ascending: true });
-
-  if (error) { console.error('Could not load check-ins:', error.message); return; }
-  S.allCheckins = data || [];
-  renderDashboard();
-}
-
-// ═══════════════════════════════════════════════════════
-// DASHBOARD — PERIOD SELECTOR
-// ═══════════════════════════════════════════════════════
-window.setPeriod = function(days, btn) {
-  S.dashPeriod = days;
-  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderDashboard();
-};
-
-function getFilteredCheckins() {
-  const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - S.dashPeriod);
-  return S.allCheckins.filter(c => new Date(c.created_at) >= cutoff);
-}
-
-function getPreviousCheckins() {
-  const cutoffEnd = new Date();
-  cutoffEnd.setDate(cutoffEnd.getDate() - S.dashPeriod);
-  const cutoffStart = new Date();
-  cutoffStart.setDate(cutoffStart.getDate() - S.dashPeriod * 2);
-  return S.allCheckins.filter(c => {
-    const t = new Date(c.created_at);
-    return t >= cutoffStart && t < cutoffEnd;
-  });
-}
-
-function avg(arr, key) {
-  if (!arr.length) return null;
-  return arr.reduce((s, c) => s + (c[key] || 0), 0) / arr.length;
-}
-
-// ═══════════════════════════════════════════════════════
-// DASHBOARD — RENDER
-// ═══════════════════════════════════════════════════════
-function renderDashboard() {
-  const container = document.getElementById('dashboardContent');
-  const checkins  = getFilteredCheckins();
-  const prev      = getPreviousCheckins();
-
-  if (S.allCheckins.length === 0) {
-    container.innerHTML = `
-      <div class="dash-empty">
-        <p><strong>No check-ins yet.</strong> Your first check-in will appear here.</p>
-      </div>`;
-    return;
-  }
-
-  if (checkins.length === 0) {
-    container.innerHTML = `
-      <div class="dash-empty">
-        <p>No check-ins in the last ${S.dashPeriod} days. Try a longer period or add a new check-in.</p>
-      </div>`;
-    return;
-  }
-
-  // Destroy existing charts
-  Object.values(S.charts).forEach(c => { try { c.destroy(); } catch(e){} });
-  S.charts = {};
-
-  container.innerHTML = `
-    <div class="summary-row">
-      <div class="summary-cell">
-        <div class="summary-cell__label">Check-ins</div>
-        <div class="summary-cell__val" id="summaryCount">—</div>
-        <div class="summary-cell__delta" id="summaryCountDelta"></div>
-      </div>
-      <div class="summary-cell">
-        <div class="summary-cell__label">Avg Energy</div>
-        <div class="summary-cell__val" id="summaryArousal">—</div>
-        <div class="summary-cell__delta" id="summaryArousalDelta"></div>
-      </div>
-      <div class="summary-cell">
-        <div class="summary-cell__label">Avg Mood</div>
-        <div class="summary-cell__val" id="summaryValence">—</div>
-        <div class="summary-cell__delta" id="summaryValenceDelta"></div>
-      </div>
-      <div class="summary-cell">
-        <div class="summary-cell__label">Avg Sensory</div>
-        <div class="summary-cell__val" id="summarySensory">—</div>
-        <div class="summary-cell__delta" id="summarySensoryDelta"></div>
-      </div>
-    </div>
-
-    <div class="chart-grid">
-      <div class="chart-block full-width">
-        <div class="chart-block__title">Energy, Mood &amp; Sensory load over time</div>
-        <canvas id="chartTimeline" height="140"></canvas>
-      </div>
-      <div class="chart-block">
-        <div class="chart-block__title">Affect space — energy vs mood</div>
-        <canvas id="chartScatter" height="200"></canvas>
-      </div>
-      <div class="chart-block">
-        <div class="chart-block__title">Most frequent emotions</div>
-        <div class="emotion-freq-grid" id="emotionFreqGrid"></div>
-      </div>
-      <div class="chart-block full-width">
-        <div class="chart-block__title">Time of day — when you check in</div>
-        <div class="tod-grid" id="todGrid"></div>
-        <div class="tod-label-row" id="todLabelRow"></div>
-      </div>
-      <div class="chart-block full-width chord-history-section">
-        <div class="chart-block__title">Chord record</div>
-        <div class="chord-history-header">
-          <span style="font-size:.78rem;color:var(--muted);">Chords saved from your check-ins</span>
-          <div class="chord-history-controls">
-            <div class="tempo-control">
-              <span>Tempo</span>
-              <input type="range" id="tempoSlider" min="0.5" max="4" step="0.5" value="2">
-              <span class="tempo-val" id="tempoVal">2s</span>
-            </div>
-            <button class="play-progression-btn" id="playProgressionBtn" disabled onclick="toggleProgression()">▶ Play progression</button>
-          </div>
-        </div>
-        <div id="chordHistoryList"></div>
-      </div>
-    </div>
-  `;
-
-  // ── Summary ──
-  const aAvg = avg(checkins, 'arousal');
-  const vAvg = avg(checkins, 'valence');
-  const sAvg = avg(checkins, 'sensory_load');
-  const pAAvg = avg(prev, 'arousal');
-  const pVAvg = avg(prev, 'valence');
-  const pSAvg = avg(prev, 'sensory_load');
-
-  document.getElementById('summaryCount').textContent   = checkins.length;
-  document.getElementById('summaryArousal').textContent = aAvg !== null ? aAvg.toFixed(1) : '—';
-  document.getElementById('summaryValence').textContent = vAvg !== null ? vAvg.toFixed(1) : '—';
-  document.getElementById('summarySensory').textContent = sAvg !== null ? sAvg.toFixed(1) : '—';
-
-  function deltaHtml(curr, prevV, higherIsBetter) {
-    if (curr === null || prevV === null) return '';
-    const diff = curr - prevV;
-    if (Math.abs(diff) < 0.2) return `<span class="delta-flat">≈ no change</span>`;
-    const up  = diff > 0;
-    const cls = (up === higherIsBetter) ? 'delta-up' : 'delta-down';
-    return `<span class="${cls}">${up ? '↑' : '↓'} ${Math.abs(diff).toFixed(1)} vs prev</span>`;
-  }
-
-  document.getElementById('summaryCountDelta').innerHTML   = '';
-  document.getElementById('summaryArousalDelta').innerHTML = deltaHtml(aAvg, pAAvg, true);
-  document.getElementById('summaryValenceDelta').innerHTML = deltaHtml(vAvg, pVAvg, true);
-  document.getElementById('summarySensoryDelta').innerHTML = deltaHtml(sAvg, pSAvg, false);
-
-  // ── Timeline chart ──
-  const labels = checkins.map(c => {
-    const d = new Date(c.created_at);
-    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) +
-           ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-  });
-
-  const chartColors = {
-    arousal: 'rgba(232,131,58,1)',
-    valence: 'rgba(42,92,69,1)',
-    sensory: 'rgba(192,57,43,0.6)',
-  };
-
-  const timelineCtx = document.getElementById('chartTimeline').getContext('2d');
-  S.charts.timeline = new Chart(timelineCtx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        { label: 'Energy', data: checkins.map(c => c.arousal), borderColor: chartColors.arousal, backgroundColor: 'rgba(232,131,58,0.07)', borderWidth: 2, pointRadius: checkins.length > 30 ? 0 : 3, tension: 0.35, fill: false },
-        { label: 'Mood',   data: checkins.map(c => c.valence), borderColor: chartColors.valence, backgroundColor: 'rgba(42,92,69,0.07)',   borderWidth: 2, pointRadius: checkins.length > 30 ? 0 : 3, tension: 0.35, fill: false },
-        { label: 'Sensory',data: checkins.map(c => c.sensory_load), borderColor: chartColors.sensory, backgroundColor: 'rgba(192,57,43,0.04)', borderWidth: 1.5, borderDash: [4, 3], pointRadius: 0, tension: 0.35, fill: false },
-      ],
-    },
-    options: {
-      responsive: true, maintainAspectRatio: true,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { position: 'top', labels: { font: { family: "'Inter', sans-serif", size: 11 }, color: '#6b6b6b', boxWidth: 12, padding: 12 } },
-        tooltip: { backgroundColor: '#fff', borderColor: '#e5e5e0', borderWidth: 1, titleColor: '#1a1a1a', bodyColor: '#6b6b6b', titleFont: { family: "'Space Grotesk', sans-serif", size: 11, weight: '600' }, bodyFont: { family: "'Inter', sans-serif", size: 11 }, padding: 10 },
-      },
-      scales: {
-        y: { min: 1, max: 10, ticks: { stepSize: 1, font: { family: "'Inter', sans-serif", size: 10 }, color: '#6b6b6b' }, grid: { color: '#f0f0ec' } },
-        x: { ticks: { maxTicksLimit: 8, font: { family: "'Inter', sans-serif", size: 10 }, color: '#6b6b6b', maxRotation: 0 }, grid: { display: false } },
-      },
-    },
-  });
-
-  // ── Scatter ──
-  const scatterCtx = document.getElementById('chartScatter').getContext('2d');
-  S.charts.scatter = new Chart(scatterCtx, {
-    type: 'scatter',
-    data: {
-      datasets: [{
-        label: 'Check-ins',
-        data: checkins.map(c => ({ x: c.valence, y: c.arousal })),
-        backgroundColor: 'rgba(42,92,69,0.45)',
-        borderColor: 'rgba(42,92,69,0.7)',
-        borderWidth: 1, pointRadius: 5, pointHoverRadius: 6,
-      }],
-    },
-    options: {
-      responsive: true, maintainAspectRatio: true,
-      plugins: {
-        legend: { display: false },
-        tooltip: { backgroundColor: '#fff', borderColor: '#e5e5e0', borderWidth: 1, titleColor: '#1a1a1a', bodyColor: '#6b6b6b', callbacks: { title: () => '', label: ctx => `Energy ${ctx.parsed.y}, Mood ${ctx.parsed.x}` } },
-      },
-      scales: {
-        x: { min: 1, max: 10, title: { display: true, text: 'Mood (unpleasant → pleasant)', font: { family: "'Inter', sans-serif", size: 10 }, color: '#6b6b6b' }, ticks: { stepSize: 1, font: { size: 10 }, color: '#6b6b6b' }, grid: { color: '#f0f0ec' } },
-        y: { min: 1, max: 10, title: { display: true, text: 'Energy (low → high)', font: { family: "'Inter', sans-serif", size: 10 }, color: '#6b6b6b' }, ticks: { stepSize: 1, font: { size: 10 }, color: '#6b6b6b' }, grid: { color: '#f0f0ec' } },
-      },
-    },
-  });
-
-  // ── Emotion frequency ──
-  const wordCounts = {};
-  checkins.forEach(c => {
-    (c.emotion_words || []).forEach(w => { wordCounts[w] = (wordCounts[w] || 0) + 1; });
-  });
-  const sortedWords = Object.entries(wordCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
-  const freqGrid = document.getElementById('emotionFreqGrid');
-  if (sortedWords.length === 0) {
-    freqGrid.innerHTML = '<p style="font-size:.78rem;color:var(--muted)">No emotion words recorded in this period.</p>';
-  } else {
-    const maxCount = sortedWords[0][1];
-    freqGrid.innerHTML = sortedWords.map(([word, count]) => `
-      <div class="emotion-freq-item">
-        <span class="emotion-freq-name">${word}</span>
-        <div class="emotion-freq-bar-wrap"><div class="emotion-freq-bar" style="width:${(count/maxCount*100).toFixed(0)}%"></div></div>
-        <span class="emotion-freq-count">${count}</span>
-      </div>`).join('');
-  }
-
-  // ── Time of day ──
-  const hourData = Array.from({ length: 24 }, () => ({ count: 0, arousalSum: 0 }));
-  checkins.forEach(c => {
-    const h = new Date(c.created_at).getHours();
-    hourData[h].count++;
-    hourData[h].arousalSum += c.arousal;
-  });
-  const maxHourCount = Math.max(...hourData.map(h => h.count), 1);
-  const todGrid = document.getElementById('todGrid');
-  const todLabels = document.getElementById('todLabelRow');
-  todGrid.innerHTML = hourData.map((h, i) => {
-    if (h.count === 0) return `<div class="tod-col"><div class="tod-cell" style="background:var(--border)"></div></div>`;
-    const intensity = h.count / maxHourCount;
-    const avgA = h.arousalSum / h.count;
-    const col = lerpColor([42,92,69],[232,131,58],(avgA-1)/9);
-    return `<div class="tod-col"><div class="tod-cell" style="background:rgb(${col[0]},${col[1]},${col[2]});opacity:${0.3+intensity*0.7}" title="${i}:00 — ${h.count} check-in(s)"></div></div>`;
-  }).join('');
-  todLabels.innerHTML = hourData.map((_, i) =>
-    `<div class="tod-hour-label">${i % 3 === 0 ? i : ''}</div>`
-  ).join('');
-
-  // ── Chord history ──
-  renderChordHistory(checkins);
-
-  // ── Tempo control ──
-  const tempoSlider = document.getElementById('tempoSlider');
-  const tempoVal    = document.getElementById('tempoVal');
-  if (tempoSlider) {
-    tempoSlider.addEventListener('input', () => {
-      S.chordDuration = parseFloat(tempoSlider.value);
-      tempoVal.textContent = tempoSlider.value + 's';
-    });
-  }
-}
-
-// ═══════════════════════════════════════════════════════
-// CHORD HISTORY RENDER
-// ═══════════════════════════════════════════════════════
-function renderChordHistory(checkins) {
-  const listEl = document.getElementById('chordHistoryList');
-  const playBtn = document.getElementById('playProgressionBtn');
-
-  // Only show check-ins that have note data
-  const withChords = checkins
-    .filter(c => c.selected_notes && c.selected_notes.length > 0)
-    .reverse(); // most recent first
-
-  if (withChords.length === 0) {
-    listEl.innerHTML = '<div class="chord-history-empty">No chord check-ins yet. Select notes during a check-in to build your record.</div>';
-    if (playBtn) playBtn.disabled = true;
-    return;
-  }
-
-  if (playBtn) playBtn.disabled = false;
-
-  listEl.innerHTML = '';
-  const listWrap = document.createElement('div');
-  listWrap.className = 'chord-history-list';
-
-  withChords.forEach((c, idx) => {
-    const noteNames = c.selected_notes.map(pc => getNoteName(pc)).join(' ');
-    const chordName = c.chord_name || c.selected_notes.map(pc => getNoteName(pc)).join(' ');
-    const date = new Date(c.created_at).toLocaleDateString('en-GB', {
-      day: 'numeric', month: 'short',
-    });
-    const time = new Date(c.created_at).toLocaleTimeString('en-GB', {
-      hour: '2-digit', minute: '2-digit',
-    });
-
-    const item = document.createElement('div');
-    item.className = 'chord-history-item';
-    item.innerHTML = `
-      <span class="chord-history-name${!c.chord_name ? ' unnamed' : ''}">${chordName}</span>
-      <span class="chord-history-notes">${noteNames}</span>
-      <span class="chord-history-date">${date} ${time}</span>
-      <button class="chord-play-btn" title="Play this chord">▶</button>
-    `;
-
-    // Play individual chord on button click
-    item.querySelector('.chord-play-btn').addEventListener('click', () => {
-      // Build notes with octave 4 for playback
-      const notes = c.selected_notes.map(pc => ({ pitchClass: pc, octave: 4 }));
-      playChord(notes, { duration: S.chordDuration });
-    });
-
-    listWrap.appendChild(item);
-  });
-
-  listEl.appendChild(listWrap);
-}
-
-// ═══════════════════════════════════════════════════════
-// PROGRESSION PLAYBACK
-// ═══════════════════════════════════════════════════════
-window.toggleProgression = function() {
-  if (S.progressionPlaying) {
-    stopProgression();
-  } else {
-    startProgression();
-  }
-};
-
-function startProgression() {
-  const checkins  = getFilteredCheckins();
-  const withChords = checkins.filter(c => c.selected_notes && c.selected_notes.length > 0);
-  if (withChords.length === 0) return;
-
-  S.progressionPlaying = true;
-  const btn = document.getElementById('playProgressionBtn');
-  if (btn) { btn.textContent = '■ Stop'; }
-
-  let idx = 0;
-
-  function playNext() {
-    if (!S.progressionPlaying || idx >= withChords.length) {
-      stopProgression();
-      return;
-    }
-
-    const c = withChords[idx];
-    const notes = c.selected_notes.map(pc => ({ pitchClass: pc, octave: 4 }));
-    playChord(notes, { duration: S.chordDuration });
-
-    // Highlight current item
-    const items = document.querySelectorAll('.chord-history-item');
-    // Items are reversed (most recent first), so we need to map correctly
-    const reversedIdx = withChords.length - 1 - idx;
-    items.forEach((el, i) => {
-      el.style.background = i === reversedIdx ? 'var(--accent-light)' : '';
-    });
-
-    idx++;
-    S.progressionTimer = setTimeout(playNext, S.chordDuration * 1000 + 300);
-  }
-
-  playNext();
-}
-
-function stopProgression() {
-  S.progressionPlaying = false;
-  if (S.progressionTimer) {
-    clearTimeout(S.progressionTimer);
-    S.progressionTimer = null;
-  }
-  const btn = document.getElementById('playProgressionBtn');
-  if (btn) { btn.textContent = '▶ Play progression'; }
-  // Clear highlights
-  document.querySelectorAll('.chord-history-item').forEach(el => {
-    el.style.background = '';
-  });
-}
-
-// ═══════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════
-function onAuthReady(cb) {
-  if (window._currentUser) { cb(); return; }
-  window.addEventListener('authReady', cb, { once: true });
-}
-
-onAuthReady(async () => {
-  buildNoteGrid();
-  await loadCheckins();
-});
-
-// Expose for inline onclick handlers
-window.goToStep       = window.goToStep;
-window.submitCheckin  = window.submitCheckin;
-window.resetToStep1   = window.resetToStep1;
-window.setPeriod      = window.setPeriod;
-window.handlePlayChord  = handlePlayChord;
-window.handleClearNotes = handleClearNotes;
-window.toggleProgression = window.toggleProgression;
-
+sections.forEach(s => observer.observe(s));
 </script>
 </body>
 </html>
