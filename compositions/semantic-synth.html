@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Semantic Synth — Sensory Intelligence Lab</title>
+
+  <link rel="icon" href="/images/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+
+  <script src="/dashboard/auth-guard.js" type="module"></script>
+  <script type="module">
+    import { applyGatingOnReady } from '/assets/js/gating.js';
+    applyGatingOnReady({ targetSelector: '.synth-interface', moduleName: 'semantic-synth' });
+  </script>
+
+  <!-- compromise.js NLP library -->
+  <script src="https://unpkg.com/compromise@14.14.0/builds/compromise.js"></script>
+
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --font-body:'Inter',sans-serif;
+      --font-heading:'Space Grotesk',sans-serif;
+      --bg:#fff;--surface:#f9f9f7;--border:#e5e5e0;
+      --text:#1a1a1a;--muted:#6b6b6b;
+      --accent:#2a5c45;--accent-light:#edf4f0;--accent-hover:#1e4433;
+
+      /* Voice colors */
+      --v1:#2a5c45;   /* token pulse — green */
+      --v2:#1a4d6b;   /* probability field — blue */
+      --v3:#6b3a1a;   /* semantic cluster — amber */
+      --v4:#4a1a6b;   /* syntactic arch — purple */
+      --v5:#1a5c5c;   /* entropy drone — teal */
+    }
+    html{font-size:16px}
+    body{font-family:var(--font-body);color:var(--text);background:var(--bg);
+      min-height:100vh;display:flex;flex-direction:column;}
+
+    /* ── HEADER ── */
+    .sil-header{border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;
+      display:flex;align-items:center;justify-content:space-between;position:sticky;
+      top:0;background:var(--bg);z-index:100;gap:1rem;width:100%;}
+    .sil-header__wordmark{font-family:var(--font-heading);font-size:1rem;font-weight:600;
+      letter-spacing:-0.01em;white-space:nowrap;flex-shrink:0;text-decoration:none;color:var(--text);}
+    .sil-header__wordmark:hover{color:var(--accent);}
+    .sil-header__nav{display:flex;gap:.25rem;align-items:center;}
+    .sil-header__nav a{font-family:var(--font-body);font-size:.8rem;font-weight:500;
+      text-decoration:none;color:var(--muted);transition:color .15s;white-space:nowrap;padding:.3rem .65rem;}
+    .sil-header__nav a:hover{color:var(--text);}
+    .sil-header__nav a.sil-active{color:var(--accent);font-weight:600;}
+    .sil-header__signout{font-family:var(--font-body);font-size:.8rem;font-weight:500;
+      color:var(--muted);background:none;border:1px solid var(--border);cursor:pointer;
+      padding:.3rem .75rem;transition:color .15s,border-color .15s;white-space:nowrap;line-height:1.6;}
+    .sil-header__signout:hover{color:var(--text);border-color:var(--text);}
+    .sil-header__signout:disabled{opacity:.5;cursor:not-allowed;}
+    .sil-header__toggle{display:none;flex-direction:column;gap:4px;background:none;
+      border:none;cursor:pointer;padding:4px;flex-shrink:0;}
+    .sil-header__toggle span{display:block;width:20px;height:2px;background:var(--text);}
+    @media(max-width:700px){
+      .sil-header{padding:0 1rem;}
+      .sil-header__toggle{display:flex;}
+      .sil-header__nav{display:none;position:absolute;top:56px;left:0;right:0;
+        background:var(--bg);border-bottom:1px solid var(--border);flex-direction:column;
+        align-items:flex-start;padding:.75rem 1rem;gap:0;z-index:99;}
+      .sil-header__nav.sil-open{display:flex;}
+      .sil-header__nav a,.sil-header__signout{font-size:.875rem;padding:.55rem .5rem;}
+      .sil-header__signout{border:none;}
+    }
+
+    /* ── BREADCRUMB ── */
+    .bc{padding:.75rem 1.5rem 0;max-width:1100px;margin:0 auto;width:100%}
+    .bc ol{list-style:none;display:flex;gap:.3rem;align-items:center;font-size:.75rem;color:var(--muted);}
+    .bc li+li::before{content:'/';margin-right:.3rem;color:var(--border)}
+    .bc a{color:var(--muted);text-decoration:none;}
+    .bc a:hover{color:var(--accent);text-decoration:underline;}
+
+    /* ── LAYOUT ── */
+    main{max-width:1100px;margin:0 auto;padding:2.5rem 1.5rem 4rem;flex:1;width:100%;}
+    @media(max-width:600px){main{padding:1.5rem 1rem 3rem}}
+
+    .ph{margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border);}
+    .ph h2{font-family:var(--font-heading);font-size:1.5rem;font-weight:600;
+      letter-spacing:-.02em;line-height:1.2;margin-bottom:.4rem;}
+    .ph p{font-size:.9rem;color:var(--muted);line-height:1.6;max-width:680px;}
+
+    /* ── SYNTH INTERFACE (gated) ── */
+    .synth-interface{display:flex;flex-direction:column;gap:1.25rem;}
+
+    /* ── VOICE LEGEND ── */
+    .voice-legend{display:flex;gap:1rem;flex-wrap:wrap;padding:.75rem 1rem;
+      border:1px solid var(--border);background:var(--surface);}
+    .voice-dot{display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--muted);}
+    .voice-dot-pip{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+    /* ── CONVERSATION AREA ── */
+    .conversation{display:flex;flex-direction:column;gap:0;
+      border:1px solid var(--border);min-height:420px;max-height:600px;
+      overflow-y:auto;background:var(--bg);}
+    .conv-empty{display:flex;align-items:center;justify-content:center;
+      flex:1;min-height:300px;font-size:.85rem;color:var(--muted);
+      font-style:italic;text-align:center;padding:2rem;line-height:1.7;}
+
+    /* User bubble */
+    .conv-user{padding:1rem 1.25rem;border-bottom:1px solid var(--border);
+      background:var(--surface);}
+    .conv-user-label{font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;
+      color:var(--muted);margin-bottom:.4rem;font-family:var(--font-heading);font-weight:600;}
+    .conv-user-text{font-size:.9rem;line-height:1.6;color:var(--text);}
+
+    /* System response bubble */
+    .conv-response{padding:1rem 1.25rem;border-bottom:1px solid var(--border);background:var(--bg);}
+    .conv-response-label{font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;
+      color:var(--accent);margin-bottom:.75rem;font-family:var(--font-heading);font-weight:600;}
+
+    /* Token highlight row */
+    .token-row{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.75rem;
+      padding:.6rem .75rem;background:var(--surface);border:1px solid var(--border);}
+    .token-chip{font-family:'Courier New',monospace;font-size:.72rem;padding:.15rem .45rem;
+      border:1px solid;border-radius:0;cursor:default;transition:opacity .2s;}
+    .token-chip.pos-noun{border-color:#4a1a6b;color:#4a1a6b;background:#f5eefa;}
+    .token-chip.pos-verb{border-color:#1a4d6b;color:#1a4d6b;background:#eaf3fa;}
+    .token-chip.pos-adjective{border-color:#6b3a1a;color:#6b3a1a;background:#faf0e6;}
+    .token-chip.pos-adverb{border-color:#1a5c5c;color:#1a5c5c;background:#eaf5f5;}
+    .token-chip.pos-other{border-color:#c8c8c0;color:var(--muted);background:var(--surface);}
+    .token-chip.playing{opacity:1;box-shadow:0 0 0 2px currentColor;}
+    .token-chip.played{opacity:.45;}
+
+    /* Analysis grid */
+    .analysis-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+      gap:.5rem;margin-bottom:.75rem;}
+    .analysis-cell{border:1px solid var(--border);padding:.5rem .7rem;background:var(--surface);}
+    .analysis-cell-label{font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
+      color:var(--muted);margin-bottom:.2rem;}
+    .analysis-cell-val{font-family:'Courier New',monospace;font-size:.82rem;
+      color:var(--text);font-weight:600;}
+    .analysis-cell-sub{font-size:.65rem;color:var(--muted);margin-top:.1rem;}
+
+    /* Canvas visualization */
+    .vis-wrap{border:1px solid var(--border);background:var(--surface);
+      position:relative;overflow:hidden;}
+    .vis-canvas{display:block;width:100%;}
+    .vis-label{position:absolute;top:6px;left:8px;font-size:.62rem;
+      letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+      font-family:var(--font-heading);font-weight:600;}
+
+    /* Voice activity bars */
+    .voice-bars{display:grid;grid-template-columns:repeat(5,1fr);gap:.4rem;
+      margin-bottom:.5rem;}
+    .voice-bar-wrap{display:flex;flex-direction:column;gap:.2rem;}
+    .voice-bar-label{font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;
+      color:var(--muted);}
+    .voice-bar-track{height:4px;background:var(--border);position:relative;overflow:hidden;}
+    .voice-bar-fill{position:absolute;left:0;top:0;height:100%;width:0%;
+      transition:width .1s;border-radius:0;}
+
+    /* Probability branch display */
+    .prob-row{display:flex;gap:.4rem;flex-wrap:wrap;padding:.5rem .75rem;
+      border:1px solid var(--border);background:var(--bg);margin-bottom:.5rem;}
+    .prob-token{display:flex;flex-direction:column;align-items:center;gap:.15rem;
+      min-width:48px;}
+    .prob-word{font-family:'Courier New',monospace;font-size:.7rem;color:var(--text);}
+    .prob-bar{width:100%;height:3px;background:var(--border);}
+    .prob-bar-fill{height:100%;background:var(--v2);transition:width .3s;}
+    .prob-pct{font-size:.6rem;color:var(--muted);font-variant-numeric:tabular-nums;}
+
+    /* Memory fingerprint */
+    .memory-row{display:flex;align-items:center;gap:.65rem;padding:.5rem .75rem;
+      border:1px solid var(--border);background:var(--surface);font-size:.72rem;color:var(--muted);}
+    .memory-label{font-family:var(--font-heading);font-size:.6rem;font-weight:600;
+      letter-spacing:.1em;text-transform:uppercase;flex-shrink:0;}
+    .memory-pip-row{display:flex;gap:.2rem;align-items:center;}
+    .memory-pip{width:16px;height:16px;border:1px solid var(--border);
+      position:relative;overflow:hidden;}
+    .memory-pip-fill{position:absolute;bottom:0;left:0;right:0;background:var(--accent);}
+    .memory-state{font-size:.7rem;color:var(--accent);font-style:italic;margin-left:auto;}
+
+    /* ── INPUT AREA ── */
+    .input-area{border:1px solid var(--border);background:var(--bg);}
+    .input-inner{display:flex;flex-direction:column;}
+    .input-textarea{width:100%;min-height:80px;padding:1rem;
+      font-family:var(--font-body);font-size:.9rem;color:var(--text);
+      background:var(--bg);border:none;outline:none;resize:vertical;
+      line-height:1.6;border-bottom:1px solid var(--border);}
+    .input-textarea::placeholder{color:#bbb;}
+    .input-footer{display:flex;align-items:center;justify-content:space-between;
+      padding:.6rem 1rem;flex-wrap:wrap;gap:.5rem;}
+    .input-hint{font-size:.72rem;color:var(--muted);}
+    .input-controls{display:flex;gap:.5rem;align-items:center;}
+    .analyze-btn{font-family:var(--font-heading);font-size:.78rem;font-weight:600;
+      background:var(--accent);color:white;border:none;padding:.55rem 1.5rem;
+      cursor:pointer;transition:background .12s;letter-spacing:-.01em;}
+    .analyze-btn:hover{background:var(--accent-hover);}
+    .analyze-btn:disabled{opacity:.45;cursor:not-allowed;}
+    .stop-btn{font-family:var(--font-heading);font-size:.78rem;font-weight:600;
+      background:transparent;color:var(--text);border:1px solid var(--border);
+      padding:.55rem 1rem;cursor:pointer;transition:all .12s;}
+    .stop-btn:hover{border-color:var(--text);}
+    .stop-btn:disabled{opacity:.35;cursor:not-allowed;}
+
+    /* Controls strip */
+    .controls-strip{border:1px solid var(--border);padding:.75rem 1rem;
+      background:var(--surface);display:flex;gap:1.25rem;flex-wrap:wrap;align-items:center;}
+    .ctrl-mini{display:flex;flex-direction:column;gap:.3rem;flex:1;min-width:100px;}
+    .ctrl-mini-label{font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
+      color:var(--muted);display:flex;justify-content:space-between;}
+    .ctrl-mini-val{font-size:.65rem;color:var(--accent);font-weight:600;}
+    input[type=range]{-webkit-appearance:none;width:100%;height:2px;
+      background:var(--border);outline:none;cursor:pointer;}
+    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;
+      border-radius:50%;background:var(--accent);cursor:pointer;}
+    input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;
+      background:var(--accent);cursor:pointer;border:none;}
+
+    /* ── ESSAY ── */
+    .essay{margin-top:2.5rem;padding-top:2rem;border-top:1px solid var(--border);
+      font-size:.9rem;line-height:1.8;color:var(--text);}
+    .essay h2{font-family:var(--font-heading);font-size:1rem;font-weight:600;
+      letter-spacing:-.01em;margin:1.75rem 0 .45rem;}
+    .essay h2:first-child{margin-top:0;}
+    .essay p+p{margin-top:.75rem;}
+    .essay em{font-style:italic;}
+    .essay strong{font-weight:600;}
+    .essay-divider{display:flex;align-items:center;gap:1rem;margin:2.5rem 0 2rem;}
+    .essay-divider-line{flex:1;height:1px;background:var(--border);}
+    .essay-divider-label{font-family:var(--font-heading);font-size:.67rem;font-weight:600;
+      letter-spacing:.14em;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+    .pull-quote{border-left:3px solid var(--accent);padding:.75rem 1rem;margin:1.25rem 0;
+      background:var(--surface);}
+    .pull-quote p{font-size:.88rem;font-style:italic;line-height:1.65;}
+    .pull-quote cite{display:block;font-size:.72rem;color:var(--muted);
+      font-style:normal;margin-top:.35rem;}
+
+    footer{border-top:1px solid var(--border);padding:1.25rem 2rem;
+      text-align:center;font-size:.78rem;color:var(--muted);margin-top:2rem;}
+    footer a{color:var(--muted);text-decoration:none;}
+    footer a:hover{color:var(--accent);}
+
+    @media(max-width:600px){
+      .analysis-grid{grid-template-columns:repeat(2,1fr);}
+      .voice-bars{grid-template-columns:repeat(3,1fr);}
+      .controls-strip{gap:.75rem;}
+    }
+  </style>
+</head>
+<body>
+
+<header class="sil-header">
+  <a class="sil-header__wordmark" href="/dashboard/">Sensory Intelligence Lab</a>
+  <button class="sil-header__toggle" id="silMenuToggle" aria-label="Toggle navigation" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <nav class="sil-header__nav" id="silNav">
+    <a href="/dashboard/">Dashboard</a>
+    <a href="/account/">Account</a>
+    <a href="/booking/">Book a session</a>
+    <button class="sil-header__signout" id="silSignOut">Sign out</button>
+  </nav>
+</header>
+
+<nav aria-label="Breadcrumb" class="bc">
+  <ol>
+    <li><a href="/dashboard/">Dashboard</a></li>
+    <li><a href="/compositions/">Compositions</a></li>
+    <li>Semantic Synth</li>
+  </ol>
+</nav>
+
+<main>
+  <div class="ph">
+    <h2>Semantic Synth</h2>
+    <p>Type anything. The system will parse, weight, predict, and transform your language into a multi-layered sonic structure — not what the text means, but what it costs to process it.</p>
+  </div>
+
+  <div class="synth-interface">
+
+    <!-- Voice legend -->
+    <div class="voice-legend">
+      <span class="voice-dot"><span class="voice-dot-pip" style="background:var(--v1)"></span>Token pulse</span>
+      <span class="voice-dot"><span class="voice-dot-pip" style="background:var(--v2)"></span>Probability field</span>
+      <span class="voice-dot"><span class="voice-dot-pip" style="background:var(--v3)"></span>Semantic clusters</span>
+      <span class="voice-dot"><span class="voice-dot-pip" style="background:var(--v4)"></span>Syntactic structure</span>
+      <span class="voice-dot"><span class="voice-dot-pip" style="background:var(--v5)"></span>Entropy drone</span>
+    </div>
+
+    <!-- Global controls -->
+    <div class="controls-strip">
+      <div class="ctrl-mini">
+        <span class="ctrl-mini-label">Tempo <span class="ctrl-mini-val" id="tempo-val">100 ms</span></span>
+        <input type="range" min="40" max="400" value="100" id="ctrl-tempo"
+          oninput="SS.tempo=+this.value;document.getElementById('tempo-val').textContent=this.value+' ms'">
+      </div>
+      <div class="ctrl-mini">
+        <span class="ctrl-mini-label">Voice mix <span class="ctrl-mini-val" id="mix-val">50%</span></span>
+        <input type="range" min="0" max="100" value="50" id="ctrl-mix"
+          oninput="SS.mixBalance=+this.value/100;document.getElementById('mix-val').textContent=this.value+'%'">
+      </div>
+      <div class="ctrl-mini">
+        <span class="ctrl-mini-label">Complexity <span class="ctrl-mini-val" id="complexity-val">50%</span></span>
+        <input type="range" min="0" max="100" value="50" id="ctrl-complexity"
+          oninput="SS.complexity=+this.value/100;document.getElementById('complexity-val').textContent=this.value+'%'">
+      </div>
+      <div class="ctrl-mini">
+        <span class="ctrl-mini-label">Volume <span class="ctrl-mini-val" id="vol-val">70%</span></span>
+        <input type="range" min="0" max="100" value="70" id="ctrl-vol"
+          oninput="SS.setVolume(+this.value/100);document.getElementById('vol-val').textContent=this.value+'%'">
+      </div>
+    </div>
+
+    <!-- Conversation -->
+    <div class="conversation" id="conversation">
+      <div class="conv-empty" id="conv-empty">
+        Submit a sentence, a paragraph, a question, a fragment.<br>
+        The system will parse it and respond in sound and structure.
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div class="input-area">
+      <div class="input-inner">
+        <textarea class="input-textarea" id="main-input"
+          placeholder="Type anything here — a sentence, a question, a memory, a fragment of thought…"
+          rows="3"></textarea>
+        <div class="input-footer">
+          <span class="input-hint" id="input-hint">Five voices · One system · No understanding</span>
+          <div class="input-controls">
+            <button class="stop-btn" id="stop-btn" onclick="SS.stop()" disabled>■ stop</button>
+            <button class="analyze-btn" id="analyze-btn" onclick="SS.analyze()">analyze →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /synth-interface -->
+
+  <!-- Essay -->
+  <div class="essay">
+    <h2>You are listening to a system trying to understand you</h2>
+    <p>This is not an AI music generator. You are not asking a machine to compose in a style, or to express a mood, or to accompany you emotionally. What you are doing is submitting language to a computational process and listening to what that process sounds like from the inside.</p>
+    <p>When you type a sentence, a human hears meaning — association, memory, tone, weight. A language processing system does something different and stranger: it counts, ranks, clusters, predicts. It breaks the sentence into tokens and looks each one up in a statistical table. It measures the distances between words in a high-dimensional space. It computes a probability distribution over what token most likely comes next, given everything that came before. It does not understand. It computes. And in that computation — in the weights and distances and distributions — there is something that has the structure of music, even though no one intended it to be.</p>
+    <p>Each of the five voices you hear corresponds to a distinct mode of computational analysis. They run in parallel, simultaneously, the way a language model's layers run in parallel — not sequentially reading the text, but processing different aspects of it all at once. Together they form a texture that is precisely as complex as the linguistic structure of what you wrote. Not more expressive, not more emotional — exactly as structured as the language itself.</p>
+
+    <div class="essay-divider">
+      <div class="essay-divider-line"></div>
+      <span class="essay-divider-label">The Five Voices</span>
+      <div class="essay-divider-line"></div>
+    </div>
+
+    <h2>Voice I — Token Pulse</h2>
+    <p>The most literal layer. Each word becomes a single percussive event. Its duration is proportional to its character length. Its pitch is derived from its frequency rank in English — the most common words (the, and, a, is, of) produce the lowest tones; rare or unusual words produce high, bright clicks. Punctuation produces silence. The result is a rhythmic digital pulse that encodes the statistical texture of the vocabulary. Common language sounds low and dense; unusual, specific, or technical language sounds high and sparse. This is genuinely how a language model "sees" rarity — as surprise, as information content, as a moment that requires more processing weight.</p>
+
+    <h2>Voice II — Probability Field</h2>
+    <p>At each word in the sequence, a bigram model estimates what is likely to come next: a probability distribution over possible continuations. The five most probable next tokens are played simultaneously as sine tones, their amplitudes proportional to their probability weights. When the next word is highly predictable — when the context strongly constrains what can follow — the voice produces a clear, harmonically stable chord: one dominant tone, others near-silent. When the next word is uncertain — when many continuations are roughly equally probable — the voice produces a cloud of quiet tones, a diffuse spectral haze. You are hearing the system's confidence fluctuate moment by moment. Predictable language sounds harmonically stable. Uncertain or surprising language sounds diffuse and restless.</p>
+
+    <h2>Voice III — Semantic Clusters</h2>
+    <p>Words are mapped to semantic categories: motion, color, number, body, time, place, emotion, abstraction, relation, nature, and others. Within a sentence, the trajectory through these categories — which semantic domains the words visit and in what order — determines a harmonic field. Words in the same cluster produce unison or close-interval relationships. Semantically distant words produce wider intervals, dissonance, spread. A sentence that stays within one semantic domain sounds harmonically coherent. A sentence that jumps between distant domains — technical vocabulary alongside emotional language, abstract concepts alongside concrete physical description — sounds wide, dissonant, unstable. This is measuring something real about semantic coherence: how much a piece of language is about one thing versus many things simultaneously.</p>
+
+    <h2>Voice IV — Syntactic Architecture</h2>
+    <p>Grammatical function maps directly to register. Nouns anchor a slow, sustained bass. Verbs produce mid-register accents. Adjectives color the high register. Adverbs produce brief high inflections. Conjunctions and prepositions produce transitions. Sentence-final punctuation produces a slow decay, a breath, a pause in the structure. What you hear is the grammatical skeleton of the sentence rendered as register and rhythm. A noun-heavy sentence sounds weighted, sustained, low. A verb-heavy sentence sounds active, mid-register, kinetic. Complex nested clauses produce layered sustained tones that accumulate and slowly resolve. The grammar has a sonic shape that is not arbitrary — it corresponds to real structural properties of the language.</p>
+
+    <h2>Voice V — Entropy Drone</h2>
+    <p>This voice never stops once activated. It computes the running type-token ratio — the ratio of unique words to total words — and the Shannon entropy of the word distribution in everything submitted so far. These are mapped to a slowly evolving ambient texture: a continuous tone whose pitch and spectral content shift with the complexity and variety of the accumulated language. Highly repetitive text produces a low, simple, stable tone. High-entropy, varied, lexically rich text produces a higher, more spectrally complex texture. When you stop submitting, it decays slowly back toward silence. It is the system's background hum — its internal state, its running sense of how much it has been asked to process and how varied that processing has been.</p>
+
+    <div class="essay-divider">
+      <div class="essay-divider-line"></div>
+      <span class="essay-divider-label">George Lewis — Responsive Systems</span>
+      <div class="essay-divider-line"></div>
+    </div>
+
+    <h2>A system that listens</h2>
+    <p>George Lewis is a composer, trombonist, and scholar whose work over the past fifty years has consistently asked what it would mean for a machine not just to produce sound but to <em>listen</em> — to develop a response to what it has heard, to build a history of interaction, to change its behavior based on the accumulated record of a relationship. His composition <em>Voyager</em> (1986–ongoing) is the clearest instantiation of this question: a software system that improvises in real time with human musicians, analyzing their pitch, rhythm, density, and articulation, and generating responses that are neither random nor predetermined. Voyager has a memory, a set of analytical dispositions, a tendency to reinforce or destabilize patterns depending on what it detects in its human partners.</p>
+    <p>Lewis situates this work explicitly within an African American improvisational tradition — the call-and-response structures of blues, jazz, and gospel — while simultaneously engaging with the European tradition of algorithmic composition. The machine is not a neutral tool; it has aesthetic preferences, embedded in its code, that reflect choices made by its composer. When Voyager destabilizes a pattern, that is a compositional decision. When it reinforces one, that is also a decision. The system has a point of view.</p>
+    <p>Semantic Synth inherits this disposition. After each submission, the system builds a fingerprint of your language: its rarity profile, semantic range, syntactic complexity, predictability, and entropy level. It stores these across your session and compares each new input against this accumulated history. Similar language stabilizes the system — voices settle, patterns lock, the probability field narrows. Different language disturbs it — voices spread, patterns fragment, the harmonic field widens. You are not expressing emotion; the system is not responding to meaning. But you are in a structural relationship with it, and that relationship develops over time.</p>
+
+    <div class="essay-divider">
+      <div class="essay-divider-line"></div>
+      <span class="essay-divider-label">Ryoji Ikeda — Data as Material</span>
+      <div class="essay-divider-line"></div>
+    </div>
+
+    <h2>The beauty of unmediated data</h2>
+    <p>Ryoji Ikeda's practice begins with a refusal: he will not translate data into emotion, will not use information as raw material to be shaped into something warmer and more human. In works like <em>test pattern</em> (2008–ongoing) and <em>data.tron</em> (2007), data flows through his systems and is rendered directly — as light, as sound, as the visual pattern of binary information at the speed of transmission. The aesthetic does not soften or humanize; it reveals structure, precision, the intrinsic form of information as it actually exists.</p>
+    <p>The claim underlying this work is significant: that data has its own beauty, and that this beauty is obscured rather than revealed when we insist on mediating it through emotional or narrative frames. A frequency distribution is not a metaphor for something else; it is itself. The rhythm produced by word length is not an approximation of a drum pattern — it is a sonic rendering of a measurable property of language. Ikeda insists on the literalness of the mapping, the directness of the correspondence, the refusal of expressivity in favor of structural honesty.</p>
+
+    <div class="pull-quote">
+      <p>I am not interested in emotion. I am interested in the accuracy of the data.</p>
+      <cite>— Ryoji Ikeda</cite>
+    </div>
+
+    <p>The token pulse voice in Semantic Synth is the most Ikeda-like: each word produces exactly one sound, whose pitch and duration are determined by measurable lexical properties. No interpolation, no smoothing, no emotional shaping. The word <em>the</em> produces a low, brief click because it is the most common word in English and it is short. The word <em>phosphorescent</em> produces a high, sustained tone because it is rare and long. This is not poetic. It is accurate.</p>
+
+    <div class="essay-divider">
+      <div class="essay-divider-line"></div>
+      <span class="essay-divider-label">What Language Models Actually Do</span>
+      <div class="essay-divider-line"></div>
+    </div>
+
+    <h2>Prediction without understanding</h2>
+    <p>A large language model does not understand language in the way you understand language. It has no intention, no referential experience, no memory of having learned what words mean from the world. What it has is a very large table of statistical relationships between tokens, learned from an enormous corpus of text, which allows it to predict — with remarkable accuracy — what token is likely to come next given a sequence of previous tokens.</p>
+    <p>This is genuinely strange and worth sitting with. The model has never seen a chair. It has processed, during training, millions of sentences that contain the word <em>chair</em> in proximity to words like <em>sit</em>, <em>table</em>, <em>wooden</em>, <em>comfortable</em>, <em>leg</em>. From this, it has built a dense web of statistical associations that allows it to use the word <em>chair</em> correctly in almost any context. But there is no chair in the model. There is only the pattern of the word <em>chair</em> in relation to other words.</p>
+    <p>When a language model processes a sentence, it runs it through many layers of attention — a mechanism that computes, for each word, how much it should influence the processing of every other word in the sequence. The word <em>bank</em> in "I sat by the bank" attends strongly to "river" if that word is present; the same word in "I deposited money at the bank" attends strongly to "deposited" and "money." These attention patterns are not programmed; they emerge from training. They are the model's learned sense of which words are relevant to which other words in which contexts.</p>
+    <p>The probability field voice makes this process partially audible. The bigram model embedded in this piece is incomparably simpler than a real language model — a two-word window rather than thousands of tokens of context, a small corpus rather than the breadth of human written language. But the <em>structure</em> is the same: at each moment, a distribution over possible continuations, with some possibilities weighted heavily and others nearly excluded. When you hear the probability field produce a clear chord, you are hearing the system's near-certainty about what comes next. When you hear a diffuse cloud of tones, you are hearing its uncertainty — the moment when many continuations are roughly equally probable, when the language has arrived at a point of high branching factor.</p>
+    <p>The philosopher Ludwig Wittgenstein wrote that if a lion could speak, we could not understand it — because understanding requires shared forms of life, shared practices, a world held in common. A language model can speak with remarkable fluency, and we can understand its words. But its relationship to those words is nothing like ours. It has no form of life. It has distributions. And those distributions, made audible, are what you have been hearing.</p>
+  </div>
+
+</main>
+
+<footer>
+  <p>Jordan Elias Music Therapy · Berlin ·
+    <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a> ·
+    <a href="https://jordanelias.de/" target="_blank" rel="noopener">jordanelias.de</a>
+  </p>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   SEMANTIC SYNTH — Full Engine
+   Five audio voices + canvas visualization + memory system
+═══════════════════════════════════════════════════════════ */
+
+/* ── SEMANTIC CLUSTER TABLE ──
+   20 clusters, ~500 words total.
+   Each word maps to a cluster index (0-19).
+   Clusters determine harmonic field in Voice III.
+─────────────────────────────────────────────────────────── */
+const CLUSTERS = {
+  // 0 — MOTION / ACTION
+  run:0,walk:0,move:0,jump:0,fall:0,rise:0,fly:0,swim:0,climb:0,slide:0,
+  push:0,pull:0,turn:0,spin:0,flow:0,drift:0,travel:0,speed:0,rush:0,crawl:0,
+  leap:0,dance:0,roll:0,race:0,chase:0,flee:0,approach:0,retreat:0,advance:0,
+  // 1 — PERCEPTION / SENSES
+  see:1,hear:1,feel:1,touch:1,smell:1,taste:1,look:1,watch:1,listen:1,sense:1,
+  notice:1,observe:1,bright:1,loud:1,quiet:1,dark:1,warm:1,cold:1,soft:1,hard:1,
+  light:1,shadow:1,color:1,sound:1,noise:1,silence:1,sharp:1,smooth:1,rough:1,
+  // 2 — EMOTION / AFFECT
+  love:2,hate:2,fear:2,joy:2,sad:2,anger:2,hope:2,grief:2,longing:2,desire:2,
+  happy:2,lonely:2,anxious:2,calm:2,excited:2,bored:2,proud:2,ashamed:2,
+  pleasure:2,pain:2,beauty:2,wonder:2,awe:2,disgust:2,surprise:2,nostalgia:2,
+  // 3 — COGNITION / MIND
+  think:3,know:3,believe:3,understand:3,remember:3,forget:3,imagine:3,dream:3,
+  learn:3,reason:3,idea:3,thought:3,mind:3,memory:3,concept:3,theory:3,
+  knowledge:3,wisdom:3,intelligence:3,consciousness:3,perception:3,attention:3,
+  // 4 — TIME
+  now:4,then:4,before:4,after:4,past:4,future:4,present:4,always:4,never:4,
+  moment:4,time:4,day:4,night:4,year:4,hour:4,second:4,century:4,age:4,
+  history:4,duration:4,sequence:4,rhythm:4,cycle:4,eternal:4,temporary:4,
+  // 5 — SPACE / PLACE
+  here:5,there:5,where:5,place:5,space:5,location:5,near:5,far:5,above:5,below:5,
+  inside:5,outside:5,between:5,around:5,through:5,across:5,distance:5,depth:5,
+  height:5,surface:5,edge:5,center:5,boundary:5,infinite:5,contained:5,
+  // 6 — NATURE / WORLD
+  water:6,fire:6,earth:6,wind:6,tree:6,stone:6,river:6,mountain:6,sky:6,sea:6,
+  sun:6,moon:6,star:6,cloud:6,rain:6,snow:6,forest:6,desert:6,ocean:6,
+  flower:6,grass:6,leaf:6,bird:6,animal:6,plant:6,soil:6,air:6,
+  // 7 — BODY / PHYSICAL
+  hand:7,eye:7,head:7,heart:7,face:7,body:7,blood:7,breath:7,bone:7,skin:7,
+  arm:7,leg:7,voice:7,mouth:7,ear:7,finger:7,back:7,chest:7,shoulder:7,
+  weight:7,strength:7,physical:7,flesh:7,nerve:7,brain:7,
+  // 8 — LANGUAGE / COMMUNICATION
+  word:8,speak:8,say:8,tell:8,ask:8,answer:8,write:8,read:8,language:8,text:8,
+  sentence:8,story:8,meaning:8,symbol:8,sign:8,letter:8,voice2:8,communicate:8,
+  message:8,describe:8,explain:8,express:8,translate:8,interpret:8,
+  // 9 — NUMBER / QUANTITY
+  one:9,two:9,three:9,four:9,five:9,six:9,many:9,few:9,all:9,none:9,
+  number:9,count:9,measure:9,size:9,amount:9,more:9,less:9,half:9,whole:9,
+  infinite2:9,zero:9,hundred:9,thousand:9,million:9,ratio:9,frequency:9,
+  // 10 — STRUCTURE / ORDER
+  system:10,order:10,pattern:10,structure:10,form:10,rule:10,law:10,logic:10,
+  organize:10,arrange:10,sequence2:10,layer:10,network:10,connection:10,grid:10,
+  hierarchy:10,process:10,algorithm:10,code:10,data:10,function:10,
+  // 11 — RELATION / SOCIAL
+  together:11,apart:11,relation:11,between2:11,with:11,without:11,against:11,
+  friend:11,family:11,other:11,self:11,we:11,they:11,community:11,society:11,
+  power:11,control:11,freedom:11,justice:11,equality:11,conflict:11,
+  // 12 — CREATION / ART
+  make:12,create:12,build:12,design:12,art:12,music:12,image:12,paint:12,
+  compose:12,form2:12,shape:12,craft:12,work:12,produce:12,construct:12,
+  express2:12,imagine2:12,invention:12,original:12,poem:12,song:12,
+  // 13 — CHANGE / TRANSFORMATION
+  change:13,transform:13,become:13,evolve:13,grow:13,decay:13,break:13,fix:13,
+  shift:13,alter:13,adapt:13,emerge:13,collapse:13,expand:13,contract:13,
+  dissolve:13,crystallize:13,mutate:13,develop:13,transition:13,
+  // 14 — ABSTRACTION / CONCEPT
+  abstract:14,concept2:14,idea2:14,theory2:14,meaning2:14,truth:14,reality:14,
+  existence:14,essence:14,nature2:14,being:14,nothing:14,everything:14,
+  possible:14,impossible:14,necessary:14,chance:14,reason2:14,cause:14,
+  // 15 — TECHNOLOGY / MACHINE
+  machine:15,computer:15,technology:15,digital:15,electronic:15,signal:15,
+  network2:15,program:15,software:15,hardware:15,device:15,interface:15,
+  system2:15,artificial:15,synthetic:15,processor:15,memory2:15,
+  // 16 — LIGHT / COLOR
+  red:16,blue:16,green:16,yellow:16,white:16,black:16,purple:16,orange:16,
+  pink:16,grey:16,golden:16,silver:16,glow:16,shine:16,reflect:16,transparent:16,
+  opaque:16,luminous:16,dim:16,bright2:16,hue:16,spectrum:16,
+  // 17 — SCALE / INTENSITY
+  small:17,large:17,tiny:17,huge:17,vast:17,minute:17,enormous:17,massive:17,
+  intense:17,gentle:17,extreme:17,moderate:17,deep:17,shallow:17,wide:17,
+  narrow:17,strong:17,weak:17,heavy:17,light2:17,dense:17,sparse:17,
+  // 18 — NEGATION / UNCERTAINTY
+  not:18,never2:18,nothing2:18,unknown:18,uncertain:18,ambiguous:18,
+  unclear:18,lost:18,absent:18,empty:18,void:18,missing:18,hidden:18,
+  invisible:18,silent:18,broken:18,incomplete:18,fragment:18,
+  // 19 — COMMON FUNCTION WORDS (lowest semantic weight)
+  the:19,a:19,an:19,is:19,are:19,was:19,were:19,be:19,been:19,being2:19,
+  have:19,has:19,had:19,do:19,does:19,did:19,will:19,would:19,could:19,
+  should:19,may:19,might:19,can:19,of:19,in:19,to:19,for:19,on:19,
+  at:19,by:19,from:19,up:19,about:19,into:19,over:19,after2:19
+};
+
+/* Cluster pitch bands (Hz) — each cluster occupies a frequency region */
+const CLUSTER_BASE_HZ = [
+  180,   // 0 motion
+  220,   // 1 perception
+  261,   // 2 emotion
+  311,   // 3 cognition
+  370,   // 4 time
+  440,   // 5 space
+  523,   // 6 nature
+  392,   // 7 body
+  466,   // 8 language
+  554,   // 9 number
+  659,   // 10 structure
+  349,   // 11 relation
+  415,   // 12 creation
+  494,   // 13 change
+  587,   // 14 abstraction
+  698,   // 15 technology
+  622,   // 16 light/color
+  277,   // 17 scale
+  233,   // 18 negation
+  165,   // 19 function words
+];
+
+/* English word frequency rank lookup (top 500 by relative rank 0-1) */
+const FREQ_RANK = (function(){
+  const topWords = [
+    'the','of','and','a','to','in','is','you','that','it','he','was','for',
+    'on','are','as','with','his','they','i','at','be','this','have','from',
+    'or','one','had','by','word','but','not','what','all','were','we','when',
+    'your','can','said','there','use','an','each','which','she','do','how',
+    'their','if','will','up','other','about','out','many','then','them','these',
+    'so','some','her','would','make','like','him','into','time','has','look',
+    'two','more','write','go','see','number','no','way','could','people','my',
+    'than','first','water','been','call','who','oil','its','now','find','long',
+    'down','day','did','get','come','made','may','part','over','new','sound',
+    'take','only','little','work','know','place','year','live','me','back',
+    'give','most','very','after','thing','our','just','name','good','sentence',
+    'man','think','say','great','where','help','through','much','before','line',
+    'right','too','mean','old','any','same','tell','boy','follow','came','want',
+    'show','also','around','form','three','small','set','put','end','does','another',
+    'well','large','need','hand','high','such','play','spell','air','away','animal',
+    'house','point','page','letter','mother','answer','found','study','still','learn',
+    'plant','cover','food','sun','four','between','state','keep','eye','never',
+    'last','let','thought','city','tree','cross','farm','hard','start','might',
+    'story','saw','far','sea','draw','left','late','run','dont','while','press',
+    'close','night','real','life','few','open','seem','together','next','white',
+    'children','begin','got','walk','example','ease','paper','often','always',
+    'music','those','both','mark','book','letter','until','mile','river','car',
+    'feet','care','second','group','carry','took','rain','eat','room','friend',
+    'began','idea','fish','mountain','stop','once','base','hear','horse','cut',
+    'sure','watch','color','face','wood','main','enough','plain','girl','usual',
+    'young','ready','above','ever','red','list','though','feel','talk','bird',
+    'soon','body','dog','family','direct','pose','leave','song','measure','door'
+  ];
+  const map = {};
+  topWords.forEach((w,i) => { map[w] = 1 - (i / topWords.length); });
+  return map;
+})();
+
+/* Bigram probabilities — a curated set for prediction voice */
+const BIGRAMS = {
+  'the': [['world',18],['time',15],['day',14],['way',12],['night',10],
+           ['light',9],['dark',7],['end',6],['same',5],['mind',4]],
+  'i': [['think',20],['feel',18],['know',15],['want',12],['see',11],
+         ['love',10],['was',9],['am',8],['can',7],['have',6]],
+  'in': [['the',25],['a',18],['this',14],['my',12],['time',10],
+          ['silence',8],['light',7],['dark',6],['space',5],['all',4]],
+  'a': [['new',16],['world',14],['moment',12],['long',10],['small',9],
+         ['deep',8],['single',7],['strange',6],['slow',5],['great',4]],
+  'it': [['is',22],['was',18],['feels',12],['seems',10],['moves',8],
+          ['turns',7],['grows',6],['falls',5],['rises',4],['breaks',3]],
+  'and': [['the',20],['a',15],['then',12],['so',10],['yet',8],
+           ['it',7],['all',6],['in',5],['nothing',4],['silence',3]],
+  'is': [['a',18],['the',15],['not',14],['like',12],['still',10],
+          ['here',8],['there',7],['always',6],['never',5],['just',4]],
+  'of': [['the',28],['a',15],['time',12],['light',10],['sound',8],
+          ['silence',7],['space',6],['all',5],['nothing',4],['being',3]],
+  'to': [['be',20],['the',18],['a',14],['see',10],['feel',9],
+          ['know',8],['find',7],['hear',6],['understand',5],['say',4]],
+  'this': [['is',22],['was',15],['world',12],['moment',10],['place',8],
+             ['feeling',7],['system',6],['pattern',5],['light',4],['voice',3]],
+  'that': [['is',20],['the',18],['a',12],['was',10],['we',8],
+             ['there',7],['this',6],['never',5],['always',4],['makes',3]],
+  'not': [['a',18],['the',15],['what',12],['how',10],['why',8],
+           ['just',7],['only',6],['here',5],['there',4],['yet',3]],
+  'all': [['the',20],['of',18],['things',14],['is',10],['are',8],
+           ['that',7],['we',6],['time',5],['light',4],['silence',3]],
+  'what': [['is',25],['was',18],['if',12],['we',10],['you',8],
+             ['the',7],['remains',6],['matters',5],['happens',4],['exists',3]],
+  'time': [['and',15],['is',14],['to',12],['the',10],['has',8],
+             ['passes',7],['moves',6],['stops',5],['holds',4],['breaks',3]],
+};
+
+/* ── ENGLISH WORD FREQUENCY (for token pitch) ── */
+function getFreqScore(word) {
+  const w = word.toLowerCase().replace(/[^a-z]/g,'');
+  if (FREQ_RANK[w] !== undefined) return FREQ_RANK[w];
+  if (w.length <= 2) return 0.9;
+  if (w.length <= 4) return 0.5;
+  if (w.length <= 7) return 0.25;
+  return 0.1;
+}
+
+/* ── SEMANTIC CLUSTER LOOKUP ── */
+function getCluster(word) {
+  const w = word.toLowerCase().replace(/[^a-z]/g,'');
+  return CLUSTERS[w] !== undefined ? CLUSTERS[w] : -1;
+}
+
+/* ══════════════════════════════════════════════════════════
+   AUDIO ENGINE
+══════════════════════════════════════════════════════════ */
+let AC = null;
+let masterGain = null;
+let entropyOsc = null, entropyGain = null, entropyFilter = null;
+let entropyOsc2 = null;
+
+function initAudio() {
+  if (AC) return;
+  AC = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = AC.createGain();
+  masterGain.gain.value = SS.volume;
+  // Soft limiter
+  const limiter = AC.createDynamicsCompressor();
+  limiter.threshold.value = -8;
+  limiter.knee.value = 6;
+  limiter.ratio.value = 10;
+  limiter.attack.value = 0.01;
+  limiter.release.value = 0.15;
+  masterGain.connect(limiter);
+  limiter.connect(AC.destination);
+}
+
+function resumeAudio() {
+  if (!AC) initAudio();
+  if (AC.state === 'suspended') AC.resume();
+  return AC;
+}
+
+/* ── Smooth gain helper ── */
+function ramp(param, val, t, dur) {
+  param.setTargetAtTime(val, t || AC.currentTime, dur || 0.05);
+}
+
+/* ── Start entropy drone ── */
+function startEntropyDrone(entropy) {
+  if (!AC) return;
+  const now = AC.currentTime;
+  const freq = 80 + entropy * 120;
+
+  if (!entropyOsc) {
+    entropyFilter = AC.createBiquadFilter();
+    entropyFilter.type = 'lowpass';
+    entropyFilter.frequency.value = 200 + entropy * 800;
+    entropyFilter.Q.value = 1.5;
+
+    entropyGain = AC.createGain();
+    entropyGain.gain.setValueAtTime(0, now);
+
+    entropyOsc = AC.createOscillator();
+    entropyOsc.type = 'sawtooth';
+    entropyOsc.frequency.value = freq;
+
+    entropyOsc2 = AC.createOscillator();
+    entropyOsc2.type = 'sine';
+    entropyOsc2.frequency.value = freq * 1.5;
+
+    const g2 = AC.createGain();
+    g2.gain.value = 0.3;
+    entropyOsc2.connect(g2);
+    g2.connect(entropyFilter);
+    entropyOsc.connect(entropyFilter);
+    entropyFilter.connect(entropyGain);
+    entropyGain.connect(masterGain);
+
+    entropyOsc.start();
+    entropyOsc2.start();
+  }
+
+  ramp(entropyGain.gain, 0.12 + entropy * 0.1, now, 0.3);
+  ramp(entropyOsc.frequency, freq, now, 0.8);
+  ramp(entropyOsc2.frequency, freq * 1.5, now, 0.8);
+  ramp(entropyFilter.frequency, 200 + entropy * 1200, now, 0.5);
+}
+
+function fadeEntropyDrone() {
+  if (!entropyGain || !AC) return;
+  ramp(entropyGain.gain, 0, AC.currentTime, 1.5);
+}
+
+/* ── Voice 1: Token Pulse ── */
+function playTokenPulse(freqScore, charLen, time) {
+  if (!AC) return;
+  const now = time || AC.currentTime;
+  const freq = 120 + (1 - freqScore) * 2200; // rare = high
+  const dur  = 0.04 + (charLen / 20) * 0.12; // longer words = longer pulse
+
+  const osc  = AC.createOscillator();
+  const gain = AC.createGain();
+  osc.type = 'square';
+  osc.frequency.value = freq;
+
+  // Brief sharp envelope
+  gain.gain.setValueAtTime(0, now);
+  gain.gain.linearRampToValueAtTime(0.18, now + 0.005);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+
+  const filt = AC.createBiquadFilter();
+  filt.type = 'highpass';
+  filt.frequency.value = 800;
+  filt.Q.value = 0.5;
+
+  osc.connect(filt);
+  filt.connect(gain);
+  gain.connect(masterGain);
+  osc.start(now);
+  osc.stop(now + dur + 0.01);
+}
+
+/* ── Voice 2: Probability Field ── */
+function playProbabilityChord(predictions, time) {
+  if (!AC || !predictions.length) return;
+  const now = time || AC.currentTime;
+  const oscs = [];
+
+  predictions.slice(0, 5).forEach((pred, i) => {
+    const [word, weight] = pred;
+    const freqScore = getFreqScore(word);
+    const freq = 220 + freqScore * 660 + i * 40;
+    const amp  = (weight / 100) * 0.12;
+
+    const osc  = AC.createOscillator();
+    const gain = AC.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(amp, now + 0.08);
+    gain.gain.setTargetAtTime(0, now + 0.5, 0.2);
+
+    osc.connect(gain);
+    gain.connect(masterGain);
+    osc.start(now);
+    osc.stop(now + 1.2);
+    oscs.push(osc);
+  });
+  return oscs;
+}
+
+/* ── Voice 3: Semantic Cluster Field ── */
+function playSemanticCluster(clusterA, clusterB, time) {
+  if (!AC || clusterA < 0) return;
+  const now  = time || AC.currentTime;
+  const freqA = CLUSTER_BASE_HZ[clusterA];
+  const freqB = clusterB >= 0 ? CLUSTER_BASE_HZ[clusterB] : freqA;
+  const distance = Math.abs(clusterA - clusterB) / 20;
+
+  // Two tones: interval width proportional to semantic distance
+  [freqA, freqB * (1 + distance * 0.5)].forEach((freq, i) => {
+    const osc  = AC.createOscillator();
+    const gain = AC.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.07, now + 0.12);
+    gain.gain.setTargetAtTime(0, now + 0.3, 0.25);
+
+    const filt = AC.createBiquadFilter();
+    filt.type = 'bandpass';
+    filt.frequency.value = freq;
+    filt.Q.value = 3;
+
+    osc.connect(filt);
+    filt.connect(gain);
+    gain.connect(masterGain);
+    osc.start(now);
+    osc.stop(now + 1.0);
+  });
+}
+
+/* ── Voice 4: Syntactic Architecture ── */
+function playSyntax(pos, time) {
+  if (!AC) return;
+  const now = time || AC.currentTime;
+
+  const posMap = {
+    noun:     { freq: 110, dur: 0.35, amp: 0.14, type: 'triangle' },
+    verb:     { freq: 220, dur: 0.18, amp: 0.10, type: 'sine' },
+    adjective:{ freq: 440, dur: 0.12, amp: 0.07, type: 'sine' },
+    adverb:   { freq: 660, dur: 0.09, amp: 0.05, type: 'sine' },
+    preposition:{freq:165, dur: 0.08, amp: 0.04, type: 'triangle'},
+    conjunction:{freq:185, dur: 0.06, amp: 0.04, type: 'sine'},
+    other:    { freq: 196, dur: 0.06, amp: 0.03, type: 'sine' },
+  };
+
+  const cfg = posMap[pos] || posMap.other;
+  const osc  = AC.createOscillator();
+  const gain = AC.createGain();
+  osc.type = cfg.type;
+  osc.frequency.value = cfg.freq;
+
+  gain.gain.setValueAtTime(0, now);
+  gain.gain.linearRampToValueAtTime(cfg.amp, now + 0.015);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + cfg.dur);
+
+  osc.connect(gain);
+  gain.connect(masterGain);
+  osc.start(now);
+  osc.stop(now + cfg.dur + 0.01);
+}
+
+/* ══════════════════════════════════════════════════════════
+   NLP ANALYSIS ENGINE
+══════════════════════════════════════════════════════════ */
+function analyzeText(text) {
+  const doc = typeof nlp !== 'undefined' ? nlp(text) : null;
+
+  /* Tokenize */
+  const rawTokens = text.match(/\b\w+\b|[.,!?;:]/g) || [];
+  const words = rawTokens.filter(t => /\w/.test(t));
+
+  /* POS tags via compromise.js */
+  const posMap = {};
+  if (doc) {
+    doc.nouns().out('array').forEach(w => { posMap[w.toLowerCase()] = 'noun'; });
+    doc.verbs().out('array').forEach(w => { posMap[w.toLowerCase()] = 'verb'; });
+    doc.adjectives().out('array').forEach(w => { posMap[w.toLowerCase()] = 'adjective'; });
+    doc.adverbs().out('array').forEach(w => { posMap[w.toLowerCase()] = 'adverb'; });
+  }
+
+  /* Per-token analysis */
+  const tokens = words.map(w => {
+    const lower = w.toLowerCase();
+    return {
+      word: w,
+      lower,
+      freqScore: getFreqScore(w),
+      cluster: getCluster(w),
+      pos: posMap[lower] || 'other',
+      len: w.length,
+    };
+  });
+
+  /* Statistical analysis */
+  const wordCounts = {};
+  words.forEach(w => { const l = w.toLowerCase(); wordCounts[l] = (wordCounts[l]||0)+1; });
+  const uniqueWords = Object.keys(wordCounts).length;
+  const ttr = words.length > 0 ? uniqueWords / words.length : 0;
+  const avgFreq = tokens.reduce((s,t) => s + t.freqScore, 0) / (tokens.length || 1);
+  const avgLen  = tokens.reduce((s,t) => s + t.len, 0) / (tokens.length || 1);
+
+  /* Shannon entropy of word distribution */
+  const entropy = Object.values(wordCounts).reduce((h, cnt) => {
+    const p = cnt / words.length;
+    return h - p * Math.log2(p);
+  }, 0) / Math.max(1, Math.log2(uniqueWords || 2));
+
+  /* Semantic cluster distribution */
+  const clusterCounts = new Array(20).fill(0);
+  tokens.forEach(t => { if (t.cluster >= 0) clusterCounts[t.cluster]++; });
+  const dominantCluster = clusterCounts.indexOf(Math.max(...clusterCounts));
+  const semanticSpread = clusterCounts.filter(c=>c>0).length / 20;
+
+  /* Predictions: bigram lookup */
+  const predictions = {};
+  for (let i = 0; i < tokens.length - 1; i++) {
+    const key = tokens[i].lower;
+    if (BIGRAMS[key]) {
+      predictions[key] = BIGRAMS[key];
+    }
+  }
+  // Also predict after last word
+  const lastWord = tokens[tokens.length-1]?.lower;
+  const lastPred = lastWord && BIGRAMS[lastWord] ? BIGRAMS[lastWord] : null;
+
+  /* Fingerprint for memory system */
+  const fingerprint = [
+    1 - avgFreq,         // rarity
+    semanticSpread,      // semantic diversity
+    posDistribution(tokens), // syntactic diversity
+    lastPred ? lastPred[0][1]/100 : 0.5, // predictability
+    entropy              // entropy
+  ];
+
+  return {
+    tokens, words, ttr, avgFreq, avgLen, entropy,
+    clusterCounts, dominantCluster, semanticSpread,
+    wordCounts, uniqueWords, predictions, lastPred,
+    fingerprint,
+    sentences: (text.match(/[.!?]+/g)||[]).length || 1,
+  };
+}
+
+function posDistribution(tokens) {
+  const counts = {};
+  tokens.forEach(t => { counts[t.pos] = (counts[t.pos]||0)+1; });
+  return Object.keys(counts).length / 7;
+}
+
+/* ══════════════════════════════════════════════════════════
+   CANVAS VISUALIZATION
+══════════════════════════════════════════════════════════ */
+function buildVisualization(analysis, container) {
+  const wrap = document.createElement('div');
+  wrap.className = 'vis-wrap';
+
+  const canvas = document.createElement('canvas');
+  canvas.className = 'vis-canvas';
+  canvas.height = 180;
+  wrap.appendChild(canvas);
+
+  const label = document.createElement('div');
+  label.className = 'vis-label';
+  label.textContent = 'token field · semantic connections · probability branches';
+  wrap.appendChild(label);
+
+  container.appendChild(wrap);
+
+  // Draw after layout
+  requestAnimationFrame(() => {
+    const W = canvas.offsetWidth;
+    canvas.width = W;
+    const ctx = canvas.getContext('2d');
+    drawVis(ctx, W, 180, analysis);
+  });
+
+  return canvas;
+}
+
+function drawVis(ctx, W, H, analysis) {
+  const { tokens } = analysis;
+  if (!tokens.length) return;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Background
+  ctx.fillStyle = '#f9f9f7';
+  ctx.fillRect(0, 0, W, H);
+
+  // Grid lines (Ikeda-inspired)
+  ctx.strokeStyle = '#e5e5e0';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 40) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  for (let y = 0; y < H; y += 40) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+
+  // Place tokens on a line, spaced evenly
+  const margin = 24;
+  const usable = W - margin * 2;
+  const nodePositions = [];
+
+  tokens.forEach((t, i) => {
+    const x = margin + (i / Math.max(tokens.length - 1, 1)) * usable;
+    const y = H / 2 + (t.cluster >= 0 ? (t.cluster - 9.5) * 5 : 0);
+    nodePositions.push({ x, y, token: t });
+  });
+
+  // Draw semantic connections (lines between nearby clusters)
+  nodePositions.forEach((a, i) => {
+    nodePositions.forEach((b, j) => {
+      if (j <= i) return;
+      if (a.token.cluster < 0 || b.token.cluster < 0) return;
+      const dist = Math.abs(a.token.cluster - b.token.cluster);
+      if (dist > 4) return; // only nearby clusters
+      const alpha = (1 - dist / 4) * 0.25;
+      ctx.strokeStyle = `rgba(42,92,69,${alpha})`;
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      // Curved arc
+      const cx = (a.x + b.x) / 2;
+      const cy = a.y - 20 - dist * 8;
+      ctx.quadraticCurveTo(cx, cy, b.x, b.y);
+      ctx.stroke();
+    });
+  });
+
+  // Draw nodes
+  const POS_COLORS = {
+    noun: '#4a1a6b', verb: '#1a4d6b', adjective: '#6b3a1a',
+    adverb: '#1a5c5c', other: '#999'
+  };
+
+  nodePositions.forEach(({ x, y, token }) => {
+    const r = 3 + (1 - token.freqScore) * 5; // rare = bigger
+    const color = POS_COLORS[token.pos] || POS_COLORS.other;
+
+    // Glow for rare words
+    if (token.freqScore < 0.3) {
+      ctx.beginPath();
+      ctx.arc(x, y, r + 3, 0, Math.PI * 2);
+      ctx.fillStyle = color + '22';
+      ctx.fill();
+    }
+
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+  });
+
+  // Draw probability branches from last word
+  if (analysis.lastPred) {
+    const lastPos = nodePositions[nodePositions.length - 1];
+    if (lastPos) {
+      analysis.lastPred.slice(0, 5).forEach(([word, weight], i) => {
+        const angle = -0.6 + i * 0.3;
+        const len = 30 + (weight / 100) * 50;
+        const ex = lastPos.x + Math.cos(angle) * len;
+        const ey = lastPos.y + Math.sin(angle) * len;
+        const alpha = weight / 100;
+
+        ctx.strokeStyle = `rgba(26,77,107,${alpha * 0.7})`;
+        ctx.lineWidth = weight / 25;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(lastPos.x, lastPos.y);
+        ctx.lineTo(ex, ey);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = `rgba(26,77,107,${alpha * 0.6})`;
+        ctx.font = `${9 + weight/20}px 'Courier New', monospace`;
+        ctx.fillText(word, ex + 3, ey + 3);
+      });
+    }
+  }
+
+  // X-axis: word labels
+  ctx.fillStyle = '#bbb';
+  ctx.font = '8px "Courier New", monospace';
+  ctx.textAlign = 'center';
+  nodePositions.forEach(({ x, token }) => {
+    if (token.word.length < 12) ctx.fillText(token.word, x, H - 6);
+  });
+  ctx.textAlign = 'left';
+}
+
+/* ══════════════════════════════════════════════════════════
+   PLAYBACK SEQUENCER
+══════════════════════════════════════════════════════════ */
+let playbackTimer = null;
+let isPlaying = false;
+
+function schedulePlayback(analysis, responseEl) {
+  if (isPlaying) stopPlayback();
+  isPlaying = true;
+
+  document.getElementById('stop-btn').disabled = false;
+  document.getElementById('analyze-btn').disabled = true;
+
+  const { tokens } = analysis;
+  const tempo = SS.tempo;
+  let t = 0;
+  let tokenIdx = 0;
+
+  // Get token chips for highlighting
+  const chips = responseEl.querySelectorAll('.token-chip');
+
+  // Start entropy drone immediately
+  startEntropyDrone(analysis.entropy);
+
+  // Update voice bars
+  const bars = responseEl.querySelectorAll('.voice-bar-fill');
+
+  function playNextToken() {
+    if (!isPlaying || tokenIdx >= tokens.length) {
+      finishPlayback();
+      return;
+    }
+
+    const tok = tokens[tokenIdx];
+    const now = AC ? AC.currentTime : 0;
+
+    // Highlight chip
+    chips.forEach(c => c.classList.remove('playing'));
+    if (chips[tokenIdx]) {
+      chips[tokenIdx].classList.add('playing');
+      if (tokenIdx > 0 && chips[tokenIdx-1]) chips[tokenIdx-1].classList.add('played');
+      chips[tokenIdx].scrollIntoView({ behavior:'smooth', block:'nearest' });
+    }
+
+    // Voice 1: token pulse
+    playTokenPulse(tok.freqScore, tok.len, now);
+    if (bars[0]) { bars[0].style.width = ((1-tok.freqScore)*100)+'%'; }
+
+    // Voice 2: probability field (for words in bigram table)
+    const pred = BIGRAMS[tok.lower];
+    if (pred) {
+      playProbabilityChord(pred, now + 0.02);
+      if (bars[1]) { bars[1].style.width = (pred[0][1])+'%'; }
+    }
+
+    // Voice 3: semantic clusters
+    if (tokenIdx > 0 && tok.cluster >= 0) {
+      const prevCluster = tokens[tokenIdx-1].cluster;
+      playSemanticCluster(tok.cluster, prevCluster, now + 0.01);
+      if (bars[2]) {
+        const dist = Math.abs(tok.cluster - prevCluster) / 20 * 100;
+        bars[2].style.width = dist+'%';
+      }
+    }
+
+    // Voice 4: syntactic
+    playSyntax(tok.pos, now + 0.005);
+    const posWeights = {noun:100,verb:80,adjective:60,adverb:40,other:20};
+    if (bars[3]) bars[3].style.width = (posWeights[tok.pos]||20)+'%';
+
+    // Voice 5: entropy bar (slowly updates)
+    if (bars[4]) bars[4].style.width = (analysis.entropy * 100)+'%';
+
+    // Update probability display
+    if (pred) {
+      const probRow = responseEl.querySelector('.prob-row');
+      if (probRow) {
+        probRow.querySelectorAll('.prob-bar-fill').forEach((fill, i) => {
+          if (pred[i]) fill.style.width = pred[i][1]+'%';
+        });
+      }
+    }
+
+    tokenIdx++;
+    const delay = tempo * (1 + (1-tok.freqScore)*SS.complexity * 2);
+    playbackTimer = setTimeout(playNextToken, delay);
+  }
+
+  // Small startup delay
+  setTimeout(playNextToken, 200);
+}
+
+function finishPlayback() {
+  isPlaying = false;
+  document.getElementById('stop-btn').disabled = true;
+  document.getElementById('analyze-btn').disabled = false;
+  // Let entropy drone fade
+  setTimeout(fadeEntropyDrone, 2000);
+}
+
+function stopPlayback() {
+  isPlaying = false;
+  clearTimeout(playbackTimer);
+  fadeEntropyDrone();
+  document.getElementById('stop-btn').disabled = true;
+  document.getElementById('analyze-btn').disabled = false;
+}
+
+/* ══════════════════════════════════════════════════════════
+   MEMORY SYSTEM
+══════════════════════════════════════════════════════════ */
+const MEMORY = {
+  history: [],
+  maxHistory: 5,
+  add(fp) {
+    this.history.push(fp);
+    if (this.history.length > this.maxHistory) this.history.shift();
+  },
+  similarity(fp) {
+    if (!this.history.length) return 0.5;
+    const avg = this.history[this.history.length-1];
+    const dist = fp.reduce((s,v,i) => s + Math.abs(v - avg[i]), 0) / fp.length;
+    return 1 - dist;
+  },
+  getState(sim) {
+    if (sim > 0.8) return { label:'pattern reinforcing', stability:1.0 };
+    if (sim > 0.6) return { label:'recognising structure', stability:0.7 };
+    if (sim > 0.4) return { label:'processing divergence', stability:0.45 };
+    return { label:'destabilising', stability:0.1 };
+  }
+};
+
+/* ══════════════════════════════════════════════════════════
+   UI BUILD — Response Bubble
+══════════════════════════════════════════════════════════ */
+function buildResponseEl(analysis, similarity, memState, text) {
+  const div = document.createElement('div');
+  div.className = 'conv-response';
+
+  const label = document.createElement('div');
+  label.className = 'conv-response-label';
+  label.textContent = 'system';
+  div.appendChild(label);
+
+  // Voice bars
+  const barsWrap = document.createElement('div');
+  barsWrap.className = 'voice-bars';
+  const voiceNames = ['token','probability','semantic','syntax','entropy'];
+  const voiceColors = ['var(--v1)','var(--v2)','var(--v3)','var(--v4)','var(--v5)'];
+  voiceNames.forEach((name, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'voice-bar-wrap';
+    wrap.innerHTML = `<span class="voice-bar-label">${name}</span>
+      <div class="voice-bar-track">
+        <div class="voice-bar-fill" style="background:${voiceColors[i]}"></div>
+      </div>`;
+    barsWrap.appendChild(wrap);
+  });
+  div.appendChild(barsWrap);
+
+  // Token chips
+  const tokenRow = document.createElement('div');
+  tokenRow.className = 'token-row';
+  analysis.tokens.forEach(tok => {
+    const chip = document.createElement('span');
+    chip.className = `token-chip pos-${tok.pos}`;
+    chip.textContent = tok.word;
+    chip.title = `${tok.pos} · cluster: ${tok.cluster >= 0 ? tok.cluster : '—'} · freq rank: ${(tok.freqScore*100).toFixed(0)}%`;
+    tokenRow.appendChild(chip);
+  });
+  div.appendChild(tokenRow);
+
+  // Analysis grid
+  const grid = document.createElement('div');
+  grid.className = 'analysis-grid';
+  const cells = [
+    { label:'Tokens', val: analysis.tokens.length, sub:'words parsed' },
+    { label:'Unique', val: analysis.uniqueWords, sub:'type–token ratio: '+(analysis.ttr*100).toFixed(0)+'%' },
+    { label:'Avg rarity', val: ((1-analysis.avgFreq)*100).toFixed(0)+'%', sub:'higher = more unusual' },
+    { label:'Entropy', val: (analysis.entropy*100).toFixed(0)+'%', sub:'information density' },
+    { label:'Sem. spread', val: (analysis.semanticSpread*100).toFixed(0)+'%', sub:'cluster diversity' },
+    { label:'Memory sim.', val: (similarity*100).toFixed(0)+'%', sub:memState.label },
+  ];
+  cells.forEach(c => {
+    const cell = document.createElement('div');
+    cell.className = 'analysis-cell';
+    cell.innerHTML = `<div class="analysis-cell-label">${c.label}</div>
+      <div class="analysis-cell-val">${c.val}</div>
+      <div class="analysis-cell-sub">${c.sub}</div>`;
+    grid.appendChild(cell);
+  });
+  div.appendChild(grid);
+
+  // Canvas visualization
+  buildVisualization(analysis, div);
+
+  // Probability prediction display
+  if (analysis.lastPred) {
+    const probTitle = document.createElement('div');
+    probTitle.style.cssText = 'font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:.5rem .75rem 0;font-family:var(--font-heading);font-weight:600;';
+    probTitle.textContent = 'Predicted continuations after last token';
+    div.appendChild(probTitle);
+
+    const probRow = document.createElement('div');
+    probRow.className = 'prob-row';
+    analysis.lastPred.slice(0, 8).forEach(([word, weight]) => {
+      const tok = document.createElement('div');
+      tok.className = 'prob-token';
+      tok.innerHTML = `<span class="prob-word">${word}</span>
+        <div class="prob-bar"><div class="prob-bar-fill" style="width:${weight}%"></div></div>
+        <span class="prob-pct">${weight}%</span>`;
+      probRow.appendChild(tok);
+    });
+    div.appendChild(probRow);
+  }
+
+  // Memory fingerprint
+  const memRow = document.createElement('div');
+  memRow.className = 'memory-row';
+  memRow.innerHTML = `<span class="memory-label">memory</span>`;
+  const pipRow = document.createElement('div');
+  pipRow.className = 'memory-pip-row';
+  MEMORY.history.slice(-5).forEach(fp => {
+    const pip = document.createElement('div');
+    pip.className = 'memory-pip';
+    const fill = document.createElement('div');
+    fill.className = 'memory-pip-fill';
+    fill.style.height = (fp[4] * 100) + '%';
+    pip.appendChild(fill);
+    pipRow.appendChild(pip);
+  });
+  memRow.appendChild(pipRow);
+  const stateEl = document.createElement('span');
+  stateEl.className = 'memory-state';
+  stateEl.textContent = memState.label;
+  memRow.appendChild(stateEl);
+  div.appendChild(memRow);
+
+  return div;
+}
+
+/* ══════════════════════════════════════════════════════════
+   MAIN CONTROLLER
+══════════════════════════════════════════════════════════ */
+const SS = {
+  tempo: 100,
+  mixBalance: 0.5,
+  complexity: 0.5,
+  volume: 0.7,
+
+  setVolume(v) {
+    this.volume = v;
+    if (masterGain) ramp(masterGain.gain, v, null, 0.05);
+  },
+
+  async analyze() {
+    const input = document.getElementById('main-input');
+    const text  = input.value.trim();
+    if (!text) return;
+
+    resumeAudio();
+
+    // Remove empty state
+    const emptyEl = document.getElementById('conv-empty');
+    if (emptyEl) emptyEl.remove();
+
+    // Add user bubble
+    const conv = document.getElementById('conversation');
+    const userBubble = document.createElement('div');
+    userBubble.className = 'conv-user';
+    userBubble.innerHTML = `<div class="conv-user-label">you</div>
+      <div class="conv-user-text">${escHtml(text)}</div>`;
+    conv.appendChild(userBubble);
+
+    // Analyze
+    const analysis = analyzeText(text);
+    const similarity = MEMORY.similarity(analysis.fingerprint);
+    const memState   = MEMORY.getState(similarity);
+    MEMORY.add(analysis.fingerprint);
+
+    // Build response bubble
+    const responseEl = buildResponseEl(analysis, similarity, memState, text);
+    conv.appendChild(responseEl);
+    conv.scrollTop = conv.scrollHeight;
+
+    // Clear input
+    input.value = '';
+
+    // Schedule audio playback
+    schedulePlayback(analysis, responseEl);
+  },
+
+  stop() {
+    stopPlayback();
+  }
+};
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ── Keyboard shortcut: Ctrl/Cmd+Enter to analyze ── */
+document.getElementById('main-input').addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); SS.analyze(); }
+});
+
+/* ── HEADER BEHAVIOUR ── */
+const path = window.location.pathname.replace(/\/$/, '') || '/';
+document.querySelectorAll('.sil-header__nav a').forEach(a => {
+  const href = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
+  if (href === path) a.classList.add('sil-active');
+});
+const menuToggle = document.getElementById('silMenuToggle');
+const silNav     = document.getElementById('silNav');
+menuToggle.addEventListener('click', () => {
+  const open = silNav.classList.toggle('sil-open');
+  menuToggle.setAttribute('aria-expanded', open);
+});
+silNav.querySelectorAll('a').forEach(a =>
+  a.addEventListener('click', () => silNav.classList.remove('sil-open'))
+);
+
+async function getSupabase() {
+  if (window._supabase) return window._supabase;
+  const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+  return createClient(
+    'https://lrjuufvrgkuvfxcmybtf.supabase.co',
+    'sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1'
+  );
+}
+document.getElementById('silSignOut').addEventListener('click', async function () {
+  this.disabled = true; this.textContent = 'Signing out…';
+  try { const sb = await getSupabase(); await sb.auth.signOut(); }
+  finally { window.location.replace('/'); }
+});
+
+</script>
+</body>
+</html>
