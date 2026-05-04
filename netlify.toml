@@ -226,6 +226,26 @@
   from = "/neural-synthesis/"
   to   = "/compositions/neural-synthesis.html"
   status = 200
+
+[[redirects]]
+  from = "/semantic-synth"
+  to   = "/compositions/semantic-synths.html"
+  status = 200
+
+[[redirects]]
+  from = "/semantic-synth/"
+  to   = "/compositions/semantic-synth.html"
+  status = 200
+
+[[redirects]]
+  from = "/oramics"
+  to   = "/compositions/oramics.html"
+  status = 200
+
+[[redirects]]
+  from = "/oramics/"
+  to   = "/compositions/oramics.html"
+  status = 200
   
 # ── Subscribe ──
 
