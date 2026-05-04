@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oramics — Sensory Intelligence Lab</title>
+
+  <link rel="icon" href="/images/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+
+  <script src="/dashboard/auth-guard.js" type="module"></script>
+  <script type="module">
+    import { applyGatingOnReady } from '/assets/js/gating.js';
+    applyGatingOnReady({ targetSelector: '.oramics-app', moduleName: 'oramics' });
+  </script>
+
+  <style>
+    *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --font-body: 'Inter', sans-serif;
+      --font-heading: 'Space Grotesk', sans-serif;
+      --bg: #fff; --surface: #f9f9f7; --border: #e5e5e0;
+      --text: #1a1a1a; --muted: #6b6b6b;
+      --accent: #2a5c45; --accent-light: #edf4f0; --accent-hover: #1e4433;
+
+      /* Oramics-specific */
+      --film: #faf8f2;          /* warm cream — film stock */
+      --film-edge: #e8e4d8;     /* slightly darker edge */
+      --ink: #1a1a14;           /* drawing ink */
+      --playhead: #c0392b;      /* bright red — film gate */
+
+      /* Layer colors */
+      --pitch-col:  #2a5c45;
+      --amp-col:    #1a4d6b;
+      --timbre-col: #7b3f00;
+      --mod-col:    #5c2a5c;
+    }
+
+    html { font-size: 16px; }
+    body {
+      font-family: var(--font-body); color: var(--text);
+      background: var(--bg); min-height: 100vh; display: flex; flex-direction: column;
+    }
+
+    /* ── HEADER ── */
+    .sil-header {
+      border-bottom: 1px solid var(--border); padding: 0 1.5rem; height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; background: var(--bg); z-index: 100; gap: 1rem; width: 100%;
+    }
+    .sil-header__wordmark {
+      font-family: var(--font-heading); font-size: 1rem; font-weight: 600;
+      letter-spacing: -0.01em; white-space: nowrap; flex-shrink: 0;
+      text-decoration: none; color: var(--text);
+    }
+    .sil-header__wordmark:hover { color: var(--accent); }
+    .sil-header__nav { display: flex; gap: .25rem; align-items: center; }
+    .sil-header__nav a {
+      font-family: var(--font-body); font-size: .8rem; font-weight: 500;
+      text-decoration: none; color: var(--muted); transition: color .15s;
+      white-space: nowrap; padding: .3rem .65rem;
+    }
+    .sil-header__nav a:hover { color: var(--text); }
+    .sil-header__nav a.sil-active { color: var(--accent); font-weight: 600; }
+    .sil-header__signout {
+      font-family: var(--font-body); font-size: .8rem; font-weight: 500;
+      color: var(--muted); background: none; border: 1px solid var(--border);
+      cursor: pointer; padding: .3rem .75rem; transition: color .15s, border-color .15s;
+      white-space: nowrap; line-height: 1.6;
+    }
+    .sil-header__signout:hover { color: var(--text); border-color: var(--text); }
+    .sil-header__signout:disabled { opacity: .5; cursor: not-allowed; }
+    .sil-header__toggle {
+      display: none; flex-direction: column; gap: 4px; background: none;
+      border: none; cursor: pointer; padding: 4px; flex-shrink: 0;
+    }
+    .sil-header__toggle span { display: block; width: 20px; height: 2px; background: var(--text); }
+    @media(max-width: 700px) {
+      .sil-header { padding: 0 1rem; }
+      .sil-header__toggle { display: flex; }
+      .sil-header__nav {
+        display: none; position: absolute; top: 56px; left: 0; right: 0;
+        background: var(--bg); border-bottom: 1px solid var(--border);
+        flex-direction: column; align-items: flex-start; padding: .75rem 1rem; gap: 0; z-index: 99;
+      }
+      .sil-header__nav.sil-open { display: flex; }
+      .sil-header__nav a, .sil-header__signout { font-size: .875rem; padding: .55rem .5rem; }
+      .sil-header__signout { border: none; }
+    }
+
+    /* ── BREADCRUMB ── */
+    .bc { padding: .75rem 1.5rem 0; max-width: 1100px; margin: 0 auto; width: 100%; }
+    .bc ol { list-style: none; display: flex; gap: .3rem; align-items: center; font-size: .75rem; color: var(--muted); }
+    .bc li+li::before { content: '/'; margin-right: .3rem; color: var(--border); }
+    .bc a { color: var(--muted); text-decoration: none; }
+    .bc a:hover { color: var(--accent); text-decoration: underline; }
+
+    /* ── PAGE LAYOUT ── */
+    main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 4rem; flex: 1; width: 100%; }
+    @media(max-width: 600px) { main { padding: 1rem .75rem 3rem; } }
+
+    .ph { margin-bottom: 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border); }
+    .ph h2 {
+      font-family: var(--font-heading); font-size: 1.5rem; font-weight: 600;
+      letter-spacing: -.02em; line-height: 1.2; margin-bottom: .3rem;
+    }
+    .ph p { font-size: .88rem; color: var(--muted); line-height: 1.6; max-width: 680px; }
+
+    /* ═══════════════════════════════════════════════
+       ORAMICS APP
+    ═══════════════════════════════════════════════ */
+    .oramics-app {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      border: 1px solid var(--border);
+      background: var(--film);
+      /* Paper grain texture via SVG filter */
+      position: relative;
+    }
+    .oramics-app::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: .025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* ── TOP TOOLBAR ── */
+    .toolbar {
+      display: flex; align-items: center; gap: .5rem;
+      padding: .6rem .85rem; border-bottom: 1px solid var(--film-edge);
+      background: var(--film); flex-wrap: wrap;
+      position: relative; z-index: 5;
+    }
+    .toolbar-sep {
+      width: 1px; height: 22px; background: var(--film-edge); flex-shrink: 0; margin: 0 .25rem;
+    }
+    .tbtn {
+      font-family: var(--font-heading); font-size: .72rem; font-weight: 600;
+      background: transparent; color: var(--text); border: 1px solid var(--film-edge);
+      padding: .35rem .8rem; cursor: pointer; transition: all .12s; white-space: nowrap;
+      letter-spacing: .01em;
+    }
+    .tbtn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+    .tbtn.active { background: var(--accent); color: white; border-color: var(--accent); }
+    .tbtn.danger { border-color: #e8c0bc; }
+    .tbtn.danger:hover { background: #c0392b; color: white; border-color: #c0392b; }
+    .tbtn:disabled { opacity: .35; cursor: not-allowed; pointer-events: none; }
+    .tbtn.play-btn { background: var(--accent); color: white; border-color: var(--accent); }
+    .tbtn.play-btn:hover { background: var(--accent-hover); }
+    .tbtn.stop-btn.active { background: #c0392b; color: white; border-color: #c0392b; }
+
+    .speed-row { display: flex; align-items: center; gap: .4rem; }
+    .speed-label { font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+    .speed-val { font-family: 'Courier New', monospace; font-size: .72rem; color: var(--accent); min-width: 28px; }
+    input[type=range].slider {
+      -webkit-appearance: none; width: 70px; height: 2px;
+      background: var(--film-edge); outline: none; cursor: pointer;
+    }
+    input[type=range].slider::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 11px; height: 11px;
+      border-radius: 50%; background: var(--accent); cursor: pointer;
+    }
+    input[type=range].slider::-moz-range-thumb {
+      width: 11px; height: 11px; border-radius: 50%; background: var(--accent); border: none; cursor: pointer;
+    }
+
+    /* Waveform selector */
+    .wave-select {
+      font-family: 'Courier New', monospace; font-size: .72rem;
+      background: var(--film); color: var(--text); border: 1px solid var(--film-edge);
+      padding: .3rem .5rem; cursor: pointer; outline: none;
+    }
+
+    /* Analog toggle */
+    .analog-toggle { display: flex; align-items: center; gap: .4rem; }
+    .analog-toggle-label { font-size: .68rem; color: var(--muted); }
+    .toggle-sw { position: relative; width: 28px; height: 16px; }
+    .toggle-sw input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-sw-slider {
+      position: absolute; inset: 0; background: var(--film-edge);
+      border-radius: 16px; cursor: pointer; transition: background .15s;
+    }
+    .toggle-sw-slider::before {
+      content: ''; position: absolute; width: 10px; height: 10px;
+      left: 3px; top: 3px; background: white; border-radius: 50%; transition: transform .15s;
+    }
+    .toggle-sw input:checked + .toggle-sw-slider { background: var(--accent); }
+    .toggle-sw input:checked + .toggle-sw-slider::before { transform: translateX(12px); }
+
+    /* ── MAIN CANVAS AREA ── */
+    .canvas-area {
+      display: flex; flex-direction: row; flex: 1;
+      position: relative;
+    }
+
+    /* Layer panel — left sidebar */
+    .layer-panel {
+      width: 130px; flex-shrink: 0; border-right: 1px solid var(--film-edge);
+      display: flex; flex-direction: column; background: var(--film);
+      position: relative; z-index: 5;
+    }
+    .layer-panel-title {
+      font-family: var(--font-heading); font-size: .58rem; font-weight: 600;
+      letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+      padding: .5rem .65rem .35rem; border-bottom: 1px solid var(--film-edge);
+    }
+    .layer-item {
+      display: flex; align-items: center; gap: .4rem; padding: .45rem .65rem;
+      border-bottom: 1px solid var(--film-edge); cursor: pointer;
+      transition: background .1s; position: relative;
+    }
+    .layer-item:hover { background: rgba(42,92,69,.05); }
+    .layer-item.active { background: var(--accent-light); }
+    .layer-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+    .layer-name {
+      font-family: var(--font-heading); font-size: .68rem; font-weight: 600;
+      color: var(--text); flex: 1;
+    }
+    .layer-item.active .layer-name { color: var(--accent); }
+    .layer-vis {
+      font-size: .65rem; color: var(--muted); cursor: pointer; padding: 1px 3px;
+      opacity: .6; transition: opacity .1s;
+    }
+    .layer-vis:hover { opacity: 1; }
+    .layer-hint {
+      font-size: .6rem; color: var(--muted); padding: .3rem .65rem .6rem;
+      line-height: 1.45; border-bottom: 1px solid var(--film-edge);
+    }
+
+    /* Layer freq labels */
+    .layer-mapping {
+      padding: .5rem .65rem;
+      border-bottom: 1px solid var(--film-edge);
+    }
+    .layer-mapping-title {
+      font-size: .58rem; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: .3rem;
+    }
+    .layer-scale {
+      display: flex; flex-direction: column; gap: 1px; font-family: 'Courier New', monospace;
+      font-size: .6rem; color: var(--muted);
+    }
+    .layer-scale-row { display: flex; justify-content: space-between; }
+
+    /* Tool selector in panel */
+    .tool-group { padding: .5rem .65rem; border-bottom: 1px solid var(--film-edge); }
+    .tool-group-title {
+      font-size: .58rem; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: .35rem;
+    }
+    .tool-btns { display: flex; flex-wrap: wrap; gap: .3rem; }
+    .tool-btn {
+      font-size: .65rem; padding: .2rem .45rem; border: 1px solid var(--film-edge);
+      background: var(--film); color: var(--muted); cursor: pointer; transition: all .1s;
+    }
+    .tool-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .tool-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+    .brush-size-row { display: flex; align-items: center; gap: .4rem; margin-top: .35rem; }
+    .brush-size-label { font-size: .6rem; color: var(--muted); }
+    input[type=range].brush-slider {
+      -webkit-appearance: none; flex: 1; height: 2px;
+      background: var(--film-edge); outline: none; cursor: pointer;
+    }
+    input[type=range].brush-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 10px; height: 10px;
+      border-radius: 50%; background: var(--accent); cursor: pointer;
+    }
+
+    /* ── CANVAS STACK ── */
+    .canvas-stack-wrap {
+      flex: 1; position: relative; overflow: hidden; background: var(--film);
+      /* Film sprocket holes top & bottom via pseudo-elements */
+    }
+    .canvas-stack-wrap::before,
+    .canvas-stack-wrap::after {
+      content: '';
+      position: absolute; left: 0; right: 0; height: 12px; z-index: 8;
+      pointer-events: none;
+      background-image: repeating-linear-gradient(
+        90deg,
+        transparent 0px, transparent 16px,
+        rgba(0,0,0,.08) 16px, rgba(0,0,0,.08) 24px,
+        transparent 24px, transparent 32px
+      );
+    }
+    .canvas-stack-wrap::before { top: 0; border-bottom: 1px solid var(--film-edge); }
+    .canvas-stack-wrap::after  { bottom: 0; border-top: 1px solid var(--film-edge); }
+
+    .canvas-inner {
+      position: absolute; top: 12px; bottom: 12px; left: 0; right: 0;
+    }
+
+    /* Grid overlay canvas (lowest) */
+    .c-grid, .c-pitch, .c-amp, .c-timbre, .c-mod, .c-ui {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: block;
+    }
+    .c-grid    { z-index: 1; pointer-events: none; }
+    .c-pitch   { z-index: 2; }
+    .c-amp     { z-index: 3; }
+    .c-timbre  { z-index: 4; }
+    .c-mod     { z-index: 5; }
+    .c-ui      { z-index: 6; pointer-events: none; } /* playhead, etc */
+    .c-draw    { z-index: 7; position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: crosshair; }
+
+    /* Y-axis ruler */
+    .y-ruler {
+      position: absolute; top: 12px; bottom: 12px; right: 0; width: 28px;
+      border-left: 1px solid var(--film-edge); background: var(--film);
+      z-index: 8; pointer-events: none;
+    }
+    .y-ruler canvas { display: block; width: 100%; height: 100%; }
+
+    /* Status bar */
+    .status-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .35rem .85rem; border-top: 1px solid var(--film-edge);
+      background: var(--film); font-family: 'Courier New', monospace;
+      font-size: .65rem; color: var(--muted); flex-wrap: wrap; gap: .4rem;
+      position: relative; z-index: 5;
+    }
+    .status-pos { color: var(--text); }
+    .status-param { color: var(--accent); }
+    .status-tip { font-family: var(--font-body); font-size: .65rem; font-style: italic; }
+
+    /* ── INSPECTOR PANEL ── */
+    .inspector {
+      border-top: 1px solid var(--film-edge); padding: .75rem .85rem;
+      background: var(--film); position: relative; z-index: 5;
+    }
+    .inspector-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem;
+    }
+    @media(max-width: 600px) { .inspector-grid { grid-template-columns: repeat(2, 1fr); } }
+    .insp-cell {
+      border: 1px solid var(--film-edge); padding: .45rem .6rem; background: rgba(255,255,255,.6);
+    }
+    .insp-label {
+      font-size: .58rem; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: .2rem;
+    }
+    .insp-val {
+      font-family: 'Courier New', monospace; font-size: .82rem;
+      font-weight: 600; color: var(--text);
+    }
+    .insp-bar { height: 2px; background: var(--film-edge); margin-top: .3rem; position: relative; }
+    .insp-bar-fill { position: absolute; top: 0; left: 0; height: 100%; transition: width .05s; }
+
+    /* ── ESSAY ── */
+    .essay {
+      margin-top: 2.5rem; padding-top: 2rem; border-top: 1px solid var(--border);
+      font-size: .9rem; line-height: 1.8; color: var(--text);
+    }
+    .essay h2 {
+      font-family: var(--font-heading); font-size: 1rem; font-weight: 600;
+      letter-spacing: -.01em; margin: 1.75rem 0 .45rem;
+    }
+    .essay h2:first-child { margin-top: 0; }
+    .essay p + p { margin-top: .75rem; }
+    .essay em { font-style: italic; }
+    .essay strong { font-weight: 600; }
+    .essay-divider {
+      display: flex; align-items: center; gap: 1rem; margin: 2.5rem 0 2rem;
+    }
+    .essay-divider-line { flex: 1; height: 1px; background: var(--border); }
+    .essay-divider-label {
+      font-family: var(--font-heading); font-size: .67rem; font-weight: 600;
+      letter-spacing: .14em; text-transform: uppercase; color: var(--muted); white-space: nowrap;
+    }
+    .pull-quote {
+      border-left: 3px solid var(--accent); padding: .75rem 1rem;
+      margin: 1.25rem 0; background: var(--surface);
+    }
+    .pull-quote p { font-size: .88rem; font-style: italic; line-height: 1.65; }
+    .pull-quote cite { display: block; font-size: .72rem; color: var(--muted); font-style: normal; margin-top: .35rem; }
+
+    footer {
+      border-top: 1px solid var(--border); padding: 1.25rem 2rem;
+      text-align: center; font-size: .78rem; color: var(--muted); margin-top: 2rem;
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<header class="sil-header">
+  <a class="sil-header__wordmark" href="/dashboard/">Sensory Intelligence Lab</a>
+  <button class="sil-header__toggle" id="silMenuToggle" aria-label="Toggle navigation" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <nav class="sil-header__nav" id="silNav">
+    <a href="/dashboard/">Dashboard</a>
+    <a href="/account/">Account</a>
+    <a href="/booking/">Book a session</a>
+    <button class="sil-header__signout" id="silSignOut">Sign out</button>
+  </nav>
+</header>
+
+<nav aria-label="Breadcrumb" class="bc">
+  <ol>
+    <li><a href="/dashboard/">Dashboard</a></li>
+    <li><a href="/compositions/">Compositions</a></li>
+    <li>Oramics</li>
+  </ol>
+</nav>
+
+<main>
+
+  <div class="ph">
+    <h2>Oramics</h2>
+    <p>Draw directly onto a moving film strip. Your shapes become sound — pitch, amplitude, timbre, modulation — exactly as Daphne Oram's machine translated drawn marks into music in 1957.</p>
+  </div>
+
+  <!-- THE INSTRUMENT -->
+  <div class="oramics-app" id="oramicsApp">
+
+    <!-- Top toolbar -->
+    <div class="toolbar" id="toolbar">
+      <!-- Transport -->
+      <button class="tbtn play-btn" id="btn-play" onclick="ORM.play()">▶ play</button>
+      <button class="tbtn stop-btn" id="btn-stop" onclick="ORM.stop()">■ stop</button>
+      <button class="tbtn" id="btn-loop" onclick="ORM.toggleLoop()" title="Loop playback">↺ loop</button>
+      <div class="toolbar-sep"></div>
+
+      <!-- Speed -->
+      <div class="speed-row">
+        <span class="speed-label">speed</span>
+        <input type="range" class="slider" id="speed-slider" min="0.1" max="3" step="0.05" value="0.8"
+          oninput="ORM.setSpeed(+this.value)">
+        <span class="speed-val" id="speed-val">0.8×</span>
+      </div>
+      <div class="toolbar-sep"></div>
+
+      <!-- Waveform -->
+      <select class="wave-select" id="wave-select" onchange="ORM.setWave(this.value)">
+        <option value="sine">sine</option>
+        <option value="triangle">triangle</option>
+        <option value="sawtooth">sawtooth</option>
+        <option value="square">square</option>
+      </select>
+
+      <!-- Polyphony -->
+      <div class="speed-row">
+        <span class="speed-label">voices</span>
+        <input type="range" class="slider" id="voices-slider" min="1" max="6" step="1" value="1"
+          oninput="ORM.setVoices(+this.value);document.getElementById('voices-val').textContent=this.value">
+        <span class="speed-val" id="voices-val">1</span>
+      </div>
+      <div class="toolbar-sep"></div>
+
+      <!-- Analog imperfection -->
+      <div class="analog-toggle">
+        <label class="toggle-sw" title="Analog imperfection — adds wow, flutter, drift">
+          <input type="checkbox" id="analog-toggle" onchange="ORM.setAnalog(this.checked)">
+          <span class="toggle-sw-slider"></span>
+        </label>
+        <span class="analog-toggle-label">analog</span>
+      </div>
+      <div class="toolbar-sep"></div>
+
+      <!-- Actions -->
+      <button class="tbtn" onclick="ORM.randomize()" title="Generate random Oramics-style shapes">✦ randomize</button>
+      <button class="tbtn" onclick="ORM.clearAll()" title="Clear all layers">clear</button>
+      <button class="tbtn" onclick="ORM.exportWav()" id="btn-export">export WAV</button>
+    </div>
+
+    <!-- Canvas area -->
+    <div class="canvas-area">
+
+      <!-- Layer panel -->
+      <div class="layer-panel">
+        <div class="layer-panel-title">layers</div>
+
+        <div class="layer-item active" id="layer-btn-pitch" onclick="ORM.setLayer('pitch')">
+          <span class="layer-dot" style="background:var(--pitch-col)"></span>
+          <span class="layer-name">Pitch</span>
+          <span class="layer-vis" onclick="ORM.toggleVis('pitch',event)" title="Toggle visibility">●</span>
+        </div>
+        <div class="layer-item" id="layer-btn-amp" onclick="ORM.setLayer('amp')">
+          <span class="layer-dot" style="background:var(--amp-col)"></span>
+          <span class="layer-name">Amplitude</span>
+          <span class="layer-vis" onclick="ORM.toggleVis('amp',event)" title="Toggle visibility">●</span>
+        </div>
+        <div class="layer-item" id="layer-btn-timbre" onclick="ORM.setLayer('timbre')">
+          <span class="layer-dot" style="background:var(--timbre-col)"></span>
+          <span class="layer-name">Timbre</span>
+          <span class="layer-vis" onclick="ORM.toggleVis('timbre',event)" title="Toggle visibility">●</span>
+        </div>
+        <div class="layer-item" id="layer-btn-mod" onclick="ORM.setLayer('mod')">
+          <span class="layer-dot" style="background:var(--mod-col)"></span>
+          <span class="layer-name">Modulation</span>
+          <span class="layer-vis" onclick="ORM.toggleVis('mod',event)" title="Toggle visibility">●</span>
+        </div>
+
+        <div class="layer-hint" id="layer-hint">
+          Draw on this canvas. Vertical position maps to pitch frequency — high on canvas = high pitch.
+        </div>
+
+        <div class="layer-mapping">
+          <div class="layer-mapping-title">scale</div>
+          <div class="layer-scale" id="layer-scale">
+            <div class="layer-scale-row"><span>top</span><span id="scale-top">2000 Hz</span></div>
+            <div class="layer-scale-row"><span>mid</span><span id="scale-mid">600 Hz</span></div>
+            <div class="layer-scale-row"><span>bot</span><span id="scale-bot">80 Hz</span></div>
+          </div>
+        </div>
+
+        <div class="tool-group">
+          <div class="tool-group-title">tools</div>
+          <div class="tool-btns">
+            <button class="tool-btn active" id="tool-brush" onclick="ORM.setTool('brush')">brush</button>
+            <button class="tool-btn" id="tool-line" onclick="ORM.setTool('line')">line</button>
+            <button class="tool-btn" id="tool-erase" onclick="ORM.setTool('erase')">erase</button>
+            <button class="tool-btn" id="tool-sine" onclick="ORM.setTool('sine')">∿ sine</button>
+            <button class="tool-btn" id="tool-ramp" onclick="ORM.setTool('ramp')">/ ramp</button>
+            <button class="tool-btn" id="tool-flat" onclick="ORM.setTool('flat')">― flat</button>
+          </div>
+          <div class="brush-size-row">
+            <span class="brush-size-label">size</span>
+            <input type="range" class="brush-slider" min="2" max="32" value="8" id="brush-size"
+              oninput="ORM.brushSize=+this.value">
+          </div>
+          <div class="brush-size-row" style="margin-top:.3rem">
+            <span class="brush-size-label">soft</span>
+            <input type="range" class="brush-slider" min="0" max="1" step=".05" value="0.6" id="brush-soft"
+              oninput="ORM.brushSoft=+this.value">
+          </div>
+        </div>
+
+      </div><!-- /layer-panel -->
+
+      <!-- Canvas stack -->
+      <div class="canvas-stack-wrap" id="canvasWrap">
+        <div class="canvas-inner" id="canvasInner">
+          <canvas class="c-grid"   id="c-grid"></canvas>
+          <canvas class="c-pitch"  id="c-pitch"></canvas>
+          <canvas class="c-amp"    id="c-amp"></canvas>
+          <canvas class="c-timbre" id="c-timbre"></canvas>
+          <canvas class="c-mod"    id="c-mod"></canvas>
+          <canvas class="c-ui"     id="c-ui"></canvas>
+          <canvas class="c-draw"   id="c-draw"></canvas>
+        </div>
+        <div class="y-ruler">
+          <canvas id="c-ruler"></canvas>
+        </div>
+      </div>
+
+    </div><!-- /canvas-area -->
+
+    <!-- Status bar -->
+    <div class="status-bar">
+      <span>
+        position: <span class="status-pos" id="st-pos">0.00s</span> ·
+        pitch: <span class="status-param" id="st-pitch">—</span> ·
+        amp: <span class="status-param" id="st-amp">—</span> ·
+        filter: <span class="status-param" id="st-filter">—</span>
+      </span>
+      <span class="status-tip" id="st-tip">Draw on the canvas above. Left → right = time. Up/down = parameter value.</span>
+    </div>
+
+    <!-- Inspector -->
+    <div class="inspector">
+      <div class="inspector-grid">
+        <div class="insp-cell">
+          <div class="insp-label">Pitch</div>
+          <div class="insp-val" id="insp-pitch">— Hz</div>
+          <div class="insp-bar"><div class="insp-bar-fill" id="ibar-pitch" style="background:var(--pitch-col)"></div></div>
+        </div>
+        <div class="insp-cell">
+          <div class="insp-label">Amplitude</div>
+          <div class="insp-val" id="insp-amp">—</div>
+          <div class="insp-bar"><div class="insp-bar-fill" id="ibar-amp" style="background:var(--amp-col)"></div></div>
+        </div>
+        <div class="insp-cell">
+          <div class="insp-label">Filter cutoff</div>
+          <div class="insp-val" id="insp-filter">— Hz</div>
+          <div class="insp-bar"><div class="insp-bar-fill" id="ibar-filter" style="background:var(--timbre-col)"></div></div>
+        </div>
+        <div class="insp-cell">
+          <div class="insp-label">Modulation</div>
+          <div class="insp-val" id="insp-mod">—</div>
+          <div class="insp-bar"><div class="insp-bar-fill" id="ibar-mod" style="background:var(--mod-col)"></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /oramics-app -->
+
+  <!-- Essay -->
+  <div class="essay">
+
+    <h2>Sound drawn onto film</h2>
+    <p>In 1957 Daphne Oram left the BBC, where she had worked as a sound engineer and composer for over a decade, and set up a studio in a converted oast house in Kent. There, over the following years, she built a machine unlike anything that existed: the Oramics machine. A set of ten synchronised strips of 35mm film ran horizontally through the device. The composer drew directly onto the film — shapes, curves, lines, marks — and as the film moved through a photoelectric cell, the light transmitted through the drawn marks was converted into control voltages, which in turn controlled oscillators, filters, and amplifiers. The drawing was the score. The score was the sound.</p>
+    <p>Oramics was not notation. It was not a description of sound intended for a performer to realise. It was a direct physical encoding of sound itself: the shape on the film was the sound you heard, with no intermediary, no interpretation, no performance. The composer drew in time and heard time drawn back. This was a genuinely new relationship between the act of inscription and the act of sounding — one that most electronic music systems of the period, which used keyboards, punch cards, or written parameter sheets, did not offer.</p>
+
+    <div class="essay-divider">
+      <div class="essay-divider-line"></div>
+      <span class="essay-divider-label">Daphne Oram — Life &amp; Work</span>
+      <div class="essay-divider-line"></div>
+    </div>
+
+    <h2>From the BBC to the oast house</h2>
+    <p>Daphne Oram was born in Wiltshire in 1925. She taught herself composition and showed exceptional ability young; at eighteen she joined the BBC as a music balancer, one of the few women in technical roles in the corporation at that time. Over the following decade she worked in studios, composed incidental music for radio programmes, and became increasingly convinced that electronic sound offered compositional possibilities unavailable through conventional instruments and notation. In 1957 she co-founded the BBC Radiophonic Workshop — alongside Desmond Briscoe — and became its first studio manager. She left the following year, frustrated by the institutional constraints placed on the Workshop's work and determined to pursue her own research independently.</p>
+    <p>The Oramics machine occupied much of the next two decades. It was an enormously laborious undertaking — designing, constructing, and refining a bespoke electronic instrument with minimal funding and institutional support, largely alone. Oram applied for patents, sought grants, and gave demonstrations, but the machine never received the recognition or resources that might have allowed it to develop into something widely used. She continued working in her studio in Fairseat, Kent, composing, teaching, and writing — her book <em>An Individual Note of Music, Sound and Electronics</em> (1972) remains one of the most distinctive accounts of electronic music's possibilities — until her death in 2003.</p>
+
+    <div class="pull-quote">
+      <p>The Oramics machine was trying to escape the tyranny of the note — to give composers direct, continuous, unquantised control over sound in time, in the same way a painter has continuous control over mark and surface.</p>
+      <cite>— paraphrased from Daphne Oram, <em>An Individual Note</em>, 1972</cite>
+    </div>
+
+    <h2>The machine and its logic</h2>
+    <p>The Oramics machine worked through photoelectric cells reading the opacity of marks drawn on clear film. A dense, opaque mark blocked more light; a thin or faint mark allowed more through. The amount of light reaching the cell determined the voltage output, which in turn determined the parameter being controlled — frequency on one strip, amplitude on another, filter settings on a third. Multiple strips ran simultaneously, so a composer could draw different control curves for different parameters on different strips, all advancing in synchrony through the machine.</p>
+    <p>The spatial logic of the system was immediate and intuitive: drawing a line that moved upward on the pitch strip produced a rising pitch. A dense, heavy mark on the amplitude strip produced a loud sound. A curved, organic shape produced a curved, organic modulation. The act of drawing was compositional; the visual shape of the drawing was the sonic shape of the music. Oram called this "visualising sound" — and it remains one of the most direct translations of visual mark-making into sonic experience that electronic music has produced.</p>
+    <p>The system was also continuous and unquantised in a way that most electronic music tools of the period were not. A keyboard divides pitch into semitones; notation divides time into bars and beats; punch-card systems work in discrete steps. The Oramics machine could produce any pitch, any amplitude, any modulation depth, over any duration, with curves and inflections of any shape. This was a genuinely different compositional substrate — one closer to the physical experience of drawing than to the logical structure of notation.</p>
+
+    <h2>What this instrument does</h2>
+    <p>This browser-based Oramics instrument follows the logic of the original machine as closely as a digital medium allows. You draw on four independent layers — pitch, amplitude, timbre, and modulation — and as the playhead moves from left to right across your drawing, the pixel values it reads are converted into audio parameters in real time. High vertical position on the pitch layer means high frequency; high vertical position on the amplitude layer means louder output; high position on the timbre layer means a brighter, more open filter; high position on the modulation layer means more vibrato and FM depth.</p>
+    <p>The drawing tools include a freehand brush with variable softness, a line tool for precise slopes, and preset shapes — sine curves, linear ramps, flat sustained tones — that can be placed quickly to build more complex structures. Multiple voices can be activated, producing polyphonic textures from a single drawing by reading the canvas at multiple vertical offsets simultaneously. The analog imperfection toggle adds low-frequency oscillation to the playback speed, gentle random drift to pitch, and subtle noise to all parameters — approximating the physical variability of film-transport mechanisms and photoelectric cells that gave Oram's recordings their characteristic slightly unstable, warm quality.</p>
+    <p>The system is deliberately open-ended. There is no right way to draw. A single horizontal line at mid-canvas height produces a sustained middle-register tone. A curve that rises from bottom to top of the pitch layer produces a rising glissando. Heavy, layered marks on the amplitude layer produce swells and fades. Complex, overlapping shapes produce complex, unpredictable sound — which is exactly what Oram intended: that the composer's hand, moving freely across a surface, could become the primary instrument of sonic shaping.</p>
+
+  </div>
+
+</main>
+
+<footer>
+  <p>Jordan Elias Music Therapy · Berlin ·
+    <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a> ·
+    <a href="https://jordanelias.de/" target="_blank" rel="noopener">jordanelias.de</a>
+  </p>
+</footer>
+
+<!-- ════════════════════════════════════════════════════════
+     ORAMICS ENGINE
+════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+'use strict';
+
+/* ── LAYER CONFIG ── */
+const LAYERS = {
+  pitch:  { id: 'c-pitch',  color: '#2a5c45', alpha: 0.85,
+            hint: 'Vertical position = frequency. Top = 2000 Hz, Bottom = 80 Hz.' },
+  amp:    { id: 'c-amp',    color: '#1a4d6b', alpha: 0.75,
+            hint: 'Pixel brightness = amplitude. Darker marks = louder sound.' },
+  timbre: { id: 'c-timbre', color: '#7b3f00', alpha: 0.75,
+            hint: 'Vertical position = filter cutoff. Top = bright, Bottom = muffled.' },
+  mod:    { id: 'c-mod',    color: '#5c2a5c', alpha: 0.75,
+            hint: 'Vertical position = modulation depth. Top = heavy vibrato/FM.' },
+};
+
+const LAYER_SCALES = {
+  pitch:  { top: '2000 Hz', mid: '600 Hz',  bot: '80 Hz',   unit: 'Hz' },
+  amp:    { top: '100%',    mid: '50%',     bot: '0%',      unit: '' },
+  timbre: { top: '8000 Hz', mid: '2000 Hz', bot: '200 Hz',  unit: 'Hz' },
+  mod:    { top: '100%',    mid: '50%',     bot: '0%',      unit: '' },
+};
+
+/* ── AUDIO ENGINE ── */
+let AC = null, masterGain, analyserNode;
+const voices = [];
+let numVoices = 1;
+let waveType = 'sine';
+let analogOn = false;
+
+/* Analog drift oscillators */
+let analogLFO = null, analogLFOGain = null;
+
+function initAudio() {
+  if (AC) return;
+  AC = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = AC.createGain();
+  masterGain.gain.value = 0.7;
+
+  const limiter = AC.createDynamicsCompressor();
+  limiter.threshold.value = -8;
+  limiter.knee.value = 6;
+  limiter.ratio.value = 10;
+  limiter.attack.value = 0.005;
+  limiter.release.value = 0.1;
+
+  analyserNode = AC.createAnalyser();
+  analyserNode.fftSize = 256;
+
+  masterGain.connect(limiter);
+  limiter.connect(analyserNode);
+  analyserNode.connect(AC.destination);
+
+  /* Analog LFO for wow/flutter */
+  analogLFO = AC.createOscillator();
+  analogLFOGain = AC.createGain();
+  analogLFO.type = 'sine';
+  analogLFO.frequency.value = 0.7; // ~0.7Hz wow
+  analogLFOGain.gain.value = 0;
+  analogLFO.connect(analogLFOGain);
+  analogLFO.start();
+
+  buildVoices();
+}
+
+function buildVoices() {
+  // Tear down existing
+  voices.forEach(v => {
+    try { v.osc.stop(); } catch(e){}
+    try { v.vibLFO.stop(); } catch(e){}
+    try { v.fmLFO.stop(); } catch(e){}
+  });
+  voices.length = 0;
+
+  for (let i = 0; i < numVoices; i++) {
+    const osc     = AC.createOscillator();
+    const oscGain = AC.createGain();
+    const filter  = AC.createBiquadFilter();
+    const vGain   = AC.createGain(); // voice gain (amplitude layer)
+
+    /* Vibrato */
+    const vibLFO  = AC.createOscillator();
+    const vibGain = AC.createGain();
+    vibLFO.type = 'sine';
+    vibLFO.frequency.value = 5.5;
+    vibGain.gain.value = 0;
+    vibLFO.connect(vibGain);
+    vibGain.connect(osc.frequency);
+
+    /* FM */
+    const fmLFO  = AC.createOscillator();
+    const fmGain = AC.createGain();
+    fmLFO.type = 'sine';
+    fmLFO.frequency.value = 2.3;
+    fmGain.gain.value = 0;
+    fmLFO.connect(fmGain);
+    fmGain.connect(osc.frequency);
+
+    /* Analog wow on playback rate via gain node trick:
+       we use it on oscillator frequency directly */
+    if (analogLFOGain) {
+      analogLFOGain.connect(osc.frequency);
+    }
+
+    filter.type = 'lowpass';
+    filter.frequency.value = 2000;
+    filter.Q.value = 1.2;
+
+    osc.type = waveType;
+    osc.frequency.value = 220;
+    oscGain.gain.value = 0;
+    vGain.gain.value = 0;
+
+    osc.connect(oscGain);
+    oscGain.connect(filter);
+    filter.connect(vGain);
+    vGain.connect(masterGain);
+
+    osc.start();
+    vibLFO.start();
+    fmLFO.start();
+
+    voices.push({ osc, oscGain, filter, vGain, vibLFO, vibGain, fmLFO, fmGain });
+  }
+}
+
+function ramp(param, val, tc) {
+  if (!AC) return;
+  param.setTargetAtTime(val, AC.currentTime, tc || 0.04);
+}
+
+/* ── CANVAS STATE ── */
+let canvases = {}; // layer id → canvas element
+let ctxs = {};     // layer id → 2d context
+let W = 0, H = 0;
+let gridCtx = null, uiCtx = null, drawCtx = null, rulerCtx = null;
+
+/* ── PLAYBACK STATE ── */
+let playing = false;
+let looping = true;
+let playheadX = 0; // 0..W pixels
+let playheadT = 0; // seconds
+let lastRafT  = 0;
+let rafId     = null;
+let speed = 0.8;    // pixels per frame at 60fps base → scaled by speed
+const PIXELS_PER_SECOND = 80; // canvas pixels per second of playback
+
+/* ── DRAWING STATE ── */
+let activeLayer = 'pitch';
+let tool = 'brush';
+let brushSize = 8;
+let brushSoft = 0.6;
+let drawing = false;
+let lineStart = null;
+let visibleLayers = { pitch: true, amp: true, timbre: true, mod: true };
+
+/* ── SMOOTH PARAMETER HISTORY ── */
+let smoothPitch = 440, smoothAmp = 0, smoothFilter = 2000, smoothMod = 0;
+
+/* ══════════════════════════════════════════════════════════
+   INIT — resize canvases, draw grid, bind events
+══════════════════════════════════════════════════════════ */
+function init() {
+  const wrap = document.getElementById('canvasInner');
+
+  // Set canvas dimensions
+  Object.keys(LAYERS).forEach(k => {
+    const c = document.getElementById(LAYERS[k].id);
+    canvases[k] = c;
+    ctxs[k] = c.getContext('2d');
+  });
+  gridCtx  = document.getElementById('c-grid').getContext('2d');
+  uiCtx    = document.getElementById('c-ui').getContext('2d');
+  drawCtx  = document.getElementById('c-draw').getContext('2d');
+  rulerCtx = document.getElementById('c-ruler').getContext('2d');
+
+  resize();
+  window.addEventListener('resize', resize);
+
+  drawGrid();
+  drawRuler();
+
+  // Bind drawing events
+  const dc = document.getElementById('c-draw');
+  dc.addEventListener('mousedown',  onDrawStart);
+  dc.addEventListener('mousemove',  onDrawMove);
+  dc.addEventListener('mouseup',    onDrawEnd);
+  dc.addEventListener('mouseleave', onDrawEnd);
+  dc.addEventListener('touchstart', e => { e.preventDefault(); onDrawStart(e.touches[0]); }, { passive: false });
+  dc.addEventListener('touchmove',  e => { e.preventDefault(); onDrawMove(e.touches[0]); }, { passive: false });
+  dc.addEventListener('touchend',   e => { e.preventDefault(); onDrawEnd(e.touches[0]); }, { passive: false });
+
+  // Click on canvas = scrub playhead
+  dc.addEventListener('click', e => {
+    if (drawing) return;
+    const r = dc.getBoundingClientRect();
+    playheadX = e.clientX - r.left;
+    playheadT = playheadX / PIXELS_PER_SECOND;
+    drawUI();
+    if (!playing) sampleAndApply();
+  });
+}
+
+function resize() {
+  const wrap = document.getElementById('canvasInner');
+  W = wrap.clientWidth;
+  H = wrap.clientHeight;
+
+  // Set all canvases
+  const allIds = ['c-grid','c-pitch','c-amp','c-timbre','c-mod','c-ui','c-draw'];
+  allIds.forEach(id => {
+    const c = document.getElementById(id);
+    c.width = W; c.height = H;
+  });
+
+  // Ruler
+  const ruler = document.getElementById('c-ruler');
+  ruler.width  = ruler.offsetWidth || 28;
+  ruler.height = H;
+
+  drawGrid();
+  drawRuler();
+  drawUI();
+  // Redraw existing layer contents (they get cleared on resize)
+  // We store off-screen copies for persistence
+  restoreLayerImages();
+}
+
+/* Offscreen backup for each layer (survives resize) */
+const layerImages = {};
+
+function backupLayer(k) {
+  const c = canvases[k];
+  if (!c || !W || !H) return;
+  layerImages[k] = ctxs[k].getImageData(0, 0, W, H);
+}
+
+function restoreLayerImages() {
+  Object.keys(LAYERS).forEach(k => {
+    if (layerImages[k]) {
+      ctxs[k].putImageData(layerImages[k], 0, 0);
+    }
+  });
+}
+
+/* ── GRID ── */
+function drawGrid() {
+  if (!gridCtx || !W || !H) return;
+  gridCtx.clearRect(0, 0, W, H);
+
+  // Vertical time grid every PIXELS_PER_SECOND px
+  gridCtx.strokeStyle = 'rgba(0,0,0,.06)';
+  gridCtx.lineWidth = 1;
+  for (let x = 0; x <= W; x += PIXELS_PER_SECOND) {
+    gridCtx.beginPath();
+    gridCtx.moveTo(x, 0);
+    gridCtx.lineTo(x, H);
+    gridCtx.stroke();
+  }
+  // Sub-divisions every quarter second
+  gridCtx.strokeStyle = 'rgba(0,0,0,.03)';
+  for (let x = 0; x <= W; x += PIXELS_PER_SECOND / 4) {
+    gridCtx.beginPath();
+    gridCtx.moveTo(x, 0);
+    gridCtx.lineTo(x, H);
+    gridCtx.stroke();
+  }
+  // Horizontal pitch lines (at octave positions)
+  gridCtx.strokeStyle = 'rgba(42,92,69,.08)';
+  const octaves = [80, 160, 320, 640, 1280, 2560];
+  octaves.forEach(hz => {
+    const y = hzToY(hz);
+    if (y < 0 || y > H) return;
+    gridCtx.beginPath();
+    gridCtx.moveTo(0, y);
+    gridCtx.lineTo(W, y);
+    gridCtx.stroke();
+    gridCtx.fillStyle = 'rgba(42,92,69,.35)';
+    gridCtx.font = '9px Courier New, monospace';
+    gridCtx.fillText(hz+'Hz', 4, y - 2);
+  });
+
+  // Center line
+  gridCtx.strokeStyle = 'rgba(0,0,0,.08)';
+  gridCtx.lineWidth = 1;
+  gridCtx.setLineDash([4, 4]);
+  gridCtx.beginPath();
+  gridCtx.moveTo(0, H / 2);
+  gridCtx.lineTo(W, H / 2);
+  gridCtx.stroke();
+  gridCtx.setLineDash([]);
+}
+
+function drawRuler() {
+  if (!rulerCtx) return;
+  const rW = rulerCtx.canvas.width;
+  const rH = rulerCtx.canvas.height;
+  rulerCtx.clearRect(0, 0, rW, rH);
+  rulerCtx.fillStyle = '#f5f3ed';
+  rulerCtx.fillRect(0, 0, rW, rH);
+
+  // Draw Hz labels
+  rulerCtx.fillStyle = '#999';
+  rulerCtx.font = '8px Courier New, monospace';
+  rulerCtx.textAlign = 'right';
+  const octaves = [80, 160, 320, 640, 1280];
+  octaves.forEach(hz => {
+    if (!H) return;
+    const y = hzToY(hz);
+    if (y < 4 || y > rH - 4) return;
+    rulerCtx.fillStyle = '#bbb';
+    rulerCtx.fillRect(0, y, 6, 1);
+    rulerCtx.fillStyle = '#999';
+    rulerCtx.fillText(hz > 999 ? (hz/1000).toFixed(1)+'k' : hz, rW - 2, y + 3);
+  });
+  rulerCtx.textAlign = 'left';
+}
+
+/* ── PLAYHEAD / UI CANVAS ── */
+function drawUI() {
+  if (!uiCtx || !W || !H) return;
+  uiCtx.clearRect(0, 0, W, H);
+
+  // Draw layer compositing — show all visible layers with tint
+  Object.keys(LAYERS).forEach(k => {
+    if (!visibleLayers[k]) return;
+    const isActive = k === activeLayer;
+    uiCtx.globalAlpha = isActive ? LAYERS[k].alpha : LAYERS[k].alpha * 0.4;
+    uiCtx.drawImage(canvases[k], 0, 0);
+  });
+  uiCtx.globalAlpha = 1;
+
+  // Playhead line
+  uiCtx.strokeStyle = 'rgba(192,57,43,0.9)';
+  uiCtx.lineWidth = 2;
+  uiCtx.shadowColor = '#c0392b';
+  uiCtx.shadowBlur = 6;
+  uiCtx.beginPath();
+  uiCtx.moveTo(playheadX, 0);
+  uiCtx.lineTo(playheadX, H);
+  uiCtx.stroke();
+  uiCtx.shadowBlur = 0;
+
+  // Playhead time label
+  uiCtx.fillStyle = '#c0392b';
+  uiCtx.font = '9px Courier New, monospace';
+  uiCtx.fillText(playheadT.toFixed(2)+'s', playheadX + 4, 12);
+}
+
+/* ── COORDINATE HELPERS ── */
+function hzToY(hz) {
+  // Log scale 80–2000 Hz → canvas H..0
+  const minHz = 80, maxHz = 2000;
+  const t = (Math.log(hz) - Math.log(minHz)) / (Math.log(maxHz) - Math.log(minHz));
+  return H - t * H;
+}
+function yToHz(y) {
+  if (!H) return 440;
+  const minHz = 80, maxHz = 2000;
+  const t = 1 - (y / H);
+  return minHz * Math.pow(maxHz / minHz, t);
+}
+function yToFilter(y) {
+  if (!H) return 2000;
+  const minF = 200, maxF = 8000;
+  const t = 1 - (y / H);
+  return minF * Math.pow(maxF / minF, t);
+}
+
+/* ── CANVAS SAMPLING ── */
+function sampleLayer(layerKey, x) {
+  const ctx = ctxs[layerKey];
+  if (!ctx || !H) return 0;
+  // Sample a column of pixels at x
+  const px = Math.max(0, Math.min(W - 1, Math.round(x)));
+  const imageData = ctx.getImageData(px, 0, 1, H);
+  const data = imageData.data; // RGBA flat array, length = H*4
+
+  // Find weighted average Y of drawn pixels
+  let weightedY = 0, totalWeight = 0;
+  for (let row = 0; row < H; row++) {
+    const a = data[row * 4 + 3]; // alpha channel
+    if (a > 8) {
+      // Weight by alpha * (for amplitude, also by brightness)
+      const weight = a / 255;
+      weightedY += row * weight;
+      totalWeight += weight;
+    }
+  }
+
+  if (totalWeight === 0) return -1; // no mark in this column
+
+  const avgY = weightedY / totalWeight;
+  return avgY / H; // 0 = top, 1 = bottom
+}
+
+function sampleAndApply() {
+  if (!AC) return;
+
+  const pitchNorm  = sampleLayer('pitch', playheadX);
+  const ampNorm    = sampleLayer('amp', playheadX);
+  const timbreNorm = sampleLayer('timbre', playheadX);
+  const modNorm    = sampleLayer('mod', playheadX);
+
+  const now = AC.currentTime;
+  const tc  = 0.06; // smoothing time constant
+
+  // Pitch: 0 = top = 2000Hz, 1 = bottom = 80Hz (log scale)
+  const targetPitch = pitchNorm >= 0
+    ? 80 * Math.pow(2000 / 80, 1 - pitchNorm)
+    : 0;
+
+  // Amplitude: 0 = top = loud, 1 = bottom = quiet
+  // But absence of mark = silence
+  const targetAmp = ampNorm >= 0 ? (1 - ampNorm) : (pitchNorm >= 0 ? 0.6 : 0);
+
+  // Filter: 0 = top = bright (8000), 1 = bottom = dark (200)
+  const targetFilter = timbreNorm >= 0
+    ? 200 * Math.pow(8000 / 200, 1 - timbreNorm)
+    : 2000;
+
+  // Modulation: 0 = top = heavy vibrato
+  const targetMod = modNorm >= 0 ? (1 - modNorm) : 0;
+
+  // Analog drift noise
+  const drift = analogOn ? (Math.random() - 0.5) * targetPitch * 0.004 : 0;
+
+  // Apply to voices
+  voices.forEach((v, i) => {
+    let pitchOffset = 0;
+    if (numVoices > 1) {
+      // Spread voices across a minor chord-like structure
+      const intervals = [0, 1.5, 1.2, -1.2, 1.7, -1.5];
+      pitchOffset = (intervals[i] || 0) * 50;
+    }
+
+    if (targetPitch > 0 && targetAmp > 0) {
+      ramp(v.osc.frequency, Math.max(20, targetPitch + pitchOffset + drift), tc);
+      ramp(v.oscGain.gain, targetAmp * 0.6, tc);
+    } else {
+      ramp(v.oscGain.gain, 0, tc);
+    }
+
+    ramp(v.filter.frequency, targetFilter, tc * 2);
+    ramp(v.vGain.gain, 1, tc);
+
+    // Vibrato from mod layer
+    ramp(v.vibGain.gain, targetMod * 25, tc);
+    // FM from mod
+    ramp(v.fmGain.gain, targetMod * targetPitch * 0.08, tc);
+    v.fmLFO.frequency.setTargetAtTime(2 + targetMod * 8, now, tc);
+
+    v.osc.type = waveType;
+  });
+
+  // Smooth for inspector
+  const smooth = (cur, tgt) => cur * 0.85 + tgt * 0.15;
+  smoothPitch  = smooth(smoothPitch,  targetPitch);
+  smoothAmp    = smooth(smoothAmp,    targetAmp);
+  smoothFilter = smooth(smoothFilter, targetFilter);
+  smoothMod    = smooth(smoothMod,    targetMod);
+
+  updateInspector(smoothPitch, smoothAmp, smoothFilter, smoothMod, playheadT);
+}
+
+function updateInspector(pitch, amp, filter, mod, t) {
+  document.getElementById('insp-pitch').textContent  = pitch > 0 ? pitch.toFixed(0)+' Hz' : '—';
+  document.getElementById('insp-amp').textContent    = amp > 0 ? (amp*100).toFixed(0)+'%' : '—';
+  document.getElementById('insp-filter').textContent = filter.toFixed(0)+' Hz';
+  document.getElementById('insp-mod').textContent    = (mod*100).toFixed(0)+'%';
+
+  const pct = v => Math.round(v) + '%';
+  document.getElementById('ibar-pitch').style.width  = pitch > 0 ? Math.min(100, pitch/20)+'%' : '0%';
+  document.getElementById('ibar-amp').style.width    = (amp*100)+'%';
+  document.getElementById('ibar-filter').style.width = Math.min(100, filter/80)+'%';
+  document.getElementById('ibar-mod').style.width    = (mod*100)+'%';
+
+  document.getElementById('st-pos').textContent    = t.toFixed(2)+'s';
+  document.getElementById('st-pitch').textContent  = pitch > 0 ? pitch.toFixed(0)+' Hz' : '—';
+  document.getElementById('st-amp').textContent    = amp > 0 ? (amp*100).toFixed(0)+'%' : '—';
+  document.getElementById('st-filter').textContent = filter.toFixed(0)+' Hz';
+}
+
+/* ── RAF LOOP ── */
+function raf(ts) {
+  if (!playing) return;
+
+  const dt = lastRafT ? (ts - lastRafT) / 1000 : 0;
+  lastRafT = ts;
+
+  // Advance playhead
+  playheadX += dt * speed * PIXELS_PER_SECOND;
+  playheadT  = playheadX / PIXELS_PER_SECOND;
+
+  if (playheadX >= W) {
+    if (looping) {
+      playheadX = 0;
+      playheadT = 0;
+    } else {
+      playing = false;
+      ORM.stop();
+      return;
+    }
+  }
+
+  sampleAndApply();
+  drawUI();
+
+  rafId = requestAnimationFrame(raf);
+}
+
+/* ══════════════════════════════════════════════════════════
+   DRAWING SYSTEM
+══════════════════════════════════════════════════════════ */
+function getPos(e) {
+  const c = document.getElementById('c-draw');
+  const r = c.getBoundingClientRect();
+  return {
+    x: (e.clientX || e.pageX) - r.left,
+    y: (e.clientY || e.pageY) - r.top,
+  };
+}
+
+let lastDrawPos = null;
+
+function onDrawStart(e) {
+  if (tool === 'line' || tool === 'sine' || tool === 'ramp' || tool === 'flat') {
+    lineStart = getPos(e);
+    return;
+  }
+  drawing = true;
+  lastDrawPos = null;
+  onDrawMove(e);
+}
+
+function onDrawMove(e) {
+  const pos = getPos(e);
+
+  // Show cursor parameter in status bar
+  const hz = yToHz(pos.y);
+  document.getElementById('st-tip').textContent =
+    `cursor → ${activeLayer} ${activeLayer === 'pitch' ? hz.toFixed(0)+' Hz' : ((1-pos.y/H)*100).toFixed(0)+'%'} · ${(pos.x/PIXELS_PER_SECOND).toFixed(2)}s`;
+
+  if (!drawing) return;
+  drawMark(pos);
+  backupLayer(activeLayer);
+  drawUI();
+
+  // Preview tone while drawing on pitch layer
+  if (activeLayer === 'pitch' && AC && voices.length) {
+    const targetHz = yToHz(pos.y);
+    voices[0].osc.frequency.setTargetAtTime(targetHz, AC.currentTime, 0.02);
+    voices[0].oscGain.gain.setTargetAtTime(0.35, AC.currentTime, 0.02);
+    voices[0].vGain.gain.value = 1;
+    clearTimeout(ORM._previewTimeout);
+    ORM._previewTimeout = setTimeout(() => {
+      if (!playing) voices[0].oscGain.gain.setTargetAtTime(0, AC.currentTime, 0.08);
+    }, 120);
+  }
+
+  lastDrawPos = pos;
+}
+
+function onDrawEnd(e) {
+  if (tool === 'line') {
+    const pos = getPos(e || { clientX: 0, clientY: 0 });
+    if (lineStart && pos) drawLineTool(lineStart, pos);
+    lineStart = null;
+    backupLayer(activeLayer);
+    drawUI();
+  } else if (tool === 'sine') {
+    const pos = getPos(e || { clientX: 0, clientY: 0 });
+    if (lineStart && pos) drawSinePreset(lineStart, pos);
+    lineStart = null;
+    backupLayer(activeLayer);
+    drawUI();
+  } else if (tool === 'ramp') {
+    const pos = getPos(e || { clientX: 0, clientY: 0 });
+    if (lineStart && pos) drawRampPreset(lineStart, pos);
+    lineStart = null;
+    backupLayer(activeLayer);
+    drawUI();
+  } else if (tool === 'flat') {
+    const pos = getPos(e || { clientX: 0, clientY: 0 });
+    if (lineStart && pos) drawFlatPreset(lineStart, pos);
+    lineStart = null;
+    backupLayer(activeLayer);
+    drawUI();
+  }
+  drawing = false;
+  lastDrawPos = null;
+}
+
+function drawMark(pos) {
+  const ctx = ctxs[activeLayer];
+  const color = LAYERS[activeLayer].color;
+
+  if (tool === 'erase') {
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, brushSize * 1.5, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0,0,0,1)';
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+    return;
+  }
+
+  if (tool !== 'brush') return;
+
+  if (brushSoft > 0 && lastDrawPos) {
+    // Interpolate between last and current for smooth strokes
+    const steps = Math.ceil(Math.hypot(pos.x - lastDrawPos.x, pos.y - lastDrawPos.y) / (brushSize / 2));
+    for (let s = 0; s <= steps; s++) {
+      const t = steps ? s / steps : 0;
+      const ix = lastDrawPos.x + (pos.x - lastDrawPos.x) * t;
+      const iy = lastDrawPos.y + (pos.y - lastDrawPos.y) * t;
+      drawBrushDab(ctx, ix, iy, color);
+    }
+  } else {
+    drawBrushDab(ctx, pos.x, pos.y, color);
+  }
+}
+
+function drawBrushDab(ctx, x, y, color) {
+  if (brushSoft > 0.1) {
+    // Radial gradient for soft brush
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, brushSize);
+    grad.addColorStop(0,   color + 'ee');
+    grad.addColorStop(brushSoft * 0.8, color + '88');
+    grad.addColorStop(1,   color + '00');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(x, y, brushSize, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    // Hard brush
+    ctx.fillStyle = color + 'dd';
+    ctx.beginPath();
+    ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function drawLineTool(a, b) {
+  const ctx = ctxs[activeLayer];
+  const color = LAYERS[activeLayer].color;
+  ctx.strokeStyle = color + 'cc';
+  ctx.lineWidth = brushSize;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(a.x, a.y);
+  ctx.lineTo(b.x, b.y);
+  ctx.stroke();
+}
+
+function drawSinePreset(a, b) {
+  const ctx = ctxs[activeLayer];
+  const color = LAYERS[activeLayer].color;
+  ctx.strokeStyle = color + 'cc';
+  ctx.lineWidth = brushSize;
+  ctx.lineCap = 'round';
+  const steps = Math.abs(b.x - a.x);
+  const cycles = 2;
+  ctx.beginPath();
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const x = a.x + (b.x - a.x) * t;
+    const amp = (b.y - a.y) / 2;
+    const y = a.y + amp + Math.sin(t * cycles * Math.PI * 2) * amp;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+}
+
+function drawRampPreset(a, b) {
+  drawLineTool(a, b);
+}
+
+function drawFlatPreset(a, b) {
+  const midY = (a.y + b.y) / 2;
+  drawLineTool({ x: a.x, y: midY }, { x: b.x, y: midY });
+}
+
+/* ══════════════════════════════════════════════════════════
+   PUBLIC CONTROLLER
+══════════════════════════════════════════════════════════ */
+const ORM = window.ORM = {
+  brushSize: 8,
+  brushSoft: 0.6,
+  _previewTimeout: null,
+
+  play() {
+    if (!AC) initAudio();
+    if (AC.state === 'suspended') AC.resume();
+    playing = true;
+    lastRafT = 0;
+    document.getElementById('btn-play').classList.add('active');
+    rafId = requestAnimationFrame(raf);
+  },
+
+  stop() {
+    playing = false;
+    cancelAnimationFrame(rafId);
+    if (AC) {
+      voices.forEach(v => {
+        v.oscGain.gain.setTargetAtTime(0, AC.currentTime, 0.08);
+      });
+    }
+    document.getElementById('btn-play').classList.remove('active');
+    drawUI();
+  },
+
+  toggleLoop() {
+    looping = !looping;
+    document.getElementById('btn-loop').classList.toggle('active', looping);
+  },
+
+  setSpeed(v) {
+    speed = v;
+    document.getElementById('speed-val').textContent = v.toFixed(2) + '×';
+  },
+
+  setWave(w) {
+    waveType = w;
+    voices.forEach(v => { v.osc.type = w; });
+  },
+
+  setVoices(n) {
+    numVoices = n;
+    if (AC) buildVoices();
+  },
+
+  setAnalog(on) {
+    analogOn = on;
+    if (analogLFOGain && AC) {
+      analogLFOGain.gain.setTargetAtTime(on ? 8 : 0, AC.currentTime, 0.3);
+    }
+  },
+
+  setLayer(k) {
+    activeLayer = k;
+    document.querySelectorAll('.layer-item').forEach(el => el.classList.remove('active'));
+    document.getElementById('layer-btn-' + k).classList.add('active');
+
+    // Update hint and scale
+    document.getElementById('layer-hint').textContent = LAYERS[k].hint;
+    const sc = LAYER_SCALES[k];
+    document.getElementById('scale-top').textContent = sc.top;
+    document.getElementById('scale-mid').textContent = sc.mid;
+    document.getElementById('scale-bot').textContent = sc.bot;
+  },
+
+  toggleVis(k, e) {
+    e.stopPropagation();
+    visibleLayers[k] = !visibleLayers[k];
+    const dot = document.querySelector(`#layer-btn-${k} .layer-vis`);
+    if (dot) dot.style.opacity = visibleLayers[k] ? '1' : '0.2';
+    drawUI();
+  },
+
+  setTool(t) {
+    tool = t;
+    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+    const btn = document.getElementById('tool-' + t);
+    if (btn) btn.classList.add('active');
+
+    // Change cursor
+    const cursors = {
+      brush: 'crosshair', line: 'crosshair', erase: 'cell',
+      sine: 'crosshair', ramp: 'crosshair', flat: 'crosshair'
+    };
+    document.getElementById('c-draw').style.cursor = cursors[t] || 'crosshair';
+
+    const tips = {
+      brush: 'Click and drag to draw. Hold down for continuous strokes.',
+      line:  'Click and drag to draw a straight line between two points.',
+      erase: 'Click and drag to erase marks.',
+      sine:  'Click and drag to place a sine wave curve.',
+      ramp:  'Click and drag to place a linear ramp (rise or fall).',
+      flat:  'Click and drag to place a flat sustained line.',
+    };
+    document.getElementById('st-tip').textContent = tips[t] || '';
+  },
+
+  clearAll() {
+    Object.keys(LAYERS).forEach(k => {
+      ctxs[k].clearRect(0, 0, W, H);
+      delete layerImages[k];
+    });
+    drawUI();
+    ORM.stop();
+  },
+
+  randomize() {
+    // Generate organic Oramics-style random shapes on each layer
+    Object.keys(LAYERS).forEach(k => {
+      ctxs[k].clearRect(0, 0, W, H);
+      const color = LAYERS[k].color;
+      const ctx = ctxs[k];
+
+      // Each layer gets a different randomization character
+      if (k === 'pitch') {
+        // Slow organic curves — smooth pitch contours
+        generateOrganicCurve(ctx, color, 3, 0.7, true);
+      } else if (k === 'amp') {
+        // Swells and silences
+        generateSwells(ctx, color, 4);
+      } else if (k === 'timbre') {
+        // Medium complexity curves
+        generateOrganicCurve(ctx, color, 5, 0.5, false);
+      } else if (k === 'mod') {
+        // Sparse, intermittent marks
+        generateSparseMarks(ctx, color);
+      }
+
+      backupLayer(k);
+    });
+    drawUI();
+  },
+
+  async exportWav() {
+    if (!W || !H) return;
+    const btn = document.getElementById('btn-export');
+    btn.disabled = true;
+    btn.textContent = 'rendering…';
+
+    const duration = W / PIXELS_PER_SECOND;
+    const sr = 44100;
+    const offCtx = new OfflineAudioContext(2, Math.ceil(duration * sr), sr);
+
+    const offMaster = offCtx.createGain();
+    offMaster.gain.value = 0.7;
+    const offLimiter = offCtx.createDynamicsCompressor();
+    offLimiter.threshold.value = -8;
+    offLimiter.ratio.value = 10;
+    offMaster.connect(offLimiter);
+    offLimiter.connect(offCtx.destination);
+
+    // Schedule parameter automation from canvas data
+    const sliceCount = Math.min(W, 2000);
+    const sliceW = W / sliceCount;
+
+    const osc = offCtx.createOscillator();
+    const oscG = offCtx.createGain();
+    const filt = offCtx.createBiquadFilter();
+    filt.type = 'lowpass';
+    osc.type = waveType;
+
+    osc.connect(oscG); oscG.connect(filt); filt.connect(offMaster);
+    osc.start(0);
+
+    for (let i = 0; i < sliceCount; i++) {
+      const x = i * sliceW;
+      const t = x / PIXELS_PER_SECOND;
+      const pN = sampleLayer('pitch', x);
+      const aN = sampleLayer('amp', x);
+      const tN = sampleLayer('timbre', x);
+
+      const hz  = pN >= 0 ? 80 * Math.pow(2000/80, 1-pN) : 0;
+      const amp = aN >= 0 ? (1-aN) * 0.6 : (pN >= 0 ? 0.55 : 0);
+      const fc  = tN >= 0 ? 200 * Math.pow(8000/200, 1-tN) : 2000;
+
+      if (hz > 0) {
+        osc.frequency.setValueAtTime(hz, t);
+        oscG.gain.setValueAtTime(amp, t);
+        filt.frequency.setValueAtTime(fc, t);
+      } else {
+        oscG.gain.setValueAtTime(0, t);
+      }
+    }
+
+    try {
+      const rendered = await offCtx.startRendering();
+      const wavBlob = audioBufferToWav(rendered);
+      const url = URL.createObjectURL(wavBlob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'oramics-' + Date.now() + '.wav'; a.click();
+      URL.revokeObjectURL(url);
+    } catch(e) {
+      console.error('Export failed', e);
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'export WAV';
+  },
+};
+
+/* ── RANDOM GENERATORS ── */
+function generateOrganicCurve(ctx, color, points, brushW, logScale) {
+  // Generate control points and draw a smooth curve
+  const ptList = [];
+  for (let i = 0; i <= points; i++) {
+    ptList.push({
+      x: (i / points) * W,
+      y: 0.15 * H + Math.random() * 0.7 * H,
+    });
+  }
+
+  ctx.strokeStyle = color + 'cc';
+  ctx.lineWidth = brushW * 8;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(ptList[0].x, ptList[0].y);
+
+  for (let i = 1; i < ptList.length - 1; i++) {
+    const xc = (ptList[i].x + ptList[i+1].x) / 2;
+    const yc = (ptList[i].y + ptList[i+1].y) / 2;
+    ctx.quadraticCurveTo(ptList[i].x, ptList[i].y, xc, yc);
+  }
+  const last = ptList[ptList.length - 1];
+  ctx.lineTo(last.x, last.y);
+  ctx.stroke();
+
+  // Add some texture variation
+  for (let i = 0; i < points * 3; i++) {
+    const x = Math.random() * W;
+    const idx = Math.floor((x / W) * (ptList.length - 1));
+    const baseY = ptList[Math.min(idx, ptList.length-1)].y;
+    const grad = ctx.createRadialGradient(x, baseY, 0, x, baseY, 12 + Math.random() * 20);
+    grad.addColorStop(0, color + '66');
+    grad.addColorStop(1, color + '00');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(x, baseY + (Math.random()-0.5)*30, 12 + Math.random()*20, 0, Math.PI*2);
+    ctx.fill();
+  }
+}
+
+function generateSwells(ctx, color, count) {
+  for (let i = 0; i < count; i++) {
+    const cx = (i + 0.5 + Math.random() * 0.4 - 0.2) / count * W;
+    const r  = (0.06 + Math.random() * 0.12) * W;
+    const cy = H * (0.1 + Math.random() * 0.3); // top = loud
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    grad.addColorStop(0, color + 'dd');
+    grad.addColorStop(0.5, color + '88');
+    grad.addColorStop(1, color + '00');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, r, r * 0.7, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function generateSparseMarks(ctx, color) {
+  const count = 4 + Math.floor(Math.random() * 6);
+  for (let i = 0; i < count; i++) {
+    const x = Math.random() * W;
+    const y = Math.random() * H * 0.5; // mostly upper half (more mod)
+    const len = (0.04 + Math.random() * 0.12) * W;
+    ctx.strokeStyle = color + 'bb';
+    ctx.lineWidth = 4 + Math.random() * 10;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + len, y + (Math.random()-0.5) * H * 0.2);
+    ctx.stroke();
+  }
+}
+
+/* ── WAV EXPORT UTILITY ── */
+function audioBufferToWav(buf) {
+  const len = buf.length, sr = buf.sampleRate, ch = buf.numberOfChannels;
+  const bps = 2, dl = len * ch * bps;
+  const ab = new ArrayBuffer(44 + dl);
+  const v  = new DataView(ab);
+  const ws = (o, s) => { for (let i=0; i<s.length; i++) v.setUint8(o+i, s.charCodeAt(i)); };
+  ws(0,'RIFF'); v.setUint32(4, 36+dl, true); ws(8,'WAVE'); ws(12,'fmt ');
+  v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, ch, true);
+  v.setUint32(24, sr, true); v.setUint32(28, sr*ch*bps, true);
+  v.setUint16(32, ch*bps, true); v.setUint16(34, 16, true);
+  ws(36,'data'); v.setUint32(40, dl, true);
+  let off = 44;
+  for (let i=0; i<len; i++) {
+    for (let c=0; c<ch; c++) {
+      const s = Math.max(-1, Math.min(1, buf.getChannelData(c)[i]||0));
+      v.setInt16(off, s < 0 ? s*0x8000 : s*0x7FFF, true);
+      off += 2;
+    }
+  }
+  return new Blob([ab], { type:'audio/wav' });
+}
+
+/* ── HEADER / SUPABASE ── */
+const _path = window.location.pathname.replace(/\/$/, '') || '/';
+document.querySelectorAll('.sil-header__nav a').forEach(a => {
+  const href = (a.getAttribute('href')||'').replace(/\/$/, '') || '/';
+  if (href === _path) a.classList.add('sil-active');
+});
+const menuToggle = document.getElementById('silMenuToggle');
+const silNav     = document.getElementById('silNav');
+menuToggle.addEventListener('click', () => {
+  const open = silNav.classList.toggle('sil-open');
+  menuToggle.setAttribute('aria-expanded', open);
+});
+silNav.querySelectorAll('a').forEach(a =>
+  a.addEventListener('click', () => silNav.classList.remove('sil-open'))
+);
+async function getSupabase() {
+  if (window._supabase) return window._supabase;
+  const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+  return createClient('https://lrjuufvrgkuvfxcmybtf.supabase.co','sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1');
+}
+document.getElementById('silSignOut').addEventListener('click', async function () {
+  this.disabled = true; this.textContent = 'Signing out…';
+  try { const sb = await getSupabase(); await sb.auth.signOut(); }
+  finally { window.location.replace('/'); }
+});
+
+/* ── START ── */
+window.addEventListener('load', () => {
+  init();
+  // Set initial loop button state
+  document.getElementById('btn-loop').classList.add('active');
+});
+
+}());
+</script>
+
+</body>
+</html>
