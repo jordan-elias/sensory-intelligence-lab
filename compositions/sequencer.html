@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Sequencer</title>
+  <title>Sequencer — Sensory Intelligence Lab</title>
 
   <link rel="icon" href="/images/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
@@ -271,8 +271,8 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 1rem 1rem 1rem;
-      gap: .85rem;
+      padding: .65rem .9rem .65rem;
+      gap: .55rem;
       background: var(--surface);
     }
 
@@ -298,8 +298,10 @@
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       grid-template-rows: repeat(4, 1fr);
-      gap: 6px;
+      gap: 5px;
       width: 100%;
+      /* Constrain max size so whole grid stays compact */
+      max-width: 380px;
     }
 
     .pad {
@@ -316,7 +318,8 @@
       user-select: none;
       -webkit-user-select: none;
       border-radius: 3px;
-      min-height: 52px;
+      min-height: 42px;
+      max-height: 80px;
     }
     .pad:active { transform: scale(.94); }
 
@@ -362,17 +365,16 @@
 
     /* ── NOTE PICKER POPOVER ── */
     .note-picker {
-      position: absolute;
-      z-index: 100;
+      position: fixed;   /* fixed to viewport so it sits right on the pad */
+      z-index: 500;
       background: #fff;
       border: 1px solid var(--border);
-      box-shadow: 0 4px 16px rgba(0,0,0,.12);
-      padding: .5rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,.14);
+      padding: .45rem;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 4px;
-      min-width: 160px;
-      /* positioned by JS */
+      width: 172px;
     }
     .note-picker.hidden { display: none; }
     .note-picker-btn {
@@ -531,9 +533,9 @@
         min-height: 48px;
       }
       .track-item:nth-child(even) { border-right: none; }
-      .grid-area { padding: .75rem .75rem; gap: .65rem; }
-      .pad-grid { gap: 5px; }
-      .pad { min-height: 60px; }
+      .grid-area { padding: .5rem .6rem; gap: .45rem; }
+      .pad-grid { gap: 4px; }
+      .pad { min-height: 48px; }
       .transport { padding: .5rem .6rem; }
       .tbtn { font-size: .68rem; padding: .38rem .6rem; min-height: 40px; }
       input[type=range].t-slider { width: 70px; }
@@ -541,9 +543,30 @@
     }
 
     @media (max-width: 420px) {
-      .pad { min-height: 54px; }
+      .pad { min-height: 44px; }
       .track-item { width: 100%; border-right: none; }
     }
+
+    /* ── ESSAY ── */
+    .essay {
+      margin-top: 2.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      font-size: .9rem;
+      line-height: 1.8;
+      color: var(--text);
+      max-width: 680px;
+    }
+    .essay h2 {
+      font-family: var(--font-head);
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -.01em;
+      margin: 1.75rem 0 .45rem;
+    }
+    .essay h2:first-child { margin-top: 0; }
+    .essay p + p { margin-top: .75rem; }
+    .essay strong { font-weight: 600; }
 
     /* ── FOOTER ── */
     footer {
@@ -603,12 +626,18 @@
 
       <!-- Key selector (melodic only) -->
       <select class="t-select" id="key-select" onchange="SEQ.setKey(this.value)" title="Root note">
-        <option value="C">C</option><option value="C#">C#</option>
-        <option value="D">D</option><option value="D#">D#</option>
-        <option value="E">E</option><option value="F">F</option>
-        <option value="F#">F#</option><option value="G">G</option>
-        <option value="G#">G#</option><option value="A">A</option>
-        <option value="A#">A#</option><option value="B">B</option>
+        <option value="C">C</option>
+        <option value="C#">C# / Db</option>
+        <option value="D">D</option>
+        <option value="D#">Eb / D#</option>
+        <option value="E">E</option>
+        <option value="F">F</option>
+        <option value="F#">F# / Gb</option>
+        <option value="G">G</option>
+        <option value="G#">Ab / G#</option>
+        <option value="A">A</option>
+        <option value="A#">Bb / A#</option>
+        <option value="B">B</option>
       </select>
       <select class="t-select" id="scale-select" onchange="SEQ.setScale(this.value)" title="Scale">
         <option value="major">Major</option>
@@ -691,12 +720,41 @@
           </select>
           <button class="chain-add-btn" onclick="SEQ.addChainStep()">+ add</button>
           <button class="chain-clear-btn" onclick="SEQ.clearChain()">clear chain</button>
+          <div style="flex:1"></div>
+          <button class="chain-add-btn" onclick="SEQ.exportWav()" id="btn-export" title="Render current loop or chain to WAV file">⬇ export WAV</button>
         </div>
         <div class="chain-mode-note" id="chainNote">No chain — Loop 1 repeats continuously.</div>
       </div>
     </div>
 
   </div><!-- /seq-app -->
+
+  <!-- ESSAY -->
+  <div class="essay">
+
+    <h2>How to use the sequencer</h2>
+    <p>The sequencer is a 16-step loop machine — the most common tool in electronic music production. Each of the 16 squares represents one sixteenth note: a beat subdivided into four equal parts, so four squares make up one beat and sixteen squares make one complete bar of 4/4 time. When you press play, a red outline moves through the squares from left to right, triggering any step that is switched on as it passes. That's the whole logic. Everything else is just choosing what gets triggered when.</p>
+
+    <h2>Tracks</h2>
+    <p>The left column lists eight tracks: four rhythmic (Kick, Snare, Hi-Hat, Cymbal) and four melodic (Bass, Lead 1, Lead 2, Lead 3). Only one track is active at a time — click a track name to select it, then tap squares to turn steps on or off. The grid always shows the pattern for the selected track, so you build each layer separately. When you play, all eight tracks run simultaneously.</p>
+    <p>A good starting point is the example beat, which loads a classic 4-on-the-floor kick pattern, snare on beats 2 and 4, and eighth-note hi-hats. Press play to hear it, then click each track in turn and look at its pattern to understand what is contributing to the sound.</p>
+
+    <h2>Rhythm tracks</h2>
+    <p>The four rhythm tracks — Kick, Snare, Hi-Hat, Cymbal — are on/off: a step is either active or silent. The most fundamental drum pattern in 4/4 time places a kick on steps 1, 5, 9, and 13 (the four beats), a snare on steps 5 and 13 (beats 2 and 4), and hi-hats on every other step. From this foundation you can add, remove, or shift any step to create syncopation — rhythmic interest that pushes against or between the beats.</p>
+
+    <h2>Melody tracks</h2>
+    <p>The melodic tracks work slightly differently. When you tap an empty step, it turns on and a small menu appears showing the available notes from your chosen scale. Tap a note name to assign it. If you tap a step that is already on, the menu reopens so you can change the note or turn the step off. The key and scale selectors in the transport bar determine which notes are available — change the key and all note names update to match.</p>
+    <p>The five scale options cover the most useful sounds in Western music. <strong>Major</strong> is bright and resolved. <strong>Natural minor</strong> is darker and more melancholic. <strong>Minor pentatonic</strong> — five notes from the minor scale — is particularly forgiving: almost any combination of steps sounds musical, which makes it ideal for improvising melodic ideas quickly. <strong>Major pentatonic</strong> is the equivalent bright five-note scale. <strong>Harmonic minor</strong> adds a raised seventh that gives a tense, dramatic quality.</p>
+
+    <h2>Loop slots and chaining</h2>
+    <p>The sequencer has four loop slots. Each stores a completely independent set of patterns across all eight tracks. By default, Loop 1 plays on repeat. Click Loop 2, 3, or 4 to switch to a different slot and program a new pattern — the copy button duplicates the current loop to the next slot so you can vary an existing pattern rather than starting from scratch.</p>
+    <p>The chain section lets you combine loops into an arrangement. Use the selectors to choose a loop and how many times it should repeat, then click Add. You can build a sequence like "Loop 1 twice, then Loop 2 four times, then Loop 3 once" and it will cycle through that pattern continuously. To remove a step from the chain, click the × on it. Export WAV renders the entire chain — or the current loop if no chain is set — as a stereo audio file you can take into any other software.</p>
+
+    <h2>Tempo</h2>
+    <p>The BPM slider controls playback speed. 120 BPM is a common tempo for house and pop music — four beats per second. 90 BPM gives a more relaxed hip-hop feel; 140 feels urgent and energetic. Changes take effect immediately, so you can adjust tempo while the sequencer is playing to find the right feel before committing to a number.</p>
+
+  </div>
+
 </main>
 
 <footer>
@@ -742,9 +800,34 @@ const SCALES = {
   minor_pentatonic:[0, 3, 5, 7, 10, 12, 15, 17],
 };
 
-const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+/* ── ENHARMONIC SPELLING ── */
+// Which keys prefer flats vs sharps
+const FLAT_KEYS = new Set(['F','Bb','Eb','Ab','Db','Gb','Cb','D#','G#','A#']);
+// Scales that always use flats regardless of key
+const FLAT_SCALES = new Set(['minor','harmonic_minor','minor_pentatonic']);
 
-/* Root frequencies for octave 3 */
+const NOTE_SHARP = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const NOTE_FLAT  = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+
+function preferFlats(root, scale) {
+  // Minor-family scales on any root tend toward flats
+  if (FLAT_SCALES.has(scale)) return true;
+  return FLAT_KEYS.has(root);
+}
+
+function spelledNote(semitone, root, scale) {
+  const names = preferFlats(root, scale) ? NOTE_FLAT : NOTE_SHARP;
+  return names[((semitone % 12) + 12) % 12];
+}
+
+function getScaleNoteName(root, scale, scaleIdx) {
+  const semitones = SCALES[scale] || SCALES.major;
+  const st = semitones[Math.min(scaleIdx, semitones.length - 1)];
+  const rootSemitone = NOTE_SHARP.indexOf(root) !== -1
+    ? NOTE_SHARP.indexOf(root)
+    : NOTE_FLAT.indexOf(root);
+  return spelledNote(rootSemitone + st, root, scale);
+}
 const ROOT_HZ = {
   'C':130.81,'C#':138.59,'D':146.83,'D#':155.56,
   'E':164.81,'F':174.61,'F#':185.00,'G':196.00,
@@ -938,17 +1021,106 @@ function playLead(time, hz, vol, variant) {
   osc.start(time); osc.stop(time + 0.25);
 }
 
+/* ── OFFLINE RENDERING FOR EXPORT ── */
+function renderDrumOffline(ctx, id, time, vol) {
+  if (id === 'kick') {
+    const g = ctx.createGain();
+    g.connect(ctx.destination);
+    const osc = ctx.createOscillator();
+    osc.connect(g);
+    osc.frequency.setValueAtTime(150, time);
+    osc.frequency.exponentialRampToValueAtTime(40, time + 0.08);
+    osc.type = 'sine';
+    g.gain.setValueAtTime(vol * 1.2, time);
+    g.gain.exponentialRampToValueAtTime(0.001, time + 0.38);
+    osc.start(time); osc.stop(time + 0.4);
+  } else if (id === 'snare') {
+    const bufLen = ctx.sampleRate * 0.2;
+    const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    const hpf = ctx.createBiquadFilter(); hpf.type = 'highpass'; hpf.frequency.value = 1500;
+    const g = ctx.createGain();
+    src.connect(hpf); hpf.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(vol * 0.9, time);
+    g.gain.exponentialRampToValueAtTime(0.001, time + 0.18);
+    src.start(time); src.stop(time + 0.22);
+  } else if (id === 'hihat') {
+    const bufLen = ctx.sampleRate * 0.06;
+    const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    const hpf = ctx.createBiquadFilter(); hpf.type = 'highpass'; hpf.frequency.value = 7000;
+    const g = ctx.createGain();
+    src.connect(hpf); hpf.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(vol * 0.6, time);
+    g.gain.exponentialRampToValueAtTime(0.001, time + 0.055);
+    src.start(time); src.stop(time + 0.08);
+  } else if (id === 'cymbal') {
+    const bufLen = ctx.sampleRate * 0.7;
+    const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    const hpf = ctx.createBiquadFilter(); hpf.type = 'bandpass'; hpf.frequency.value = 5000; hpf.Q.value = 0.5;
+    const g = ctx.createGain();
+    src.connect(hpf); hpf.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(vol * 0.55, time);
+    g.gain.exponentialRampToValueAtTime(0.001, time + 0.65);
+    src.start(time); src.stop(time + 0.72);
+  }
+}
+
+function renderMelodicOffline(ctx, leadVariant, hz, time, vol) {
+  const osc = ctx.createOscillator();
+  const lpf = ctx.createBiquadFilter();
+  const g   = ctx.createGain();
+  if (leadVariant === 0) {
+    lpf.type = 'lowpass'; lpf.frequency.value = 500; lpf.Q.value = 1.5;
+    osc.type = 'sawtooth'; osc.frequency.value = hz;
+    osc.connect(lpf); lpf.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.001, time);
+    g.gain.linearRampToValueAtTime(vol * 0.7, time + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.001, time + 0.28);
+    osc.start(time); osc.stop(time + 0.32);
+  } else {
+    const types = ['triangle','sawtooth','sine'];
+    const cutoffs = [1800,2400,1200];
+    osc.type = types[(leadVariant-1) % types.length];
+    lpf.type = 'lowpass'; lpf.frequency.value = cutoffs[(leadVariant-1) % cutoffs.length];
+    osc.frequency.value = hz * 2;
+    osc.connect(lpf); lpf.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.001, time);
+    g.gain.linearRampToValueAtTime(vol * 0.5, time + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, time + 0.22);
+    osc.start(time); osc.stop(time + 0.25);
+  }
+}
+
+function audioBufferToWav(buf) {
+  const len=buf.length, sr=buf.sampleRate, ch=buf.numberOfChannels;
+  const bps=2, dl=len*ch*bps;
+  const ab=new ArrayBuffer(44+dl), v=new DataView(ab);
+  const ws=(o,s)=>{for(let i=0;i<s.length;i++) v.setUint8(o+i,s.charCodeAt(i));};
+  ws(0,'RIFF'); v.setUint32(4,36+dl,true); ws(8,'WAVE'); ws(12,'fmt ');
+  v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,ch,true);
+  v.setUint32(24,sr,true); v.setUint32(28,sr*ch*bps,true);
+  v.setUint16(32,ch*bps,true); v.setUint16(34,16,true);
+  ws(36,'data'); v.setUint32(40,dl,true);
+  let off=44;
+  for(let i=0;i<len;i++) for(let c=0;c<ch;c++){
+    const s=Math.max(-1,Math.min(1,buf.getChannelData(c)[i]||0));
+    v.setInt16(off,s<0?s*0x8000:s*0x7FFF,true); off+=2;
+  }
+  return new Blob([ab],{type:'audio/wav'});
+}
+
 function getScaleHz(root, scale, scaleIdx) {
   const semitones = SCALES[scale] || SCALES.major;
   const st = semitones[Math.min(scaleIdx, semitones.length - 1)];
   return ROOT_HZ[root] * Math.pow(2, st / 12);
-}
-
-function getScaleNoteName(root, scale, scaleIdx) {
-  const semitones = SCALES[scale] || SCALES.major;
-  const st = semitones[Math.min(scaleIdx, semitones.length - 1)];
-  const rootIdx = NOTE_NAMES.indexOf(root);
-  return NOTE_NAMES[(rootIdx + st) % 12];
 }
 
 /* ══════════════════════════════════════════════
@@ -1231,15 +1403,33 @@ function openNotePicker(stepIdx, padEl) {
     picker.appendChild(btn);
   });
 
-  // Position picker near the pad
-  const padRect = padEl.getBoundingClientRect();
-  const gridRect = document.getElementById('padGrid').getBoundingClientRect();
-  let top  = padRect.bottom - gridRect.top + 6;
-  let left = padRect.left  - gridRect.left;
-  // Keep within grid
-  const pickerW = 168;
-  if (left + pickerW > gridRect.width) left = gridRect.width - pickerW - 4;
-  if (left < 0) left = 0;
+  // Position: use fixed coords relative to viewport so it appears right on the pad
+  // First measure the picker to know its size
+  picker.style.position = 'fixed';
+  picker.style.top = '-9999px';
+  picker.style.left = '-9999px';
+
+  const padRect = picker.getBoundingClientRect(); // zero-size at this point, do after
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+
+  // Get pad position in viewport
+  const pr = padEl.getBoundingClientRect();
+  const pickerW = 172;
+  const pickerH = 180; // approximate
+
+  // Try: below the pad, aligned to its left edge
+  let top  = pr.bottom + 4;
+  let left = pr.left;
+
+  // If would overflow right edge → align to pad's right edge instead
+  if (left + pickerW > vw - 8) left = pr.right - pickerW;
+  // If would overflow bottom → show above the pad
+  if (top + pickerH > vh - 8) top = pr.top - pickerH - 4;
+  // Clamp left
+  left = Math.max(8, left);
+  top  = Math.max(8, top);
+
   picker.style.top  = top  + 'px';
   picker.style.left = left + 'px';
 }
@@ -1457,6 +1647,64 @@ const SEQ = window.SEQ = {
     chain = [];
     chainPos = 0; chainReps = 0;
     renderChainUI();
+  },
+
+  async exportWav() {
+    const btn = document.getElementById('btn-export');
+    btn.textContent = 'rendering…';
+    btn.style.opacity = '.5';
+    btn.style.pointerEvents = 'none';
+
+    // Determine what to render: chain if set, else current loop × 1
+    const renderPlan = chain.length > 0
+      ? chain.flatMap(({ loopIdx, reps }) => Array(reps).fill(loopIdx))
+      : [editingLoop];
+
+    const sr = 44100;
+    const loopDur = (NUM_STEPS * stepDuration()); // seconds per loop pass
+    const totalDur = renderPlan.length * loopDur + 0.8; // +0.8s tail
+    const offCtx = new OfflineAudioContext(2, Math.ceil(totalDur * sr), sr);
+
+    // Render each loop pass
+    let t = 0;
+    for (const loopIdx of renderPlan) {
+      const loopData = loops[loopIdx];
+      for (let step = 0; step < NUM_STEPS; step++) {
+        const time = t + step * stepDuration();
+        TRACKS.forEach((track, ti) => {
+          const cell = loopData[ti][step];
+          if (cell === null || cell === false) return;
+          const vol = 0.8;
+          // Inline synthesis for offline context
+          if (track.type === 'drum') {
+            renderDrumOffline(offCtx, track.id, time, vol);
+          } else {
+            const scaleIdx = typeof cell === 'number' ? cell : 4;
+            const hz = getScaleHz(rootKey, scaleName, scaleIdx);
+            const leadVariant = ['bass','lead1','lead2','lead3'].indexOf(track.id);
+            renderMelodicOffline(offCtx, leadVariant, hz, time, vol);
+          }
+        });
+      }
+      t += loopDur;
+    }
+
+    try {
+      const rendered = await offCtx.startRendering();
+      const wav = audioBufferToWav(rendered);
+      const url = URL.createObjectURL(wav);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'sequencer-' + Date.now() + '.wav';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch(e) {
+      console.error('Export failed', e);
+    }
+
+    btn.textContent = '⬇ export WAV';
+    btn.style.opacity = '';
+    btn.style.pointerEvents = '';
   },
 };
 
