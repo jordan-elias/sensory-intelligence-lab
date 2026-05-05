@@ -205,129 +205,140 @@
       border-bottom: 1px solid var(--border);
     }
 
-    /* ══════════════════════════════════════
-       RESOURCE CARDS
-    ══════════════════════════════════════ */
-    .resource-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-      border: 1px solid var(--border);
-    }
+   /* ══════════════════════════════════════
+   RESOURCE LINKS (list style, no cards)
+══════════════════════════════════════ */
 
-    .resource-item {
-      display: flex;
-      align-items: baseline;
-      gap: 1rem;
-      padding: 0.85rem 1.1rem;
-      background: var(--bg);
-      border-bottom: 1px solid var(--border);
-      transition: background 0.12s;
-      text-decoration: none;
-      color: inherit;
-    }
-    .resource-item:last-child { border-bottom: none; }
-    .resource-item:hover { background: var(--surface); text-decoration: none; }
+/* Container becomes a simple vertical list */
+.resource-list {
+  display: block;
+  border: none;
+  padding-left: 0;
+  margin: 0;
+}
 
-    .resource-item__body { flex: 1; min-width: 0; }
+/* Each item behaves like a list row */
+.resource-item {
+  display: block;
+  padding: 0;
+  margin: 0 0 0.6rem 0;
+  background: none;
+  border: none;
+  text-decoration: underline;
+  color: var(--text);
+}
 
-    .resource-item__name {
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--text);
-      line-height: 1.4;
-      margin-bottom: 0.15rem;
-    }
+/* Remove hover box effects */
+.resource-item:hover {
+  background: none;
+  text-decoration: underline;
+}
 
-    .resource-item__meta {
-      font-size: 0.75rem;
-      color: var(--muted);
-      line-height: 1.5;
-    }
+/* Keep structure but simplify */
+.resource-item__body {
+  display: inline;
+}
 
-    .resource-item__arrow {
-      font-size: 0.75rem;
-      color: var(--border);
-      flex-shrink: 0;
-      transition: color 0.15s, transform 0.15s;
-    }
-    .resource-item:hover .resource-item__arrow {
-      color: var(--accent);
-      transform: translateX(2px);
-    }
+.resource-item__name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+  display: inline;
+}
 
-    /* ── Sub-section within a lib section ── */
-    .lib-subsection {
-      margin-bottom: 1.5rem;
-    }
-    .lib-subsection:last-child { margin-bottom: 0; }
+/* Description becomes inline secondary text */
+.resource-item__meta {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-left: 0.4rem;
+  display: inline;
+}
 
-    .lib-subsection-label {
-      font-family: var(--font-heading);
-      font-size: 0.72rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 0.6rem;
-    }
+/* Remove arrow entirely */
+.resource-item__arrow {
+  display: none;
+}
 
-    /* ══════════════════════════════════════
-       BOOK CARDS (two-column grid)
-    ══════════════════════════════════════ */
-    .book-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1px;
-      background: var(--border);
-      border: 1px solid var(--border);
-    }
-    @media (max-width: 600px) { .book-grid { grid-template-columns: 1fr; } }
+/* ── Sub-sections remain but simplified ── */
+.lib-subsection {
+  margin-bottom: 1.5rem;
+}
 
-    .book-card {
-      background: var(--bg);
-      padding: 1rem 1.1rem;
-      text-decoration: none;
-      color: inherit;
-      transition: background 0.12s;
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-    }
-    .book-card:hover { background: var(--surface); text-decoration: none; }
+.lib-subsection:last-child {
+  margin-bottom: 0;
+}
 
-    .book-card__title {
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: var(--text);
-      line-height: 1.35;
-    }
-    .book-card__author {
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
-    .book-card__note {
-      font-size: 0.72rem;
-      color: var(--muted);
-      margin-top: 0.2rem;
-      line-height: 1.5;
-    }
-    .book-card__tag {
-      display: inline-block;
-      margin-top: 0.4rem;
-      font-size: 0.6rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--accent);
-      background: var(--accent-light);
-      padding: 0.15rem 0.45rem;
-      width: fit-content;
-    }
-    .book-card__tag.external {
-      color: var(--muted);
-      background: var(--surface);
-    }
+.lib-subsection-label {
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.6rem;
+}
+
+/* ══════════════════════════════════════
+   BOOK LINKS (list style, no grid/cards)
+══════════════════════════════════════ */
+
+.book-grid {
+  display: block;
+  border: none;
+  background: none;
+}
+
+/* Each book becomes a text link with inline info */
+.book-card {
+  display: block;
+  padding: 0;
+  margin: 0 0 0.6rem 0;
+  background: none;
+  text-decoration: underline;
+  color: var(--text);
+}
+
+.book-card:hover {
+  background: none;
+  text-decoration: underline;
+}
+
+.book-card__title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+  display: inline;
+}
+
+.book-card__author {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-left: 0.4rem;
+  display: inline;
+}
+
+.book-card__note {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-left: 0.4rem;
+  display: inline;
+}
+
+.book-card__tag {
+  display: inline;
+  margin-left: 0.4rem;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: none;
+  padding: 0;
+}
+
+.book-card__tag.external {
+  color: var(--muted);
+}
 
     /* ══════════════════════════════════════
        CONTACT NOTE
@@ -404,42 +415,42 @@
             <div class="resource-item__name">Audacity</div>
             <div class="resource-item__meta">Free, open-source audio recording and editing software. Cross-platform.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+      
         </a>
         <a class="resource-item" href="https://supercollider.github.io/" target="_blank" rel="noopener">
           <div class="resource-item__body">
             <div class="resource-item__name">SuperCollider</div>
             <div class="resource-item__meta">Audio synthesis and algorithmic composition environment. Includes beginner tutorials.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+      
         </a>
         <a class="resource-item" href="https://lmms.io/" target="_blank" rel="noopener">
           <div class="resource-item__body">
             <div class="resource-item__name">LMMS</div>
             <div class="resource-item__meta">Free, open-source digital audio workstation with beat editor and synthesisers.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+      
         </a>
         <a class="resource-item" href="https://www.bespokesynth.com/" target="_blank" rel="noopener">
           <div class="resource-item__body">
             <div class="resource-item__name">Bespoke Synth</div>
             <div class="resource-item__meta">Modular music creation environment. Highly visual and experimental.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+       
         </a>
         <a class="resource-item" href="https://100r.co/" target="_blank" rel="noopener">
           <div class="resource-item__body">
             <div class="resource-item__name">Hundred Rabbits</div>
             <div class="resource-item__meta">Independent studio developing minimalist creative tools including audio and music software.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+  
         </a>
         <a class="resource-item" href="https://obsproject.com/" target="_blank" rel="noopener">
           <div class="resource-item__body">
             <div class="resource-item__name">OBS Studio</div>
             <div class="resource-item__meta">Open-source recording and streaming software. Useful for capturing live audio and performance.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+  
         </a>
       </div>
     </div>
@@ -453,35 +464,35 @@
             <div class="resource-item__name">Freesound</div>
             <div class="resource-item__meta">Community sound library with hundreds of thousands of Creative Commons audio samples.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+      
         </a>
         <a class="resource-item" href="https://archive.org/details/audio" target="_blank" rel="noopener">
           <div class="resource-item__body">
             <div class="resource-item__name">Internet Archive — Audio Collection</div>
             <div class="resource-item__meta">Broad archive of recordings: live concerts, old-time radio, field recordings, and more.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+  
         </a>
         <a class="resource-item" href="https://commons.wikimedia.org/wiki/Category:Audio_files" target="_blank" rel="noopener">
           <div class="resource-item__body">
             <div class="resource-item__name">Wikimedia Commons — Audio Files</div>
             <div class="resource-item__meta">Freely licensed audio files from Wikipedia's media repository.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+  
         </a>
         <a class="resource-item" href="https://aporee.org/" target="_blank" rel="noopener">
           <div class="resource-item__body">
             <div class="resource-item__name">Radio Aporee</div>
             <div class="resource-item__meta">Global soundscape map with geolocated field recordings from around the world.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+
         </a>
         <a class="resource-item" href="https://www.wildsanctuary.com/" target="_blank" rel="noopener">
           <div class="resource-item__body">
             <div class="resource-item__name">Wild Sanctuary</div>
             <div class="resource-item__meta">Nature sound archives and soundscape ecology research by Bernie Krause.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+     
         </a>
       </div>
     </div>
@@ -642,28 +653,28 @@
             <div class="resource-item__name">UbuWeb — Sound</div>
             <div class="resource-item__meta">Archive of experimental and avant-garde audio: Cage, Oliveros, Xenakis, Nono, and hundreds more.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+   
         </a>
         <a class="resource-item" href="https://www.loc.gov/collections/?fa=subject_topic:performing+arts%7Coriginal-format:sound+recording" target="_blank" rel="noopener">
           <div class="resource-item__body">
             <div class="resource-item__name">Library of Congress — Sound Recordings</div>
             <div class="resource-item__meta">Performing arts and sound recording collections from the US national library.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+
         </a>
         <a class="resource-item" href="https://www.wendycarlos.com/" target="_blank" rel="noopener">
           <div class="resource-item__body">
             <div class="resource-item__name">Wendy Carlos</div>
             <div class="resource-item__meta">Electronic music pioneer; synthesis and early digital sound.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+  
         </a>
                 <a class="resource-item" href="https://www.nicolascollins.com/" target="_blank" rel="noopener">
           <div class="resource-item__body">
             <div class="resource-item__name">Nicolas Collins</div>
             <div class="resource-item__meta">Experimental electronics, hardware hacking, and DIY sound.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+ 
         </a>
       </div>
     </div>
@@ -677,28 +688,28 @@
             <div class="resource-item__name">UbuWeb — Film</div>
             <div class="resource-item__meta">Experimental film and video art archive. Hundreds of works freely available to stream.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+      
         </a>
         <a class="resource-item" href="https://www.eai.org/" target="_blank" rel="noopener">
           <div class="resource-item__body">
             <div class="resource-item__name">Electronic Arts Intermix (EAI)</div>
             <div class="resource-item__meta">Distribution archive for video and media art. Focuses on works from the 1960s onwards.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+    
         </a>
         <a class="resource-item" href="https://www.lima.nl/" target="_blank" rel="noopener">
           <div class="resource-item__body">
             <div class="resource-item__name">LIMA</div>
             <div class="resource-item__meta">Media art and time-based works archive based in the Netherlands.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+    
         </a>
         <a class="resource-item" href="https://lightcone.org/en" target="_blank" rel="noopener">
           <div class="resource-item__body">
             <div class="resource-item__name">Light Cone</div>
             <div class="resource-item__meta">Experimental film distribution and archive based in Paris.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+    
         </a>
       </div>
     </div>
@@ -712,21 +723,21 @@
             <div class="resource-item__name">Audio Signal Processing — Coursera</div>
             <div class="resource-item__meta">Free audit available. Covers spectral analysis, filtering, and synthesis.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+ 
         </a>
         <a class="resource-item" href="https://ocw.mit.edu/search/?d=Music%20and%20Theater%20Arts&s=department_course_numbers.sort_coursenum" target="_blank" rel="noopener">
           <div class="resource-item__body">
             <div class="resource-item__name">MIT OpenCourseWare — Music &amp; Sound</div>
             <div class="resource-item__meta">Freely available lecture notes, assignments, and readings from MIT music and theatre courses.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+   
         </a>
         <a class="resource-item" href="https://www.kadenze.com/courses" target="_blank" rel="noopener">
           <div class="resource-item__body">
             <div class="resource-item__name">Kadenze</div>
             <div class="resource-item__meta">Creative technology and sound art courses. Some free, some paid.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+
         </a>
       </div>
     </div>
@@ -740,14 +751,14 @@
             <div class="resource-item__name">Centre for Clinical Interventions — Self-help resources</div>
             <div class="resource-item__meta">Evidence-based self-help worksheets covering anxiety, mood, perfectionism, and more. Free to download.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+     
         </a>
         <a class="resource-item" href="https://positivepsychology.com/mindfulness-exercises-techniques-activities/" target="_blank" rel="noopener">
           <div class="resource-item__body">
             <div class="resource-item__name">Mindfulness Exercises — Positive Psychology</div>
             <div class="resource-item__meta">Overview of evidence-based mindfulness practices with instructions and research context.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+    
         </a>
       </div>
     </div>
@@ -761,28 +772,28 @@
             <div class="resource-item__name">The Gender Dysphoria Bible</div>
             <div class="resource-item__meta">Comprehensive educational resource on gender dysphoria and trans experiences.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+     
         </a>
         <a class="resource-item" href="https://lgbtqia.fandom.com/" target="_blank" rel="noopener">
           <div class="resource-item__body">
             <div class="resource-item__name">LGBTQIA+ Wiki</div>
             <div class="resource-item__meta">Community-authored encyclopaedia of orientations, gender identities, and related terminology.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+
         </a>
         <a class="resource-item" href="https://www.thetrevorproject.org/resources/" target="_blank" rel="noopener">
           <div class="resource-item__body">
             <div class="resource-item__name">The Trevor Project — Resources</div>
             <div class="resource-item__meta">Crisis support and educational LGBTQ+ resources, focused on young people.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+
         </a>
         <a class="resource-item" href="https://www.glaad.org/transgender/resources" target="_blank" rel="noopener">
           <div class="resource-item__body">
             <div class="resource-item__name">GLAAD — Transgender Resource Guide</div>
             <div class="resource-item__meta">Educational materials and media guidelines on trans identities and experiences.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+
         </a>
       </div>
     </div>
@@ -796,14 +807,14 @@
             <div class="resource-item__name">Neurodiversity Wiki</div>
             <div class="resource-item__meta">Accessible information about neurodiversity topics.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+
         </a>
         <a class="resource-item" href="https://autisticadvocacy.org/" target="_blank" rel="noopener">
           <div class="resource-item__body">
             <div class="resource-item__name">Autistic Self Advocacy Network (ASAN)</div>
             <div class="resource-item__meta">Autistic-led advocacy organisation with educational materials and policy resources.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+
         </a>
        
         <a class="resource-item" href="https://autisticwomenandnonbinarynetwork.org/" target="_blank" rel="noopener">
@@ -811,14 +822,14 @@
             <div class="resource-item__name">Autistic Women &amp; Nonbinary Network</div>
             <div class="resource-item__meta">Community resources, education, and advocacy for autistic women and non-binary people.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+
         </a>
         <a class="resource-item" href="https://www.autism.org.uk/advice-and-guidance" target="_blank" rel="noopener">
           <div class="resource-item__body">
             <div class="resource-item__name">National Autistic Society — Guidance</div>
             <div class="resource-item__meta">Practical information on autism for autistic people, families, and professionals. UK-based.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+   
         </a>
       </div>
     </div>
@@ -832,21 +843,21 @@
             <div class="resource-item__name">The Quietus</div>
             <div class="resource-item__meta">Independent music and culture magazine. Strong coverage of experimental and underground music.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+    
         </a>
         <a class="resource-item" href="https://wire.co.uk/" target="_blank" rel="noopener">
           <div class="resource-item__body">
             <div class="resource-item__name">The Wire</div>
             <div class="resource-item__meta">Experimental music and sound culture. Monthly magazine and online content.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+
         </a>
         <a class="resource-item" href="https://soundstudiesblog.com/" target="_blank" rel="noopener">
           <div class="resource-item__body">
             <div class="resource-item__name">Sound Studies Blog</div>
             <div class="resource-item__meta">Research and writing on listening, sonic culture, and the interdisciplinary field of sound studies.</div>
           </div>
-          <span class="resource-item__arrow">↗</span>
+
         </a>
       </div>
     </div>
