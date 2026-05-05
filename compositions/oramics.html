@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Oramics — Sensory Intelligence Lab</title>
+  <title>Oramics</title>
 
   <link rel="icon" href="/images/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
@@ -794,16 +794,6 @@
       <button class="tbtn" onclick="ORM.randomize()" title="Generate random Oramics-style shapes">✦ randomize</button>
       <button class="tbtn" onclick="ORM.clearAll()">clear</button>
       <button class="tbtn" onclick="ORM.exportWav()" id="btn-export">export WAV</button>
-
-      <div class="toolbar-sep"></div>
-      <div style="display:flex;gap:.35rem;align-items:center;flex-shrink:0;">
-      <span style="font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap;">live</span>
-      <span style="font-family:'Courier New',monospace;font-size:.68rem;color:var(--pitch-col);white-space:nowrap;" id="insp-pitch">—</span>
-      <span style="font-family:'Courier New',monospace;font-size:.68rem;color:var(--amp-col);white-space:nowrap;" id="insp-amp">—</span>
-      <span style="font-family:'Courier New',monospace;font-size:.68rem;color:var(--timbre-col);white-space:nowrap;" id="insp-filter">—</span>
-      <span style="font-family:'Courier New',monospace;font-size:.68rem;color:var(--mod-col);white-space:nowrap;" id="insp-mod">—</span>
-      </div>
-      
     </div>
 
     <!-- Canvas area — full width -->
@@ -911,8 +901,33 @@
         </div>
       </div>
 
-      
-     
+      <!-- Inspector section -->
+      <div class="bp-section" style="flex: 1; min-width: 300px;">
+        <div class="bp-section-title">live values</div>
+        <div class="inspector-row">
+          <div class="insp-cell">
+            <div class="insp-label">Pitch</div>
+            <div class="insp-val" id="insp-pitch">— Hz</div>
+            <div class="insp-bar"><div class="insp-bar-fill" id="ibar-pitch" style="background:var(--pitch-col)"></div></div>
+          </div>
+          <div class="insp-cell">
+            <div class="insp-label">Amplitude</div>
+            <div class="insp-val" id="insp-amp">—</div>
+            <div class="insp-bar"><div class="insp-bar-fill" id="ibar-amp" style="background:var(--amp-col)"></div></div>
+          </div>
+          <div class="insp-cell">
+            <div class="insp-label">Filter</div>
+            <div class="insp-val" id="insp-filter">— Hz</div>
+            <div class="insp-bar"><div class="insp-bar-fill" id="ibar-filter" style="background:var(--timbre-col)"></div></div>
+          </div>
+          <div class="insp-cell">
+            <div class="insp-label">Mod</div>
+            <div class="insp-val" id="insp-mod">—</div>
+            <div class="insp-bar"><div class="insp-bar-fill" id="ibar-mod" style="background:var(--mod-col)"></div></div>
+          </div>
+        </div>
+      </div>
+
 
     </div><!-- /bottom-panel -->
 
