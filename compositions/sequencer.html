@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Sequencer</title>
+  <title>Sequencer — Sensory Intelligence Lab</title>
 
   <link rel="icon" href="/images/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
@@ -276,32 +276,26 @@
       background: var(--surface);
     }
 
-    /* Step indicator strip */
-    .step-strip {
-      display: grid;
-      grid-template-columns: repeat(16, 1fr);
-      gap: 3px;
-      padding: 0 1px;
+    /* ── GRID AREA ── */
+    .grid-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: .9rem 1rem;
+      gap: .55rem;
+      background: var(--surface);
     }
-    .step-num {
-      text-align: center;
-      font-family: var(--font-mono);
-      font-size: .55rem;
-      color: var(--muted);
-      opacity: .5;
-      transition: opacity .08s;
-    }
-    .step-num.playing { color: var(--pad-play); opacity: 1; font-weight: 500; }
 
     /* The 4×4 grid */
     .pad-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       grid-template-rows: repeat(4, 1fr);
-      gap: 5px;
+      gap: 7px;
       width: 100%;
-      /* Constrain max size so whole grid stays compact */
-      max-width: 380px;
+      max-width: 340px;
     }
 
     .pad {
@@ -318,8 +312,7 @@
       user-select: none;
       -webkit-user-select: none;
       border-radius: 3px;
-      min-height: 42px;
-      max-height: 80px;
+      min-height: 56px;
     }
     .pad:active { transform: scale(.94); }
 
@@ -533,9 +526,9 @@
         min-height: 48px;
       }
       .track-item:nth-child(even) { border-right: none; }
-      .grid-area { padding: .5rem .6rem; gap: .45rem; }
-      .pad-grid { gap: 4px; }
-      .pad { min-height: 48px; }
+      .grid-area { padding: .6rem .6rem; gap: .45rem; }
+      .pad-grid { gap: 5px; max-width: 100%; }
+      .pad { min-height: 52px; }
       .transport { padding: .5rem .6rem; }
       .tbtn { font-size: .68rem; padding: .38rem .6rem; min-height: 40px; }
       input[type=range].t-slider { width: 70px; }
@@ -666,11 +659,6 @@
 
       <!-- Grid area -->
       <div class="grid-area">
-        <!-- Step number strip -->
-        <div class="step-strip" id="stepStrip">
-          <!-- populated by JS -->
-        </div>
-
         <!-- 4×4 pad grid -->
         <div class="pad-grid" id="padGrid">
           <!-- populated by JS -->
@@ -1187,11 +1175,6 @@ function scheduler() {
 let lastPlayhead = -1;
 
 function renderPlayhead(step) {
-  // Update step strip
-  document.querySelectorAll('.step-num').forEach((el, i) => {
-    el.classList.toggle('playing', i === step);
-  });
-  // Update pads
   document.querySelectorAll('.pad').forEach((el, i) => {
     el.classList.toggle('playing', i === step);
   });
@@ -1254,17 +1237,6 @@ function buildPadGrid() {
 
     pad.addEventListener('click', () => onPadClick(i));
     grid.appendChild(pad);
-  }
-}
-
-function buildStepStrip() {
-  const strip = document.getElementById('stepStrip');
-  strip.innerHTML = '';
-  for (let i = 0; i < NUM_STEPS; i++) {
-    const el = document.createElement('div');
-    el.className = 'step-num';
-    el.textContent = i + 1;
-    strip.appendChild(el);
   }
 }
 
@@ -1712,7 +1684,6 @@ const SEQ = window.SEQ = {
    INIT
 ══════════════════════════════════════════════ */
 function init() {
-  buildStepStrip();
   buildPadGrid();
   buildTrackList();
   buildLoopSlots();
