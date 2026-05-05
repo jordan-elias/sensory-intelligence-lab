@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Worksheets</title>
+
+  <link rel="icon" href="/images/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+
+  <script src="/dashboard/auth-guard.js" type="module"></script>
+
+  <script type="module">
+    import { applyGatingOnReady } from '/assets/js/gating.js';
+    applyGatingOnReady({
+      targetSelector: '#worksheetsApp',
+      moduleName: 'worksheets',
+    });
+  </script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --font-body: 'Inter', sans-serif;
+      --font-heading: 'Space Grotesk', sans-serif;
+      --font-writing: 'Lora', Georgia, serif;
+      --bg: #ffffff;
+      --surface: #f9f9f7;
+      --border: #e5e5e0;
+      --text: #1a1a1a;
+      --muted: #6b6b6b;
+      --accent: #2a5c45;
+      --accent-light: #edf4f0;
+      --accent-hover: #1e4433;
+      --error: #c0392b;
+      --error-bg: #fdf2f2;
+    }
+
+    html { font-size: 16px; }
+    body {
+      font-family: var(--font-body);
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+    a:hover { color: var(--accent); }
+
+    /* ── HEADER ── */
+    .sil-header {
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0; left: 0; right: 0;
+      background: var(--bg);
+      z-index: 100;
+      gap: 1rem;
+      width: 100%;
+    }
+    .sil-header__wordmark {
+      font-family: var(--font-heading);
+      font-size: 1rem; font-weight: 600;
+      letter-spacing: -0.01em;
+      white-space: nowrap; flex-shrink: 0;
+      text-decoration: none; color: var(--text);
+    }
+    .sil-header__wordmark:hover { color: var(--accent); }
+    .sil-header__nav { display: flex; gap: 0.25rem; align-items: center; }
+    .sil-header__nav a {
+      font-family: var(--font-body);
+      font-size: 0.8rem; font-weight: 500;
+      text-decoration: none; color: var(--muted);
+      transition: color 0.15s; white-space: nowrap;
+      padding: 0.3rem 0.65rem;
+    }
+    .sil-header__nav a:hover { color: var(--text); }
+    .sil-header__nav a.sil-active { color: var(--accent); font-weight: 600; }
+    .sil-header__signout {
+      font-family: var(--font-body);
+      font-size: 0.8rem; font-weight: 500;
+      color: var(--muted); background: none;
+      border: 1px solid var(--border); cursor: pointer;
+      padding: 0.3rem 0.75rem;
+      transition: color 0.15s, border-color 0.15s;
+      white-space: nowrap; line-height: 1.6;
+    }
+    .sil-header__signout:hover { color: var(--text); border-color: var(--text); }
+    .sil-header__signout:disabled { opacity: 0.5; cursor: not-allowed; }
+    .sil-header__toggle {
+      display: none; flex-direction: column; gap: 4px;
+      background: none; border: none; cursor: pointer;
+      padding: 4px; flex-shrink: 0;
+    }
+    .sil-header__toggle span { display: block; width: 20px; height: 2px; background: var(--text); }
+    @media (max-width: 700px) {
+      .sil-header { padding: 0 1rem; }
+      .sil-header__toggle { display: flex; }
+      .sil-header__nav {
+        display: none; position: absolute;
+        top: 56px; left: 0; right: 0;
+        background: var(--bg); border-bottom: 1px solid var(--border);
+        flex-direction: column; align-items: flex-start;
+        padding: 0.75rem 1rem; gap: 0; z-index: 99;
+      }
+      .sil-header__nav.sil-open { display: flex; }
+      .sil-header__nav a,
+      .sil-header__signout { font-size: 0.875rem; padding: 0.55rem 0.5rem; }
+      .sil-header__signout { border: none; }
+    }
+
+    /* ── Breadcrumb ── */
+    .bc { padding: .75rem 1.5rem 0; max-width: 900px; margin: 0 auto; width: 100%; }
+    .bc ol { list-style: none; display: flex; gap: .3rem; align-items: center; font-size: .75rem; color: var(--muted); flex-wrap: wrap; }
+    .bc li + li::before { content: '/'; margin-right: .3rem; color: var(--border); }
+    .bc a { color: var(--muted); text-decoration: none; }
+    .bc a:hover { color: var(--accent); text-decoration: underline; }
+
+    /* ── Main ── */
+    main { max-width: 900px; margin: 0 auto; padding: 2.5rem 2rem 4rem; flex: 1; width: 100%; }
+    @media (max-width: 600px) { main { padding: 1.5rem 1rem 3rem; } }
+
+    /* ── Page header ── */
+    .ph { margin-bottom: 2rem; padding-bottom: 1.75rem; border-bottom: 1px solid var(--border); }
+    .ph h2 { font-family: var(--font-heading); font-size: 2rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; margin-bottom: .4rem; }
+    .ph p { font-size: .9rem; color: var(--muted); }
+
+    .section-label {
+      font-family: var(--font-heading);
+      font-size: .65rem; font-weight: 600; letter-spacing: .14em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: .75rem;
+    }
+
+    /* ── Vault overlay ── */
+    .vault-overlay {
+      position: fixed; inset: 0;
+      background: rgba(255,255,255,.97);
+      z-index: 400;
+      display: none;
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: 1rem;
+      text-align: center; padding: 2rem;
+    }
+    .vault-overlay.visible { display: flex; }
+    .vault-overlay__icon { font-size: 2rem; margin-bottom: .25rem; opacity: .5; }
+    .vault-overlay__title { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 600; color: var(--text); }
+    .vault-overlay__sub { font-size: .85rem; color: var(--muted); max-width: 320px; line-height: 1.6; }
+    .vault-spinner {
+      width: 28px; height: 28px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Worksheet picker ── */
+    #worksheetsApp { display: block; }
+
+    .ws-picker { display: block; }
+    .ws-picker.hidden { display: none; }
+
+    .ws-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1px;
+      border: 1px solid var(--border);
+      margin-bottom: 2.5rem;
+    }
+    .ws-card {
+      background: var(--bg);
+      padding: 1.5rem 1.5rem 1.25rem;
+      cursor: pointer;
+      transition: background .12s;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: .4rem;
+    }
+    .ws-card:hover { background: var(--accent-light); }
+    .ws-card__icon { font-size: 1.25rem; margin-bottom: .2rem; }
+    .ws-card__name {
+      font-family: var(--font-heading); font-size: .95rem; font-weight: 600;
+      color: var(--text); letter-spacing: -.01em;
+    }
+    .ws-card__desc { font-size: .78rem; color: var(--muted); line-height: 1.5; }
+    .ws-card:hover .ws-card__name { color: var(--accent-hover); }
+
+    /* ── Saved worksheets list ── */
+    .saved-section { margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 2rem; }
+    .privacy-notice {
+      display: flex; align-items: flex-start; gap: .6rem;
+      background: var(--accent-light); border: 1px solid #c0d9c8;
+      padding: .65rem .9rem; margin-bottom: 1.25rem;
+      font-size: .75rem; color: var(--accent-hover); line-height: 1.55;
+    }
+    .privacy-notice__icon { flex-shrink: 0; font-size: .9rem; margin-top: .05rem; opacity: .7; }
+    .saved-list { display: flex; flex-direction: column; gap: 1px; border: 1px solid var(--border); }
+    .saved-item {
+      display: flex; align-items: center; gap: 1rem;
+      padding: .7rem 1rem; background: var(--bg);
+      border-bottom: 1px solid var(--border); transition: background .1s; cursor: pointer;
+    }
+    .saved-item:last-child { border-bottom: none; }
+    .saved-item:hover { background: var(--surface); }
+    .saved-item__type {
+      font-size: .65rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted); background: var(--surface); border: 1px solid var(--border);
+      padding: .15rem .5rem; flex-shrink: 0; white-space: nowrap;
+    }
+    .saved-item__name { font-size: .85rem; font-weight: 500; color: var(--text); flex: 1; }
+    .saved-item__date { font-size: .72rem; color: var(--muted); flex-shrink: 0; }
+    .saved-item__delete {
+      font-size: .65rem; padding: .2rem .55rem;
+      border: 1px solid var(--border); background: var(--bg);
+      color: var(--muted); cursor: pointer; transition: all .1s; flex-shrink: 0;
+    }
+    .saved-item__delete:hover { border-color: var(--error); color: var(--error); }
+    .saved-empty { padding: 1.5rem; text-align: center; font-size: .85rem; color: var(--muted); }
+
+    /* ── Worksheet view ── */
+    .ws-view { display: none; }
+    .ws-view.visible { display: block; }
+
+    .ws-view-header {
+      display: flex; align-items: center; gap: 1rem;
+      margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border);
+    }
+    .ws-back {
+      font-family: var(--font-body); font-size: .8rem; font-weight: 500;
+      color: var(--muted); background: none; border: 1px solid var(--border);
+      cursor: pointer; padding: .3rem .75rem; transition: all .12s; flex-shrink: 0;
+    }
+    .ws-back:hover { color: var(--text); border-color: var(--text); }
+    .ws-view-header h3 {
+      font-family: var(--font-heading); font-size: 1.35rem; font-weight: 600;
+      letter-spacing: -.02em; flex: 1;
+    }
+
+    /* ── Form elements ── */
+    .ws-section {
+      margin-bottom: 2rem; padding: 1.5rem; border: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .ws-section + .ws-section { margin-top: 0; border-top: none; }
+
+    .ws-section-title {
+      font-family: var(--font-heading); font-size: .95rem; font-weight: 600;
+      letter-spacing: -.01em; margin-bottom: 1rem; color: var(--text);
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .ws-section-title .ws-section-icon { font-size: 1rem; }
+
+    .ws-field { margin-bottom: 1.25rem; }
+    .ws-field:last-child { margin-bottom: 0; }
+
+    .ws-label {
+      display: block;
+      font-size: .78rem; font-weight: 500; color: var(--muted);
+      margin-bottom: .35rem; line-height: 1.45;
+    }
+    .ws-label em { font-style: italic; font-weight: 400; color: var(--muted); opacity: .8; }
+
+    textarea.ws-input, input.ws-input, select.ws-input {
+      width: 100%;
+      font-family: var(--font-writing); font-size: .95rem; line-height: 1.7;
+      padding: .65rem .85rem;
+      border: 1px solid var(--border); background: var(--bg); color: var(--text);
+      outline: none; transition: border-color .15s; resize: vertical;
+    }
+    textarea.ws-input:focus, input.ws-input:focus, select.ws-input:focus {
+      border-color: var(--accent);
+    }
+    textarea.ws-input::placeholder, input.ws-input::placeholder { color: #c0c0bb; font-style: italic; }
+    input.ws-input, select.ws-input { font-family: var(--font-body); font-size: .875rem; resize: none; }
+    select.ws-input { cursor: pointer; }
+
+    textarea.ws-input.sm { min-height: 80px; }
+    textarea.ws-input.md { min-height: 120px; }
+    textarea.ws-input.lg { min-height: 180px; }
+
+    /* ── Scale inputs ── */
+    .scale-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: .35rem; }
+    .scale-btn {
+      width: 36px; height: 36px; border: 1px solid var(--border);
+      background: var(--bg); color: var(--muted); cursor: pointer;
+      font-family: var(--font-heading); font-size: .8rem; font-weight: 600;
+      transition: all .12s; display: flex; align-items: center; justify-content: center;
+    }
+    .scale-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .scale-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+    .scale-labels { display: flex; justify-content: space-between; font-size: .65rem; color: var(--muted); margin-top: .2rem; }
+
+    /* ── Category cards (Goal Setting) ── */
+    .cat-grid { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); }
+    .cat-row {
+      border-bottom: 1px solid var(--border); padding: 1.25rem 1.25rem 1rem;
+      background: var(--bg);
+    }
+    .cat-row:last-child { border-bottom: none; }
+    .cat-row-header {
+      display: flex; align-items: center; gap: .6rem;
+      margin-bottom: .85rem;
+    }
+    .cat-icon { font-size: .9rem; }
+    .cat-name {
+      font-family: var(--font-heading); font-size: .82rem; font-weight: 600;
+      letter-spacing: .02em; text-transform: uppercase; color: var(--accent-hover);
+    }
+    .cat-grid-inner { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .75rem; }
+    @media (max-width: 580px) { .cat-grid-inner { grid-template-columns: 1fr; } }
+
+    /* ── Dynamic sections (Music Autobiography) ── */
+    .dyn-sections { display: flex; flex-direction: column; gap: 0; }
+    .dyn-section {
+      border: 1px solid var(--border); padding: 1.25rem;
+      background: var(--bg); margin-bottom: 0;
+      border-bottom: none;
+    }
+    .dyn-section:last-child { border-bottom: 1px solid var(--border); }
+    .dyn-section-header { display: flex; align-items: center; gap: .65rem; margin-bottom: 1rem; }
+    .dyn-section-num {
+      font-family: var(--font-heading); font-size: .65rem; font-weight: 600;
+      letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+      border: 1px solid var(--border); padding: .15rem .55rem;
+    }
+    .dyn-section-label-input {
+      flex: 1; font-family: var(--font-heading); font-size: .88rem; font-weight: 600;
+      border: none; border-bottom: 1px solid var(--border);
+      outline: none; padding: .2rem .1rem; color: var(--text);
+      background: transparent; transition: border-color .15s;
+    }
+    .dyn-section-label-input:focus { border-color: var(--accent); }
+    .dyn-section-label-input::placeholder { color: #c0c0bb; font-weight: 400; font-style: italic; }
+    .dyn-remove {
+      font-size: .65rem; padding: .2rem .55rem;
+      border: 1px solid var(--border); background: var(--bg);
+      color: var(--muted); cursor: pointer; transition: all .1s; flex-shrink: 0;
+    }
+    .dyn-remove:hover { border-color: var(--error); color: var(--error); }
+    .add-section-btn {
+      font-family: var(--font-heading); font-size: .8rem; font-weight: 600;
+      padding: .6rem 1.25rem; border: 1px dashed var(--border);
+      background: var(--bg); color: var(--muted); cursor: pointer;
+      transition: all .15s; margin-top: .75rem; letter-spacing: -.01em;
+    }
+    .add-section-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+    /* ── Lyric blocks ── */
+    .lyric-block {
+      border: 1px solid var(--border); padding: 1.25rem; margin-bottom: 0; background: var(--bg);
+      border-bottom: none;
+    }
+    .lyric-block:last-child { border-bottom: 1px solid var(--border); }
+    .lyric-block-header { display: flex; align-items: center; gap: .65rem; margin-bottom: 1rem; }
+    .lyric-block-num {
+      font-family: var(--font-heading); font-size: .65rem; font-weight: 600;
+      letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+      border: 1px solid var(--border); padding: .15rem .55rem;
+    }
+    .lyric-block-title {
+      font-family: var(--font-heading); font-size: .82rem; font-weight: 600;
+      color: var(--text); flex: 1;
+    }
+
+    /* ── Skill cards (DBT) ── */
+    .skill-checklist { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); }
+    .skill-item {
+      display: flex; align-items: flex-start; gap: .75rem;
+      padding: .75rem 1rem; border-bottom: 1px solid var(--border); background: var(--bg);
+      transition: background .1s;
+    }
+    .skill-item:last-child { border-bottom: none; }
+    .skill-item input[type="checkbox"] {
+      margin-top: .2rem; flex-shrink: 0;
+      width: 15px; height: 15px; accent-color: var(--accent);
+    }
+    .skill-item-body { flex: 1; }
+    .skill-item-name { font-size: .85rem; font-weight: 500; color: var(--text); margin-bottom: .15rem; }
+    .skill-item-desc { font-size: .75rem; color: var(--muted); line-height: 1.5; }
+    .skill-item.checked { background: var(--accent-light); }
+    .skill-item.checked .skill-item-name { color: var(--accent-hover); }
+
+    /* ── Tag pills ── */
+    .tag-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: .35rem; }
+    .tag-pill {
+      font-size: .72rem; padding: .25rem .7rem;
+      border: 1px solid var(--border); background: var(--bg); color: var(--muted);
+      cursor: pointer; transition: all .1s;
+    }
+    .tag-pill:hover { border-color: var(--accent); color: var(--accent); }
+    .tag-pill.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+    /* ── Horizontal rule ── */
+    .ws-divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+
+    /* ── Callout box ── */
+    .ws-callout {
+      background: var(--accent-light); border-left: 3px solid var(--accent);
+      padding: .75rem 1rem; margin-bottom: 1.25rem;
+      font-size: .82rem; color: var(--accent-hover); line-height: 1.6;
+    }
+    .ws-callout strong { font-weight: 600; display: block; margin-bottom: .2rem; }
+
+    /* ── Save bar ── */
+    .ws-save-bar {
+      display: flex; align-items: center; gap: .75rem;
+      padding: 1.25rem 0; border-top: 1px solid var(--border);
+      margin-top: 2rem; flex-wrap: wrap;
+    }
+    .ws-save-bar input {
+      font-family: var(--font-body); font-size: .85rem;
+      padding: .55rem .85rem; border: 1px solid var(--border);
+      background: var(--bg); color: var(--text);
+      outline: none; flex: 1; min-width: 160px; transition: border-color .12s;
+    }
+    .ws-save-bar input:focus { border-color: var(--accent); }
+
+    .action-btn {
+      font-family: var(--font-heading);
+      font-size: .82rem; font-weight: 600;
+      padding: .65rem 1.5rem;
+      border: none; background: var(--accent); color: white;
+      cursor: pointer; transition: background .15s; letter-spacing: -.01em; white-space: nowrap;
+    }
+    .action-btn:hover { background: var(--accent-hover); }
+    .action-btn:disabled { opacity: .4; cursor: not-allowed; }
+    .action-btn.outline {
+      background: var(--bg); color: var(--text); border: 1px solid var(--border);
+    }
+    .action-btn.outline:hover { border-color: var(--accent); color: var(--accent); background: var(--bg); }
+
+    .msg { padding: .6rem .9rem; font-size: .78rem; line-height: 1.5; display: none; }
+    .msg.success { background: var(--accent-light); border-left: 3px solid var(--accent); color: var(--accent); display: block; }
+    .msg.error   { background: var(--error-bg); border-left: 3px solid var(--error); color: var(--error); display: block; }
+
+    /* ── Viewer modal ── */
+    .viewer-modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,.5);
+      z-index: 300; display: none; align-items: flex-start;
+      justify-content: center; padding: 2rem 1rem; overflow-y: auto;
+    }
+    .viewer-modal.open { display: flex; }
+    .viewer-inner {
+      background: var(--bg); border: 1px solid var(--border);
+      width: 100%; max-width: 640px; padding: 2rem;
+    }
+    .viewer-inner h3 { font-family: var(--font-heading); font-size: 1rem; font-weight: 600; margin-bottom: .25rem; }
+    .viewer-meta { font-size: .72rem; color: var(--muted); margin-bottom: 1.25rem; }
+    .viewer-body {
+      font-size: .875rem; line-height: 1.75; color: var(--text);
+      max-height: 65vh; overflow-y: auto;
+      border-top: 1px solid var(--border); padding-top: 1.25rem;
+    }
+    .viewer-body .vb-section { margin-bottom: 1.5rem; }
+    .viewer-body .vb-section-title {
+      font-family: var(--font-heading); font-size: .75rem; font-weight: 600;
+      letter-spacing: .1em; text-transform: uppercase; color: var(--accent);
+      margin-bottom: .5rem; padding-bottom: .35rem; border-bottom: 1px solid var(--border);
+    }
+    .viewer-body .vb-field { margin-bottom: .75rem; }
+    .viewer-body .vb-label { font-size: .7rem; color: var(--muted); margin-bottom: .15rem; font-weight: 500; }
+    .viewer-body .vb-value { font-family: var(--font-writing); font-size: .9rem; color: var(--text); line-height: 1.65; white-space: pre-wrap; }
+    .viewer-body .vb-value.empty { color: var(--muted); font-style: italic; }
+    .viewer-footer { margin-top: 1.25rem; display: flex; gap: .65rem; flex-wrap: wrap; }
+    .decrypting { font-size: .8rem; color: var(--muted); font-style: italic; padding: 1rem 0; display: block; }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 1.25rem 2rem; text-align: center;
+      font-size: .78rem; color: var(--muted);
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="sil-header">
+  <a class="sil-header__wordmark" href="/dashboard/">Sensory Intelligence Lab</a>
+  <button class="sil-header__toggle" id="silMenuToggle" aria-label="Toggle navigation" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <nav class="sil-header__nav" id="silNav">
+    <a href="/dashboard/">Dashboard</a>
+    <a href="/account/">Account</a>
+    <a href="/booking/">Book a session</a>
+    <button class="sil-header__signout" id="silSignOut">Sign out</button>
+  </nav>
+</header>
+
+<nav aria-label="Breadcrumb" class="bc">
+  <ol>
+    <li><a href="/dashboard/">Dashboard</a></li>
+    <li>Worksheets</li>
+  </ol>
+</nav>
+
+<!-- VAULT OVERLAY -->
+<div class="vault-overlay" id="vaultOverlay">
+  <div class="vault-overlay__icon">🔒︎</div>
+  <div class="vault-overlay__title">Setting up your secure vault</div>
+  <div class="vault-overlay__sub">Your worksheets will be encrypted on this device before saving. This only happens once.</div>
+  <div class="vault-spinner"></div>
+</div>
+
+<main id="worksheetsApp">
+
+  <div class="ph">
+    <h2>Worksheets</h2>
+    <p>Reflective exercises to explore music, memory, emotion, and wellbeing. Your responses are encrypted and private.</p>
+  </div>
+
+  <!-- ═══════════════════════════════
+       PICKER VIEW
+  ═══════════════════════════════ -->
+  <div class="ws-picker" id="wsPicker">
+    <p class="section-label">Choose a worksheet</p>
+    <div class="ws-grid">
+
+      <div class="ws-card" onclick="openWorksheet('goals')">
+        <div class="ws-card__icon">◎</div>
+        <div class="ws-card__name">Goals &amp; Values</div>
+        <div class="ws-card__desc">Reflect on what's going well, what to nurture, and set intentions across key life areas.</div>
+      </div>
+
+      <div class="ws-card" onclick="openWorksheet('music-auto')">
+        <div class="ws-card__icon">♩</div>
+        <div class="ws-card__name">Music Autobiography</div>
+        <div class="ws-card__desc">Map the soundtrack of your life — songs and memories across chapters of your story.</div>
+      </div>
+
+      <div class="ws-card" onclick="openWorksheet('session-reflection')">
+        <div class="ws-card__icon">◇</div>
+        <div class="ws-card__name">Session Reflection</div>
+        <div class="ws-card__desc">Process and integrate your experience following a music therapy session.</div>
+      </div>
+
+      <div class="ws-card" onclick="openWorksheet('lyric-analysis')">
+        <div class="ws-card__icon">✦</div>
+        <div class="ws-card__name">Lyric Analysis</div>
+        <div class="ws-card__desc">Choose a song, select meaningful lyrics, and explore what they reveal about you.</div>
+      </div>
+
+      <div class="ws-card" onclick="openWorksheet('coping')">
+        <div class="ws-card__icon">△</div>
+        <div class="ws-card__name">Coping &amp; Distress Tolerance</div>
+        <div class="ws-card__desc">DBT-informed tools for navigating difficult emotions and moments of distress.</div>
+      </div>
+
+      <div class="ws-card" onclick="openWorksheet('interpersonal')">
+        <div class="ws-card__icon">○</div>
+        <div class="ws-card__name">Interpersonal Effectiveness</div>
+        <div class="ws-card__desc">Explore connection, communication, and relationships — in a neurodiversity-affirming way.</div>
+      </div>
+
+    </div>
+
+    <!-- Saved worksheets -->
+    <div class="saved-section" id="savedSection" style="display:none">
+      <p class="section-label">Saved worksheets</p>
+      <div class="privacy-notice">
+        <span class="privacy-notice__icon">ꄗ</span>
+        <span>Your worksheets are encrypted before saving. Only you can read them.</span>
+      </div>
+      <div class="saved-list" id="savedList">
+        <div class="saved-empty">No saved worksheets yet.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════
+       WORKSHEET VIEWS
+  ═══════════════════════════════ -->
+  <div class="ws-view" id="wsView">
+
+    <div class="ws-view-header">
+      <button class="ws-back" onclick="closeWorksheet()">← Back</button>
+      <h3 id="wsViewTitle">Worksheet</h3>
+    </div>
+
+    <div id="wsContent"><!-- injected per worksheet --></div>
+
+    <div class="ws-save-bar">
+      <input type="text" id="wsSaveNameInput" placeholder="Name this worksheet (e.g. Week 3 goals)">
+      <button class="action-btn" id="wsSaveBtn" onclick="saveWorksheet()">Save encrypted</button>
+      <button class="action-btn outline" onclick="closeWorksheet()">Discard</button>
+    </div>
+    <div class="msg" id="wsMsg"></div>
+
+  </div>
+
+</main>
+
+<!-- Viewer modal -->
+<div class="viewer-modal" id="viewerModal">
+  <div class="viewer-inner">
+    <h3 id="viewerTitle">—</h3>
+    <div class="viewer-meta" id="viewerMeta"></div>
+    <div class="viewer-body" id="viewerBody"></div>
+    <div class="viewer-footer">
+      <button class="action-btn outline" onclick="closeViewerModal()">Close</button>
+      <button class="action-btn outline" onclick="downloadViewing()">Download .txt</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Jordan Elias Music Therapy · Berlin ·
+    <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a>
+  </p>
+</footer>
+
+<script type="module">
+'use strict';
+
+import {
+  loadUserKeyFromBase64,
+  hasUserKey,
+  encrypt,
+  decrypt,
+  decryptSafe,
+  isEncrypted,
+  clearUserKey,
+} from '/assets/js/crypto-utils.js';
+
+// ─── HEADER ───────────────────────────────────────────
+const path = window.location.pathname.replace(/\/$/, '') || '/';
+document.querySelectorAll('.sil-header__nav a').forEach(a => {
+  const href = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
+  if (href === path) a.classList.add('sil-active');
+});
+const menuToggle = document.getElementById('silMenuToggle');
+const silNav     = document.getElementById('silNav');
+menuToggle.addEventListener('click', () => {
+  const open = silNav.classList.toggle('sil-open');
+  menuToggle.setAttribute('aria-expanded', open);
+});
+silNav.querySelectorAll('a').forEach(a =>
+  a.addEventListener('click', () => silNav.classList.remove('sil-open'))
+);
+
+async function getSupabase() {
+  if (window._supabase) return window._supabase;
+  const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+  return createClient(
+    'https://lrjuufvrgkuvfxcmybtf.supabase.co',
+    'sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1'
+  );
+}
+
+document.getElementById('silSignOut').addEventListener('click', async function () {
+  this.disabled = true; this.textContent = 'Signing out…';
+  clearUserKey();
+  try { const sb = await getSupabase(); await sb.auth.signOut(); } finally {
+    window.location.replace('/');
+  }
+});
+
+// ─── VAULT ────────────────────────────────────────────
+let _vaultReady = false;
+let _vaultPromise = null;
+
+async function ensureVaultReady() {
+  if (_vaultReady) return;
+  if (_vaultPromise) return _vaultPromise;
+  _vaultPromise = (async () => {
+    const sb = await getSupabase();
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) throw new Error('No active session');
+
+    const { data: profile } = await sb
+      .from('profiles').select('encryption_key_enc').eq('id', session.user.id).single();
+    const isFirstTime = !profile?.encryption_key_enc;
+    if (isFirstTime) document.getElementById('vaultOverlay').classList.add('visible');
+
+    const res = await fetch('/.netlify/functions/get-or-create-vault-key', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const { key } = await res.json();
+    await loadUserKeyFromBase64(key);
+    _vaultReady = true;
+
+    if (isFirstTime) {
+      document.querySelector('.vault-overlay__title').textContent = 'Your vault is ready';
+      document.querySelector('.vault-overlay__sub').textContent =
+        'Worksheets are encrypted on this device before saving.';
+      document.querySelector('.vault-spinner').style.display = 'none';
+      await new Promise(r => setTimeout(r, 1800));
+      document.getElementById('vaultOverlay').classList.remove('visible');
+    }
+  })();
+  return _vaultPromise;
+}
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+const S = {
+  currentType: null,
+  saved: [],
+  viewingEntry: null,
+  viewingData: null,
+};
+
+// ═══════════════════════════════════════════════════════
+// WORKSHEET DEFINITIONS
+// ═══════════════════════════════════════════════════════
+const WS_META = {
+  'goals':              { label: 'Goals & Values',                icon: '◎' },
+  'music-auto':         { label: 'Music Autobiography',           icon: '♩' },
+  'session-reflection': { label: 'Session Reflection',            icon: '◇' },
+  'lyric-analysis':     { label: 'Lyric Analysis',                icon: '✦' },
+  'coping':             { label: 'Coping & Distress Tolerance',   icon: '△' },
+  'interpersonal':      { label: 'Interpersonal Effectiveness',   icon: '○' },
+};
+
+// ═══════════════════════════════════════════════════════
+// WORKSHEET RENDERERS
+// ═══════════════════════════════════════════════════════
+
+function renderGoals() {
+  const categories = [
+    { id: 'work',     icon: '⬡', name: 'Work / School' },
+    { id: 'mental',   icon: '☁', name: 'Mental Health' },
+    { id: 'social',   icon: '⬡', name: 'Social' },
+    { id: 'love',     icon: '◌', name: 'Love & Romance' },
+    { id: 'family',   icon: '⬡', name: 'Family' },
+    { id: 'physical', icon: '△', name: 'Physical Health' },
+    { id: 'creative', icon: '✦', name: 'Creative' },
+  ];
+
+  const catRows = categories.map(c => `
+    <div class="cat-row">
+      <div class="cat-row-header">
+        <span class="cat-icon">${c.icon}</span>
+        <span class="cat-name">${c.name}</span>
+      </div>
+      <div class="cat-grid-inner">
+        <div class="ws-field">
+          <label class="ws-label">What is going well?</label>
+          <textarea class="ws-input sm" data-field="${c.id}_well" placeholder="Reflect on what's working…"></textarea>
+        </div>
+        <div class="ws-field">
+          <label class="ws-label">What would I like to nurture or improve?</label>
+          <textarea class="ws-input sm" data-field="${c.id}_improve" placeholder="Be specific and kind to yourself…"></textarea>
+        </div>
+        <div class="ws-field">
+          <label class="ws-label">My intention here</label>
+          <textarea class="ws-input sm" data-field="${c.id}_intention" placeholder="One clear intention…"></textarea>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="ws-callout">
+      <strong>How to use this worksheet</strong>
+      For each life area, take a moment to notice what's already going well — before focusing on what to change. Intentions work best when they're honest, specific, and grounded in your values rather than external pressure.
+    </div>
+
+    <div class="ws-section">
+      <div class="ws-section-title">
+        <span class="ws-section-icon">◎</span> Overall reflection
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">Right now, what matters most to me?</label>
+        <textarea class="ws-input md" data-field="overall_matters" placeholder="Write freely…"></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">What value or quality do I most want to embody in this period of my life?</label>
+        <textarea class="ws-input md" data-field="overall_value" placeholder="e.g. patience, courage, presence, creativity…"></textarea>
+      </div>
+    </div>
+
+    <div class="ws-section" style="border-top:none; padding:0;">
+      <div style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);">
+        <div class="ws-section-title" style="margin-bottom:0;">
+          <span class="ws-section-icon">⬡</span> By life area
+        </div>
+      </div>
+      <div class="cat-grid">${catRows}</div>
+    </div>
+
+    <div class="ws-section" style="border-top:none; margin-top:0;">
+      <div class="ws-section-title">
+        <span class="ws-section-icon">◇</span> Closing
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">If I could focus on only one thing this week, it would be…</label>
+        <textarea class="ws-input md" data-field="closing_one" placeholder=""></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">A compassionate reminder to myself</label>
+        <textarea class="ws-input sm" data-field="closing_reminder" placeholder="Something kind and true…"></textarea>
+      </div>
+    </div>
+  `;
+}
+
+function renderMusicAuto() {
+  return `
+    <div class="ws-callout">
+      <strong>Your musical story</strong>
+      Add a section for each chapter of your life — childhood, school years, a particular relationship, a difficult period, now. Name each section however feels right (an age, a place, a phrase). For each, note the songs that defined or marked that time, and what they meant to you.
+    </div>
+
+    <div class="ws-section">
+      <div class="ws-section-title"><span class="ws-section-icon">◌</span> Before we begin</div>
+      <div class="ws-field">
+        <label class="ws-label">What is your earliest memory of music?</label>
+        <textarea class="ws-input md" data-field="earliest_memory" placeholder="A song, a sound, a feeling…"></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">Is there a song that feels like "your song" — one you come back to again and again? What is it, and why?</label>
+        <textarea class="ws-input md" data-field="your_song" placeholder=""></textarea>
+      </div>
+    </div>
+
+    <div id="autoSections" class="dyn-sections"></div>
+    <button class="add-section-btn" onclick="addAutoSection()">+ Add a chapter</button>
+
+    <div class="ws-section" style="margin-top:1.5rem;">
+      <div class="ws-section-title"><span class="ws-section-icon">✦</span> Reflection</div>
+      <div class="ws-field">
+        <label class="ws-label">Looking at your musical story as a whole, what patterns do you notice?</label>
+        <textarea class="ws-input lg" data-field="patterns" placeholder="e.g. genres that reappear, themes in lyrics, how music connects to emotion or memory for you…"></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">What does music do for you that other things can't?</label>
+        <textarea class="ws-input md" data-field="music_does" placeholder=""></textarea>
+      </div>
+    </div>
+  `;
+}
+
+let _autoSectionCount = 0;
+function addAutoSection() {
+  _autoSectionCount++;
+  const n = _autoSectionCount;
+  const container = document.getElementById('autoSections');
+  const div = document.createElement('div');
+  div.className = 'dyn-section';
+  div.dataset.sectionId = n;
+  div.innerHTML = `
+    <div class="dyn-section-header">
+      <span class="dyn-section-num">Chapter ${n}</span>
+      <input type="text" class="dyn-section-label-input" data-field="auto_${n}_label" placeholder="Name this chapter (e.g. Age 8–12, High school, Berlin years…)">
+      <button class="dyn-remove" onclick="removeAutoSection(${n})">Remove</button>
+    </div>
+    <div class="ws-field">
+      <label class="ws-label">Songs from this time</label>
+      <textarea class="ws-input sm" data-field="auto_${n}_songs" placeholder="List songs, artists, albums…"></textarea>
+    </div>
+    <div class="ws-field">
+      <label class="ws-label">What was happening in your life during this chapter?</label>
+      <textarea class="ws-input md" data-field="auto_${n}_life" placeholder="Brief context — you don't have to share everything…"></textarea>
+    </div>
+    <div class="ws-field">
+      <label class="ws-label">What did music mean to you during this time? What was it doing for you?</label>
+      <textarea class="ws-input md" data-field="auto_${n}_meaning" placeholder=""></textarea>
+    </div>
+    <div class="ws-field">
+      <label class="ws-label">Is there one song that captures this chapter most? What would you want someone to understand about why?</label>
+      <textarea class="ws-input md" data-field="auto_${n}_defining" placeholder=""></textarea>
+    </div>
+  `;
+  container.appendChild(div);
+  window._autoSectionCount = _autoSectionCount;
+}
+window.addAutoSection = addAutoSection;
+window.removeAutoSection = function(n) {
+  const el = document.querySelector(`[data-section-id="${n}"]`);
+  if (el) el.remove();
+};
+
+function renderSessionReflection() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  return `
+    <div class="ws-section">
+      <div class="ws-section-title"><span class="ws-section-icon">◇</span> About this session</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:.75rem;">
+        <div class="ws-field">
+          <label class="ws-label">Date</label>
+          <input type="text" class="ws-input" data-field="session_date" value="${dateStr}">
+        </div>
+        <div class="ws-field">
+          <label class="ws-label">Session number / type</label>
+          <input type="text" class="ws-input" data-field="session_type" placeholder="e.g. Session 4, Individual, Group…">
+        </div>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">Music or activities in this session</label>
+        <textarea class="ws-input sm" data-field="session_music" placeholder="Songs listened to, improvised, created, sung…"></textarea>
+      </div>
+    </div>
+
+    <div class="ws-section" style="border-top:none; margin-top:0;">
+      <div class="ws-section-title"><span class="ws-section-icon">○</span> During the session</div>
+      <div class="ws-field">
+        <label class="ws-label">How were you feeling when you arrived?</label>
+        <textarea class="ws-input sm" data-field="before_feeling" placeholder="Emotionally, physically, mentally…"></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">What moment stood out most to you — and what do you think made it significant?</label>
+        <textarea class="ws-input md" data-field="standout_moment" placeholder="It might be something that moved you, surprised you, made you uncomfortable, or felt important…"></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">Where did you notice sensation or emotion in your body during the session?</label>
+        <textarea class="ws-input md" data-field="body_sensation" placeholder="Tension, release, warmth, contraction, energy — wherever and however you noticed it…"></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">Was there anything that felt difficult, uncomfortable, or that you wanted to avoid?</label>
+        <textarea class="ws-input md" data-field="difficult" placeholder="No judgment — this is useful information too…"></textarea>
+      </div>
+    </div>
+
+    <div class="ws-section" style="border-top:none; margin-top:0;">
+      <div class="ws-section-title"><span class="ws-section-icon">✦</span> After the session</div>
+      <div class="ws-field">
+        <label class="ws-label">How are you feeling now, compared to when you arrived?</label>
+        <textarea class="ws-input sm" data-field="after_feeling" placeholder="Notice shifts, even subtle ones…"></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">What is one thing you are taking with you from this session — an insight, a feeling, a question?</label>
+        <textarea class="ws-input md" data-field="takeaway" placeholder=""></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">Is there something you want to remember, explore further, or bring to the next session?</label>
+        <textarea class="ws-input md" data-field="bring_next" placeholder=""></textarea>
+      </div>
+    </div>
+
+    <div class="ws-section" style="border-top:none; margin-top:0;">
+      <div class="ws-section-title"><span class="ws-section-icon">△</span> Rate this session</div>
+      <div class="ws-field">
+        <label class="ws-label">Overall, how did this session feel? <em>(1 = very difficult / not useful · 10 = exactly what I needed)</em></label>
+        <div class="scale-row" id="sessionScaleRow"></div>
+        <div class="scale-labels"><span>Very difficult</span><span>Exactly right</span></div>
+        <input type="hidden" data-field="session_rating" id="sessionRating" value="">
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">Anything you'd like to share with your therapist about this session?</label>
+        <textarea class="ws-input md" data-field="for_therapist" placeholder="Optional — this is your space first…"></textarea>
+      </div>
+    </div>
+  `;
+}
+
+function initSessionScaleRow() {
+  const row = document.getElementById('sessionScaleRow');
+  if (!row) return;
+  for (let i = 1; i <= 10; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'scale-btn';
+    btn.textContent = i;
+    btn.type = 'button';
+    btn.onclick = () => {
+      row.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('sessionRating').value = i;
+    };
+    row.appendChild(btn);
+  }
+}
+
+function renderLyricAnalysis() {
+  return `
+    <div class="ws-callout">
+      <strong>How to use this worksheet</strong>
+      Choose a song that means something to you — one that moves you, one you've been drawn to, or one that's been in your head. You'll select specific lines or passages, then work through a series of questions for each one. You can add up to three selections.
+    </div>
+
+    <div class="ws-section">
+      <div class="ws-section-title"><span class="ws-section-icon">♩</span> The song</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:.75rem;">
+        <div class="ws-field">
+          <label class="ws-label">Song title</label>
+          <input type="text" class="ws-input" data-field="song_title" placeholder="">
+        </div>
+        <div class="ws-field">
+          <label class="ws-label">Artist / composer</label>
+          <input type="text" class="ws-input" data-field="song_artist" placeholder="">
+        </div>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">Why did you choose this song today?</label>
+        <textarea class="ws-input md" data-field="song_why" placeholder="It might be that you've always loved it, that it appeared suddenly in your mind, that it makes you feel something you can't quite name…"></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">What is the song "about" on the surface — the literal story or situation?</label>
+        <textarea class="ws-input sm" data-field="song_surface" placeholder="Briefly, in your own words…"></textarea>
+      </div>
+    </div>
+
+    <div id="lyricBlocks"></div>
+    <button class="add-section-btn" id="addLyricBtn" onclick="addLyricBlock()">+ Add a lyric selection</button>
+
+    <div class="ws-section" style="margin-top:1.5rem;">
+      <div class="ws-section-title"><span class="ws-section-icon">◎</span> The whole song</div>
+      <div class="ws-field">
+        <label class="ws-label">After sitting with these lyrics, what do you think this song is really about — beneath the surface?</label>
+        <textarea class="ws-input md" data-field="song_deeper" placeholder="What is the emotional truth of it?"></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">What has this song revealed or uncovered for you today?</label>
+        <textarea class="ws-input md" data-field="song_revealed" placeholder="An insight, a question, a feeling — whatever arose…"></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">If this song could say something directly to you right now, what might it say?</label>
+        <textarea class="ws-input md" data-field="song_message" placeholder="Try to let the answer come without overthinking…"></textarea>
+      </div>
+    </div>
+  `;
+}
+
+let _lyricBlockCount = 0;
+function addLyricBlock() {
+  const container = document.getElementById('lyricBlocks');
+  if (container.children.length >= 3) {
+    document.getElementById('addLyricBtn').style.display = 'none';
+    return;
+  }
+  _lyricBlockCount++;
+  const n = _lyricBlockCount;
+  const div = document.createElement('div');
+  div.className = 'lyric-block';
+  div.dataset.lyricId = n;
+  div.innerHTML = `
+    <div class="lyric-block-header">
+      <span class="lyric-block-num">Selection ${n}</span>
+      <span class="lyric-block-title">Lyric passage</span>
+      <button class="dyn-remove" onclick="removeLyricBlock(${n})">Remove</button>
+    </div>
+    <div class="ws-field">
+      <label class="ws-label">The lyric(s) you've chosen <em>— copy them here exactly as they appear in the song</em></label>
+      <textarea class="ws-input md" data-field="lyric_${n}_text" placeholder="Type or paste the line(s) here…" style="font-style:italic; border-left: 3px solid var(--accent);"></textarea>
+    </div>
+    <div class="ws-field">
+      <label class="ws-label">Why did these words catch your attention? What was the pull?</label>
+      <textarea class="ws-input md" data-field="lyric_${n}_pull" placeholder="Don't analyse yet — just describe the initial reaction…"></textarea>
+    </div>
+    <div class="ws-field">
+      <label class="ws-label">What do these words mean to you — in your own life, right now?</label>
+      <textarea class="ws-input md" data-field="lyric_${n}_meaning" placeholder="How do they land when you read them as if they were written for you?"></textarea>
+    </div>
+    <div class="ws-field">
+      <label class="ws-label">What memory, image, or feeling do these words bring up?</label>
+      <textarea class="ws-input md" data-field="lyric_${n}_memory" placeholder="Let the association come without judging it…"></textarea>
+    </div>
+    <div class="ws-field">
+      <label class="ws-label">Who are you in this story? Are you the speaker, another character, someone watching? Or does it shift?</label>
+      <textarea class="ws-input md" data-field="lyric_${n}_role" placeholder=""></textarea>
+    </div>
+    <div class="ws-field">
+      <label class="ws-label">Is there something in these words that describes something you haven't yet been able to say yourself? What is it?</label>
+      <textarea class="ws-input md" data-field="lyric_${n}_unsaid" placeholder="Music often finds the words before we do…"></textarea>
+    </div>
+  `;
+  container.appendChild(div);
+  if (container.children.length >= 3) document.getElementById('addLyricBtn').style.display = 'none';
+  window._lyricBlockCount = _lyricBlockCount;
+}
+window.addLyricBlock = addLyricBlock;
+window.removeLyricBlock = function(n) {
+  const el = document.querySelector(`[data-lyric-id="${n}"]`);
+  if (el) el.remove();
+  document.getElementById('addLyricBtn').style.display = '';
+};
+
+function renderCoping() {
+  return `
+    <div class="ws-callout">
+      <strong>About this worksheet</strong>
+      Distress tolerance isn't about making problems disappear — it's about getting through a difficult moment without making things worse. These tools are drawn from DBT (Dialectical Behaviour Therapy). Work through them as you need: in a moment of distress, or as preparation.
+    </div>
+
+    <div class="ws-section">
+      <div class="ws-section-title"><span class="ws-section-icon">△</span> Right now</div>
+      <div class="ws-field">
+        <label class="ws-label">What is happening? (briefly — you don't have to give every detail)</label>
+        <textarea class="ws-input md" data-field="situation" placeholder="Just enough to orient yourself to what you're dealing with…"></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">What emotion(s) are present? How intense are they?</label>
+        <div class="tag-row" id="emotionTags">
+          ${['Overwhelmed','Anxious','Angry','Sad','Numb','Ashamed','Scared','Lonely','Frustrated','Confused','Hopeless','Hurt'].map(e =>
+            `<button type="button" class="tag-pill" onclick="toggleTag(this)">${e}</button>`
+          ).join('')}
+        </div>
+        <div style="margin-top:.6rem;">
+          <label class="ws-label">Add your own</label>
+          <input type="text" class="ws-input" data-field="emotion_other" placeholder="Other feelings…" style="max-width:300px;">
+        </div>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">Distress level right now <em>(1 = manageable · 10 = crisis level)</em></label>
+        <div class="scale-row" id="distressScale"></div>
+        <div class="scale-labels"><span>Manageable</span><span>Crisis level</span></div>
+        <input type="hidden" data-field="distress_level" id="distressLevel" value="">
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">What does your body feel like right now? Where do you notice distress physically?</label>
+        <textarea class="ws-input md" data-field="body_now" placeholder="Chest tightness, jaw tension, shallow breathing, heaviness, restlessness…"></textarea>
+      </div>
+    </div>
+
+    <div class="ws-section" style="border-top:none; margin-top:0;">
+      <div class="ws-section-title"><span class="ws-section-icon">○</span> TIPP — quick regulation tools</div>
+      <div class="ws-callout" style="margin-bottom:1rem; font-size:.8rem;">
+        TIPP (Temperature, Intense exercise, Paced breathing, Progressive muscle relaxation) works directly on the body's nervous system. These are not solutions — they're tools to bring distress down enough to think clearly.
+      </div>
+      <div class="skill-checklist" id="tippList">
+        <div class="skill-item" onclick="toggleSkill(this)">
+          <input type="checkbox">
+          <div class="skill-item-body">
+            <div class="skill-item-name">Temperature — cold water on face / wrists</div>
+            <div class="skill-item-desc">Hold cold water on your face or wrists for 30 seconds. This activates the dive reflex, slowing your heart rate and calming the nervous system quickly.</div>
+          </div>
+        </div>
+        <div class="skill-item" onclick="toggleSkill(this)">
+          <input type="checkbox">
+          <div class="skill-item-body">
+            <div class="skill-item-name">Intense exercise — brief, vigorous movement</div>
+            <div class="skill-item-desc">Even 1–2 minutes of jumping, running, or intense movement can discharge adrenaline and shift the emotional state significantly.</div>
+          </div>
+        </div>
+        <div class="skill-item" onclick="toggleSkill(this)">
+          <input type="checkbox">
+          <div class="skill-item-body">
+            <div class="skill-item-name">Paced breathing — slow exhale</div>
+            <div class="skill-item-desc">Inhale for 4 counts, exhale for 6–8. The longer exhale activates the parasympathetic system. Repeat for 2–3 minutes.</div>
+          </div>
+        </div>
+        <div class="skill-item" onclick="toggleSkill(this)">
+          <input type="checkbox">
+          <div class="skill-item-body">
+            <div class="skill-item-name">Progressive muscle relaxation</div>
+            <div class="skill-item-desc">Systematically tense and release muscle groups from feet to face. Helps release physical tension held during distress.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ws-section" style="border-top:none; margin-top:0;">
+      <div class="ws-section-title"><span class="ws-section-icon">✦</span> ACCEPTS — distraction with purpose</div>
+      <div class="ws-callout" style="margin-bottom:1rem; font-size:.8rem;">
+        ACCEPTS is a DBT distraction skill. Distraction isn't avoidance — it's a way to survive a moment without acting on it. The goal is to tolerate, not to fix.
+      </div>
+      <div class="skill-checklist">
+        ${[
+          ['Activities', 'Engage in an absorbing activity — something that demands enough attention to pull you away from the distress.'],
+          ['Contributing', 'Do something for someone else, however small. Shifting focus outward can shift emotion.'],
+          ['Comparisons', 'Compare this moment to a harder time you survived, or to others who are struggling. Not to minimise — to gain perspective.'],
+          ['Emotions (opposite)', 'Do something that evokes a different emotion — watch something funny, listen to something uplifting, look at something beautiful.'],
+          ['Pushing away (temporarily)', 'Mentally set the situation aside for a defined period. Tell yourself you'll return to it — and then do something else.'],
+          ['Thoughts', 'Occupy your mind — count, read, do a puzzle, recite something. Crowd out the spiralling thoughts with different ones.'],
+          ['Sensations', 'Use strong (but safe) sensory input — a scent, a texture, a flavour — to anchor yourself in the present moment.'],
+        ].map(([name, desc]) => `
+          <div class="skill-item" onclick="toggleSkill(this)">
+            <input type="checkbox">
+            <div class="skill-item-body">
+              <div class="skill-item-name">${name}</div>
+              <div class="skill-item-desc">${desc}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="ws-section" style="border-top:none; margin-top:0;">
+      <div class="ws-section-title"><span class="ws-section-icon">◎</span> Radical acceptance</div>
+      <div class="ws-callout" style="margin-bottom:1rem; font-size:.8rem;">
+        Radical acceptance means acknowledging reality as it is — not approving of it, not giving up on changing it, but stopping the fight against what already is. Pain is inevitable; suffering is often the result of refusing to accept it.
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">What is the reality of this situation that is hardest to accept?</label>
+        <textarea class="ws-input md" data-field="hardest_accept" placeholder="Try to name it plainly…"></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">What does non-acceptance cost you (in energy, mood, action)?</label>
+        <textarea class="ws-input md" data-field="non_acceptance_cost" placeholder=""></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">A statement of acceptance (even if partial)</label>
+        <textarea class="ws-input sm" data-field="acceptance_statement" placeholder="e.g. "This is painful. It is real. I can get through it.""></textarea>
+      </div>
+    </div>
+
+    <div class="ws-section" style="border-top:none; margin-top:0;">
+      <div class="ws-section-title"><span class="ws-section-icon">◇</span> Music as a coping tool</div>
+      <div class="ws-field">
+        <label class="ws-label">Is there a song or type of music that helps you regulate when distressed? What does it do?</label>
+        <textarea class="ws-input md" data-field="music_coping" placeholder="Think about tempo, texture, lyrics, memory associations…"></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">Create a brief coping playlist — 3 to 5 songs for a hard moment</label>
+        <textarea class="ws-input md" data-field="coping_playlist" placeholder="List them here, with a note on why each one…"></textarea>
+      </div>
+    </div>
+
+    <div class="ws-section" style="border-top:none; margin-top:0;">
+      <div class="ws-section-title"><span class="ws-section-icon">△</span> After the moment</div>
+      <div class="ws-field">
+        <label class="ws-label">What helped most? What would you do differently next time?</label>
+        <textarea class="ws-input md" data-field="what_helped" placeholder=""></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">What does this moment tell you about what you need more of in your life?</label>
+        <textarea class="ws-input md" data-field="what_need" placeholder=""></textarea>
+      </div>
+    </div>
+  `;
+}
+
+function initDistressScale() {
+  const row = document.getElementById('distressScale');
+  if (!row) return;
+  for (let i = 1; i <= 10; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'scale-btn';
+    btn.textContent = i;
+    btn.type = 'button';
+    btn.onclick = () => {
+      row.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('distressLevel').value = i;
+    };
+    row.appendChild(btn);
+  }
+}
+
+function renderInterpersonal() {
+  return `
+    <div class="ws-callout">
+      <strong>A note on this worksheet</strong>
+      Interpersonal effectiveness skills are often taught as scripts or formulas. This worksheet takes a different approach: it invites you to understand your own patterns, values, and needs first — and to recognise that connection looks different for different people. There is no single "right" way to relate.
+    </div>
+
+    <div class="ws-section">
+      <div class="ws-section-title"><span class="ws-section-icon">○</span> How you relate — your baseline</div>
+      <div class="ws-field">
+        <label class="ws-label">In general, how do you prefer to connect with people? What conditions help you feel safe in relationships?</label>
+        <textarea class="ws-input md" data-field="connection_style" placeholder="e.g. one-on-one vs group, slow-paced conversations, shared interests, less eye contact, text rather than phone — there's no wrong answer…"></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">What tends to drain you in social situations, even with people you care about?</label>
+        <textarea class="ws-input md" data-field="social_drain" placeholder="e.g. small talk, unpredictability, noise, being expected to perform enjoyment, large groups…"></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">What helps you recover after demanding social interactions?</label>
+        <textarea class="ws-input md" data-field="social_recovery" placeholder=""></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">Are there ways you mask or adapt your communication style in certain contexts? What does that cost you?</label>
+        <textarea class="ws-input md" data-field="masking" placeholder="No judgement — noticing is the first step…"></textarea>
+      </div>
+    </div>
+
+    <div class="ws-section" style="border-top:none; margin-top:0;">
+      <div class="ws-section-title"><span class="ws-section-icon">◎</span> A current relationship or situation</div>
+      <div class="ws-callout" style="font-size:.8rem; margin-bottom:1rem;">
+        Choose one relationship or interpersonal situation that's on your mind — with a friend, partner, family member, colleague, or someone you find difficult. You don't have to name them.
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">Who is this with / what is the situation? (as much or as little detail as you want)</label>
+        <textarea class="ws-input sm" data-field="situation_who" placeholder=""></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">What do you want from this situation? <em>Be honest — there may be more than one thing.</em></label>
+        <textarea class="ws-input md" data-field="what_want" placeholder="e.g. to be understood, to feel less alone, to change something, to repair something, to end something, to not lose the relationship…"></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">What is getting in the way of that?</label>
+        <textarea class="ws-input md" data-field="obstacle" placeholder="Including internal obstacles — fear, uncertainty, overwhelm, not knowing how to start…"></textarea>
+      </div>
+    </div>
+
+    <div class="ws-section" style="border-top:none; margin-top:0;">
+      <div class="ws-section-title"><span class="ws-section-icon">△</span> DEAR MAN — asking for what you need</div>
+      <div class="ws-callout" style="font-size:.8rem; margin-bottom:1rem;">
+        DEAR MAN is a DBT framework for communicating a need or request effectively. Adapt it to your style — it doesn't have to be word-for-word or formulaic. What matters is that it's honest and clear.
+      </div>
+      <div class="ws-field">
+        <label class="ws-label"><strong>D</strong>escribe — what is the situation you want to address? (facts only, no interpretation yet)</label>
+        <textarea class="ws-input sm" data-field="dear_describe" placeholder="e.g. "In our last few conversations, I've noticed I end up not saying what I actually mean…""></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label"><strong>E</strong>xpress — what are your feelings about it? <em>Use "I" statements rather than "you" statements.</em></label>
+        <textarea class="ws-input sm" data-field="dear_express" placeholder="e.g. "I feel unheard" rather than "you never listen"…"></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label"><strong>A</strong>ssert — what specifically are you asking for? <em>Be concrete. Vague requests are harder to meet.</em></label>
+        <textarea class="ws-input sm" data-field="dear_assert" placeholder="What exactly do you want them to do, stop doing, or understand?"></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label"><strong>R</strong>einforce — why might this benefit them / the relationship too?</label>
+        <textarea class="ws-input sm" data-field="dear_reinforce" placeholder="What does meeting this need make possible for both of you?"></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label"><strong>M</strong>indful — what might you watch out for? (distractions, defensiveness, getting derailed)</label>
+        <textarea class="ws-input sm" data-field="dear_mindful" placeholder=""></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label"><strong>A</strong>ppear confident — how do you want to come across, even if you're nervous?</label>
+        <textarea class="ws-input sm" data-field="dear_appear" placeholder="What posture, tone, or approach do you want to bring?"></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label"><strong>N</strong>egotiate — what are you flexible on? What is non-negotiable?</label>
+        <textarea class="ws-input sm" data-field="dear_negotiate" placeholder="Knowing your limits in advance helps you stay clear during the conversation…"></textarea>
+      </div>
+    </div>
+
+    <div class="ws-section" style="border-top:none; margin-top:0;">
+      <div class="ws-section-title"><span class="ws-section-icon">◇</span> GIVE — maintaining the relationship</div>
+      <div class="ws-callout" style="font-size:.8rem; margin-bottom:1rem;">
+        GIVE focuses on how to hold the relationship with care, even in difficult conversations. These aren't about appeasing — they're about approaching with the relationship in mind.
+      </div>
+      <div class="ws-field">
+        <label class="ws-label"><strong>G</strong>entle — how can you be direct without being harsh? What tone do you want to bring?</label>
+        <textarea class="ws-input sm" data-field="give_gentle" placeholder=""></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label"><strong>I</strong>nterested — what might this look like from their perspective?</label>
+        <textarea class="ws-input md" data-field="give_interested" placeholder="Try to genuinely imagine their experience — what pressures, fears, or needs might they be carrying?"></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label"><strong>V</strong>alidate — what is real or understandable about their perspective, even if you disagree?</label>
+        <textarea class="ws-input sm" data-field="give_validate" placeholder="Validation doesn't mean agreement — it means acknowledging their reality…"></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label"><strong>E</strong>asy manner — how do you hold lightness, even in difficulty?</label>
+        <textarea class="ws-input sm" data-field="give_easy" placeholder="What helps you stay out of rigidity or defensiveness?"></textarea>
+      </div>
+    </div>
+
+    <div class="ws-section" style="border-top:none; margin-top:0;">
+      <div class="ws-section-title"><span class="ws-section-icon">✦</span> Boundaries and self-respect</div>
+      <div class="ws-callout" style="font-size:.8rem; margin-bottom:1rem;">
+        Boundaries aren't walls — they're information about what you need to remain present and safe in a relationship. They protect the connection as much as they protect you.
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">In this situation (or in general), where do you feel your limits are? What behaviour is not okay with you?</label>
+        <textarea class="ws-input md" data-field="boundaries" placeholder="Try to be specific — vague limits are hard to hold…"></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">What makes it hard to hold those limits? (fear of conflict, fear of rejection, guilt, uncertainty about whether your limits are "valid")</label>
+        <textarea class="ws-input md" data-field="boundary_hard" placeholder=""></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">What would holding this limit say about how you value yourself?</label>
+        <textarea class="ws-input md" data-field="boundary_self_value" placeholder=""></textarea>
+      </div>
+    </div>
+
+    <div class="ws-section" style="border-top:none; margin-top:0;">
+      <div class="ws-section-title"><span class="ws-section-icon">○</span> Connection and music</div>
+      <div class="ws-field">
+        <label class="ws-label">Is there a song that captures something about this relationship or situation — or about how you experience connection in general?</label>
+        <textarea class="ws-input md" data-field="connection_song" placeholder="It might be something that says what you can't, or that describes the dynamic you're in…"></textarea>
+      </div>
+      <div class="ws-field">
+        <label class="ws-label">What does music teach you about connection that your daily life doesn't?</label>
+        <textarea class="ws-input md" data-field="music_connection" placeholder=""></textarea>
+      </div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════
+// UI INTERACTIONS
+// ═══════════════════════════════════════════════════════
+window.toggleTag = function(btn) {
+  btn.classList.toggle('active');
+};
+
+window.toggleSkill = function(item) {
+  const cb = item.querySelector('input[type="checkbox"]');
+  cb.checked = !cb.checked;
+  item.classList.toggle('checked', cb.checked);
+};
+
+// ═══════════════════════════════════════════════════════
+// OPEN / CLOSE WORKSHEET
+// ═══════════════════════════════════════════════════════
+window.openWorksheet = function(type) {
+  S.currentType = type;
+  _autoSectionCount = 0;
+  _lyricBlockCount  = 0;
+
+  const meta = WS_META[type];
+  document.getElementById('wsViewTitle').textContent = meta.label;
+
+  const content = document.getElementById('wsContent');
+  content.innerHTML = {
+    'goals':              renderGoals,
+    'music-auto':         renderMusicAuto,
+    'session-reflection': renderSessionReflection,
+    'lyric-analysis':     renderLyricAnalysis,
+    'coping':             renderCoping,
+    'interpersonal':      renderInterpersonal,
+  }[type]();
+
+  // Post-render initialisation
+  if (type === 'session-reflection') initSessionScaleRow();
+  if (type === 'coping')             initDistressScale();
+
+  // Default name
+  const now = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  document.getElementById('wsSaveNameInput').value = `${meta.label} — ${now}`;
+  document.getElementById('wsMsg').className = 'msg';
+
+  document.getElementById('wsPicker').classList.add('hidden');
+  document.getElementById('wsView').classList.add('visible');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+window.closeWorksheet = function() {
+  document.getElementById('wsPicker').classList.remove('hidden');
+  document.getElementById('wsView').classList.remove('visible');
+  document.getElementById('wsContent').innerHTML = '';
+  S.currentType = null;
+};
+
+// ═══════════════════════════════════════════════════════
+// COLLECT FORM DATA
+// ═══════════════════════════════════════════════════════
+function collectFormData() {
+  const data = {};
+
+  // Standard inputs
+  document.querySelectorAll('#wsContent [data-field]').forEach(el => {
+    const key = el.dataset.field;
+    if (!key) return;
+    if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
+      data[key] = el.value;
+    }
+  });
+
+  // Tag pills
+  const activeTags = [];
+  document.querySelectorAll('#wsContent .tag-pill.active').forEach(t => activeTags.push(t.textContent));
+  if (activeTags.length) data['_emotion_tags'] = activeTags;
+
+  // Checked skills
+  const checkedSkills = [];
+  document.querySelectorAll('#wsContent .skill-item.checked .skill-item-name').forEach(n => checkedSkills.push(n.textContent));
+  if (checkedSkills.length) data['_checked_skills'] = checkedSkills;
+
+  return data;
+}
+
+// ═══════════════════════════════════════════════════════
+// SAVE
+// ═══════════════════════════════════════════════════════
+window.saveWorksheet = async function() {
+  const name    = document.getElementById('wsSaveNameInput').value.trim() || WS_META[S.currentType].label;
+  const msgEl   = document.getElementById('wsMsg');
+  const btn     = document.getElementById('wsSaveBtn');
+
+  btn.disabled = true;
+  msgEl.className = 'msg';
+
+  const sb   = window._supabase;
+  const user = window._currentUser;
+  if (!sb || !user) {
+    msgEl.className = 'msg error'; msgEl.textContent = 'Not signed in.';
+    btn.disabled = false; return;
+  }
+
+  try { await ensureVaultReady(); }
+  catch (err) {
+    msgEl.className = 'msg error'; msgEl.textContent = 'Could not unlock vault: ' + err.message;
+    btn.disabled = false; return;
+  }
+
+  const formData = collectFormData();
+  const payload  = JSON.stringify({ type: S.currentType, data: formData });
+
+  let encryptedContent;
+  try { encryptedContent = await encrypt(payload); }
+  catch (err) {
+    msgEl.className = 'msg error'; msgEl.textContent = 'Encryption failed: ' + err.message;
+    btn.disabled = false; return;
+  }
+
+  const { error } = await sb.from('worksheets').insert({
+    user_id:      user.id,
+    title:        name,
+    type:         S.currentType,
+    content:      encryptedContent,
+    encrypted_at: new Date().toISOString(),
+    key_version:  1,
+  });
+
+  if (error) {
+    msgEl.className = 'msg error'; msgEl.textContent = 'Could not save: ' + error.message;
+    btn.disabled = false; return;
+  }
+
+  msgEl.className = 'msg success';
+  msgEl.textContent = `"${name}" saved and encrypted.`;
+  btn.disabled = false;
+  await loadSaved();
+};
+
+// ═══════════════════════════════════════════════════════
+// LOAD & RENDER SAVED
+// ═══════════════════════════════════════════════════════
+async function loadSaved() {
+  const sb   = window._supabase;
+  const user = window._currentUser;
+  if (!sb || !user) return;
+
+  const { data, error } = await sb
+    .from('worksheets')
+    .select('id, title, type, created_at, content')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+
+  if (error) { console.error(error); return; }
+  S.saved = data || [];
+  renderSaved();
+}
+
+function renderSaved() {
+  const section = document.getElementById('savedSection');
+  const list    = document.getElementById('savedList');
+  if (!S.saved.length) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  list.innerHTML = S.saved.map(e => {
+    const meta = WS_META[e.type] || { label: e.type, icon: '◇' };
+    const date = new Date(e.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    return `
+      <div class="saved-item" onclick="viewSaved('${e.id}')">
+        <span class="saved-item__type">${escHtml(meta.icon)} ${escHtml(meta.label)}</span>
+        <span class="saved-item__name">${escHtml(e.title || 'Untitled')}</span>
+        <span class="saved-item__date">${date}</span>
+        <button class="saved-item__delete" onclick="deleteSaved(event,'${e.id}')">Delete</button>
+      </div>
+    `;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// VIEW SAVED
+// ═══════════════════════════════════════════════════════
+window.viewSaved = async function(id) {
+  const e = S.saved.find(s => s.id === id);
+  if (!e) return;
+  S.viewingEntry = e;
+  S.viewingData  = null;
+
+  const meta = WS_META[e.type] || { label: e.type };
+  document.getElementById('viewerTitle').textContent = e.title || 'Untitled';
+  const date = new Date(e.created_at).toLocaleDateString('en-GB', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+  document.getElementById('viewerMeta').textContent = `${meta.label} · ${date}`;
+
+  const bodyEl = document.getElementById('viewerBody');
+  bodyEl.innerHTML = '<span class="decrypting">Decrypting…</span>';
+  document.getElementById('viewerModal').classList.add('open');
+
+  try {
+    await ensureVaultReady();
+    let plaintext;
+    if (isEncrypted(e.content)) {
+      plaintext = await decrypt(e.content);
+    } else {
+      plaintext = e.content || '';
+    }
+    const parsed = JSON.parse(plaintext);
+    S.viewingData = parsed;
+    bodyEl.innerHTML = renderViewerBody(parsed);
+  } catch (err) {
+    bodyEl.innerHTML = `<span class="decrypting">Could not decrypt this entry. (${escHtml(err.message)})</span>`;
+  }
+};
+
+function renderViewerBody(parsed) {
+  const type = parsed.type;
+  const d    = parsed.data || {};
+  const meta = WS_META[type] || {};
+  let html = '';
+
+  // Generic renderer — iterate all fields grouped by visual sections
+  // For each non-empty field, show label and value
+  const fieldLabels = {
+    // Goals
+    overall_matters: "What matters most right now",
+    overall_value: "Value to embody",
+    closing_one: "Focus for this week",
+    closing_reminder: "Compassionate reminder",
+    // Music auto
+    earliest_memory: "Earliest memory of music",
+    your_song: "Your song",
+    patterns: "Patterns noticed",
+    music_does: "What music does for me",
+    // Session reflection
+    session_date: "Date", session_type: "Session type",
+    session_music: "Music / activities",
+    before_feeling: "Feeling on arrival",
+    standout_moment: "Standout moment",
+    body_sensation: "Body sensation",
+    difficult: "What felt difficult",
+    after_feeling: "Feeling after",
+    takeaway: "Taking with me",
+    bring_next: "For next session",
+    session_rating: "Session rating",
+    for_therapist: "Note for therapist",
+    // Lyric analysis
+    song_title: "Song", song_artist: "Artist",
+    song_why: "Why this song",
+    song_surface: "Surface meaning",
+    song_deeper: "Deeper meaning",
+    song_revealed: "What it revealed",
+    song_message: "What the song says to me",
+    // Coping
+    situation: "The situation",
+    emotion_other: "Other emotions",
+    distress_level: "Distress level",
+    body_now: "Body sensations",
+    hardest_accept: "Hardest to accept",
+    non_acceptance_cost: "Cost of non-acceptance",
+    acceptance_statement: "Statement of acceptance",
+    music_coping: "Music as coping",
+    coping_playlist: "Coping playlist",
+    what_helped: "What helped",
+    what_need: "What I need more of",
+    // Interpersonal
+    connection_style: "How I prefer to connect",
+    social_drain: "What drains me socially",
+    social_recovery: "How I recover",
+    masking: "Masking / adapting",
+    situation_who: "The situation",
+    what_want: "What I want",
+    obstacle: "What's in the way",
+    dear_describe: "Describe", dear_express: "Express",
+    dear_assert: "Assert", dear_reinforce: "Reinforce",
+    dear_mindful: "Mindful", dear_appear: "Appear confident",
+    dear_negotiate: "Negotiate",
+    give_gentle: "Gentle", give_interested: "Interested",
+    give_validate: "Validate", give_easy: "Easy manner",
+    boundaries: "My limits",
+    boundary_hard: "What makes it hard",
+    boundary_self_value: "What holding limits says about me",
+    connection_song: "A song for this",
+    music_connection: "Music and connection",
+  };
+
+  // Category fields for goals
+  const goalCats = ['work','mental','social','love','family','physical','creative'];
+  const goalCatNames = { work:'Work / School', mental:'Mental Health', social:'Social', love:'Love & Romance', family:'Family', physical:'Physical Health', creative:'Creative' };
+
+  if (type === 'goals') {
+    // Overall
+    const overallFields = ['overall_matters','overall_value'];
+    const overallContent = overallFields.map(f => d[f] ? `<div class="vb-field"><div class="vb-label">${fieldLabels[f]}</div><div class="vb-value">${escHtml(d[f])}</div></div>` : '').join('');
+    if (overallContent) html += `<div class="vb-section"><div class="vb-section-title">Overall reflection</div>${overallContent}</div>`;
+
+    goalCats.forEach(c => {
+      const fields = [`${c}_well`,`${c}_improve`,`${c}_intention`];
+      const fLabels = ['What is going well','What to nurture / improve','Intention'];
+      const content = fields.map((f,i) => d[f] ? `<div class="vb-field"><div class="vb-label">${fLabels[i]}</div><div class="vb-value">${escHtml(d[f])}</div></div>` : '').join('');
+      if (content) html += `<div class="vb-section"><div class="vb-section-title">${goalCatNames[c]}</div>${content}</div>`;
+    });
+
+    const closingContent = ['closing_one','closing_reminder'].map(f => d[f] ? `<div class="vb-field"><div class="vb-label">${fieldLabels[f]}</div><div class="vb-value">${escHtml(d[f])}</div></div>` : '').join('');
+    if (closingContent) html += `<div class="vb-section"><div class="vb-section-title">Closing</div>${closingContent}</div>`;
+
+  } else if (type === 'music-auto') {
+    const opening = ['earliest_memory','your_song'].map(f => d[f] ? `<div class="vb-field"><div class="vb-label">${fieldLabels[f]}</div><div class="vb-value">${escHtml(d[f])}</div></div>` : '').join('');
+    if (opening) html += `<div class="vb-section"><div class="vb-section-title">Opening</div>${opening}</div>`;
+
+    // Dynamic chapters
+    let n = 1;
+    while (d[`auto_${n}_label`] || d[`auto_${n}_songs`]) {
+      const label = d[`auto_${n}_label`] || `Chapter ${n}`;
+      const chapFields = [['songs','Songs from this time'],['life','Life during this chapter'],['meaning','What music meant'],['defining','Defining song']];
+      const chapContent = chapFields.map(([suf,lbl]) => d[`auto_${n}_${suf}`] ? `<div class="vb-field"><div class="vb-label">${lbl}</div><div class="vb-value">${escHtml(d[`auto_${n}_${suf}`])}</div></div>` : '').join('');
+      if (chapContent) html += `<div class="vb-section"><div class="vb-section-title">${escHtml(label)}</div>${chapContent}</div>`;
+      n++;
+    }
+
+    const reflection = ['patterns','music_does'].map(f => d[f] ? `<div class="vb-field"><div class="vb-label">${fieldLabels[f]}</div><div class="vb-value">${escHtml(d[f])}</div></div>` : '').join('');
+    if (reflection) html += `<div class="vb-section"><div class="vb-section-title">Reflection</div>${reflection}</div>`;
+
+  } else {
+    // Generic: group by known field order, show all non-empty fields
+    const allKnown = Object.keys(fieldLabels);
+    const shown = new Set();
+
+    // Dynamic lyric blocks
+    if (type === 'lyric-analysis') {
+      const songFields = ['song_title','song_artist','song_why','song_surface'];
+      const songContent = songFields.map(f => d[f] ? `<div class="vb-field"><div class="vb-label">${fieldLabels[f]}</div><div class="vb-value">${escHtml(d[f])}</div></div>` : '').join('');
+      if (songContent) html += `<div class="vb-section"><div class="vb-section-title">The song</div>${songContent}</div>`;
+      songFields.forEach(f => shown.add(f));
+
+      let ln = 1;
+      while (d[`lyric_${ln}_text`]) {
+        const lyricFields = [['text','Selected lyric'],['pull','Initial pull'],['meaning','Personal meaning'],['memory','Memory / feeling evoked'],['role','Who you are in the story'],['unsaid','What it says you couldn\'t']];
+        const lyricContent = lyricFields.map(([suf,lbl]) => d[`lyric_${ln}_${suf}`] ? `<div class="vb-field"><div class="vb-label">${lbl}</div><div class="vb-value">${escHtml(d[`lyric_${ln}_${suf}`])}</div></div>` : '').join('');
+        if (lyricContent) html += `<div class="vb-section"><div class="vb-section-title">Selection ${ln}</div>${lyricContent}</div>`;
+        ln++;
+      }
+
+      const closeFields = ['song_deeper','song_revealed','song_message'];
+      const closeContent = closeFields.map(f => d[f] ? `<div class="vb-field"><div class="vb-label">${fieldLabels[f]}</div><div class="vb-value">${escHtml(d[f])}</div></div>` : '').join('');
+      if (closeContent) html += `<div class="vb-section"><div class="vb-section-title">The whole song</div>${closeContent}</div>`;
+    } else {
+      // Session, coping, interpersonal — group by known fields
+      const grouped = allKnown.filter(f => d[f] && !shown.has(f));
+      if (grouped.length) {
+        html += `<div class="vb-section"><div class="vb-section-title">${escHtml(meta.label)}</div>` +
+          grouped.map(f => `<div class="vb-field"><div class="vb-label">${fieldLabels[f]}</div><div class="vb-value">${escHtml(d[f])}</div></div>`).join('') +
+          '</div>';
+      }
+
+      // Emotion tags
+      if (d._emotion_tags?.length) {
+        html += `<div class="vb-section"><div class="vb-section-title">Emotions</div><div class="vb-field"><div class="vb-value">${d._emotion_tags.map(escHtml).join(', ')}</div></div></div>`;
+      }
+
+      // Checked skills
+      if (d._checked_skills?.length) {
+        html += `<div class="vb-section"><div class="vb-section-title">Skills used</div><div class="vb-field"><div class="vb-value">${d._checked_skills.map(escHtml).join('<br>')}</div></div></div>`;
+      }
+    }
+  }
+
+  return html || '<span class="decrypting">No content recorded.</span>';
+}
+
+window.closeViewerModal = function() {
+  document.getElementById('viewerModal').classList.remove('open');
+  S.viewingEntry = null; S.viewingData = null;
+};
+
+document.getElementById('viewerModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('viewerModal')) closeViewerModal();
+});
+
+window.downloadViewing = function() {
+  if (!S.viewingData) return;
+  const d    = S.viewingData.data || {};
+  const type = S.viewingData.type;
+  const meta = WS_META[type] || {};
+  let text   = `${S.viewingEntry?.title || meta.label}\n${'─'.repeat(40)}\n\n`;
+  Object.entries(d).forEach(([k, v]) => {
+    if (!v || k.startsWith('_')) return;
+    text += `${k}\n${Array.isArray(v) ? v.join(', ') : v}\n\n`;
+  });
+  const blob = new Blob([text], { type: 'text/plain' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = `${(S.viewingEntry?.title || 'worksheet').replace(/\s+/g,'-')}.txt`;
+  a.click();
+};
+
+// ═══════════════════════════════════════════════════════
+// DELETE
+// ═══════════════════════════════════════════════════════
+window.deleteSaved = async function(ev, id) {
+  ev.stopPropagation();
+  const e = S.saved.find(s => s.id === id);
+  if (!confirm(`Delete "${e?.title || 'this worksheet'}"? This cannot be undone.`)) return;
+  const { error } = await window._supabase.from('worksheets').delete().eq('id', id);
+  if (error) { alert('Delete failed: ' + error.message); return; }
+  await loadSaved();
+};
+
+// ═══════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+function onAuthReady(cb) {
+  if (window._currentUser) { cb(); return; }
+  window.addEventListener('authReady', cb, { once: true });
+}
+
+onAuthReady(async () => {
+  await ensureVaultReady();
+  await loadSaved();
+});
+
+</script>
+</body>
+</html>
