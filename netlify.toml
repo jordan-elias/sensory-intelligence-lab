@@ -246,6 +246,27 @@
   from = "/oramics/"
   to   = "/compositions/oramics.html"
   status = 200
+
+
+[[redirects]]
+  from = "/sequencer"
+  to   = "/sequencer/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/sequencer/"
+  to   = "/sequencer/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/worksheets"
+  to   = "/worksheets/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/worksheets/"
+  to   = "/worksheets/index.html"
+  status = 200
   
 # ── Subscribe ──
 
