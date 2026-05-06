@@ -413,6 +413,41 @@
     }
     .ws-callout strong { font-weight: 600; display: block; margin-bottom: .2rem; }
 
+    /* ── Song search bar ── */
+    .song-search-bar { display: flex; gap: .5rem; margin-bottom: .75rem; }
+    .song-search-bar input { flex: 1; font-family: var(--font-body); font-size: .875rem; padding: .6rem .85rem; border: 1px solid var(--border); background: var(--bg); color: var(--text); outline: none; transition: border-color .15s; }
+    .song-search-bar input:focus { border-color: var(--accent); }
+    .song-search-btn { font-family: var(--font-heading); font-size: .8rem; font-weight: 600; padding: .6rem 1.25rem; border: none; background: var(--accent); color: white; cursor: pointer; transition: background .15s; white-space: nowrap; }
+    .song-search-btn:hover { background: var(--accent-hover); }
+    .song-search-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    .search-results { border: 1px solid var(--border); margin-bottom: .75rem; display: none; }
+    .search-results.visible { display: block; }
+    .search-result-item { display: flex; align-items: center; gap: .75rem; padding: .65rem 1rem; cursor: pointer; border-bottom: 1px solid var(--border); transition: background .1s; }
+    .search-result-item:last-child { border-bottom: none; }
+    .search-result-item:hover { background: var(--accent-light); }
+    .search-result-title { font-size: .85rem; font-weight: 500; color: var(--text); }
+    .search-result-artist { font-size: .75rem; color: var(--muted); }
+    .search-loading { padding: .85rem 1rem; font-size: .8rem; color: var(--muted); font-style: italic; }
+
+    /* ── Song player (lyric analysis) ── */
+    .song-player { display: none; border: 1px solid var(--border); background: var(--surface); padding: 1rem 1.25rem; margin-bottom: 1.25rem; }
+    .song-player.visible { display: block; }
+    .song-player-meta { display: flex; align-items: baseline; gap: .75rem; margin-bottom: .75rem; flex-wrap: wrap; }
+    .song-player-title { font-family: var(--font-heading); font-size: .9rem; font-weight: 600; color: var(--text); }
+    .song-player-artist { font-size: .78rem; color: var(--muted); }
+    .song-player-change { font-size: .7rem; color: var(--muted); cursor: pointer; text-decoration: underline; margin-left: auto; flex-shrink: 0; }
+    .song-player-change:hover { color: var(--accent); }
+    /* Audio-only YouTube: clip to show just the control bar */
+    .yt-audio-wrap { width: 100%; overflow: hidden; height: 60px; position: relative; }
+    .yt-audio-wrap iframe { width: 100%; height: 120px; margin-top: -60px; border: none; pointer-events: auto; }
+
+    /* ── Lyrics panel ── */
+    .lyrics-panel { display: none; }
+    .lyrics-panel.visible { display: block; }
+    .lyrics-box { border: 1px solid var(--border); background: var(--bg); font-family: var(--font-writing); font-size: .88rem; line-height: 1.9; padding: 1.25rem 1.5rem; max-height: 320px; overflow-y: auto; white-space: pre-wrap; color: var(--text); }
+    .lyrics-hint { font-size: .72rem; color: var(--accent); margin-top: .4rem; font-style: italic; }
+
     /* ── Save bar ── */
     .ws-save-bar {
       display: flex; align-items: center; gap: .75rem;
@@ -475,6 +510,67 @@
     .viewer-body .vb-value.empty { color: var(--muted); font-style: italic; }
     .viewer-footer { margin-top: 1.25rem; display: flex; gap: .65rem; flex-wrap: wrap; }
     .decrypting { font-size: .8rem; color: var(--muted); font-style: italic; padding: 1rem 0; display: block; }
+
+    /* ── Disclaimer / info notice ── */
+    .ws-notice {
+      display: flex; align-items: flex-start; gap: .55rem;
+      border: 1px solid var(--border); background: var(--surface);
+      padding: .6rem .9rem; margin-bottom: 1rem;
+      font-size: .73rem; color: var(--muted); line-height: 1.55;
+    }
+    .ws-notice__icon { flex-shrink: 0; opacity: .55; font-size: .85rem; margin-top: .05rem; }
+
+    /* ── Song search (autobiography chapters) ── */
+    .chapter-song-search { margin-bottom: .85rem; }
+    .chapter-song-search .song-search-bar { margin-bottom: .5rem; }
+    .chapter-song-search .search-results { margin-bottom: .5rem; }
+    .chapter-players { display: flex; flex-direction: column; gap: .5rem; margin-bottom: .75rem; }
+    .chapter-player {
+      border: 1px solid var(--border); background: var(--surface);
+      padding: .6rem .85rem; display: flex; align-items: center; gap: .75rem;
+    }
+    .chapter-player-label { font-size: .78rem; font-weight: 500; color: var(--text); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chapter-player-yt { width: 200px; flex-shrink: 0; overflow: hidden; height: 32px; position: relative; }
+    .chapter-player-yt iframe { width: 200px; height: 90px; margin-top: -29px; border: none; }
+    .chapter-player-remove { font-size: .65rem; padding: .15rem .45rem; border: 1px solid var(--border); background: var(--bg); color: var(--muted); cursor: pointer; flex-shrink: 0; transition: all .1s; }
+    .chapter-player-remove:hover { border-color: var(--error); color: var(--error); }
+
+    /* ── Goals comparison modal ── */
+    .compare-modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,.5);
+      z-index: 350; display: none; align-items: flex-start;
+      justify-content: center; padding: 2rem 1rem; overflow-y: auto;
+    }
+    .compare-modal.open { display: flex; }
+    .compare-inner {
+      background: var(--bg); border: 1px solid var(--border);
+      width: 100%; max-width: 860px; padding: 2rem;
+    }
+    .compare-inner h3 { font-family: var(--font-heading); font-size: 1rem; font-weight: 600; margin-bottom: .25rem; }
+    .compare-subtitle { font-size: .78rem; color: var(--muted); margin-bottom: 1.5rem; }
+    .compare-selectors { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+    @media (max-width: 580px) { .compare-selectors { grid-template-columns: 1fr; } }
+    .compare-selectors select { font-family: var(--font-body); font-size: .85rem; padding: .55rem .75rem; border: 1px solid var(--border); background: var(--bg); color: var(--text); outline: none; width: 100%; cursor: pointer; transition: border-color .15s; }
+    .compare-selectors select:focus { border-color: var(--accent); }
+    .compare-selectors label { font-size: .72rem; font-weight: 500; color: var(--muted); display: block; margin-bottom: .35rem; }
+    .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--border); }
+    @media (max-width: 580px) { .compare-grid { grid-template-columns: 1fr; } }
+    .compare-col { padding: 0; }
+    .compare-col + .compare-col { border-left: 1px solid var(--border); }
+    .compare-col-header { padding: .75rem 1rem; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .compare-col-title { font-family: var(--font-heading); font-size: .8rem; font-weight: 600; color: var(--text); }
+    .compare-col-date { font-size: .68rem; color: var(--muted); margin-top: .1rem; }
+    .compare-cat { border-bottom: 1px solid var(--border); }
+    .compare-cat:last-child { border-bottom: none; }
+    .compare-cat-name { font-size: .65rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); padding: .6rem 1rem .35rem; border-bottom: 1px solid var(--border); background: var(--accent-light); }
+    .compare-field { padding: .5rem 1rem; border-bottom: 1px solid var(--border); }
+    .compare-field:last-child { border-bottom: none; }
+    .compare-field-label { font-size: .65rem; color: var(--muted); margin-bottom: .2rem; font-weight: 500; }
+    .compare-field-value { font-family: var(--font-writing); font-size: .82rem; color: var(--text); line-height: 1.55; white-space: pre-wrap; }
+    .compare-field-value.empty { color: var(--muted); font-style: italic; }
+    .compare-loading { padding: 2rem; text-align: center; font-size: .85rem; color: var(--muted); font-style: italic; }
+    .compare-footer { margin-top: 1.25rem; display: flex; gap: .65rem; flex-wrap: wrap; align-items: center; }
+    .compare-hint { font-size: .72rem; color: var(--muted); flex: 1; font-style: italic; }
 
     footer {
       border-top: 1px solid var(--border);
@@ -578,6 +674,9 @@
       <div class="saved-list" id="savedList">
         <div class="saved-empty">No saved worksheets yet.</div>
       </div>
+      <div id="compareGoalsBtnWrap" style="display:none; margin-top:1rem;">
+        <button class="action-btn outline" onclick="openCompareModal()">Compare two Goals &amp; Values worksheets →</button>
+      </div>
     </div>
   </div>
 
@@ -603,6 +702,29 @@
   </div>
 
 </main>
+
+<!-- Goals comparison modal -->
+<div class="compare-modal" id="compareModal">
+  <div class="compare-inner">
+    <h3>Compare Goals &amp; Values worksheets</h3>
+    <div class="compare-subtitle">Select two worksheets to place side by side and reflect on how things have changed.</div>
+    <div class="compare-selectors">
+      <div>
+        <label>Earlier worksheet</label>
+        <select id="compareSelectA" onchange="runComparison()"><option value="">— Choose —</option></select>
+      </div>
+      <div>
+        <label>Later worksheet</label>
+        <select id="compareSelectB" onchange="runComparison()"><option value="">— Choose —</option></select>
+      </div>
+    </div>
+    <div id="compareContent"><div class="compare-loading">Choose two worksheets above to begin.</div></div>
+    <div class="compare-footer">
+      <span class="compare-hint">Read across the columns — notice what's shifted, what's stayed, what surprises you.</span>
+      <button class="action-btn outline" onclick="closeCompareModal()">Close</button>
+    </div>
+  </div>
+</div>
 
 <!-- Viewer modal -->
 <div class="viewer-modal" id="viewerModal">
@@ -862,10 +984,20 @@ function addAutoSection() {
       <input type="text" class="dyn-section-label-input" data-field="auto_${n}_label" placeholder="Name this chapter (e.g. Age 8–12, High school, Berlin years…)">
       <button class="dyn-remove" onclick="removeAutoSection(${n})">Remove</button>
     </div>
+
     <div class="ws-field">
-      <label class="ws-label">Songs from this time</label>
-      <textarea class="ws-input sm" data-field="auto_${n}_songs" placeholder="List songs, artists, albums…"></textarea>
+      <label class="ws-label">Songs from this time — search to add and listen, or type them below</label>
+      <div class="chapter-song-search">
+        <div class="song-search-bar">
+          <input type="text" id="chSongInput_${n}" placeholder="Search for a song from this chapter…" onkeydown="if(event.key==='Enter') searchChapterSong(${n})">
+          <button class="song-search-btn" onclick="searchChapterSong(${n})">Search</button>
+        </div>
+        <div class="search-results" id="chSongResults_${n}"></div>
+        <div class="chapter-players" id="chPlayers_${n}"></div>
+      </div>
+      <textarea class="ws-input sm" data-field="auto_${n}_songs" placeholder="Or type song and artist names here…"></textarea>
     </div>
+
     <div class="ws-field">
       <label class="ws-label">What was happening in your life during this chapter?</label>
       <textarea class="ws-input md" data-field="auto_${n}_life" placeholder="Brief context — you don't have to share everything…"></textarea>
@@ -983,21 +1115,52 @@ function renderLyricAnalysis() {
   return `
     <div class="ws-callout">
       <strong>How to use this worksheet</strong>
-      Choose a song that means something to you — one that moves you, one you've been drawn to, or one that's been in your head. You'll select specific lines or passages, then work through a series of questions for each one. You can add up to three selections.
+      Search for a song below. The lyrics will load automatically and you can listen while you work. Choose up to three lines or passages that catch your attention, then work through the questions for each one.
+    </div>
+
+    <div class="ws-notice">
+      <span class="ws-notice__icon">ⓘ</span>
+      <span>The audio player finds the closest match on YouTube — it may occasionally surface a live version or cover rather than the original recording. Lyrics are sourced automatically and may sometimes be missing or contain small inaccuracies. You can paste or edit lyrics manually below if needed.</span>
     </div>
 
     <div class="ws-section">
-      <div class="ws-section-title"><span class="ws-section-icon">♩</span> The song</div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:.75rem;">
-        <div class="ws-field">
-          <label class="ws-label">Song title</label>
-          <input type="text" class="ws-input" data-field="song_title" placeholder="">
-        </div>
-        <div class="ws-field">
-          <label class="ws-label">Artist / composer</label>
-          <input type="text" class="ws-input" data-field="song_artist" placeholder="">
-        </div>
+      <div class="ws-section-title"><span class="ws-section-icon">♩</span> Find your song</div>
+
+      <div class="song-search-bar">
+        <input type="text" id="songSearchInput" placeholder="Song title or artist name…" onkeydown="if(event.key==='Enter') searchSong()">
+        <button class="song-search-btn" id="songSearchBtn" onclick="searchSong()">Search</button>
       </div>
+      <div class="search-results" id="songSearchResults"></div>
+
+      <!-- Player (shown after selection) -->
+      <div class="song-player" id="songPlayer">
+        <div class="song-player-meta">
+          <span class="song-player-title" id="songPlayerTitle"></span>
+          <span class="song-player-artist" id="songPlayerArtist"></span>
+          <span class="song-player-change" onclick="changeSong()">Change song</span>
+        </div>
+        <div class="yt-audio-wrap" id="ytAudioWrap"></div>
+      </div>
+
+      <!-- Lyrics -->
+      <div class="lyrics-panel" id="lyricsPanel">
+        <p class="section-label" style="margin-top:1rem; margin-bottom:.5rem;">Lyrics</p>
+        <div class="lyrics-box" id="lyricsBox"></div>
+        <p class="lyrics-hint" id="lyricsHint" style="display:none;">Read through the lyrics, then add selections below to begin your reflection.</p>
+      </div>
+
+      <!-- Hidden fields for song identity -->
+      <input type="hidden" data-field="song_title">
+      <input type="hidden" data-field="song_artist">
+
+      <div class="ws-field" style="margin-top:1.25rem;">
+        <label class="ws-label">If lyrics didn't load, paste or edit them here <em>(optional)</em></label>
+        <textarea class="ws-input md" data-field="song_lyrics_manual" placeholder="Paste lyrics here if needed…"></textarea>
+      </div>
+    </div>
+
+    <div class="ws-section" style="border-top:none; margin-top:0;">
+      <div class="ws-section-title"><span class="ws-section-icon">○</span> First impressions</div>
       <div class="ws-field">
         <label class="ws-label">Why did you choose this song today?</label>
         <textarea class="ws-input md" data-field="song_why" placeholder="It might be that you've always loved it, that it appeared suddenly in your mind, that it makes you feel something you can't quite name…"></textarea>
@@ -1008,8 +1171,9 @@ function renderLyricAnalysis() {
       </div>
     </div>
 
+    <p class="section-label" style="margin-top:1.5rem; margin-bottom:.5rem;">Lyric selections</p>
     <div id="lyricBlocks"></div>
-    <button class="add-section-btn" id="addLyricBtn" onclick="addLyricBlock()">+ Add a lyric selection</button>
+    <button class="add-section-btn" id="addLyricBtn" onclick="addLyricBlock()">+ Add a lyric selection (up to 3)</button>
 
     <div class="ws-section" style="margin-top:1.5rem;">
       <div class="ws-section-title"><span class="ws-section-icon">◎</span> The whole song</div>
@@ -1383,6 +1547,246 @@ function renderInterpersonal() {
 }
 
 // ═══════════════════════════════════════════════════════
+// SONG SEARCH — shared logic for lyric analysis + autobiography
+// ═══════════════════════════════════════════════════════
+
+// Lyric analysis: global song state
+let _selectedSong = null;
+
+async function _geniusSearch(query) {
+  const res = await fetch(`/.netlify/functions/genius-search?q=${encodeURIComponent(query)}`);
+  if (!res.ok) throw new Error('Search failed');
+  const { hits } = await res.json();
+  return hits || [];
+}
+
+function _ytEmbed(title, artist) {
+  const q = encodeURIComponent(`${title} ${artist}`);
+  return `<iframe src="https://www.youtube-nocookie.com/embed?listType=search&list=${q}&autoplay=0&controls=1&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&fs=0" allow="autoplay; encrypted-media" title="Audio player"></iframe>`;
+}
+
+// ── Lyric analysis song search ──
+window.searchSong = async function() {
+  const query = document.getElementById('songSearchInput').value.trim();
+  if (!query) return;
+  const btn = document.getElementById('songSearchBtn');
+  const results = document.getElementById('songSearchResults');
+  btn.disabled = true;
+  results.innerHTML = '<div class="search-loading">Searching…</div>';
+  results.classList.add('visible');
+  try {
+    const hits = await _geniusSearch(query);
+    window._searchHits = hits;
+    if (!hits.length) { results.innerHTML = '<div class="search-loading">No results found. Try a different search.</div>'; btn.disabled = false; return; }
+    results.innerHTML = hits.slice(0, 6).map((h, i) => `
+      <div class="search-result-item" onclick="selectSong(${i})">
+        <div>
+          <div class="search-result-title">${escHtml(h.result.title)}</div>
+          <div class="search-result-artist">${escHtml(h.result.primary_artist.name)}</div>
+        </div>
+      </div>`).join('');
+  } catch (err) {
+    results.innerHTML = `<div class="search-loading">Search error: ${escHtml(err.message)}</div>`;
+  }
+  btn.disabled = false;
+};
+
+window.selectSong = async function(index) {
+  const hit    = window._searchHits[index];
+  const title  = hit.result.title;
+  const artist = hit.result.primary_artist.name;
+  document.getElementById('songSearchResults').classList.remove('visible');
+  const playerEl = document.getElementById('songPlayer');
+  playerEl.classList.add('visible');
+  document.getElementById('songPlayerTitle').textContent  = title;
+  document.getElementById('songPlayerArtist').textContent = artist;
+  // Set hidden fields
+  const tf = document.querySelector('[data-field="song_title"]');
+  const af = document.querySelector('[data-field="song_artist"]');
+  if (tf) tf.value = title;
+  if (af) af.value = artist;
+  _selectedSong = { title, artist };
+  document.getElementById('ytAudioWrap').innerHTML = _ytEmbed(title, artist);
+  // Fetch lyrics
+  const lyricsPanel = document.getElementById('lyricsPanel');
+  const lyricsBox   = document.getElementById('lyricsBox');
+  lyricsPanel.classList.add('visible');
+  lyricsBox.textContent = 'Loading lyrics…';
+  try {
+    const url = `https://lrclib.net/api/get?artist_name=${encodeURIComponent(artist)}&track_name=${encodeURIComponent(title)}`;
+    const res = await fetch(url);
+    if (res.ok) {
+      const data = await res.json();
+      const lyrics = data.plainLyrics || data.syncedLyrics?.replace(/\[\d+:\d+\.\d+\]/g,'') || '';
+      if (lyrics) { lyricsBox.textContent = lyrics; document.getElementById('lyricsHint').style.display = 'block'; return; }
+    }
+    lyricsBox.innerHTML = '<span style="font-style:italic;color:var(--muted)">Lyrics not found automatically. Paste them in the field below if you\'d like them here.</span>';
+    document.getElementById('lyricsHint').style.display = 'none';
+  } catch { lyricsBox.innerHTML = '<span style="font-style:italic;color:var(--muted)">Could not load lyrics. Paste them in the field below.</span>'; }
+};
+
+window.changeSong = function() {
+  document.getElementById('songPlayer').classList.remove('visible');
+  document.getElementById('lyricsPanel').classList.remove('visible');
+  document.getElementById('ytAudioWrap').innerHTML = '';
+  document.getElementById('songSearchInput').value = '';
+  document.getElementById('songSearchInput').focus();
+  _selectedSong = null;
+};
+
+// ── Music autobiography: per-chapter song search ──
+window.searchChapterSong = async function(n) {
+  const input   = document.getElementById(`chSongInput_${n}`);
+  const results = document.getElementById(`chSongResults_${n}`);
+  const query   = input.value.trim(); if (!query) return;
+  results.innerHTML = '<div class="search-loading">Searching…</div>';
+  results.classList.add('visible');
+  try {
+    const hits = await _geniusSearch(query);
+    if (!hits.length) { results.innerHTML = '<div class="search-loading">No results found.</div>'; return; }
+    results.innerHTML = hits.slice(0, 5).map((h, i) => `
+      <div class="search-result-item" onclick="addChapterSong(${n}, ${i}, ${JSON.stringify(JSON.stringify(hits.slice(0,5))).slice(1,-1)})">
+        <div>
+          <div class="search-result-title">${escHtml(h.result.title)}</div>
+          <div class="search-result-artist">${escHtml(h.result.primary_artist.name)}</div>
+        </div>
+      </div>`).join('');
+    // Store hits on element for retrieval
+    results.dataset.hits = JSON.stringify(hits.slice(0,5));
+  } catch (err) {
+    results.innerHTML = `<div class="search-loading">Error: ${escHtml(err.message)}</div>`;
+  }
+};
+
+window.addChapterSong = function(n, index) {
+  const results = document.getElementById(`chSongResults_${n}`);
+  const hits    = JSON.parse(results.dataset.hits || '[]');
+  const hit     = hits[index]; if (!hit) return;
+  const title   = hit.result.title;
+  const artist  = hit.result.primary_artist.name;
+  results.classList.remove('visible');
+  results.innerHTML = '';
+  document.getElementById(`chSongInput_${n}`).value = '';
+
+  // Also append to textarea
+  const ta = document.querySelector(`[data-field="auto_${n}_songs"]`);
+  if (ta) ta.value = (ta.value ? ta.value + '\n' : '') + `${title} — ${artist}`;
+
+  // Add player
+  const playerId = `chp_${n}_${Date.now()}`;
+  const players  = document.getElementById(`chPlayers_${n}`);
+  const div      = document.createElement('div');
+  div.className  = 'chapter-player'; div.id = playerId;
+  div.innerHTML  = `
+    <div class="chapter-player-label" title="${escHtml(title)} — ${escHtml(artist)}">${escHtml(title)} — ${escHtml(artist)}</div>
+    <div class="chapter-player-yt">${_ytEmbed(title, artist)}</div>
+    <button class="chapter-player-remove" onclick="document.getElementById('${playerId}').remove()">✕</button>
+  `;
+  players.appendChild(div);
+};
+
+// ═══════════════════════════════════════════════════════
+// GOALS COMPARISON
+// ═══════════════════════════════════════════════════════
+const GOAL_CATS = ['work','mental','social','love','family','physical','creative'];
+const GOAL_CAT_NAMES = { work:'Work / School', mental:'Mental Health', social:'Social', love:'Love & Romance', family:'Family', physical:'Physical Health', creative:'Creative' };
+
+window.openCompareModal = function() {
+  const goalsSaved = S.saved.filter(s => s.type === 'goals');
+  const selA = document.getElementById('compareSelectA');
+  const selB = document.getElementById('compareSelectB');
+  const makeOptions = () => goalsSaved.map(s => {
+    const date = new Date(s.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    return `<option value="${escHtml(s.id)}">${escHtml(s.title)} — ${date}</option>`;
+  }).join('');
+  selA.innerHTML = '<option value="">— Choose —</option>' + makeOptions();
+  selB.innerHTML = '<option value="">— Choose —</option>' + makeOptions();
+  // Default: oldest and newest if ≥2
+  if (goalsSaved.length >= 2) {
+    selA.value = goalsSaved[goalsSaved.length - 1].id; // oldest (list is newest-first)
+    selB.value = goalsSaved[0].id;                     // newest
+    runComparison();
+  } else {
+    document.getElementById('compareContent').innerHTML = '<div class="compare-loading">You need at least two saved Goals &amp; Values worksheets to compare.</div>';
+  }
+  document.getElementById('compareModal').classList.add('open');
+};
+
+window.closeCompareModal = function() {
+  document.getElementById('compareModal').classList.remove('open');
+};
+
+document.addEventListener('click', e => {
+  if (e.target === document.getElementById('compareModal')) closeCompareModal();
+});
+
+window.runComparison = async function() {
+  const idA = document.getElementById('compareSelectA').value;
+  const idB = document.getElementById('compareSelectB').value;
+  const content = document.getElementById('compareContent');
+  if (!idA || !idB) { content.innerHTML = '<div class="compare-loading">Choose two worksheets above.</div>'; return; }
+  if (idA === idB) { content.innerHTML = '<div class="compare-loading">Please select two different worksheets.</div>'; return; }
+  content.innerHTML = '<div class="compare-loading">Decrypting…</div>';
+  try {
+    await ensureVaultReady();
+    const entA = S.saved.find(s => s.id === idA);
+    const entB = S.saved.find(s => s.id === idB);
+    const decryptEntry = async (e) => {
+      const pt = isEncrypted(e.content) ? await decrypt(e.content) : e.content;
+      return JSON.parse(pt);
+    };
+    const [parsedA, parsedB] = await Promise.all([decryptEntry(entA), decryptEntry(entB)]);
+    const dA = parsedA.data || {}, dB = parsedB.data || {};
+    const dateA = new Date(entA.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+    const dateB = new Date(entB.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+
+    const renderCol = (d) => {
+      let html = '';
+      // Overall
+      html += `<div class="compare-cat">
+        <div class="compare-cat-name">Overall</div>
+        <div class="compare-field"><div class="compare-field-label">What matters most</div><div class="compare-field-value ${d.overall_matters?'':'empty'}">${d.overall_matters ? escHtml(d.overall_matters) : '—'}</div></div>
+        <div class="compare-field"><div class="compare-field-label">Value to embody</div><div class="compare-field-value ${d.overall_value?'':'empty'}">${d.overall_value ? escHtml(d.overall_value) : '—'}</div></div>
+      </div>`;
+      GOAL_CATS.forEach(c => {
+        html += `<div class="compare-cat">
+          <div class="compare-cat-name">${GOAL_CAT_NAMES[c]}</div>
+          <div class="compare-field"><div class="compare-field-label">Going well</div><div class="compare-field-value ${d[c+'_well']?'':'empty'}">${d[c+'_well'] ? escHtml(d[c+'_well']) : '—'}</div></div>
+          <div class="compare-field"><div class="compare-field-label">To nurture</div><div class="compare-field-value ${d[c+'_improve']?'':'empty'}">${d[c+'_improve'] ? escHtml(d[c+'_improve']) : '—'}</div></div>
+          <div class="compare-field"><div class="compare-field-label">Intention</div><div class="compare-field-value ${d[c+'_intention']?'':'empty'}">${d[c+'_intention'] ? escHtml(d[c+'_intention']) : '—'}</div></div>
+        </div>`;
+      });
+      html += `<div class="compare-cat">
+        <div class="compare-cat-name">Closing</div>
+        <div class="compare-field"><div class="compare-field-label">Focus for this period</div><div class="compare-field-value ${d.closing_one?'':'empty'}">${d.closing_one ? escHtml(d.closing_one) : '—'}</div></div>
+        <div class="compare-field"><div class="compare-field-label">Compassionate reminder</div><div class="compare-field-value ${d.closing_reminder?'':'empty'}">${d.closing_reminder ? escHtml(d.closing_reminder) : '—'}</div></div>
+      </div>`;
+      return html;
+    };
+
+    content.innerHTML = `
+      <div class="compare-grid">
+        <div class="compare-col">
+          <div class="compare-col-header">
+            <div class="compare-col-title">${escHtml(entA.title)}</div>
+            <div class="compare-col-date">${dateA}</div>
+          </div>
+          ${renderCol(dA)}
+        </div>
+        <div class="compare-col">
+          <div class="compare-col-header">
+            <div class="compare-col-title">${escHtml(entB.title)}</div>
+            <div class="compare-col-date">${dateB}</div>
+          </div>
+          ${renderCol(dB)}
+        </div>
+      </div>`;
+  } catch (err) {
+    content.innerHTML = `<div class="compare-loading">Could not load comparison: ${escHtml(err.message)}</div>`;
+  }
+};
+
+// ═══════════════════════════════════════════════════════
 // UI INTERACTIONS
 // ═══════════════════════════════════════════════════════
 window.toggleTag = function(btn) {
@@ -1541,6 +1945,7 @@ async function loadSaved() {
 function renderSaved() {
   const section = document.getElementById('savedSection');
   const list    = document.getElementById('savedList');
+  const compareBtnWrap = document.getElementById('compareGoalsBtnWrap');
   if (!S.saved.length) { section.style.display = 'none'; return; }
   section.style.display = 'block';
   list.innerHTML = S.saved.map(e => {
@@ -1555,6 +1960,9 @@ function renderSaved() {
       </div>
     `;
   }).join('');
+  // Show compare button only when ≥2 goals worksheets are saved
+  const goalsCount = S.saved.filter(s => s.type === 'goals').length;
+  compareBtnWrap.style.display = goalsCount >= 2 ? 'block' : 'none';
 }
 
 // ═══════════════════════════════════════════════════════
