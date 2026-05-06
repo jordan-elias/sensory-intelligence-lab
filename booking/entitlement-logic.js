@@ -1,8 +1,7 @@
 /**
  * booking/entitlement-logic.js
  *
- * Standalone entitlement helper. Can be imported by the booking page
- * or used in server-side functions.
+ * Standalone entitlement helper. Imported by booking/index.html.
  *
  * Usage:
  *   import { getBookingEntitlement } from '/booking/entitlement-logic.js';
@@ -43,15 +42,15 @@ export async function getBookingEntitlement(supabase, userId) {
 
   if (profileErr) throw new Error('Could not load profile: ' + profileErr.message);
 
-  const tier   = profile.subscription_tier ?? 'free';
+  const tier   = profile.subscription_tier   ?? 'free';
   const status = profile.subscription_status ?? 'free';
-  const isBeta = profile.is_beta ?? false;
+  const isBeta = profile.is_beta             ?? false;
 
   // Active means the subscription is current (not lapsed / canceled / past_due)
   const isActive = status === 'active' || status === 'trialing';
 
   // Beta users get lab-level tool access but no included sessions —
-  // they must pay for video sessions like any free/lab user.
+  // they must book sessions like any free/lab user.
   // So for booking purposes, beta is treated the same as 'lab' tier.
   const effectiveTier = isBeta && !isActive ? 'lab' : tier;
 
@@ -105,16 +104,17 @@ export async function getBookingEntitlement(supabase, userId) {
     sessionsRemaining: 0,
     canBookIncluded:   false,
 
-    // Paid single session always available to anyone via Cal.com
-    canBookPaid: true,
+    // Single paid session — always bookable via Cal.com (Cal handles payment)
+    canBookSingle: true,
 
-    // Upgrade hint for UI
-    showUpgradeNudge: false,
+    // Upgrade hints for UI
+    showUpgradeToCall1: false,
+    showUpgradeToCall2: false,
   };
 
-  // If subscription is not active, treat as free for session purposes
+  // If subscription is not active, suggest upgrading
   if (!isActive) {
-    ent.showUpgradeNudge = true;
+    ent.showUpgradeToCall1 = true;
     return ent;
   }
 
@@ -122,9 +122,9 @@ export async function getBookingEntitlement(supabase, userId) {
   switch (effectiveTier) {
 
     case 'lab':
-      // Lab plan — no included sessions, suggest upgrade
-      ent.sessionsIncluded   = 0;
-      ent.showUpgradeNudge   = true;
+      // Lab plan — no included sessions, suggest upgrade to call1
+      ent.sessionsIncluded    = 0;
+      ent.showUpgradeToCall1  = true;
       break;
 
     case 'call1':
@@ -133,6 +133,7 @@ export async function getBookingEntitlement(supabase, userId) {
       ent.sessionsUsed      = Math.min(subscriberSessionsUsed, 1);
       ent.sessionsRemaining = Math.max(0, 1 - subscriberSessionsUsed);
       ent.canBookIncluded   = subscriberSessionsUsed < 1;
+      ent.showUpgradeToCall2 = true;
       break;
 
     case 'call2':
@@ -145,11 +146,41 @@ export async function getBookingEntitlement(supabase, userId) {
 
     default:
       // Free tier
-      ent.showUpgradeNudge = true;
+      ent.showUpgradeToCall1 = true;
       break;
   }
 
   return ent;
+}
+
+/**
+ * Fetch upcoming scheduled bookings for a user.
+ *
+ * Returns bookings with scheduled_at in the future, ordered ascending.
+ * Includes all event types (intro, session, subscriber-session).
+ *
+ * @param {import('@supabase/supabase-js').SupabaseClient} supabase
+ * @param {string} userId
+ * @returns {Promise<UpcomingBooking[]>}
+ */
+export async function getUpcomingBookings(supabase, userId) {
+  const now = new Date().toISOString();
+
+  const { data, error } = await supabase
+    .from('bookings')
+    .select('id, event_type, scheduled_at, completed_at, cal_event_id, status')
+    .eq('user_id', userId)
+    .eq('status', 'scheduled')
+    .gt('scheduled_at', now)
+    .order('scheduled_at', { ascending: true })
+    .limit(5);
+
+  if (error) {
+    console.warn('Could not load upcoming bookings:', error.message);
+    return [];
+  }
+
+  return data || [];
 }
 
 /**
@@ -166,6 +197,17 @@ export async function getBookingEntitlement(supabase, userId) {
  * @property {number}       sessionsUsed
  * @property {number}       sessionsRemaining
  * @property {boolean}      canBookIncluded
- * @property {boolean}      canBookPaid
- * @property {boolean}      showUpgradeNudge
+ * @property {boolean}      canBookSingle
+ * @property {boolean}      showUpgradeToCall1
+ * @property {boolean}      showUpgradeToCall2
+ */
+
+/**
+ * @typedef {Object} UpcomingBooking
+ * @property {string}  id
+ * @property {string}  event_type
+ * @property {string}  scheduled_at
+ * @property {string}  completed_at
+ * @property {string}  cal_event_id
+ * @property {string}  status
  */
