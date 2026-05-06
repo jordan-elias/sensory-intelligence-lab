@@ -1352,7 +1352,7 @@ function openNotePicker(stepIdx, padEl) {
   // Off button
   const offBtn = document.createElement('div');
   offBtn.className = 'note-picker-off';
-  offBtn.textContent = '✕ turn off';
+  offBtn.textContent = 'turn off';
   offBtn.addEventListener('click', () => {
     loops[editingLoop][activeTrack][stepIdx] = null;
     closePicker();
