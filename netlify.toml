@@ -307,3 +307,11 @@
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+
+
+# This schedules send-session-reminders to run at the top of every hour.
+ 
+[functions."send-session-reminders"]
+  schedule = "0 * * * *"
+ 
+
