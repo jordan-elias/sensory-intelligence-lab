@@ -153,6 +153,158 @@
     }
     .ph p { font-size: .9rem; color: var(--muted); }
 
+    /* ══════════════════════════════════════
+       UPCOMING SESSIONS
+    ══════════════════════════════════════ */
+    .upcoming-section {
+      margin-bottom: 2.25rem;
+    }
+
+    .upcoming-section .section-label {
+      margin-bottom: .75rem;
+    }
+
+    .upcoming-empty {
+      padding: 1rem 1.25rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-size: .82rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .upcoming-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      border: 1px solid var(--border);
+    }
+
+    .upcoming-item {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      padding: .9rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      flex-wrap: wrap;
+    }
+
+    .upcoming-item:last-child {
+      border-bottom: none;
+    }
+
+    .upcoming-item__date-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      flex-shrink: 0;
+      text-align: center;
+    }
+
+    .upcoming-item__day {
+      font-family: var(--font-heading);
+      font-size: 1.35rem;
+      font-weight: 600;
+      line-height: 1;
+      color: var(--accent);
+    }
+
+    .upcoming-item__month {
+      font-family: var(--font-heading);
+      font-size: .6rem;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: .15rem;
+    }
+
+    .upcoming-item__divider {
+      width: 1px;
+      height: 36px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    .upcoming-item__details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .upcoming-item__type {
+      font-family: var(--font-heading);
+      font-size: .82rem;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -.01em;
+    }
+
+    .upcoming-item__time {
+      font-size: .78rem;
+      color: var(--muted);
+      margin-top: .15rem;
+    }
+
+    .upcoming-item__duration {
+      font-size: .72rem;
+      color: var(--muted);
+      margin-top: .1rem;
+    }
+
+    .upcoming-item__action {
+      flex-shrink: 0;
+    }
+
+    .upcoming-item__link {
+      font-family: var(--font-heading);
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: -.01em;
+      padding: .4rem .9rem;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--muted);
+      text-decoration: none;
+      display: inline-block;
+      transition: border-color .15s, color .15s;
+      white-space: nowrap;
+    }
+
+    .upcoming-item__link:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .upcoming-item__badge {
+      display: inline-block;
+      font-family: var(--font-heading);
+      font-size: .58rem;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: .18rem .5rem;
+      border: 1px solid currentColor;
+      margin-left: .5rem;
+      vertical-align: middle;
+      position: relative;
+      top: -.05rem;
+    }
+
+    .badge-intro      { color: var(--muted); border-color: var(--border); }
+    .badge-session    { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
+    .badge-subscriber { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
+
+    @media (max-width: 520px) {
+      .upcoming-item { gap: .85rem; }
+      .upcoming-item__divider { display: none; }
+      .upcoming-item__action { width: 100%; }
+      .upcoming-item__link { width: 100%; text-align: center; }
+    }
+
     /* ── Invitation block ── */
     .invitation-block {
       margin-bottom: 2.25rem;
@@ -214,10 +366,10 @@
       margin-bottom: 1.25rem; display: none;
     }
     .msg.show { display: block; }
-    .msg.error   { background: var(--error-bg);   border-left: 3px solid var(--error);   color: var(--error);   }
-    .msg.warning { background: var(--warning-bg);  border-left: 3px solid var(--warning);  color: var(--warning); }
-    .msg.info    { background: var(--accent-light); border-left: 3px solid var(--accent);  color: var(--accent);  }
-    .msg.success { background: var(--accent-light); border-left: 3px solid var(--accent);  color: var(--accent-hover); }
+    .msg.error   { background: var(--error-bg);    border-left: 3px solid var(--error);   color: var(--error);         }
+    .msg.warning { background: var(--warning-bg);  border-left: 3px solid var(--warning); color: var(--warning);       }
+    .msg.info    { background: var(--accent-light); border-left: 3px solid var(--accent); color: var(--accent);        }
+    .msg.success { background: var(--accent-light); border-left: 3px solid var(--accent); color: var(--accent-hover);  }
 
     /* ── Plan status card ── */
     .plan-card {
@@ -288,45 +440,8 @@
     }
     .cal-embed-wrap iframe { width: 100% !important; border: none !important; }
 
-    /* ── Single session — payment gate ── */
-    .session-payment-gate {
-      border: 1px solid var(--border);
-      padding: 2rem;
-      background: var(--surface);
-      margin-bottom: 1rem;
-    }
-    .session-payment-gate h4 {
-      font-family: var(--font-heading);
-      font-size: 1rem; font-weight: 600;
-      margin-bottom: .5rem;
-    }
-    .session-payment-gate p {
-      font-size: .85rem; color: var(--muted);
-      line-height: 1.65; margin-bottom: 1.25rem;
-    }
-    .session-payment-gate .policy-note {
-      font-size: .78rem;
-      color: var(--muted);
-      background: var(--bg);
-      border: 1px solid var(--border);
-      padding: .75rem 1rem;
-      margin-bottom: 1.25rem;
-      line-height: 1.6;
-    }
-    .session-payment-gate .policy-note strong { color: var(--text); font-weight: 500; }
-    .pay-btn {
-      font-family: var(--font-heading);
-      font-size: .875rem; font-weight: 600;
-      padding: .75rem 2rem;
-      border: none; background: var(--accent); color: white;
-      cursor: pointer; transition: background .15s; letter-spacing: -.01em;
-      display: inline-block;
-    }
-    .pay-btn:hover { background: var(--accent-hover); }
-    .pay-btn:disabled { opacity: .5; cursor: not-allowed; }
-
-    /* ── Session summary table ── */
-    .info-rows { border: 1px solid var(--border); margin-bottom: 2rem; }
+    /* ── Session info table ── */
+    .info-rows { border: 1px solid var(--border); margin-bottom: 1.25rem; }
     .info-row {
       display: flex; align-items: baseline;
       justify-content: space-between;
@@ -337,6 +452,18 @@
     .info-row:last-child { border-bottom: none; }
     .info-label { font-size: .78rem; font-weight: 500; color: var(--muted); flex-shrink: 0; }
     .info-val   { font-size: .875rem; color: var(--text); text-align: right; }
+
+    /* ── Single session note ── */
+    .single-session-note {
+      padding: .75rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-size: .78rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 1.25rem;
+    }
+    .single-session-note strong { color: var(--text); font-weight: 500; }
 
     /* ── Footer ── */
     footer {
@@ -385,6 +512,14 @@
     <p>Book a one-to-one video session with Jordan.</p>
   </div>
 
+  <!-- ══════════════════════════════════════
+       UPCOMING SESSIONS
+  ══════════════════════════════════════ -->
+  <div class="upcoming-section" id="upcomingSection" style="display:none">
+    <p class="section-label">Your upcoming sessions</p>
+    <div id="upcomingList"></div>
+  </div>
+
   <!-- ── Invitation block ── -->
   <div class="invitation-block">
     <h3>Want to talk?</h3>
@@ -398,6 +533,7 @@
   </div>
 
   <div id="pageMsg" class="msg"></div>
+
   <div id="bookingRoot">
     <div class="loading-block">
       <div class="loading-spinner"></div>
@@ -414,6 +550,8 @@
 </footer>
 
 <script type="module">
+
+import { getBookingEntitlement, getUpcomingBookings } from '/booking/entitlement-logic.js';
 
 // ─────────────────────────────────────────────────────────
 // HEADER BEHAVIOUR
@@ -470,134 +608,115 @@ function fmtDate(iso) {
   });
 }
 
-function periodStartFromEnd(periodEnd) {
-  const d = new Date(periodEnd);
-  return new Date(d.getFullYear(), d.getMonth() - 1, d.getDate());
+function fmtTime(iso) {
+  if (!iso) return '';
+  return new Date(iso).toLocaleTimeString('en-GB', {
+    hour: '2-digit', minute: '2-digit',
+    timeZoneName: 'short',
+  });
 }
 
-// ─────────────────────────────────────────────────────────
-// SINGLE SESSION STRIPE CHECKOUT
-// ─────────────────────────────────────────────────────────
-async function checkoutSingleSession(btn) {
-  const sb   = window._supabase;
-  const user = window._currentUser;
-  if (!sb || !user) { showPageMsg('Please sign in first.', 'error'); return; }
-
-  if (btn) { btn.disabled = true; btn.textContent = 'Redirecting to payment…'; }
-
-  try {
-    const { data: { session } } = await sb.auth.getSession();
-    const res = await fetch('/.netlify/functions/create-single-session-checkout', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
-      },
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(text || 'Payment setup failed.');
-    }
-
-    const { url } = await res.json();
-    window.location.href = url;
-
-  } catch (err) {
-    showPageMsg(err.message || 'Could not start payment. Please try again.', 'error');
-    if (btn) { btn.disabled = false; btn.textContent = 'Pay €75 and book'; }
-  }
-}
-
-// ─────────────────────────────────────────────────────────
-// ENTITLEMENT LOGIC
-// ─────────────────────────────────────────────────────────
-async function getEntitlement(supabase, userId) {
-
-  const { data: profile, error: profileErr } = await supabase
-    .from('profiles')
-    .select('subscription_tier, subscription_status, current_period_end, intro_call_used, is_beta, email')
-    .eq('id', userId)
-    .single();
-
-  if (profileErr) throw new Error('Could not load your profile: ' + profileErr.message);
-
-  const tier   = profile.subscription_tier ?? 'free';
-  const status = profile.subscription_status ?? 'free';
-  const isBeta = profile.is_beta ?? false;
-
-  const isActive = status === 'active' || status === 'trialing';
-  const effectiveTier = isBeta && !isActive ? 'lab' : tier;
-
-  const periodEnd   = profile.current_period_end
-    ? new Date(profile.current_period_end)
-    : null;
-  const periodStart = periodEnd ? periodStartFromEnd(periodEnd) : null;
-
-  let subscriberSessionsUsed = 0;
-  if (isActive && periodStart && periodEnd) {
-    const { data: bookings } = await supabase
-      .from('bookings')
-      .select('event_type, status, scheduled_at')
-      .eq('user_id', userId)
-      .gte('scheduled_at', periodStart.toISOString())
-      .lte('scheduled_at', periodEnd.toISOString())
-      .in('status', ['scheduled', 'completed']);
-
-    subscriberSessionsUsed = (bookings || []).filter(
-      b => b.event_type === 'subscriber-session'
-    ).length;
-  }
-
-  const introUsed = !!profile.intro_call_used;
-
-  const e = {
-    tier: effectiveTier,
-    isActive,
-    status,
-    isBeta,
-    email: profile.email || '',
-    periodStart,
-    periodEnd,
-    canBookIntro: !introUsed,
-    sessionsIncluded:  0,
-    sessionsUsed:      subscriberSessionsUsed,
-    sessionsRemaining: 0,
-    canBookIncluded:   false,
-    canBookPaid: true,       // single paid session is always available
-    showUpgradeToCall1: false,
-    showUpgradeToCall2: false,
+function fmtDay(iso) {
+  if (!iso) return { day: '–', month: '–' };
+  const d = new Date(iso);
+  return {
+    day:   d.toLocaleDateString('en-GB', { day: 'numeric' }),
+    month: d.toLocaleDateString('en-GB', { month: 'short' }).toUpperCase(),
   };
+}
 
-  if (!isActive) {
-    e.showUpgradeToCall1 = true;
-    return e;
+function sessionDuration(eventType) {
+  if (eventType === 'intro') return '30 minutes';
+  return '50 minutes';
+}
+
+function sessionTypeLabel(eventType) {
+  switch (eventType) {
+    case 'intro':              return 'Introductory session';
+    case 'subscriber-session': return 'Monthly session';
+    case 'session':            return 'Individual session';
+    default:                   return 'Session';
+  }
+}
+
+function sessionBadgeClass(eventType) {
+  switch (eventType) {
+    case 'intro':              return 'badge-intro';
+    case 'subscriber-session': return 'badge-subscriber';
+    case 'session':            return 'badge-session';
+    default:                   return 'badge-intro';
+  }
+}
+
+/**
+ * Build a Cal.com booking management URL.
+ * Cal.com doesn't expose per-booking links via the API without OAuth,
+ * so we link to the user's upcoming bookings page on app.cal.com.
+ * If a cal_event_id (uid) is available we can deep-link to that booking.
+ */
+function calBookingUrl(calEventId) {
+  if (calEventId) {
+    // Cal.com booking detail page — works for the booker if they're signed in to Cal
+    return `https://app.cal.com/booking/${calEventId}`;
+  }
+  // Fallback: general upcoming bookings page
+  return 'https://app.cal.com/bookings/upcoming';
+}
+
+// ─────────────────────────────────────────────────────────
+// RENDER UPCOMING SESSIONS
+// ─────────────────────────────────────────────────────────
+function renderUpcoming(bookings) {
+  const section = document.getElementById('upcomingSection');
+  const list    = document.getElementById('upcomingList');
+
+  if (!bookings || bookings.length === 0) {
+    // Keep section hidden — no upcoming sessions, no noise
+    return;
   }
 
-  switch (effectiveTier) {
-    case 'lab':
-      e.sessionsIncluded   = 0;
-      e.showUpgradeToCall1 = true;
-      break;
-    case 'call1':
-      e.sessionsIncluded  = 1;
-      e.sessionsUsed      = Math.min(subscriberSessionsUsed, 1);
-      e.sessionsRemaining = Math.max(0, 1 - subscriberSessionsUsed);
-      e.canBookIncluded   = subscriberSessionsUsed < 1;
-      e.showUpgradeToCall2 = true;
-      break;
-    case 'call2':
-      e.sessionsIncluded  = 2;
-      e.sessionsUsed      = Math.min(subscriberSessionsUsed, 2);
-      e.sessionsRemaining = Math.max(0, 2 - subscriberSessionsUsed);
-      e.canBookIncluded   = subscriberSessionsUsed < 2;
-      break;
-    default:
-      e.showUpgradeToCall1 = true;
-      break;
-  }
+  section.style.display = 'block';
 
-  return e;
+  const ul = document.createElement('div');
+  ul.className = 'upcoming-list';
+
+  bookings.forEach(booking => {
+    const { day, month } = fmtDay(booking.scheduled_at);
+    const timeStr        = fmtTime(booking.scheduled_at);
+    const endTimeStr     = booking.completed_at ? fmtTime(booking.completed_at) : '';
+    const typeLabel      = sessionTypeLabel(booking.event_type);
+    const badgeClass     = sessionBadgeClass(booking.event_type);
+    const duration       = sessionDuration(booking.event_type);
+    const bookingUrl     = calBookingUrl(booking.cal_event_id);
+
+    const endDisplay = endTimeStr ? ` – ${endTimeStr}` : '';
+
+    const item = document.createElement('div');
+    item.className = 'upcoming-item';
+    item.innerHTML = `
+      <div class="upcoming-item__date-block">
+        <div class="upcoming-item__day">${day}</div>
+        <div class="upcoming-item__month">${month}</div>
+      </div>
+      <div class="upcoming-item__divider"></div>
+      <div class="upcoming-item__details">
+        <div class="upcoming-item__type">
+          ${typeLabel}
+          <span class="upcoming-item__badge ${badgeClass}">${booking.event_type === 'subscriber-session' ? 'Included' : booking.event_type === 'intro' ? 'Free' : 'Paid'}</span>
+        </div>
+        <div class="upcoming-item__time">${timeStr}${endDisplay}</div>
+        <div class="upcoming-item__duration">${duration} · Video call</div>
+      </div>
+      <div class="upcoming-item__action">
+        <a class="upcoming-item__link" href="${bookingUrl}" target="_blank" rel="noopener">
+          View booking →
+        </a>
+      </div>
+    `;
+    ul.appendChild(item);
+  });
+
+  list.appendChild(ul);
 }
 
 // ─────────────────────────────────────────────────────────
@@ -612,9 +731,9 @@ const PLAN_LABELS = {
 };
 
 // ─────────────────────────────────────────────────────────
-// RENDER
+// RENDER BOOKING OPTIONS
 // ─────────────────────────────────────────────────────────
-function render(ent, sessionJustPaid) {
+function render(ent) {
   const root = document.getElementById('bookingRoot');
   root.innerHTML = '';
 
@@ -647,15 +766,20 @@ function render(ent, sessionJustPaid) {
   `;
   root.appendChild(planCard);
 
-  // ── Upgrade nudge ──
-  if (ent.showUpgradeToCall1 || ent.showUpgradeToCall2) {
+  // ── Upgrade nudges ──
+  if (ent.showUpgradeToCall1) {
     const nudge = document.createElement('div');
     nudge.className = 'upgrade-nudge';
-    const upgradeMsg = ent.showUpgradeToCall2
-      ? 'Upgrade to <strong>Lab + 2 sessions</strong> to include two video sessions each month.'
-      : 'Add a monthly video session by upgrading to <strong>Lab + 1 session</strong>.';
     nudge.innerHTML = `
-      <p>${upgradeMsg}</p>
+      <p>Add a monthly video session by upgrading to <strong>Lab + 1 session</strong>.</p>
+      <a class="nudge-btn" href="/subscribe/">View plans</a>
+    `;
+    root.appendChild(nudge);
+  } else if (ent.showUpgradeToCall2) {
+    const nudge = document.createElement('div');
+    nudge.className = 'upgrade-nudge';
+    nudge.innerHTML = `
+      <p>Upgrade to <strong>Lab + 2 sessions</strong> to include two video sessions each month.</p>
       <a class="nudge-btn" href="/subscribe/">View plans</a>
     `;
     root.appendChild(nudge);
@@ -667,31 +791,31 @@ function render(ent, sessionJustPaid) {
   // Intro (one-time, available to everyone who hasn't used it)
   if (ent.canBookIntro) {
     sections.push({
-      id:       'cal-intro',
-      label:    'Introductory Session',
-      meta:     'One-time · Complimentary',
+      id:        'cal-intro',
+      label:     'Introductory Session',
+      meta:      'One-time · Complimentary',
       metaClass: 'included',
-      calLink:  'jordan-elias/intro',
-      ns:       'intro',
+      calLink:   'jordan-elias/intro',
+      ns:        'intro',
       rows: [
         { label: 'Type',     val: 'Introductory call' },
         { label: 'Cost',     val: 'Complimentary' },
         { label: 'Duration', val: '30 minutes' },
         { label: 'Format',   val: 'Video call' },
       ],
-      useCal: true,
+      note: null,
     });
   }
 
   // Included subscriber session
   if (ent.canBookIncluded) {
     sections.push({
-      id:       'cal-subscriber',
-      label:    'Monthly Session',
-      meta:     `Included in your plan · ${ent.sessionsRemaining} remaining`,
+      id:        'cal-subscriber',
+      label:     'Monthly Session',
+      meta:      `Included in your plan · ${ent.sessionsRemaining} remaining`,
       metaClass: 'included',
-      calLink:  'jordan-elias/subscriber-session',
-      ns:       'subscriber-session',
+      calLink:   'jordan-elias/subscriber-session',
+      ns:        'subscriber-session',
       rows: [
         { label: 'Type',      val: 'Subscriber session' },
         { label: 'Cost',      val: 'Included in plan' },
@@ -699,35 +823,35 @@ function render(ent, sessionJustPaid) {
         { label: 'Duration',  val: '50 minutes' },
         { label: 'Format',    val: 'Video call' },
       ],
-      useCal: true,
+      note: null,
     });
   } else if (ent.sessionsIncluded > 0 && !ent.canBookIncluded) {
+    // Used all included sessions — show info message, still offer paid below
     const note = document.createElement('div');
     note.className = 'msg info show';
     note.style.marginBottom = '2rem';
-    note.textContent = `You've used all ${ent.sessionsIncluded} included session${ent.sessionsIncluded > 1 ? 's' : ''} for this billing period. Your next session will be available after ${fmtDate(ent.periodEnd)}.`;
+    note.textContent = `You've used all ${ent.sessionsIncluded} included session${ent.sessionsIncluded > 1 ? 's' : ''} for this billing period. Your next included session will be available after ${fmtDate(ent.periodEnd)}.`;
     root.appendChild(note);
   }
 
-  // Single paid session — always available, requires Stripe payment
+  // Single paid session — always available, Cal.com handles payment at booking
   sections.push({
-    id:       'single-session',
-    label:    'Single Session',
-    meta:     '€75 · Book anytime',
+    id:        'cal-session',
+    label:     'Single Session',
+    meta:      '€75 · Book anytime',
     metaClass: '',
-    calLink:  'jordan-elias/session',
-    ns:       'session',
+    calLink:   'jordan-elias/session',
+    ns:        'session',
     rows: [
       { label: 'Type',     val: 'Individual session' },
       { label: 'Cost',     val: '€75' },
       { label: 'Duration', val: '50 minutes' },
       { label: 'Format',   val: 'Video call' },
     ],
-    useCal: sessionJustPaid,  // show Cal embed only if payment just completed
-    usePaymentGate: !sessionJustPaid,
+    note: 'Payment is collected at the time of booking via Cal.com. Full refund if you cancel more than 48 hours before your appointment. Within 48 hours, sessions can be rescheduled but are non-refundable.',
   });
 
-  // Build DOM
+  // ── Build DOM for each section ──
   sections.forEach(sec => {
     const wrap = document.createElement('div');
     wrap.className = 'cal-section';
@@ -750,46 +874,34 @@ function render(ent, sessionJustPaid) {
     });
     wrap.appendChild(infoRows);
 
-    if (sec.usePaymentGate) {
-      // Show payment gate instead of Cal embed
-      const gate = document.createElement('div');
-      gate.className = 'session-payment-gate';
-      gate.innerHTML = `
-        <h4>Book a single session</h4>
-        <p>Pay securely via Stripe, then choose your time on the next screen. You'll receive a confirmation and calendar invite by email.</p>
-        <div class="policy-note">
-          <strong>Cancellation policy:</strong> Full refund if you cancel more than 48 hours before your appointment.
-          Within 48 hours, sessions can be rescheduled but are non-refundable.
-          To reschedule or cancel, reply to your confirmation email.
-        </div>
-        <button class="pay-btn" id="singleSessionPayBtn">Pay €75 and book</button>
-      `;
-      wrap.appendChild(gate);
-
-      // Wire up payment button after DOM insertion
-      setTimeout(() => {
-        const btn = document.getElementById('singleSessionPayBtn');
-        if (btn) btn.addEventListener('click', () => checkoutSingleSession(btn));
-      }, 0);
-
-    } else {
-      // Show Cal.com embed
-      const calWrap = document.createElement('div');
-      calWrap.className = 'cal-embed-wrap';
-      calWrap.id = sec.id;
-      wrap.appendChild(calWrap);
+    if (sec.note) {
+      const noteEl = document.createElement('div');
+      noteEl.className = 'single-session-note';
+      noteEl.innerHTML = `<strong>Cancellation policy:</strong> ${sec.note}`;
+      wrap.appendChild(noteEl);
     }
+
+    // Cal.com embed
+    const calWrap = document.createElement('div');
+    calWrap.className = 'cal-embed-wrap';
+    calWrap.id = sec.id;
+    wrap.appendChild(calWrap);
 
     root.appendChild(wrap);
   });
 
-  // Mount Cal.com embeds for sections that need them
-  loadAndMountCal(sections.filter(s => s.useCal));
+  // Mount all Cal.com embeds
+  loadAndMountCal(sections);
 }
 
 // ─────────────────────────────────────────────────────────
 // CAL.COM LOADING + MOUNTING
 // ─────────────────────────────────────────────────────────
+
+// Track which namespaces have already been initialised to avoid
+// double-mounting if the page re-renders.
+const _calInitialised = new Set();
+
 function loadAndMountCal(sections) {
   if (!sections.length) return;
 
@@ -816,6 +928,9 @@ function loadAndMountCal(sections) {
 
 function mountCalSections(sections) {
   sections.forEach(sec => {
+    // Skip if already initialised (prevents duplicate embeds on re-render)
+    if (_calInitialised.has(sec.ns)) return;
+
     const el = document.getElementById(sec.id);
     if (!el) return;
 
@@ -832,6 +947,8 @@ function mountCalSections(sections) {
       layout: 'month_view',
       hideEventTypeDetails: false,
     });
+
+    _calInitialised.add(sec.ns);
   });
 }
 
@@ -852,27 +969,23 @@ onAuthReady(async () => {
     return;
   }
 
-  // Check URL params from Stripe redirect
+  // Check URL params (kept for future redirects from other pages)
   const params = new URLSearchParams(window.location.search);
-  const sessionJustPaid   = params.get('session_paid') === 'true';
-  const sessionCanceled   = params.get('session_canceled') === 'true';
-
-  if (sessionJustPaid) {
-    showPageMsg(
-      'Payment received — please choose a date and time below to complete your booking.',
-      'success'
-    );
+  if (params.has('canceled')) {
+    showPageMsg('Your booking was cancelled — no charge was made.', 'info');
     window.history.replaceState({}, '', window.location.pathname);
   }
 
-  if (sessionCanceled) {
-    showPageMsg('Payment was cancelled — no charge was made.', 'info');
-    window.history.replaceState({}, '', window.location.pathname);
-  }
-
+  // Load upcoming bookings and entitlement in parallel
   try {
-    const ent = await getEntitlement(supabase, user.id);
-    render(ent, sessionJustPaid);
+    const [upcoming, ent] = await Promise.all([
+      getUpcomingBookings(supabase, user.id),
+      getBookingEntitlement(supabase, user.id),
+    ]);
+
+    renderUpcoming(upcoming);
+    render(ent);
+
   } catch (err) {
     console.error('Booking page error:', err);
     document.getElementById('bookingRoot').innerHTML = '';
