@@ -13,7 +13,6 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
 
-
   <script src="/dashboard/auth-guard.js" type="module"></script>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
@@ -59,27 +58,12 @@
     .bc a:hover { color: var(--accent); text-decoration: underline; }
 
     /* ── Main ── */
-    main {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 2.5rem 1.5rem 5rem;
-      flex: 1;
-      width: 100%;
-    }
+    main { max-width: 1000px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; flex: 1; width: 100%; }
     @media (max-width: 600px) { main { padding: 1.5rem 1rem 3rem; } }
 
     /* ── Page header ── */
-    .ph {
-      margin-bottom: 2.5rem;
-      padding-bottom: 2rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .ph h2 {
-      font-family: var(--font-heading);
-      font-size: 2rem; font-weight: 600;
-      letter-spacing: -.02em; line-height: 1.2;
-      margin-bottom: .5rem;
-    }
+    .ph { margin-bottom: 2.5rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border); }
+    .ph h2 { font-family: var(--font-heading); font-size: 2rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; margin-bottom: .5rem; }
     .ph p { font-size: .9rem; color: var(--muted); max-width: 52ch; line-height: 1.7; }
 
     /* ── Current plan banner ── */
@@ -122,36 +106,22 @@
 
     /* ── Billing toggle ── */
     .billing-toggle {
-      display: flex;
-      align-items: center;
-      gap: 1px;
-      background: var(--border);
-      border: 1px solid var(--border);
-      width: fit-content;
-      margin-bottom: 2rem;
+      display: flex; align-items: center; gap: 1px;
+      background: var(--border); border: 1px solid var(--border);
+      width: fit-content; margin-bottom: 2rem;
     }
     .billing-btn {
       font-family: var(--font-heading);
       font-size: .8rem; font-weight: 600;
-      padding: .55rem 1.5rem;
-      border: none;
-      background: var(--bg);
-      color: var(--muted);
-      cursor: pointer;
-      transition: all .15s;
-      letter-spacing: -.01em;
-      white-space: nowrap;
+      padding: .55rem 1.5rem; border: none;
+      background: var(--bg); color: var(--muted);
+      cursor: pointer; transition: all .15s;
+      letter-spacing: -.01em; white-space: nowrap;
     }
     .billing-btn.active { background: var(--accent); color: white; }
     .billing-btn:not(.active):hover { background: var(--accent-light); color: var(--accent); }
 
-    .yearly-note {
-      font-size: .78rem;
-      color: var(--accent);
-      font-weight: 500;
-      margin-bottom: 1.75rem;
-      display: none;
-    }
+    .yearly-note { font-size: .78rem; color: var(--accent); font-weight: 500; margin-bottom: 1.75rem; display: none; }
     .yearly-note.visible { display: block; }
 
     /* ── Plan grid ── */
@@ -163,191 +133,160 @@
       border: 1px solid var(--border);
       margin-bottom: 3rem;
     }
+    @media (max-width: 900px) { .plan-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 540px) { .plan-grid { grid-template-columns: 1fr; } }
 
-    @media (max-width: 900px) {
-      .plan-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 540px) {
-      .plan-grid { grid-template-columns: 1fr; }
-    }
+    .plan-card { background: var(--bg); padding: 1.75rem 1.5rem; display: flex; flex-direction: column; position: relative; }
+    .plan-card.highlighted { background: var(--surface); }
+    .plan-card.is-current { background: var(--accent-light); }
 
-    .plan-card {
-      background: var(--bg);
-      padding: 1.75rem 1.5rem;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
-
-    .plan-card.highlighted {
-      background: var(--surface);
-    }
-
-    .plan-card.is-current {
-      background: var(--accent-light);
-    }
+    /* Capacity-full state */
+    .plan-card.is-full { background: var(--surface); opacity: .85; }
 
     .plan-badge {
       font-family: var(--font-heading);
       font-size: .58rem; font-weight: 600;
       letter-spacing: .1em; text-transform: uppercase;
-      padding: .2rem .5rem;
-      border: 1px solid currentColor;
-      width: fit-content;
-      margin-bottom: 1rem;
+      padding: .2rem .5rem; border: 1px solid currentColor;
+      width: fit-content; margin-bottom: 1rem;
     }
-    .plan-badge.free-badge    { color: var(--muted); border-color: var(--border); }
+    .plan-badge.free-badge    { color: var(--muted);  border-color: var(--border); }
     .plan-badge.lab-badge     { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
     .plan-badge.call1-badge   { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
     .plan-badge.call2-badge   { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
     .plan-badge.current-badge { background: var(--accent); color: white; border-color: var(--accent); }
+    .plan-badge.full-badge    { color: var(--muted);  border-color: var(--border); background: var(--surface); }
 
-    .plan-name {
-      font-family: var(--font-heading);
-      font-size: 1rem; font-weight: 600;
-      letter-spacing: -.01em;
-      margin-bottom: .35rem;
-    }
+    .plan-name { font-family: var(--font-heading); font-size: 1rem; font-weight: 600; letter-spacing: -.01em; margin-bottom: .35rem; }
+    .plan-tagline { font-size: .78rem; color: var(--muted); line-height: 1.55; margin-bottom: 1.25rem; min-height: 2.5rem; }
 
-    .plan-tagline {
-      font-size: .78rem;
-      color: var(--muted);
-      line-height: 1.55;
-      margin-bottom: 1.25rem;
-      min-height: 2.5rem;
-    }
-
-    .plan-price {
-      margin-bottom: 1.5rem;
-      border-top: 1px solid var(--border);
-      padding-top: 1.1rem;
-    }
-    .plan-price .amount {
-      font-family: var(--font-heading);
-      font-size: 1.6rem; font-weight: 600;
-      letter-spacing: -.03em;
-      color: var(--text);
-    }
-    .plan-price .period {
-      font-size: .78rem;
-      color: var(--muted);
-      margin-left: .2rem;
-    }
-    .plan-price .yearly-equiv {
-      font-size: .7rem;
-      color: var(--muted);
-      margin-top: .2rem;
-      display: none;
-    }
+    .plan-price { margin-bottom: 1.5rem; border-top: 1px solid var(--border); padding-top: 1.1rem; }
+    .plan-price .amount { font-family: var(--font-heading); font-size: 1.6rem; font-weight: 600; letter-spacing: -.03em; color: var(--text); }
+    .plan-price .period { font-size: .78rem; color: var(--muted); margin-left: .2rem; }
+    .plan-price .yearly-equiv { font-size: .7rem; color: var(--muted); margin-top: .2rem; display: none; }
     .yearly-equiv.visible { display: block; }
-    .plan-price .saving {
-      display: inline-block;
-      font-size: .65rem; font-weight: 600;
-      color: var(--accent);
-      background: var(--accent-light);
-      padding: .1rem .4rem;
-      margin-top: .3rem;
-    }
+    .plan-price .saving { display: inline-block; font-size: .65rem; font-weight: 600; color: var(--accent); background: var(--accent-light); padding: .1rem .4rem; margin-top: .3rem; }
 
-    .plan-features {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: .55rem;
-      margin-bottom: 1.75rem;
-      flex: 1;
-    }
-    .plan-features li {
-      display: flex;
-      gap: .6rem;
-      font-size: .8rem;
-      line-height: 1.45;
-      color: var(--text);
-    }
-    .plan-features li::before {
-      content: '—';
-      color: var(--accent);
-      flex-shrink: 0;
-      font-weight: 500;
-    }
-    .plan-features li.muted-feature {
-      color: var(--muted);
-    }
-    .plan-features li.muted-feature::before {
-      color: var(--border);
-    }
+    .plan-features { list-style: none; display: flex; flex-direction: column; gap: .55rem; margin-bottom: 1.75rem; flex: 1; }
+    .plan-features li { display: flex; gap: .6rem; font-size: .8rem; line-height: 1.45; color: var(--text); }
+    .plan-features li::before { content: '—'; color: var(--accent); flex-shrink: 0; font-weight: 500; }
+    .plan-features li.muted-feature { color: var(--muted); }
+    .plan-features li.muted-feature::before { color: var(--border); }
 
     .plan-cta {
       font-family: var(--font-heading);
       font-size: .82rem; font-weight: 600;
-      padding: .72rem 1rem;
-      border: none;
-      cursor: pointer;
-      transition: all .15s;
-      letter-spacing: -.01em;
-      text-align: center;
-      width: 100%;
+      padding: .72rem 1rem; border: none; cursor: pointer;
+      transition: all .15s; letter-spacing: -.01em;
+      text-align: center; width: 100%;
     }
     .plan-cta.primary { background: var(--accent); color: white; }
     .plan-cta.primary:hover { background: var(--accent-hover); }
     .plan-cta.secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
     .plan-cta.secondary:hover { border-color: var(--accent); color: var(--accent); }
     .plan-cta.current-cta { background: var(--surface); color: var(--muted); border: 1px solid var(--border); cursor: default; }
+    .plan-cta.waitlist-cta { background: var(--surface); color: var(--muted); border: 1px solid var(--border); cursor: default; font-style: italic; }
     .plan-cta:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* Capacity notice inside a full card */
+    .capacity-notice {
+      font-size: .72rem;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: .75rem;
+      padding: .5rem .7rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
 
     /* ── Feature comparison table ── */
     .comparison-section { margin-bottom: 3rem; }
-
-    .comparison-table {
-      width: 100%;
-      border: 1px solid var(--border);
-      border-collapse: collapse;
-      font-size: .82rem;
-    }
-
-    .comparison-table th {
-      font-family: var(--font-heading);
-      font-size: .72rem; font-weight: 600;
-      letter-spacing: -.01em;
-      padding: .85rem 1rem;
-      text-align: left;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      border-right: 1px solid var(--border);
-    }
+    .comparison-table { width: 100%; border: 1px solid var(--border); border-collapse: collapse; font-size: .82rem; }
+    .comparison-table th { font-family: var(--font-heading); font-size: .72rem; font-weight: 600; letter-spacing: -.01em; padding: .85rem 1rem; text-align: left; background: var(--surface); border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); }
     .comparison-table th:last-child { border-right: none; }
     .comparison-table th.plan-col { text-align: center; }
-
-    .comparison-table td {
-      padding: .65rem 1rem;
-      border-bottom: 1px solid var(--border);
-      border-right: 1px solid var(--border);
-      vertical-align: middle;
-    }
+    .comparison-table td { padding: .65rem 1rem; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); vertical-align: middle; }
     .comparison-table td:last-child { border-right: none; }
     .comparison-table tr:last-child td { border-bottom: none; }
-
     .comparison-table .feature-name { font-weight: 500; color: var(--text); }
-    .comparison-table .feature-sub  { font-size: .72rem; color: var(--muted); margin-top: .1rem; }
+    .comparison-table .feature-sub { font-size: .72rem; color: var(--muted); margin-top: .1rem; }
     .comparison-table .check-col { text-align: center; }
+    .check   { color: var(--accent); font-weight: 600; font-size: .9rem; }
+    .cross   { color: var(--border); font-size: .9rem; }
+    .partial { color: var(--muted); font-size: .75rem; font-weight: 500; }
+    .comparison-table .row-group td { background: var(--surface); font-family: var(--font-heading); font-size: .6rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding: .5rem 1rem; }
+    @media (max-width: 680px) { .comparison-section { display: none; } }
 
-    .check    { color: var(--accent); font-weight: 600; font-size: .9rem; }
-    .cross    { color: var(--border); font-size: .9rem; }
-    .partial  { color: var(--muted); font-size: .75rem; font-weight: 500; }
+    /* ── About section ── */
+    .about-section {
+      margin-bottom: 3rem;
+      padding: 2.5rem 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .about-section .section-label { margin-bottom: 1.5rem; }
 
-    .comparison-table .row-group td {
-      background: var(--surface);
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: start;
+    }
+    @media (max-width: 680px) { .about-grid { grid-template-columns: 1fr; gap: 2rem; } }
+
+    .about-lead {
       font-family: var(--font-heading);
-      font-size: .6rem;
+      font-size: 1.25rem;
       font-weight: 600;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      padding: .5rem 1rem;
+      letter-spacing: -.02em;
+      line-height: 1.4;
+      color: var(--text);
+      margin-bottom: 1.25rem;
     }
 
-    @media (max-width: 680px) {
-      .comparison-section { display: none; }
+    .about-body {
+      font-size: .875rem;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+    .about-body p + p { margin-top: 1rem; }
+
+    .about-pillars {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .pillar {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+    .pillar-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--accent-light);
+      border: 1px solid #c0d9c8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .85rem;
+      flex-shrink: 0;
+      margin-top: .1rem;
+    }
+    .pillar-text {}
+    .pillar-title {
+      font-family: var(--font-heading);
+      font-size: .82rem;
+      font-weight: 600;
+      letter-spacing: -.01em;
+      color: var(--text);
+      margin-bottom: .2rem;
+    }
+    .pillar-desc {
+      font-size: .78rem;
+      color: var(--muted);
+      line-height: 1.6;
     }
 
     /* ── FAQ ── */
@@ -355,137 +294,46 @@
     .faq-list { display: flex; flex-direction: column; border: 1px solid var(--border); }
     .faq-item { border-bottom: 1px solid var(--border); }
     .faq-item:last-child { border-bottom: none; }
-    .faq-q {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: .9rem 1.1rem;
-      cursor: pointer;
-      user-select: none;
-      gap: 1rem;
-    }
+    .faq-q { display: flex; align-items: center; justify-content: space-between; padding: .9rem 1.1rem; cursor: pointer; user-select: none; gap: 1rem; }
     .faq-q:hover { background: var(--surface); }
     .faq-q-text { font-size: .85rem; font-weight: 500; color: var(--text); }
     .faq-icon { font-size: .8rem; color: var(--muted); flex-shrink: 0; transition: transform .2s; }
     .faq-item.open .faq-icon { transform: rotate(45deg); }
-    .faq-a {
-      max-height: 0; overflow: hidden;
-      transition: max-height .3s ease-out;
-      font-size: .83rem; color: var(--muted);
-      line-height: 1.7;
-    }
+    .faq-a { max-height: 0; overflow: hidden; transition: max-height .3s ease-out; font-size: .83rem; color: var(--muted); line-height: 1.7; }
     .faq-item.open .faq-a { max-height: 500px; }
     .faq-a-inner { padding: 0 1.1rem 1rem; }
 
     /* ── Message ── */
-    .msg {
-      padding: .75rem 1rem;
-      font-size: .82rem; line-height: 1.5;
-      margin-bottom: 1.25rem; display: none;
-    }
+    .msg { padding: .75rem 1rem; font-size: .82rem; line-height: 1.5; margin-bottom: 1.25rem; display: none; }
     .msg.show { display: block; }
     .msg.error   { background: var(--error-bg); border-left: 3px solid var(--error); color: var(--error); }
     .msg.success { background: var(--accent-light); border-left: 3px solid var(--accent); color: var(--accent); }
     .msg.info    { background: var(--accent-light); border-left: 3px solid var(--accent); color: var(--accent-hover); }
 
     /* ── Footer ── */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 1.25rem 1.5rem;
-      text-align: center; font-size: .78rem; color: var(--muted);
-    }
+    footer { border-top: 1px solid var(--border); padding: 1.25rem 1.5rem; text-align: center; font-size: .78rem; color: var(--muted); }
     footer a { color: var(--muted); text-decoration: none; }
     footer a:hover { color: var(--accent); text-decoration: underline; }
 
     /* ── Header ── */
-    .sil-header {
-      border-bottom: 1px solid var(--border);
-      padding: 0 1.5rem;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      left: 0;
-      right: 0;
-      background: var(--bg);
-      z-index: 100;
-      gap: 1rem;
-      width: 100%;
-    }
-    .sil-header__wordmark {
-      font-family: var(--font-heading);
-      font-size: 1rem;
-      font-weight: 600;
-      letter-spacing: -0.01em;
-      white-space: nowrap;
-      flex-shrink: 0;
-      text-decoration: none;
-      color: var(--text);
-    }
+    .sil-header { border-bottom: 1px solid var(--border); padding: 0 1.5rem; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; left: 0; right: 0; background: var(--bg); z-index: 100; gap: 1rem; width: 100%; }
+    .sil-header__wordmark { font-family: var(--font-heading); font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; flex-shrink: 0; text-decoration: none; color: var(--text); }
     .sil-header__wordmark:hover { color: var(--accent); }
-    .sil-header__nav {
-      display: flex;
-      gap: 0.25rem;
-      align-items: center;
-    }
-    .sil-header__nav a {
-      font-family: var(--font-body);
-      font-size: 0.8rem;
-      font-weight: 500;
-      text-decoration: none;
-      color: var(--muted);
-      transition: color 0.15s;
-      white-space: nowrap;
-      padding: 0.3rem 0.65rem;
-    }
+    .sil-header__nav { display: flex; gap: 0.25rem; align-items: center; }
+    .sil-header__nav a { font-family: var(--font-body); font-size: 0.8rem; font-weight: 500; text-decoration: none; color: var(--muted); transition: color 0.15s; white-space: nowrap; padding: 0.3rem 0.65rem; }
     .sil-header__nav a:hover { color: var(--text); }
     .sil-header__nav a.sil-active { color: var(--accent); font-weight: 600; }
-    .sil-header__signout {
-      font-family: var(--font-body);
-      font-size: 0.8rem;
-      font-weight: 500;
-      color: var(--muted);
-      background: none;
-      border: 1px solid var(--border);
-      cursor: pointer;
-      padding: 0.3rem 0.75rem;
-      transition: color 0.15s, border-color 0.15s;
-      white-space: nowrap;
-      line-height: 1.6;
-    }
+    .sil-header__signout { font-family: var(--font-body); font-size: 0.8rem; font-weight: 500; color: var(--muted); background: none; border: 1px solid var(--border); cursor: pointer; padding: 0.3rem 0.75rem; transition: color 0.15s, border-color 0.15s; white-space: nowrap; line-height: 1.6; }
     .sil-header__signout:hover { color: var(--text); border-color: var(--text); }
     .sil-header__signout:disabled { opacity: 0.5; cursor: not-allowed; }
-    .sil-header__toggle {
-      display: none;
-      flex-direction: column;
-      gap: 4px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 4px;
-      flex-shrink: 0;
-    }
+    .sil-header__toggle { display: none; flex-direction: column; gap: 4px; background: none; border: none; cursor: pointer; padding: 4px; flex-shrink: 0; }
     .sil-header__toggle span { display: block; width: 20px; height: 2px; background: var(--text); }
     @media (max-width: 700px) {
       .sil-header { padding: 0 1rem; }
       .sil-header__toggle { display: flex; }
-      .sil-header__nav {
-        display: none;
-        position: absolute;
-        top: 56px; left: 0; right: 0;
-        background: var(--bg);
-        border-bottom: 1px solid var(--border);
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 0.75rem 1rem;
-        gap: 0;
-        z-index: 99;
-      }
+      .sil-header__nav { display: none; position: absolute; top: 56px; left: 0; right: 0; background: var(--bg); border-bottom: 1px solid var(--border); flex-direction: column; align-items: flex-start; padding: 0.75rem 1rem; gap: 0; z-index: 99; }
       .sil-header__nav.sil-open { display: flex; }
-      .sil-header__nav a,
-      .sil-header__signout { font-size: 0.875rem; padding: 0.55rem 0.5rem; }
+      .sil-header__nav a, .sil-header__signout { font-size: 0.875rem; padding: 0.55rem 0.5rem; }
       .sil-header__signout { border: none; }
     }
   </style>
@@ -522,7 +370,7 @@
 
   <div class="msg" id="pageMsg"></div>
 
-  <!-- Current plan banner — shown when user already has a paid plan -->
+  <!-- Current plan banner -->
   <div class="current-plan-banner" id="currentPlanBanner" style="display:none">
     <p>You are currently on the <strong id="currentPlanLabel">—</strong> plan.
        Changes take effect at the start of your next billing period.</p>
@@ -541,7 +389,7 @@
 
     <!-- Free -->
     <div class="plan-card" id="card-free">
-      <span class="plan-badge free-badge">Free</span>
+      <span class="plan-badge free-badge" id="badge-free">Free</span>
       <div class="plan-name">Free</div>
       <div class="plan-tagline">Core tools for self-directed sensory and regulation practice.</div>
       <div class="plan-price">
@@ -563,7 +411,7 @@
 
     <!-- Lab -->
     <div class="plan-card highlighted" id="card-lab">
-      <span class="plan-badge lab-badge">Lab</span>
+      <span class="plan-badge lab-badge" id="badge-lab">Lab</span>
       <div class="plan-name">Lab Access</div>
       <div class="plan-tagline">Full access to every module — tools, training, and creative instruments.</div>
       <div class="plan-price">
@@ -586,7 +434,7 @@
 
     <!-- Call 1 -->
     <div class="plan-card" id="card-call1">
-      <span class="plan-badge call1-badge">Lab + 1 session</span>
+      <span class="plan-badge call1-badge" id="badge-call1">Lab + 1 session</span>
       <div class="plan-name">Lab + 1 Call</div>
       <div class="plan-tagline">Full Lab access plus one 50-minute video session with Jordan each month.</div>
       <div class="plan-price">
@@ -601,12 +449,15 @@
         <li>Session scheduling via calendar</li>
         <li>Carry-over if unused <span style="font-size:.7rem;color:var(--muted)">(1 month)</span></li>
       </ul>
+      <div class="capacity-notice" id="notice-call1" style="display:none">
+        All session slots are currently full. Join the waitlist and we'll contact you when a space opens.
+      </div>
       <button class="plan-cta primary" id="cta-call1" onclick="checkout('call1')">Get started</button>
     </div>
 
     <!-- Call 2 -->
     <div class="plan-card" id="card-call2">
-      <span class="plan-badge call2-badge">Lab + 2 sessions</span>
+      <span class="plan-badge call2-badge" id="badge-call2">Lab + 2 sessions</span>
       <div class="plan-name">Lab + 2 Calls</div>
       <div class="plan-tagline">Full Lab access plus two 50-minute video sessions with Jordan each month.</div>
       <div class="plan-price">
@@ -622,6 +473,9 @@
         <li>Priority scheduling</li>
         <li>Carry-over if unused <span style="font-size:.7rem;color:var(--muted)">(1 month)</span></li>
       </ul>
+      <div class="capacity-notice" id="notice-call2" style="display:none">
+        All session slots are currently full. Join the waitlist and we'll contact you when a space opens.
+      </div>
       <button class="plan-cta primary" id="cta-call2" onclick="checkout('call2')">Get started</button>
     </div>
 
@@ -718,6 +572,58 @@
     </table>
   </div>
 
+  <!-- About section -->
+  <div class="about-section">
+    <p class="section-label">Why this exists</p>
+    <div class="about-grid">
+
+      <div class="about-left">
+        <div class="about-lead">Music therapy that continues between sessions.</div>
+        <div class="about-body">
+          <p>Most of what happens in therapy happens between sessions — in the moments when you're trying to regulate, trying to listen differently, trying to remember what worked. I built the Sensory Intelligence Lab as a place for that work to live.</p>
+          <p>This isn't a subscription to content. It's a structured environment for self-directed practice: tools I use in sessions, made available for daily use, built around how your nervous system actually works.</p>
+          <p>The session tiers exist for people who want more direct access — continuity across the week rather than one appointment a month, a space to bring what's come up in the Lab, and a relationship with the work that builds over time.</p>
+        </div>
+      </div>
+
+      <div class="about-pillars">
+
+        <div class="pillar">
+          <div class="pillar-icon">◎</div>
+          <div class="pillar-text">
+            <div class="pillar-title">Continuity</div>
+            <div class="pillar-desc">The tools here are designed to carry the thread between our sessions — not to replace them, but to give you somewhere to go in between.</div>
+          </div>
+        </div>
+
+        <div class="pillar">
+          <div class="pillar-icon">◈</div>
+          <div class="pillar-text">
+            <div class="pillar-title">Self-directed practice</div>
+            <div class="pillar-desc">Regulation, ear training, journaling, soundscapes — practices you can return to on your own schedule, at your own pace, without needing a prompt.</div>
+          </div>
+        </div>
+
+        <div class="pillar">
+          <div class="pillar-icon">◇</div>
+          <div class="pillar-text">
+            <div class="pillar-title">More direct access</div>
+            <div class="pillar-desc">Session tiers mean you can bring what you've been working on straight to a call — less catch-up, more depth. I keep session numbers small on purpose.</div>
+          </div>
+        </div>
+
+        <div class="pillar">
+          <div class="pillar-icon">○</div>
+          <div class="pillar-text">
+            <div class="pillar-title">Boutique, not scaled</div>
+            <div class="pillar-desc">There's a hard cap on how many session subscribers I take. The tools are available to anyone; the sessions are intentionally limited so I can do them properly.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <!-- FAQ -->
   <div class="faq-section">
     <p class="section-label">Common questions</p>
@@ -737,6 +643,14 @@
           <span class="faq-icon">+</span>
         </div>
         <div class="faq-a"><div class="faq-a-inner">Unused sessions carry over for one month. If you miss two months in a row, the sessions expire. This is to keep the scheduling manageable — video sessions are a finite resource on Jordan's end.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span class="faq-q-text">Why is there a limit on session places?</span>
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-a"><div class="faq-a-inner">Session tiers are capped at 64 monthly sessions in total across all subscribers. This is a deliberate choice — keeping the number small means I can show up fully for the sessions I do take, rather than stretching thin. If the session tiers are full, you'll be able to join a waitlist.</div></div>
       </div>
 
       <div class="faq-item">
@@ -786,7 +700,7 @@
 <script type="module">
 
 // ─────────────────────────────────────────────────────────
-// HEADER BEHAVIOUR
+// HEADER
 // ─────────────────────────────────────────────────────────
 const _path = window.location.pathname.replace(/\/$/, '') || '/';
 document.querySelectorAll('.sil-header__nav a').forEach(a => {
@@ -804,21 +718,12 @@ _silNav.querySelectorAll('a').forEach(a =>
   a.addEventListener('click', () => _silNav.classList.remove('sil-open'))
 );
 
-async function _getSupabase() {
-  if (window._supabase) return window._supabase;
-  const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-  return createClient(
-    'https://lrjuufvrgkuvfxcmybtf.supabase.co',
-    'sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1'
-  );
-}
-
 document.getElementById('silSignOut').addEventListener('click', async function () {
   this.disabled = true;
   this.textContent = 'Signing out…';
   try {
-    const sb = await _getSupabase();
-    await sb.auth.signOut();
+    const sb = window._supabase;
+    if (sb) await sb.auth.signOut();
   } finally {
     window.location.replace('/');
   }
@@ -827,10 +732,14 @@ document.getElementById('silSignOut').addEventListener('click', async function (
 // ─────────────────────────────────────────────────────────
 // STATE
 // ─────────────────────────────────────────────────────────
-let billing   = 'monthly';
-let userPlan  = 'free';
-let userTier  = 'free';
-let isBeta    = false;
+let billing  = 'monthly';
+let userPlan = 'free';
+let userTier = 'free';
+let isBeta   = false;
+
+// Session capacity — must match SESSION_CAPACITY in create-checkout-session.js
+const SESSION_CAPACITY    = 64;
+const SESSIONS_PER_TIER   = { call1: 1, call2: 2 };
 
 const PLAN_LABELS = {
   free:  'Free',
@@ -841,7 +750,7 @@ const PLAN_LABELS = {
 };
 
 // ─────────────────────────────────────────────────────────
-// AUTH
+// AUTH + CAPACITY CHECK
 // ─────────────────────────────────────────────────────────
 function onAuthReady(cb) {
   if (window._currentUser) { cb(); return; }
@@ -853,23 +762,34 @@ onAuthReady(async () => {
   const user = window._currentUser;
   if (!sb || !user) return;
 
-  const { data: profile } = await sb
-    .from('profiles')
-    .select('subscription_tier, subscription_status, is_beta, current_period_end')
-    .eq('id', user.id)
-    .single();
+  // Load user's own plan and a capacity count in parallel
+  const [profileResult, capacityResult] = await Promise.all([
+    sb.from('profiles')
+      .select('subscription_tier, subscription_status, is_beta, current_period_end')
+      .eq('id', user.id)
+      .single(),
+    sb.from('profiles')
+      .select('subscription_tier', { count: 'exact', head: false })
+      .in('subscription_tier', ['call1', 'call2'])
+      .in('subscription_status', ['active', 'trialing']),
+  ]);
 
+  const profile = profileResult.data;
   if (profile) {
     userTier = profile.subscription_tier || 'free';
     isBeta   = !!profile.is_beta;
-
-    // Treat beta users as having full access but show their status
     userPlan = isBeta ? 'beta' : userTier;
   }
 
-  renderPlanState();
+  // Compute sessions committed
+  const activeRows      = capacityResult.data || [];
+  const sessionsUsed    = activeRows.reduce((t, r) => t + (SESSIONS_PER_TIER[r.subscription_tier] ?? 0), 0);
+  const call1Full       = (sessionsUsed + SESSIONS_PER_TIER.call1) > SESSION_CAPACITY;
+  const call2Full       = (sessionsUsed + SESSIONS_PER_TIER.call2) > SESSION_CAPACITY;
 
-  // Check for success param from Stripe redirect
+  renderPlanState({ call1Full, call2Full });
+
+  // Stripe redirect params
   const params = new URLSearchParams(window.location.search);
   if (params.get('success') === 'true') {
     showMsg('Your subscription is active. Welcome to the Lab.', 'success');
@@ -883,41 +803,71 @@ onAuthReady(async () => {
 
 // ─────────────────────────────────────────────────────────
 // RENDER PLAN STATE
-// Mark current plan, disable its CTA, show banner if paid
 // ─────────────────────────────────────────────────────────
-function renderPlanState() {
-  // Current plan banner
+function renderPlanState({ call1Full = false, call2Full = false } = {}) {
+  // Banner
   const activeTiers = ['lab', 'call1', 'call2', 'beta'];
   if (activeTiers.includes(userPlan)) {
     const banner = document.getElementById('currentPlanBanner');
-    const label  = document.getElementById('currentPlanLabel');
     banner.style.display = 'flex';
-    label.textContent = PLAN_LABELS[userPlan] || userPlan;
-    // Hide portal button for beta users (no Stripe sub)
+    document.getElementById('currentPlanLabel').textContent = PLAN_LABELS[userPlan] || userPlan;
     if (isBeta) document.getElementById('portalBtn').style.display = 'none';
   }
 
-  // Mark current card
+  // Map effective current tier to card id
   const tierMap = { free: 'free', lab: 'lab', call1: 'call1', call2: 'call2', beta: 'lab' };
-  const currentCardId = 'card-' + (tierMap[userPlan] || 'free');
-  const currentCard = document.getElementById(currentCardId);
+  const currentCardKey = tierMap[userPlan] || 'free';
+
+  // Mark current card
+  const currentCard = document.getElementById('card-' + currentCardKey);
   if (currentCard) currentCard.classList.add('is-current');
 
-  // Update CTAs
-  ['free','lab','call1','call2'].forEach(t => {
-    const cta = document.getElementById('cta-' + t);
+  // Apply capacity states
+  applyCapacityState('call1', call1Full, currentCardKey === 'call1');
+  applyCapacityState('call2', call2Full, currentCardKey === 'call2');
+
+  // Update CTAs for all tiers
+  ['free', 'lab', 'call1', 'call2'].forEach(t => {
+    const cta      = document.getElementById('cta-' + t);
+    const badge    = document.getElementById('badge-' + t);
     if (!cta) return;
-    const isCurrentTier = (t === (tierMap[userPlan] || 'free'));
-    if (isCurrentTier) {
+
+    const isCurrent = t === currentCardKey;
+
+    if (isCurrent) {
       cta.textContent = 'Current plan';
-      cta.className = 'plan-cta current-cta';
-      cta.disabled = true;
-    } else if (t === 'free') {
+      cta.className   = 'plan-cta current-cta';
+      cta.disabled    = true;
+      if (badge) badge.className = 'plan-badge current-badge';
+    } else if (t === 'free' && userPlan !== 'free') {
       cta.textContent = 'Downgrade to free';
-      cta.className = 'plan-cta secondary';
-      cta.onclick = () => openPortal();
+      cta.className   = 'plan-cta secondary';
+      cta.onclick     = () => openPortal();
     }
+    // call1/call2 capacity states are handled by applyCapacityState
   });
+}
+
+function applyCapacityState(tier, isFull, isCurrent) {
+  const card   = document.getElementById('card-' + tier);
+  const cta    = document.getElementById('cta-' + tier);
+  const notice = document.getElementById('notice-' + tier);
+  const badge  = document.getElementById('badge-' + tier);
+
+  if (!card || !cta) return;
+
+  // Don't override "current plan" state
+  if (isCurrent) return;
+
+  if (isFull) {
+    card.classList.add('is-full');
+    cta.textContent = 'Currently full';
+    cta.className   = 'plan-cta waitlist-cta';
+    cta.disabled    = true;
+    cta.onclick     = null;
+    if (notice) notice.style.display = 'block';
+    if (badge)  { badge.textContent = tier === 'call1' ? 'Full' : 'Full'; badge.className = 'plan-badge full-badge'; }
+  }
 }
 
 // ─────────────────────────────────────────────────────────
@@ -929,13 +879,11 @@ window.setBilling = function(period) {
   document.getElementById('btnYearly').classList.toggle('active', period === 'yearly');
   document.getElementById('yearlyNote').classList.toggle('visible', period === 'yearly');
 
-  // Update prices
   document.querySelectorAll('[data-monthly]').forEach(el => {
     el.textContent = el.dataset[period] || '';
     el.classList.toggle('visible', period === 'yearly' && el.classList.contains('yearly-equiv'));
   });
 
-  // Savings badges
   ['lab','call1','call2'].forEach(t => {
     const s = document.getElementById('saving-' + t);
     if (s) s.style.display = period === 'yearly' ? 'inline-block' : 'none';
@@ -946,11 +894,11 @@ window.setBilling = function(period) {
 // CHECKOUT
 // ─────────────────────────────────────────────────────────
 window.checkout = async function(tier) {
-  const sb      = window._supabase;
-  const user    = window._currentUser;
+  const sb   = window._supabase;
+  const user = window._currentUser;
   if (!sb || !user) { showMsg('Please sign in first.', 'error'); return; }
 
-  const plan = tier + '_' + billing; // e.g. lab_monthly
+  const plan = tier + '_' + billing;
   const btn  = document.getElementById('cta-' + tier);
   if (btn) { btn.disabled = true; btn.textContent = 'Redirecting…'; }
 
@@ -966,8 +914,14 @@ window.checkout = async function(tier) {
     });
 
     if (!res.ok) {
-      const text = await res.text();
-      throw new Error(text || 'Checkout failed.');
+      const body = await res.json().catch(() => ({}));
+      // Handle capacity_full specifically — the server double-checks even if the UI looked available
+      if (body.error === 'capacity_full') {
+        applyCapacityState(tier, true, false);
+        showMsg('Session places have just filled — all slots are now taken. Please check back next month.', 'error');
+        return;
+      }
+      throw new Error(body.error || 'Checkout failed.');
     }
 
     const { url } = await res.json();
@@ -980,29 +934,22 @@ window.checkout = async function(tier) {
 };
 
 // ─────────────────────────────────────────────────────────
-// STRIPE CUSTOMER PORTAL
+// STRIPE PORTAL
 // ─────────────────────────────────────────────────────────
 window.openPortal = async function() {
-  const sb   = window._supabase;
+  const sb  = window._supabase;
   if (!sb) return;
-
   const btn = document.getElementById('portalBtn');
   if (btn) { btn.disabled = true; btn.textContent = 'Opening…'; }
-
   try {
     const { data: { session } } = await sb.auth.getSession();
     const res = await fetch('/.netlify/functions/create-portal-session', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
-      },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
     });
-
     if (!res.ok) throw new Error('Could not open billing portal.');
     const { url } = await res.json();
     window.location.href = url;
-
   } catch (err) {
     showMsg(err.message, 'error');
     if (btn) { btn.disabled = false; btn.textContent = 'Manage billing →'; }
@@ -1013,8 +960,7 @@ window.openPortal = async function() {
 // FAQ
 // ─────────────────────────────────────────────────────────
 window.toggleFaq = function(el) {
-  const item = el.closest('.faq-item');
-  item.classList.toggle('open');
+  el.closest('.faq-item').classList.toggle('open');
 };
 
 // ─────────────────────────────────────────────────────────
