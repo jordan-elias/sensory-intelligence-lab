@@ -314,9 +314,10 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+    Content-Security-Policy = "frame-ancestors 'none'"
+    frame-src = "https://app.cal.com"
 
 
 # This schedules send-session-reminders to run at the top of every hour.
