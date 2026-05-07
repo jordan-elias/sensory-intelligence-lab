@@ -1332,7 +1332,7 @@ function renderCoping() {
           ['Contributing', 'Do something for someone else, however small. Shifting focus outward can shift emotion.'],
           ['Comparisons', 'Compare this moment to a harder time you survived, or to others who are struggling. Not to minimise — to gain perspective.'],
           ['Emotions (opposite)', 'Do something that evokes a different emotion — watch something funny, listen to something uplifting, look at something beautiful.'],
-          ['Pushing away (temporarily)', 'Mentally set the situation aside for a defined period. Tell yourself you\'ll return to it — and then do something else.'],
+          ['Pushing away (temporarily)', 'Mentally set the situation aside for a defined period. Tell yourself you'll return to it — and then do something else.'],
           ['Thoughts', 'Occupy your mind — count, read, do a puzzle, recite something. Crowd out the spiralling thoughts with different ones.'],
           ['Sensations', 'Use strong (but safe) sensory input — a scent, a texture, a flavour — to anchor yourself in the present moment.'],
         ].map(([name, desc]) => `
@@ -1691,7 +1691,7 @@ window.addChapterSong = function(n, index) {
 const GOAL_CATS = ['work','mental','social','love','family','physical','creative'];
 const GOAL_CAT_NAMES = { work:'Work / School', mental:'Mental Health', social:'Social', love:'Love & Romance', family:'Family', physical:'Physical Health', creative:'Creative' };
 
-function openCompareModal() {
+window.openCompareModal = function() {
   const goalsSaved = S.saved.filter(s => s.type === 'goals');
   const selA = document.getElementById('compareSelectA');
   const selB = document.getElementById('compareSelectB');
@@ -1710,17 +1710,17 @@ function openCompareModal() {
     document.getElementById('compareContent').innerHTML = '<div class="compare-loading">You need at least two saved Goals &amp; Values worksheets to compare.</div>';
   }
   document.getElementById('compareModal').classList.add('open');
-}
+};
 
-function closeCompareModal() {
+window.closeCompareModal = function() {
   document.getElementById('compareModal').classList.remove('open');
-}
+};
 
 document.addEventListener('click', e => {
   if (e.target === document.getElementById('compareModal')) closeCompareModal();
 });
 
-async function runComparison() {
+window.runComparison = async function() {
   const idA = document.getElementById('compareSelectA').value;
   const idB = document.getElementById('compareSelectB').value;
   const content = document.getElementById('compareContent');
@@ -1784,25 +1784,25 @@ async function runComparison() {
   } catch (err) {
     content.innerHTML = `<div class="compare-loading">Could not load comparison: ${escHtml(err.message)}</div>`;
   }
-}
+};
 
 // ═══════════════════════════════════════════════════════
 // UI INTERACTIONS
 // ═══════════════════════════════════════════════════════
-function toggleTag(btn) {
+window.toggleTag = function(btn) {
   btn.classList.toggle('active');
-}
+};
 
-function toggleSkill(item) {
+window.toggleSkill = function(item) {
   const cb = item.querySelector('input[type="checkbox"]');
   cb.checked = !cb.checked;
   item.classList.toggle('checked', cb.checked);
-}
+};
 
 // ═══════════════════════════════════════════════════════
 // OPEN / CLOSE WORKSHEET
 // ═══════════════════════════════════════════════════════
-function openWorksheet(type) {
+window.openWorksheet = function(type) {
   S.currentType = type;
   _autoSectionCount = 0;
   _lyricBlockCount  = 0;
@@ -1832,14 +1832,14 @@ function openWorksheet(type) {
   document.getElementById('wsPicker').classList.add('hidden');
   document.getElementById('wsView').classList.add('visible');
   window.scrollTo({ top: 0, behavior: 'smooth' });
-}
+};
 
-function closeWorksheet() {
+window.closeWorksheet = function() {
   document.getElementById('wsPicker').classList.remove('hidden');
   document.getElementById('wsView').classList.remove('visible');
   document.getElementById('wsContent').innerHTML = '';
   S.currentType = null;
-}
+};
 
 // ═══════════════════════════════════════════════════════
 // COLLECT FORM DATA
@@ -2156,16 +2156,16 @@ function renderViewerBody(parsed) {
   return html || '<span class="decrypting">No content recorded.</span>';
 }
 
-function closeViewerModal() {
+window.closeViewerModal = function() {
   document.getElementById('viewerModal').classList.remove('open');
   S.viewingEntry = null; S.viewingData = null;
-}
+};
 
 document.getElementById('viewerModal').addEventListener('click', e => {
   if (e.target === document.getElementById('viewerModal')) closeViewerModal();
 });
 
-function downloadViewing() {
+window.downloadViewing = function() {
   if (!S.viewingData) return;
   const d    = S.viewingData.data || {};
   const type = S.viewingData.type;
@@ -2180,7 +2180,7 @@ function downloadViewing() {
   a.href     = URL.createObjectURL(blob);
   a.download = `${(S.viewingEntry?.title || 'worksheet').replace(/\s+/g,'-')}.txt`;
   a.click();
-}
+};
 
 // ═══════════════════════════════════════════════════════
 // DELETE
@@ -2216,17 +2216,46 @@ onAuthReady(async () => {
   await loadSaved();
 });
 
-// ── Expose all inline onclick handlers to global scope ──
-window.openWorksheet     = openWorksheet;
-window.closeWorksheet    = closeWorksheet;
-window.toggleTag         = toggleTag;
-window.toggleSkill       = toggleSkill;
-window.openCompareModal  = openCompareModal;
-window.closeCompareModal = closeCompareModal;
-window.runComparison     = runComparison;
-window.closeViewerModal  = closeViewerModal;
-window.downloadViewing   = downloadViewing;
-
 </script>
+
+<script>
+  /**
+   * Switches the view from the picker to a specific worksheet
+   * @param {string} type - The ID/slug of the worksheet to open
+   */
+  function openWorksheet(type) {
+    const picker = document.getElementById('wsPicker');
+    const appContainer = document.getElementById('worksheetsApp');
+    
+    // 1. Hide the picker grid
+    if (picker) picker.classList.add('hidden');
+    
+    // 2. Logic to show the specific worksheet view
+    // Since your worksheet views (.ws-view) aren't in the HTML yet, 
+    // you'll need to ensure they exist or are injected here.
+    console.log("Opening worksheet:", type);
+    
+    // Example: Find a div with id="view-goals" and make it visible
+    const targetView = document.getElementById(`view-${type}`);
+    if (targetView) {
+      targetView.classList.add('visible');
+    }
+  }
+
+  /**
+   * Returns to the picker grid
+   */
+  function closeWorksheet() {
+    const picker = document.getElementById('wsPicker');
+    if (picker) picker.classList.remove('hidden');
+    
+    // Hide all worksheet views
+    document.querySelectorAll('.ws-view').forEach(view => {
+      view.classList.remove('visible');
+    });
+  }
+</script>
+
+  
 </body>
 </html>
