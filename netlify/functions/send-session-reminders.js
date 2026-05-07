@@ -3,6 +3,7 @@
  *
  * Netlify scheduled function — runs every hour via cron.
  * Finds completed sessions where reminder_sent = false,
+ * checks the user's notification_preferences,
  * sends a gentle post-session reflection email via Resend,
  * then marks reminder_sent = true.
  *
@@ -123,8 +124,6 @@ function buildEmail(attendeeName) {
       <a class="cta" href="${worksheetUrl}">Open session reflection →</a>
     </div>
 
- 
-
     <p style="margin-bottom:0;">Warmly,<br>Jordan</p>
 
     <hr class="divider">
@@ -210,24 +209,38 @@ export async function handler() {
 
   if (!bookings?.length) {
     console.log('No sessions to remind');
-    return { statusCode: 200, body: JSON.stringify({ sent: 0, failed: 0 }) };
+    return { statusCode: 200, body: JSON.stringify({ sent: 0, failed: 0, skipped: 0 }) };
   }
 
   console.log(`Found ${bookings.length} session(s) to remind`);
 
-  let sent = 0, failed = 0;
+  let sent = 0, failed = 0, skipped = 0;
 
   for (const booking of bookings) {
-    // Get user email from profiles — name comes from metadata stored by cal-webhook
+    // Fetch email + notification preferences together
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('email')
+      .select('email, notification_preferences')
       .eq('id', booking.user_id)
       .single();
 
     if (profileError || !profile?.email) {
       console.error(`No profile found for user ${booking.user_id}`);
       failed++;
+      continue;
+    }
+
+    // Check opt-out. Use !== false so that null (no prefs set yet) defaults to sending —
+    // existing users haven't had a chance to set preferences and should keep receiving emails.
+    const prefs = profile.notification_preferences;
+    if (prefs !== null && prefs?.post_session_reminder === false) {
+      console.log(`Skipping reminder for ${profile.email} (booking ${booking.id}) — opted out`);
+      // Mark reminder_sent so this row isn't re-evaluated on the next hourly run
+      await supabase
+        .from('bookings')
+        .update({ reminder_sent: true, reminder_sent_at: new Date().toISOString() })
+        .eq('id', booking.id);
+      skipped++;
       continue;
     }
 
@@ -260,6 +273,6 @@ export async function handler() {
     }
   }
 
-  console.log(`send-session-reminders: done — sent: ${sent}, failed: ${failed}`);
-  return { statusCode: 200, body: JSON.stringify({ sent, failed }) };
+  console.log(`send-session-reminders: done — sent: ${sent}, skipped: ${skipped}, failed: ${failed}`);
+  return { statusCode: 200, body: JSON.stringify({ sent, skipped, failed }) };
 }
