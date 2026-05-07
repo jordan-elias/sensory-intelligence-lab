@@ -1326,25 +1326,11 @@ function renderCoping() {
       <div class="ws-callout" style="margin-bottom:1rem; font-size:.8rem;">
         ACCEPTS is a DBT distraction skill. Distraction isn't avoidance — it's a way to survive a moment without acting on it. The goal is to tolerate, not to fix.
       </div>
-      <div class="skill-checklist">
-        ${[
-          ['Activities', 'Engage in an absorbing activity — something that demands enough attention to pull you away from the distress.'],
-          ['Contributing', 'Do something for someone else, however small. Shifting focus outward can shift emotion.'],
-          ['Comparisons', 'Compare this moment to a harder time you survived, or to others who are struggling. Not to minimise — to gain perspective.'],
-          ['Emotions (opposite)', 'Do something that evokes a different emotion — watch something funny, listen to something uplifting, look at something beautiful.'],
-          ['Pushing away (temporarily)', 'Mentally set the situation aside for a defined period. Tell yourself you'll return to it — and then do something else.'],
-          ['Thoughts', 'Occupy your mind — count, read, do a puzzle, recite something. Crowd out the spiralling thoughts with different ones.'],
-          ['Sensations', 'Use strong (but safe) sensory input — a scent, a texture, a flavour — to anchor yourself in the present moment.'],
-        ].map(([name, desc]) => `
-          <div class="skill-item" onclick="toggleSkill(this)">
-            <input type="checkbox">
-            <div class="skill-item-body">
-              <div class="skill-item-name">${name}</div>
-              <div class="skill-item-desc">${desc}</div>
-            </div>
-          </div>
-        `).join('')}
+      
+    <div class="skill-checklist">
+        ${renderAcceptsSkills()}
       </div>
+
     </div>
 
     <div class="ws-section" style="border-top:none; margin-top:0;">
@@ -1391,6 +1377,29 @@ function renderCoping() {
     </div>
   `;
 }
+
+
+function renderAcceptsSkills() {
+  const items = [
+    ['Activities', 'Engage in an absorbing activity — something that demands enough attention to pull you away from the distress.'],
+    ['Contributing', 'Do something for someone else, however small. Shifting focus outward can shift emotion.'],
+    ['Comparisons', 'Compare this moment to a harder time you survived, or to others who are struggling. Not to minimise — to gain perspective.'],
+    ['Emotions (opposite)', 'Do something that evokes a different emotion — watch something funny, listen to something uplifting, look at something beautiful.'],
+    ['Pushing away (temporarily)', 'Mentally set the situation aside for a defined period. Tell yourself you\'ll return to it — and then do something else.'],
+    ['Thoughts', 'Occupy your mind — count, read, do a puzzle, recite something. Crowd out the spiralling thoughts with different ones.'],
+    ['Sensations', 'Use strong (but safe) sensory input — a scent, a texture, a flavour — to anchor yourself in the present moment.'],
+  ];
+  return items.map(([name, desc]) =>
+    `<div class="skill-item" onclick="toggleSkill(this)">
+      <input type="checkbox">
+      <div class="skill-item-body">
+        <div class="skill-item-name">${name}</div>
+        <div class="skill-item-desc">${desc}</div>
+      </div>
+    </div>`
+  ).join('');
+}
+
 
 function initDistressScale() {
   const row = document.getElementById('distressScale');
