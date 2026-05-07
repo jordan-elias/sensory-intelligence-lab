@@ -553,7 +553,7 @@
         </div>
       </div>
       <div id="signupConfirm" class="confirm-screen" style="display:none">
-        <div class="confirm-icon">✉️</div>
+        
         <h3>Check your inbox</h3>
         <p>A confirmation link has been sent to<br>
           <span class="confirm-email" id="confirmedEmail"></span></p>
@@ -759,10 +759,11 @@
     document.getElementById('authTabs').style.display = tab === 'forgot' ? 'none' : 'flex';
   };
 
-  function showMsg(id, text, type) {
-    const el = document.getElementById(id);
-    el.textContent = text; el.className = `msg ${type} show`;
-  }
+  function showMsg(id, html, type) {
+  const el = document.getElementById(id);
+  el.innerHTML = html;  // changed from textContent
+  el.className = `msg ${type} show`;
+}
   function clearMsg(id) { document.getElementById(id).className = 'msg'; }
   function setLoading(id, loading, label) {
     const el = document.getElementById(id);
@@ -796,33 +797,63 @@
   };
 
   window.handleSignUp = async function() {
-    clearMsg('signupMsg');
+  clearMsg('signupMsg');
 
-    // Guard: consent must be checked (belt-and-suspenders beyond the disabled button)
-    if (!document.getElementById('privacyConsent').checked) {
-      showMsg('signupMsg','Please read and agree to the privacy policy to continue.','error');
-      return;
+  if (!document.getElementById('privacyConsent').checked) {
+    showMsg('signupMsg', 'Please read and agree to the privacy policy to continue.', 'error');
+    return;
+  }
+
+  const email = document.getElementById('signupEmail').value.trim();
+  const pw    = document.getElementById('signupPassword').value;
+  const pwc   = document.getElementById('signupConfirmPassword').value;
+  if (!email || !pw || !pwc) { showMsg('signupMsg', 'Please fill in all fields.', 'error'); return; }
+  if (pw.length < 8) { showMsg('signupMsg', 'Password must be at least 8 characters.', 'error'); return; }
+  if (pw !== pwc)    { showMsg('signupMsg', 'Passwords do not match.', 'error'); return; }
+
+  // Check if email already exists in profiles table
+  const { data: existing } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('email', email)
+    .maybeSingle();
+
+  if (existing) {
+    showMsg('signupMsg',
+      'An account with this email already exists. <a href="#" onclick="switchTab(\'signin\');return false;" style="color:inherit;font-weight:600;text-decoration:underline;text-underline-offset:3px;">Sign in instead?</a>',
+      'error'
+    );
+    // Also pre-fill the sign-in email field for convenience
+    document.getElementById('signinEmail').value = email;
+    return;
+  }
+
+  setLoading('signupBtn', true, 'Create account');
+  const { error } = await supabase.auth.signUp({
+    email, password: pw,
+    options: { emailRedirectTo: 'https://lab.jordanelias.de/dashboard/' }
+  });
+  setLoading('signupBtn', false, 'Create account');
+
+  if (error) {
+    // Supabase sometimes returns this even when the email exists but isn't in profiles yet
+    if (error.message.toLowerCase().includes('already registered') ||
+        error.message.toLowerCase().includes('already exists')) {
+      showMsg('signupMsg',
+        'An account with this email already exists. <a href="#" onclick="switchTab(\'signin\');return false;" style="color:inherit;font-weight:600;text-decoration:underline;text-underline-offset:3px;">Sign in instead?</a>',
+        'error'
+      );
+      document.getElementById('signinEmail').value = email;
+    } else {
+      showMsg('signupMsg', error.message, 'error');
     }
+    return;
+  }
 
-    const email = document.getElementById('signupEmail').value.trim();
-    const pw    = document.getElementById('signupPassword').value;
-    const pwc   = document.getElementById('signupConfirmPassword').value;
-    if (!email || !pw || !pwc) { showMsg('signupMsg','Please fill in all fields.','error'); return; }
-    if (pw.length < 8) { showMsg('signupMsg','Password must be at least 8 characters.','error'); return; }
-    if (pw !== pwc)    { showMsg('signupMsg','Passwords do not match.','error'); return; }
-
-    setLoading('signupBtn', true, 'Create account');
-    const { error } = await supabase.auth.signUp({
-      email, password: pw,
-      options: { emailRedirectTo: "https://lab.jordanelias.de/" }
-    });
-    setLoading('signupBtn', false, 'Create account');
-    if (error) { showMsg('signupMsg', error.message, 'error'); return; }
-
-    document.getElementById('signupForm').style.display    = 'none';
-    document.getElementById('confirmedEmail').textContent  = email;
-    document.getElementById('signupConfirm').style.display = 'block';
-  };
+  document.getElementById('signupForm').style.display    = 'none';
+  document.getElementById('confirmedEmail').textContent  = email;
+  document.getElementById('signupConfirm').style.display = 'block';
+};
 
   window.handleForgot = async function() {
     clearMsg('forgotMsg');
