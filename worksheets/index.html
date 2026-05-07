@@ -2220,9 +2220,14 @@ function onAuthReady(cb) {
   window.addEventListener('authReady', cb, { once: true });
 }
 
+
 onAuthReady(async () => {
-  await ensureVaultReady();
-  await loadSaved();
+  try {
+    await ensureVaultReady();
+    await loadSaved();
+  } catch (err) {
+    console.error('Init error:', err);
+  }
 });
 
 
