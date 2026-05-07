@@ -664,6 +664,31 @@
 
     </div>
 
+    <!-- ADD THIS AFTER THE </div id="wsPicker"> -->
+
+<div id="wsView" class="ws-view">
+  <div class="ws-view-header">
+    <button class="ws-back" onclick="closeWorksheet()">← Back</button>
+    <h3 id="wsActiveTitle">Worksheet</h3>
+  </div>
+
+  <div id="wsContent">
+    <!-- These IDs must match the 'type' passed to openWorksheet() -->
+    <div id="view-goals" class="ws-view-content">
+       <div class="ws-section"><label class="ws-label">Your Goals...</label><textarea class="ws-input"></textarea></div>
+    </div>
+    <div id="view-music-auto" class="ws-view-content">
+       <div class="ws-section"><label class="ws-label">Your Autobiography...</label><textarea class="ws-input"></textarea></div>
+    </div>
+    <!-- Add other view divs (view-session-reflection, etc.) as needed -->
+  </div>
+
+  <div class="ws-save-bar">
+    <input type="text" class="ws-input" id="saveName" placeholder="Entry Name (e.g. May 7th)">
+    <button class="action-btn" onclick="saveWorksheet()">Save Encrypted</button>
+  </div>
+</div>
+
     <!-- Saved worksheets -->
     <div class="saved-section" id="savedSection" style="display:none">
       <p class="section-label">Saved worksheets</p>
@@ -748,6 +773,7 @@
 <script type="module">
 'use strict';
 
+
 import {
   loadUserKeyFromBase64,
   hasUserKey,
@@ -757,6 +783,39 @@ import {
   isEncrypted,
   clearUserKey,
 } from '/assets/js/crypto-utils.js';
+
+
+/* --- Add this inside your <script type="module"> around line 500 --- */
+
+window.openWorksheet = function(type) {
+    // Hide Picker
+    document.getElementById('wsPicker').classList.add('hidden');
+    // Show View Container
+    const viewContainer = document.getElementById('wsView');
+    viewContainer.classList.add('visible');
+
+    // Hide all worksheet content divs
+    document.querySelectorAll('.ws-view-content').forEach(div => div.style.display = 'none');
+
+    // Show the specific one (Ensure these IDs exist in your HTML)
+    const targetDiv = document.getElementById(`view-${type}`);
+    if (targetDiv) targetDiv.style.display = 'block';
+
+    const titleMap = {
+        'goals': 'Goals & Values',
+        'music-auto': 'Music Autobiography',
+        'session-reflection': 'Session Reflection',
+        'lyric-analysis': 'Lyric Analysis',
+        'coping': 'Coping Skills'
+    };
+    document.getElementById('wsActiveTitle').innerText = titleMap[type] || 'Worksheet';
+    window.scrollTo(0,0);
+};
+
+window.closeWorksheet = function() {
+    document.getElementById('wsPicker').classList.remove('hidden');
+    document.getElementById('wsView').classList.remove('visible');
+};
 
 // ─── HEADER ───────────────────────────────────────────
 const path = window.location.pathname.replace(/\/$/, '') || '/';
@@ -790,6 +849,27 @@ document.getElementById('silSignOut').addEventListener('click', async function (
     window.location.replace('/');
   }
 });
+
+/* --- Add this below the worksheet functions --- */
+
+const menuToggle = document.getElementById('silMenuToggle');
+const silNav     = document.getElementById('silNav');
+
+if (menuToggle && silNav) {
+    menuToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpened = silNav.classList.toggle('sil-open');
+        menuToggle.setAttribute('aria-expanded', isOpened);
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!silNav.contains(e.target) && !menuToggle.contains(e.target)) {
+            silNav.classList.remove('sil-open');
+            menuToggle.setAttribute('aria-expanded', 'false');
+        }
+    });
+}
 
 // ─── VAULT ────────────────────────────────────────────
 let _vaultReady = false;
@@ -1785,6 +1865,7 @@ window.runComparison = async function() {
     content.innerHTML = `<div class="compare-loading">Could not load comparison: ${escHtml(err.message)}</div>`;
   }
 };
+
 
 // ═══════════════════════════════════════════════════════
 // UI INTERACTIONS
