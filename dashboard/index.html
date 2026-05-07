@@ -940,13 +940,15 @@
       window.addEventListener('authReady', cb, { once: true });
     }
 
+
     onAuthReady(() => {
       const user = window._currentUser;
-      const name = user?.user_metadata?.full_name || user?.email?.split('@')[0] || '';
-      const firstName = name.split(' ')[0];
-      if (firstName) {
-        document.getElementById('greeting').textContent = `Welcome back, ${firstName}`;
-      }
+      const name = user?.user_metadata?.full_name?.trim();
+      const firstName = name ? name.split(' ')[0] : null;
+        document.getElementById('greeting').textContent = firstName
+          ? `Welcome back, ${firstName}`
+          : 'Welcome to your sensory intelligence dashboard';
+    }
 
 
       // ── Set body access attribute for CSS ──
