@@ -1332,7 +1332,7 @@ function renderCoping() {
           ['Contributing', 'Do something for someone else, however small. Shifting focus outward can shift emotion.'],
           ['Comparisons', 'Compare this moment to a harder time you survived, or to others who are struggling. Not to minimise — to gain perspective.'],
           ['Emotions (opposite)', 'Do something that evokes a different emotion — watch something funny, listen to something uplifting, look at something beautiful.'],
-          ['Pushing away (temporarily)', 'Mentally set the situation aside for a defined period. Tell yourself you'll return to it — and then do something else.'],
+          ['Pushing away (temporarily)', 'Mentally set the situation aside for a defined period. Tell yourself you\'ll return to it — and then do something else.'],
           ['Thoughts', 'Occupy your mind — count, read, do a puzzle, recite something. Crowd out the spiralling thoughts with different ones.'],
           ['Sensations', 'Use strong (but safe) sensory input — a scent, a texture, a flavour — to anchor yourself in the present moment.'],
         ].map(([name, desc]) => `
@@ -1691,7 +1691,7 @@ window.addChapterSong = function(n, index) {
 const GOAL_CATS = ['work','mental','social','love','family','physical','creative'];
 const GOAL_CAT_NAMES = { work:'Work / School', mental:'Mental Health', social:'Social', love:'Love & Romance', family:'Family', physical:'Physical Health', creative:'Creative' };
 
-window.openCompareModal = function() {
+function openCompareModal() {
   const goalsSaved = S.saved.filter(s => s.type === 'goals');
   const selA = document.getElementById('compareSelectA');
   const selB = document.getElementById('compareSelectB');
@@ -1710,17 +1710,17 @@ window.openCompareModal = function() {
     document.getElementById('compareContent').innerHTML = '<div class="compare-loading">You need at least two saved Goals &amp; Values worksheets to compare.</div>';
   }
   document.getElementById('compareModal').classList.add('open');
-};
+}
 
-window.closeCompareModal = function() {
+function closeCompareModal() {
   document.getElementById('compareModal').classList.remove('open');
-};
+}
 
 document.addEventListener('click', e => {
   if (e.target === document.getElementById('compareModal')) closeCompareModal();
 });
 
-window.runComparison = async function() {
+async function runComparison() {
   const idA = document.getElementById('compareSelectA').value;
   const idB = document.getElementById('compareSelectB').value;
   const content = document.getElementById('compareContent');
@@ -1784,25 +1784,25 @@ window.runComparison = async function() {
   } catch (err) {
     content.innerHTML = `<div class="compare-loading">Could not load comparison: ${escHtml(err.message)}</div>`;
   }
-};
+}
 
 // ═══════════════════════════════════════════════════════
 // UI INTERACTIONS
 // ═══════════════════════════════════════════════════════
-window.toggleTag = function(btn) {
+function toggleTag(btn) {
   btn.classList.toggle('active');
-};
+}
 
-window.toggleSkill = function(item) {
+function toggleSkill(item) {
   const cb = item.querySelector('input[type="checkbox"]');
   cb.checked = !cb.checked;
   item.classList.toggle('checked', cb.checked);
-};
+}
 
 // ═══════════════════════════════════════════════════════
 // OPEN / CLOSE WORKSHEET
 // ═══════════════════════════════════════════════════════
-window.openWorksheet = function(type) {
+function openWorksheet(type) {
   S.currentType = type;
   _autoSectionCount = 0;
   _lyricBlockCount  = 0;
@@ -1832,14 +1832,14 @@ window.openWorksheet = function(type) {
   document.getElementById('wsPicker').classList.add('hidden');
   document.getElementById('wsView').classList.add('visible');
   window.scrollTo({ top: 0, behavior: 'smooth' });
-};
+}
 
-window.closeWorksheet = function() {
+function closeWorksheet() {
   document.getElementById('wsPicker').classList.remove('hidden');
   document.getElementById('wsView').classList.remove('visible');
   document.getElementById('wsContent').innerHTML = '';
   S.currentType = null;
-};
+}
 
 // ═══════════════════════════════════════════════════════
 // COLLECT FORM DATA
@@ -2156,16 +2156,16 @@ function renderViewerBody(parsed) {
   return html || '<span class="decrypting">No content recorded.</span>';
 }
 
-window.closeViewerModal = function() {
+function closeViewerModal() {
   document.getElementById('viewerModal').classList.remove('open');
   S.viewingEntry = null; S.viewingData = null;
-};
+}
 
 document.getElementById('viewerModal').addEventListener('click', e => {
   if (e.target === document.getElementById('viewerModal')) closeViewerModal();
 });
 
-window.downloadViewing = function() {
+function downloadViewing() {
   if (!S.viewingData) return;
   const d    = S.viewingData.data || {};
   const type = S.viewingData.type;
@@ -2180,7 +2180,7 @@ window.downloadViewing = function() {
   a.href     = URL.createObjectURL(blob);
   a.download = `${(S.viewingEntry?.title || 'worksheet').replace(/\s+/g,'-')}.txt`;
   a.click();
-};
+}
 
 // ═══════════════════════════════════════════════════════
 // DELETE
@@ -2215,6 +2215,17 @@ onAuthReady(async () => {
   await ensureVaultReady();
   await loadSaved();
 });
+
+// ── Expose all inline onclick handlers to global scope ──
+window.openWorksheet     = openWorksheet;
+window.closeWorksheet    = closeWorksheet;
+window.toggleTag         = toggleTag;
+window.toggleSkill       = toggleSkill;
+window.openCompareModal  = openCompareModal;
+window.closeCompareModal = closeCompareModal;
+window.runComparison     = runComparison;
+window.closeViewerModal  = closeViewerModal;
+window.downloadViewing   = downloadViewing;
 
 </script>
 </body>
