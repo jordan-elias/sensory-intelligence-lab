@@ -18,7 +18,7 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl        = process.env.SUPABASE_URL || 'https://lrjuufvrgkuvfxcmybtf.supabase.co';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const resendApiKey       = process.env.RESEND_API_KEY;
-const SITE_URL           = process.env.SITE_URL || 'https://jordanelias.de';
+const SITE_URL           = process.env.SITE_URL || 'https://lab.jordanelias.de';
 const FROM_ADDRESS       = 'Jordan Elias <hello@jordanelias.de>';
 
 // How many minutes after session end before sending the reminder.
@@ -41,96 +41,95 @@ function buildEmail(attendeeName) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>How was your session?</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Inter:wght@400;500&family=Lora:ital@0;1&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: Georgia, serif;
-      background: #f9f9f7;
+      font-family: 'Inter', -apple-system, sans-serif;
+      background-color: #f9f9f7;
+      margin: 0;
+      padding: 0;
       color: #1a1a1a;
-      line-height: 1.75;
-      padding: 40px 20px;
     }
-    .wrapper {
+    .container {
       max-width: 520px;
-      margin: 0 auto;
+      margin: 40px auto;
       background: #ffffff;
+      border-radius: 4px;
+      overflow: hidden;
       border: 1px solid #e5e5e0;
-      padding: 48px 48px 40px;
     }
-    .wordmark {
-      font-family: Arial, sans-serif;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: #6b6b6b;
-      margin-bottom: 36px;
+    .header {
+      background-color: #2a5c45;
+      padding: 28px 40px;
+      text-align: center;
     }
-    h1 {
-      font-family: Georgia, serif;
-      font-size: 22px;
-      font-weight: normal;
+    .header h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      color: #ffffff;
+      font-size: 20px;
+      font-weight: 400;
+      margin: 0;
+      letter-spacing: 0.3px;
+    }
+    .body {
+      padding: 40px;
       color: #1a1a1a;
-      margin-bottom: 24px;
-      line-height: 1.35;
     }
-    p {
+    .body p {
+      font-family: 'Lora', Georgia, serif;
       font-size: 15px;
-      color: #3a3a3a;
-      margin-bottom: 18px;
+      line-height: 1.7;
+      margin: 0 0 18px;
+      color: #1a1a1a;
     }
-    .cta-wrap { margin: 32px 0; }
+    .cta-wrap {
+      text-align: center;
+      margin: 32px 0;
+    }
     .cta {
       display: inline-block;
-      background: #2a5c45;
+      background-color: #2a5c45;
       color: #ffffff !important;
       text-decoration: none;
-      font-family: Arial, sans-serif;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.03em;
-      padding: 13px 28px;
-    }
-    .divider {
-      border: none;
-      border-top: 1px solid #e5e5e0;
-      margin: 36px 0 24px;
+      padding: 13px 30px;
+      border-radius: 4px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.2px;
     }
     .footer {
-      font-family: Arial, sans-serif;
-      font-size: 11px;
-      color: #9b9b9b;
+      background-color: #f9f9f7;
+      border-top: 1px solid #e5e5e0;
+      padding: 20px 40px;
+      text-align: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      color: #6b6b6b;
       line-height: 1.65;
     }
-    .footer a { color: #9b9b9b; text-decoration: underline; }
-    @media (max-width: 580px) {
-      .wrapper { padding: 32px 24px 28px; }
-    }
+    .footer a { color: #2a5c45; }
   </style>
 </head>
 <body>
-  <div class="wrapper">
-    <div class="wordmark">Sensory Intelligence Lab</div>
-
-    <h1>How was your session today?</h1>
-
-    <p>Hi ${firstName},</p>
-
-    <p>I hope today's session left you with something to sit with.</p>
-
-    <p>If you'd like to reflect on what came up while it's still fresh, there's a session reflection worksheet available. It's totally optional, but here if it feels useful for you:</p>
-
-    <div class="cta-wrap">
-      <a class="cta" href="${worksheetUrl}">Open session reflection →</a>
+  <div class="container">
+    <div class="header">
+      <h1>Sensory Intelligence Lab</h1>
     </div>
-
-    <p style="margin-bottom:0;">Warmly,<br>Jordan</p>
-
-    <hr class="divider">
-
+    <div class="body">
+      <p>Hi ${firstName},</p>
+      <p>I hope today's session left you with something to sit with.</p>
+      <p>If you'd like to reflect on what came up while it's still fresh, there's a session reflection worksheet available. It's optional, but here if it feels useful:</p>
+      <div class="cta-wrap">
+        <a class="cta" href="${worksheetUrl}">Open session reflection →</a>
+      </div>
+      <p>Warm regards,<br>Jordan</p>
+    </div>
     <div class="footer">
-      <p>You're receiving this because you had a session with Jordan today.</p>
-      <p style="margin-top:8px;">You can manage your notification preferences in your <a href="${SITE_URL}/account/">account settings</a>.</p>
+      You're receiving this because you had a session today.
+      You can manage your notification preferences in your
+      <a href="${SITE_URL}/account/">account settings</a>.
     </div>
   </div>
 </body>
@@ -140,7 +139,7 @@ function buildEmail(attendeeName) {
 
 I hope today's session left you with something to sit with.
 
-If you'd like to reflect on what came up while it's still fresh, there's a session reflection worksheet available. It's totally optional, but here if it feels useful for you:
+If you'd like to reflect on what came up while it's still fresh, there's a session reflection worksheet available. It's optional, but here if it feels useful:
 
 ${worksheetUrl}
 
@@ -148,8 +147,8 @@ Warm regards,
 Jordan
 
 ---
-You're receiving this because you had a session with Jordan Elias Music Therapy today.
-Manage your notification preferences: ${SITE_URL}/account/`;
+You're receiving this because you had a session today.
+Manage notification preferences: ${SITE_URL}/account/`;
 
   return { html, text };
 }
@@ -185,22 +184,30 @@ async function sendReminderEmail({ to, name }) {
 export async function handler() {
   console.log('send-session-reminders: starting run at', new Date().toISOString());
 
-  const now         = new Date();
-  // Upper bound: sessions that ended more than DELAY_MINUTES ago
-  const windowEnd   = new Date(now.getTime() - DELAY_MINUTES * 60 * 1000).toISOString();
-  // Lower bound: don't email about sessions that ended more than 24 hours ago —
-  // prevents a backlog of old rows from firing if the function was paused
-  const windowStart = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+  const now = new Date();
+
+  // Use scheduled_at as proxy for session end time.
+  // A session is considered "done" once scheduled_at + SESSION_DURATION_MINUTES has passed.
+  // We then wait an additional DELAY_MINUTES before sending.
+  // Upper bound: sessions whose end time was at least DELAY_MINUTES ago
+  //   → scheduled_at <= now - SESSION_DURATION_MINUTES - DELAY_MINUTES
+  const SESSION_DURATION_MINUTES = 50;
+  const windowEnd   = new Date(
+    now.getTime() - (SESSION_DURATION_MINUTES + DELAY_MINUTES) * 60 * 1000
+  ).toISOString();
+  // Lower bound: don't email about sessions from more than 25 hours ago —
+  // guards against backlog if the function was paused or redeployed
+  const windowStart = new Date(now.getTime() - 25 * 60 * 60 * 1000).toISOString();
 
   // Fetch eligible bookings
   const { data: bookings, error: fetchError } = await supabase
     .from('bookings')
-    .select('id, user_id, event_type, completed_at, metadata')
+    .select('id, user_id, event_type, scheduled_at, metadata')
     .eq('status', 'scheduled')
     .eq('reminder_sent', false)
     .in('event_type', ['session', 'subscriber-session'])
-    .gte('completed_at', windowStart)
-    .lte('completed_at', windowEnd);
+    .gte('scheduled_at', windowStart)
+    .lte('scheduled_at', windowEnd);
 
   if (fetchError) {
     console.error('Error fetching bookings:', fetchError);
