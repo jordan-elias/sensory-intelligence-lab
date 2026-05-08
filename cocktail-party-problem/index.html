@@ -10,16 +10,15 @@
   <link rel="apple-touch-icon" href="/images/favicon.png">
   <link rel="manifest" href="/site.webmanifest">
 
-
   <script src="/dashboard/auth-guard.js" type="module"></script>
 
   <script type="module">
-  import { applyGatingOnReady } from '/assets/js/gating.js';
-  applyGatingOnReady({
-    targetSelector: '.lab-section',
-    moduleName: 'cocktail-party',
-  });
-</script>
+    import { applyGatingOnReady } from '/assets/js/gating.js';
+    applyGatingOnReady({
+      targetSelector: '.lab-section',
+      moduleName: 'cocktail-party',
+    });
+  </script>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
 
@@ -39,10 +38,11 @@
       --accent-hover: #1e4433;
       --error: #c0392b;
       --error-bg: #fdf2f2;
+      --warn: #92610a;
+      --warn-bg: #fdf8ee;
     }
 
     html { font-size: 16px; }
-
     body {
       font-family: var(--font-body);
       color: var(--text);
@@ -52,96 +52,120 @@
       display: flex;
       flex-direction: column;
     }
-
     a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
     a:hover { color: var(--accent); }
 
-    /* ══════════════════════════════════════
-       HEADER
-    ══════════════════════════════════════ */
+    /* ── HEADER ── */
     .sil-header {
       border-bottom: 1px solid var(--border);
-      padding: 0 1.5rem;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0; left: 0; right: 0;
-      background: var(--bg);
-      z-index: 100;
-      gap: 1rem;
-      width: 100%;
+      padding: 0 1.5rem; height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; left: 0; right: 0;
+      background: var(--bg); z-index: 100; gap: 1rem; width: 100%;
     }
     .sil-header__wordmark {
-      font-family: var(--font-heading);
-      font-size: 1rem; font-weight: 600;
-      letter-spacing: -0.01em;
-      white-space: nowrap; flex-shrink: 0;
+      font-family: var(--font-heading); font-size: 1rem; font-weight: 600;
+      letter-spacing: -0.01em; white-space: nowrap; flex-shrink: 0;
       text-decoration: none; color: var(--text);
     }
     .sil-header__wordmark:hover { color: var(--accent); }
     .sil-header__nav { display: flex; gap: 0.25rem; align-items: center; }
     .sil-header__nav a {
-      font-family: var(--font-body);
-      font-size: 0.8rem; font-weight: 500;
-      text-decoration: none; color: var(--muted);
-      transition: color 0.15s; white-space: nowrap;
-      padding: 0.3rem 0.65rem;
+      font-family: var(--font-body); font-size: 0.8rem; font-weight: 500;
+      text-decoration: none; color: var(--muted); transition: color 0.15s;
+      white-space: nowrap; padding: 0.3rem 0.65rem;
     }
     .sil-header__nav a:hover { color: var(--text); }
     .sil-header__nav a.sil-active { color: var(--accent); font-weight: 600; }
     .sil-header__signout {
-      font-family: var(--font-body);
-      font-size: 0.8rem; font-weight: 500;
-      color: var(--muted); background: none;
-      border: 1px solid var(--border); cursor: pointer;
-      padding: 0.3rem 0.75rem;
-      transition: color 0.15s, border-color 0.15s;
-      white-space: nowrap; line-height: 1.6;
+      font-family: var(--font-body); font-size: 0.8rem; font-weight: 500;
+      color: var(--muted); background: none; border: 1px solid var(--border);
+      cursor: pointer; padding: 0.3rem 0.75rem;
+      transition: color 0.15s, border-color 0.15s; white-space: nowrap; line-height: 1.6;
     }
     .sil-header__signout:hover { color: var(--text); border-color: var(--text); }
     .sil-header__signout:disabled { opacity: 0.5; cursor: not-allowed; }
     .sil-header__toggle {
-      display: none; flex-direction: column;
-      gap: 4px; background: none; border: none;
-      cursor: pointer; padding: 4px; flex-shrink: 0;
+      display: none; flex-direction: column; gap: 4px;
+      background: none; border: none; cursor: pointer; padding: 4px; flex-shrink: 0;
     }
     .sil-header__toggle span { display: block; width: 20px; height: 2px; background: var(--text); }
     @media (max-width: 700px) {
       .sil-header { padding: 0 1rem; }
       .sil-header__toggle { display: flex; }
       .sil-header__nav {
-        display: none; position: absolute;
-        top: 56px; left: 0; right: 0;
-        background: var(--bg);
-        border-bottom: 1px solid var(--border);
+        display: none; position: absolute; top: 56px; left: 0; right: 0;
+        background: var(--bg); border-bottom: 1px solid var(--border);
         flex-direction: column; align-items: flex-start;
         padding: 0.75rem 1rem; gap: 0; z-index: 99;
       }
       .sil-header__nav.sil-open { display: flex; }
-      .sil-header__nav a,
-      .sil-header__signout { font-size: 0.875rem; padding: 0.55rem 0.5rem; }
+      .sil-header__nav a, .sil-header__signout { font-size: 0.875rem; padding: 0.55rem 0.5rem; }
       .sil-header__signout { border: none; }
     }
 
-    /* ── Breadcrumb ── */
+    /* ── BREADCRUMB ── */
     .bc { padding: .75rem 1.5rem 0; max-width: 860px; margin: 0 auto; width: 100%; }
     .bc ol { list-style: none; display: flex; gap: .3rem; align-items: center; font-size: .75rem; color: var(--muted); flex-wrap: wrap; }
     .bc li + li::before { content: '/'; margin-right: .3rem; color: var(--border); }
     .bc a { color: var(--muted); text-decoration: none; }
     .bc a:hover { color: var(--accent); text-decoration: underline; }
 
-    /* ── Main ── */
+    /* ── MAIN ── */
     main { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; flex: 1; width: 100%; }
     @media (max-width: 600px) { main { padding: 1.5rem 1rem 3rem; } }
 
-    /* ── Page header ── */
+    /* ── PAGE HEADER ── */
     .ph { margin-bottom: 2rem; padding-bottom: 1.75rem; border-bottom: 1px solid var(--border); }
     .ph h2 { font-family: var(--font-heading); font-size: 2rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; margin-bottom: .4rem; }
     .ph p { font-size: .9rem; color: var(--muted); }
 
-    /* ── Game section ── */
+    /* ── LEVEL SELECTOR ── */
+    .level-selector {
+      border: 1px solid var(--border);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      background: var(--surface);
+    }
+    .level-selector-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem; flex-wrap: wrap; gap: .5rem;
+    }
+    .level-selector-title {
+      font-family: var(--font-heading); font-size: .67rem; font-weight: 600;
+      letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+    }
+    .word-set-row { display: flex; gap: .35rem; align-items: center; }
+    .word-set-label { font-size: .72rem; color: var(--muted); margin-right: .2rem; }
+    .level-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: .4rem;
+    }
+    @media (max-width: 600px) {
+      .level-grid { grid-template-columns: repeat(5, 1fr); }
+    }
+    .level-btn {
+      font-family: var(--font-heading); font-size: .72rem; font-weight: 600;
+      background: var(--bg); color: var(--muted);
+      border: 1px solid var(--border);
+      padding: .5rem .25rem; cursor: pointer;
+      transition: all .12s; text-align: center;
+      display: flex; flex-direction: column; gap: .15rem;
+      align-items: center;
+    }
+    .level-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .level-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+    .level-btn .lvl-num { font-size: .82rem; }
+    .level-btn .lvl-best {
+      font-size: .55rem; font-weight: 500; letter-spacing: .04em;
+      color: var(--muted); white-space: nowrap;
+    }
+    .level-btn.active .lvl-best { color: rgba(255,255,255,.7); }
+    .level-btn .lvl-best.perfect { color: var(--accent); font-weight: 600; }
+    .level-btn.active .lvl-best.perfect { color: #a8e6cf; }
+
+    /* ── MAIN GAME SECTION ── */
     .lab-section {
       border: 1px solid var(--border);
       padding: 1.5rem;
@@ -149,108 +173,107 @@
       background: var(--surface);
     }
     .lab-section > h3 {
-      font-family: var(--font-heading);
-      font-size: .65rem; font-weight: 600; letter-spacing: .12em;
-      text-transform: uppercase; color: var(--muted);
+      font-family: var(--font-heading); font-size: .67rem; font-weight: 600;
+      letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
       margin-bottom: 1.25rem;
     }
 
-    /* ── Spectrogram ── */
+    /* ── LEVEL STATUS BAR ── */
+    .level-status {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: .85rem; flex-wrap: wrap; gap: .5rem;
+    }
+    .level-status-left {
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .level-badge {
+      font-family: var(--font-heading); font-size: .72rem; font-weight: 600;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: var(--accent); background: var(--accent-light);
+      border: 1px solid #c0d9c8; padding: .2rem .65rem;
+    }
+    .trial-counter {
+      font-family: var(--font-heading); font-size: .82rem; font-weight: 600;
+      color: var(--text);
+    }
+    .trial-counter span { color: var(--muted); font-weight: 400; }
+    .streak-display {
+      display: flex; align-items: center; gap: .3rem;
+      font-family: var(--font-heading); font-size: .78rem; font-weight: 600;
+    }
+    .streak-num { color: var(--accent); }
+    .streak-label { font-size: .62rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+    .streak-display.hot .streak-num { color: #c0392b; }
+
+    /* ── TRIAL PROGRESS PIPS ── */
+    .trial-pips {
+      display: flex; gap: 4px; margin-bottom: .85rem;
+    }
+    .trial-pip {
+      height: 4px; flex: 1; background: var(--border);
+      transition: background .2s;
+    }
+    .trial-pip.correct { background: var(--accent); }
+    .trial-pip.incorrect { background: #c0a080; }
+    .trial-pip.current { background: var(--muted); }
+
+    /* ── SPECTROGRAM ── */
     .spectrogram-container {
       border: 1px solid var(--border);
-      margin-bottom: .85rem;
-      height: 100px;
-      background: #0a0a0a;
-      overflow: hidden;
+      margin-bottom: .85rem; height: 80px;
+      background: #0a0a0a; overflow: hidden;
     }
-    canvas#spectrogram {
-      width: 100%;
-      height: 100px;
-      display: block;
-    }
+    canvas#spectrogram { width: 100%; height: 80px; display: block; }
 
-    /* ── Stats ── */
-    .cocktail-stats {
-      display: flex; gap: 1.5rem; justify-content: center;
-      margin: .75rem 0; padding: .5rem 0;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      flex-wrap: wrap;
-    }
-    .stat-item { display: flex; align-items: baseline; gap: .35rem; }
-    .stat-label { font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
-    .stat-value { font-family: var(--font-heading); font-size: .9rem; font-weight: 600; color: var(--text); }
-
-    /* ── Row layouts ── */
-    .gen-row {
-      display: flex; align-items: center; gap: 6px;
-      margin-bottom: .6rem; flex-wrap: wrap;
-    }
-    .gen-row-label {
-      font-size: .62rem; letter-spacing: .1em;
-      text-transform: uppercase; color: var(--muted);
-      white-space: nowrap;
-    }
+    /* ── CONTROLS ROW ── */
     .control-row {
       display: flex; align-items: center;
       gap: 8px; margin-bottom: .75rem; flex-wrap: wrap;
     }
 
-    /* ── Preset / toggle buttons ── */
-    .lab-preset-btn {
-      font-family: var(--font-body);
-      font-size: .72rem; font-weight: 500;
-      background: var(--bg); color: var(--muted);
-      border: 1px solid var(--border);
-      padding: .28rem .8rem; cursor: pointer;
-      transition: all .12s;
-    }
-    .lab-preset-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .lab-preset-btn.on { background: var(--accent); color: white; border-color: var(--accent); }
-
-    /* ── Main action buttons ── */
+    /* ── BUTTONS ── */
     .lab-btn {
-      font-family: var(--font-heading);
-      font-size: .78rem; font-weight: 600;
+      font-family: var(--font-heading); font-size: .78rem; font-weight: 600;
       background: var(--bg); color: var(--text);
       border: 1px solid var(--border);
       padding: .5rem 1.2rem; cursor: pointer;
-      transition: all .12s; white-space: nowrap;
-      flex-shrink: 0;
+      transition: all .12s; white-space: nowrap; flex-shrink: 0;
     }
     .lab-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
     .lab-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
     .lab-btn.primary:hover:not(:disabled) { background: var(--accent-hover); }
     .lab-btn:disabled { opacity: .35; cursor: not-allowed; }
 
-    /* ── Feedback ── */
-    .feedback-msg {
-      flex: 1; min-width: 100px;
-      font-size: .8rem; color: var(--text);
-      padding: .45rem 1rem;
+    .lab-preset-btn {
+      font-family: var(--font-body); font-size: .72rem; font-weight: 500;
+      background: var(--bg); color: var(--muted);
       border: 1px solid var(--border);
-      background: var(--bg);
+      padding: .28rem .8rem; cursor: pointer; transition: all .12s;
+    }
+    .lab-preset-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .lab-preset-btn.on { background: var(--accent); color: white; border-color: var(--accent); }
+
+    /* ── FEEDBACK ── */
+    .feedback-msg {
+      flex: 1; min-width: 100px; font-size: .8rem; color: var(--text);
+      padding: .45rem 1rem; border: 1px solid var(--border); background: var(--bg);
       text-align: center; min-height: 38px;
       display: flex; align-items: center; justify-content: center;
     }
     .feedback-msg.success { border-color: var(--accent); background: var(--accent-light); color: var(--accent-hover); font-weight: 500; }
-    .feedback-msg.error   { border-color: #c0a080; background: #fdf8f0; color: #6b4a1a; font-weight: 500; }
+    .feedback-msg.error { border-color: #c0a080; background: #fdf8f0; color: #6b4a1a; font-weight: 500; }
 
-    /* ── Choice buttons ── */
+    /* ── CHOICE BUTTONS ── */
     .choice-buttons {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: .5rem;
-      margin: .75rem 0;
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: .5rem; margin: .75rem 0;
     }
     .choice-btn {
-      font-family: var(--font-heading);
-      font-size: .9rem; font-weight: 600;
+      font-family: var(--font-heading); font-size: .9rem; font-weight: 600;
       background: var(--bg); color: var(--text);
       border: 1px solid var(--border);
       padding: .85rem .5rem; cursor: pointer;
-      transition: all .12s; min-height: 52px;
-      letter-spacing: -.01em;
+      transition: all .12s; min-height: 52px; letter-spacing: -.01em;
     }
     .choice-btn:hover:not(:disabled):not(:empty) { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
     .choice-btn:disabled { opacity: .4; cursor: not-allowed; }
@@ -258,76 +281,99 @@
     .choice-btn.incorrect { border-color: #c0a080; color: #6b4a1a; background: #fdf8f0; }
     .choice-btn:empty { visibility: hidden; }
 
-    /* ── Sliders ── */
-    .lab-ctrl { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 120px; }
-    .lab-ctrl input[type=range] {
-      width: 100%; -webkit-appearance: none; appearance: none;
-      height: 3px; background: var(--border); outline: none; cursor: pointer;
+    /* ── STATS ── */
+    .cocktail-stats {
+      display: flex; gap: 1.5rem; justify-content: center;
+      margin: .75rem 0; padding: .5rem 0;
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
     }
-    .lab-ctrl input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none; width: 13px; height: 13px;
-      border-radius: 50%; background: var(--accent); cursor: pointer;
-    }
-    .lab-ctrl input[type=range]::-moz-range-thumb {
-      width: 13px; height: 13px; border-radius: 50%;
-      background: var(--accent); border: none; cursor: pointer;
-    }
-    .lab-ctrl-bottom { display: flex; justify-content: space-between; align-items: baseline; }
-    .lab-ctrl-label { font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
-    .lab-ctrl-val { font-size: .65rem; color: var(--accent); font-weight: 500; }
-
-    /* ── Collapsible ── */
-    .collapsible-section { border-top: 1px solid var(--border); margin-top: .85rem; padding-top: .85rem; }
-    .collapsible-header {
-      font-size: .65rem; letter-spacing: .1em; text-transform: uppercase;
-      color: var(--muted); cursor: pointer; user-select: none;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .collapsible-header:hover { color: var(--text); }
-    .collapsible-content { max-height: 0; overflow: hidden; transition: max-height .3s ease-out; }
-    .collapsible-content.active { max-height: 400px; padding-top: .75rem; }
-
-    /* ── Spatial diagram ── */
-    .spatial-diagram-wrap {
-      margin: .5rem 0 .85rem;
-      display: flex; justify-content: center;
-    }
-    .spatial-diagram {
-      position: relative;
-      width: 200px; height: 200px;
-      border: 1px solid var(--border);
-      border-radius: 50%;
-      background: var(--bg);
-    }
-    .sound-dot {
-      position: absolute;
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-    }
-    .sound-dot.target  { background: var(--text); }
-    .sound-dot.masker  { background: transparent; border: 2px solid var(--border); }
-    .listener-dot {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      width: 14px; height: 14px;
-      background: var(--muted);
-      border-radius: 50%;
-      opacity: 0.4;
-    }
+    .stat-item { display: flex; align-items: baseline; gap: .35rem; }
+    .stat-label { font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+    .stat-value { font-family: var(--font-heading); font-size: .9rem; font-weight: 600; color: var(--text); }
+    .stat-value.accent { color: var(--accent); }
 
     .lab-hint {
       font-size: .72rem; color: var(--muted);
       margin-top: .65rem; text-align: center; line-height: 1.5;
     }
 
-    /* ── Article text ── */
+    /* ── DIFFICULTY INFO ── */
+    .difficulty-info {
+      display: flex; align-items: center; gap: .6rem;
+      padding: .5rem .75rem; background: var(--bg); border: 1px solid var(--border);
+      margin-bottom: .85rem; font-size: .72rem; color: var(--muted);
+    }
+    .difficulty-info-label {
+      font-family: var(--font-heading); font-size: .6rem; font-weight: 600;
+      letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+      flex-shrink: 0;
+    }
+    .diff-pip { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── LEVEL COMPLETE OVERLAY ── */
+    .level-complete {
+      display: none; position: fixed; inset: 0;
+      background: rgba(255,255,255,.97); z-index: 300;
+      align-items: center; justify-content: center; flex-direction: column;
+      padding: 2rem;
+    }
+    .level-complete.visible { display: flex; }
+    .level-complete-inner {
+      max-width: 440px; width: 100%; text-align: center;
+    }
+    .level-complete-title {
+      font-family: var(--font-heading); font-size: 1.5rem; font-weight: 600;
+      letter-spacing: -.02em; margin-bottom: .5rem;
+    }
+    .level-complete-score {
+      font-family: var(--font-heading); font-size: 3rem; font-weight: 600;
+      color: var(--accent); line-height: 1; margin-bottom: .25rem;
+    }
+    .level-complete-score-label {
+      font-size: .75rem; color: var(--muted); letter-spacing: .08em;
+      text-transform: uppercase; margin-bottom: 1.5rem;
+    }
+    .level-complete-stats {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: .75rem; margin-bottom: 1.75rem;
+      border: 1px solid var(--border); padding: 1rem;
+      background: var(--surface);
+    }
+    .lc-stat { text-align: center; }
+    .lc-stat-val {
+      font-family: var(--font-heading); font-size: 1.1rem; font-weight: 600;
+      color: var(--text); display: block;
+    }
+    .lc-stat-label { font-size: .65rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
+    .level-complete-msg {
+      font-size: .85rem; color: var(--muted); line-height: 1.65;
+      margin-bottom: 1.5rem; font-style: italic;
+    }
+    .lc-record {
+      font-size: .75rem; color: var(--accent); font-weight: 500;
+      margin-bottom: 1rem; display: none;
+    }
+    .lc-record.visible { display: block; }
+    .level-complete-btns {
+      display: flex; gap: .65rem; justify-content: center; flex-wrap: wrap;
+    }
+    .lc-pip-row {
+      display: flex; gap: 4px; justify-content: center; margin-bottom: 1.25rem;
+    }
+    .lc-pip {
+      width: 24px; height: 4px;
+      background: var(--border);
+    }
+    .lc-pip.correct { background: var(--accent); }
+    .lc-pip.incorrect { background: #c0a080; }
+
+    /* ── ARTICLE ── */
     .article-text { margin-top: 2rem; }
     .article-text h3 { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 600; margin-bottom: .6rem; }
     .article-text p { font-size: .9rem; color: var(--muted); line-height: 1.75; margin-bottom: 1rem; }
 
-    /* ── Footer ── */
+    /* ── FOOTER ── */
     footer { border-top: 1px solid var(--border); padding: 1.25rem 1.5rem; text-align: center; font-size: .78rem; color: var(--muted); }
     footer a { color: var(--muted); text-decoration: none; }
     footer a:hover { color: var(--accent); }
@@ -336,14 +382,12 @@
       .choice-buttons { grid-template-columns: repeat(2, 1fr); }
       .control-row { flex-wrap: wrap; }
       .feedback-msg { flex-basis: 100%; }
+      .cocktail-stats { gap: .75rem; }
     }
   </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════
-     HEADER
-══════════════════════════════════════ -->
 <header class="sil-header">
   <a class="sil-header__wordmark" href="/dashboard/">Sensory Intelligence Lab</a>
   <button class="sil-header__toggle" id="silMenuToggle" aria-label="Toggle navigation" aria-expanded="false">
@@ -368,45 +412,61 @@
 
   <div class="ph">
     <h2>Cocktail Party Problem</h2>
-    <p>Train selective auditory attention. Identify a target word against competing background noise. Adjust difficulty, masker type, and signal-to-noise ratio.</p>
+    <p>Train selective auditory attention. Identify a target word against competing background noise. Ten levels of increasing difficulty.</p>
   </div>
 
+  <!-- ── LEVEL SELECTOR ── -->
+  <div class="level-selector" id="levelSelector">
+    <div class="level-selector-head">
+      <span class="level-selector-title">Select level</span>
+      <div class="word-set-row">
+        <span class="word-set-label">Words:</span>
+        <button class="lab-preset-btn on" data-wordset="colors">Colours</button>
+        <button class="lab-preset-btn" data-wordset="numbers">Numbers</button>
+      </div>
+    </div>
+    <div class="level-grid" id="levelGrid">
+      <!-- populated by JS -->
+    </div>
+  </div>
+
+  <!-- ── MAIN GAME ── -->
   <div class="lab-section">
-    <h3>Word identification in noise</h3>
+    <h3 id="section-title">Cocktail party problem — level 1</h3>
+
+    <!-- Level status bar -->
+    <div class="level-status">
+      <div class="level-status-left">
+        <span class="level-badge" id="level-badge">Level 1</span>
+        <span class="trial-counter">Trial <strong id="trial-num">—</strong><span> / 10</span></span>
+      </div>
+      <div class="streak-display" id="streak-display">
+        <span class="streak-num" id="streak-num">0</span>
+        <span class="streak-label">streak</span>
+      </div>
+    </div>
+
+    <!-- Trial progress pips -->
+    <div class="trial-pips" id="trial-pips">
+      <!-- 10 pips populated by JS -->
+    </div>
+
+    <!-- Difficulty info bar -->
+    <div class="difficulty-info" id="difficulty-info">
+      <span class="difficulty-info-label">Level 1</span>
+      <span id="diff-desc">One background · target clearly above noise · easy to identify</span>
+    </div>
 
     <!-- Spectrogram -->
     <div class="spectrogram-container">
-      <canvas id="spectrogram" width="800" height="100"></canvas>
-    </div>
-
-    <!-- Difficulty -->
-    <div class="gen-row">
-      <span class="gen-row-label">Difficulty</span>
-      <button class="lab-preset-btn on" data-difficulty="easy">Easy</button>
-      <button class="lab-preset-btn" data-difficulty="medium">Medium</button>
-      <button class="lab-preset-btn" data-difficulty="hard">Hard</button>
-    </div>
-
-    <!-- Word set -->
-    <div class="gen-row">
-      <span class="gen-row-label">Word set</span>
-      <button class="lab-preset-btn on" data-wordset="colors">Colours</button>
-      <button class="lab-preset-btn" data-wordset="numbers">Numbers</button>
-    </div>
-
-    <!-- Maskers -->
-    <div class="gen-row">
-      <span class="gen-row-label">Background</span>
-      <button class="lab-preset-btn on" data-masker="nature">Nature</button>
-      <button class="lab-preset-btn" data-masker="traffic">Traffic</button>
-      <button class="lab-preset-btn" data-masker="voices">Voices</button>
+      <canvas id="spectrogram" width="800" height="80"></canvas>
     </div>
 
     <!-- Controls + feedback -->
     <div class="control-row">
       <button class="lab-btn primary" id="btn-play">▶ Play</button>
       <button class="lab-btn" id="btn-repeat" disabled>↺ Repeat</button>
-      <button class="lab-btn" id="btn-next" disabled>Next</button>
+      <button class="lab-btn" id="btn-next" disabled>Next →</button>
       <div class="feedback-msg" id="feedback-msg"></div>
     </div>
 
@@ -432,58 +492,58 @@
         <span class="stat-label">Accuracy</span>
         <span class="stat-value" id="stat-accuracy">—</span>
       </div>
-    </div>
-
-    <!-- Advanced settings (collapsible) -->
-    <div class="collapsible-section">
-      <div class="collapsible-header" id="advanced-toggle">
-        <span>Advanced settings</span>
-        <span id="advanced-icon">▾</span>
+      <div class="stat-item">
+        <span class="stat-label">Avg reaction</span>
+        <span class="stat-value accent" id="stat-reaction">—</span>
       </div>
-      <div class="collapsible-content" id="advanced-content">
-
-        <div class="gen-row" style="margin-top:.5rem;">
-          <div class="lab-ctrl">
-            <input type="range" id="target-volume" min="0" max="1" step="0.05" value="1.0">
-            <div class="lab-ctrl-bottom">
-              <span class="lab-ctrl-label">Target volume</span>
-              <span class="lab-ctrl-val" id="target-volume-val">1.0</span>
-            </div>
-          </div>
-          <div class="lab-ctrl">
-            <input type="range" id="snr" min="-15" max="15" step="1" value="10">
-            <div class="lab-ctrl-bottom">
-              <span class="lab-ctrl-label">SNR</span>
-              <span class="lab-ctrl-val" id="snr-val">10 dB</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Spatial diagram toggle -->
-        <div class="gen-row">
-          <button class="lab-preset-btn" id="toggle-spatial">Show spatial diagram</button>
-        </div>
-
-        <div id="spatial-container" style="display:none;">
-          <div class="spatial-diagram-wrap">
-            <div class="spatial-diagram" id="spatial-diagram">
-              <div class="listener-dot"></div>
-            </div>
-          </div>
-        </div>
-
+      <div class="stat-item">
+        <span class="stat-label">Best streak</span>
+        <span class="stat-value" id="stat-best-streak">0</span>
       </div>
     </div>
 
     <p class="lab-hint">Headphones recommended · Listen for the target word · Select from the four options</p>
-
   </div>
 
-  <!-- Article -->
+  <!-- ── LEVEL COMPLETE OVERLAY ── -->
+  <div class="level-complete" id="levelComplete">
+    <div class="level-complete-inner">
+      <div class="level-complete-title" id="lc-title">Level complete</div>
+      <div class="level-complete-score" id="lc-score">7 / 10</div>
+      <div class="level-complete-score-label">correct answers</div>
+      <div class="lc-pip-row" id="lc-pips"></div>
+      <div class="level-complete-stats">
+        <div class="lc-stat">
+          <span class="lc-stat-val" id="lc-accuracy">70%</span>
+          <span class="lc-stat-label">Accuracy</span>
+        </div>
+        <div class="lc-stat">
+          <span class="lc-stat-val" id="lc-reaction">—</span>
+          <span class="lc-stat-label">Avg reaction</span>
+        </div>
+        <div class="lc-stat">
+          <span class="lc-stat-val" id="lc-streak">0</span>
+          <span class="lc-stat-label">Best streak</span>
+        </div>
+        <div class="lc-stat">
+          <span class="lc-stat-val" id="lc-prev-best">—</span>
+          <span class="lc-stat-label">Previous best</span>
+        </div>
+      </div>
+      <div class="lc-record" id="lc-record">★ New personal best</div>
+      <div class="level-complete-msg" id="lc-msg"></div>
+      <div class="level-complete-btns">
+        <button class="lab-btn" onclick="retryLevel()">Try again</button>
+        <button class="lab-btn primary" id="lc-next-btn" onclick="nextLevel()">Next level →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ARTICLE ── -->
   <div class="article-text">
     <h3>The cocktail party problem</h3>
     <p>The term was coined by Colin Cherry in 1953 to describe the auditory system's remarkable ability to selectively attend to a single voice or sound source within a complex acoustic scene. At a crowded party, you can focus on one conversation while filtering out others — not by reducing the volume of competing sounds, but by directing attentional resources toward specific auditory streams.</p>
-    <p>This capacity depends on a network of auditory and prefrontal cortex regions that work together to segregate sound sources using spatial cues (where the sound comes from), spectral cues (its frequency content), and temporal cues (its rhythmic and timing patterns). The signal-to-noise ratio control in this exercise manipulates how much the target word stands out from the background — at positive SNR values the target is louder; at negative values the background dominates and selective attention becomes the primary resource.</p>
+    <p>This capacity depends on a network of auditory and prefrontal cortex regions that work together to segregate sound sources using spatial cues (where the sound comes from), spectral cues (its frequency content), and temporal cues (its rhythmic and timing patterns). As you progress through the levels, the signal-to-noise ratio decreases and additional competing sound sources are added — requiring increasing reliance on selective attention rather than simple loudness detection.</p>
     <p>Training on this task is associated with improved performance in real-world noisy environments, and is used in auditory rehabilitation contexts for hearing loss and auditory processing difficulties.</p>
   </div>
 
@@ -502,14 +562,13 @@
 'use strict';
 
 // ─────────────────────────────────────────────────────────
-// HEADER BEHAVIOUR
+// HEADER
 // ─────────────────────────────────────────────────────────
 const path = window.location.pathname.replace(/\/$/, '') || '/';
 document.querySelectorAll('.sil-header__nav a').forEach(a => {
   const href = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
   if (href === path) a.classList.add('sil-active');
 });
-
 const menuToggle = document.getElementById('silMenuToggle');
 const silNav     = document.getElementById('silNav');
 menuToggle.addEventListener('click', () => {
@@ -519,128 +578,124 @@ menuToggle.addEventListener('click', () => {
 silNav.querySelectorAll('a').forEach(a =>
   a.addEventListener('click', () => silNav.classList.remove('sil-open'))
 );
-
 async function getSupabase() {
   if (window._supabase) return window._supabase;
   const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-  return createClient(
-    'https://lrjuufvrgkuvfxcmybtf.supabase.co',
-    'sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1'
-  );
+  return createClient('https://lrjuufvrgkuvfxcmybtf.supabase.co','sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1');
 }
-
 document.getElementById('silSignOut').addEventListener('click', async function () {
-  this.disabled = true;
-  this.textContent = 'Signing out…';
-  try {
-    const sb = await getSupabase();
-    await sb.auth.signOut();
-  } finally {
-    window.location.replace('/');
-  }
+  this.disabled = true; this.textContent = 'Signing out…';
+  try { const sb = await getSupabase(); await sb.auth.signOut(); }
+  finally { window.location.replace('/'); }
 });
+
+// ═══════════════════════════════════════════════════════
+// LEVEL CONFIG
+// ═══════════════════════════════════════════════════════
+const LEVEL_CONFIG = [
+  { level: 1,  snr:  15, maskers: ['nature'],                      desc: 'One background · target clearly above noise · easy to identify' },
+  { level: 2,  snr:  10, maskers: ['nature'],                      desc: 'One background · target noticeably louder than noise' },
+  { level: 3,  snr:   8, maskers: ['nature'],                      desc: 'One background · target moderately above noise' },
+  { level: 4,  snr:   5, maskers: ['nature', 'traffic'],           desc: 'Two backgrounds · target slightly above noise' },
+  { level: 5,  snr:   2, maskers: ['nature', 'traffic'],           desc: 'Two backgrounds · target barely above noise' },
+  { level: 6,  snr:  -2, maskers: ['nature', 'traffic'],           desc: 'Two backgrounds · target now quieter than background' },
+  { level: 7,  snr:  -5, maskers: ['nature', 'traffic', 'voices'], desc: 'Three backgrounds · target well below noise floor' },
+  { level: 8,  snr:  -8, maskers: ['nature', 'traffic', 'voices'], desc: 'Three backgrounds · significant masking' },
+  { level: 9,  snr: -12, maskers: ['nature', 'traffic', 'voices'], desc: 'Three backgrounds · very faint target' },
+  { level: 10, snr: -15, maskers: ['nature', 'traffic', 'voices'], desc: 'Expert · three backgrounds · target barely audible' },
+];
+
+const LEVEL_MESSAGES = [
+  'A clear first step. The word stands out — your brain barely had to work.',
+  'Still fairly accessible. A good foundation for what\'s ahead.',
+  'The first signs of challenge. Notice how attention sharpens.',
+  'A second voice enters the background. Your brain must now choose.',
+  'Two maskers at near-equal volume to the target. Listening becomes work.',
+  'The background is now louder than the word. You are training real attention.',
+  'All three backgrounds active. This is what a busy room actually sounds like.',
+  'Significant masking. Elite listeners start to separate here.',
+  'The target is very faint. You are approaching the limits of normal hearing.',
+  'Expert level. This is the true cocktail party problem in its hardest form.',
+];
+
+// ═══════════════════════════════════════════════════════
+// WORD SETS
+// ═══════════════════════════════════════════════════════
+const WORD_SETS = {
+  colors:  ['red','blue','green','yellow','orange','purple','pink','brown',
+             'black','white','gray','silver','gold','violet','indigo','cyan',
+             'magenta','turquoise','lime','maroon'],
+  numbers: ['one','two','three','four','five','six','seven','eight','nine','ten'],
+};
+const MASKER_TYPES = ['nature', 'traffic', 'voices'];
 
 // ═══════════════════════════════════════════════════════
 // AUDIO ENGINE
 // ═══════════════════════════════════════════════════════
 class AudioEngine {
   constructor() {
-    this.audioCtx       = null;
+    this.audioCtx = null;
     this.resonanceScene = null;
-    this.analyser       = null;
-    this.sources        = [];
-    this.isInitialized  = false;
+    this.analyser = null;
+    this.sources  = [];
+    this.isInitialized = false;
   }
-
   async init() {
     if (this.isInitialized) return;
-
     this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
     this.resonanceScene = new ResonanceAudio(this.audioCtx);
     this.resonanceScene.setRoomProperties(
       { width: 10, height: 3, depth: 8 },
-      {
-        left:  'brick-bare', right: 'brick-bare',
-        front: 'brick-bare', back:  'brick-bare',
-        down:  'wood-panel', up:    'acoustic-ceiling-tiles',
-      }
+      { left:'brick-bare', right:'brick-bare', front:'brick-bare',
+        back:'brick-bare', down:'wood-panel', up:'acoustic-ceiling-tiles' }
     );
-
-    // Analyser for spectrogram
     this.analyser = this.audioCtx.createAnalyser();
     this.analyser.fftSize = 2048;
     this.analyser.smoothingTimeConstant = 0.8;
-
-    // Resonance → analyser → destination
     this.resonanceScene.output.connect(this.analyser);
     this.analyser.connect(this.audioCtx.destination);
-
     this.isInitialized = true;
   }
-
   resume() {
-    if (this.audioCtx && this.audioCtx.state === 'suspended') {
-      this.audioCtx.resume();
-    }
+    if (this.audioCtx && this.audioCtx.state === 'suspended') this.audioCtx.resume();
   }
-
-  // SNR: maskerGain = targetGain × 10^(−SNR/20)
   calcMaskerGain(snr, targetGain = 1.0) {
     return targetGain * Math.pow(10, -snr / 20);
   }
-
   _makeSource(buffer, gain, position) {
-    const src  = this.audioCtx.createBufferSource();
+    const src = this.audioCtx.createBufferSource();
     src.buffer = buffer;
-
     const resSrc = this.resonanceScene.createSource();
     if (position) resSrc.setPosition(position.x, position.y, position.z);
     else          resSrc.setPosition(0, 0, -1);
-
     const gainNode = this.audioCtx.createGain();
     gainNode.gain.value = gain;
-
     src.connect(gainNode);
     gainNode.connect(resSrc.input);
-
     return src;
   }
-
-  // Returns trial duration in seconds
   playTrial(targetBuffer, maskerBuffers, settings) {
     this.stopAll();
-
-    const now      = this.audioCtx.currentTime;
+    const now = this.audioCtx.currentTime;
     const duration = 4.0;
-
-    // Target: random onset between 0.5–2.5 s
     const wordStart = now + 0.5 + Math.random() * 2.0;
-
-    // Masker positions around the listener
     const positions = [
-      { x: -2,   y: 0, z:  0   },  // hard left
-      { x: -1.5, y: 0, z: -1.5 },  // front-left
-      { x:  1.5, y: 0, z: -1.5 },  // front-right
-      { x:  0,   y: 0, z:  2   },  // behind
+      { x: -2,   y: 0, z:  0   },
+      { x: -1.5, y: 0, z: -1.5 },
+      { x:  1.5, y: 0, z: -1.5 },
+      { x:  0,   y: 0, z:  2   },
     ];
-
     maskerBuffers.forEach((buf, i) => {
       if (!buf) return;
       const src = this._makeSource(buf, settings.maskerGain, positions[i] || positions[0]);
-      src.start(now);
-      src.stop(now + duration);
+      src.start(now); src.stop(now + duration);
       this.sources.push(src);
     });
-
     const tSrc = this._makeSource(targetBuffer, settings.targetGain, { x: 0, y: 0, z: -1 });
-    tSrc.start(wordStart);
-    tSrc.stop(now + duration);
+    tSrc.start(wordStart); tSrc.stop(now + duration);
     this.sources.push(tSrc);
-
-    return duration;
+    return { duration, wordStart: (wordStart - now) };
   }
-
   stopAll() {
     this.sources.forEach(src => { try { src.stop(); } catch(e){} });
     this.sources = [];
@@ -653,53 +708,40 @@ class AudioEngine {
 class AssetLoader {
   constructor(audioCtx) {
     this.audioCtx = audioCtx;
-    this.targets  = {};  // word → AudioBuffer[]
-    this.maskers  = {};  // type → AudioBuffer
+    this.targets  = {};
+    this.maskers  = {};
   }
-
   async _fetch(url) {
     try {
       const res = await fetch(url);
       const ab  = await res.arrayBuffer();
       return await this.audioCtx.decodeAudioData(ab);
-    } catch(e) {
-      console.warn('Audio load failed:', url, e);
-      return null;
-    }
+    } catch(e) { console.warn('Audio load failed:', url, e); return null; }
   }
-
   async loadWord(word, variant = 0) {
     const buf = await this._fetch(`/audio/targets/${word}_${variant}.mp3`);
     if (!this.targets[word]) this.targets[word] = [];
     this.targets[word][variant] = buf;
     return buf;
   }
-
   async loadMasker(type) {
     const buf = await this._fetch(`/audio/maskers/${type}.mp3`);
     this.maskers[type] = buf;
     return buf;
   }
-
   getWord(word) {
     const variants = (this.targets[word] || []).filter(Boolean);
     return variants.length ? variants[Math.floor(Math.random() * variants.length)] : null;
   }
-
-  getMasker(type) {
-    return this.maskers[type] || null;
-  }
-
-  // Slice a random 4-second excerpt from a masker buffer
+  getMasker(type) { return this.maskers[type] || null; }
   excerpt(buf, duration = 4.0) {
     if (!buf) return null;
-    const sr      = this.audioCtx.sampleRate;
-    const len     = Math.floor(sr * duration);
+    const sr = this.audioCtx.sampleRate;
+    const len = Math.floor(sr * duration);
     const maxStart = buf.length - len;
     if (maxStart <= 0) return buf;
-
-    const start  = Math.floor(Math.random() * maxStart);
-    const out    = this.audioCtx.createBuffer(buf.numberOfChannels, len, sr);
+    const start = Math.floor(Math.random() * maxStart);
+    const out   = this.audioCtx.createBuffer(buf.numberOfChannels, len, sr);
     for (let c = 0; c < buf.numberOfChannels; c++) {
       out.getChannelData(c).set(buf.getChannelData(c).subarray(start, start + len));
     }
@@ -708,155 +750,205 @@ class AssetLoader {
 }
 
 // ═══════════════════════════════════════════════════════
-// WORD SETS
-// ═══════════════════════════════════════════════════════
-const WORD_SETS = {
-  colors:  ['red','blue','green','yellow','orange','purple','pink','brown',
-             'black','white','gray','silver','gold','violet','indigo','cyan',
-             'magenta','turquoise','lime','maroon'],
-  numbers: ['one','two','three','four','five','six','seven','eight','nine','ten'],
-};
-
-const MASKER_TYPES = ['nature', 'traffic', 'voices'];
-
-// ═══════════════════════════════════════════════════════
-// GAME STATE
+// STATE
 // ═══════════════════════════════════════════════════════
 const engine = new AudioEngine();
 let loader   = null;
 
 const S = {
-  trials:   0,
-  correct:  0,
-  attempts: 0,
+  // Session
+  currentLevel: 1,
+  wordSet: 'colors',
   isPlaying: false,
 
-  currentWord:    null,
-  currentTarget:  null,
+  // Level run
+  trialsInLevel: 0,        // 0-9 (how many completed)
+  trialResults: [],        // array of { correct, reactionMs }
+  currentWord: null,
+  currentTarget: null,
   currentMaskers: null,
-  choices:        [],
+  choices: [],
+  attempts: 0,
+  trialAnswered: false,
+  wordEndTime: null,       // performance.now() when word finishes, for reaction time
+  reactionStart: null,
 
-  difficulty:     'easy',
-  wordSet:        'colors',
-  activeMaskers:  ['nature'],
-  targetGain:     1.0,
-  snr:            10,
+  // Running game stats
+  streak: 0,
+  bestStreak: 0,
+  totalTrials: 0,
+  totalCorrect: 0,
+  reactionTimes: [],
 
-  spectrogramOn:  true,
-  spatialOn:      false,
+  // Persistent best scores per level — loaded from Supabase
+  // bestScores[level] = { correct, accuracy, avgReaction }
+  bestScores: {},
 
-  presets: {
-    easy:   { snr:  10, maskers: ['nature'] },
-    medium: { snr:  -5, maskers: ['nature', 'traffic'] },
-    hard:   { snr: -15, maskers: ['nature', 'traffic', 'voices'] },
-  },
+  // Word frequency weighting — tracks error counts per word
+  // wordErrors[word] = count
+  wordErrors: {},
 };
 
-// Spectrogram animation
-let spectroRaf = null;
-
 // ═══════════════════════════════════════════════════════
-// INIT
+// SUPABASE PERSISTENCE
 // ═══════════════════════════════════════════════════════
-async function init() {
-  await engine.init();
-  loader = new AssetLoader(engine.audioCtx);
-  await preload();
-  startSpectrogram();
-  applyPreset('easy');
-  updateSpatialDiagram();
-  setupUI();
+async function loadBestScores() {
+  try {
+    const sb   = window._supabase;
+    const uid  = window._currentUser?.id;
+    if (!sb || !uid) return;
+    const { data } = await sb
+      .from('cocktail_scores')
+      .select('level, correct, accuracy, avg_reaction_ms')
+      .eq('user_id', uid);
+    if (data) {
+      data.forEach(row => {
+        S.bestScores[row.level] = {
+          correct:    row.correct,
+          accuracy:   row.accuracy,
+          avgReaction: row.avg_reaction_ms,
+        };
+      });
+    }
+  } catch(e) { console.warn('Could not load scores:', e); }
+  renderLevelGrid();
 }
 
-async function preload() {
-  // Maskers
-  for (const t of MASKER_TYPES) await loader.loadMasker(t);
-  // A handful of words to start (rest are lazy-loaded at play time)
-  const seed = ['red','blue','one','two','three','green'];
-  for (const w of seed) {
-    for (let v = 0; v < 3; v++) await loader.loadWord(w, v);
-  }
+async function saveBestScore(level, correct, accuracy, avgReactionMs) {
+  try {
+    const sb  = window._supabase;
+    const uid = window._currentUser?.id;
+    if (!sb || !uid) return;
+    await sb.from('cocktail_scores').upsert({
+      user_id:         uid,
+      level,
+      correct,
+      accuracy,
+      avg_reaction_ms: avgReactionMs,
+      updated_at:      new Date().toISOString(),
+    }, { onConflict: 'user_id,level' });
+  } catch(e) { console.warn('Could not save score:', e); }
 }
 
 // ═══════════════════════════════════════════════════════
 // SPECTROGRAM
 // ═══════════════════════════════════════════════════════
+let spectroRaf = null;
 function startSpectrogram() {
-  stopSpectrogram();
-  const analyser   = engine.analyser;
-  const bufLen     = analyser.frequencyBinCount;
-  const dataArr    = new Uint8Array(bufLen);
-  const canvas     = document.getElementById('spectrogram');
-  const ctx        = canvas.getContext('2d');
-  const maxBin     = Math.floor(bufLen * 0.5); // up to ~8 kHz
-
+  if (spectroRaf) cancelAnimationFrame(spectroRaf);
+  const analyser = engine.analyser;
+  const bufLen   = analyser.frequencyBinCount;
+  const dataArr  = new Uint8Array(bufLen);
+  const canvas   = document.getElementById('spectrogram');
+  const ctx      = canvas.getContext('2d');
+  const maxBin   = Math.floor(bufLen * 0.5);
   function draw() {
     spectroRaf = requestAnimationFrame(draw);
     analyser.getByteFrequencyData(dataArr);
-
-    // Scroll left by 2 px
     const img = ctx.getImageData(2, 0, canvas.width - 2, canvas.height);
     ctx.putImageData(img, 0, 0);
-
-    // Clear rightmost strip
     ctx.fillStyle = '#0a0a0a';
     ctx.fillRect(canvas.width - 2, 0, 2, canvas.height);
-
-    // Draw new column
     for (let i = 0; i < maxBin; i++) {
       const val = dataArr[i];
       const y   = canvas.height - Math.round((i / maxBin) * canvas.height);
       const h   = Math.max(1, Math.round(canvas.height / maxBin));
-
-      // Map value to green-tinted colour matching the lab palette
-      const r = Math.round(val * 0.18);
-      const g = Math.round(val * 0.38 + 20);
-      const b = Math.round(val * 0.14);
+      const r   = Math.round(val * 0.18);
+      const g   = Math.round(val * 0.38 + 20);
+      const b   = Math.round(val * 0.14);
       ctx.fillStyle = `rgb(${r},${g},${b})`;
       ctx.fillRect(canvas.width - 2, y, 2, h);
     }
   }
-
   draw();
 }
 
-function stopSpectrogram() {
-  if (spectroRaf) { cancelAnimationFrame(spectroRaf); spectroRaf = null; }
+// ═══════════════════════════════════════════════════════
+// WORD FREQUENCY WEIGHTING
+// ═══════════════════════════════════════════════════════
+function pickWeightedWord(words) {
+  // Words that have been answered incorrectly more often get higher weight
+  const weights = words.map(w => 1 + (S.wordErrors[w] || 0) * 1.5);
+  const total   = weights.reduce((a, b) => a + b, 0);
+  let rand      = Math.random() * total;
+  for (let i = 0; i < words.length; i++) {
+    rand -= weights[i];
+    if (rand <= 0) return words[i];
+  }
+  return words[words.length - 1];
 }
 
 // ═══════════════════════════════════════════════════════
-// SPATIAL DIAGRAM
+// LEVEL GRID RENDER
 // ═══════════════════════════════════════════════════════
-function updateSpatialDiagram() {
-  const diagram = document.getElementById('spatial-diagram');
-  diagram.querySelectorAll('.sound-dot').forEach(d => d.remove());
+function renderLevelGrid() {
+  const grid = document.getElementById('levelGrid');
+  grid.innerHTML = LEVEL_CONFIG.map(cfg => {
+    const best   = S.bestScores[cfg.level];
+    const active = cfg.level === S.currentLevel;
+    const bestTxt = best
+      ? (best.correct === 10 ? '10/10 ★' : `${best.correct}/10`)
+      : '—';
+    const isPerfect = best && best.correct === 10;
+    return `<button class="level-btn ${active ? 'active' : ''}" onclick="selectLevel(${cfg.level})">
+      <span class="lvl-num">${cfg.level}</span>
+      <span class="lvl-best ${isPerfect ? 'perfect' : ''}">${bestTxt}</span>
+    </button>`;
+  }).join('');
+}
 
-  // Target — centred, slightly forward
-  const target = document.createElement('div');
-  target.className = 'sound-dot target';
-  target.style.left = '50%';
-  target.style.top  = '35%';
-  diagram.appendChild(target);
+window.selectLevel = function(level) {
+  if (S.isPlaying) {
+    engine.stopAll();
+    S.isPlaying = false;
+  }
+  S.currentLevel    = level;
+  S.trialsInLevel   = 0;
+  S.trialResults    = [];
+  S.streak          = 0;
+  S.bestStreak      = 0;
 
-  // Masker positions
-  const pos = [
-    { left: '14%', top: '50%' },
-    { left: '26%', top: '22%' },
-    { left: '74%', top: '22%' },
-    { left: '86%', top: '50%' },
-  ];
+  renderLevelGrid();
+  updateLevelUI();
+  resetTrialUI();
+  updateStats();
+};
 
-  S.activeMaskers.forEach((_, i) => {
-    const dot = document.createElement('div');
-    dot.className = 'sound-dot masker';
-    dot.style.left = pos[i].left;
-    dot.style.top  = pos[i].top;
-    diagram.appendChild(dot);
-  });
+function updateLevelUI() {
+  const cfg = LEVEL_CONFIG[S.currentLevel - 1];
+  document.getElementById('section-title').textContent =
+    `Cocktail party problem — level ${S.currentLevel}`;
+  document.getElementById('level-badge').textContent = `Level ${S.currentLevel}`;
+
+  const diffInfo = document.getElementById('difficulty-info');
+  diffInfo.querySelector('.difficulty-info-label').textContent = `Level ${S.currentLevel}`;
+  document.getElementById('diff-desc').textContent = cfg.desc;
+
+  document.getElementById('trial-num').textContent = '—';
+  renderPips();
 }
 
 // ═══════════════════════════════════════════════════════
-// GAME LOGIC
+// TRIAL PIPS
+// ═══════════════════════════════════════════════════════
+function renderPips() {
+  const container = document.getElementById('trial-pips');
+  container.innerHTML = '';
+  for (let i = 0; i < 10; i++) {
+    const pip = document.createElement('div');
+    pip.className = 'trial-pip';
+    pip.id = `pip-${i}`;
+    if (i < S.trialResults.length) {
+      pip.classList.add(S.trialResults[i].correct ? 'correct' : 'incorrect');
+    } else if (i === S.trialsInLevel && S.trialsInLevel < 10) {
+      pip.classList.add('current');
+    }
+    container.appendChild(pip);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// PLAY TRIAL
 // ═══════════════════════════════════════════════════════
 async function play() {
   if (S.isPlaying) {
@@ -866,55 +958,71 @@ async function play() {
     document.getElementById('btn-play').classList.add('primary');
     return;
   }
+  if (S.trialsInLevel >= 10) return;
 
   engine.resume();
 
+  const cfg   = LEVEL_CONFIG[S.currentLevel - 1];
   const words = WORD_SETS[S.wordSet];
-  S.currentWord = words[Math.floor(Math.random() * words.length)];
 
-  // Lazy-load if needed
+  // Pick weighted word
+  S.currentWord = pickWeightedWord(words);
+
+  // Lazy-load word audio
   let targetBuf = loader.getWord(S.currentWord);
   if (!targetBuf) {
     for (let v = 0; v < 3; v++) await loader.loadWord(S.currentWord, v);
     targetBuf = loader.getWord(S.currentWord);
   }
-  if (!targetBuf) {
-    setFeedback('No audio file found for this word.', 'error');
-    return;
-  }
+  if (!targetBuf) { setFeedback('Audio not found for this word.', 'error'); return; }
 
   S.currentTarget = targetBuf;
 
-  // Build choices: target + 3 random distractors
+  // Build choices
   const others = words.filter(w => w !== S.currentWord)
-                      .sort(() => Math.random() - 0.5)
-                      .slice(0, 3);
+    .sort(() => Math.random() - 0.5).slice(0, 3);
   S.choices = [S.currentWord, ...others].sort(() => Math.random() - 0.5);
-  S.attempts = 0;
+  S.attempts      = 0;
+  S.trialAnswered = false;
+  S.reactionStart = null;
 
-  // Populate choice buttons
+  // Populate choice buttons (hidden until audio finishes)
   const btns = document.querySelectorAll('#choice-buttons .choice-btn');
   S.choices.forEach((word, i) => {
     btns[i].textContent = word.charAt(0).toUpperCase() + word.slice(1);
-    btns[i].disabled    = false;
+    btns[i].disabled    = true;
     btns[i].className   = 'choice-btn';
     btns[i].onclick     = () => checkAnswer(word);
   });
 
-  // Prepare masker buffers (random excerpts)
-  S.currentMaskers = S.activeMaskers.map(t => loader.excerpt(loader.getMasker(t)));
+  // Update trial counter
+  document.getElementById('trial-num').textContent = S.trialsInLevel + 1;
+  renderPips();
 
-  const maskerGain = engine.calcMaskerGain(S.snr, S.targetGain);
-  const duration   = engine.playTrial(S.currentTarget, S.currentMaskers, {
-    targetGain: S.targetGain,
+  // Maskers
+  S.currentMaskers = cfg.maskers.map(t => loader.excerpt(loader.getMasker(t)));
+  const maskerGain = engine.calcMaskerGain(cfg.snr, 1.0);
+
+  const { duration, wordStart } = engine.playTrial(S.currentTarget, S.currentMaskers, {
+    targetGain: 1.0,
     maskerGain,
   });
 
   S.isPlaying = true;
+  setFeedback('Listening…');
   document.getElementById('btn-play').textContent = '■ Stop';
   document.getElementById('btn-play').classList.remove('primary');
   document.getElementById('btn-repeat').disabled = false;
-  setFeedback('');
+
+  // Enable choice buttons after word would have finished (~wordStart + ~0.8s)
+  const enableDelay = (wordStart + 0.85) * 1000;
+  setTimeout(() => {
+    if (!S.trialAnswered) {
+      btns.forEach(b => { if (b.textContent) b.disabled = false; });
+      S.reactionStart = performance.now();
+      setFeedback('What did you hear?');
+    }
+  }, enableDelay);
 
   setTimeout(() => {
     S.isPlaying = false;
@@ -924,18 +1032,28 @@ async function play() {
 }
 
 function repeat() {
-  if (!S.currentTarget || !S.currentMaskers) return;
+  if (!S.currentTarget || !S.currentMaskers || S.trialAnswered) return;
   engine.resume();
-
-  const maskerGain = engine.calcMaskerGain(S.snr, S.targetGain);
-  const duration   = engine.playTrial(S.currentTarget, S.currentMaskers, {
-    targetGain: S.targetGain,
+  const cfg        = LEVEL_CONFIG[S.currentLevel - 1];
+  const maskerGain = engine.calcMaskerGain(cfg.snr, 1.0);
+  const { duration, wordStart } = engine.playTrial(S.currentTarget, S.currentMaskers, {
+    targetGain: 1.0,
     maskerGain,
   });
-
   S.isPlaying = true;
+  setFeedback('Listening…');
   document.getElementById('btn-play').textContent = '■ Stop';
   document.getElementById('btn-play').classList.remove('primary');
+
+  const btns = document.querySelectorAll('#choice-buttons .choice-btn');
+  btns.forEach(b => { if (b.textContent) b.disabled = true; });
+  setTimeout(() => {
+    if (!S.trialAnswered) {
+      btns.forEach(b => { if (b.textContent) b.disabled = false; });
+      S.reactionStart = performance.now();
+      setFeedback('What did you hear?');
+    }
+  }, (wordStart + 0.85) * 1000);
 
   setTimeout(() => {
     S.isPlaying = false;
@@ -944,40 +1062,47 @@ function repeat() {
   }, duration * 1000);
 }
 
-function next() {
-  engine.stopAll();
-  S.isPlaying = false;
-  document.getElementById('btn-play').textContent = '▶ Play';
-  document.getElementById('btn-play').classList.add('primary');
-  document.getElementById('btn-repeat').disabled = true;
-  document.getElementById('btn-next').disabled   = true;
-
-  setFeedback('');
-
-  const btns = document.querySelectorAll('#choice-buttons .choice-btn');
-  btns.forEach(b => {
-    b.textContent = '';
-    b.disabled    = true;
-    b.className   = 'choice-btn';
-    b.onclick     = null;
-  });
-}
-
+// ═══════════════════════════════════════════════════════
+// CHECK ANSWER
+// ═══════════════════════════════════════════════════════
 function checkAnswer(selected) {
+  if (S.trialAnswered) return;
   S.attempts++;
-  const correct = selected === S.currentWord;
+
+  const correct      = selected === S.currentWord;
+  const reactionMs   = S.reactionStart ? Math.round(performance.now() - S.reactionStart) : null;
 
   if (correct) {
-    S.correct++;
-    S.trials++;
-    updateStats();
-    setFeedback('Correct', 'success');
+    S.trialAnswered = true;
+    S.streak++;
+    if (S.streak > S.bestStreak) S.bestStreak = S.streak;
+    S.totalCorrect++;
+    S.totalTrials++;
+    if (reactionMs) S.reactionTimes.push(reactionMs);
+
+    S.trialResults.push({ correct: true, reactionMs });
 
     document.querySelectorAll('#choice-buttons .choice-btn').forEach(b => {
       if (b.textContent.toLowerCase() === S.currentWord) b.classList.add('correct');
       b.disabled = true;
     });
+
+    const reactionStr = reactionMs ? ` (${(reactionMs/1000).toFixed(2)}s)` : '';
+    setFeedback('Correct' + reactionStr, 'success');
+
+    updateStreakDisplay();
+    updateStats();
+    renderPips();
+
     document.getElementById('btn-next').disabled = false;
+    document.getElementById('btn-repeat').disabled = true;
+
+    if (S.trialsInLevel + 1 >= 10) {
+      S.trialsInLevel++;
+      setTimeout(showLevelComplete, 900);
+    } else {
+      S.trialsInLevel++;
+    }
 
   } else if (S.attempts < 2) {
     setFeedback('Try again', 'error');
@@ -990,138 +1115,215 @@ function checkAnswer(selected) {
 
   } else {
     // Second wrong — reveal
-    S.trials++;
-    updateStats();
-    setFeedback('Incorrect — answer: ' + S.currentWord.charAt(0).toUpperCase() + S.currentWord.slice(1), 'error');
+    S.trialAnswered = true;
+    S.streak = 0;
+    S.totalTrials++;
+    // Track word error for weighting
+    S.wordErrors[S.currentWord] = (S.wordErrors[S.currentWord] || 0) + 1;
+
+    S.trialResults.push({ correct: false, reactionMs });
 
     document.querySelectorAll('#choice-buttons .choice-btn').forEach(b => {
       if (b.textContent.toLowerCase() === S.currentWord) b.classList.add('correct');
       b.disabled = true;
     });
+
+    const wordCap = S.currentWord.charAt(0).toUpperCase() + S.currentWord.slice(1);
+    setFeedback('The word was: ' + wordCap, 'error');
+
+    updateStreakDisplay();
+    updateStats();
+    renderPips();
+
     document.getElementById('btn-next').disabled = false;
+    document.getElementById('btn-repeat').disabled = true;
+
+    if (S.trialsInLevel + 1 >= 10) {
+      S.trialsInLevel++;
+      setTimeout(showLevelComplete, 1200);
+    } else {
+      S.trialsInLevel++;
+    }
   }
 }
 
+function nextTrial() {
+  engine.stopAll();
+  S.isPlaying = false;
+  document.getElementById('btn-play').textContent = '▶ Play';
+  document.getElementById('btn-play').classList.add('primary');
+  document.getElementById('btn-repeat').disabled = true;
+  document.getElementById('btn-next').disabled   = true;
+  setFeedback('');
+  const btns = document.querySelectorAll('#choice-buttons .choice-btn');
+  btns.forEach(b => {
+    b.textContent = '';
+    b.disabled    = true;
+    b.className   = 'choice-btn';
+    b.onclick     = null;
+  });
+  renderPips();
+}
+
+function resetTrialUI() {
+  nextTrial();
+  document.getElementById('trial-num').textContent = '—';
+  renderPips();
+}
+
+// ═══════════════════════════════════════════════════════
+// STREAK DISPLAY
+// ═══════════════════════════════════════════════════════
+function updateStreakDisplay() {
+  const el = document.getElementById('streak-display');
+  document.getElementById('streak-num').textContent = S.streak;
+  el.classList.toggle('hot', S.streak >= 3);
+}
+
+// ═══════════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════════
+function updateStats() {
+  document.getElementById('stat-trials').textContent    = S.totalTrials;
+  document.getElementById('stat-correct').textContent   = S.totalCorrect;
+  document.getElementById('stat-best-streak').textContent = S.bestStreak;
+  const pct = S.totalTrials > 0
+    ? Math.round((S.totalCorrect / S.totalTrials) * 100) + '%' : '—';
+  document.getElementById('stat-accuracy').textContent  = pct;
+  const avgR = S.reactionTimes.length > 0
+    ? (S.reactionTimes.reduce((a,b)=>a+b,0) / S.reactionTimes.length / 1000).toFixed(2) + 's'
+    : '—';
+  document.getElementById('stat-reaction').textContent  = avgR;
+}
+
+// ═══════════════════════════════════════════════════════
+// LEVEL COMPLETE
+// ═══════════════════════════════════════════════════════
+async function showLevelComplete() {
+  const results  = S.trialResults;
+  const correct  = results.filter(r => r.correct).length;
+  const accuracy = Math.round((correct / 10) * 100);
+  const times    = results.filter(r => r.reactionMs).map(r => r.reactionMs);
+  const avgReact = times.length
+    ? (times.reduce((a,b)=>a+b,0) / times.length / 1000).toFixed(2) + 's'
+    : '—';
+  const avgReactMs = times.length
+    ? Math.round(times.reduce((a,b)=>a+b,0) / times.length)
+    : null;
+
+  // Check if new best
+  const prev = S.bestScores[S.currentLevel];
+  const isNewBest = !prev || correct > prev.correct ||
+    (correct === prev.correct && avgReactMs && avgReactMs < (prev.avgReaction || Infinity));
+
+  if (isNewBest) {
+    S.bestScores[S.currentLevel] = { correct, accuracy, avgReaction: avgReactMs };
+    await saveBestScore(S.currentLevel, correct, accuracy, avgReactMs);
+    renderLevelGrid();
+  }
+
+  // Populate overlay
+  document.getElementById('lc-title').textContent =
+    correct === 10 ? '★ Perfect score' : correct >= 7 ? 'Level complete' : 'Level finished';
+  document.getElementById('lc-score').textContent = `${correct} / 10`;
+  document.getElementById('lc-accuracy').textContent = accuracy + '%';
+  document.getElementById('lc-reaction').textContent = avgReact;
+  document.getElementById('lc-streak').textContent   = S.bestStreak;
+  document.getElementById('lc-prev-best').textContent = prev ? `${prev.correct}/10` : '—';
+
+  const recordEl = document.getElementById('lc-record');
+  recordEl.classList.toggle('visible', isNewBest && !!prev);
+
+  // Pip row
+  const pipRow = document.getElementById('lc-pips');
+  pipRow.innerHTML = results.map(r =>
+    `<div class="lc-pip ${r.correct ? 'correct' : 'incorrect'}"></div>`
+  ).join('');
+
+  // Message
+  document.getElementById('lc-msg').textContent = LEVEL_MESSAGES[S.currentLevel - 1];
+
+  // Next level button
+  const nextBtn = document.getElementById('lc-next-btn');
+  if (S.currentLevel >= 10) {
+    nextBtn.textContent = 'Try level 1 again';
+    nextBtn.onclick = () => { closeLevelComplete(); window.selectLevel(1); };
+  } else {
+    nextBtn.textContent = `Next: Level ${S.currentLevel + 1} →`;
+    nextBtn.onclick = nextLevel;
+  }
+
+  document.getElementById('levelComplete').classList.add('visible');
+}
+
+function closeLevelComplete() {
+  document.getElementById('levelComplete').classList.remove('visible');
+}
+
+window.retryLevel = function() {
+  closeLevelComplete();
+  selectLevel(S.currentLevel);
+};
+
+window.nextLevel = function() {
+  closeLevelComplete();
+  if (S.currentLevel < 10) selectLevel(S.currentLevel + 1);
+};
+
+// ═══════════════════════════════════════════════════════
+// FEEDBACK
+// ═══════════════════════════════════════════════════════
 function setFeedback(msg, cls) {
   const el = document.getElementById('feedback-msg');
   el.textContent = msg;
   el.className   = 'feedback-msg' + (cls ? ' ' + cls : '');
 }
 
-function updateStats() {
-  document.getElementById('stat-trials').textContent  = S.trials;
-  document.getElementById('stat-correct').textContent = S.correct;
-  const pct = S.trials > 0 ? Math.round((S.correct / S.trials) * 100) + '%' : '—';
-  document.getElementById('stat-accuracy').textContent = pct;
-}
-
 // ═══════════════════════════════════════════════════════
-// PRESET APPLICATION
+// INIT
 // ═══════════════════════════════════════════════════════
-function applyPreset(key) {
-  const p = S.presets[key];
-  if (!p) return;
+async function init() {
+  await engine.init();
+  loader = new AssetLoader(engine.audioCtx);
 
-  S.snr           = p.snr;
-  S.activeMaskers = [...p.maskers];
+  // Preload maskers and seed words
+  for (const t of MASKER_TYPES) await loader.loadMasker(t);
+  const seedWords = ['red','blue','one','two','three','green'];
+  for (const w of seedWords) {
+    for (let v = 0; v < 3; v++) await loader.loadWord(w, v);
+  }
 
-  document.getElementById('snr').value         = p.snr;
-  document.getElementById('snr-val').textContent = p.snr + ' dB';
+  startSpectrogram();
+  renderLevelGrid();
+  updateLevelUI();
+  updateStats();
 
-  document.querySelectorAll('[data-masker]').forEach(b => {
-    b.classList.toggle('on', S.activeMaskers.includes(b.dataset.masker));
-  });
+  // Wire up buttons
+  document.getElementById('btn-play').addEventListener('click', play);
+  document.getElementById('btn-repeat').addEventListener('click', repeat);
+  document.getElementById('btn-next').addEventListener('click', nextTrial);
 
-  updateSpatialDiagram();
-}
-
-// ═══════════════════════════════════════════════════════
-// UI WIRING
-// ═══════════════════════════════════════════════════════
-function setupUI() {
-
-  // Difficulty
-  document.querySelectorAll('[data-difficulty]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('[data-difficulty]').forEach(b => b.classList.remove('on'));
-      btn.classList.add('on');
-      S.difficulty = btn.dataset.difficulty;
-      applyPreset(S.difficulty);
-    });
-  });
-
-  // Word set
+  // Word set toggles
   document.querySelectorAll('[data-wordset]').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('[data-wordset]').forEach(b => b.classList.remove('on'));
       btn.classList.add('on');
       S.wordSet = btn.dataset.wordset;
+      // Reset if mid-level
+      if (S.trialsInLevel > 0) selectLevel(S.currentLevel);
     });
-  });
-
-  // Masker toggles
-  document.querySelectorAll('[data-masker]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const masker = btn.dataset.masker;
-      if (btn.classList.contains('on')) {
-        if (S.activeMaskers.length > 1) {
-          btn.classList.remove('on');
-          S.activeMaskers = S.activeMaskers.filter(m => m !== masker);
-        }
-      } else {
-        btn.classList.add('on');
-        S.activeMaskers.push(masker);
-      }
-      updateSpatialDiagram();
-    });
-  });
-
-  // Play / repeat / next
-  document.getElementById('btn-play').addEventListener('click',   play);
-  document.getElementById('btn-repeat').addEventListener('click', repeat);
-  document.getElementById('btn-next').addEventListener('click',   next);
-
-  // Volume slider
-  document.getElementById('target-volume').addEventListener('input', e => {
-    S.targetGain = parseFloat(e.target.value);
-    document.getElementById('target-volume-val').textContent = parseFloat(e.target.value).toFixed(2);
-  });
-
-  // SNR slider
-  document.getElementById('snr').addEventListener('input', e => {
-    S.snr = parseFloat(e.target.value);
-    document.getElementById('snr-val').textContent = e.target.value + ' dB';
-  });
-
-  // Advanced collapsible
-  document.getElementById('advanced-toggle').addEventListener('click', () => {
-    const content = document.getElementById('advanced-content');
-    const icon    = document.getElementById('advanced-icon');
-    const open    = content.classList.toggle('active');
-    icon.textContent = open ? '▴' : '▾';
-  });
-
-  // Spatial toggle
-  document.getElementById('toggle-spatial').addEventListener('click', () => {
-    S.spatialOn = !S.spatialOn;
-    const container = document.getElementById('spatial-container');
-    const btn       = document.getElementById('toggle-spatial');
-    container.style.display = S.spatialOn ? 'block' : 'none';
-    btn.classList.toggle('on', S.spatialOn);
-    btn.textContent = S.spatialOn ? 'Hide spatial diagram' : 'Show spatial diagram';
-    if (S.spatialOn) updateSpatialDiagram();
   });
 }
 
-// ─────────────────────────────────────────────────────────
-// Start once auth is confirmed
-// ─────────────────────────────────────────────────────────
 function onAuthReady(cb) {
   if (window._currentUser) { cb(); return; }
   window.addEventListener('authReady', cb, { once: true });
 }
 
-onAuthReady(() => init());
+onAuthReady(async () => {
+  await loadBestScores();
+  await init();
+});
 
 </script>
 </body>
