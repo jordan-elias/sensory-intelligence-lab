@@ -940,34 +940,40 @@
       window.addEventListener('authReady', cb, { once: true });
     }
 
-    onAuthReady(() => {
-      const user = window._currentUser;
-      const name = user?.user_metadata?.full_name || user?.email?.split('@')[0] || '';
-      const firstName = name.split(' ')[0];
-      if (firstName) {
-        document.getElementById('greeting').textContent = `Welcome back, ${firstName}`;
-      }
+onAuthReady(async () => {
+  const user = window._currentUser;
 
+  const { data: profile } = await window._supabase
+    .from('profiles')
+    .select('full_name')
+    .eq('id', user.id)
+    .single();
 
-      // ── Set body access attribute for CSS ──
-      // auth-guard exposes window._accessTier as 'free' | 'lab' | 'call1' | 'call2' | 'beta'
-      const tier = window._accessTier || 'free';
-      document.body.setAttribute('data-access', tier);
+  const fullName  = profile?.full_name?.trim() || '';
+  const firstName = fullName.split(' ')[0];
 
-      // ── Swap tags on gated cards for free users ──
-      if (tier === 'free') {
-        document.querySelectorAll('.module-card[data-gated="true"] .module-tag').forEach(tag => {
-          tag.textContent = 'Limited preview';
-          tag.classList.add('limited-preview');
-        });
-      }
+  document.getElementById('greeting').textContent = firstName
+    ? `Welcome back, ${firstName}`
+    : 'Welcome to your Sensory Intelligence dashboard';
 
-      // ── Prefill feedback form email ──
-      const emailField = document.getElementById('feedbackEmail');
-      if (emailField && user?.email) {
-        emailField.value = user.email;
-      }
+  // ── Set body access attribute for CSS ──
+  const tier = window._accessTier || 'free';
+  document.body.setAttribute('data-access', tier);
+
+  // ── Swap tags on gated cards for free users ──
+  if (tier === 'free') {
+    document.querySelectorAll('.module-card[data-gated="true"] .module-tag').forEach(tag => {
+      tag.textContent = 'Limited preview';
+      tag.classList.add('limited-preview');
     });
+  }
+
+  // ── Prefill feedback form email ──
+  const emailField = document.getElementById('feedbackEmail');
+  if (emailField && user?.email) {
+    emailField.value = user.email;
+  }
+});
 
     // ── Daily prompt ──
     const PROMPTS = [
@@ -982,25 +988,58 @@
       "Choose a room in your home. Close your eyes and build a map of the space using only sound.",
       "Listen to a field recording or environmental sound. What story does it tell about the place it was made?",
       "Notice the quality of silence between sounds. Is it empty, or does it have its own texture?",
-      "Hum a single note quietly and hold it. Notice how the room responds — what resonates, what absorbs.",
-      "Find a sound that feels regulating to you today. Stay with it for five minutes. Note how your body responds.",
-      "Listen to music you wouldn't normally choose. Suspend judgment and track only the physical sensation it produces.",
-      "Pay attention to the sound of your own voice today — its pitch, pace, and quality in different conversations.",
-      "Find a repeating sound — traffic, machinery, water. Listen until you stop hearing it as noise.",
-      "Choose three sounds from your environment. If they were instruments in an ensemble, what would the piece be called?",
-      "Listen to a piece with your eyes closed. Imagine the space in which it was recorded — its size, surfaces, light.",
-      "Notice when you next involuntarily attend to a sound. What drew your attention? What does that tell you?",
-      "Spend two minutes in focal listening — one source, full attention. Then switch to global listening — everything at once.",
-      "Find a drone or continuous tone in your environment. Follow its subtle variations rather than treating it as fixed.",
-      "Listen back to a field recording you have made. What do you hear now that you didn't notice when you recorded it?",
-      "Pay attention to how the acoustic character of your space changes at different times of day.",
-      "Choose a sound that you usually find irritating. Listen to it with neutral attention for two minutes.",
-      "Find a piece of music in a language you don't speak. Listen only to the phonetic texture — not meaning, only sound.",
-      "Notice the silence after a sound ends. How long does it take for quiet to settle?",
-      "Listen to the lowest frequency sound you can identify right now. Follow it.",
-      "Attend to the rhythm of the city, building, or space you are in. Is there a pulse beneath the surface?",
-      "Close your eyes and point toward a sound source. Open them. How accurate was your spatial sense?",
-      "Choose one minute of complete, undivided listening today — no other task, no interpretation. Just attend.",
+"Hum a single note quietly and hold it. Notice how the room responds — what resonates, what absorbs.",
+"Find a sound that feels regulating to you today. Stay with it for five minutes. Note how your body responds.",
+"Listen to music you wouldn't normally choose. Suspend judgment and track only the physical sensation it produces.",
+"Pay attention to the sound of your own voice today — its pitch, pace, and quality in different conversations.",
+"Find a repeating sound — traffic, machinery, water. Listen until you stop hearing it as noise.",
+"Choose three sounds from your environment. If they were instruments in an ensemble, what would the piece be called?",
+"Listen to a piece with your eyes closed. Imagine the space in which it was recorded — its size, surfaces, light.",
+"Notice when you next involuntarily attend to a sound. What drew your attention? What does that tell you?",
+"Spend two minutes in focal listening — one source, full attention. Then switch to global listening — everything at once.",
+"Find a drone or continuous tone in your environment. Follow its subtle variations rather than treating it as fixed.",
+"Listen back to a field recording you have made. What do you hear now that you didn't notice when you recorded it?",
+"Pay attention to how the acoustic character of your space changes at different times of day.",
+"Choose a sound that you usually find irritating. Listen to it with neutral attention for two minutes.",
+"Find a piece of music in a language you don't speak. Listen only to the phonetic texture — not meaning, only sound.",
+"Notice the silence after a sound ends. How long does it take for quiet to settle?",
+"Listen to the lowest frequency sound you can identify right now. Follow it.",
+"'Reduce noise until you hear the music that was always underneath it.' Sit in the quietest place available and listen for ten minutes.",
+"Attend to the rhythm of the city, building, or space you are in. Is there a pulse beneath the surface?",
+"Close your eyes and point toward a sound source. Open them. How accurate was your spatial sense?",
+"Choose one minute of complete, undivided listening today — no other task, no interpretation. Just attend.",
+"Find a sound that has been present all day without your noticing. Give it your full attention for one minute.",
+"Listen to a piece of music and follow only the silences — the gaps, pauses, and rests between notes.",
+"Notice the texture of your own footsteps today. What do the surfaces you walk on sound like?",
+"Choose a window. Listen to what is happening on the other side of it for two full minutes.",
+"Attend to the sound of water — rain, a tap, a kettle, a river. Notice its internal rhythm and variation.",
+"Find the highest frequency sound in your environment right now. How long can you track it?",
+"'Tune your ears the way a musician tunes an instrument — with patience and without force.' Spend two minutes adjusting your listening until you can hear something you couldn't before.",
+"Listen to a piece of music and follow only the bass — the lowest layer. Notice what it holds.",
+"Close your eyes in a familiar room. How does the acoustics of the space feel different when you can't see it?",
+"Notice the sound of your own breathing during a moment of concentration. Is it held, shallow, or free?",
+"Find a recording of rain. Listen and notice when your body begins to respond to it.",
+"Pay attention to the transition between indoors and outdoors today — the acoustic threshold you cross.",
+"Listen to a piece of music you associate with a specific memory. Notice whether the memory or the sound arrives first.",
+"Attend to the rhythm of a conversation you are in today — not the words, but the pacing, pausing, and overlap.",
+"Find the most uncomfortable sound in your current environment. Sit with it for ninety seconds without resistance.",
+"Choose a room you know well. Stand in a different corner than usual. How does it sound from there?",
+"Listen to a piece of music and track only the dynamic changes — where it gets louder, softer, and why.",
+"Notice what sounds mark the boundaries of your day — the sounds that signal morning, evening, transition.",
+"Find a recording made somewhere you have never been. Listen as a form of travel.",
+"Pay attention to the difference between sounds that come from outside your body and sounds that come from within it.",
+"Take a familiar route and listen as if you are a stranger to it — as if every sound is new information.",
+"Choose a piece of music with a strong pulse. Notice where in your body you feel the rhythm first.",
+"Find a sound that makes you feel safe. Stay with it and notice what safety feels like as a physical state.",
+"Listen to a piece of music and identify the moment you feel most moved. What specifically happened in the sound at that point?",
+"Pay attention to how your listening changes when you are tired. What sounds recede? What becomes more intrusive?",
+"Notice the acoustic quality of a space you enter today — its size, surface, and what the room does to sound.",
+"Find a field recording from a natural environment. Listen for the difference between foreground and background.",
+"Choose a piece of music and listen to only the first thirty seconds, repeated three times. What do you notice on the third pass?",
+"Attend to the way sound behaves differently in fog, rain, cold, or wind. What does weather do to listening?",
+"Find a sound that is ordinarily background. Bring it to foreground for two minutes. Then let it recede again.",
+"Listen to a piece of music and notice when your attention wanders. Where does it go? What brought it back?",
+
     ];
 
     const dayOfYear = Math.floor(
