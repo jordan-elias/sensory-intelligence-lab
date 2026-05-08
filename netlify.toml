@@ -311,7 +311,7 @@
   status = 200
 
 
-# ── Security headers ──
+# ── Content Security Policy ──
 [[headers]]
   for = "/*"
   [headers.values]
@@ -333,6 +333,7 @@
         https://fonts.googleapis.com
         https://esm.sh
         https://cdnjs.cloudflare.com
+        https://cdn.jsdelivr.net
         https://www.youtube.com;
 
       style-src
