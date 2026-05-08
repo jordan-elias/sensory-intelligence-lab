@@ -341,7 +341,18 @@
 </head>
 <body>
 
-<div id="lab-header"></div>
+<header class="sil-header">
+  <a class="sil-header__wordmark" href="/dashboard/">Sensory Intelligence Lab</a>
+  <button class="sil-header__toggle" id="silMenuToggle" aria-label="Toggle navigation" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <nav class="sil-header__nav" id="silNav">
+    <a href="/dashboard/">Dashboard</a>
+    <a href="/account/">Account</a>
+    <a href="/booking/">Book a session</a>
+    <button class="sil-header__signout" id="silSignOut" onclick="handleSignOut()">Sign out</button>
+  </nav>
+</header>
 
 <nav aria-label="Breadcrumb" class="bc">
   <ol>
@@ -529,7 +540,7 @@
 
       <div class="notif-row">
         <div class="notif-row-text">
-          <div class="notif-row-label">Product updates &amp; announcements</div>
+          <div class="notif-row-label">Updates &amp; announcements</div>
           <div class="notif-row-desc">Occasional emails about new modules, features, or changes to the Lab.</div>
         </div>
         <div class="toggle-wrap">
@@ -879,7 +890,7 @@
     document.getElementById('notifPostSession').checked      = prefs.post_session_reminder   ?? true;
     document.getElementById('notifBookingConfirm').checked   = prefs.booking_confirmation    ?? true;
     document.getElementById('notifSessionReminder').checked  = prefs.session_reminder_24h    ?? true;
-    document.getElementById('notifProductUpdates').checked   = prefs.product_updates         ?? false;
+    document.getElementById('notifProductUpdates').checked   = prefs.product_updates         ?? true;
   }
 
   window.handleNotifChange = function() {
@@ -932,7 +943,7 @@
         post_session_reminder: true,
         booking_confirmation:  true,
         session_reminder_24h:  true,
-        product_updates:       false,
+        product_updates:       true,
       };
       applyNotifPrefs(profile.notification_preferences ?? defaultPrefs);
 
@@ -1155,6 +1166,15 @@
       btn.textContent = 'Yes, permanently delete my account';
     }
   };
+
+  
+window.handleSignOut = async function() {
+  const btn = document.getElementById('silSignOut');
+  btn.disabled = true; btn.textContent = 'Signing out…';
+  try { await window._supabase.auth.signOut(); } finally {
+    window.location.replace('/');
+  }
+};
 
 </script>
 </body>
