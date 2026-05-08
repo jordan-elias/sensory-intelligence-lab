@@ -435,7 +435,7 @@
     .cal-embed-wrap {
       border: 1px solid var(--border);
       background: var(--bg);
-      overflow: hidden;
+      overflow: scroll;
       min-height: 500px;
     }
     .cal-embed-wrap iframe { width: 100% !important; border: none !important; }
@@ -905,47 +905,49 @@ const _calInitialised = new Set();
 function loadAndMountCal(sections) {
   if (!sections.length) return;
 
-  if (typeof window.Cal !== 'undefined') {
-    mountCalSections(sections);
-    return;
-  }
+  // Cal's required bootstrapper — sets up the queue before the script loads
+  (function (C, A, L) {
+    let p = function (a, ar) { a.q.push(ar); };
+    let d = C.document;
+    C.Cal = C.Cal || function () {
+      let cal = C.Cal; let ar = arguments;
+      if (!cal.loaded) {
+        cal.ns = {}; cal.q = cal.q || [];
+        d.head.appendChild(d.createElement('script')).src = A;
+        cal.loaded = true;
+      }
+      if (ar[0] === L) {
+        const api = function () { p(api, arguments); };
+        const namespace = ar[1];
+        api.q = api.q || [];
+        if (typeof namespace === 'string') {
+          cal.ns[namespace] = cal.ns[namespace] || api;
+          p(cal.ns[namespace], ar);
+          p(cal, ['initNamespace', namespace]);
+        } else p(cal, ar);
+        return;
+      }
+      p(cal, ar);
+    };
+  })(window, 'https://app.cal.com/embed/embed.js', 'init');
 
-  const script = document.createElement('script');
-  script.src = 'https://app.cal.com/embed/embed.js';
-  script.async = true;
-  script.onload = () => {
-    if (typeof window.Cal === 'undefined') {
-      showPageMsg('Cal.com embed could not load. Please refresh the page.', 'error');
-      return;
-    }
-    mountCalSections(sections);
-  };
-  script.onerror = () => {
-    showPageMsg('Could not load the booking calendar. Please check your connection and refresh.', 'error');
-  };
-  document.body.appendChild(script);
-}
-
-function mountCalSections(sections) {
+  // Now queue all section inits immediately — Cal will process them
+  // once the embed script finishes loading
   sections.forEach(sec => {
-    // Skip if already initialised (prevents duplicate embeds on re-render)
     if (_calInitialised.has(sec.ns)) return;
 
-    const el = document.getElementById(sec.id);
-    if (!el) return;
-
-    window.Cal('init', sec.ns, { origin: 'https://app.cal.com' });
-    window.Cal.ns[sec.ns]('inline', {
+    Cal('init', sec.ns, { origin: 'https://app.cal.com' });
+    Cal.ns[sec.ns]('inline', {
       elementOrSelector: `#${sec.id}`,
       calLink: sec.calLink,
       config: {
         layout: 'month_view',
-        useSlotsViewOnSmallScreen: true,
+        useSlotsViewOnSmallScreen: 'true', // note: string, not boolean, matching Cal's own snippet
       },
     });
-    window.Cal.ns[sec.ns]('ui', {
-      layout: 'month_view',
+    Cal.ns[sec.ns]('ui', {
       hideEventTypeDetails: false,
+      layout: 'month_view',
     });
 
     _calInitialised.add(sec.ns);
