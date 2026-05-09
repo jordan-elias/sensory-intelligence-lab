@@ -737,34 +737,112 @@ function render(ent) {
   const root = document.getElementById('bookingRoot');
   root.innerHTML = '';
 
-  // ── Plan status card ──
-  const planCard = document.createElement('div');
-  planCard.className = 'plan-card';
+  const sections = [];
 
-  const sessionsLine = ent.sessionsIncluded > 0
-    ? `<div class="plan-sessions-row">
-        <strong>${ent.sessionsRemaining}</strong> of ${ent.sessionsIncluded} included session${ent.sessionsIncluded > 1 ? 's' : ''} remaining this period
-        ${ent.periodEnd ? `· renews ${fmtDate(ent.periodEnd)}` : ''}
-       </div>`
-    : '';
+  if (ent.tier === 'call1' || ent.tier === 'call2') {
+    // ── Call1 / Call2: always show subscriber-session calendar only ──
 
-  const badgeClass = ent.isBeta ? 'beta'
-    : ['lab','call1','call2'].includes(ent.tier) && ent.isActive ? ent.tier
-    : 'free';
+    const sessionsLine = `<strong>${ent.sessionsRemaining}</strong> of ${ent.sessionsIncluded} included session${ent.sessionsIncluded > 1 ? 's' : ''} remaining this period${ent.periodEnd ? ` · renews ${fmtDate(ent.periodEnd)}` : ''}`;
 
-  const badgeLabel = ent.isBeta ? 'Beta'
-    : ent.isActive && ent.tier !== 'free' ? (PLAN_LABELS[ent.tier] || ent.tier)
-    : 'Free';
+    const statusCard = document.createElement('div');
+    statusCard.className = 'plan-card';
+    statusCard.innerHTML = `
+      <div class="plan-card-left">
+        <span class="plan-card-label">Your plan</span>
+        <span class="plan-card-name">${PLAN_LABELS[ent.tier]}</span>
+        <div class="plan-sessions-row">${sessionsLine}</div>
+      </div>
+      <span class="plan-badge ${ent.tier}">${ent.isBeta ? 'Beta' : PLAN_LABELS[ent.tier]}</span>
+    `;
+    root.appendChild(statusCard);
 
-  planCard.innerHTML = `
-    <div class="plan-card-left">
-      <span class="plan-card-label">Your plan</span>
-      <span class="plan-card-name">${PLAN_LABELS[ent.isBeta ? 'beta' : ent.tier] || 'Free access'}</span>
-      ${sessionsLine}
-    </div>
-    <span class="plan-badge ${badgeClass}">${badgeLabel}</span>
-  `;
-  root.appendChild(planCard);
+    if (ent.showUpgradeToCall2) {
+      const nudge = document.createElement('div');
+      nudge.className = 'upgrade-nudge';
+      nudge.innerHTML = `
+        <p>Upgrade to <strong>Lab + 2 sessions</strong> to include two video sessions each month.</p>
+        <a class="nudge-btn" href="/subscribe/">View plans</a>
+      `;
+      root.appendChild(nudge);
+    }
+
+    sections.push({
+      id:      'cal-subscriber',
+      label:   'Monthly Session',
+      meta:    `Included in your plan`,
+      calLink: 'jordan-elias/subscriber-session',
+      ns:      'subscriber-session',
+    });
+
+  } else {
+    // ── Free / Beta / Lab ──
+
+    const badgeClass = ent.isBeta ? 'beta' : 'free';
+    const badgeLabel = ent.isBeta ? 'Beta' : PLAN_LABELS[ent.tier] || 'Free';
+
+    const statusCard = document.createElement('div');
+    statusCard.className = 'plan-card';
+    statusCard.innerHTML = `
+      <div class="plan-card-left">
+        <span class="plan-card-label">Your plan</span>
+        <span class="plan-card-name">${PLAN_LABELS[ent.isBeta ? 'beta' : ent.tier] || 'Free access'}</span>
+      </div>
+      <span class="plan-badge ${badgeClass}">${badgeLabel}</span>
+    `;
+    root.appendChild(statusCard);
+
+    if (ent.canBookIntro) {
+      // Intro not yet used — show intro only
+      sections.push({
+        id:      'cal-intro',
+        label:   'Introductory Session',
+        meta:    'One-time · Complimentary',
+        calLink: 'jordan-elias/intro',
+        ns:      'intro',
+      });
+    } else {
+      // Intro done — show single session + upgrade nudge
+      const nudge = document.createElement('div');
+      nudge.className = 'upgrade-nudge';
+      nudge.innerHTML = `
+        <p>Add a monthly video session by upgrading to <strong>Lab + 1 session</strong>.</p>
+        <a class="nudge-btn" href="/subscribe/">View plans</a>
+      `;
+      root.appendChild(nudge);
+
+      sections.push({
+        id:      'cal-session',
+        label:   'Single Session',
+        meta:    '€75 · Book anytime',
+        calLink: 'jordan-elias/session',
+        ns:      'session',
+      });
+    }
+  }
+
+  // ── Build DOM for each section ──
+  sections.forEach(sec => {
+    const wrap = document.createElement('div');
+    wrap.className = 'cal-section';
+
+    const head = document.createElement('div');
+    head.className = 'cal-section-head';
+    head.innerHTML = `
+      <p class="section-label">${sec.label}</p>
+      <span class="cal-section-meta">${sec.meta}</span>
+    `;
+    wrap.appendChild(head);
+
+    const calWrap = document.createElement('div');
+    calWrap.className = 'cal-embed-wrap';
+    calWrap.id = sec.id;
+    wrap.appendChild(calWrap);
+
+    root.appendChild(wrap);
+  });
+
+  loadAndMountCal(sections);
+}
 
   // ── Upgrade nudges ──
   if (ent.showUpgradeToCall1) {
@@ -905,7 +983,6 @@ const _calInitialised = new Set();
 function loadAndMountCal(sections) {
   if (!sections.length) return;
 
-  // Cal's required bootstrapper — sets up the queue before the script loads
   (function (C, A, L) {
     let p = function (a, ar) { a.q.push(ar); };
     let d = C.document;
@@ -931,8 +1008,6 @@ function loadAndMountCal(sections) {
     };
   })(window, 'https://app.cal.com/embed/embed.js', 'init');
 
-  // Now queue all section inits immediately — Cal will process them
-  // once the embed script finishes loading
   sections.forEach(sec => {
     if (_calInitialised.has(sec.ns)) return;
 
@@ -942,10 +1017,27 @@ function loadAndMountCal(sections) {
       calLink: sec.calLink,
       config: {
         layout: 'month_view',
-        useSlotsViewOnSmallScreen: 'true', // note: string, not boolean, matching Cal's own snippet
+        useSlotsViewOnSmallScreen: 'true',
       },
     });
     Cal.ns[sec.ns]('ui', {
+      theme: 'light',
+      cssVarsPerTheme: {
+        light: {
+          'cal-brand':           '#2a5c45',
+          'cal-brand-emphasis':  '#1e4433',
+          'cal-brand-text':      '#ffffff',
+          'cal-bg':              '#ffffff',
+          'cal-bg-subtle':       '#f9f9f7',
+          'cal-bg-emphasis':     '#e5e5e0',
+          'cal-border':          '#e5e5e0',
+          'cal-border-subtle':   '#e5e5e0',
+          'cal-border-emphasis': '#1a1a1a',
+          'cal-text':            '#1a1a1a',
+          'cal-text-emphasis':   '#1a1a1a',
+          'cal-text-subtle':     '#6b6b6b',
+        },
+      },
       hideEventTypeDetails: false,
       layout: 'month_view',
     });
@@ -953,7 +1045,7 @@ function loadAndMountCal(sections) {
     _calInitialised.add(sec.ns);
   });
 }
-
+  
 // ─────────────────────────────────────────────────────────
 // INIT
 // ─────────────────────────────────────────────────────────
