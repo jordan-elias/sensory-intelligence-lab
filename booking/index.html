@@ -1045,6 +1045,37 @@ function loadAndMountCal(sections) {
     _calInitialised.add(sec.ns);
   });
 }
+
+// ─────────────────────────────────────────────────────────
+// Session booking message for call1 and call2
+// ─────────────────────────────────────────────────────────
+
+function renderEntitlementMessage(ent, upcomingBookings) {
+  // Only relevant for call1/call2 users
+  if (ent.tier !== 'call1' && ent.tier !== 'call2') return;
+
+  const container = document.getElementById('upcomingSection');
+  const existing  = document.getElementById('entitlementMsg');
+  if (existing) existing.remove();
+
+  const msg = document.createElement('div');
+  msg.id    = 'entitlementMsg';
+  msg.className = 'msg info show';
+  msg.style.marginTop = '.75rem';
+  msg.style.marginBottom = '0';
+
+  const periodEnd    = ent.periodEnd ? fmtDate(ent.periodEnd) : null;
+  const nextPeriodMsg = periodEnd ? ` You can also book ahead into future months` : '';
+
+  if (ent.sessionsRemaining > 0) {
+    msg.textContent = `You have ${ent.sessionsRemaining} included session${ent.sessionsRemaining > 1 ? 's' : ''} remaining this period${periodEnd ? ` (renews ${periodEnd})` : ''}.${nextPeriodMsg}`;
+  } else {
+    msg.textContent = `You've used all included sessions for this period${periodEnd ? ` (renews ${periodEnd})` : ''}. You can still book sessions for future periods below.${nextPeriodMsg}`;
+  }
+
+  container.appendChild(msg);
+  container.style.display = 'block';
+}
   
 // ─────────────────────────────────────────────────────────
 // INIT
@@ -1078,6 +1109,7 @@ onAuthReady(async () => {
     ]);
 
     renderUpcoming(upcoming);
+    renderEntitlementMessage(ent, upcoming);
     render(ent);
 
   } catch (err) {
