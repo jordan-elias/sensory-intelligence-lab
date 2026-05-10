@@ -439,8 +439,20 @@
     .song-player-change { font-size: .7rem; color: var(--muted); cursor: pointer; text-decoration: underline; margin-left: auto; flex-shrink: 0; }
     .song-player-change:hover { color: var(--accent); }
     /* Audio-only YouTube: clip to show just the control bar */
-    .yt-audio-wrap { width: 100%; overflow: hidden; height: 60px; position: relative; }
-    .yt-audio-wrap iframe { width: 100%; height: 120px; margin-top: -60px; border: none; pointer-events: auto; }
+  .yt-audio-wrap {
+  width: 100%;
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+}
+.yt-audio-wrap iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
 
     /* ── Lyrics panel ── */
     .lyrics-panel { display: none; }
@@ -1569,9 +1581,26 @@ async function _geniusSearch(query) {
   return hits || [];
 }
 
-function _ytEmbed(title, artist) {
-  const q = encodeURIComponent(`${title} ${artist}`);
-  return `<iframe src="https://www.youtube-nocookie.com/embed?listType=search&list=${q}&autoplay=0&controls=1&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&fs=0" allow="autoplay; encrypted-media" title="Audio player"></iframe>`;
+function _ytEmbed(videoId) {
+  if (!videoId) return `<div style="padding:.5rem;font-size:.75rem;color:var(--muted);font-style:italic;">No video found for this song.</div>`;
+  return `<iframe
+    src="https://www.youtube-nocookie.com/embed/${videoId}?controls=1&rel=0&modestbranding=1"
+    allow="autoplay; encrypted-media"
+    allowfullscreen
+    style="width:100%;height:100%;border:none;"
+    title="Audio player"></iframe>`;
+}
+
+async function _getVideoId(title, artist) {
+  const q = `${title} ${artist} official audio`;
+  try {
+    const res  = await fetch(`/.netlify/functions/youtube-search?q=${encodeURIComponent(q)}`);
+    const data = await res.json();
+    return data.videoId || null;
+  } catch (err) {
+    console.warn('Video ID lookup failed:', err);
+    return null;
+  }
 }
 
 // ── Lyric analysis song search ──
@@ -1604,18 +1633,28 @@ window.selectSong = async function(index) {
   const hit    = window._searchHits[index];
   const title  = hit.result.title;
   const artist = hit.result.primary_artist.name;
+
   document.getElementById('songSearchResults').classList.remove('visible');
+
   const playerEl = document.getElementById('songPlayer');
   playerEl.classList.add('visible');
   document.getElementById('songPlayerTitle').textContent  = title;
   document.getElementById('songPlayerArtist').textContent = artist;
+
   // Set hidden fields
   const tf = document.querySelector('[data-field="song_title"]');
   const af = document.querySelector('[data-field="song_artist"]');
   if (tf) tf.value = title;
   if (af) af.value = artist;
   _selectedSong = { title, artist };
-  document.getElementById('ytAudioWrap').innerHTML = _ytEmbed(title, artist);
+
+  // Show loading state while fetching video ID
+  const wrap = document.getElementById('ytAudioWrap');
+  wrap.innerHTML = `<div style="padding:.5rem;font-size:.75rem;color:var(--muted);font-style:italic;">Finding player…</div>`;
+
+  const videoId = await _getVideoId(title, artist);
+  wrap.innerHTML = _ytEmbed(videoId);
+
   // Fetch lyrics
   const lyricsPanel = document.getElementById('lyricsPanel');
   const lyricsBox   = document.getElementById('lyricsBox');
@@ -1627,11 +1666,17 @@ window.selectSong = async function(index) {
     if (res.ok) {
       const data = await res.json();
       const lyrics = data.plainLyrics || data.syncedLyrics?.replace(/\[\d+:\d+\.\d+\]/g,'') || '';
-      if (lyrics) { lyricsBox.textContent = lyrics; document.getElementById('lyricsHint').style.display = 'block'; return; }
+      if (lyrics) {
+        lyricsBox.textContent = lyrics;
+        document.getElementById('lyricsHint').style.display = 'block';
+        return;
+      }
     }
     lyricsBox.innerHTML = '<span style="font-style:italic;color:var(--muted)">Lyrics not found automatically. Paste them in the field below if you\'d like them here.</span>';
     document.getElementById('lyricsHint').style.display = 'none';
-  } catch { lyricsBox.innerHTML = '<span style="font-style:italic;color:var(--muted)">Could not load lyrics. Paste them in the field below.</span>'; }
+  } catch {
+    lyricsBox.innerHTML = '<span style="font-style:italic;color:var(--muted)">Could not load lyrics. Paste them in the field below.</span>';
+  }
 };
 
 window.changeSong = function() {
@@ -1667,31 +1712,50 @@ window.searchChapterSong = async function(n) {
   }
 };
 
-window.addChapterSong = function(n, index) {
+window.addChapterSong = async function(n, index) {
   const results = document.getElementById(`chSongResults_${n}`);
   const hits    = JSON.parse(results.dataset.hits || '[]');
   const hit     = hits[index]; if (!hit) return;
   const title   = hit.result.title;
   const artist  = hit.result.primary_artist.name;
+
   results.classList.remove('visible');
   results.innerHTML = '';
   document.getElementById(`chSongInput_${n}`).value = '';
 
-  // Also append to textarea
+  // Append to textarea
   const ta = document.querySelector(`[data-field="auto_${n}_songs"]`);
   if (ta) ta.value = (ta.value ? ta.value + '\n' : '') + `${title} — ${artist}`;
 
-  // Add player
+  // Add player with loading state
   const playerId = `chp_${n}_${Date.now()}`;
   const players  = document.getElementById(`chPlayers_${n}`);
   const div      = document.createElement('div');
-  div.className  = 'chapter-player'; div.id = playerId;
+  div.className  = 'chapter-player';
+  div.id         = playerId;
   div.innerHTML  = `
     <div class="chapter-player-label" title="${escHtml(title)} — ${escHtml(artist)}">${escHtml(title)} — ${escHtml(artist)}</div>
-    <div class="chapter-player-yt">${_ytEmbed(title, artist)}</div>
+    <div class="chapter-player-yt" id="yt-${playerId}">
+      <span style="font-size:.72rem;color:var(--muted);font-style:italic;">Finding player…</span>
+    </div>
     <button class="chapter-player-remove" onclick="document.getElementById('${playerId}').remove()">✕</button>
   `;
   players.appendChild(div);
+
+  // Fetch video ID and inject player
+  const videoId = await _getVideoId(title, artist);
+  const ytWrap  = document.getElementById(`yt-${playerId}`);
+  if (ytWrap) {
+    if (videoId) {
+      ytWrap.innerHTML = `<iframe
+        src="https://www.youtube-nocookie.com/embed/${videoId}?controls=1&rel=0&modestbranding=1"
+        allow="autoplay; encrypted-media"
+        style="width:200px;height:113px;border:none;"
+        title="Audio player"></iframe>`;
+    } else {
+      ytWrap.innerHTML = `<span style="font-size:.72rem;color:var(--muted);font-style:italic;">No video found</span>`;
+    }
+  }
 };
 
 // ═══════════════════════════════════════════════════════
