@@ -677,8 +677,8 @@ class AudioEngine {
   playTrial(targetBuffer, maskerBuffers, settings) {
     this.stopAll();
     const now = this.audioCtx.currentTime;
-    const duration = 4.0;
-    const wordStart = now + 0.5 + Math.random() * 2.0;
+    const duration = 5.0;
+    const wordStart = now + 0.3 + Math.random() * 0.5;
     const positions = [
       { x: -2,   y: 0, z:  0   },
       { x: -1.5, y: 0, z: -1.5 },
