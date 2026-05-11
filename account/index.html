@@ -374,28 +374,7 @@
     <p>Manage your profile, password, and subscription.</p>
   </div>
 
-  <!-- ── Password reset (from email link) ── -->
-  <div id="resetSection" style="display:none">
-    <p class="sl">New password</p>
-    <div class="card">
-      <div class="card-head"><h3>Set new password</h3></div>
-      <div class="card-body">
-        <div class="msg" id="resetMsg"></div>
-        <div class="form-group">
-          <label for="resetPw">New password</label>
-          <input type="password" id="resetPw" placeholder="At least 8 characters" autocomplete="new-password">
-          <div class="pw-strength"><div class="pw-strength-fill" id="resetPwStrength"></div></div>
-        </div>
-        <div class="form-group">
-          <label for="resetPwConfirm">Confirm new password</label>
-          <input type="password" id="resetPwConfirm" placeholder="Repeat your new password" autocomplete="new-password">
-        </div>
-        <div class="btn-row">
-          <button class="btn" id="resetPwBtn" onclick="handlePasswordReset()">Save new password</button>
-        </div>
-      </div>
-    </div>
-  </div>
+ 
 
   <!-- ── Profile ── -->
   <p class="sl">Profile</p>
@@ -452,30 +431,50 @@
     </div>
   </div>
 
-  <!-- ── Change password ── -->
-  <p class="sl">Password</p>
-  <div class="card">
-    <div class="card-head"><h3>Change password</h3></div>
-    <div class="card-body">
-      <div class="msg" id="passwordMsg"></div>
-      <div class="form-group">
-        <label for="currentPw">Current password</label>
-        <input type="password" id="currentPw" placeholder="Your current password" autocomplete="current-password">
-      </div>
-      <div class="form-group">
-        <label for="newPw">New password</label>
-        <input type="password" id="newPw" placeholder="At least 8 characters" autocomplete="new-password">
-        <div class="pw-strength"><div class="pw-strength-fill" id="newPwStrength"></div></div>
-      </div>
-      <div class="form-group">
-        <label for="newPwConfirm">Confirm new password</label>
-        <input type="password" id="newPwConfirm" placeholder="Repeat your new password" autocomplete="new-password">
-      </div>
-      <div class="btn-row">
-        <button class="btn" id="passwordBtn" onclick="handlePasswordChange()">Update password</button>
-      </div>
+ <!-- ── Change password (normal mode) ── -->
+<p class="sl">Password</p>
+<div class="card" id="changePasswordCard">
+  <div class="card-head"><h3>Change password</h3></div>
+  <div class="card-body">
+    <div class="msg" id="passwordMsg"></div>
+    <div class="form-group">
+      <label for="currentPw">Current password</label>
+      <input type="password" id="currentPw" placeholder="Your current password" autocomplete="current-password">
+    </div>
+    <div class="form-group">
+      <label for="newPw">New password</label>
+      <input type="password" id="newPw" placeholder="At least 8 characters" autocomplete="new-password">
+      <div class="pw-strength"><div class="pw-strength-fill" id="newPwStrength"></div></div>
+    </div>
+    <div class="form-group">
+      <label for="newPwConfirm">Confirm new password</label>
+      <input type="password" id="newPwConfirm" placeholder="Repeat your new password" autocomplete="new-password">
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="passwordBtn" onclick="handlePasswordChange()">Update password</button>
     </div>
   </div>
+</div>
+
+<!-- ── Set new password (recovery mode) ── -->
+<div class="card" id="recoveryPasswordCard" style="display:none">
+  <div class="card-head"><h3>Set new password</h3></div>
+  <div class="card-body">
+    <div class="msg" id="recoveryMsg"></div>
+    <div class="form-group">
+      <label for="recoveryPw">New password</label>
+      <input type="password" id="recoveryPw" placeholder="At least 8 characters" autocomplete="new-password">
+      <div class="pw-strength"><div class="pw-strength-fill" id="recoveryPwStrength"></div></div>
+    </div>
+    <div class="form-group">
+      <label for="recoveryPwConfirm">Confirm new password</label>
+      <input type="password" id="recoveryPwConfirm" placeholder="Repeat your new password" autocomplete="new-password">
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="recoveryPwBtn" onclick="handleRecoveryPasswordSet()">Save new password</button>
+    </div>
+  </div>
+</div>
 
   <!-- ── Subscription ── -->
   <p class="sl">Subscription</p>
@@ -695,8 +694,9 @@
       bar.style.background = score <= 1 ? '#c0392b' : score <= 3 ? '#e67e22' : '#2a5c45';
     });
   }
-  updateStrength('newPw', 'newPwStrength');
-  updateStrength('resetPw', 'resetPwStrength');
+updateStrength('newPw', 'newPwStrength');
+updateStrength('resetPw', 'resetPwStrength');
+updateStrength('recoveryPw', 'recoveryPwStrength');
 
   // ── Subscription rendering ──
   const PLAN_CONFIG = {
@@ -975,18 +975,21 @@
       renderSubscription(profile, bookingsUsed);
     }
 
-    // Password reset token check
-    const hash   = window.location.hash;
-    const params = new URLSearchParams(hash.replace('#', ''));
-    if (params.get('type') === 'recovery') {
-      document.getElementById('resetBanner').style.display  = 'block';
-      document.getElementById('resetSection').style.display = 'block';
-      setTimeout(() => document.getElementById('resetBanner').scrollIntoView({ behavior: 'smooth' }), 300);
-    }
+   // Recovery mode detection
+const { data: { session: currentSession } } = await supabase.auth.getSession();
+const hash = window.location.hash;
+const hashParams = new URLSearchParams(hash.replace('#', ''));
+const isRecovery = hashParams.get('type') === 'recovery' || currentSession?.user?.app_metadata?.recovery === true;
 
-    document.getElementById('mainContent').classList.add('ready');
-  });
+if (isRecovery) {
+  document.getElementById('resetBanner').style.display   = 'block';
+  document.getElementById('changePasswordCard').style.display = 'none';
+  document.getElementById('recoveryPasswordCard').style.display = 'block';
+  setTimeout(() => document.getElementById('resetBanner').scrollIntoView({ behavior: 'smooth' }), 300);
+}
 
+});
+  
   // ── Update name ──
   window.handleNameUpdate = async function() {
     clearMsg('nameMsg');
@@ -1056,23 +1059,30 @@
     );
   };
 
-  // ── Password reset (from email link) ──
-  window.handlePasswordReset = async function() {
-    clearMsg('resetMsg');
-    const pw  = document.getElementById('resetPw').value;
-    const pwc = document.getElementById('resetPwConfirm').value;
-    if (!pw || !pwc) { showMsg('resetMsg', 'Please fill in both fields.', 'error'); return; }
-    if (pw.length < 8) { showMsg('resetMsg', 'Password must be at least 8 characters.', 'error'); return; }
-    if (pw !== pwc) { showMsg('resetMsg', 'Passwords do not match.', 'error'); return; }
-    setLoading('resetPwBtn', true, 'Save new password');
-    const { error } = await window._supabase.auth.updateUser({ password: pw });
-    setLoading('resetPwBtn', false, 'Save new password');
-    if (error) { showMsg('resetMsg', error.message, 'error'); return; }
-    history.replaceState(null, '', window.location.pathname);
-    showMsg('resetMsg', 'Password set successfully.', 'success');
-    document.getElementById('resetBanner').style.display = 'none';
-    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 800);
-  };
+// ── Set password in recovery mode (no current password required) ──
+window.handleRecoveryPasswordSet = async function() {
+  clearMsg('recoveryMsg');
+  const pw  = document.getElementById('recoveryPw').value;
+  const pwc = document.getElementById('recoveryPwConfirm').value;
+  if (!pw || !pwc) { showMsg('recoveryMsg', 'Please fill in both fields.', 'error'); return; }
+  if (pw.length < 8) { showMsg('recoveryMsg', 'Password must be at least 8 characters.', 'error'); return; }
+  if (pw !== pwc) { showMsg('recoveryMsg', 'Passwords do not match.', 'error'); return; }
+
+  setLoading('recoveryPwBtn', true, 'Save new password');
+  const { error } = await window._supabase.auth.updateUser({ password: pw });
+  setLoading('recoveryPwBtn', false, 'Save new password');
+
+  if (error) { showMsg('recoveryMsg', error.message, 'error'); return; }
+
+  history.replaceState(null, '', window.location.pathname);
+  document.getElementById('resetBanner').style.display      = 'none';
+  document.getElementById('recoveryPasswordCard').style.display = 'none';
+  document.getElementById('changePasswordCard').style.display   = 'block';
+  showMsg('passwordMsg', 'Password set successfully. You can now sign in with your new password.', 'success');
+  setTimeout(() => document.getElementById('changePasswordCard').scrollIntoView({ behavior: 'smooth' }), 100);
+};
+    
+ 
 
   // ── Sign out all ──
   window.handleSignOutAll = async function() {
