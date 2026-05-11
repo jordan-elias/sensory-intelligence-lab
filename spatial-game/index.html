@@ -11,7 +11,6 @@
   <link rel="apple-touch-icon" href="/images/favicon.png">
   <link rel="manifest" href="/site.webmanifest">
 
-
   <script src="/dashboard/auth-guard.js" type="module"></script>
 
   <script type="module">
@@ -20,7 +19,7 @@
     targetSelector: '.lab-section',
     moduleName: 'spatial-game',
   });
-</script>
+  </script>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
 
@@ -64,9 +63,7 @@
       align-items: center;
       justify-content: space-between;
       position: sticky;
-      top: 0;
-      left: 0;
-      right: 0;
+      top: 0; left: 0; right: 0;
       background: var(--bg);
       z-index: 100;
       gap: 1rem;
@@ -74,72 +71,47 @@
     }
     .sil-header__wordmark {
       font-family: var(--font-heading);
-      font-size: 1rem;
-      font-weight: 600;
+      font-size: 1rem; font-weight: 600;
       letter-spacing: -0.01em;
-      white-space: nowrap;
-      flex-shrink: 0;
-      text-decoration: none;
-      color: var(--text);
+      white-space: nowrap; flex-shrink: 0;
+      text-decoration: none; color: var(--text);
     }
     .sil-header__wordmark:hover { color: var(--accent); }
-    .sil-header__nav {
-      display: flex;
-      gap: 0.25rem;
-      align-items: center;
-    }
+    .sil-header__nav { display: flex; gap: 0.25rem; align-items: center; }
     .sil-header__nav a {
       font-family: var(--font-body);
-      font-size: 0.8rem;
-      font-weight: 500;
-      text-decoration: none;
-      color: var(--muted);
-      transition: color 0.15s;
-      white-space: nowrap;
+      font-size: 0.8rem; font-weight: 500;
+      text-decoration: none; color: var(--muted);
+      transition: color 0.15s; white-space: nowrap;
       padding: 0.3rem 0.65rem;
     }
     .sil-header__nav a:hover { color: var(--text); }
     .sil-header__nav a.sil-active { color: var(--accent); font-weight: 600; }
     .sil-header__signout {
       font-family: var(--font-body);
-      font-size: 0.8rem;
-      font-weight: 500;
-      color: var(--muted);
-      background: none;
-      border: 1px solid var(--border);
-      cursor: pointer;
+      font-size: 0.8rem; font-weight: 500;
+      color: var(--muted); background: none;
+      border: 1px solid var(--border); cursor: pointer;
       padding: 0.3rem 0.75rem;
       transition: color 0.15s, border-color 0.15s;
-      white-space: nowrap;
-      line-height: 1.6;
+      white-space: nowrap; line-height: 1.6;
     }
     .sil-header__signout:hover { color: var(--text); border-color: var(--text); }
     .sil-header__signout:disabled { opacity: 0.5; cursor: not-allowed; }
     .sil-header__toggle {
-      display: none;
-      flex-direction: column;
-      gap: 4px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 4px;
-      flex-shrink: 0;
+      display: none; flex-direction: column; gap: 4px;
+      background: none; border: none; cursor: pointer; padding: 4px; flex-shrink: 0;
     }
     .sil-header__toggle span { display: block; width: 20px; height: 2px; background: var(--text); }
     @media (max-width: 700px) {
       .sil-header { padding: 0 1rem; }
       .sil-header__toggle { display: flex; }
       .sil-header__nav {
-        display: none;
-        position: absolute;
+        display: none; position: absolute;
         top: 56px; left: 0; right: 0;
-        background: var(--bg);
-        border-bottom: 1px solid var(--border);
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 0.75rem 1rem;
-        gap: 0;
-        z-index: 99;
+        background: var(--bg); border-bottom: 1px solid var(--border);
+        flex-direction: column; align-items: flex-start;
+        padding: 0.75rem 1rem; gap: 0; z-index: 99;
       }
       .sil-header__nav.sil-open { display: flex; }
       .sil-header__nav a,
@@ -163,12 +135,6 @@
     .ph h2 { font-family: var(--font-heading); font-size: 2rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; margin-bottom: .4rem; }
     .ph p { font-size: .9rem; color: var(--muted); }
 
-    .section-label {
-      font-family: var(--font-heading);
-      font-size: .65rem; font-weight: 600; letter-spacing: .14em;
-      text-transform: uppercase; color: var(--muted); margin-bottom: .75rem;
-    }
-
     /* ── Game container ── */
     .lab-section {
       border: 1px solid var(--border);
@@ -182,6 +148,46 @@
       text-transform: uppercase; color: var(--muted);
       margin-bottom: 1.25rem;
     }
+
+    /* ══════════════════════════════════════
+       LEVEL SELECTOR
+    ══════════════════════════════════════ */
+    .level-selector {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-bottom: .85rem;
+      align-items: center;
+    }
+    .level-selector-label {
+      font-size: .62rem; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--muted);
+      white-space: nowrap; margin-right: 2px;
+    }
+    .level-btn {
+      font-family: var(--font-heading);
+      font-size: .72rem; font-weight: 600;
+      width: 30px; height: 30px;
+      border: 1px solid var(--border);
+      background: var(--bg); color: var(--muted);
+      cursor: pointer;
+      transition: all .12s;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .level-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+    .level-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+    .level-btn.level-hard { border-color: #c0a080; }
+    .level-btn.level-hard:hover { border-color: #8b4513; color: #8b4513; background: #fdf8f0; }
+    .level-btn.level-hard.active { background: #8b4513; border-color: #8b4513; color: white; }
+
+    /* Level description badge */
+    .level-desc {
+      font-size: .72rem; color: var(--muted);
+      margin-bottom: .75rem;
+      min-height: 1.4em;
+    }
+    .level-desc strong { color: var(--text); font-weight: 500; }
 
     /* ── Stats ── */
     .spatial-stats {
@@ -209,28 +215,7 @@
     .lab-btn.primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
     .lab-btn:disabled { opacity: .35; cursor: not-allowed; }
 
-    .lab-preset-btn {
-      font-family: var(--font-body);
-      font-size: .72rem; font-weight: 500;
-      background: var(--bg); color: var(--muted);
-      border: 1px solid var(--border);
-      padding: .28rem .8rem; cursor: pointer;
-      transition: all .12s;
-    }
-    .lab-preset-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .lab-preset-btn.on { background: var(--accent); color: white; border-color: var(--accent); }
-
     /* ── Rows ── */
-    .gen-row {
-      display: flex; align-items: center; gap: 6px;
-      margin-bottom: .6rem; flex-wrap: wrap;
-    }
-    .gen-row-label {
-      font-size: .62rem; letter-spacing: .1em;
-      text-transform: uppercase; color: var(--muted);
-      white-space: nowrap;
-    }
-
     .control-row {
       display: flex; align-items: center;
       gap: 8px; margin-bottom: .6rem; flex-wrap: wrap;
@@ -248,35 +233,6 @@
     }
     .feedback-msg.success { border-color: var(--accent); background: var(--accent-light); color: var(--accent-hover); font-weight: 500; }
     .feedback-msg.error   { border-color: #c0a080; background: #fdf8f0; color: #6b4a1a; font-weight: 500; }
-
-    /* ── Sliders ── */
-    .lab-ctrl { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 140px; }
-    .lab-ctrl input[type=range] {
-      width: 100%; -webkit-appearance: none; appearance: none;
-      height: 3px; background: var(--border); outline: none; cursor: pointer;
-    }
-    .lab-ctrl input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none; width: 13px; height: 13px;
-      border-radius: 50%; background: var(--accent); cursor: pointer;
-    }
-    .lab-ctrl input[type=range]::-moz-range-thumb {
-      width: 13px; height: 13px; border-radius: 50%;
-      background: var(--accent); border: none; cursor: pointer;
-    }
-    .lab-ctrl-bottom { display: flex; justify-content: space-between; align-items: baseline; }
-    .lab-ctrl-label { font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
-    .lab-ctrl-val { font-size: .65rem; color: var(--accent); font-weight: 500; }
-
-    /* ── Collapsible ── */
-    .collapsible-section { border-top: 1px solid var(--border); margin-top: .85rem; padding-top: .85rem; }
-    .collapsible-header {
-      font-size: .65rem; letter-spacing: .1em; text-transform: uppercase;
-      color: var(--muted); cursor: pointer; user-select: none;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .collapsible-header:hover { color: var(--text); }
-    .collapsible-content { max-height: 0; overflow: hidden; transition: max-height .3s ease-out; }
-    .collapsible-content.active { max-height: 1000px; padding-top: .75rem; }
 
     /* ── Spatial diagram ── */
     .spatial-diagram-container {
@@ -305,24 +261,40 @@
       transform: translate(-50%, -50%);
       transition: opacity .4s ease;
     }
-    /* Target — filled solid */
     .source-target {
       background: var(--text);
       border: 2px solid var(--text);
       z-index: 10;
     }
-    /* Distractor — hollow ring */
     .source-distractor {
       background: transparent;
       border: 2px solid var(--border);
       z-index: 5;
     }
-    /* Clickable state */
     .source-clickable { cursor: pointer; }
     .source-clickable:hover { transform: translate(-50%, -50%) scale(1.3); border-color: var(--accent); }
-    /* Post-guess states */
     .source-selected { background: var(--accent); border-color: var(--accent); }
     .source-revealed { background: var(--text); border-color: var(--text); box-shadow: 0 0 0 3px var(--accent-light); }
+
+    /* ── Pulse animation keyframes ── */
+    @keyframes pulse-pluck {
+      0%   { box-shadow: 0 0 0 0px rgba(42,92,69,0.55); }
+      15%  { box-shadow: 0 0 0 7px rgba(42,92,69,0.0); }
+      100% { box-shadow: 0 0 0 0px rgba(42,92,69,0.0); }
+    }
+    @keyframes pulse-hum {
+      0%   { box-shadow: 0 0 0 0px rgba(42,92,69,0.35); }
+      50%  { box-shadow: 0 0 0 6px rgba(42,92,69,0.0); }
+      100% { box-shadow: 0 0 0 0px rgba(42,92,69,0.0); }
+    }
+    @keyframes pulse-chirp {
+      0%   { box-shadow: 0 0 0 0px rgba(42,92,69,0.45); }
+      12%  { box-shadow: 0 0 0 5px rgba(42,92,69,0.0); }
+      100% { box-shadow: 0 0 0 0px rgba(42,92,69,0.0); }
+    }
+    .pulse-pluck  { animation: pulse-pluck  667ms ease-out infinite; }
+    .pulse-hum    { animation: pulse-hum    444ms ease-in-out infinite; }
+    .pulse-chirp  { animation: pulse-chirp  333ms ease-out infinite; }
 
     .path-trace { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
 
@@ -347,9 +319,140 @@
     footer { border-top: 1px solid var(--border); padding: 1.25rem 1.5rem; text-align: center; font-size: .78rem; color: var(--muted); }
     footer a { color: var(--muted); text-decoration: none; }
     footer a:hover { color: var(--accent); }
+
+    /* ══════════════════════════════════════
+       TUTORIAL OVERLAY
+    ══════════════════════════════════════ */
+    .tutorial-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(26,26,26,0.72);
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .tutorial-overlay.hidden { display: none; }
+
+    .tutorial-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      max-width: 420px;
+      width: 100%;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .tutorial-card h2 {
+      font-family: var(--font-heading);
+      font-size: 1.2rem; font-weight: 600;
+      letter-spacing: -.01em;
+      margin-bottom: .5rem;
+    }
+    .tutorial-card p {
+      font-size: .88rem; color: var(--muted);
+      line-height: 1.7; margin-bottom: 1.25rem;
+    }
+
+    /* Mini demo diagram inside tutorial */
+    .tutorial-diagram-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+    }
+    .tutorial-diagram {
+      position: relative;
+      width: 200px; height: 200px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      background: var(--surface);
+      overflow: hidden;
+    }
+    .tutorial-dot {
+      position: absolute;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--text);
+      border: 2px solid var(--text);
+      transform: translate(-50%, -50%);
+    }
+
+    .tutorial-step-label {
+      font-size: .62rem; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--accent);
+      font-weight: 600; margin-bottom: .4rem;
+    }
+
+    .tutorial-actions {
+      display: flex; gap: .65rem; align-items: center;
+      justify-content: space-between; flex-wrap: wrap;
+    }
+    .tutorial-skip {
+      font-size: .78rem; color: var(--muted);
+      background: none; border: none; cursor: pointer;
+      text-decoration: underline; text-underline-offset: 3px;
+      padding: .3rem 0;
+    }
+    .tutorial-skip:hover { color: var(--text); }
+
+    .tutorial-dots-nav {
+      display: flex; gap: 6px; align-items: center;
+    }
+    .tutorial-dots-nav span {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--border); display: block;
+      transition: background .2s;
+    }
+    .tutorial-dots-nav span.active { background: var(--accent); }
   </style>
 </head>
 <body>
+
+<!-- ══════════════════════════════════════
+     TUTORIAL OVERLAY
+══════════════════════════════════════ -->
+<div class="tutorial-overlay hidden" id="tutorial-overlay" role="dialog" aria-modal="true" aria-label="Tutorial">
+  <div class="tutorial-card">
+    <!-- Step 1 -->
+    <div id="tut-step-1">
+      <div class="tutorial-step-label">Introduction · Step 1 of 2</div>
+      <h2>Sound moving through space</h2>
+      <p>Each dot in the circle represents a sound source. When you put on headphones, the dot's position maps directly to where you'll hear the sound — left, right, in front, or behind you.</p>
+      <div class="tutorial-diagram-wrap">
+        <div class="tutorial-diagram" id="tut-diagram">
+          <div class="tutorial-dot" id="tut-dot"></div>
+        </div>
+      </div>
+      <p>Watch the dot move around the circle and notice how the sound follows it through space.</p>
+      <div class="tutorial-actions">
+        <button class="tutorial-skip" id="tut-skip">Skip tutorial</button>
+        <div class="tutorial-dots-nav">
+          <span class="active" id="tut-nav-1"></span>
+          <span id="tut-nav-2"></span>
+        </div>
+        <button class="lab-btn primary" id="tut-next-1">Next →</button>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="tut-step-2" style="display:none;">
+      <div class="tutorial-step-label">Introduction · Step 2 of 2</div>
+      <h2>The shell game</h2>
+      <p>You'll see the <strong>target dot</strong> (filled) and one or two distractor dots (hollow rings) playing at the same time. Then all the dots fade out and keep moving — your job is to track the target through the sound alone.</p>
+      <p>When the movement stops, the dots reappear — all identical. <strong>Tap the one you were tracking.</strong></p>
+      <p style="font-size:.8rem; color: var(--accent); font-weight:500;">Headphones are strongly recommended for the full spatial effect.</p>
+      <div class="tutorial-actions">
+        <button class="tutorial-skip" id="tut-skip-2">Skip</button>
+        <div class="tutorial-dots-nav">
+          <span id="tut-nav-1b"></span>
+          <span class="active" id="tut-nav-2b"></span>
+        </div>
+        <button class="lab-btn primary" id="tut-finish">Let's go →</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ══════════════════════════════════════
      HEADER
@@ -384,6 +487,12 @@
   <div class="lab-section">
     <h3>The auditory shell game</h3>
 
+    <!-- Level Selector -->
+    <div class="level-selector" id="level-selector">
+      <span class="level-selector-label">Level</span>
+    </div>
+    <div class="level-desc" id="level-desc"></div>
+
     <!-- Spatial Diagram -->
     <div class="spatial-diagram-container">
       <div class="spatial-diagram" id="spatial-diagram">
@@ -393,14 +502,6 @@
 
     <!-- Phase Indicator -->
     <div class="phase-indicator" id="phase-indicator"></div>
-
-    <!-- Difficulty -->
-    <div class="gen-row">
-      <span class="gen-row-label">Difficulty</span>
-      <button class="lab-preset-btn on" data-difficulty="easy">Easy</button>
-      <button class="lab-preset-btn" data-difficulty="medium">Medium</button>
-      <button class="lab-preset-btn" data-difficulty="hard">Hard</button>
-    </div>
 
     <!-- Controls + feedback -->
     <div class="control-row">
@@ -425,42 +526,7 @@
       </div>
     </div>
 
-    <!-- Custom settings (collapsible) -->
-    <div class="collapsible-section">
-      <div class="collapsible-header" id="custom-toggle">
-        <span>Custom settings</span>
-        <span id="custom-icon">▾</span>
-      </div>
-      <div class="collapsible-content" id="custom-content">
-
-        <div class="gen-row" style="margin-top:.5rem;">
-          <span class="gen-row-label">Sources</span>
-          <button class="lab-preset-btn on" data-sources="2">2</button>
-          <button class="lab-preset-btn" data-sources="3">3</button>
-        </div>
-
-        <div class="gen-row">
-          <span class="gen-row-label">Path</span>
-          <button class="lab-preset-btn on" data-complexity="simple">Simple</button>
-          <button class="lab-preset-btn" data-complexity="medium">Medium</button>
-          <button class="lab-preset-btn" data-complexity="complex">Complex</button>
-        </div>
-
-        <div class="gen-row">
-          <div class="lab-ctrl">
-            <input type="range" id="movement-speed" min="0.5" max="2" step="0.1" value="1.0">
-            <div class="lab-ctrl-bottom">
-              <span class="lab-ctrl-label">Movement speed</span>
-              <span class="lab-ctrl-val" id="movement-speed-val">1.0×</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
     <p class="lab-hint">Headphones recommended · Listen to the distinct sound · Click where it ends</p>
-
   </div>
 
   <!-- Context -->
@@ -486,12 +552,50 @@
 'use strict';
 
 // ─────────────────────────────────────────────────────────
+// SUPABASE
+// ─────────────────────────────────────────────────────────
+let _sb = null;
+async function getSupabase() {
+  if (_sb) return _sb;
+  const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+  _sb = createClient(
+    'https://lrjuufvrgkuvfxcmybtf.supabase.co',
+    'sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1'
+  );
+  return _sb;
+}
+
+async function getCurrentUserId() {
+  try {
+    const sb = await getSupabase();
+    const { data: { user } } = await sb.auth.getUser();
+    return user ? user.id : null;
+  } catch { return null; }
+}
+
+async function saveTrialToSupabase(level, correct) {
+  try {
+    const sb = await getSupabase();
+    const userId = await getCurrentUserId();
+    if (!userId) return;
+    await sb.from('spatial_game_stats').insert({
+      user_id:    userId,
+      level:      level,
+      correct:    correct,
+      played_at:  new Date().toISOString(),
+    });
+  } catch (e) {
+    console.warn('Could not save stat:', e.message);
+  }
+}
+
+// ─────────────────────────────────────────────────────────
 // HEADER BEHAVIOUR
 // ─────────────────────────────────────────────────────────
-const path = window.location.pathname.replace(/\/$/, '') || '/';
+const pathName = window.location.pathname.replace(/\/$/, '') || '/';
 document.querySelectorAll('.sil-header__nav a').forEach(a => {
   const href = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
-  if (href === path) a.classList.add('sil-active');
+  if (href === pathName) a.classList.add('sil-active');
 });
 
 const menuToggle = document.getElementById('silMenuToggle');
@@ -503,15 +607,6 @@ menuToggle.addEventListener('click', () => {
 silNav.querySelectorAll('a').forEach(a =>
   a.addEventListener('click', () => silNav.classList.remove('sil-open'))
 );
-
-async function getSupabase() {
-  if (window._supabase) return window._supabase;
-  const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-  return createClient(
-    'https://lrjuufvrgkuvfxcmybtf.supabase.co',
-    'sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1'
-  );
-}
 
 document.getElementById('silSignOut').addEventListener('click', async function () {
   this.disabled = true;
@@ -525,55 +620,64 @@ document.getElementById('silSignOut').addEventListener('click', async function (
 });
 
 // ═══════════════════════════════════════════════════════
+// 10-LEVEL CONFIGURATION
+// Levels 1-4: 2 sources. Levels 5-10: 3 sources.
+// minSeparationDeg: minimum angular separation between
+// final dot positions (enforced at path generation time).
+// ═══════════════════════════════════════════════════════
+const LEVELS = [
+  // lvl  sources  complexity  speedMul  minSepDeg  label
+  { num: 1,  sources: 2, complexity: 'simple',  speed: 0.5,  minSep: 120, label: '2 sources · slow · wide spacing' },
+  { num: 2,  sources: 2, complexity: 'simple',  speed: 0.7,  minSep: 100, label: '2 sources · gentle pace · wide spacing' },
+  { num: 3,  sources: 2, complexity: 'medium',  speed: 0.9,  minSep:  70, label: '2 sources · moderate speed · medium spacing' },
+  { num: 4,  sources: 2, complexity: 'medium',  speed: 1.1,  minSep:  60, label: '2 sources · faster paths · medium spacing' },
+  { num: 5,  sources: 3, complexity: 'simple',  speed: 1.0,  minSep:  90, label: '3 sources introduced · slow paths · wide spacing' },
+  { num: 6,  sources: 3, complexity: 'medium',  speed: 1.2,  minSep:  60, label: '3 sources · medium paths · medium spacing' },
+  { num: 7,  sources: 3, complexity: 'medium',  speed: 1.4,  minSep:  35, label: '3 sources · fast paths · narrow spacing' },
+  { num: 8,  sources: 3, complexity: 'complex', speed: 1.6,  minSep:  25, label: '3 sources · complex paths · narrow spacing' },
+  { num: 9,  sources: 3, complexity: 'complex', speed: 1.8,  minSep:  15, label: '3 sources · complex paths · tight spacing' },
+  { num: 10, sources: 3, complexity: 'complex', speed: 2.2,  minSep:   5, label: '3 sources · maximum speed · can cluster' },
+];
+
+// ═══════════════════════════════════════════════════════
 // TONE SOURCE
-// Synthesises a spatially-positioned sound with a distinct
-// timbre and rhythmic pattern using Resonance Audio.
 // ═══════════════════════════════════════════════════════
 class ToneSource {
   constructor(audioCtx, resonanceScene, config) {
-    this.audioCtx       = audioCtx;
-    this.resonanceScene = resonanceScene;
-    this.frequency      = config.frequency;
-    this.timbre         = config.timbre;   // 'pluck' | 'hum' | 'chirp'
-    this.rhythmMs       = config.rhythmMs; // interval between notes in ms
-    this.isTarget       = config.isTarget;
-    this.position       = { x: 0, y: 0, z: -1 };
+    this.audioCtx        = audioCtx;
+    this.resonanceScene  = resonanceScene;
+    this.frequency       = config.frequency;
+    this.timbre          = config.timbre;
+    this.rhythmMs        = config.rhythmMs;
+    this.isTarget        = config.isTarget;
+    this.position        = { x: 0, y: 0, z: -1 };
     this.resonanceSource = null;
-    this._intervalId    = null;
+    this._intervalId     = null;
   }
 
   init() {
     this.resonanceSource = this.resonanceScene.createSource();
-    this.resonanceSource.setPosition(
-      this.position.x,
-      this.position.y,
-      this.position.z
-    );
+    this.resonanceSource.setPosition(this.position.x, this.position.y, this.position.z);
   }
 
   _playNote() {
     const ctx = this.audioCtx;
     const now = ctx.currentTime;
-
     const osc  = ctx.createOscillator();
     const gain = ctx.createGain();
 
     switch (this.timbre) {
-
       case 'pluck':
-        // Sine — sharp percussive decay
         osc.type = 'sine';
         osc.frequency.setValueAtTime(this.frequency, now);
         gain.gain.setValueAtTime(0.32, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
         osc.connect(gain);
         gain.connect(this.resonanceSource.input);
-        osc.start(now);
-        osc.stop(now + 0.25);
+        osc.start(now); osc.stop(now + 0.25);
         break;
 
       case 'hum':
-        // Triangle — slow attack, sustained
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(this.frequency, now);
         gain.gain.setValueAtTime(0.0, now);
@@ -582,12 +686,10 @@ class ToneSource {
         gain.gain.linearRampToValueAtTime(0.0,  now + 0.42);
         osc.connect(gain);
         gain.connect(this.resonanceSource.input);
-        osc.start(now);
-        osc.stop(now + 0.45);
+        osc.start(now); osc.stop(now + 0.45);
         break;
 
       case 'chirp': {
-        // Square through lowpass — bright, clipped
         osc.type = 'square';
         osc.frequency.setValueAtTime(this.frequency, now);
         const filt = ctx.createBiquadFilter();
@@ -599,8 +701,7 @@ class ToneSource {
         osc.connect(filt);
         filt.connect(gain);
         gain.connect(this.resonanceSource.input);
-        osc.start(now);
-        osc.stop(now + 0.20);
+        osc.start(now); osc.stop(now + 0.20);
         break;
       }
     }
@@ -620,33 +721,24 @@ class ToneSource {
 
   setPosition(x, y, z) {
     this.position = { x, y, z };
-    if (this.resonanceSource) {
-      this.resonanceSource.setPosition(x, y, z);
-    }
+    if (this.resonanceSource) this.resonanceSource.setPosition(x, y, z);
   }
 }
 
 // ═══════════════════════════════════════════════════════
 // PATH GENERATOR
-// Produces per-frame position arrays for each source.
-// Diagram is 300×300 px; origin at centre (150,150).
 // ═══════════════════════════════════════════════════════
-const DIAGRAM_RADIUS = 150; // px, half of 300px container
+const DIAGRAM_RADIUS = 150;
 
 function polarToXY(angleDeg, distance) {
   const rad = (angleDeg - 90) * Math.PI / 180;
-  return {
-    x: distance * Math.cos(rad),
-    y: distance * Math.sin(rad),
-  };
+  return { x: distance * Math.cos(rad), y: distance * Math.sin(rad) };
 }
 
 function xyToSpatial(x, y) {
-  // Map diagram coords to Resonance Audio 3D space
-  // x → left/right,  y → front/back (z-axis)
   return {
-    sx: (x / DIAGRAM_RADIUS) * 2,
-    sy: 0,
+    sx:  (x / DIAGRAM_RADIUS) * 2,
+    sy:  0,
     sz: -(y / DIAGRAM_RADIUS) * 2,
   };
 }
@@ -657,7 +749,6 @@ function generatePath(complexity, durationSec, startAngleDeg, speedMul) {
   const pts    = [];
 
   if (complexity === 'simple') {
-    // Arc: 180° sweep at 70% radius
     const r = DIAGRAM_RADIUS * 0.70;
     for (let i = 0; i <= frames; i++) {
       const angle = startAngleDeg + (180 * i / frames);
@@ -667,7 +758,6 @@ function generatePath(complexity, durationSec, startAngleDeg, speedMul) {
     }
 
   } else if (complexity === 'medium') {
-    // Lissajous figure
     const A = DIAGRAM_RADIUS * 0.62;
     const offset = startAngleDeg * Math.PI / 180;
     for (let i = 0; i <= frames; i++) {
@@ -679,7 +769,6 @@ function generatePath(complexity, durationSec, startAngleDeg, speedMul) {
     }
 
   } else {
-    // Complex: smoothed random walk
     let angle    = startAngleDeg;
     let distance = DIAGRAM_RADIUS * 0.50;
     const raw = [];
@@ -690,14 +779,13 @@ function generatePath(complexity, durationSec, startAngleDeg, speedMul) {
       const { x, y } = polarToXY(angle, distance);
       raw.push({ x, y });
     }
-    // Moving-average smooth
     const W = 5;
     for (let i = 0; i <= frames; i++) {
       const lo = Math.max(0, i - W), hi = Math.min(frames, i + W);
-      let sx2 = 0, sy2 = 0;
-      for (let j = lo; j <= hi; j++) { sx2 += raw[j].x; sy2 += raw[j].y; }
+      let ax = 0, ay = 0;
+      for (let j = lo; j <= hi; j++) { ax += raw[j].x; ay += raw[j].y; }
       const n = hi - lo + 1;
-      const x = sx2 / n, y = sy2 / n;
+      const x = ax / n, y = ay / n;
       const sp = xyToSpatial(x, y);
       pts.push({ x, y, sx: sp.sx, sy: sp.sy, sz: sp.sz });
     }
@@ -706,29 +794,69 @@ function generatePath(complexity, durationSec, startAngleDeg, speedMul) {
   return pts;
 }
 
+// Compute angle in degrees of a point (x,y) from centre
+function pointAngle(x, y) {
+  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+}
+
+// Angular distance between two angles (0–180)
+function angularDist(a1, a2) {
+  const d = Math.abs(a1 - a2) % 360;
+  return d > 180 ? 360 - d : d;
+}
+
+// Build paths for all sources, retrying until final positions
+// satisfy the minimum angular separation for the current level.
+function buildPathsWithSeparation(levelCfg) {
+  const { sources: numSrc, complexity, speed: speedMul, minSep } = levelCfg;
+  const MAX_ATTEMPTS = 20;
+
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    const paths = [];
+    for (let i = 0; i < numSrc; i++) {
+      const startAngle = Math.random() * 360;
+      paths.push(generatePath(complexity, 5.0, startAngle, speedMul));
+    }
+
+    // Check all pairs of final positions
+    let ok = true;
+    for (let i = 0; i < numSrc && ok; i++) {
+      for (let j = i + 1; j < numSrc && ok; j++) {
+        const fi = paths[i][paths[i].length - 1];
+        const fj = paths[j][paths[j].length - 1];
+        const ai = pointAngle(fi.x, fi.y);
+        const aj = pointAngle(fj.x, fj.y);
+        if (angularDist(ai, aj) < minSep) ok = false;
+      }
+    }
+
+    if (ok) return paths;
+  }
+
+  // Fallback: return last attempt even if separation not met
+  const paths = [];
+  for (let i = 0; i < numSrc; i++) {
+    paths.push(generatePath(complexity, 5.0, Math.random() * 360, speedMul));
+  }
+  return paths;
+}
+
 // ═══════════════════════════════════════════════════════
 // GAME STATE
 // ═══════════════════════════════════════════════════════
 const G = {
   audioCtx:       null,
   resonanceScene: null,
-
-  sources:        [],   // ToneSource[]
-  paths:          [],   // position arrays per source
+  sources:        [],
+  paths:          [],
   targetIndex:    0,
-
-  phase: 'idle',  // idle | identity | handoff | tracking | reveal | guess | result
-  trials:  0,
-  correct: 0,
-
-  // Settings
-  numSources:    2,
-  complexity:    'simple',
-  speedMul:      1.0,
-
-  animRaf:       null,
-  trackStart:    null,  // performance.now() when tracking phase started
-  trackDuration: 0,     // ms
+  phase:          'idle',
+  trials:         0,
+  correct:        0,
+  currentLevel:   1,    // 1-indexed
+  animRaf:        null,
+  trackStart:     null,
+  trackDuration:  0,
 };
 
 // ─────────────────────────────────────────────────────────
@@ -737,7 +865,6 @@ const G = {
 function initAudio() {
   if (G.audioCtx) return;
   G.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
   G.resonanceScene = new ResonanceAudio(G.audioCtx);
   G.resonanceScene.setRoomProperties(
     { width: 8, height: 3, depth: 8 },
@@ -751,53 +878,26 @@ function initAudio() {
 }
 
 // ─────────────────────────────────────────────────────────
-// SOURCE CONFIGS
-// Three sources with distinct timbres, pitches, and rhythms.
-// Different rhythms (pluck=quarter-note feel, hum=triplet,
-// chirp=dotted-eighth) make each source individually trackable.
+// SOURCE CONFIGS — distinct timbres, pitches, rhythms
 // ─────────────────────────────────────────────────────────
 const SOURCE_CONFIGS = [
-  {
-    frequency: 329.63,  // E4
-    timbre:    'pluck',
-    rhythmMs:  667,     // ~90 BPM quarter notes
-    isTarget:  true,
-  },
-  {
-    frequency: 392.00,  // G4
-    timbre:    'hum',
-    rhythmMs:  444,     // triplet eighths at 90 BPM
-    isTarget:  false,
-  },
-  {
-    frequency: 523.25,  // C5
-    timbre:    'chirp',
-    rhythmMs:  333,     // sixteenth-note feel
-    isTarget:  false,
-  },
+  { frequency: 329.63, timbre: 'pluck',  rhythmMs: 667, isTarget: true  },  // E4
+  { frequency: 392.00, timbre: 'hum',    rhythmMs: 444, isTarget: false },  // G4
+  { frequency: 523.25, timbre: 'chirp',  rhythmMs: 333, isTarget: false },  // C5
 ];
+
+const PULSE_CLASSES = ['pulse-pluck', 'pulse-hum', 'pulse-chirp'];
 
 function buildSources() {
   G.sources.forEach(s => s.stopRhythm());
   G.sources = [];
-
-  for (let i = 0; i < G.numSources; i++) {
+  const lvl = LEVELS[G.currentLevel - 1];
+  for (let i = 0; i < lvl.sources; i++) {
     const src = new ToneSource(G.audioCtx, G.resonanceScene, SOURCE_CONFIGS[i]);
     src.init();
     G.sources.push(src);
   }
-  G.targetIndex = 0; // always first config
-}
-
-function buildPaths() {
-  G.paths = [];
-  // 5 seconds of movement per trial (divided by speed multiplier)
-  const dur = 5.0;
-  for (let i = 0; i < G.numSources; i++) {
-    const startAngle = Math.random() * 360;
-    G.paths.push(generatePath(G.complexity, dur, startAngle, G.speedMul));
-  }
-  G.trackDuration = (dur / G.speedMul) * 1000; // ms
+  G.targetIndex = 0;
 }
 
 // ─────────────────────────────────────────────────────────
@@ -810,26 +910,15 @@ const feedbackEl = document.getElementById('feedback-msg');
 const btnPlay    = document.getElementById('btn-play');
 const btnNext    = document.getElementById('btn-next');
 
-function setPhase(text) {
-  phaseEl.textContent = text;
-}
-
+function setPhase(text)       { phaseEl.textContent = text; }
 function setFeedback(msg, cls) {
   feedbackEl.textContent = msg;
   feedbackEl.className   = 'feedback-msg' + (cls ? ' ' + cls : '');
 }
+function clearDots()  { diagram.querySelectorAll('.sound-source').forEach(d => d.remove()); }
+function clearPath()  { pathSvg.innerHTML = ''; }
 
-function clearDots() {
-  diagram.querySelectorAll('.sound-source').forEach(d => d.remove());
-}
-
-function clearPath() {
-  pathSvg.innerHTML = '';
-}
-
-// Build dot elements. In 'identity' the target is visually distinct;
-// in 'reveal' all dots look the same (shell game).
-function drawDots(showTarget) {
+function drawDots(showTarget, withPulse) {
   clearDots();
   G.sources.forEach((src, i) => {
     const dot = document.createElement('div');
@@ -840,7 +929,16 @@ function drawDots(showTarget) {
     } else {
       dot.classList.add('source-distractor');
     }
+    if (withPulse) {
+      dot.classList.add(PULSE_CLASSES[i]);
+    }
     diagram.appendChild(dot);
+  });
+}
+
+function removePulseClasses() {
+  diagram.querySelectorAll('.sound-source').forEach((dot, i) => {
+    PULSE_CLASSES.forEach(c => dot.classList.remove(c));
   });
 }
 
@@ -850,8 +948,8 @@ function placeDots() {
     if (!dot) return;
     const frame = currentFrame(i);
     const pos   = G.paths[i][frame];
-    dot.style.left    = (150 + pos.x) + 'px';
-    dot.style.top     = (150 + pos.y) + 'px';
+    dot.style.left = (150 + pos.x) + 'px';
+    dot.style.top  = (150 + pos.y) + 'px';
     src.setPosition(pos.sx, pos.sy, pos.sz);
   });
 }
@@ -864,18 +962,13 @@ function currentFrame(sourceIndex) {
 }
 
 function setDotsOpacity(opacity) {
-  diagram.querySelectorAll('.sound-source').forEach(d => {
-    d.style.opacity = opacity;
-  });
+  diagram.querySelectorAll('.sound-source').forEach(d => { d.style.opacity = opacity; });
 }
 
 function drawPathTrace(sourceIndex) {
   clearPath();
   const pts = G.paths[sourceIndex];
   if (pts.length < 2) return;
-
-  const W = diagram.offsetWidth;
-  const H = diagram.offsetHeight;
 
   const d = pts.map((p, i) => {
     const px = (150 / DIAGRAM_RADIUS) * (DIAGRAM_RADIUS + p.x);
@@ -892,7 +985,6 @@ function drawPathTrace(sourceIndex) {
   el.setAttribute('opacity', '0.45');
   pathSvg.appendChild(el);
 
-  // Start dot
   const sp = pts[0];
   const startDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
   startDot.setAttribute('cx', (150 / DIAGRAM_RADIUS) * (DIAGRAM_RADIUS + sp.x));
@@ -915,10 +1007,8 @@ function updateStats() {
 // ─────────────────────────────────────────────────────────
 // FIVE-PHASE TRIAL
 // ─────────────────────────────────────────────────────────
-
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-// Fade opacity from current value to target over `ms` ms
 function fadeOpacity(fromVal, toVal, ms) {
   return new Promise(resolve => {
     const start = performance.now();
@@ -940,19 +1030,22 @@ async function runTrial() {
   setFeedback('');
   clearPath();
 
-  // ── PHASE 1: IDENTITY (0–3 s) ──────────────────────────
-  // Target plays solo for 1.5 s so the user can orient, then
-  // distractors join for another 1.5 s. Dots are visible and
-  // the target dot is visually distinct (solid vs hollow).
+  const lvl = LEVELS[G.currentLevel - 1];
+
+  // Build paths with separation enforcement
+  G.paths = buildPathsWithSeparation(lvl);
+  G.trackDuration = (5.0 / lvl.speed) * 1000; // ms
+
+  // ── PHASE 1: IDENTITY (0–3s) ──────────────────────────
+  // Target plays solo for 1.5s, then distractors join for 1.5s.
+  // Dots are visible with rhythmic pulse animation.
   G.phase = 'identity';
   setPhase('listen — the filled dot is the target');
 
-  buildPaths();
-  G.trackStart = performance.now(); // begin tracking path time from now
-
-  drawDots(true);   // target = solid, distractors = hollow
+  G.trackStart = performance.now();
+  drawDots(true, true);   // target = solid, distractors = hollow, all pulse
   setDotsOpacity(1);
-  placeDots();      // set initial positions
+  placeDots();
 
   // Target plays solo
   G.sources[G.targetIndex].startRhythm();
@@ -964,18 +1057,14 @@ async function runTrial() {
   });
   await sleep(1500);
 
-  // ── PHASE 2: HANDOFF (3–4 s) ──────────────────────────
-  // Dots start moving; fade to invisible over 1 s.
+  // ── PHASE 2: HANDOFF (3–4s) ──────────────────────────
   G.phase = 'handoff';
   setPhase('track the target as it moves');
 
-  G.trackStart = performance.now(); // restart timing from here for tracking
-
-  // Rebuild paths with fresh timing (movement phase = 5 s from here)
-  buildPaths();
+  // Restart timing for the movement phase
+  G.paths = buildPathsWithSeparation(lvl);
   G.trackStart = performance.now();
 
-  // Animation loop — runs through handoff + tracking
   let animRunning = true;
   function animate() {
     if (!animRunning) return;
@@ -984,20 +1073,18 @@ async function runTrial() {
   }
   animate();
 
-  // Fade dots out
+  // Remove pulse right as fade-out begins (clean transition)
+  removePulseClasses();
+
+  // Fade dots out over 1s
   await fadeOpacity(1, 0, 1000);
 
-  // ── PHASE 3: TRACKING (4–9 s) ─────────────────────────
-  // Audio and movement continue; dots invisible.
+  // ── PHASE 3: TRACKING (4–9s) ─────────────────────────
   G.phase = 'tracking';
   setPhase('tracking…');
-
-  // Wait remaining track duration (paths are 5 s / speedMul)
   await sleep(Math.max(0, G.trackDuration - 1000));
 
   // ── PHASE 4: REVEAL ───────────────────────────────────
-  // Stop audio and animation. Dots reappear at final positions,
-  // now all looking the same (the shell game).
   G.phase = 'reveal';
   setPhase('where did the target end up?');
 
@@ -1005,8 +1092,8 @@ async function runTrial() {
   if (G.animRaf) cancelAnimationFrame(G.animRaf);
   G.sources.forEach(s => s.stopRhythm());
 
-  // Redraw as identical hollow dots (no target distinction)
-  drawDots(false);
+  // Redraw as identical hollow dots — no target distinction
+  drawDots(false, false);
 
   // Place at final positions
   G.sources.forEach((src, i) => {
@@ -1031,11 +1118,10 @@ async function runTrial() {
 // ─────────────────────────────────────────────────────────
 // GUESS HANDLING
 // ─────────────────────────────────────────────────────────
-function handleGuess(selectedIndex) {
+async function handleGuess(selectedIndex) {
   if (G.phase !== 'guess') return;
   G.phase = 'result';
 
-  // Remove click handlers + clickable style
   diagram.querySelectorAll('.sound-source').forEach(d => {
     d.classList.remove('source-clickable');
     d.style.cursor = 'default';
@@ -1045,6 +1131,9 @@ function handleGuess(selectedIndex) {
   G.trials++;
   if (correct) G.correct++;
   updateStats();
+
+  // Save to Supabase (fire and forget)
+  saveTrialToSupabase(G.currentLevel, correct);
 
   const selectedDot = diagram.querySelector(`.sound-source[data-idx="${selectedIndex}"]`);
   if (selectedDot) selectedDot.classList.add('source-selected');
@@ -1080,68 +1169,32 @@ function resetTrial() {
 }
 
 // ─────────────────────────────────────────────────────────
-// SETTINGS UI
+// LEVEL SELECTOR UI
 // ─────────────────────────────────────────────────────────
-const PRESETS = {
-  easy:   { numSources: 2, complexity: 'simple',  speedMul: 1.0 },
-  medium: { numSources: 2, complexity: 'medium',  speedMul: 1.5 },
-  hard:   { numSources: 3, complexity: 'complex', speedMul: 1.5 },
-};
+const levelSelector = document.getElementById('level-selector');
+const levelDesc     = document.getElementById('level-desc');
 
-function applyPreset(key) {
-  const p = PRESETS[key];
-  G.numSources = p.numSources;
-  G.complexity = p.complexity;
-  G.speedMul   = p.speedMul;
-
-  document.querySelectorAll('[data-sources]').forEach(b =>
-    b.classList.toggle('on', parseInt(b.dataset.sources) === p.numSources)
-  );
-  document.querySelectorAll('[data-complexity]').forEach(b =>
-    b.classList.toggle('on', b.dataset.complexity === p.complexity)
-  );
-  const speedSlider = document.getElementById('movement-speed');
-  speedSlider.value = p.speedMul;
-  document.getElementById('movement-speed-val').textContent = p.speedMul.toFixed(1) + '×';
+function buildLevelUI() {
+  LEVELS.forEach(lvl => {
+    const btn = document.createElement('button');
+    btn.className    = 'level-btn' + (lvl.num >= 8 ? ' level-hard' : '');
+    btn.dataset.level = lvl.num;
+    btn.textContent  = lvl.num;
+    btn.setAttribute('aria-label', `Level ${lvl.num}`);
+    btn.addEventListener('click', () => setLevel(lvl.num));
+    levelSelector.appendChild(btn);
+  });
 }
 
-document.querySelectorAll('[data-difficulty]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('[data-difficulty]').forEach(b => b.classList.remove('on'));
-    btn.classList.add('on');
-    applyPreset(btn.dataset.difficulty);
+function setLevel(num) {
+  G.currentLevel = num;
+  document.querySelectorAll('.level-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.level) === num);
   });
-});
-
-document.querySelectorAll('[data-sources]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('[data-sources]').forEach(b => b.classList.remove('on'));
-    btn.classList.add('on');
-    G.numSources = parseInt(btn.dataset.sources);
-  });
-});
-
-document.querySelectorAll('[data-complexity]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('[data-complexity]').forEach(b => b.classList.remove('on'));
-    btn.classList.add('on');
-    G.complexity = btn.dataset.complexity;
-  });
-});
-
-document.getElementById('movement-speed').addEventListener('input', e => {
-  G.speedMul = parseFloat(e.target.value);
-  document.getElementById('movement-speed-val').textContent =
-    G.speedMul.toFixed(1) + '×';
-});
-
-// Collapsible custom settings
-document.getElementById('custom-toggle').addEventListener('click', () => {
-  const content = document.getElementById('custom-content');
-  const icon    = document.getElementById('custom-icon');
-  const open    = content.classList.toggle('active');
-  icon.textContent = open ? '▴' : '▾';
-});
+  const lvl = LEVELS[num - 1];
+  levelDesc.innerHTML = `<strong>Level ${num}:</strong> ${lvl.label}`;
+  resetTrial();
+}
 
 // ─────────────────────────────────────────────────────────
 // PLAY / NEXT BUTTONS
@@ -1157,8 +1210,119 @@ btnNext.addEventListener('click', () => {
   resetTrial();
 });
 
-// Init preset UI
-applyPreset('easy');
+// ─────────────────────────────────────────────────────────
+// TUTORIAL
+// ─────────────────────────────────────────────────────────
+const tutOverlay = document.getElementById('tutorial-overlay');
+const tutDot     = document.getElementById('tut-dot');
+
+let tutAnimRaf = null;
+let tutAudioCtx = null;
+let tutResonance = null;
+let tutSource = null;
+let tutRhythmId = null;
+
+function tutPointOnCircle(angleDeg, r) {
+  const rad = (angleDeg - 90) * Math.PI / 180;
+  return {
+    x: 100 + r * Math.cos(rad),
+    y: 100 + r * Math.sin(rad),
+  };
+}
+
+function startTutorialDemo() {
+  let angle = 0;
+  const r   = 68; // px, within 200px circle
+
+  function animStep(ts) {
+    angle = (ts / 20) % 360; // slow orbit
+    const { x, y } = tutPointOnCircle(angle, r);
+    tutDot.style.left = x + 'px';
+    tutDot.style.top  = y + 'px';
+    tutAnimRaf = requestAnimationFrame(animStep);
+
+    // Update Resonance position if audio running
+    if (tutSource && tutSource.resonanceSource) {
+      const sx =  (x - 100) / 50;  // roughly -2 to 2
+      const sz = -(y - 100) / 50;
+      tutSource.resonanceSource.setPosition(sx, 0, sz);
+    }
+  }
+  tutAnimRaf = requestAnimationFrame(animStep);
+
+  // Attempt to start audio (may fail until user interaction)
+  startTutorialAudio();
+}
+
+function startTutorialAudio() {
+  try {
+    if (!tutAudioCtx) {
+      tutAudioCtx   = new (window.AudioContext || window.webkitAudioContext)();
+      tutResonance  = new ResonanceAudio(tutAudioCtx);
+      tutResonance.setRoomProperties(
+        { width: 8, height: 3, depth: 8 },
+        { left: 'acoustic-ceiling-tiles', right: 'acoustic-ceiling-tiles',
+          front:'acoustic-ceiling-tiles', back:  'acoustic-ceiling-tiles',
+          down: 'acoustic-ceiling-tiles', up:    'acoustic-ceiling-tiles' }
+      );
+      tutResonance.output.connect(tutAudioCtx.destination);
+      tutSource = new ToneSource(tutAudioCtx, tutResonance, SOURCE_CONFIGS[0]);
+      tutSource.init();
+    }
+    if (tutAudioCtx.state === 'suspended') tutAudioCtx.resume();
+    if (!tutRhythmId) tutSource.startRhythm();
+  } catch(e) { /* audio not available */ }
+}
+
+function stopTutorialDemo() {
+  if (tutAnimRaf)  { cancelAnimationFrame(tutAnimRaf); tutAnimRaf = null; }
+  if (tutSource)   { tutSource.stopRhythm(); tutRhythmId = null; }
+  if (tutAudioCtx) { tutAudioCtx.close().catch(()=>{}); tutAudioCtx = null; tutResonance = null; tutSource = null; }
+}
+
+function closeTutorial() {
+  stopTutorialDemo();
+  tutOverlay.classList.add('hidden');
+  try { localStorage.setItem('sil_spatial_tutorial_seen', '1'); } catch(e){}
+}
+
+function showTutorialStep2() {
+  document.getElementById('tut-step-1').style.display = 'none';
+  document.getElementById('tut-step-2').style.display = 'block';
+}
+
+// Wire tutorial buttons
+document.getElementById('tut-skip').addEventListener('click',    closeTutorial);
+document.getElementById('tut-skip-2').addEventListener('click',  closeTutorial);
+document.getElementById('tut-finish').addEventListener('click',  closeTutorial);
+document.getElementById('tut-next-1').addEventListener('click',  () => {
+  showTutorialStep2();
+  // Try starting audio on this interaction
+  startTutorialAudio();
+});
+
+// Auto-advance on first interaction (click anywhere in tutorial card)
+tutOverlay.addEventListener('click', () => {
+  startTutorialAudio();
+}, { once: true });
+
+// ─────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────
+buildLevelUI();
+setLevel(1);
+
+// Show tutorial if first visit
+try {
+  if (!localStorage.getItem('sil_spatial_tutorial_seen')) {
+    tutOverlay.classList.remove('hidden');
+    // Start the dot animation (audio will start on first interaction)
+    // Small delay so the overlay renders first
+    setTimeout(startTutorialDemo, 200);
+  }
+} catch(e) {
+  // localStorage blocked — just don't show tutorial
+}
 
 </script>
 
