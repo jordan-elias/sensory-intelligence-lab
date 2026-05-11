@@ -785,39 +785,73 @@ const SCALES = {
   minor_pentatonic:[0, 3, 5, 7, 10, 12, 15, 17],
 };
 
-/* ── ENHARMONIC SPELLING ── */
-// Which keys prefer flats vs sharps
-const FLAT_KEYS = new Set(['F','Bb','Eb','Ab','Db','Gb','Cb','D#','G#','A#']);
-// Scales that always use flats regardless of key
-const FLAT_SCALES = new Set(['minor','harmonic_minor','minor_pentatonic']);
+/* ── DIATONIC NOTE SPELLING ── */
 
-const NOTE_SHARP = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-const NOTE_FLAT  = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+// Letter names in order
+const LETTERS = ['C','D','E','F','G','A','B'];
 
-function preferFlats(root, scale) {
-  // Minor-family scales on any root tend toward flats
-  if (FLAT_SCALES.has(scale)) return true;
-  return FLAT_KEYS.has(root);
+// Semitone value of each natural letter (C=0)
+const LETTER_SEMITONE = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 };
+
+// Parse a root like "C#", "Bb", "D#" into { letter, alter }
+// alter: 0=natural, 1=sharp, -1=flat
+function parseRoot(root) {
+  const letter = root[0];
+  const alter  = root.length === 1 ? 0
+    : root[1] === '#' ? 1 : -1;
+  return { letter, alter };
 }
 
-function spelledNote(semitone, root, scale) {
-  const names = preferFlats(root, scale) ? NOTE_FLAT : NOTE_SHARP;
-  return names[((semitone % 12) + 12) % 12];
-}
+// Diatonic intervals (in semitones) above root for scale degrees 0–7
+// These are the generic interval sizes: unison, 2nd, 3rd, 4th, 5th, 6th, 7th, octave
+// Used to derive the letter for each scale degree
+const DEGREE_LETTER_STEPS = {
+  major:           [0, 1, 2, 3, 4, 5, 6, 7],  // C D E F G A B C
+  minor:           [0, 1, 2, 3, 4, 5, 6, 7],  // same letter pattern
+  harmonic_minor:  [0, 1, 2, 3, 4, 5, 6, 7],
+  major_pentatonic:[0, 1, 2, 4, 5, 7],         // 1 2 3 5 6 (skip 4th and 7th)
+  minor_pentatonic:[0, 2, 3, 4, 6, 7],         // 1 b3 4 5 b7 (skip 2nd and 6th)
+};
+
+// Semitone intervals for each scale degree (0-based)
+// Already defined above as SCALES — reuse that.
 
 function getScaleNoteName(root, scale, scaleIdx) {
   const semitones = SCALES[scale] || SCALES.major;
-  const st = semitones[Math.min(scaleIdx, semitones.length - 1)];
-  const rootSemitone = NOTE_SHARP.indexOf(root) !== -1
-    ? NOTE_SHARP.indexOf(root)
-    : NOTE_FLAT.indexOf(root);
-  return spelledNote(rootSemitone + st, root, scale);
+  if (scaleIdx >= semitones.length) scaleIdx = semitones.length - 1;
+
+  const targetSt = semitones[scaleIdx]; // semitones above root
+
+  // Root letter index into LETTERS
+  const { letter: rootLetter, alter: rootAlter } = parseRoot(root);
+  const rootLetterIdx = LETTERS.indexOf(rootLetter);
+
+  // How many letter steps up for this degree
+  const letterSteps = DEGREE_LETTER_STEPS[scale] || DEGREE_LETTER_STEPS.major;
+  const letterStep  = letterSteps[Math.min(scaleIdx, letterSteps.length - 1)];
+
+  // The letter for this degree
+  const degLetterIdx  = (rootLetterIdx + letterStep) % 7;
+  const degLetter     = LETTERS[degLetterIdx];
+
+  // Expected semitone of that natural letter above C, adjusted for root
+  const rootSt        = LETTER_SEMITONE[rootLetter] + rootAlter;
+  const degNaturalSt  = LETTER_SEMITONE[degLetter];
+
+  // Actual semitone of the degree note (absolute, C=0)
+  const actualSt = ((rootSt + targetSt) % 12 + 12) % 12;
+  // Natural semitone of the degree letter (absolute)
+  const naturalSt = (degNaturalSt % 12 + 12) % 12;
+
+  // Difference tells us how many sharps/flats to add
+  let diff = actualSt - naturalSt;
+  // Normalise: diff should be -1, 0, or 1 for any diatonic scale
+  if (diff > 6)  diff -= 12;
+  if (diff < -6) diff += 12;
+
+  const acc = diff === 0 ? '' : diff === 1 ? '#' : diff === -1 ? 'b' : diff === 2 ? '##' : 'bb';
+  return degLetter + acc;
 }
-const ROOT_HZ = {
-  'C':130.81,'C#':138.59,'D':146.83,'D#':155.56,
-  'E':164.81,'F':174.61,'F#':185.00,'G':196.00,
-  'G#':207.65,'A':220.00,'A#':233.08,'B':246.94
-};
 
 /* ══════════════════════════════════════════════
    STATE
