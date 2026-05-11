@@ -537,13 +537,29 @@
     .chapter-song-search .song-search-bar { margin-bottom: .5rem; }
     .chapter-song-search .search-results { margin-bottom: .5rem; }
     .chapter-players { display: flex; flex-direction: column; gap: .5rem; margin-bottom: .75rem; }
-    .chapter-player {
-      border: 1px solid var(--border); background: var(--surface);
-      padding: .6rem .85rem; display: flex; align-items: center; gap: .75rem;
-    }
-    .chapter-player-label { font-size: .78rem; font-weight: 500; color: var(--text); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .chapter-player-yt { width: 200px; flex-shrink: 0; overflow: hidden; height: 32px; position: relative; }
-    .chapter-player-yt iframe { width: 200px; height: 90px; margin-top: -29px; border: none; }
+   .chapter-player {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: .75rem .85rem;
+  display: flex;
+  flex-direction: column;
+}
+.chapter-player-label {
+  font-size: .78rem; font-weight: 500; color: var(--text);
+  flex: 1; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.chapter-player-yt {
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 16 / 9;
+}
+.chapter-player-yt iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
     .chapter-player-remove { font-size: .65rem; padding: .15rem .45rem; border: 1px solid var(--border); background: var(--bg); color: var(--muted); cursor: pointer; flex-shrink: 0; transition: all .1s; }
     .chapter-player-remove:hover { border-color: var(--error); color: var(--error); }
 
@@ -1732,27 +1748,28 @@ window.addChapterSong = async function(n, index) {
   const div      = document.createElement('div');
   div.className  = 'chapter-player';
   div.id         = playerId;
-  div.innerHTML  = `
+ div.innerHTML = `
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:.5rem; gap:.5rem;">
     <div class="chapter-player-label" title="${escHtml(title)} — ${escHtml(artist)}">${escHtml(title)} — ${escHtml(artist)}</div>
-    <div class="chapter-player-yt" id="yt-${playerId}">
-      <span style="font-size:.72rem;color:var(--muted);font-style:italic;">Finding player…</span>
-    </div>
     <button class="chapter-player-remove" onclick="document.getElementById('${playerId}').remove()">✕</button>
-  `;
+  </div>
+  <div class="chapter-player-yt" id="yt-${playerId}">
+    <span style="font-size:.72rem;color:var(--muted);font-style:italic;">Finding player…</span>
+  </div>
+`;
   players.appendChild(div);
 
   // Fetch video ID and inject iframe
   const videoId = await _getVideoId(title, artist);
   const ytWrap  = document.getElementById(`yt-${playerId}`);
   if (ytWrap) {
-    ytWrap.innerHTML = videoId
-      ? `<iframe
-          src="https://www.youtube-nocookie.com/embed/${videoId}?controls=1&rel=0&modestbranding=1"
-          allow="autoplay; encrypted-media"
-          allowfullscreen
-          style="width:200px;height:113px;border:none;"
-          title="Audio player"></iframe>`
-      : `<span style="font-size:.72rem;color:var(--muted);font-style:italic;">No video found</span>`;
+ytWrap.innerHTML = videoId
+  ? `<iframe
+      src="https://www.youtube-nocookie.com/embed/${videoId}?controls=1&rel=0&modestbranding=1"
+      allow="autoplay; encrypted-media"
+      allowfullscreen
+      title="Audio player"></iframe>`
+  : `<span style="font-size:.72rem;color:var(--muted);font-style:italic;">No video found</span>`;
   }
 };
 
