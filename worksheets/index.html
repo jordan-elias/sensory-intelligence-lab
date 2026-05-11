@@ -1698,15 +1698,14 @@ window.searchChapterSong = async function(n) {
   try {
     const hits = await _geniusSearch(query);
     if (!hits.length) { results.innerHTML = '<div class="search-loading">No results found.</div>'; return; }
+    results.dataset.hits = JSON.stringify(hits.slice(0, 5));
     results.innerHTML = hits.slice(0, 5).map((h, i) => `
-      <div class="search-result-item" onclick="addChapterSong(${n}, ${i}, ${JSON.stringify(JSON.stringify(hits.slice(0,5))).slice(1,-1)})">
+      <div class="search-result-item" onclick="addChapterSong(${n}, ${i})">
         <div>
           <div class="search-result-title">${escHtml(h.result.title)}</div>
           <div class="search-result-artist">${escHtml(h.result.primary_artist.name)}</div>
         </div>
       </div>`).join('');
-    // Store hits on element for retrieval
-    results.dataset.hits = JSON.stringify(hits.slice(0,5));
   } catch (err) {
     results.innerHTML = `<div class="search-loading">Error: ${escHtml(err.message)}</div>`;
   }
@@ -1727,7 +1726,7 @@ window.addChapterSong = async function(n, index) {
   const ta = document.querySelector(`[data-field="auto_${n}_songs"]`);
   if (ta) ta.value = (ta.value ? ta.value + '\n' : '') + `${title} — ${artist}`;
 
-  // Add player with loading state
+  // Add player card with loading state
   const playerId = `chp_${n}_${Date.now()}`;
   const players  = document.getElementById(`chPlayers_${n}`);
   const div      = document.createElement('div');
@@ -1742,19 +1741,18 @@ window.addChapterSong = async function(n, index) {
   `;
   players.appendChild(div);
 
-  // Fetch video ID and inject player
+  // Fetch video ID and inject iframe
   const videoId = await _getVideoId(title, artist);
   const ytWrap  = document.getElementById(`yt-${playerId}`);
   if (ytWrap) {
-    if (videoId) {
-      ytWrap.innerHTML = `<iframe
-        src="https://www.youtube-nocookie.com/embed/${videoId}?controls=1&rel=0&modestbranding=1"
-        allow="autoplay; encrypted-media"
-        style="width:200px;height:113px;border:none;"
-        title="Audio player"></iframe>`;
-    } else {
-      ytWrap.innerHTML = `<span style="font-size:.72rem;color:var(--muted);font-style:italic;">No video found</span>`;
-    }
+    ytWrap.innerHTML = videoId
+      ? `<iframe
+          src="https://www.youtube-nocookie.com/embed/${videoId}?controls=1&rel=0&modestbranding=1"
+          allow="autoplay; encrypted-media"
+          allowfullscreen
+          style="width:200px;height:113px;border:none;"
+          title="Audio player"></iframe>`
+      : `<span style="font-size:.72rem;color:var(--muted);font-style:italic;">No video found</span>`;
   }
 };
 
