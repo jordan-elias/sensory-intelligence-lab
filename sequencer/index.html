@@ -793,15 +793,19 @@ const LETTERS = ['C','D','E','F','G','A','B'];
 // Semitone value of each natural letter (C=0)
 const LETTER_SEMITONE = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 };
 
-// Parse a root like "C#", "Bb", "D#" into { letter, alter }
-// alter: 0=natural, 1=sharp, -1=flat
 function parseRoot(root) {
-  const letter = root[0];
-  const alter  = root.length === 1 ? 0
-    : root[1] === '#' ? 1 : -1;
-  return { letter, alter };
+  const letter = root[0].toUpperCase();
+  let alter = 0;
+  if (root.includes('#')) alter = 1;
+  if (root.includes('b')) alter = -1;
+  
+  return { 
+    letter: letter, 
+    alter: alter, 
+    semitone: LETTER_SEMITONE[letter] + alter 
+  };
 }
-
+  
 // Diatonic intervals (in semitones) above root for scale degrees 0–7
 // These are the generic interval sizes: unison, 2nd, 3rd, 4th, 5th, 6th, 7th, octave
 // Used to derive the letter for each scale degree
