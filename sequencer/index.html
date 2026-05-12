@@ -785,6 +785,18 @@ const SCALES = {
   minor_pentatonic:[0, 3, 5, 7, 10, 12, 15, 17],
 };
 
+// Root pitch in Hz (octave 2, A4 = 440) — must match <option value> on #key-select
+const ROOT_HZ = (() => {
+  const A4 = 440;
+  const midiRoot = 36; // C2 — comfortable range for bass + lead voices
+  const semitoneFromC = { C: 0, 'C#': 1, D: 2, 'D#': 3, E: 4, F: 5, 'F#': 6, G: 7, 'G#': 8, A: 9, 'A#': 10, B: 11 };
+  const out = {};
+  for (const name of Object.keys(semitoneFromC)) {
+    out[name] = A4 * Math.pow(2, (midiRoot + semitoneFromC[name] - 69) / 12);
+  }
+  return out;
+})();
+
 /* ── DIATONIC NOTE SPELLING ── */
 
 // Letter names in order
