@@ -22,6 +22,7 @@ function normaliseQuery(q) {
 
 export async function handler(event) {
   const raw = event.queryStringParameters?.q;
+  const regionCode = event.queryStringParameters?.regionCode || null;
   if (!raw) {
     return { statusCode: 400, body: JSON.stringify({ error: 'Missing query parameter q' }) };
   }
@@ -64,9 +65,10 @@ export async function handler(event) {
 
   console.log(`Cache miss: "${query}" — calling YouTube API`);
 
+  const regionParam = regionCode ? `&regionCode=${encodeURIComponent(regionCode)}` : '';
   const ytUrl = `https://www.googleapis.com/youtube/v3/search` +
     `?part=snippet&q=${encodeURIComponent(query)}&type=video` +
-    `&maxResults=1&key=${youtubeApiKey}`;
+    `&maxResults=1&key=${youtubeApiKey}${regionParam}`;
 
   let videoId = null;
   let title   = null;
