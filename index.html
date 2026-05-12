@@ -811,32 +811,23 @@
   if (pw.length < 8) { showMsg('signupMsg', 'Password must be at least 8 characters.', 'error'); return; }
   if (pw !== pwc)    { showMsg('signupMsg', 'Passwords do not match.', 'error'); return; }
 
-  // Check if email already exists in profiles table
-  const { data: existing } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('email', email)
-    .maybeSingle();
-
-  if (existing) {
-    showMsg('signupMsg',
-      'An account with this email already exists. <a href="#" onclick="switchTab(\'signin\');return false;" style="color:inherit;font-weight:600;text-decoration:underline;text-underline-offset:3px;">Sign in instead?</a>',
-      'error'
-    );
-    // Also pre-fill the sign-in email field for convenience
-    document.getElementById('signinEmail').value = email;
-    return;
-  }
-
   setLoading('signupBtn', true, 'Create account');
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email, password: pw,
     options: { emailRedirectTo: 'https://lab.jordanelias.de/dashboard/' }
   });
   setLoading('signupBtn', false, 'Create account');
 
+  if (data.user && data.user.identities && data.user.identities.length === 0) {
+    showMsg('signupMsg',
+      'An account with this email already exists. <a href="#" onclick="switchTab(\'signin\');return false;" style="color:inherit;font-weight:600;text-decoration:underline;text-underline-offset:3px;">Sign in instead?</a>',
+      'error'
+    );
+    document.getElementById('signinEmail').value = email;
+    return;
+  }
+
   if (error) {
-    // Supabase sometimes returns this even when the email exists but isn't in profiles yet
     if (error.message.toLowerCase().includes('already registered') ||
         error.message.toLowerCase().includes('already exists')) {
       showMsg('signupMsg',
@@ -854,7 +845,7 @@
   document.getElementById('confirmedEmail').textContent  = email;
   document.getElementById('signupConfirm').style.display = 'block';
 };
-
+  
   window.handleForgot = async function() {
     clearMsg('forgotMsg');
     const email = document.getElementById('forgotEmail').value.trim();
