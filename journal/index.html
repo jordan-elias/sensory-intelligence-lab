@@ -979,6 +979,14 @@ function onPromptChange() {
 // COUNTDOWN + SESSION
 // ═══════════════════════════════════════════════════════
 function beginCountdown() {
+  // Mobile Safari (and strict autoplay policies): AudioContext must be created
+  // and resumed in the same user gesture as "audio intent". Music actually
+  // starts ~3s later in startSession → startMusic, which is no longer a gesture,
+  // so resume() there often leaves the context suspended with no audible output.
+  initAudio();
+  const resume = S.audioCtx && S.audioCtx.resume && S.audioCtx.resume();
+  if (resume && typeof resume.then === 'function') resume.catch(() => {});
+
   document.getElementById('setupPanel').classList.add('hidden');
   const overlay = document.getElementById('countdownOverlay');
   const numEl   = document.getElementById('countdownNum');
