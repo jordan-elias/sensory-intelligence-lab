@@ -743,6 +743,26 @@
     border-bottom: none;
     box-shadow: 0 -2px 16px rgba(0,0,0,0.15);
   }
+  #stickyPlayerHeader {
+    padding: .35rem .6rem;
+    gap: .3rem;
+  }
+  #stickyPlayerTitle {
+    font-size: .7rem;
+  }
+  #stickyPlayerArtist {
+    font-size: .6rem;
+  }
+  #stickyPlayerControls button {
+    width: 22px;
+    height: 22px;
+    font-size: .6rem;
+  }
+  #stickyVideoWrap {
+    max-height: 160px;
+    margin: 0 .75rem .75rem;
+    width: calc(100% - 1.5rem);
+  }
 }
     
     footer {
@@ -1770,10 +1790,22 @@ async function _geniusSearch(query) {
 
 
 
-async function _getVideoId(title, artist) {
-  const q = `${title} ${artist} official audio`;
+function _getRegionCode() {
   try {
-    const res  = await fetch(`/.netlify/functions/youtube-search?q=${encodeURIComponent(q)}`);
+    const lang = navigator.language || navigator.languages?.[0] || '';
+    const parts = lang.split('-');
+    if (parts.length >= 2) return parts[parts.length - 1].toUpperCase();
+  } catch(e) {}
+  return null;
+}
+
+async function _getVideoId(title, artist) {
+  const q          = `${title} ${artist} official audio`;
+  const regionCode = _getRegionCode();
+  const params     = new URLSearchParams({ q });
+  if (regionCode) params.set('regionCode', regionCode);
+  try {
+    const res  = await fetch(`/.netlify/functions/youtube-search?${params.toString()}`);
     const data = await res.json();
     return data.videoId || null;
   } catch (err) {
