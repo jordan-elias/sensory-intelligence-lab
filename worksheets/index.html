@@ -331,11 +331,17 @@
     }
     .dyn-section:last-child { border-bottom: 1px solid var(--border); }
     .dyn-section-header { display: flex; align-items: center; gap: .65rem; margin-bottom: 1rem; }
-    .dyn-section-num {
-      font-family: var(--font-heading); font-size: .65rem; font-weight: 600;
-      letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
-      border: 1px solid var(--border); padding: .15rem .55rem;
-    }
+   .dyn-section-num {
+  font-family: var(--font-heading); font-size: .65rem; font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+  border: 1px solid var(--border); padding: .15rem .55rem;
+  cursor: pointer; user-select: none;
+  transition: background .12s, color .12s;
+}
+.dyn-section-num:hover { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
+.dyn-section.collapsed .dyn-section-num { background: var(--surface); }
+.dyn-section-body { }
+.dyn-section.collapsed .dyn-section-body { display: none; }
     .dyn-section-label-input {
       flex: 1; font-family: var(--font-heading); font-size: .88rem; font-weight: 600;
       border: none; border-bottom: 1px solid var(--border);
@@ -455,11 +461,103 @@
   border: none;
 }
 
-    /* ── Lyrics panel ── */
+/* ── Lyrics panel ── */
     .lyrics-panel { display: none; }
     .lyrics-panel.visible { display: block; }
     .lyrics-box { border: 1px solid var(--border); background: var(--bg); font-family: var(--font-writing); font-size: .88rem; line-height: 1.9; padding: 1.25rem 1.5rem; max-height: 320px; overflow-y: auto; white-space: pre-wrap; color: var(--text); }
     .lyrics-hint { font-size: .72rem; color: var(--accent); margin-top: .4rem; font-style: italic; }
+
+/* ── Worksheet saved entries menu ── */
+    .ws-saved-menu {
+      margin-top: 1.25rem;
+      border: 1px solid var(--border);
+    }
+    .ws-saved-menu-header {
+      font-family: var(--font-heading);
+      font-size: .63rem; font-weight: 600;
+      letter-spacing: .14em; text-transform: uppercase;
+      color: var(--muted);
+      padding: .6rem 1rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .ws-saved-menu-item {
+      display: flex; align-items: center; gap: .75rem;
+      padding: .6rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      transition: background .1s;
+    }
+    .ws-saved-menu-item:last-child { border-bottom: none; }
+    .ws-saved-menu-item__name {
+      flex: 1; font-size: .82rem; font-weight: 500; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .ws-saved-menu-item__date {
+      font-size: .7rem; color: var(--muted); flex-shrink: 0;
+    }
+    .ws-saved-menu-item__edit {
+      font-family: var(--font-heading);
+      font-size: .65rem; font-weight: 600;
+      padding: .2rem .65rem;
+      border: 1px solid var(--border);
+      background: var(--bg); color: var(--muted);
+      cursor: pointer; flex-shrink: 0;
+      transition: all .1s;
+    }
+    .ws-saved-menu-item__edit:hover { border-color: var(--accent); color: var(--accent); }
+    .ws-saved-menu-item__edit.active { background: var(--accent); border-color: var(--accent); color: white; }
+    .ws-saved-menu-empty {
+      padding: .85rem 1rem; font-size: .8rem;
+      color: var(--muted); font-style: italic;
+    }
+    
+    /* ── Lyric analysis two-column layout ── */
+    .lyric-two-col {
+      display: block;
+    }
+    .lyric-col-left {
+      display: none;
+    }
+    .lyric-col-right {
+      display: block;
+    }
+    @media (min-width: 700px) {
+      .lyric-two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        align-items: start;
+      }
+      .lyric-col-left {
+        display: block;
+        position: sticky;
+        top: 72px; /* clears the sticky header */
+        max-height: calc(100vh - 90px);
+        overflow-y: auto;
+      }
+      .lyric-col-right {
+        display: block;
+      }
+    }
+    .lyric-col-label {
+      font-family: var(--font-heading);
+      font-size: .63rem; font-weight: 600;
+      letter-spacing: .14em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: .65rem;
+    }
+    .lyric-col-left .lyrics-box {
+      max-height: none;
+    }
+    .lyric-col-left .lyrics-panel {
+      display: block;
+    }
+.lyric-col-left .lyrics-panel .lyrics-box-empty {
+      font-size: .8rem; color: var(--muted);
+      font-style: italic; padding: 1rem;
+      border: 1px solid var(--border);
+      background: var(--bg);
+    }
 
     /* ── Save bar ── */
     .ws-save-bar {
@@ -896,6 +994,7 @@
       <button class="action-btn outline" onclick="closeWorksheet()">Discard</button>
     </div>
     <div class="msg" id="wsMsg"></div>
+    <div id="wsEntriesMenu" style="display:none;"></div>
 
   </div>
 
@@ -1056,6 +1155,7 @@ const S = {
   saved: [],
   viewingEntry: null,
   viewingData: null,
+  editingId: null,  // row ID of entry being edited, null for new
 };
 
 // ═══════════════════════════════════════════════════════
@@ -1199,11 +1299,12 @@ function addAutoSection() {
   div.dataset.sectionId = n;
   div.innerHTML = `
     <div class="dyn-section-header">
-      <span class="dyn-section-num">Chapter ${n}</span>
+      <span class="dyn-section-num" title="Click to collapse/expand" onclick="toggleAutoSection(this)">▾ Chapter ${n}</span>
       <input type="text" class="dyn-section-label-input" data-field="auto_${n}_label" placeholder="Name this chapter (e.g. Age 8–12, High school, Berlin years…)">
       <button class="dyn-remove" onclick="removeAutoSection(${n})">Remove</button>
     </div>
 
+    <div class="dyn-section-body">
     <div class="ws-field">
       <label class="ws-label">Songs from this time — search to add and listen, or type them below</label>
       <div class="chapter-song-search">
@@ -1229,11 +1330,20 @@ function addAutoSection() {
       <label class="ws-label">Is there one song that captures this chapter most? What would you want someone to understand about why?</label>
       <textarea class="ws-input md" data-field="auto_${n}_defining" placeholder=""></textarea>
     </div>
+    </div>
   `;
   container.appendChild(div);
   window._autoSectionCount = _autoSectionCount;
 }
 window.addAutoSection = addAutoSection;
+
+window.toggleAutoSection = function(badge) {
+  const section = badge.closest('.dyn-section');
+  if (!section) return;
+  const collapsed = section.classList.toggle('collapsed');
+  badge.textContent = badge.textContent.replace(/^[▾▸]/, collapsed ? '▸' : '▾');
+};
+  
 window.removeAutoSection = function(n) {
   const el = document.querySelector(`[data-section-id="${n}"]`);
   if (el) el.remove();
@@ -1351,7 +1461,6 @@ function renderLyricAnalysis() {
       </div>
       <div class="search-results" id="songSearchResults"></div>
 
-      <!-- Player (shown after selection) -->
       <div class="song-player" id="songPlayer">
         <div class="song-player-meta">
           <span class="song-player-title" id="songPlayerTitle"></span>
@@ -1361,14 +1470,6 @@ function renderLyricAnalysis() {
         <div class="yt-audio-wrap" id="ytAudioWrap"></div>
       </div>
 
-      <!-- Lyrics -->
-      <div class="lyrics-panel" id="lyricsPanel">
-        <p class="section-label" style="margin-top:1rem; margin-bottom:.5rem;">Lyrics</p>
-        <div class="lyrics-box" id="lyricsBox"></div>
-        <p class="lyrics-hint" id="lyricsHint" style="display:none;">Read through the lyrics, then add selections below to begin your reflection.</p>
-      </div>
-
-      <!-- Hidden fields for song identity -->
       <input type="hidden" data-field="song_title">
       <input type="hidden" data-field="song_artist">
 
@@ -1378,35 +1479,58 @@ function renderLyricAnalysis() {
       </div>
     </div>
 
-    <div class="ws-section" style="border-top:none; margin-top:0;">
-      <div class="ws-section-title"><span class="ws-section-icon">○</span> First impressions</div>
-      <div class="ws-field">
-        <label class="ws-label">Why did you choose this song today?</label>
-        <textarea class="ws-input md" data-field="song_why" placeholder="It might be that you've always loved it, that it appeared suddenly in your mind, that it makes you feel something you can't quite name…"></textarea>
-      </div>
-      <div class="ws-field">
-        <label class="ws-label">What is the song "about" on the surface — the literal story or situation?</label>
-        <textarea class="ws-input sm" data-field="song_surface" placeholder="Briefly, in your own words…"></textarea>
-      </div>
-    </div>
+    <div class="lyric-two-col">
 
-    <p class="section-label" style="margin-top:1.5rem; margin-bottom:.5rem;">Lyric selections</p>
-    <div id="lyricBlocks"></div>
-    <button class="add-section-btn" id="addLyricBtn" onclick="addLyricBlock()">+ Add a lyric selection (up to 3)</button>
+      <!-- LEFT: lyrics (desktop only) -->
+      <div class="lyric-col-left">
+        <div class="lyric-col-label">Lyrics</div>
+        <div id="lyricsColLeft">
+          <div class="lyrics-box-empty">Lyrics will appear here once you select a song.</div>
+        </div>
+      </div>
 
-    <div class="ws-section" style="margin-top:1.5rem;">
-      <div class="ws-section-title"><span class="ws-section-icon">◎</span> The whole song</div>
-      <div class="ws-field">
-        <label class="ws-label">After sitting with these lyrics, what do you think this song is really about — beneath the surface?</label>
-        <textarea class="ws-input md" data-field="song_deeper" placeholder="What is the emotional truth of it?"></textarea>
-      </div>
-      <div class="ws-field">
-        <label class="ws-label">What has this song revealed or uncovered for you today?</label>
-        <textarea class="ws-input md" data-field="song_revealed" placeholder="An insight, a question, a feeling — whatever arose…"></textarea>
-      </div>
-      <div class="ws-field">
-        <label class="ws-label">If this song could say something directly to you right now, what might it say?</label>
-        <textarea class="ws-input md" data-field="song_message" placeholder="Try to let the answer come without overthinking…"></textarea>
+      <!-- RIGHT: all questions -->
+      <div class="lyric-col-right">
+
+        <!-- Lyrics panel for mobile (hidden on desktop via CSS) -->
+        <div class="lyrics-panel" id="lyricsPanel">
+          <p class="section-label" style="margin-bottom:.5rem;">Lyrics</p>
+          <div class="lyrics-box" id="lyricsBox"></div>
+          <p class="lyrics-hint" id="lyricsHint" style="display:none;">Read through the lyrics, then add selections below to begin your reflection.</p>
+        </div>
+
+        <div class="ws-section" style="margin-top:0;">
+          <div class="ws-section-title"><span class="ws-section-icon">○</span> First impressions</div>
+          <div class="ws-field">
+            <label class="ws-label">Why did you choose this song today?</label>
+            <textarea class="ws-input md" data-field="song_why" placeholder="It might be that you've always loved it, that it appeared suddenly in your mind, that it makes you feel something you can't quite name…"></textarea>
+          </div>
+          <div class="ws-field">
+            <label class="ws-label">What is the song "about" on the surface — the literal story or situation?</label>
+            <textarea class="ws-input sm" data-field="song_surface" placeholder="Briefly, in your own words…"></textarea>
+          </div>
+        </div>
+
+        <p class="section-label" style="margin-top:1.5rem; margin-bottom:.5rem;">Lyric selections</p>
+        <div id="lyricBlocks"></div>
+        <button class="add-section-btn" id="addLyricBtn" onclick="addLyricBlock()">+ Add a lyric selection (up to 3)</button>
+
+        <div class="ws-section" style="margin-top:1.5rem;">
+          <div class="ws-section-title"><span class="ws-section-icon">◎</span> The whole song</div>
+          <div class="ws-field">
+            <label class="ws-label">After sitting with these lyrics, what do you think this song is really about — beneath the surface?</label>
+            <textarea class="ws-input md" data-field="song_deeper" placeholder="What is the emotional truth of it?"></textarea>
+          </div>
+          <div class="ws-field">
+            <label class="ws-label">What has this song revealed or uncovered for you today?</label>
+            <textarea class="ws-input md" data-field="song_revealed" placeholder="An insight, a question, a feeling — whatever arose…"></textarea>
+          </div>
+          <div class="ws-field">
+            <label class="ws-label">If this song could say something directly to you right now, what might it say?</label>
+            <textarea class="ws-input md" data-field="song_message" placeholder="Try to let the answer come without overthinking…"></textarea>
+          </div>
+        </div>
+
       </div>
     </div>
   `;
@@ -1868,11 +1992,15 @@ window.selectSong = async function(index) {
     ? `<iframe src="https://www.youtube-nocookie.com/embed/${videoId}?controls=1&rel=0&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen style="width:100%;height:100%;border:none;" title="Audio player"></iframe>`
     : `<div style="padding:.5rem;font-size:.75rem;color:var(--muted);font-style:italic;">No video found for this song.</div>`;
 
-  // Fetch lyrics
-  const lyricsPanel = document.getElementById('lyricsPanel');
-  const lyricsBox   = document.getElementById('lyricsBox');
-  lyricsPanel.classList.add('visible');
-  lyricsBox.textContent = 'Loading lyrics…';
+// Fetch lyrics
+  const lyricsPanel  = document.getElementById('lyricsPanel');
+  const lyricsBox    = document.getElementById('lyricsBox');
+  const lyricsColLeft = document.getElementById('lyricsColLeft');
+
+  if (lyricsPanel) lyricsPanel.classList.add('visible');
+  if (lyricsBox)   lyricsBox.textContent = 'Loading lyrics…';
+  if (lyricsColLeft) lyricsColLeft.innerHTML = '<div class="lyrics-box" style="max-height:none;">Loading lyrics…</div>';
+
   try {
     const url = `https://lrclib.net/api/get?artist_name=${encodeURIComponent(artist)}&track_name=${encodeURIComponent(title)}`;
     const res = await fetch(url);
@@ -1880,18 +2008,25 @@ window.selectSong = async function(index) {
       const data = await res.json();
       const lyrics = data.plainLyrics || data.syncedLyrics?.replace(/\[\d+:\d+\.\d+\]/g,'') || '';
       if (lyrics) {
-        lyricsBox.textContent = lyrics;
-        document.getElementById('lyricsHint').style.display = 'block';
+        if (lyricsBox) lyricsBox.textContent = lyrics;
+        if (lyricsColLeft) lyricsColLeft.innerHTML = `<div class="lyrics-box" style="max-height:none;white-space:pre-wrap;">${escHtml(lyrics)}</div>`;
+        const hint = document.getElementById('lyricsHint');
+        if (hint) hint.style.display = 'block';
         return;
       }
     }
-    lyricsBox.innerHTML = '<span style="font-style:italic;color:var(--muted)">Lyrics not found automatically. Paste them in the field below if you\'d like them here.</span>';
-    document.getElementById('lyricsHint').style.display = 'none';
+    const notFound = '<span style="font-style:italic;color:var(--muted)">Lyrics not found automatically. Paste them in the field below if you\'d like them here.</span>';
+    if (lyricsBox)     lyricsBox.innerHTML    = notFound;
+    if (lyricsColLeft) lyricsColLeft.innerHTML = `<div class="lyrics-box-empty">${notFound}</div>`;
+    const hint = document.getElementById('lyricsHint');
+    if (hint) hint.style.display = 'none';
   } catch {
-    lyricsBox.innerHTML = '<span style="font-style:italic;color:var(--muted)">Could not load lyrics. Paste them in the field below.</span>';
+    const err = '<span style="font-style:italic;color:var(--muted)">Could not load lyrics. Paste them in the field below.</span>';
+    if (lyricsBox)     lyricsBox.innerHTML    = err;
+    if (lyricsColLeft) lyricsColLeft.innerHTML = `<div class="lyrics-box-empty">${err}</div>`;
   }
 };
-
+  
 window.changeSong = function() {
   document.getElementById('songPlayer').classList.remove('visible');
   document.getElementById('lyricsPanel').classList.remove('visible');
@@ -2130,6 +2265,140 @@ if (window.YT && window.YT.Player) {
   window.onYouTubeIframeAPIReady();
 }
 
+// ═══════════════════════════════════════════════════════
+// WORKSHEET ENTRIES MENU
+// ═══════════════════════════════════════════════════════
+
+function renderEntriesMenu() {
+  const menu = document.getElementById('wsEntriesMenu');
+  if (!menu) return;
+
+  // Only show for worksheet types that support editing
+  const supported = ['music-auto', 'lyric-analysis'];
+  if (!supported.includes(S.currentType)) { menu.style.display = 'none'; return; }
+
+  const entries = S.saved.filter(e => e.type === S.currentType);
+  menu.style.display = 'block';
+
+  if (!entries.length) {
+    menu.innerHTML = `
+      <div class="ws-saved-menu">
+        <div class="ws-saved-menu-header">Saved entries</div>
+        <div class="ws-saved-menu-empty">No saved entries yet.</div>
+      </div>`;
+    return;
+  }
+
+  const items = entries.map(e => {
+    const date     = new Date(e.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    const isActive = e.id === S.editingId;
+    return `
+      <div class="ws-saved-menu-item">
+        <span class="ws-saved-menu-item__name">${escHtml(e.title || 'Untitled')}</span>
+        <span class="ws-saved-menu-item__date">${date}</span>
+        <button class="ws-saved-menu-item__edit ${isActive ? 'active' : ''}"
+          onclick="loadEntryForEditing('${e.id}')">
+          ${isActive ? 'Editing' : 'Edit'}
+        </button>
+      </div>`;
+  }).join('');
+
+  menu.innerHTML = `
+    <div class="ws-saved-menu">
+      <div class="ws-saved-menu-header">Saved entries</div>
+      ${items}
+    </div>`;
+}
+
+window.loadEntryForEditing = async function(id) {
+  const entry = S.saved.find(e => e.id === id);
+  if (!entry) return;
+
+  try {
+    await ensureVaultReady();
+    const plaintext = isEncrypted(entry.content)
+      ? await decrypt(entry.content)
+      : entry.content;
+    const parsed  = JSON.parse(plaintext);
+    const data    = parsed.data || {};
+
+    // Set editing state
+    S.editingId = id;
+    document.getElementById('wsSaveNameInput').value = entry.title || '';
+    document.getElementById('wsSaveBtn').textContent = 'Update encrypted';
+
+    // Populate standard text fields
+    document.querySelectorAll('#wsContent [data-field]').forEach(el => {
+      const key = el.dataset.field;
+      if (!key || !(key in data)) return;
+      if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
+        el.value = data[key] || '';
+      }
+    });
+
+    // Rebuild song cards from _songOrder if present
+    if (data._songOrder && Array.isArray(data._songOrder)) {
+      // Group by chapter
+      const byChapter = {};
+      data._songOrder.forEach(s => {
+        const ch = s.chapter || '1';
+        if (!byChapter[ch]) byChapter[ch] = [];
+        byChapter[ch].push(s);
+      });
+
+      Object.entries(byChapter).forEach(([ch, songs]) => {
+        const players = document.getElementById(`chPlayers_${ch}`);
+        if (!players) return;
+        players.innerHTML = '';
+
+        songs.forEach(s => {
+          const playerId = `chp_${ch}_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
+          const div      = document.createElement('div');
+          div.className  = 'chapter-player';
+          div.id         = playerId;
+          div.dataset.chapter = ch;
+          div.dataset.videoId = s.videoId || '';
+          div.dataset.title   = s.title   || '';
+          div.dataset.artist  = s.artist  || '';
+
+          // Retrieve saved note for this song
+          const noteKey  = `_songnote_${(s.title || '').replace(/\W+/g,'_')}_${(s.artist || '').replace(/\W+/g,'_')}`;
+          const noteVal  = data[noteKey] || '';
+          const hasNote  = !!noteVal;
+
+          div.innerHTML = `
+            <div class="chapter-player-row">
+              <div class="chapter-player-label" title="${escHtml(s.title)} — ${escHtml(s.artist)}">${escHtml(s.title)} — ${escHtml(s.artist)}</div>
+              <button class="chapter-player-play" onclick="playFromCard('${playerId}')">▶ Play</button>
+              <button class="chapter-player-notes-toggle" onclick="toggleSongNotes('${playerId}')">${hasNote ? 'Notes ▴' : 'Notes ▾'}</button>
+              <button class="chapter-player-move" onclick="moveChapterSong('${playerId}', -1)" title="Move up">▲</button>
+              <button class="chapter-player-move" onclick="moveChapterSong('${playerId}', 1)" title="Move down">▼</button>
+              <button class="chapter-player-remove" onclick="removeChapterSong('${playerId}')">✕</button>
+            </div>
+            <div class="chapter-player-notes ${hasNote ? 'open' : ''}" id="notes-${playerId}">
+              <textarea placeholder="Notes about this song…" data-song-id="${playerId}">${escHtml(noteVal)}</textarea>
+            </div>
+          `;
+          players.appendChild(div);
+        });
+
+        rebuildPlaylist();
+        updateMoveButtons(players);
+      });
+    }
+
+    // Refresh entries menu to show active state
+    renderEntriesMenu();
+
+    // Scroll to top of worksheet
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  } catch(err) {
+    const msgEl = document.getElementById('wsMsg');
+    msgEl.className = 'msg error show';
+    msgEl.textContent = 'Could not load entry: ' + err.message;
+  }
+};
   
 // ═══════════════════════════════════════════════════════
 // GOALS COMPARISON
@@ -2250,6 +2519,7 @@ window.toggleSkill = function(item) {
 // ═══════════════════════════════════════════════════════
 window.openWorksheet = function(type) {
   S.currentType = type;
+  S.editingId   = null;
   _autoSectionCount = 0;
   _lyricBlockCount  = 0;
 
@@ -2278,15 +2548,18 @@ window.openWorksheet = function(type) {
   document.getElementById('wsPicker').classList.add('hidden');
   document.getElementById('wsView').classList.add('visible');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  renderEntriesMenu();
 };
 
 window.closeWorksheet = function() {
   document.getElementById('wsPicker').classList.remove('hidden');
   document.getElementById('wsView').classList.remove('visible');
   document.getElementById('wsContent').innerHTML = '';
+  document.getElementById('wsEntriesMenu').style.display = 'none';
+  document.getElementById('wsEntriesMenu').innerHTML = '';
   S.currentType = null;
+  S.editingId   = null;
 };
-
 // ═══════════════════════════════════════════════════════
 // COLLECT FORM DATA
 // ═══════════════════════════════════════════════════════
@@ -2369,14 +2642,31 @@ window.saveWorksheet = async function() {
     btn.disabled = false; return;
   }
 
-  const { error } = await sb.from('worksheets').insert({
-    user_id:      user.id,
-    title:        name,
-    type:         S.currentType,
-    content:      encryptedContent,
-    encrypted_at: new Date().toISOString(),
-    key_version:  1,
-  });
+  let error;
+  const wasNew = !S.editingId;
+
+  if (S.editingId) {
+    // Overwrite existing entry
+    ({ error } = await sb.from('worksheets').update({
+      title:        name,
+      content:      encryptedContent,
+      encrypted_at: new Date().toISOString(),
+    }).eq('id', S.editingId).eq('user_id', user.id));
+  } else {
+    // New entry
+    let newRow;
+    ({ data: newRow, error } = await sb.from('worksheets').insert({
+      user_id:      user.id,
+      title:        name,
+      type:         S.currentType,
+      content:      encryptedContent,
+      encrypted_at: new Date().toISOString(),
+      key_version:  1,
+    }).select('id').single());
+    if (!error && newRow) {
+      S.editingId = newRow.id;
+    }
+  }
 
   if (error) {
     msgEl.className = 'msg error'; msgEl.textContent = 'Could not save: ' + error.message;
@@ -2384,11 +2674,15 @@ window.saveWorksheet = async function() {
   }
 
   msgEl.className = 'msg success';
-  msgEl.textContent = `"${name}" saved and encrypted.`;
+ msgEl.textContent = wasNew
+    ? `"${name}" saved and encrypted.`
+    : `"${name}" updated.`;
+  btn.textContent  = 'Update encrypted';
   btn.disabled = false;
   await loadSaved();
+  renderEntriesMenu();
 };
-
+  
 // ═══════════════════════════════════════════════════════
 // LOAD & RENDER SAVED
 // ═══════════════════════════════════════════════════════
@@ -2406,8 +2700,9 @@ async function loadSaved() {
   if (error) { console.error(error); return; }
   S.saved = data || [];
   renderSaved();
+  if (S.currentType) renderEntriesMenu();
 }
-
+  
 function renderSaved() {
   const section = document.getElementById('savedSection');
   const list    = document.getElementById('savedList');
