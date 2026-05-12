@@ -21,6 +21,7 @@
     });
   </script>
 
+  <script src="https://www.youtube.com/iframe_api"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 
   <style>
@@ -462,10 +463,15 @@
 
     /* ── Save bar ── */
     .ws-save-bar {
-      display: flex; align-items: center; gap: .75rem;
-      padding: 1.25rem 0; border-top: 1px solid var(--border);
-      margin-top: 2rem; flex-wrap: wrap;
-    }
+  display: flex; align-items: center; gap: .75rem;
+  padding: 1.25rem 0; border-top: 1px solid var(--border);
+  margin-top: 2rem; flex-wrap: wrap;
+}
+@media (max-width: 600px) {
+  .ws-save-bar {
+    margin-bottom: 220px;
+  }
+}
     .ws-save-bar input {
       font-family: var(--font-body); font-size: .85rem;
       padding: .55rem .85rem; border: 1px solid var(--border);
@@ -537,31 +543,74 @@
     .chapter-song-search .song-search-bar { margin-bottom: .5rem; }
     .chapter-song-search .search-results { margin-bottom: .5rem; }
     .chapter-players { display: flex; flex-direction: column; gap: .5rem; margin-bottom: .75rem; }
-   .chapter-player {
+
+
+    /* ── Compact song card ── */
+.chapter-player {
   border: 1px solid var(--border);
   background: var(--surface);
-  padding: .75rem .85rem;
+  padding: .6rem .85rem;
   display: flex;
   flex-direction: column;
+  gap: .4rem;
+}
+.chapter-player-row {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
 }
 .chapter-player-label {
   font-size: .78rem; font-weight: 500; color: var(--text);
   flex: 1; min-width: 0;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.chapter-player-yt {
-  width: 100%;
-  max-width: 360px;
-  aspect-ratio: 16 / 9;
+.chapter-player-play {
+  font-size: .65rem; padding: .2rem .55rem;
+  border: 1px solid var(--accent); background: var(--accent);
+  color: white; cursor: pointer; flex-shrink: 0;
+  transition: all .1s; white-space: nowrap;
+  font-family: var(--font-heading); font-weight: 600;
 }
-.chapter-player-yt iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
+.chapter-player-play:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+.chapter-player-move {
+  font-size: .65rem; padding: .2rem .4rem;
+  border: 1px solid var(--border); background: var(--bg);
+  color: var(--muted); cursor: pointer; flex-shrink: 0;
+  transition: all .1s; line-height: 1;
+}
+.chapter-player-move:hover { border-color: var(--accent); color: var(--accent); }
+.chapter-player-move:disabled { opacity: .25; cursor: not-allowed; }
+.chapter-player-remove {
+  font-size: .65rem; padding: .2rem .45rem;
+  border: 1px solid var(--border); background: var(--bg);
+  color: var(--muted); cursor: pointer; flex-shrink: 0;
+  transition: all .1s;
+}
+.chapter-player-remove:hover { border-color: var(--error); color: var(--error); }
+.chapter-player-notes-toggle {
+  font-size: .65rem; padding: .2rem .55rem;
+  border: 1px solid var(--border); background: var(--bg);
+  color: var(--muted); cursor: pointer; flex-shrink: 0;
+  transition: all .1s; font-family: var(--font-body);
+}
+.chapter-player-notes-toggle:hover { border-color: var(--accent); color: var(--accent); }
+.chapter-player-notes {
+  display: none;
+}
+.chapter-player-notes.open {
   display: block;
 }
-    .chapter-player-remove { font-size: .65rem; padding: .15rem .45rem; border: 1px solid var(--border); background: var(--bg); color: var(--muted); cursor: pointer; flex-shrink: 0; transition: all .1s; }
-    .chapter-player-remove:hover { border-color: var(--error); color: var(--error); }
+.chapter-player-notes textarea {
+  width: 100%;
+  font-family: var(--font-writing); font-size: .85rem; line-height: 1.6;
+  padding: .5rem .75rem;
+  border: 1px solid var(--border); background: var(--bg); color: var(--text);
+  outline: none; resize: vertical; min-height: 70px;
+  transition: border-color .15s;
+}
+.chapter-player-notes textarea:focus { border-color: var(--accent); }
+.chapter-player-notes textarea::placeholder { color: #c0c0bb; font-style: italic; }
+    
 
     /* ── Goals comparison modal ── */
     .compare-modal {
@@ -600,11 +649,112 @@
     .compare-footer { margin-top: 1.25rem; display: flex; gap: .65rem; flex-wrap: wrap; align-items: center; }
     .compare-hint { font-size: .72rem; color: var(--muted); flex: 1; font-style: italic; }
 
+    /* ── Sticky Player ── */
+#stickyPlayer {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  width: 300px;
+  z-index: 200;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  border: 1px solid var(--border);
+  background: var(--bg);
+}
+#stickyPlayerInner {
+  display: flex;
+  flex-direction: column;
+}
+#stickyPlayerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .5rem .75rem;
+  border-bottom: 1px solid var(--border);
+  gap: .5rem;
+  background: var(--surface);
+}
+#stickyPlayerMeta {
+  flex: 1;
+  min-width: 0;
+}
+#stickyPlayerTitle {
+  font-family: var(--font-heading);
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#stickyPlayerArtist {
+  font-size: .68rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#stickyPlayerControls {
+  display: flex;
+  gap: .25rem;
+  flex-shrink: 0;
+}
+#stickyPlayerControls button {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  cursor: pointer;
+  width: 26px;
+  height: 26px;
+  font-size: .7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .12s;
+  padding: 0;
+}
+#stickyPlayerControls button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+#stickyVideoWrap {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  transition: max-height .25s ease;
+  overflow: hidden;
+  max-height: 200px;
+}
+#stickyVideoWrap.collapsed {
+  max-height: 0;
+  border-top: none;
+}
+#ytStickyPlayer {
+  width: 100%;
+  height: 100%;
+}
+/* Mobile */
+@media (max-width: 600px) {
+  #stickyPlayer {
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    box-shadow: 0 -2px 16px rgba(0,0,0,0.15);
+  }
+}
+    
     footer {
-      border-top: 1px solid var(--border);
-      padding: 1.25rem 2rem; text-align: center;
-      font-size: .78rem; color: var(--muted);
-    }
+  border-top: 1px solid var(--border);
+  padding: 1.25rem 2rem; text-align: center;
+  font-size: .78rem; color: var(--muted);
+}
+@media (max-width: 600px) {
+  footer {
+    padding-bottom: 220px;
+  }
+}
     footer a { color: var(--muted); text-decoration: none; }
     footer a:hover { color: var(--accent); }
   </style>
@@ -767,6 +917,27 @@
   </div>
 </div>
 
+<!-- Sticky Player -->
+<div id="stickyPlayer" style="display:none;">
+  <div id="stickyPlayerInner">
+    <div id="stickyPlayerHeader">
+      <div id="stickyPlayerMeta">
+        <div id="stickyPlayerTitle">—</div>
+        <div id="stickyPlayerArtist"></div>
+      </div>
+      <div id="stickyPlayerControls">
+        <button id="stickyPrev" onclick="playlistPrev()" title="Previous">&#9664;</button>
+        <button id="stickyNext" onclick="playlistNext()" title="Next">&#9654;</button>
+        <button id="stickyCollapse" onclick="toggleStickyCollapse()" title="Collapse">&#9660;</button>
+        <button id="stickyClose" onclick="closeStickyPlayer()" title="Close">&#10005;</button>
+      </div>
+    </div>
+    <div id="stickyVideoWrap">
+      <div id="ytStickyPlayer"></div>
+    </div>
+  </div>
+</div>
+  
 <footer>
   <p>Jordan Elias Music Therapy · Berlin ·
     <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a>
@@ -1597,15 +1768,7 @@ async function _geniusSearch(query) {
   return hits || [];
 }
 
-function _ytEmbed(videoId) {
-  if (!videoId) return `<div style="padding:.5rem;font-size:.75rem;color:var(--muted);font-style:italic;">No video found for this song.</div>`;
-  return `<iframe
-    src="https://www.youtube-nocookie.com/embed/${videoId}?controls=1&rel=0&modestbranding=1"
-    allow="autoplay; encrypted-media"
-    allowfullscreen
-    style="width:100%;height:100%;border:none;"
-    title="Audio player"></iframe>`;
-}
+
 
 async function _getVideoId(title, artist) {
   const q = `${title} ${artist} official audio`;
@@ -1669,7 +1832,9 @@ window.selectSong = async function(index) {
   wrap.innerHTML = `<div style="padding:.5rem;font-size:.75rem;color:var(--muted);font-style:italic;">Finding player…</div>`;
 
   const videoId = await _getVideoId(title, artist);
-  wrap.innerHTML = _ytEmbed(videoId);
+  wrap.innerHTML = videoId
+    ? `<iframe src="https://www.youtube-nocookie.com/embed/${videoId}?controls=1&rel=0&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen style="width:100%;height:100%;border:none;" title="Audio player"></iframe>`
+    : `<div style="padding:.5rem;font-size:.75rem;color:var(--muted);font-style:italic;">No video found for this song.</div>`;
 
   // Fetch lyrics
   const lyricsPanel = document.getElementById('lyricsPanel');
@@ -1738,41 +1903,202 @@ window.addChapterSong = async function(n, index) {
   results.innerHTML = '';
   document.getElementById(`chSongInput_${n}`).value = '';
 
-  // Append to textarea
+  // Append to songs textarea
   const ta = document.querySelector(`[data-field="auto_${n}_songs"]`);
   if (ta) ta.value = (ta.value ? ta.value + '\n' : '') + `${title} — ${artist}`;
 
-  // Add player card with loading state
+  // Fetch video ID
+  const videoId = await _getVideoId(title, artist);
+
+  // Build compact card
   const playerId = `chp_${n}_${Date.now()}`;
   const players  = document.getElementById(`chPlayers_${n}`);
   const div      = document.createElement('div');
   div.className  = 'chapter-player';
   div.id         = playerId;
- div.innerHTML = `
-  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:.5rem; gap:.5rem;">
-    <div class="chapter-player-label" title="${escHtml(title)} — ${escHtml(artist)}">${escHtml(title)} — ${escHtml(artist)}</div>
-    <button class="chapter-player-remove" onclick="document.getElementById('${playerId}').remove()">✕</button>
-  </div>
-  <div class="chapter-player-yt" id="yt-${playerId}">
-    <span style="font-size:.72rem;color:var(--muted);font-style:italic;">Finding player…</span>
-  </div>
-`;
-  players.appendChild(div);
+  div.dataset.chapter  = n;
+  div.dataset.videoId  = videoId || '';
+  div.dataset.title    = title;
+  div.dataset.artist   = artist;
 
-  // Fetch video ID and inject iframe
-  const videoId = await _getVideoId(title, artist);
-  const ytWrap  = document.getElementById(`yt-${playerId}`);
-  if (ytWrap) {
-ytWrap.innerHTML = videoId
-  ? `<iframe
-      src="https://www.youtube-nocookie.com/embed/${videoId}?controls=1&rel=0&modestbranding=1"
-      allow="autoplay; encrypted-media"
-      allowfullscreen
-      title="Audio player"></iframe>`
-  : `<span style="font-size:.72rem;color:var(--muted);font-style:italic;">No video found</span>`;
+  div.innerHTML = `
+    <div class="chapter-player-row">
+      <div class="chapter-player-label" title="${escHtml(title)} — ${escHtml(artist)}">${escHtml(title)} — ${escHtml(artist)}</div>
+      <button class="chapter-player-play" onclick="playFromCard('${playerId}')">▶ Play</button>
+      <button class="chapter-player-notes-toggle" onclick="toggleSongNotes('${playerId}')">Notes ▾</button>
+      <button class="chapter-player-move" onclick="moveChapterSong('${playerId}', -1)" title="Move up">▲</button>
+      <button class="chapter-player-move" onclick="moveChapterSong('${playerId}', 1)" title="Move down">▼</button>
+      <button class="chapter-player-remove" onclick="removeChapterSong('${playerId}')">✕</button>
+    </div>
+    <div class="chapter-player-notes" id="notes-${playerId}">
+      <textarea placeholder="Notes about this song — what it means to you in this chapter, the memory it carries, why it belongs here…" data-song-id="${playerId}"></textarea>
+    </div>
+  `;
+
+  players.appendChild(div);
+  rebuildPlaylist();
+  updateMoveButtons(players);
+};
+
+// ═══════════════════════════════════════════════════════
+// PLAYLIST ENGINE
+// ═══════════════════════════════════════════════════════
+
+const PLAYLIST = {
+  tracks: [],       // { videoId, title, artist, playerId }
+  currentIndex: -1,
+};
+
+function rebuildPlaylist() {
+  PLAYLIST.tracks = [];
+  document.querySelectorAll('.chapter-player').forEach(card => {
+    PLAYLIST.tracks.push({
+      videoId:  card.dataset.videoId  || '',
+      title:    card.dataset.title    || '',
+      artist:   card.dataset.artist   || '',
+      playerId: card.id,
+    });
+  });
+}
+
+function updateMoveButtons(container) {
+  const cards = container
+    ? container.querySelectorAll('.chapter-player')
+    : document.querySelectorAll('.chapter-player');
+
+  // If a container is passed, only update within it
+  // Otherwise update all cards globally
+  document.querySelectorAll('.chapter-players').forEach(c => {
+    const ch = c.querySelectorAll('.chapter-player');
+    ch.forEach((card, i) => {
+      const btns = card.querySelectorAll('.chapter-player-move');
+      if (btns.length < 2) return;
+      btns[0].disabled = i === 0;                // ▲ disabled at top
+      btns[1].disabled = i === ch.length - 1;   // ▼ disabled at bottom
+    });
+  });
+}
+window.moveChapterSong = function(playerId, direction) {
+  const card      = document.getElementById(playerId);
+  if (!card) return;
+  const container = card.closest('.chapter-players');
+  const cards     = Array.from(container.querySelectorAll('.chapter-player'));
+  const index     = cards.indexOf(card);
+  const target    = index + direction;
+  if (target < 0 || target >= cards.length) return;
+
+  if (direction === -1) {
+    container.insertBefore(card, cards[target]);
+  } else {
+    container.insertBefore(card, cards[target].nextSibling);
+  }
+
+  rebuildPlaylist();
+  updateMoveButtons(container);
+};
+
+window.removeChapterSong = function(playerId) {
+  const card      = document.getElementById(playerId);
+  if (!card) return;
+  const container = card.closest('.chapter-players');
+
+  const idx = PLAYLIST.tracks.findIndex(t => t.playerId === playerId);
+  if (idx !== -1 && idx === PLAYLIST.currentIndex) closeStickyPlayer();
+
+  card.remove();
+  rebuildPlaylist();
+  updateMoveButtons(container);
+};
+
+window.toggleSongNotes = function(playerId) {
+  const notesEl = document.getElementById(`notes-${playerId}`);
+  if (!notesEl) return;
+  const isOpen = notesEl.classList.toggle('open');
+  const btn = document.querySelector(`#${playerId} .chapter-player-notes-toggle`);
+  if (btn) btn.textContent = isOpen ? 'Notes ▴' : 'Notes ▾';
+};
+
+window.playFromCard = function(playerId) {
+  rebuildPlaylist();
+  const index = PLAYLIST.tracks.findIndex(t => t.playerId === playerId);
+  if (index === -1) return;
+  playFromPlaylist(index);
+};
+
+function playFromPlaylist(index) {
+  if (index < 0 || index >= PLAYLIST.tracks.length) return;
+  PLAYLIST.currentIndex = index;
+  const track = PLAYLIST.tracks[index];
+
+  const sp = document.getElementById('stickyPlayer');
+  sp.style.display = 'block';
+
+  document.getElementById('stickyPlayerTitle').textContent  = track.title  || '—';
+  document.getElementById('stickyPlayerArtist').textContent = track.artist || '';
+
+  document.getElementById('stickyVideoWrap').classList.remove('collapsed');
+  document.getElementById('stickyCollapse').innerHTML = '&#9660;';
+
+  if (!track.videoId) return;
+  if (window._ytPlayer && typeof window._ytPlayer.loadVideoById === 'function') {
+    window._ytPlayer.loadVideoById(track.videoId);
+  }
+}
+
+window.playlistNext = function() {
+  if (PLAYLIST.currentIndex < PLAYLIST.tracks.length - 1) {
+    playFromPlaylist(PLAYLIST.currentIndex + 1);
   }
 };
 
+window.playlistPrev = function() {
+  if (PLAYLIST.currentIndex > 0) {
+    playFromPlaylist(PLAYLIST.currentIndex - 1);
+  }
+};
+
+window.toggleStickyCollapse = function() {
+  const wrap = document.getElementById('stickyVideoWrap');
+  const btn  = document.getElementById('stickyCollapse');
+  const collapsed = wrap.classList.toggle('collapsed');
+  btn.innerHTML = collapsed ? '&#9650;' : '&#9660;';
+};
+
+window.closeStickyPlayer = function() {
+  if (window._ytPlayer && typeof window._ytPlayer.stopVideo === 'function') {
+    window._ytPlayer.stopVideo();
+  }
+  document.getElementById('stickyPlayer').style.display = 'none';
+  PLAYLIST.currentIndex = -1;
+};
+
+  
+window.onYouTubeIframeAPIReady = function() {
+  window._ytPlayer = new YT.Player('ytStickyPlayer', {
+    width:  '100%',
+    height: '100%',
+    playerVars: {
+      controls:       1,
+      rel:            0,
+      modestbranding: 1,
+      playsinline:    1,
+    },
+    events: {
+      onStateChange: function(event) {
+        if (event.data === YT.PlayerState.ENDED) {
+          playlistNext();
+        }
+      },
+    },
+  });
+};
+
+// Ensure YT callback works even if API loads before module finishes
+if (window.YT && window.YT.Player) {
+  window.onYouTubeIframeAPIReady();
+}
+
+  
 // ═══════════════════════════════════════════════════════
 // GOALS COMPARISON
 // ═══════════════════════════════════════════════════════
@@ -1953,6 +2279,26 @@ function collectFormData() {
   const checkedSkills = [];
   document.querySelectorAll('#wsContent .skill-item.checked .skill-item-name').forEach(n => checkedSkills.push(n.textContent));
   if (checkedSkills.length) data['_checked_skills'] = checkedSkills;
+
+  // Per-song notes — keyed by song title/artist so they survive reordering
+  document.querySelectorAll('#wsContent .chapter-player').forEach(card => {
+    const ta = card.querySelector('.chapter-player-notes textarea');
+    if (!ta || !ta.value.trim()) return;
+    const safeKey = `_songnote_${(card.dataset.title || '').replace(/\W+/g,'_')}_${(card.dataset.artist || '').replace(/\W+/g,'_')}`;
+    data[safeKey] = ta.value;
+  });
+
+  // Per-song order — save the ordered list of all songs across chapters
+  const songOrder = [];
+  document.querySelectorAll('#wsContent .chapter-player').forEach(card => {
+    songOrder.push({
+      chapter: card.dataset.chapter || '',
+      title:   card.dataset.title   || '',
+      artist:  card.dataset.artist  || '',
+      videoId: card.dataset.videoId || '',
+    });
+  });
+  if (songOrder.length) data['_songOrder'] = songOrder;
 
   return data;
 }
@@ -2180,7 +2526,7 @@ function renderViewerBody(parsed) {
     const closingContent = ['closing_one','closing_reminder'].map(f => d[f] ? `<div class="vb-field"><div class="vb-label">${fieldLabels[f]}</div><div class="vb-value">${escHtml(d[f])}</div></div>` : '').join('');
     if (closingContent) html += `<div class="vb-section"><div class="vb-section-title">Closing</div>${closingContent}</div>`;
 
-  } else if (type === 'music-auto') {
+ } else if (type === 'music-auto') {
     const opening = ['earliest_memory','your_song'].map(f => d[f] ? `<div class="vb-field"><div class="vb-label">${fieldLabels[f]}</div><div class="vb-value">${escHtml(d[f])}</div></div>` : '').join('');
     if (opening) html += `<div class="vb-section"><div class="vb-section-title">Opening</div>${opening}</div>`;
 
@@ -2188,8 +2534,32 @@ function renderViewerBody(parsed) {
     let n = 1;
     while (d[`auto_${n}_label`] || d[`auto_${n}_songs`]) {
       const label = d[`auto_${n}_label`] || `Chapter ${n}`;
-      const chapFields = [['songs','Songs from this time'],['life','Life during this chapter'],['meaning','What music meant'],['defining','Defining song']];
-      const chapContent = chapFields.map(([suf,lbl]) => d[`auto_${n}_${suf}`] ? `<div class="vb-field"><div class="vb-label">${lbl}</div><div class="vb-value">${escHtml(d[`auto_${n}_${suf}`])}</div></div>` : '').join('');
+
+      // Chapter-level fields
+      const chapFields = [['life','Life during this chapter'],['meaning','What music meant'],['defining','Defining song']];
+      let chapContent = chapFields.map(([suf,lbl]) => d[`auto_${n}_${suf}`]
+        ? `<div class="vb-field"><div class="vb-label">${lbl}</div><div class="vb-value">${escHtml(d[`auto_${n}_${suf}`])}</div></div>`
+        : '').join('');
+
+      // Songs from this chapter with per-song notes
+      if (d._songOrder) {
+        const chapterSongs = d._songOrder.filter(s => String(s.chapter) === String(n));
+        if (chapterSongs.length) {
+          const songsHtml = chapterSongs.map(s => {
+            const noteKey = `_songnote_${(s.title || '').replace(/\W+/g,'_')}_${(s.artist || '').replace(/\W+/g,'_')}`;
+            const note    = d[noteKey];
+            return `<div class="vb-field">
+              <div class="vb-label">${escHtml(s.title)} — ${escHtml(s.artist)}</div>
+              ${note ? `<div class="vb-value">${escHtml(note)}</div>` : '<div class="vb-value empty">No notes</div>'}
+            </div>`;
+          }).join('');
+          chapContent = `<div class="vb-field"><div class="vb-label">Songs</div></div>${songsHtml}` + chapContent;
+        }
+      } else if (d[`auto_${n}_songs`]) {
+        // Fallback for worksheets saved before this update
+        chapContent = `<div class="vb-field"><div class="vb-label">Songs from this time</div><div class="vb-value">${escHtml(d[`auto_${n}_songs`])}</div></div>` + chapContent;
+      }
+
       if (chapContent) html += `<div class="vb-section"><div class="vb-section-title">${escHtml(label)}</div>${chapContent}</div>`;
       n++;
     }
