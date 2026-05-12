@@ -1032,7 +1032,7 @@ async function runTrial() {
 
   const lvl = LEVELS[G.currentLevel - 1];
 
-  // Build paths with separation enforcement
+  // One path set for the entire trial (identity → motion → reveal). Never rebuild mid-trial.
   G.paths = buildPathsWithSeparation(lvl);
   G.trackDuration = (5.0 / lvl.speed) * 1000; // ms
 
@@ -1061,8 +1061,7 @@ async function runTrial() {
   G.phase = 'handoff';
   setPhase('track the target as it moves');
 
-  // Restart timing for the movement phase
-  G.paths = buildPathsWithSeparation(lvl);
+  // Motion phase clock only (same G.paths as at trial start — avoids a visible jump).
   G.trackStart = performance.now();
 
   let animRunning = true;
