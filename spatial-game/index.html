@@ -1035,6 +1035,7 @@ async function runTrial() {
   // One path set for the entire trial (identity → motion → reveal). Never rebuild mid-trial.
   G.paths = buildPathsWithSeparation(lvl);
   G.trackDuration = (5.0 / lvl.speed) * 1000; // ms
+  G.trackStart = null; // motion clock starts at handoff only — full path duration for fade + tracking
 
   // ── PHASE 1: IDENTITY (0–3s) ──────────────────────────
   // Target plays solo for 1.5s, then distractors join for 1.5s.
@@ -1042,7 +1043,6 @@ async function runTrial() {
   G.phase = 'identity';
   setPhase('listen — the filled dot is the target');
 
-  G.trackStart = performance.now();
   drawDots(true, true);   // target = solid, distractors = hollow, all pulse
   setDotsOpacity(1);
   placeDots();
@@ -1061,7 +1061,8 @@ async function runTrial() {
   G.phase = 'handoff';
   setPhase('track the target as it moves');
 
-  // Motion phase clock only (same G.paths as at trial start — avoids a visible jump).
+  // Same G.paths — only restart the motion clock so the path runs from frame 0 for a full
+  // G.trackDuration (visible move + 1s fade + invisible tracking). No path rebuild → no jump.
   G.trackStart = performance.now();
 
   let animRunning = true;
@@ -1158,6 +1159,7 @@ async function handleGuess(selectedIndex) {
 function resetTrial() {
   G.phase = 'idle';
   if (G.animRaf) { cancelAnimationFrame(G.animRaf); G.animRaf = null; }
+  G.trackStart = null;
   G.sources.forEach(s => s.stopRhythm());
   clearDots();
   clearPath();
