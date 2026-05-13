@@ -375,6 +375,29 @@
     .chord-play-btn:hover { border-color: var(--accent); color: var(--accent); }
     .chord-history-empty { padding: 2rem; text-align: center; font-size: .82rem; color: var(--muted); }
 
+    /* Saved notes (dashboard) — separate class names from chord-history-item (progression UI) */
+    .notes-history-section .notes-history-lede { font-size: .78rem; color: var(--muted); margin: -.35rem 0 1rem; line-height: 1.45; }
+    .notes-history-list { display: flex; flex-direction: column; gap: 1px; border: 1px solid var(--border); }
+    .notes-history-item { padding: .75rem 1rem; background: var(--bg); border-bottom: 1px solid var(--border); }
+    .notes-history-item:last-child { border-bottom: none; }
+    .notes-history-datetime { font-family: var(--font-heading); font-size: .82rem; font-weight: 600; color: var(--text); display: block; margin-bottom: .35rem; }
+    .notes-history-summary { font-size: .72rem; color: var(--muted); margin-bottom: .35rem; }
+    .notes-history-emotions { font-size: .72rem; color: var(--text); margin-bottom: .2rem; }
+    .notes-history-loc { font-size: .7rem; color: var(--muted); }
+    .notes-history-crypto { display: flex; align-items: flex-start; gap: .65rem; margin-top: .55rem; flex-wrap: wrap; }
+    .notes-history-lock { font-size: .85rem; line-height: 1.4; flex-shrink: 0; }
+    .notes-history-reveal {
+      font-family: var(--font-heading); font-size: .72rem; font-weight: 600; padding: .35rem .85rem;
+      border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+    .notes-history-reveal:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    .notes-history-reveal:disabled { opacity: .55; cursor: wait; }
+    .notes-history-body { margin-top: .5rem; font-size: .82rem; line-height: 1.55; color: var(--text); white-space: pre-wrap; }
+    .notes-history-body:empty { display: none; }
+    .notes-history-error { margin-top: .45rem; font-size: .72rem; color: var(--error); }
+    .notes-history-empty { padding: 2rem; text-align: center; font-size: .82rem; color: var(--muted); }
+
     /* Empty / loading */
     .dash-empty { padding: 3rem 2rem; text-align: center; border: 1px solid var(--border); background: var(--surface); }
     .dash-empty p { font-size: .85rem; color: var(--muted); }
@@ -657,6 +680,7 @@ import {
   loadUserKeyFromBase64,
   hasUserKey,
   encrypt,
+  decrypt,
   clearUserKey,
 } from '/assets/js/crypto-utils.js';
 
@@ -1099,7 +1123,7 @@ async function loadCheckins() {
   const since = new Date(); since.setDate(since.getDate() - 90);
   const { data, error } = await sb
     .from('checkins')
-    .select('id, created_at, arousal, valence, sensory_load, emotion_words, location_tag, selected_notes, chord_name')
+    .select('id, created_at, arousal, valence, sensory_load, emotion_words, location_tag, selected_notes, chord_name, notes, notes_encrypted_at')
     .eq('user_id', user.id)
     .gte('created_at', since.toISOString())
     .order('created_at', { ascending: true });
@@ -1228,6 +1252,12 @@ function renderDashboard() {
           </div>
         </div>
         <div id="chordHistoryList"></div>
+      </div>
+
+      <div class="chart-block full-width notes-history-section">
+        <div class="chart-block__title">Saved notes</div>
+        <p class="notes-history-lede">Notes are encrypted until you reveal them on this device.</p>
+        <div id="notesHistoryList"></div>
       </div>
     </div>
   `;
@@ -1474,6 +1504,7 @@ function renderDashboard() {
 
   // ── Chord history ──
   renderChordHistory(checkins);
+  renderNotesHistory(checkins);
 
   // ── Tempo control ──
   const tempoSlider = document.getElementById('tempoSlider');
@@ -1520,6 +1551,106 @@ function renderChordHistory(checkins) {
     });
     listWrap.appendChild(item);
   });
+  listEl.innerHTML = '';
+  listEl.appendChild(listWrap);
+}
+
+// ═══════════════════════════════════════════════════════
+// NOTES HISTORY (encrypted at rest; decrypt on demand)
+// ═══════════════════════════════════════════════════════
+function renderNotesHistory(checkins) {
+  const listEl = document.getElementById('notesHistoryList');
+  if (!listEl) return;
+
+  const withNotes = checkins.filter(c => c.notes != null).slice().reverse();
+  if (!withNotes.length) {
+    listEl.innerHTML = '<div class="notes-history-empty">No saved notes in this period.</div>';
+    return;
+  }
+
+  const listWrap = document.createElement('div');
+  listWrap.className = 'notes-history-list';
+
+  withNotes.forEach(c => {
+    const item = document.createElement('div');
+    item.className = 'notes-history-item';
+
+    const dt = new Date(c.created_at);
+    const datePart = dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    const timePart = dt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+    const encHint = c.notes_encrypted_at
+      ? new Date(c.notes_encrypted_at).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+      : '';
+
+    const emotions = (c.emotion_words && c.emotion_words.length)
+      ? c.emotion_words.join(', ')
+      : '';
+    const loc = c.location_tag || '';
+
+    item.innerHTML = `
+      <span class="notes-history-datetime"></span>
+      <div class="notes-history-summary"></div>
+      <div class="notes-history-emotions" hidden></div>
+      <div class="notes-history-loc" hidden></div>
+      <div class="notes-history-crypto">
+        <span class="notes-history-lock" title="Encrypted on this device" aria-hidden="true">🔒</span>
+        <button type="button" class="notes-history-reveal">Read note</button>
+      </div>
+      <div class="notes-history-body" aria-live="polite"></div>
+      <div class="notes-history-error" hidden></div>`;
+
+    item.querySelector('.notes-history-datetime').textContent = `${datePart} · ${timePart}`;
+    const sumEl = item.querySelector('.notes-history-summary');
+    sumEl.textContent = `Energy ${c.arousal ?? '—'} · Mood ${c.valence ?? '—'} · Sensory ${c.sensory_load ?? '—'}`;
+
+    const emoEl = item.querySelector('.notes-history-emotions');
+    if (emotions) { emoEl.textContent = emotions; emoEl.hidden = false; }
+
+    const locEl = item.querySelector('.notes-history-loc');
+    if (loc) { locEl.textContent = loc; locEl.hidden = false; }
+
+    const lockEl = item.querySelector('.notes-history-lock');
+    if (encHint) lockEl.title = `Encrypted · saved ${encHint}`;
+
+    const revealBtn = item.querySelector('.notes-history-reveal');
+    const bodyEl = item.querySelector('.notes-history-body');
+    const errEl = item.querySelector('.notes-history-error');
+
+    let revealed = false;
+
+    revealBtn.addEventListener('click', async () => {
+      if (revealed) {
+        bodyEl.textContent = '';
+        errEl.hidden = true;
+        errEl.textContent = '';
+        revealBtn.textContent = 'Read note';
+        if (lockEl) { lockEl.style.display = ''; lockEl.setAttribute('aria-hidden', 'true'); }
+        revealed = false;
+        return;
+      }
+
+      revealBtn.disabled = true;
+      errEl.hidden = true;
+      errEl.textContent = '';
+      try {
+        await ensureVaultReady();
+        const text = await decrypt(c.notes);
+        bodyEl.textContent = text;
+        if (lockEl) { lockEl.style.display = 'none'; lockEl.setAttribute('aria-hidden', 'true'); }
+        revealBtn.textContent = 'Hide note';
+        revealed = true;
+      } catch (e) {
+        errEl.textContent = e?.message || 'Could not decrypt this note.';
+        errEl.hidden = false;
+      } finally {
+        revealBtn.disabled = false;
+      }
+    });
+
+    listWrap.appendChild(item);
+  });
+
   listEl.innerHTML = '';
   listEl.appendChild(listWrap);
 }
