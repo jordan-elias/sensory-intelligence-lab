@@ -288,11 +288,10 @@ export async function handler(event) {
       PAYMENT SUCCESS
       (monthly/yearly renewal)
       ───────────────────────────── */
-      case "invoice.paid": {
-        const invoice        = stripeEvent.data.object;
-        const subscriptionId = invoice.subscription;
-        const subscription   = await stripe.subscriptions.retrieve(subscriptionId);
-        const periodEnd      = new Date(subscription.current_period_end * 1000);
+  case "invoice.paid": {
+    const invoice        = stripeEvent.data.object;
+    const subscriptionId = invoice.subscription;
+    const periodEnd      = new Date(invoice.lines.data[0].period.end * 1000);
 
         await supabase
           .from("subscriptions")
