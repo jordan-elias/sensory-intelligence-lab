@@ -239,7 +239,7 @@
 
 [[redirects]]
   from = "/semantic-synth"
-  to   = "/compositions/semantic-synths.html"
+  to   = "/compositions/semantic-synth.html"
   status = 200
 
 [[redirects]]
