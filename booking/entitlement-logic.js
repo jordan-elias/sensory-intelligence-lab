@@ -70,7 +70,7 @@ export async function getBookingEntitlement(supabase, userId) {
       .eq('user_id', userId)
       .gte('scheduled_at', periodStart.toISOString())
       .lte('scheduled_at', periodEnd.toISOString())
-      .in('status', ['scheduled', 'completed']);
+      .in('status', ['scheduled']);
 
     if (bookErr) {
       // Non-fatal — log and continue
