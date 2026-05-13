@@ -75,13 +75,13 @@
 # ── Privacy policy ──
 
 [[redirects]]
-  from = "/privacy-policy"
-  to   = "/privacy-policy/index.html"
+  from = "/privacy"
+  to   = "/privacy/index.html"
   status = 200
 
 [[redirects]]
-  from = "/privacy-policy/"
-  to   = "/privacy-policy/index.html"
+  from = "/privacy/"
+  to   = "/privacy/index.html"
   status = 200
 
 # ── Module pages ──
