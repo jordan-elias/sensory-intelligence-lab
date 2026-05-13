@@ -18,12 +18,12 @@ Alternatively, if you've set lookup_keys in Stripe, you can use stripe.prices.li
 instead of a hardcoded map — see the comment in the handler below.
 ───────────────────────────── */
 const PRICE_IDS = {
-  lab_monthly:   process.env.STRIPE_PRICE_LAB_MONTHLY   || "price_lab_monthly_id_here",
-  lab_yearly:    process.env.STRIPE_PRICE_LAB_YEARLY    || "price_lab_yearly_id_here",
-  call1_monthly: process.env.STRIPE_PRICE_CALL1_MONTHLY || "price_call1_monthly_id_here",
-  call1_yearly:  process.env.STRIPE_PRICE_CALL1_YEARLY  || "price_call1_yearly_id_here",
-  call2_monthly: process.env.STRIPE_PRICE_CALL2_MONTHLY || "price_call2_monthly_id_here",
-  call2_yearly:  process.env.STRIPE_PRICE_CALL2_YEARLY  || "price_call2_yearly_id_here",
+  lab_monthly:   process.env.STRIPE_LAB_MONTHLY_PRICE_ID,
+  lab_yearly:    process.env.STRIPE_LAB_YEARLY_PRICE_ID,
+  call1_monthly: process.env.STRIPE_CALL1_MONTHLY_PRICE_ID,
+  call1_yearly:  process.env.STRIPE_CALL1_YEARLY_PRICE_ID,
+  call2_monthly: process.env.STRIPE_CALL2_MONTHLY_PRICE_ID,
+  call2_yearly:  process.env.STRIPE_CALL2_YEARLY_PRICE_ID,
 };
 
 const TIER_ORDER = { free: 0, lab: 1, call1: 2, call2: 3 };
