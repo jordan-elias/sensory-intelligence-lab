@@ -31,6 +31,8 @@
       --accent-hover: #1e4433;
       --error: #c0392b;
       --error-bg: #fdf2f2;
+      --warning: #b45309;
+      --warning-bg: #fffbeb;
     }
 
     html { font-size: 16px; }
@@ -137,8 +139,6 @@
     .plan-card { background: var(--bg); padding: 1.75rem 1.5rem; display: flex; flex-direction: column; position: relative; }
     .plan-card.highlighted { background: var(--surface); }
     .plan-card.is-current { background: var(--accent-light); }
-
-    /* Capacity-full state */
     .plan-card.is-full { background: var(--surface); opacity: .85; }
 
     .plan-badge {
@@ -178,23 +178,26 @@
       transition: all .15s; letter-spacing: -.01em;
       text-align: center; width: 100%;
     }
-    .plan-cta.primary { background: var(--accent); color: white; }
+    .plan-cta.primary   { background: var(--accent); color: white; }
     .plan-cta.primary:hover { background: var(--accent-hover); }
     .plan-cta.secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
     .plan-cta.secondary:hover { border-color: var(--accent); color: var(--accent); }
-    .plan-cta.current-cta { background: var(--surface); color: var(--muted); border: 1px solid var(--border); cursor: default; }
+    .plan-cta.current-cta  { background: var(--surface); color: var(--muted); border: 1px solid var(--border); cursor: default; }
     .plan-cta.waitlist-cta { background: var(--surface); color: var(--muted); border: 1px solid var(--border); cursor: default; font-style: italic; }
     .plan-cta:disabled { opacity: .5; cursor: not-allowed; }
 
-    /* Capacity notice inside a full card */
     .capacity-notice {
-      font-size: .72rem;
-      color: var(--muted);
-      line-height: 1.5;
-      margin-bottom: .75rem;
-      padding: .5rem .7rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
+      font-size: .72rem; color: var(--muted); line-height: 1.5;
+      margin-bottom: .75rem; padding: .5rem .7rem;
+      background: var(--surface); border: 1px solid var(--border);
+    }
+
+    /* ── Downgrade notice on card ── */
+    .downgrade-notice {
+      font-size: .72rem; color: var(--warning); line-height: 1.5;
+      margin-bottom: .75rem; padding: .5rem .7rem;
+      background: var(--warning-bg); border: 1px solid #fcd34d;
+      display: none;
     }
 
     /* ── Feature comparison table ── */
@@ -217,75 +220,20 @@
 
     /* ── About section ── */
     .about-section {
-      margin-bottom: 3rem;
-      padding: 2.5rem 0;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
+      margin-bottom: 3rem; padding: 2.5rem 0;
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
     }
     .about-section .section-label { margin-bottom: 1.5rem; }
-
-    .about-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 3rem;
-      align-items: start;
-    }
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
     @media (max-width: 680px) { .about-grid { grid-template-columns: 1fr; gap: 2rem; } }
-
-    .about-lead {
-      font-family: var(--font-heading);
-      font-size: 1.25rem;
-      font-weight: 600;
-      letter-spacing: -.02em;
-      line-height: 1.4;
-      color: var(--text);
-      margin-bottom: 1.25rem;
-    }
-
-    .about-body {
-      font-size: .875rem;
-      color: var(--muted);
-      line-height: 1.8;
-    }
+    .about-lead { font-family: var(--font-heading); font-size: 1.25rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.4; color: var(--text); margin-bottom: 1.25rem; }
+    .about-body { font-size: .875rem; color: var(--muted); line-height: 1.8; }
     .about-body p + p { margin-top: 1rem; }
-
-    .about-pillars {
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-    }
-
-    .pillar {
-      display: flex;
-      gap: 1rem;
-      align-items: flex-start;
-    }
-    .pillar-icon {
-      width: 32px;
-      height: 32px;
-      background: var(--accent-light);
-      border: 1px solid #c0d9c8;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: .85rem;
-      flex-shrink: 0;
-      margin-top: .1rem;
-    }
-    .pillar-text {}
-    .pillar-title {
-      font-family: var(--font-heading);
-      font-size: .82rem;
-      font-weight: 600;
-      letter-spacing: -.01em;
-      color: var(--text);
-      margin-bottom: .2rem;
-    }
-    .pillar-desc {
-      font-size: .78rem;
-      color: var(--muted);
-      line-height: 1.6;
-    }
+    .about-pillars { display: flex; flex-direction: column; gap: 1.25rem; }
+    .pillar { display: flex; gap: 1rem; align-items: flex-start; }
+    .pillar-icon { width: 32px; height: 32px; background: var(--accent-light); border: 1px solid #c0d9c8; display: flex; align-items: center; justify-content: center; font-size: .85rem; flex-shrink: 0; margin-top: .1rem; }
+    .pillar-title { font-family: var(--font-heading); font-size: .82rem; font-weight: 600; letter-spacing: -.01em; color: var(--text); margin-bottom: .2rem; }
+    .pillar-desc { font-size: .78rem; color: var(--muted); line-height: 1.6; }
 
     /* ── FAQ ── */
     .faq-section { margin-bottom: 3rem; }
@@ -304,9 +252,10 @@
     /* ── Message ── */
     .msg { padding: .75rem 1rem; font-size: .82rem; line-height: 1.5; margin-bottom: 1.25rem; display: none; }
     .msg.show { display: block; }
-    .msg.error   { background: var(--error-bg); border-left: 3px solid var(--error); color: var(--error); }
+    .msg.error   { background: var(--error-bg);   border-left: 3px solid var(--error);   color: var(--error); }
     .msg.success { background: var(--accent-light); border-left: 3px solid var(--accent); color: var(--accent); }
     .msg.info    { background: var(--accent-light); border-left: 3px solid var(--accent); color: var(--accent-hover); }
+    .msg.warning { background: var(--warning-bg);  border-left: 3px solid var(--warning); color: var(--warning); }
 
     /* ── Footer ── */
     footer { border-top: 1px solid var(--border); padding: 1.25rem 1.5rem; text-align: center; font-size: .78rem; color: var(--muted); }
@@ -371,7 +320,7 @@
   <!-- Current plan banner -->
   <div class="current-plan-banner" id="currentPlanBanner" style="display:none">
     <p>You are currently on the <strong id="currentPlanLabel">—</strong> plan.
-       Changes take effect at the start of your next billing period.</p>
+       Upgrades take effect immediately. Downgrades apply at the end of your billing period.</p>
     <button class="portal-btn" id="portalBtn" onclick="openPortal()">Manage billing →</button>
   </div>
 
@@ -405,6 +354,9 @@
         <li class="muted-feature">Soundscape Machine</li>
         <li class="muted-feature">Video sessions</li>
       </ul>
+      <div class="downgrade-notice" id="downgrade-notice-free">
+        Downgrade takes effect at the end of your billing period. You keep full access until then.
+      </div>
       <button class="plan-cta current-cta" id="cta-free">Current plan</button>
     </div>
 
@@ -428,7 +380,10 @@
         <li>Session history</li>
         <li class="muted-feature">Video sessions</li>
       </ul>
-      <button class="plan-cta primary" id="cta-lab" onclick="checkout('lab')">Get started</button>
+      <div class="downgrade-notice" id="downgrade-notice-lab">
+        Downgrade takes effect at the end of your billing period. You keep full access until then.
+      </div>
+      <button class="plan-cta primary" id="cta-lab">Get started</button>
     </div>
 
     <!-- Call 1 -->
@@ -451,7 +406,10 @@
       <div class="capacity-notice" id="notice-call1" style="display:none">
         All session slots are currently full. Join the waitlist and we'll contact you when a space opens.
       </div>
-      <button class="plan-cta primary" id="cta-call1" onclick="checkout('call1')">Get started</button>
+      <div class="downgrade-notice" id="downgrade-notice-call1">
+        Downgrade takes effect at the end of your billing period. You keep full access until then.
+      </div>
+      <button class="plan-cta primary" id="cta-call1">Get started</button>
     </div>
 
     <!-- Call 2 -->
@@ -475,7 +433,10 @@
       <div class="capacity-notice" id="notice-call2" style="display:none">
         All session slots are currently full. Join the waitlist and we'll contact you when a space opens.
       </div>
-      <button class="plan-cta primary" id="cta-call2" onclick="checkout('call2')">Get started</button>
+      <div class="downgrade-notice" id="downgrade-notice-call2">
+        Downgrade takes effect at the end of your billing period. You keep full access until then.
+      </div>
+      <button class="plan-cta primary" id="cta-call2">Get started</button>
     </div>
 
   </div>
@@ -497,75 +458,45 @@
         <tr class="row-group"><td colspan="5">Core tools</td></tr>
         <tr>
           <td><div class="feature-name">Regulation Engine</div><div class="feature-sub">Generative ISO soundscapes</div></td>
-          <td class="check-col"><span class="check">✓</span></td>
-          <td class="check-col"><span class="check">✓</span></td>
-          <td class="check-col"><span class="check">✓</span></td>
-          <td class="check-col"><span class="check">✓</span></td>
+          <td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td>
         </tr>
         <tr>
           <td><div class="feature-name">Breath Regulation</div><div class="feature-sub">4 evidence-based patterns with audio</div></td>
-          <td class="check-col"><span class="check">✓</span></td>
-          <td class="check-col"><span class="check">✓</span></td>
-          <td class="check-col"><span class="check">✓</span></td>
-          <td class="check-col"><span class="check">✓</span></td>
+          <td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td>
         </tr>
         <tr>
           <td><div class="feature-name">Ear Training</div><div class="feature-sub">Intervals and chords</div></td>
-          <td class="check-col"><span class="check">✓</span></td>
-          <td class="check-col"><span class="check">✓</span></td>
-          <td class="check-col"><span class="check">✓</span></td>
-          <td class="check-col"><span class="check">✓</span></td>
+          <td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td>
         </tr>
         <tr>
           <td><div class="feature-name">Resource Library</div><div class="feature-sub">Curated books, tools, archives</div></td>
-          <td class="check-col"><span class="check">✓</span></td>
-          <td class="check-col"><span class="check">✓</span></td>
-          <td class="check-col"><span class="check">✓</span></td>
-          <td class="check-col"><span class="check">✓</span></td>
+          <td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td>
         </tr>
         <tr class="row-group"><td colspan="5">Lab tools</td></tr>
         <tr>
           <td><div class="feature-name">Check-In</div><div class="feature-sub">State and sensory load logging</div></td>
-          <td class="check-col"><span class="cross">—</span></td>
-          <td class="check-col"><span class="check">✓</span></td>
-          <td class="check-col"><span class="check">✓</span></td>
-          <td class="check-col"><span class="check">✓</span></td>
+          <td class="check-col"><span class="cross">—</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td>
         </tr>
         <tr>
           <td><div class="feature-name">Spatial Awareness</div><div class="feature-sub">Sound localisation training</div></td>
-          <td class="check-col"><span class="cross">—</span></td>
-          <td class="check-col"><span class="check">✓</span></td>
-          <td class="check-col"><span class="check">✓</span></td>
-          <td class="check-col"><span class="check">✓</span></td>
+          <td class="check-col"><span class="cross">—</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td>
         </tr>
         <tr>
           <td><div class="feature-name">Soundscape Machine</div><div class="feature-sub">Four-track tape composition</div></td>
-          <td class="check-col"><span class="cross">—</span></td>
-          <td class="check-col"><span class="check">✓</span></td>
-          <td class="check-col"><span class="check">✓</span></td>
-          <td class="check-col"><span class="check">✓</span></td>
+          <td class="check-col"><span class="cross">—</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td>
         </tr>
         <tr>
           <td><div class="feature-name">Timed Journal</div><div class="feature-sub">Timed writing with soundscapes</div></td>
-          <td class="check-col"><span class="cross">—</span></td>
-          <td class="check-col"><span class="check">✓</span></td>
-          <td class="check-col"><span class="check">✓</span></td>
-          <td class="check-col"><span class="check">✓</span></td>
+          <td class="check-col"><span class="cross">—</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td>
         </tr>
         <tr class="row-group"><td colspan="5">Video sessions</td></tr>
         <tr>
           <td><div class="feature-name">Monthly video sessions</div><div class="feature-sub">50 minutes, scheduled via calendar</div></td>
-          <td class="check-col"><span class="cross">—</span></td>
-          <td class="check-col"><span class="cross">—</span></td>
-          <td class="check-col"><span class="partial">1 / month</span></td>
-          <td class="check-col"><span class="partial">2 / month</span></td>
+          <td class="check-col"><span class="cross">—</span></td><td class="check-col"><span class="cross">—</span></td><td class="check-col"><span class="partial">1 / month</span></td><td class="check-col"><span class="partial">2 / month</span></td>
         </tr>
         <tr>
           <td><div class="feature-name">Priority scheduling</div></td>
-          <td class="check-col"><span class="cross">—</span></td>
-          <td class="check-col"><span class="cross">—</span></td>
-          <td class="check-col"><span class="cross">—</span></td>
-          <td class="check-col"><span class="check">✓</span></td>
+          <td class="check-col"><span class="cross">—</span></td><td class="check-col"><span class="cross">—</span></td><td class="check-col"><span class="cross">—</span></td><td class="check-col"><span class="check">✓</span></td>
         </tr>
       </tbody>
     </table>
@@ -575,7 +506,6 @@
   <div class="about-section">
     <p class="section-label">Why this exists</p>
     <div class="about-grid">
-
       <div class="about-left">
         <div class="about-lead">Music therapy that continues between sessions.</div>
         <div class="about-body">
@@ -584,9 +514,7 @@
           <p>The session tiers exist for people who want more direct access — continuity across the week rather than one appointment a month, a space to bring what's come up in the Lab, and a relationship with the work that builds over time.</p>
         </div>
       </div>
-
       <div class="about-pillars">
-
         <div class="pillar">
           <div class="pillar-icon">◎</div>
           <div class="pillar-text">
@@ -594,7 +522,6 @@
             <div class="pillar-desc">The tools here are designed to carry the thread between our sessions — not to replace them, but to give you somewhere to go in between.</div>
           </div>
         </div>
-
         <div class="pillar">
           <div class="pillar-icon">◈</div>
           <div class="pillar-text">
@@ -602,7 +529,6 @@
             <div class="pillar-desc">Regulation, ear training, journaling, soundscapes — practices you can return to on your own schedule, at your own pace, without needing a prompt.</div>
           </div>
         </div>
-
         <div class="pillar">
           <div class="pillar-icon">◇</div>
           <div class="pillar-text">
@@ -610,7 +536,6 @@
             <div class="pillar-desc">Session tiers mean you can bring what you've been working on straight to a call — less catch-up, more depth. I keep session numbers small on purpose.</div>
           </div>
         </div>
-
         <div class="pillar">
           <div class="pillar-icon">○</div>
           <div class="pillar-text">
@@ -618,7 +543,6 @@
             <div class="pillar-desc">There's a hard cap on how many session subscribers I take. The tools are available to anyone; the sessions are intentionally limited so I can do them properly.</div>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -627,15 +551,13 @@
   <div class="faq-section">
     <p class="section-label">Common questions</p>
     <div class="faq-list">
-
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">
           <span class="faq-q-text">Can I change or cancel my plan at any time?</span>
           <span class="faq-icon">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner">Yes. You can upgrade, downgrade, or cancel at any time via the billing portal. Changes to a lower tier take effect at the end of your current billing period — you keep access until then. Upgrades take effect immediately.</div></div>
+        <div class="faq-a"><div class="faq-a-inner">Yes. You can upgrade, downgrade, or cancel at any time. Upgrades take effect immediately and you are charged only the prorated difference. Downgrades take effect at the end of your current billing period — you keep full access until then.</div></div>
       </div>
-
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">
           <span class="faq-q-text">What happens to unused video sessions?</span>
@@ -643,7 +565,6 @@
         </div>
         <div class="faq-a"><div class="faq-a-inner">Unused sessions carry over for one month. If you miss two months in a row, the sessions expire. This is to keep the scheduling manageable — video sessions are a finite resource on Jordan's end.</div></div>
       </div>
-
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">
           <span class="faq-q-text">Why is there a limit on session places?</span>
@@ -651,7 +572,13 @@
         </div>
         <div class="faq-a"><div class="faq-a-inner">Session tiers are capped at 64 monthly sessions in total across all subscribers. This is a deliberate choice — keeping the number small means I can show up fully for the sessions I do take, rather than stretching thin. If the session tiers are full, you'll be able to join a waitlist.</div></div>
       </div>
-
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span class="faq-q-text">How does upgrading work?</span>
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-a"><div class="faq-a-inner">When you upgrade mid-cycle, Stripe calculates the unused portion of your current plan and credits it against the new plan. You pay only the difference, and access updates immediately — no need to cancel and resubscribe.</div></div>
+      </div>
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">
           <span class="faq-q-text">How does payment work?</span>
@@ -659,7 +586,6 @@
         </div>
         <div class="faq-a"><div class="faq-a-inner">Payment is handled entirely by Stripe — a secure, industry-standard payment processor. Your card details are never stored on this site. You can update your payment method or view invoices at any time through the billing portal.</div></div>
       </div>
-
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">
           <span class="faq-q-text">What are the video sessions for?</span>
@@ -667,7 +593,6 @@
         </div>
         <div class="faq-a"><div class="faq-a-inner">The sessions are one-to-one video calls with Jordan, the music therapist behind these tools. They can be used for guided listening work, discussion of what you've been exploring in the Lab, or support around goals.</div></div>
       </div>
-
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">
           <span class="faq-q-text">Is the free tier really free?</span>
@@ -675,7 +600,6 @@
         </div>
         <div class="faq-a"><div class="faq-a-inner">Yes — no credit card required, no trial period. The Regulation Engine, Breath Regulation, Ear Training, and Resource Library are free indefinitely.</div></div>
       </div>
-
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">
           <span class="faq-q-text">What is the difference between monthly and yearly billing?</span>
@@ -683,7 +607,6 @@
         </div>
         <div class="faq-a"><div class="faq-a-inner">Yearly billing gives you the equivalent of 10 months for the price of 12 — a saving of roughly 17%. The features are identical; you just pay once per year rather than once per month. You can switch between billing intervals when you change your plan.</div></div>
       </div>
-
     </div>
   </div>
 
@@ -732,13 +655,13 @@ document.getElementById('silSignOut').addEventListener('click', async function (
 // STATE
 // ─────────────────────────────────────────────────────────
 let billing  = 'monthly';
-let userPlan = 'free';
 let userTier = 'free';
+let userPlan = 'free';   // may be 'beta'
 let isBeta   = false;
 
-// Session capacity — must match SESSION_CAPACITY in create-checkout-session.js
-const SESSION_CAPACITY    = 64;
-const SESSIONS_PER_TIER   = { call1: 1, call2: 2 };
+const SESSION_CAPACITY  = 64;
+const SESSIONS_PER_TIER = { call1: 1, call2: 2 };
+const TIER_ORDER        = { free: 0, lab: 1, call1: 2, call2: 3 };
 
 const PLAN_LABELS = {
   free:  'Free',
@@ -761,7 +684,6 @@ onAuthReady(async () => {
   const user = window._currentUser;
   if (!sb || !user) return;
 
-  // Load user's own plan and a capacity count in parallel
   const [profileResult, capacityResult] = await Promise.all([
     sb.from('profiles')
       .select('subscription_tier, subscription_status, is_beta, current_period_end')
@@ -780,15 +702,14 @@ onAuthReady(async () => {
     userPlan = isBeta ? 'beta' : userTier;
   }
 
-  // Compute sessions committed
-  const activeRows      = capacityResult.data || [];
-  const sessionsUsed    = activeRows.reduce((t, r) => t + (SESSIONS_PER_TIER[r.subscription_tier] ?? 0), 0);
-  const call1Full       = (sessionsUsed + SESSIONS_PER_TIER.call1) > SESSION_CAPACITY;
-  const call2Full       = (sessionsUsed + SESSIONS_PER_TIER.call2) > SESSION_CAPACITY;
+  const activeRows   = capacityResult.data || [];
+  const sessionsUsed = activeRows.reduce((t, r) => t + (SESSIONS_PER_TIER[r.subscription_tier] ?? 0), 0);
+  const call1Full    = (sessionsUsed + SESSIONS_PER_TIER.call1) > SESSION_CAPACITY;
+  const call2Full    = (sessionsUsed + SESSIONS_PER_TIER.call2) > SESSION_CAPACITY;
 
   renderPlanState({ call1Full, call2Full });
 
-  // Stripe redirect params
+  // Handle redirect params from Stripe
   const params = new URLSearchParams(window.location.search);
   if (params.get('success') === 'true') {
     showMsg('Your subscription is active. Welcome to the Lab.', 'success');
@@ -804,46 +725,76 @@ onAuthReady(async () => {
 // RENDER PLAN STATE
 // ─────────────────────────────────────────────────────────
 function renderPlanState({ call1Full = false, call2Full = false } = {}) {
-  // Banner
-  const activeTiers = ['lab', 'call1', 'call2', 'beta'];
-  if (activeTiers.includes(userPlan)) {
+  // Show banner for any paid/beta plan
+  if (['lab', 'call1', 'call2', 'beta'].includes(userPlan)) {
     const banner = document.getElementById('currentPlanBanner');
     banner.style.display = 'flex';
     document.getElementById('currentPlanLabel').textContent = PLAN_LABELS[userPlan] || userPlan;
     if (isBeta) document.getElementById('portalBtn').style.display = 'none';
   }
 
-  // Map effective current tier to card id
-  const tierMap = { free: 'free', lab: 'lab', call1: 'call1', call2: 'call2', beta: 'lab' };
+  // beta maps to lab card for display purposes
+  const tierMap       = { free: 'free', lab: 'lab', call1: 'call1', call2: 'call2', beta: 'lab' };
   const currentCardKey = tierMap[userPlan] || 'free';
 
   // Mark current card
   const currentCard = document.getElementById('card-' + currentCardKey);
   if (currentCard) currentCard.classList.add('is-current');
 
-  // Apply capacity states
+  // Apply capacity states first (may be overridden below for current tier)
   applyCapacityState('call1', call1Full, currentCardKey === 'call1');
   applyCapacityState('call2', call2Full, currentCardKey === 'call2');
 
-  // Update CTAs for all tiers
+  // Set CTA labels based on relationship to current tier
   ['free', 'lab', 'call1', 'call2'].forEach(t => {
-    const cta      = document.getElementById('cta-' + t);
-    const badge    = document.getElementById('badge-' + t);
+    const cta    = document.getElementById('cta-' + t);
+    const badge  = document.getElementById('badge-' + t);
+    const notice = document.getElementById('downgrade-notice-' + t);
     if (!cta) return;
 
-    const isCurrent = t === currentCardKey;
+    const isCurrent  = t === currentCardKey;
+    const tOrder     = TIER_ORDER[t]              ?? 0;
+    const curOrder   = TIER_ORDER[currentCardKey] ?? 0;
+    const isUpgrade  = tOrder > curOrder;
+    const isDowngrade = tOrder < curOrder;
 
     if (isCurrent) {
       cta.textContent = 'Current plan';
       cta.className   = 'plan-cta current-cta';
       cta.disabled    = true;
+      cta.onclick     = null;
       if (badge) badge.className = 'plan-badge current-badge';
-    } else if (t === 'free' && userPlan !== 'free') {
-      cta.textContent = 'Downgrade to free';
-      cta.className   = 'plan-cta secondary';
-      cta.onclick     = () => openPortal();
+      return; // skip further logic for this card
     }
-    // call1/call2 capacity states are handled by applyCapacityState
+
+    // Skip if capacity already disabled this card
+    if (cta.classList.contains('waitlist-cta')) return;
+
+    if (isDowngrade) {
+      if (t === 'free') {
+        cta.textContent = 'Downgrade to Free';
+        cta.className   = 'plan-cta secondary';
+        cta.disabled    = false;
+        cta.onclick     = () => openPortal(); // free downgrades go via portal (cancel)
+      } else {
+        cta.textContent = 'Downgrade';
+        cta.className   = 'plan-cta secondary';
+        cta.disabled    = false;
+        cta.onclick     = () => changePlan(t);
+      }
+      if (notice) notice.style.display = 'block';
+    } else if (isUpgrade) {
+      cta.textContent = 'Upgrade';
+      cta.className   = 'plan-cta primary';
+      cta.disabled    = false;
+      cta.onclick     = () => changePlan(t);
+    } else {
+      // Free user — standard "Get started" for paid tiers
+      cta.textContent = 'Get started';
+      cta.className   = 'plan-cta primary';
+      cta.disabled    = false;
+      cta.onclick     = () => checkout(t);
+    }
   });
 }
 
@@ -852,11 +803,7 @@ function applyCapacityState(tier, isFull, isCurrent) {
   const cta    = document.getElementById('cta-' + tier);
   const notice = document.getElementById('notice-' + tier);
   const badge  = document.getElementById('badge-' + tier);
-
-  if (!card || !cta) return;
-
-  // Don't override "current plan" state
-  if (isCurrent) return;
+  if (!card || !cta || isCurrent) return;
 
   if (isFull) {
     card.classList.add('is-full');
@@ -865,7 +812,7 @@ function applyCapacityState(tier, isFull, isCurrent) {
     cta.disabled    = true;
     cta.onclick     = null;
     if (notice) notice.style.display = 'block';
-    if (badge)  { badge.textContent = tier === 'call1' ? 'Full' : 'Full'; badge.className = 'plan-badge full-badge'; }
+    if (badge)  badge.className = 'plan-badge full-badge';
   }
 }
 
@@ -883,16 +830,21 @@ window.setBilling = function(period) {
     el.classList.toggle('visible', period === 'yearly' && el.classList.contains('yearly-equiv'));
   });
 
-  ['lab','call1','call2'].forEach(t => {
+  ['lab', 'call1', 'call2'].forEach(t => {
     const s = document.getElementById('saving-' + t);
     if (s) s.style.display = period === 'yearly' ? 'inline-block' : 'none';
   });
 };
 
 // ─────────────────────────────────────────────────────────
-// CHECKOUT
+// CHECKOUT (new subscription — free users only)
 // ─────────────────────────────────────────────────────────
 window.checkout = async function(tier) {
+  // If user already has a paid subscription, route to changePlan instead
+  if (userTier !== 'free') {
+    return changePlan(tier);
+  }
+
   const sb   = window._supabase;
   const user = window._currentUser;
   if (!sb || !user) { showMsg('Please sign in first.', 'error'); return; }
@@ -914,7 +866,6 @@ window.checkout = async function(tier) {
 
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      // Handle capacity_full specifically — the server double-checks even if the UI looked available
       if (body.error === 'capacity_full') {
         applyCapacityState(tier, true, false);
         showMsg('Session places have just filled — all slots are now taken. Please check back next month.', 'error');
@@ -929,6 +880,56 @@ window.checkout = async function(tier) {
   } catch (err) {
     showMsg(err.message || 'Could not start checkout. Please try again.', 'error');
     if (btn) { btn.disabled = false; btn.textContent = 'Get started'; }
+  }
+};
+
+// ─────────────────────────────────────────────────────────
+// CHANGE PLAN (upgrade or downgrade for existing subscribers)
+// ─────────────────────────────────────────────────────────
+window.changePlan = async function(tier) {
+  const sb   = window._supabase;
+  const user = window._currentUser;
+  if (!sb || !user) { showMsg('Please sign in first.', 'error'); return; }
+
+  const plan      = tier + '_' + billing;
+  const btn       = document.getElementById('cta-' + tier);
+  const curOrder  = TIER_ORDER[userTier] ?? 0;
+  const newOrder  = TIER_ORDER[tier]     ?? 0;
+  const isUpgrade = newOrder > curOrder;
+
+  const originalText = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = isUpgrade ? 'Upgrading…' : 'Downgrading…'; }
+
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const res = await fetch('/.netlify/functions/update-subscription', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ plan }),
+    });
+
+    const body = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      if (body.error === 'capacity_full') {
+        applyCapacityState(tier, true, false);
+        showMsg('Session places have just filled — all slots are now taken.', 'error');
+        return;
+      }
+      throw new Error(body.error || 'Could not update subscription.');
+    }
+
+    showMsg(body.message || 'Your plan has been updated.', isUpgrade ? 'success' : 'warning');
+
+    // Reload after a short delay so the user sees the message
+    setTimeout(() => window.location.reload(), 2500);
+
+  } catch (err) {
+    showMsg(err.message || 'Something went wrong. Please try again.', 'error');
+    if (btn) { btn.disabled = false; btn.textContent = originalText; }
   }
 };
 
