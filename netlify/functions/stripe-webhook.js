@@ -17,10 +17,66 @@ const supabase = createClient(
 );
 
 /* ─────────────────────────────
+RESEND
+───────────────────────────── */
+const RESEND_API_KEY    = process.env.RESEND_API_KEY;
+const RESEND_FROM       = process.env.RESEND_FROM_ADDRESS || "Jordan Elias <hello@jordanelias.de>";
+
+// Aliases must match exactly what you named them in Resend → Templates
+const TEMPLATE_BY_TIER = {
+  lab:   "subscription-successful",
+  call1: "upgrade-successful-1",
+  call2: "upgrade-successful-2",
+};
+
+async function sendTierEmail({ to, tier, variables, idempotencyKey }) {
+  if (!RESEND_API_KEY) {
+    console.error("RESEND_API_KEY not set — skipping email");
+    return;
+  }
+
+  const templateAlias = TEMPLATE_BY_TIER[tier];
+  if (!templateAlias) {
+    console.log(`No email template configured for tier "${tier}" — skipping`);
+    return;
+  }
+
+  if (!to) {
+    console.error("No recipient email — skipping email");
+    return;
+  }
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization:    `Bearer ${RESEND_API_KEY}`,
+        "Content-Type":   "application/json",
+        "Idempotency-Key": idempotencyKey,
+      },
+      body: JSON.stringify({
+        from:        RESEND_FROM,
+        to:          [to],
+        template_id: templateAlias,  // Resend accepts alias strings here
+        variables,                   // Must match variable names in your template
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      console.error(`Resend send failed (${res.status}):`, err);
+    } else {
+      console.log(`Email sent → ${to} (template: ${templateAlias})`);
+    }
+  } catch (err) {
+    console.error("Resend threw an error:", err);
+  }
+}
+
+/* ─────────────────────────────
 HELPERS
 ───────────────────────────── */
 
-// Map price IDs to subscription tiers
 function getTierFromPlan(plan) {
   switch (plan) {
     case "lab_monthly":
@@ -37,16 +93,17 @@ function getTierFromPlan(plan) {
   }
 }
 
-// Upsert subscription record
+// Only send an email when the tier actually changes to something paid
+function shouldSendEmail({ status, tier, oldTier }) {
+  return (
+    ["active", "trialing"].includes(status) &&
+    tier !== "free" &&
+    tier !== (oldTier || "free")
+  );
+}
+
 async function upsertSubscription({
-  userId,
-  email,
-  plan,
-  tier,
-  customerId,
-  subscriptionId,
-  status,
-  periodEnd,
+  userId, email, plan, tier, customerId, subscriptionId, status, periodEnd,
 }) {
   const { error } = await supabase.from("subscriptions").upsert(
     {
@@ -64,16 +121,8 @@ async function upsertSubscription({
   if (error) console.error("Supabase subscription upsert error:", error);
 }
 
-// Update the profiles table with clean schema columns only
 async function updateProfile({
-  userId,
-  email,
-  plan,
-  tier,
-  customerId,
-  subscriptionId,
-  status,
-  periodEnd,
+  userId, email, plan, tier, customerId, subscriptionId, status, periodEnd,
 }) {
   const { error } = await supabase
     .from("profiles")
@@ -123,6 +172,15 @@ export async function handler(event) {
         const periodEnd    = new Date(subscription.current_period_end * 1000);
         const tier         = getTierFromPlan(metadata.plan);
 
+        // Fetch existing profile to detect tier change and get name
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("subscription_tier, email, full_name")
+          .eq("id", metadata.user_id)
+          .single();
+
+        const oldTier = profile?.subscription_tier || "free";
+
         await upsertSubscription({
           userId:         metadata.user_id,
           email:          metadata.email,
@@ -146,6 +204,21 @@ export async function handler(event) {
         });
 
         console.log("Subscription created:", subscription.id, "| Tier:", tier);
+
+        if (shouldSendEmail({ status: subscription.status, tier, oldTier })) {
+          await sendTierEmail({
+            to:             metadata.email || profile?.email,
+            tier,
+            variables: {
+              NAME:       profile?.full_name || metadata.email || "",
+              USER_EMAIL: metadata.email || profile?.email || "",
+              PLAN:       metadata.plan || "",
+              TIER:       tier,
+            },
+            idempotencyKey: `checkout:${stripeEvent.id}`,
+          });
+        }
+
         break;
       }
 
@@ -154,15 +227,23 @@ export async function handler(event) {
       (upgrades, downgrades, renewals)
       ───────────────────────────── */
       case "customer.subscription.updated": {
-        const subscription = stripeEvent.data.object;
-        const customerId   = subscription.customer;
+        const subscription   = stripeEvent.data.object;
+        const customerId     = subscription.customer;
         const subscriptionId = subscription.id;
-        const periodEnd    = new Date(subscription.current_period_end * 1000);
-        const status       = subscription.status;
-        // Use the price ID key from metadata if available, otherwise derive from price id
-        const plan         = subscription.items.data[0].price.lookup_key
-                             ?? subscription.items.data[0].price.id;
-        const tier         = getTierFromPlan(plan);
+        const periodEnd      = new Date(subscription.current_period_end * 1000);
+        const status         = subscription.status;
+        const plan           = subscription.items.data[0].price.lookup_key
+                               ?? subscription.items.data[0].price.id;
+        const tier           = getTierFromPlan(plan);
+
+        // Fetch before updating so we can detect the tier change
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("subscription_tier, email, full_name")
+          .eq("stripe_subscription_id", subscriptionId)
+          .single();
+
+        const oldTier = profile?.subscription_tier || "free";
 
         await supabase.from("subscriptions").upsert({
           stripe_subscription_id: subscriptionId,
@@ -176,15 +257,30 @@ export async function handler(event) {
         await supabase
           .from("profiles")
           .update({
-            subscription_plan:      plan,
-            subscription_tier:      tier,
-            subscription_status:    status,
-            current_period_end:     periodEnd,
-            updated_at:             new Date(),
+            subscription_plan:   plan,
+            subscription_tier:   tier,
+            subscription_status: status,
+            current_period_end:  periodEnd,
+            updated_at:          new Date(),
           })
           .eq("stripe_subscription_id", subscriptionId);
 
         console.log("Subscription updated:", subscriptionId, "| Tier:", tier, "| Status:", status);
+
+        if (shouldSendEmail({ status, tier, oldTier })) {
+          await sendTierEmail({
+            to:   profile?.email,
+            tier,
+            variables: {
+              NAME:       profile?.full_name || profile?.email || "",
+              USER_EMAIL: profile?.email || "",
+              PLAN:       plan,
+              TIER:       tier,
+            },
+            idempotencyKey: `sub-updated:${stripeEvent.id}`,
+          });
+        }
+
         break;
       }
 
@@ -192,11 +288,10 @@ export async function handler(event) {
       PAYMENT SUCCESS
       (monthly/yearly renewal)
       ───────────────────────────── */
-      case "invoice.paid": {
-        const invoice        = stripeEvent.data.object;
-        const subscriptionId = invoice.subscription;
-        const subscription   = await stripe.subscriptions.retrieve(subscriptionId);
-        const periodEnd      = new Date(subscription.current_period_end * 1000);
+  case "invoice.paid": {
+    const invoice        = stripeEvent.data.object;
+    const subscriptionId = invoice.subscription;
+    const periodEnd      = new Date(invoice.lines.data[0].period.end * 1000);
 
         await supabase
           .from("subscriptions")
@@ -254,7 +349,6 @@ export async function handler(event) {
           .update({ status: "canceled" })
           .eq("stripe_subscription_id", subscription.id);
 
-        // Downgrade to free tier on cancellation
         await supabase
           .from("profiles")
           .update({
