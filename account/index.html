@@ -101,9 +101,9 @@
 
     /* ── Messages ── */
     .msg { padding: .65rem .9rem; font-size: .78rem; line-height: 1.5; margin-bottom: .85rem; display: none; }
-    .msg.error   { background: var(--error-bg);  border-left: 3px solid var(--error);   color: var(--error);   }
+    .msg.error   { background: var(--error-bg);    border-left: 3px solid var(--error);   color: var(--error);   }
     .msg.success { background: var(--accent-light); border-left: 3px solid var(--accent); color: var(--accent); }
-    .msg.warning { background: var(--warning-bg);  border-left: 3px solid var(--warning);color: var(--warning); }
+    .msg.warning { background: var(--warning-bg);   border-left: 3px solid var(--warning); color: var(--warning); }
     .msg.show { display: block; }
 
     /* ── Password strength ── */
@@ -363,7 +363,7 @@
 
 <main class="page-loading" id="mainContent">
 
-  <!-- Password reset banner (shown when arriving via reset link) -->
+  <!-- Password reset banner (shown only in PASSWORD_RECOVERY mode) -->
   <div class="reset-banner" id="resetBanner" style="display:none">
     <h3>Set a new password</h3>
     <p>You followed a password reset link. Enter your new password below.</p>
@@ -373,8 +373,6 @@
     <h2>Account</h2>
     <p>Manage your profile, password, and subscription.</p>
   </div>
-
- 
 
   <!-- ── Profile ── -->
   <p class="sl">Profile</p>
@@ -431,50 +429,50 @@
     </div>
   </div>
 
- <!-- ── Change password (normal mode) ── -->
-<p class="sl">Password</p>
-<div class="card" id="changePasswordCard">
-  <div class="card-head"><h3>Change password</h3></div>
-  <div class="card-body">
-    <div class="msg" id="passwordMsg"></div>
-    <div class="form-group">
-      <label for="currentPw">Current password</label>
-      <input type="password" id="currentPw" placeholder="Your current password" autocomplete="current-password">
-    </div>
-    <div class="form-group">
-      <label for="newPw">New password</label>
-      <input type="password" id="newPw" placeholder="At least 8 characters" autocomplete="new-password">
-      <div class="pw-strength"><div class="pw-strength-fill" id="newPwStrength"></div></div>
-    </div>
-    <div class="form-group">
-      <label for="newPwConfirm">Confirm new password</label>
-      <input type="password" id="newPwConfirm" placeholder="Repeat your new password" autocomplete="new-password">
-    </div>
-    <div class="btn-row">
-      <button class="btn" id="passwordBtn" onclick="handlePasswordChange()">Update password</button>
+  <!-- ── Change password (normal mode) ── -->
+  <p class="sl">Password</p>
+  <div class="card" id="changePasswordCard">
+    <div class="card-head"><h3>Change password</h3></div>
+    <div class="card-body">
+      <div class="msg" id="passwordMsg"></div>
+      <div class="form-group">
+        <label for="currentPw">Current password</label>
+        <input type="password" id="currentPw" placeholder="Your current password" autocomplete="current-password">
+      </div>
+      <div class="form-group">
+        <label for="newPw">New password</label>
+        <input type="password" id="newPw" placeholder="At least 8 characters" autocomplete="new-password">
+        <div class="pw-strength"><div class="pw-strength-fill" id="newPwStrength"></div></div>
+      </div>
+      <div class="form-group">
+        <label for="newPwConfirm">Confirm new password</label>
+        <input type="password" id="newPwConfirm" placeholder="Repeat your new password" autocomplete="new-password">
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="passwordBtn" onclick="handlePasswordChange()">Update password</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ── Set new password (recovery mode) ── -->
-<div class="card" id="recoveryPasswordCard" style="display:none">
-  <div class="card-head"><h3>Set new password</h3></div>
-  <div class="card-body">
-    <div class="msg" id="recoveryMsg"></div>
-    <div class="form-group">
-      <label for="recoveryPw">New password</label>
-      <input type="password" id="recoveryPw" placeholder="At least 8 characters" autocomplete="new-password">
-      <div class="pw-strength"><div class="pw-strength-fill" id="recoveryPwStrength"></div></div>
-    </div>
-    <div class="form-group">
-      <label for="recoveryPwConfirm">Confirm new password</label>
-      <input type="password" id="recoveryPwConfirm" placeholder="Repeat your new password" autocomplete="new-password">
-    </div>
-    <div class="btn-row">
-      <button class="btn" id="recoveryPwBtn" onclick="handleRecoveryPasswordSet()">Save new password</button>
+  <!-- ── Set new password (recovery mode — hidden by default, shown on PASSWORD_RECOVERY event) ── -->
+  <div class="card" id="recoveryPasswordCard" style="display:none">
+    <div class="card-head"><h3>Set new password</h3></div>
+    <div class="card-body">
+      <div class="msg" id="recoveryMsg"></div>
+      <div class="form-group">
+        <label for="recoveryPw">New password</label>
+        <input type="password" id="recoveryPw" placeholder="At least 8 characters" autocomplete="new-password">
+        <div class="pw-strength"><div class="pw-strength-fill" id="recoveryPwStrength"></div></div>
+      </div>
+      <div class="form-group">
+        <label for="recoveryPwConfirm">Confirm new password</label>
+        <input type="password" id="recoveryPwConfirm" placeholder="Repeat your new password" autocomplete="new-password">
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="recoveryPwBtn" onclick="handleRecoveryPasswordSet()">Save new password</button>
+      </div>
     </div>
   </div>
-</div>
 
   <!-- ── Subscription ── -->
   <p class="sl">Subscription</p>
@@ -658,14 +656,20 @@
     window.addEventListener('authReady', cb, { once: true });
   }
 
-  // ── Helpers ──
+  // ─────────────────────────────────────────────────────────
+  // HELPERS
+  // ─────────────────────────────────────────────────────────
   function showMsg(id, text, type) {
     const el = document.getElementById(id);
+    if (!el) return;
     el.textContent = text;
     el.className = `msg ${type} show`;
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
-  function clearMsg(id) { document.getElementById(id).className = 'msg'; }
+  function clearMsg(id) {
+    const el = document.getElementById(id);
+    if (el) el.className = 'msg';
+  }
   function setLoading(id, loading, label) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -679,26 +683,69 @@
     });
   }
 
-  // ── Password strength ──
+  // ─────────────────────────────────────────────────────────
+  // PASSWORD STRENGTH
+  // Null-guarded: recovery card is hidden by default so both
+  // inputs exist in the DOM, but guard defensively anyway.
+  // ─────────────────────────────────────────────────────────
   function updateStrength(inputId, barId) {
-    document.getElementById(inputId).addEventListener('input', function() {
+    const input = document.getElementById(inputId);
+    const bar   = document.getElementById(barId);
+    if (!input || !bar) return;
+    input.addEventListener('input', function () {
       const v = this.value;
-      const bar = document.getElementById(barId);
       let score = 0;
-      if (v.length >= 8)  score++;
-      if (v.length >= 12) score++;
-      if (/[A-Z]/.test(v)) score++;
-      if (/[0-9]/.test(v)) score++;
-      if (/[^A-Za-z0-9]/.test(v)) score++;
-      bar.style.width = (score / 5 * 100) + '%';
+      if (v.length >= 8)           score++;
+      if (v.length >= 12)          score++;
+      if (/[A-Z]/.test(v))         score++;
+      if (/[0-9]/.test(v))         score++;
+      if (/[^A-Za-z0-9]/.test(v))  score++;
+      bar.style.width      = (score / 5 * 100) + '%';
       bar.style.background = score <= 1 ? '#c0392b' : score <= 3 ? '#e67e22' : '#2a5c45';
     });
   }
-  
-updateStrength('newPw', 'newPwStrength');
-updateStrength('recoveryPw', 'recoveryPwStrength');
-  
-  // ── Subscription rendering ──
+  updateStrength('newPw',      'newPwStrength');
+  updateStrength('recoveryPw', 'recoveryPwStrength');
+
+  // ─────────────────────────────────────────────────────────
+  // RECOVERY MODE
+  // Listen for Supabase's PASSWORD_RECOVERY auth event.
+  // This fires when the user arrives via the reset-password
+  // email link. auth-guard.js consumes the hash tokens and
+  // signs the user in, then emits this event — so we must
+  // listen via onAuthStateChange rather than reading the hash.
+  // ─────────────────────────────────────────────────────────
+  function enterRecoveryMode() {
+    document.getElementById('resetBanner').style.display          = 'block';
+    document.getElementById('changePasswordCard').style.display   = 'none';
+    document.getElementById('recoveryPasswordCard').style.display = 'block';
+    setTimeout(() => {
+      document.getElementById('resetBanner').scrollIntoView({ behavior: 'smooth' });
+    }, 150);
+  }
+
+  // Register the listener as early as possible — before onAuthReady —
+  // so we don't miss the event if it fires during page load.
+  (async () => {
+    // Wait for _supabase to be available (set by auth-guard.js)
+    const waitForSupabase = () => new Promise(resolve => {
+      if (window._supabase) { resolve(window._supabase); return; }
+      const iv = setInterval(() => {
+        if (window._supabase) { clearInterval(iv); resolve(window._supabase); }
+      }, 50);
+    });
+
+    const sb = await waitForSupabase();
+    sb.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        enterRecoveryMode();
+      }
+    });
+  })();
+
+  // ─────────────────────────────────────────────────────────
+  // SUBSCRIPTION RENDERING
+  // ─────────────────────────────────────────────────────────
   const PLAN_CONFIG = {
     free: {
       label: 'Free',
@@ -764,37 +811,32 @@ updateStrength('recoveryPw', 'recoveryPwStrength');
     },
   };
 
-  // Track whether the user currently has an active subscription (used by delete gate)
   let _userHasActiveSubscription = false;
 
   function renderSubscription(profile, bookingsUsed) {
-    const tier     = profile.subscription_tier ?? 'free';
+    const tier     = profile.subscription_tier   ?? 'free';
     const status   = profile.subscription_status ?? 'free';
-    const isBeta   = profile.is_beta ?? false;
+    const isBeta   = profile.is_beta             ?? false;
     const isActive = status === 'active' || status === 'trialing';
 
-    // Store for delete gate
     _userHasActiveSubscription = isActive && !isBeta;
 
-    // Determine which config to display
     const configKey = isBeta ? 'beta' : (isActive ? tier : 'free');
     const cfg = PLAN_CONFIG[configKey] || PLAN_CONFIG.free;
 
-    // Badge
     const badge = document.getElementById('planBadge');
     badge.textContent = cfg.label;
-    badge.className = `plan-badge ${cfg.badgeClass}`;
+    badge.className   = `plan-badge ${cfg.badgeClass}`;
 
     const periodEnd = profile.current_period_end ? fmtDate(profile.current_period_end) : null;
 
-    // Session pips for call1/call2
     let sessionPipsHtml = '';
     if ((configKey === 'call1' || configKey === 'call2') && isActive) {
       const total = configKey === 'call1' ? 1 : 2;
       const used  = Math.min(bookingsUsed || 0, total);
       const avail = total - used;
       let pips = '';
-      for (let i = 0; i < used; i++)  pips += `<div class="session-pip used" title="Used">✓</div>`;
+      for (let i = 0; i < used; i++)  pips += `<div class="session-pip used"  title="Used">✓</div>`;
       for (let i = 0; i < avail; i++) pips += `<div class="session-pip available" title="Available">→</div>`;
       const label = avail > 0
         ? `${avail} session${avail > 1 ? 's' : ''} remaining this period`
@@ -848,18 +890,19 @@ updateStrength('recoveryPw', 'recoveryPwStrength');
     `;
   }
 
-  // ── Stripe customer portal ──
-  window.openPortal = async function() {
+  // ─────────────────────────────────────────────────────────
+  // STRIPE PORTAL
+  // ─────────────────────────────────────────────────────────
+  window.openPortal = async function () {
     const sb  = window._supabase;
     const btn = event?.target;
     if (btn) { btn.disabled = true; btn.textContent = 'Opening…'; }
-
     try {
       const { data: { session } } = await sb.auth.getSession();
       const res = await fetch('/.netlify/functions/create-portal-session', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type':  'application/json',
           'Authorization': `Bearer ${session.access_token}`,
         },
       });
@@ -872,28 +915,29 @@ updateStrength('recoveryPw', 'recoveryPwStrength');
     }
   };
 
-  // ── Notifications ──
-  // Debounced autosave — saves 800 ms after the last toggle change.
+  // ─────────────────────────────────────────────────────────
+  // NOTIFICATIONS
+  // ─────────────────────────────────────────────────────────
   let _notifSaveTimer = null;
 
   function getNotifPrefs() {
     return {
-      post_session_reminder:   document.getElementById('notifPostSession').checked,
-      booking_confirmation:    document.getElementById('notifBookingConfirm').checked,
-      session_reminder_24h:    document.getElementById('notifSessionReminder').checked,
-      product_updates:         document.getElementById('notifProductUpdates').checked,
+      post_session_reminder: document.getElementById('notifPostSession').checked,
+      booking_confirmation:  document.getElementById('notifBookingConfirm').checked,
+      session_reminder_24h:  document.getElementById('notifSessionReminder').checked,
+      product_updates:       document.getElementById('notifProductUpdates').checked,
     };
   }
 
   function applyNotifPrefs(prefs) {
     if (!prefs) return;
-    document.getElementById('notifPostSession').checked      = prefs.post_session_reminder   ?? true;
-    document.getElementById('notifBookingConfirm').checked   = prefs.booking_confirmation    ?? true;
-    document.getElementById('notifSessionReminder').checked  = prefs.session_reminder_24h    ?? true;
-    document.getElementById('notifProductUpdates').checked   = prefs.product_updates         ?? true;
+    document.getElementById('notifPostSession').checked     = prefs.post_session_reminder ?? true;
+    document.getElementById('notifBookingConfirm').checked  = prefs.booking_confirmation  ?? true;
+    document.getElementById('notifSessionReminder').checked = prefs.session_reminder_24h  ?? true;
+    document.getElementById('notifProductUpdates').checked  = prefs.product_updates       ?? true;
   }
 
-  window.handleNotifChange = function() {
+  window.handleNotifChange = function () {
     const status = document.getElementById('notifSaveStatus');
     status.textContent = 'Saving…';
     clearTimeout(_notifSaveTimer);
@@ -910,7 +954,6 @@ updateStrength('recoveryPw', 'recoveryPwStrength');
           updated_at: new Date().toISOString(),
         })
         .eq('id', window._currentUser.id);
-
       if (error) throw error;
       status.textContent = 'Saved';
       setTimeout(() => { status.textContent = ''; }, 2000);
@@ -920,12 +963,14 @@ updateStrength('recoveryPw', 'recoveryPwStrength');
     }
   }
 
-  // ── Init ──
+  // ─────────────────────────────────────────────────────────
+  // INIT — runs once auth is ready
+  // ─────────────────────────────────────────────────────────
   onAuthReady(async () => {
     const supabase = window._supabase;
     const user     = window._currentUser;
 
-    document.getElementById('displayEmail').textContent    = user.email || '—';
+    document.getElementById('displayEmail').textContent     = user.email || '—';
     document.getElementById('displayCreatedAt').textContent = fmtDate(user.created_at);
 
     const { data: profile } = await supabase
@@ -938,7 +983,6 @@ updateStrength('recoveryPw', 'recoveryPwStrength');
       document.getElementById('displayName').textContent = profile.full_name || 'Not set';
       document.getElementById('nameInput').value         = profile.full_name || '';
 
-      // Load notification preferences (defaults: session-critical emails on, marketing off)
       const defaultPrefs = {
         post_session_reminder: true,
         booking_confirmation:  true,
@@ -949,8 +993,8 @@ updateStrength('recoveryPw', 'recoveryPwStrength');
 
       // Load session bookings for call1/call2 users
       let bookingsUsed = 0;
-      const tier   = profile.subscription_tier ?? 'free';
-      const status = profile.subscription_status ?? 'free';
+      const tier     = profile.subscription_tier   ?? 'free';
+      const status   = profile.subscription_status ?? 'free';
       const isActive = status === 'active' || status === 'trialing';
 
       if (isActive && (tier === 'call1' || tier === 'call2')) {
@@ -967,7 +1011,7 @@ updateStrength('recoveryPw', 'recoveryPwStrength');
             .eq('event_type', 'subscriber-session')
             .gte('scheduled_at', periodStart.toISOString())
             .lte('scheduled_at', periodEnd.toISOString())
-            .in('status', ['scheduled', 'completed']);
+            .in('status', ['scheduled']);   // counts scheduled as consumed
           bookingsUsed = (bookings || []).length;
         }
       }
@@ -975,23 +1019,14 @@ updateStrength('recoveryPw', 'recoveryPwStrength');
       renderSubscription(profile, bookingsUsed);
     }
 
-   // Recovery mode detection
-const { data: { session: currentSession } } = await supabase.auth.getSession();
-const hash = window.location.hash;
-const hashParams = new URLSearchParams(hash.replace('#', ''));
-const isRecovery = hashParams.get('type') === 'recovery' || currentSession?.user?.app_metadata?.recovery === true;
+    // Page ready
+    document.getElementById('mainContent').classList.add('ready');
+  });
 
-if (isRecovery) {
-  document.getElementById('resetBanner').style.display   = 'block';
-  document.getElementById('changePasswordCard').style.display = 'none';
-  document.getElementById('recoveryPasswordCard').style.display = 'block';
-  setTimeout(() => document.getElementById('resetBanner').scrollIntoView({ behavior: 'smooth' }), 300);
-}
-
-});
-  
-  // ── Update name ──
-  window.handleNameUpdate = async function() {
+  // ─────────────────────────────────────────────────────────
+  // UPDATE NAME
+  // ─────────────────────────────────────────────────────────
+  window.handleNameUpdate = async function () {
     clearMsg('nameMsg');
     const name = document.getElementById('nameInput').value.trim();
     if (!name) { showMsg('nameMsg', 'Please enter a name.', 'error'); return; }
@@ -1006,8 +1041,10 @@ if (isRecovery) {
     showMsg('nameMsg', 'Name updated.', 'success');
   };
 
-  // ── Change email ──
-  window.handleEmailChange = async function() {
+  // ─────────────────────────────────────────────────────────
+  // CHANGE EMAIL
+  // ─────────────────────────────────────────────────────────
+  window.handleEmailChange = async function () {
     clearMsg('emailMsg');
     const email = document.getElementById('emailInput').value.trim();
     if (!email) { showMsg('emailMsg', 'Please enter an email address.', 'error'); return; }
@@ -1026,8 +1063,10 @@ if (isRecovery) {
     document.getElementById('emailInput').value = '';
   };
 
-  // ── Change password ──
-  window.handlePasswordChange = async function() {
+  // ─────────────────────────────────────────────────────────
+  // CHANGE PASSWORD (normal mode — requires current password)
+  // ─────────────────────────────────────────────────────────
+  window.handlePasswordChange = async function () {
     clearMsg('passwordMsg');
     const current = document.getElementById('currentPw').value;
     const next    = document.getElementById('newPw').value;
@@ -1042,6 +1081,7 @@ if (isRecovery) {
       showMsg('passwordMsg', 'New passwords do not match.', 'error'); return;
     }
     setLoading('passwordBtn', true, 'Update password');
+    // Re-authenticate first to verify current password
     const { error: reAuthError } = await window._supabase.auth.signInWithPassword({
       email: window._currentUser.email, password: current,
     });
@@ -1059,33 +1099,45 @@ if (isRecovery) {
     );
   };
 
-// ── Set password in recovery mode (no current password required) ──
-window.handleRecoveryPasswordSet = async function() {
-  clearMsg('recoveryMsg');
-  const pw  = document.getElementById('recoveryPw').value;
-  const pwc = document.getElementById('recoveryPwConfirm').value;
-  if (!pw || !pwc) { showMsg('recoveryMsg', 'Please fill in both fields.', 'error'); return; }
-  if (pw.length < 8) { showMsg('recoveryMsg', 'Password must be at least 8 characters.', 'error'); return; }
-  if (pw !== pwc) { showMsg('recoveryMsg', 'Passwords do not match.', 'error'); return; }
+  // ─────────────────────────────────────────────────────────
+  // SET PASSWORD (recovery mode — no current password needed,
+  // user is already signed in via the magic link token)
+  // ─────────────────────────────────────────────────────────
+  window.handleRecoveryPasswordSet = async function () {
+    clearMsg('recoveryMsg');
+    const pw  = document.getElementById('recoveryPw').value;
+    const pwc = document.getElementById('recoveryPwConfirm').value;
+    if (!pw || !pwc) {
+      showMsg('recoveryMsg', 'Please fill in both fields.', 'error'); return;
+    }
+    if (pw.length < 8) {
+      showMsg('recoveryMsg', 'Password must be at least 8 characters.', 'error'); return;
+    }
+    if (pw !== pwc) {
+      showMsg('recoveryMsg', 'Passwords do not match.', 'error'); return;
+    }
 
-  setLoading('recoveryPwBtn', true, 'Save new password');
-  const { error } = await window._supabase.auth.updateUser({ password: pw });
-  setLoading('recoveryPwBtn', false, 'Save new password');
+    setLoading('recoveryPwBtn', true, 'Save new password');
+    const { error } = await window._supabase.auth.updateUser({ password: pw });
+    setLoading('recoveryPwBtn', false, 'Save new password');
 
-  if (error) { showMsg('recoveryMsg', error.message, 'error'); return; }
+    if (error) { showMsg('recoveryMsg', error.message, 'error'); return; }
 
-  history.replaceState(null, '', window.location.pathname);
-  document.getElementById('resetBanner').style.display      = 'none';
-  document.getElementById('recoveryPasswordCard').style.display = 'none';
-  document.getElementById('changePasswordCard').style.display   = 'block';
-  showMsg('passwordMsg', 'Password set successfully. You can now sign in with your new password.', 'success');
-  setTimeout(() => document.getElementById('changePasswordCard').scrollIntoView({ behavior: 'smooth' }), 100);
-};
-    
- 
+    // Clean up and return to normal mode
+    history.replaceState(null, '', window.location.pathname);
+    document.getElementById('resetBanner').style.display          = 'none';
+    document.getElementById('recoveryPasswordCard').style.display = 'none';
+    document.getElementById('changePasswordCard').style.display   = 'block';
+    showMsg('passwordMsg', 'Password set successfully. You can now sign in with your new password.', 'success');
+    setTimeout(() => {
+      document.getElementById('changePasswordCard').scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
 
-  // ── Sign out all ──
-  window.handleSignOutAll = async function() {
+  // ─────────────────────────────────────────────────────────
+  // SIGN OUT ALL
+  // ─────────────────────────────────────────────────────────
+  window.handleSignOutAll = async function () {
     if (!window.confirm('This will sign you out on all devices. Continue?')) return;
     showMsg('signoutMsg', 'Signing out everywhere…', 'warning');
     const { error } = await window._supabase.auth.signOut({ scope: 'global' });
@@ -1093,25 +1145,23 @@ window.handleRecoveryPasswordSet = async function() {
     window.location.replace('/');
   };
 
-  // ── Delete account flow ──
-
-  window.initiateDeleteFlow = function() {
+  // ─────────────────────────────────────────────────────────
+  // DELETE ACCOUNT FLOW
+  // ─────────────────────────────────────────────────────────
+  window.initiateDeleteFlow = function () {
     clearMsg('deleteMsg');
-
-    // Gate: block if the user has an active paid subscription
     if (_userHasActiveSubscription) {
-      document.getElementById('deleteInitSection').style.display = 'none';
-      document.getElementById('deleteGateSection').style.display = 'block';
+      document.getElementById('deleteInitSection').style.display  = 'none';
+      document.getElementById('deleteGateSection').style.display  = 'block';
       document.getElementById('deleteGateSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       return;
     }
-
     document.getElementById('deleteInitSection').style.display    = 'none';
     document.getElementById('deleteConfirmSection').style.display = 'block';
     document.getElementById('deleteConfirmInput').focus();
   };
 
-  window.cancelDeleteFlow = function() {
+  window.cancelDeleteFlow = function () {
     document.getElementById('deleteInitSection').style.display    = 'block';
     document.getElementById('deleteConfirmSection').style.display = 'none';
     document.getElementById('deleteGateSection').style.display    = 'none';
@@ -1119,14 +1169,12 @@ window.handleRecoveryPasswordSet = async function() {
     clearMsg('deleteMsg');
   };
 
-  window.handleDeleteAccount = async function() {
+  window.handleDeleteAccount = async function () {
     const input = document.getElementById('deleteConfirmInput').value.trim();
     if (input !== 'DELETE') {
       showMsg('deleteMsg', 'Please type DELETE exactly to confirm.', 'error');
       return;
     }
-
-    // Re-check subscription in case state changed in this session
     if (_userHasActiveSubscription) {
       showMsg('deleteMsg', 'You still have an active subscription. Please cancel it via the billing portal before deleting your account.', 'error');
       return;
@@ -1139,25 +1187,23 @@ window.handleRecoveryPasswordSet = async function() {
     try {
       const supabase = window._supabase;
       const user     = window._currentUser;
-
       if (!supabase || !user) throw new Error('Not signed in.');
 
-      // Delete storage objects (recordings bucket)
+      // Remove storage objects
       const { data: storageFiles } = await supabase.storage
         .from('recordings')
         .list(user.id + '/');
-
       if (storageFiles && storageFiles.length > 0) {
         const paths = storageFiles.map(f => user.id + '/' + f.name);
         await supabase.storage.from('recordings').remove(paths);
       }
 
-      // Call server-side delete function
+      // Server-side deletion
       const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch('/.netlify/functions/delete-account', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type':  'application/json',
           'Authorization': `Bearer ${session.access_token}`,
         },
       });
@@ -1177,14 +1223,15 @@ window.handleRecoveryPasswordSet = async function() {
     }
   };
 
-  
-window.handleSignOut = async function() {
-  const btn = document.getElementById('silSignOut');
-  btn.disabled = true; btn.textContent = 'Signing out…';
-  try { await window._supabase.auth.signOut(); } finally {
-    window.location.replace('/');
-  }
-};
+  // ─────────────────────────────────────────────────────────
+  // SIGN OUT (header button)
+  // ─────────────────────────────────────────────────────────
+  window.handleSignOut = async function () {
+    const btn = document.getElementById('silSignOut');
+    btn.disabled = true; btn.textContent = 'Signing out…';
+    try { await window._supabase.auth.signOut(); }
+    finally { window.location.replace('/'); }
+  };
 
 </script>
 </body>
