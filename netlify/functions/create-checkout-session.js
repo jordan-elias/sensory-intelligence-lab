@@ -126,6 +126,16 @@ export async function handler(event) {
       .eq("id", user.id)
       .single();
 
+    if (existingProfile?.subscription_status === "past_due") {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          error:
+            "Your subscription has a failed payment. Please update your payment method via the billing portal.",
+        }),
+      };
+    }
+
     const hasActiveSub =
       existingProfile?.subscription_status === "active" ||
       existingProfile?.subscription_status === "trialing";
@@ -172,7 +182,7 @@ export async function handler(event) {
       mode: "subscription",
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url:    process.env.SITE_URL + "/dashboard/?success=true",
+      success_url:    process.env.SITE_URL + "/subscribe/?success=true",
       cancel_url:     process.env.SITE_URL + "/subscribe/?canceled=true",
       customer_email: user.email,
       metadata: {

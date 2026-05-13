@@ -96,6 +96,41 @@
     .portal-btn:hover { background: var(--accent); color: white; }
     .portal-btn:disabled { opacity: .5; cursor: not-allowed; }
 
+    /* ── Past-due payment banner ── */
+    .past-due-banner {
+      display: none;
+      background: var(--error-bg);
+      border: 1px solid #f5c6c6;
+      border-left: 3px solid var(--error);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+      font-size: .85rem;
+      line-height: 1.55;
+      color: var(--error);
+    }
+    .past-due-banner strong { font-weight: 600; }
+    .past-due-banner .past-due-actions {
+      margin-top: .75rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: .65rem;
+      align-items: center;
+    }
+    .past-due-banner .past-due-portal {
+      font-family: var(--font-heading);
+      font-size: .78rem;
+      font-weight: 600;
+      padding: .5rem 1.15rem;
+      border: 1px solid var(--error);
+      background: var(--bg);
+      color: var(--error);
+      cursor: pointer;
+    }
+    .past-due-banner .past-due-portal:hover {
+      background: var(--error);
+      color: white;
+    }
+
     /* ── Section label ── */
     .section-label {
       font-family: var(--font-heading);
@@ -316,6 +351,14 @@
   </div>
 
   <div class="msg" id="pageMsg"></div>
+
+  <div class="past-due-banner" id="pastDueBanner" role="alert">
+    <strong>Payment did not go through.</strong>
+    Your subscription is past due. Update your payment method in the billing portal to restore access. You cannot start a new subscription while a past-due subscription exists on your account.
+    <div class="past-due-actions">
+      <button type="button" class="past-due-portal" onclick="openPortal()">Open billing portal</button>
+    </div>
+  </div>
 
   <!-- Current plan banner -->
   <div class="current-plan-banner" id="currentPlanBanner" style="display:none">
@@ -658,6 +701,8 @@ let billing  = 'monthly';
 let userTier = 'free';
 let userPlan = 'free';   // may be 'beta'
 let isBeta   = false;
+/** @type {string} mirrors profiles.subscription_status (e.g. active, trialing, past_due) */
+let userSubscriptionStatus = '';
 
 const SESSION_CAPACITY  = 64;
 const SESSIONS_PER_TIER = { call1: 1, call2: 2 };
@@ -700,6 +745,7 @@ onAuthReady(async () => {
     userTier = profile.subscription_tier || 'free';
     isBeta   = !!profile.is_beta;
     userPlan = isBeta ? 'beta' : userTier;
+    userSubscriptionStatus = profile.subscription_status || '';
   }
 
   const activeRows   = capacityResult.data || [];
@@ -725,6 +771,47 @@ onAuthReady(async () => {
 // RENDER PLAN STATE
 // ─────────────────────────────────────────────────────────
 function renderPlanState({ call1Full = false, call2Full = false } = {}) {
+  const pastDueEl = document.getElementById('pastDueBanner');
+  if (pastDueEl) pastDueEl.style.display = 'none';
+
+  if (userSubscriptionStatus === 'past_due') {
+    if (pastDueEl) pastDueEl.style.display = 'block';
+
+    if (['lab', 'call1', 'call2', 'beta'].includes(userPlan)) {
+      const banner = document.getElementById('currentPlanBanner');
+      banner.style.display = 'flex';
+      document.getElementById('currentPlanLabel').textContent = PLAN_LABELS[userPlan] || userPlan;
+      const portalBtn = document.getElementById('portalBtn');
+      if (isBeta) portalBtn.style.display = 'none';
+      else portalBtn.style.display = '';
+    }
+
+    const tierMapPast = { free: 'free', lab: 'lab', call1: 'call1', call2: 'call2', beta: 'lab' };
+    const currentCardKeyPast = tierMapPast[userPlan] || 'free';
+    const currentCardPast = document.getElementById('card-' + currentCardKeyPast);
+    if (currentCardPast) currentCardPast.classList.add('is-current');
+
+    ['free', 'lab', 'call1', 'call2'].forEach(t => {
+      const cta = document.getElementById('cta-' + t);
+      if (!cta) return;
+      const isCurrent = t === currentCardKeyPast;
+      if (isCurrent) {
+        cta.textContent = 'Current plan';
+        cta.className   = 'plan-cta current-cta';
+        cta.disabled    = true;
+        cta.onclick     = null;
+        const badge = document.getElementById('badge-' + t);
+        if (badge) badge.className = 'plan-badge current-badge';
+      } else {
+        cta.textContent = 'Update payment in billing portal';
+        cta.className   = 'plan-cta secondary';
+        cta.disabled    = false;
+        cta.onclick     = () => openPortal();
+      }
+    });
+    return;
+  }
+
   // Show banner for any paid/beta plan
   if (['lab', 'call1', 'call2', 'beta'].includes(userPlan)) {
     const banner = document.getElementById('currentPlanBanner');
@@ -840,6 +927,12 @@ window.setBilling = function(period) {
 // CHECKOUT (new subscription — free users only)
 // ─────────────────────────────────────────────────────────
 window.checkout = async function(tier) {
+  if (userSubscriptionStatus === 'past_due') {
+    showMsg('Your subscription has a failed payment. Please update your payment method in the billing portal.', 'error');
+    openPortal();
+    return;
+  }
+
   // If user already has a paid subscription, route to changePlan instead
   if (userTier !== 'free') {
     return changePlan(tier);
@@ -887,6 +980,12 @@ window.checkout = async function(tier) {
 // CHANGE PLAN (upgrade or downgrade for existing subscribers)
 // ─────────────────────────────────────────────────────────
 window.changePlan = async function(tier) {
+  if (userSubscriptionStatus === 'past_due') {
+    showMsg('Your subscription has a failed payment. Please update your payment method in the billing portal before changing plans.', 'error');
+    openPortal();
+    return;
+  }
+
   const sb   = window._supabase;
   const user = window._currentUser;
   if (!sb || !user) { showMsg('Please sign in first.', 'error'); return; }

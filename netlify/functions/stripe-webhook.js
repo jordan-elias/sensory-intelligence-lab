@@ -232,9 +232,21 @@ export async function handler(event) {
         const subscriptionId = subscription.id;
         const periodEnd      = new Date(subscription.current_period_end * 1000);
         const status         = subscription.status;
-        const plan           = subscription.items.data[0].price.lookup_key
-                               ?? subscription.items.data[0].price.id;
-        const tier           = getTierFromPlan(plan);
+
+        const price = subscription.items?.data?.[0]?.price;
+        const lookupKey = price?.lookup_key;
+        if (!lookupKey) {
+          throw new Error(
+            `customer.subscription.updated: Stripe price ${price?.id ?? "?"} has no lookup_key — set lookup_key in the Stripe Dashboard (subscription ${subscriptionId})`
+          );
+        }
+        const plan = lookupKey;
+        const tier = getTierFromPlan(plan);
+        if (tier === "free") {
+          throw new Error(
+            `customer.subscription.updated: unrecognized plan lookup_key "${lookupKey}" (subscription ${subscriptionId})`
+          );
+        }
 
         // Fetch before updating so we can detect the tier change
         const { data: profile } = await supabase
@@ -288,15 +300,50 @@ export async function handler(event) {
       PAYMENT SUCCESS
       (monthly/yearly renewal)
       ───────────────────────────── */
-  case "invoice.paid": {
-    const invoice        = stripeEvent.data.object;
-    const subscriptionId = invoice.subscription;
-    const periodEnd      = new Date(invoice.lines.data[0].period.end * 1000);
+      case "invoice.paid": {
+        const invoice = stripeEvent.data.object;
+        const rawSub = invoice.subscription;
+        const subscriptionId =
+          typeof rawSub === "string" ? rawSub : rawSub?.id ?? null;
+
+        if (!subscriptionId) {
+          console.log(
+            "invoice.paid: no subscription on invoice — skipping DB update",
+            invoice.id
+          );
+          break;
+        }
+
+        const lines = invoice.lines?.data ?? [];
+        let periodEndUnix = null;
+        for (const line of lines) {
+          if (line?.period?.end != null) {
+            periodEndUnix = line.period.end;
+            break;
+          }
+        }
+
+        const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+
+        if (periodEndUnix == null) {
+          if (subscription.current_period_end != null) {
+            periodEndUnix = subscription.current_period_end;
+          } else {
+            console.error(
+              "invoice.paid: could not resolve period end — skipping DB update",
+              { invoiceId: invoice.id, subscriptionId }
+            );
+            break;
+          }
+        }
+
+        const periodEnd = new Date(periodEndUnix * 1000);
+        const subStatus = subscription.status;
 
         await supabase
           .from("subscriptions")
           .update({
-            status:             subscription.status,
+            status:             subStatus,
             current_period_end: periodEnd,
           })
           .eq("stripe_subscription_id", subscriptionId);
@@ -304,9 +351,9 @@ export async function handler(event) {
         await supabase
           .from("profiles")
           .update({
-            subscription_status: subscription.status,
-            current_period_end:  periodEnd,
-            updated_at:          new Date(),
+            subscription_status: subStatus,
+            current_period_end:    periodEnd,
+            updated_at:            new Date(),
           })
           .eq("stripe_subscription_id", subscriptionId);
 
