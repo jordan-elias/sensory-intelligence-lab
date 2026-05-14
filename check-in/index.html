@@ -1238,28 +1238,36 @@ function renderDashboard() {
         <div class="tod-label-row" id="todLabelRow"></div>
       </div>
 
-      <div class="chart-block full-width chord-history-section">
-        <div class="chart-block__title">Chord record</div>
-        <div class="chord-history-header">
-          <span style="font-size:.78rem;color:var(--muted)">Chords saved from your check-ins</span>
-          <div class="chord-history-controls">
-            <div class="tempo-control">
-              <span>Tempo</span>
-              <input type="range" id="tempoSlider" min="0.5" max="4" step="0.5" value="2">
-              <span class="tempo-val" id="tempoVal">2s</span>
-            </div>
-            <button class="play-progression-btn" id="playProgressionBtn" disabled onclick="toggleProgression()">▶ Play progression</button>
-          </div>
+<div class="chart-block full-width chord-history-section">
+  <div class="chart-block__title" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;" onclick="toggleDashCard('chordBody',this)">
+    Chord record <span id="chordBodyToggle" style="font-size:.7rem;color:var(--muted);font-weight:400;">▴ collapse</span>
+  </div>
+  <div id="chordBody">
+    <div class="chord-history-header">
+      <span style="font-size:.78rem;color:var(--muted)">Chords saved from your check-ins</span>
+      <div class="chord-history-controls">
+        <div class="tempo-control">
+          <span>Tempo</span>
+          <input type="range" id="tempoSlider" min="0.5" max="4" step="0.5" value="2">
+          <span class="tempo-val" id="tempoVal">2s</span>
         </div>
-        <div id="chordHistoryList"></div>
-      </div>
-
-      <div class="chart-block full-width notes-history-section">
-        <div class="chart-block__title">Saved notes</div>
-        <p class="notes-history-lede">Notes are encrypted until you reveal them on this device.</p>
-        <div id="notesHistoryList"></div>
+        <button class="play-progression-btn" id="playProgressionBtn" disabled onclick="toggleProgression()">▶ Play progression</button>
       </div>
     </div>
+    <div id="chordHistoryList"></div>
+  </div>
+</div>
+
+<div class="chart-block full-width notes-history-section">
+  <div class="chart-block__title" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;" onclick="toggleDashCard('notesBody',this)">
+    Saved notes <span id="notesBodyToggle" style="font-size:.7rem;color:var(--muted);font-weight:400;">▴ collapse</span>
+  </div>
+  <div id="notesBody">
+    <p class="notes-history-lede">Notes are encrypted until you reveal them on this device.</p>
+    <div id="notesHistoryList"></div>
+  </div>
+</div>
+
   `;
 
   // ── Summary values ──
@@ -1611,8 +1619,8 @@ function renderNotesHistory(checkins) {
     if (loc) { locEl.textContent = loc; locEl.hidden = false; }
 
     const lockEl = item.querySelector('.notes-history-lock');
-    if (encHint) lockEl.title = `Encrypted · saved ${encHint}`;
-
+    if (encHint && lockEl) lockEl.title = `Encrypted · saved ${encHint}`;
+    
     const revealBtn = item.querySelector('.notes-history-reveal');
     const bodyEl = item.querySelector('.notes-history-body');
     const errEl = item.querySelector('.notes-history-error');
@@ -1691,6 +1699,16 @@ function stopProgression() {
   document.querySelectorAll('.chord-history-item').forEach(el => { el.style.background = ''; });
 }
 
+
+window.toggleDashCard = function(bodyId, titleEl) {
+  const body   = document.getElementById(bodyId);
+  const toggle = titleEl.querySelector('span');
+  if (!body || !toggle) return;
+  const isCollapsed = body.style.display === 'none';
+  body.style.display  = isCollapsed ? '' : 'none';
+  toggle.textContent  = isCollapsed ? '▴ collapse' : '▾ expand';
+};
+  
 // ═══════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════
