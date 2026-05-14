@@ -943,17 +943,19 @@ function removePulseClasses() {
 }
 
 function placeDots() {
+  const r = diagram.offsetWidth / 2;  // actual rendered radius
+  const scale = r / DIAGRAM_RADIUS;   // ratio vs path generation radius
   G.sources.forEach((src, i) => {
     const dot = diagram.querySelector(`.sound-source[data-idx="${i}"]`);
     if (!dot) return;
     const frame = currentFrame(i);
     const pos   = G.paths[i][frame];
-    dot.style.left = (150 + pos.x) + 'px';
-    dot.style.top  = (150 + pos.y) + 'px';
+    dot.style.left = (r + pos.x * scale) + 'px';
+    dot.style.top  = (r + pos.y * scale) + 'px';
     src.setPosition(pos.sx, pos.sy, pos.sz);
   });
 }
-
+  
 function currentFrame(sourceIndex) {
   if (G.trackStart === null) return 0;
   const elapsed = performance.now() - G.trackStart;
@@ -970,9 +972,12 @@ function drawPathTrace(sourceIndex) {
   const pts = G.paths[sourceIndex];
   if (pts.length < 2) return;
 
+  const r     = diagram.offsetWidth / 2;
+  const scale = r / DIAGRAM_RADIUS;
+
   const d = pts.map((p, i) => {
-    const px = (150 / DIAGRAM_RADIUS) * (DIAGRAM_RADIUS + p.x);
-    const py = (150 / DIAGRAM_RADIUS) * (DIAGRAM_RADIUS + p.y);
+    const px = r + p.x * scale;
+    const py = r + p.y * scale;
     return (i === 0 ? 'M' : 'L') + px.toFixed(1) + ',' + py.toFixed(1);
   }).join(' ');
 
@@ -987,8 +992,8 @@ function drawPathTrace(sourceIndex) {
 
   const sp = pts[0];
   const startDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  startDot.setAttribute('cx', (150 / DIAGRAM_RADIUS) * (DIAGRAM_RADIUS + sp.x));
-  startDot.setAttribute('cy', (150 / DIAGRAM_RADIUS) * (DIAGRAM_RADIUS + sp.y));
+  startDot.setAttribute('cx', r + sp.x * scale);
+  startDot.setAttribute('cy', r + sp.y * scale);
   startDot.setAttribute('r', '4');
   startDot.setAttribute('fill', 'var(--accent)');
   startDot.setAttribute('opacity', '0.5');
@@ -1096,15 +1101,17 @@ async function runTrial() {
   drawDots(false, false);
 
   // Place at final positions
-  G.sources.forEach((src, i) => {
-    const dot   = diagram.querySelector(`.sound-source[data-idx="${i}"]`);
-    const final = G.paths[i][G.paths[i].length - 1];
-    if (dot) {
-      dot.style.left    = (150 + final.x) + 'px';
-      dot.style.top     = (150 + final.y) + 'px';
-      dot.style.opacity = 1;
-    }
-  });
+const r = diagram.offsetWidth / 2;
+const scale = r / DIAGRAM_RADIUS;
+G.sources.forEach((src, i) => {
+  const dot   = diagram.querySelector(`.sound-source[data-idx="${i}"]`);
+  const final = G.paths[i][G.paths[i].length - 1];
+  if (dot) {
+    dot.style.left    = (r + final.x * scale) + 'px';
+    dot.style.top     = (r + final.y * scale) + 'px';
+    dot.style.opacity = 1;
+  }
+});
 
   // Make clickable
   diagram.querySelectorAll('.sound-source').forEach(dot => {
