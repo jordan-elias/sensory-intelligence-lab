@@ -2319,15 +2319,41 @@ window.loadEntryForEditing = async function(id) {
     const plaintext = isEncrypted(entry.content)
       ? await decrypt(entry.content)
       : entry.content;
-    const parsed  = JSON.parse(plaintext);
-    const data    = parsed.data || {};
+    const parsed = JSON.parse(plaintext);
+    const data   = parsed.data || {};
 
     // Set editing state
     S.editingId = id;
     document.getElementById('wsSaveNameInput').value = entry.title || '';
     document.getElementById('wsSaveBtn').textContent = 'Update encrypted';
 
-    // Populate standard text fields
+    // ── MUSIC AUTOBIOGRAPHY: rebuild chapters first ──
+    if (S.currentType === 'music-auto') {
+      const container = document.getElementById('autoSections');
+      container.innerHTML = '';
+      _autoSectionCount = 0;
+
+      // Find how many chapters were saved
+      let n = 1;
+      while (data[`auto_${n}_label`] !== undefined || data[`auto_${n}_songs`] !== undefined || data[`auto_${n}_life`] !== undefined) {
+        addAutoSection(); // creates the DOM for chapter n
+        n++;
+      }
+    }
+
+    // ── LYRIC ANALYSIS: rebuild lyric blocks first ──
+    if (S.currentType === 'lyric-analysis') {
+      const container = document.getElementById('lyricBlocks');
+      container.innerHTML = '';
+      _lyricBlockCount = 0;
+      let n = 1;
+      while (data[`lyric_${n}_text`] !== undefined) {
+        addLyricBlock();
+        n++;
+      }
+    }
+
+    // ── Populate all standard text/input fields ──
     document.querySelectorAll('#wsContent [data-field]').forEach(el => {
       const key = el.dataset.field;
       if (!key || !(key in data)) return;
@@ -2336,9 +2362,38 @@ window.loadEntryForEditing = async function(id) {
       }
     });
 
-    // Rebuild song cards from _songOrder if present
+    // ── LYRIC ANALYSIS: restore song player ──
+    if (S.currentType === 'lyric-analysis' && data.song_title && data.song_artist) {
+      const title  = data.song_title;
+      const artist = data.song_artist;
+
+      document.getElementById('songPlayerTitle').textContent  = title;
+      document.getElementById('songPlayerArtist').textContent = artist;
+      document.getElementById('songPlayer').classList.add('visible');
+      _selectedSong = { title, artist };
+
+      const wrap = document.getElementById('ytAudioWrap');
+      wrap.innerHTML = `<div style="padding:.5rem;font-size:.75rem;color:var(--muted);font-style:italic;">Finding player…</div>`;
+
+      _getVideoId(title, artist).then(videoId => {
+        wrap.innerHTML = videoId
+          ? `<iframe src="https://www.youtube-nocookie.com/embed/${videoId}?controls=1&rel=0&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen style="width:100%;height:100%;border:none;" title="Audio player"></iframe>`
+          : `<div style="padding:.5rem;font-size:.75rem;color:var(--muted);font-style:italic;">No video found for this song.</div>`;
+      });
+
+      // Restore lyrics
+      if (data.song_lyrics_manual) {
+        const lyricsPanel = document.getElementById('lyricsPanel');
+        const lyricsBox   = document.getElementById('lyricsBox');
+        const lyricsColLeft = document.getElementById('lyricsColLeft');
+        if (lyricsPanel) lyricsPanel.classList.add('visible');
+        if (lyricsBox)   lyricsBox.textContent = data.song_lyrics_manual;
+        if (lyricsColLeft) lyricsColLeft.innerHTML = `<div class="lyrics-box" style="max-height:none;white-space:pre-wrap;">${escHtml(data.song_lyrics_manual)}</div>`;
+      }
+    }
+
+    // ── MUSIC AUTOBIOGRAPHY: rebuild song cards ──
     if (data._songOrder && Array.isArray(data._songOrder)) {
-      // Group by chapter
       const byChapter = {};
       data._songOrder.forEach(s => {
         const ch = s.chapter || '1';
@@ -2361,10 +2416,9 @@ window.loadEntryForEditing = async function(id) {
           div.dataset.title   = s.title   || '';
           div.dataset.artist  = s.artist  || '';
 
-          // Retrieve saved note for this song
-          const noteKey  = `_songnote_${(s.title || '').replace(/\W+/g,'_')}_${(s.artist || '').replace(/\W+/g,'_')}`;
-          const noteVal  = data[noteKey] || '';
-          const hasNote  = !!noteVal;
+          const noteKey = `_songnote_${(s.title || '').replace(/\W+/g,'_')}_${(s.artist || '').replace(/\W+/g,'_')}`;
+          const noteVal = data[noteKey] || '';
+          const hasNote = !!noteVal;
 
           div.innerHTML = `
             <div class="chapter-player-row">
@@ -2387,10 +2441,7 @@ window.loadEntryForEditing = async function(id) {
       });
     }
 
-    // Refresh entries menu to show active state
     renderEntriesMenu();
-
-    // Scroll to top of worksheet
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
   } catch(err) {
