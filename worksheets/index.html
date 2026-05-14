@@ -230,6 +230,28 @@
     .saved-item__delete:hover { border-color: var(--error); color: var(--error); }
     .saved-empty { padding: 1.5rem; text-align: center; font-size: .85rem; color: var(--muted); }
 
+    @media (max-width: 600px) {
+  .saved-item {
+    flex-wrap: wrap;
+    gap: .5rem;
+  }
+  .saved-item__type {
+    order: 1;
+  }
+  .saved-item__name {
+    order: 2;
+    width: 100%;
+    flex-basis: 100%;
+  }
+  .saved-item__date {
+    order: 3;
+    flex: 1;
+  }
+  .saved-item__delete {
+    order: 4;
+  }
+}
+    
     /* ── Worksheet view ── */
     .ws-view { display: none; }
     .ws-view.visible { display: block; }
@@ -467,6 +489,12 @@
     .lyrics-box { border: 1px solid var(--border); background: var(--bg); font-family: var(--font-writing); font-size: .88rem; line-height: 1.9; padding: 1.25rem 1.5rem; max-height: 320px; overflow-y: auto; white-space: pre-wrap; color: var(--text); }
     .lyrics-hint { font-size: .72rem; color: var(--accent); margin-top: .4rem; font-style: italic; }
 
+    @media (min-width: 700px) {
+  .lyric-col-right .lyrics-panel {
+    display: none !important;
+  }
+}
+    
 /* ── Worksheet saved entries menu ── */
     .ws-saved-menu {
       margin-top: 1.25rem;
@@ -1492,12 +1520,13 @@ function renderLyricAnalysis() {
       <!-- RIGHT: all questions -->
       <div class="lyric-col-right">
 
-        <!-- Lyrics panel for mobile (hidden on desktop via CSS) -->
-        <div class="lyrics-panel" id="lyricsPanel">
-          <p class="section-label" style="margin-bottom:.5rem;">Lyrics</p>
-          <div class="lyrics-box" id="lyricsBox"></div>
-          <p class="lyrics-hint" id="lyricsHint" style="display:none;">Read through the lyrics, then add selections below to begin your reflection.</p>
-        </div>
+        
+  <!-- Lyrics panel for mobile only -->
+  <div class="lyrics-panel" id="lyricsPanel">
+  <p class="section-label" style="margin-bottom:.5rem;">Lyrics</p>
+  <div class="lyrics-box" id="lyricsBox"></div>
+  <p class="lyrics-hint" id="lyricsHint" style="display:none;">Read through the lyrics, then add selections below to begin your reflection.</p>
+</div>
 
         <div class="ws-section" style="margin-top:0;">
           <div class="ws-section-title"><span class="ws-section-icon">○</span> First impressions</div>
