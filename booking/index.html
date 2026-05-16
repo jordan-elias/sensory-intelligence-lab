@@ -6,7 +6,7 @@
   <title>Schedule a Session</title>
 
   <meta name="robots" content="noindex, nofollow">
-  
+
   <link rel="icon" type="image/png" href="/images/favicon.png">
   <link rel="apple-touch-icon" href="/images/favicon.png">
   <link rel="manifest" href="/site.webmanifest">
@@ -55,67 +55,49 @@
     ══════════════════════════════════════ */
     .sil-header {
       border-bottom: 1px solid var(--border);
-      padding: 0 1.5rem;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0; left: 0; right: 0;
-      background: var(--bg);
-      z-index: 100;
-      gap: 1rem;
-      width: 100%;
+      padding: 0 1.5rem; height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; left: 0; right: 0;
+      background: var(--bg); z-index: 100; gap: 1rem; width: 100%;
     }
     .sil-header__wordmark {
-      font-family: var(--font-heading);
-      font-size: 1rem; font-weight: 600;
-      letter-spacing: -0.01em;
-      white-space: nowrap; flex-shrink: 0;
+      font-family: var(--font-heading); font-size: 1rem; font-weight: 600;
+      letter-spacing: -0.01em; white-space: nowrap; flex-shrink: 0;
       text-decoration: none; color: var(--text);
     }
     .sil-header__wordmark:hover { color: var(--accent); }
     .sil-header__nav { display: flex; gap: 0.25rem; align-items: center; }
     .sil-header__nav a {
-      font-family: var(--font-body);
-      font-size: 0.8rem; font-weight: 500;
-      text-decoration: none; color: var(--muted);
-      transition: color 0.15s; white-space: nowrap;
-      padding: 0.3rem 0.65rem;
+      font-family: var(--font-body); font-size: 0.8rem; font-weight: 500;
+      text-decoration: none; color: var(--muted); transition: color 0.15s;
+      white-space: nowrap; padding: 0.3rem 0.65rem;
     }
     .sil-header__nav a:hover { color: var(--text); }
     .sil-header__nav a.sil-active { color: var(--accent); font-weight: 600; }
     .sil-header__signout {
-      font-family: var(--font-body);
-      font-size: 0.8rem; font-weight: 500;
-      color: var(--muted); background: none;
-      border: 1px solid var(--border); cursor: pointer;
-      padding: 0.3rem 0.75rem;
-      transition: color 0.15s, border-color 0.15s;
-      white-space: nowrap; line-height: 1.6;
+      font-family: var(--font-body); font-size: 0.8rem; font-weight: 500;
+      color: var(--muted); background: none; border: 1px solid var(--border);
+      cursor: pointer; padding: 0.3rem 0.75rem;
+      transition: color 0.15s, border-color 0.15s; white-space: nowrap; line-height: 1.6;
     }
     .sil-header__signout:hover { color: var(--text); border-color: var(--text); }
     .sil-header__signout:disabled { opacity: 0.5; cursor: not-allowed; }
     .sil-header__toggle {
-      display: none; flex-direction: column;
-      gap: 4px; background: none; border: none;
-      cursor: pointer; padding: 4px; flex-shrink: 0;
+      display: none; flex-direction: column; gap: 4px;
+      background: none; border: none; cursor: pointer; padding: 4px; flex-shrink: 0;
     }
     .sil-header__toggle span { display: block; width: 20px; height: 2px; background: var(--text); }
     @media (max-width: 700px) {
       .sil-header { padding: 0 1rem; }
       .sil-header__toggle { display: flex; }
       .sil-header__nav {
-        display: none; position: absolute;
-        top: 56px; left: 0; right: 0;
-        background: var(--bg);
-        border-bottom: 1px solid var(--border);
+        display: none; position: absolute; top: 56px; left: 0; right: 0;
+        background: var(--bg); border-bottom: 1px solid var(--border);
         flex-direction: column; align-items: flex-start;
         padding: 0.75rem 1rem; gap: 0; z-index: 99;
       }
       .sil-header__nav.sil-open { display: flex; }
-      .sil-header__nav a,
-      .sil-header__signout { font-size: 0.875rem; padding: 0.55rem 0.5rem; }
+      .sil-header__nav a, .sil-header__signout { font-size: 0.875rem; padding: 0.55rem 0.5rem; }
       .sil-header__signout { border: none; }
     }
 
@@ -130,26 +112,17 @@
     .bc a:hover { color: var(--accent); text-decoration: underline; }
 
     /* ── Main ── */
-    main {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 2.5rem 2rem 4rem;
-      flex: 1;
-      width: 100%;
-    }
+    main { max-width: 900px; margin: 0 auto; padding: 2.5rem 2rem 4rem; flex: 1; width: 100%; }
     @media (max-width: 600px) { main { padding: 1.5rem 1rem 3rem; } }
 
     /* ── Page header ── */
     .ph {
-      margin-bottom: 2rem;
-      padding-bottom: 1.75rem;
+      margin-bottom: 2rem; padding-bottom: 1.75rem;
       border-bottom: 1px solid var(--border);
     }
     .ph h2 {
-      font-family: var(--font-heading);
-      font-size: 2rem; font-weight: 600;
-      letter-spacing: -.02em; line-height: 1.2;
-      margin-bottom: .4rem;
+      font-family: var(--font-heading); font-size: 2rem; font-weight: 600;
+      letter-spacing: -.02em; line-height: 1.2; margin-bottom: .4rem;
     }
     .ph p { font-size: .9rem; color: var(--muted); }
 
@@ -158,84 +131,49 @@
     ══════════════════════════════════════ */
     .upcoming-section { margin-bottom: 2.25rem; }
     .upcoming-section .section-label { margin-bottom: .75rem; }
-
-    .upcoming-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      border: 1px solid var(--border);
-    }
+    .upcoming-list { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); }
 
     .upcoming-item {
-      display: flex;
-      align-items: center;
-      gap: 1.25rem;
-      padding: .9rem 1.25rem;
-      border-bottom: 1px solid var(--border);
-      background: var(--bg);
-      flex-wrap: wrap;
+      display: flex; align-items: center; gap: 1.25rem;
+      padding: .9rem 1.25rem; border-bottom: 1px solid var(--border);
+      background: var(--bg); flex-wrap: wrap;
     }
     .upcoming-item:last-child { border-bottom: none; }
 
     .upcoming-item__date-block {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      width: 42px;
-      flex-shrink: 0;
-      text-align: center;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; width: 42px; flex-shrink: 0; text-align: center;
     }
     .upcoming-item__day {
-      font-family: var(--font-heading);
-      font-size: 1.35rem; font-weight: 600;
+      font-family: var(--font-heading); font-size: 1.35rem; font-weight: 600;
       line-height: 1; color: var(--accent);
     }
     .upcoming-item__month {
-      font-family: var(--font-heading);
-      font-size: .6rem; font-weight: 600;
-      letter-spacing: .1em; text-transform: uppercase;
-      color: var(--muted); margin-top: .15rem;
+      font-family: var(--font-heading); font-size: .6rem; font-weight: 600;
+      letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-top: .15rem;
     }
-    .upcoming-item__divider {
-      width: 1px; height: 36px;
-      background: var(--border); flex-shrink: 0;
-    }
+    .upcoming-item__divider { width: 1px; height: 36px; background: var(--border); flex-shrink: 0; }
     .upcoming-item__details { flex: 1; min-width: 0; }
     .upcoming-item__type {
-      font-family: var(--font-heading);
-      font-size: .82rem; font-weight: 600;
+      font-family: var(--font-heading); font-size: .82rem; font-weight: 600;
       color: var(--text); letter-spacing: -.01em;
     }
     .upcoming-item__time { font-size: .78rem; color: var(--muted); margin-top: .15rem; }
     .upcoming-item__duration { font-size: .72rem; color: var(--muted); margin-top: .1rem; }
     .upcoming-item__action { flex-shrink: 0; }
     .upcoming-item__link {
-      font-family: var(--font-heading);
-      font-size: .72rem; font-weight: 600;
-      letter-spacing: -.01em;
-      padding: .4rem .9rem;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--muted);
-      text-decoration: none;
-      display: inline-block;
-      transition: border-color .15s, color .15s;
-      white-space: nowrap;
+      font-family: var(--font-heading); font-size: .72rem; font-weight: 600;
+      letter-spacing: -.01em; padding: .4rem .9rem;
+      border: 1px solid var(--border); background: var(--bg); color: var(--muted);
+      text-decoration: none; display: inline-block;
+      transition: border-color .15s, color .15s; white-space: nowrap;
     }
-    .upcoming-item__link:hover {
-      border-color: var(--accent); color: var(--accent); text-decoration: none;
-    }
+    .upcoming-item__link:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
     .upcoming-item__badge {
-      display: inline-block;
-      font-family: var(--font-heading);
-      font-size: .58rem; font-weight: 600;
-      letter-spacing: .1em; text-transform: uppercase;
-      padding: .18rem .5rem;
-      border: 1px solid currentColor;
-      margin-left: .5rem;
-      vertical-align: middle;
-      position: relative; top: -.05rem;
+      display: inline-block; font-family: var(--font-heading);
+      font-size: .58rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+      padding: .18rem .5rem; border: 1px solid currentColor;
+      margin-left: .5rem; vertical-align: middle; position: relative; top: -.05rem;
     }
     .badge-intro      { color: var(--muted); border-color: var(--border); }
     .badge-session    { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
@@ -250,36 +188,25 @@
 
     /* ── Invitation block ── */
     .invitation-block {
-      margin-bottom: 2.25rem;
-      padding: 1.5rem 1.75rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-left: 3px solid var(--accent);
+      margin-bottom: 2.25rem; padding: 1.5rem 1.75rem;
+      background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent);
     }
     .invitation-block h3 {
-      font-family: var(--font-heading);
-      font-size: 1.25rem; font-weight: 600;
-      letter-spacing: -.015em; color: var(--text);
-      margin-bottom: .65rem; line-height: 1.25;
+      font-family: var(--font-heading); font-size: 1.25rem; font-weight: 600;
+      letter-spacing: -.015em; color: var(--text); margin-bottom: .65rem; line-height: 1.25;
     }
     .invitation-block p {
-      font-size: .875rem; color: var(--muted);
-      line-height: 1.75; margin-bottom: .6rem;
+      font-size: .875rem; color: var(--muted); line-height: 1.75; margin-bottom: .6rem;
     }
     .invitation-block p:last-child { margin-bottom: 0; }
     .invitation-uses { display: flex; flex-direction: column; gap: .45rem; margin-top: .85rem; }
-    .invitation-use {
-      display: flex; gap: .65rem;
-      font-size: .85rem; color: var(--text); line-height: 1.5;
-    }
+    .invitation-use { display: flex; gap: .65rem; font-size: .85rem; color: var(--text); line-height: 1.5; }
     .invitation-use::before { content: '—'; color: var(--accent); flex-shrink: 0; font-weight: 500; }
 
     /* ── Section label ── */
     .section-label {
-      font-family: var(--font-heading);
-      font-size: .65rem; font-weight: 600;
-      letter-spacing: .14em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: .75rem;
+      font-family: var(--font-heading); font-size: .65rem; font-weight: 600;
+      letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: .75rem;
     }
 
     /* ── Loading state ── */
@@ -288,110 +215,150 @@
       padding: 2rem 0; color: var(--muted); font-size: .85rem;
     }
     .loading-spinner {
-      width: 16px; height: 16px;
-      border: 2px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-      flex-shrink: 0;
+      width: 16px; height: 16px; border: 2px solid var(--border);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin .7s linear infinite; flex-shrink: 0;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ── Messages ── */
-    .msg {
-      padding: .75rem 1rem; font-size: .82rem; line-height: 1.5;
-      margin-bottom: 1.25rem; display: none;
-    }
+    .msg { padding: .75rem 1rem; font-size: .82rem; line-height: 1.5; margin-bottom: 1.25rem; display: none; }
     .msg.show { display: block; }
-    .msg.error   { background: var(--error-bg);    border-left: 3px solid var(--error);   color: var(--error);         }
-    .msg.warning { background: var(--warning-bg);  border-left: 3px solid var(--warning); color: var(--warning);       }
-    .msg.info    { background: var(--accent-light); border-left: 3px solid var(--accent); color: var(--accent);        }
-    .msg.success { background: var(--accent-light); border-left: 3px solid var(--accent); color: var(--accent-hover);  }
+    .msg.error   { background: var(--error-bg);    border-left: 3px solid var(--error);   color: var(--error);        }
+    .msg.warning { background: var(--warning-bg);  border-left: 3px solid var(--warning); color: var(--warning);      }
+    .msg.info    { background: var(--accent-light); border-left: 3px solid var(--accent); color: var(--accent);       }
+    .msg.success { background: var(--accent-light); border-left: 3px solid var(--accent); color: var(--accent-hover); }
 
     /* ── Plan status card ── */
     .plan-card {
-      border: 1px solid var(--border);
-      background: var(--surface);
-      padding: 1.1rem 1.35rem;
-      margin-bottom: 2rem;
-      display: flex; align-items: center;
-      justify-content: space-between;
-      gap: 1rem; flex-wrap: wrap;
+      border: 1px solid var(--border); background: var(--surface);
+      padding: 1.1rem 1.35rem; margin-bottom: 1.25rem;
+      display: flex; align-items: flex-start;
+      justify-content: space-between; gap: 1rem; flex-wrap: wrap;
     }
-    .plan-card-left { display: flex; flex-direction: column; gap: .2rem; }
+    .plan-card-left { display: flex; flex-direction: column; gap: .25rem; }
     .plan-card-label { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; font-weight: 500; }
     .plan-card-name  { font-family: var(--font-heading); font-size: .95rem; font-weight: 600; color: var(--text); }
-    .plan-sessions-row  { font-size: .78rem; color: var(--muted); margin-top: .1rem; }
-    .plan-sessions-row strong { color: var(--text); font-weight: 600; }
-    .plan-badge {
-      display: inline-block;
-      font-family: var(--font-heading);
-      font-size: .6rem; font-weight: 600;
-      letter-spacing: .1em; text-transform: uppercase;
-      padding: .22rem .6rem;
-      border: 1px solid currentColor;
+
+    /* Session allowance within the plan card */
+    .session-allowance {
+      margin-top: .5rem;
+      display: flex; flex-direction: column; gap: .2rem;
     }
-    .plan-badge.free    { color: var(--muted); border-color: var(--border); }
-    .plan-badge.beta    { color: #6b3a1a; border-color: #d4a87a; background: #fdf4ec; }
-    .plan-badge.lab     { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
-    .plan-badge.call1   { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
-    .plan-badge.call2   { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
+    .session-allowance-row {
+      font-size: .82rem; color: var(--text); line-height: 1.5;
+    }
+    .session-allowance-row strong { font-weight: 600; }
+    .session-allowance-sub {
+      font-size: .75rem; color: var(--muted); line-height: 1.5;
+    }
+    .session-allowance-period {
+      font-size: .72rem; color: var(--muted); margin-top: .15rem;
+      padding-top: .35rem; border-top: 1px solid var(--border);
+    }
+
+    .plan-badge {
+      display: inline-block; font-family: var(--font-heading);
+      font-size: .6rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+      padding: .22rem .6rem; border: 1px solid currentColor; flex-shrink: 0;
+    }
+    .plan-badge.free  { color: var(--muted); border-color: var(--border); }
+    .plan-badge.beta  { color: #6b3a1a; border-color: #d4a87a; background: #fdf4ec; }
+    .plan-badge.lab   { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
+    .plan-badge.call1 { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
+    .plan-badge.call2 { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
+
+    /* ── Status banners ── */
+    .status-banner {
+      padding: 1rem 1.25rem; margin-bottom: 1.25rem;
+      font-size: .85rem; line-height: 1.6;
+      border: 1px solid; border-left-width: 3px;
+    }
+    .status-banner.warning {
+      background: var(--warning-bg); border-color: #fcd34d; border-left-color: var(--warning);
+      color: var(--warning);
+    }
+    .status-banner.error {
+      background: var(--error-bg); border-color: #f5c6c6; border-left-color: var(--error);
+      color: var(--error);
+    }
+    .status-banner strong { font-weight: 600; display: block; margin-bottom: .2rem; }
+    .status-banner a {
+      color: inherit; font-weight: 600; text-underline-offset: 2px;
+    }
+
+    /* ── All-used notice ── */
+    .all-used-notice {
+      padding: .85rem 1.1rem; margin-bottom: 1.25rem;
+      background: var(--accent-light); border: 1px solid #c0d9c8;
+      font-size: .82rem; color: var(--accent-hover); line-height: 1.6;
+    }
+    .all-used-notice strong { font-weight: 600; }
+
+    /* ── Book-second prompt ── */
+    .book-second-prompt {
+      padding: .85rem 1.1rem; margin-bottom: 1.25rem;
+      background: var(--accent-light); border: 1px solid #c0d9c8; border-left: 3px solid var(--accent);
+      font-size: .82rem; color: var(--accent-hover); line-height: 1.6;
+    }
+    .book-second-prompt strong { font-weight: 600; }
 
     /* ── Upgrade nudge ── */
     .upgrade-nudge {
-      border: 1px solid var(--border);
-      background: var(--surface);
-      padding: 1.1rem 1.35rem;
-      margin-bottom: 2rem;
-      display: flex; align-items: center;
-      justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+      border: 1px solid var(--border); background: var(--surface);
+      padding: 1.1rem 1.35rem; margin-bottom: 1.75rem;
     }
-    .upgrade-nudge p { font-size: .82rem; color: var(--muted); line-height: 1.55; flex: 1; }
-    .upgrade-nudge p strong { color: var(--text); }
+    .upgrade-nudge-head {
+      font-family: var(--font-heading); font-size: .72rem; font-weight: 600;
+      letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: .6rem;
+    }
+    .upgrade-nudge p { font-size: .85rem; color: var(--text); line-height: 1.65; margin-bottom: .75rem; }
+    .upgrade-nudge p:last-of-type { margin-bottom: 0; }
+    .upgrade-nudge p .muted { color: var(--muted); }
+    .nudge-actions { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: .85rem; }
     .nudge-btn {
-      font-family: var(--font-heading);
-      font-size: .78rem; font-weight: 600;
-      padding: .55rem 1.35rem;
-      border: none; background: var(--accent); color: white;
+      font-family: var(--font-heading); font-size: .78rem; font-weight: 600;
+      padding: .55rem 1.35rem; border: none; background: var(--accent); color: white;
       cursor: pointer; transition: background .15s; letter-spacing: -.01em;
       text-decoration: none; display: inline-block; white-space: nowrap;
     }
     .nudge-btn:hover { background: var(--accent-hover); color: white; }
+    .nudge-btn.secondary {
+      background: var(--bg); color: var(--text); border: 1px solid var(--border);
+    }
+    .nudge-btn.secondary:hover { border-color: var(--accent); color: var(--accent); background: var(--bg); }
 
     /* ── Session info note ── */
     .session-info-note {
-      padding: 1rem 1.25rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      font-size: .82rem;
-      color: var(--muted);
-      line-height: 1.7;
-      margin-bottom: 2rem;
+      padding: 1rem 1.25rem; background: var(--surface); border: 1px solid var(--border);
+      font-size: .82rem; color: var(--muted); line-height: 1.7; margin-bottom: 1.75rem;
     }
     .session-info-note p + p { margin-top: .5rem; }
 
     /* ── Calendar section ── */
     .cal-section { margin-bottom: 2.5rem; }
     .cal-section-head {
-      display: flex; align-items: baseline;
-      justify-content: space-between; gap: 1rem;
-      margin-bottom: 1rem; flex-wrap: wrap;
+      display: flex; align-items: baseline; justify-content: space-between;
+      gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;
     }
     .cal-section-meta { font-size: .78rem; color: var(--muted); }
     .cal-section-meta.included { color: var(--accent); font-weight: 500; }
-
     .cal-embed-wrap {
-      border: 1px solid var(--border);
-      background: var(--bg);
-      overflow: hidden;
-      min-height: 500px;
+      border: 1px solid var(--border); background: var(--bg);
+      overflow: hidden; min-height: 500px;
     }
     .cal-embed-wrap iframe { width: 100% !important; border: none !important; }
 
+    /* ── Intro note ── */
+    .intro-note {
+      margin-top: .75rem; padding: .75rem 1rem;
+      background: var(--surface); border: 1px solid var(--border);
+      font-size: .78rem; color: var(--muted); line-height: 1.6;
+    }
+
     /* ── Footer ── */
     footer {
-      border-top: 1px solid var(--border);
-      padding: 1.25rem 2rem;
+      border-top: 1px solid var(--border); padding: 1.25rem 2rem;
       text-align: center; font-size: .78rem; color: var(--muted);
     }
     footer a { color: var(--muted); text-decoration: none; }
@@ -472,7 +439,7 @@
 import { getBookingEntitlement, getUpcomingBookings } from '/booking/entitlement-logic.js';
 
 // ─────────────────────────────────────────────────────────
-// HEADER BEHAVIOUR
+// HEADER
 // ─────────────────────────────────────────────────────────
 const path = window.location.pathname.replace(/\/$/, '') || '/';
 document.querySelectorAll('.sil-header__nav a').forEach(a => {
@@ -490,21 +457,11 @@ silNav.querySelectorAll('a').forEach(a =>
   a.addEventListener('click', () => silNav.classList.remove('sil-open'))
 );
 
-async function getSupabase() {
-  if (window._supabase) return window._supabase;
-  const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-  return createClient(
-    'https://lrjuufvrgkuvfxcmybtf.supabase.co',
-    'sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1'
-  );
-}
-
 document.getElementById('silSignOut').addEventListener('click', async function () {
-  this.disabled = true;
-  this.textContent = 'Signing out…';
+  this.disabled = true; this.textContent = 'Signing out…';
   try {
-    const sb = await getSupabase();
-    await sb.auth.signOut();
+    const sb = window._supabase;
+    if (sb) await sb.auth.signOut();
   } finally {
     window.location.replace('/');
   }
@@ -519,18 +476,30 @@ function showPageMsg(text, type) {
   el.className = `msg ${type} show`;
 }
 
-function fmtDate(iso) {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('en-GB', {
+/**
+ * Format a Date as "3 June 2025".
+ */
+function fmtDate(date) {
+  if (!date) return '—';
+  return new Date(date).toLocaleDateString('en-GB', {
     day: 'numeric', month: 'long', year: 'numeric',
+  });
+}
+
+/**
+ * Format a Date as "3 Jun" (short, for period range display).
+ */
+function fmtShort(date) {
+  if (!date) return '—';
+  return new Date(date).toLocaleDateString('en-GB', {
+    day: 'numeric', month: 'short',
   });
 }
 
 function fmtTime(iso) {
   if (!iso) return '';
   return new Date(iso).toLocaleTimeString('en-GB', {
-    hour: '2-digit', minute: '2-digit',
-    timeZoneName: 'short',
+    hour: '2-digit', minute: '2-digit', timeZoneName: 'short',
   });
 }
 
@@ -571,6 +540,17 @@ function calBookingUrl(calEventId) {
 }
 
 // ─────────────────────────────────────────────────────────
+// PLAN LABELS
+// ─────────────────────────────────────────────────────────
+const PLAN_LABELS = {
+  free:  'Free access',
+  beta:  'Lab Access',   // beta displays as Lab Access
+  lab:   'Lab Access',
+  call1: 'Lab + 1 session / month',
+  call2: 'Lab + 2 sessions / month',
+};
+
+// ─────────────────────────────────────────────────────────
 // RENDER UPCOMING SESSIONS
 // ─────────────────────────────────────────────────────────
 function renderUpcoming(bookings) {
@@ -578,7 +558,6 @@ function renderUpcoming(bookings) {
 
   const section = document.getElementById('upcomingSection');
   const list    = document.getElementById('upcomingList');
-
   section.style.display = 'block';
 
   const ul = document.createElement('div');
@@ -586,17 +565,17 @@ function renderUpcoming(bookings) {
 
   bookings.forEach(booking => {
     const { day, month } = fmtDay(booking.scheduled_at);
-    const timeStr        = fmtTime(booking.scheduled_at);
-    const endTimeStr     = booking.completed_at ? fmtTime(booking.completed_at) : '';
-    const typeLabel      = sessionTypeLabel(booking.event_type);
-    const badgeClass     = sessionBadgeClass(booking.event_type);
-    const duration       = sessionDuration(booking.event_type);
-    const bookingUrl     = calBookingUrl(booking.cal_event_id);
-    const endDisplay     = endTimeStr ? ` – ${endTimeStr}` : '';
+    const timeStr    = fmtTime(booking.scheduled_at);
+    const endTimeStr = booking.completed_at ? fmtTime(booking.completed_at) : '';
+    const typeLabel  = sessionTypeLabel(booking.event_type);
+    const badgeClass = sessionBadgeClass(booking.event_type);
+    const duration   = sessionDuration(booking.event_type);
+    const bookingUrl = calBookingUrl(booking.cal_event_id);
+    const endDisplay = endTimeStr ? ` – ${endTimeStr}` : '';
 
     let badgeLabel = 'Paid';
     if (booking.event_type === 'subscriber-session') badgeLabel = 'Included';
-    else if (booking.event_type === 'intro') badgeLabel = 'Free';
+    else if (booking.event_type === 'intro')          badgeLabel = 'Free';
 
     const item = document.createElement('div');
     item.className = 'upcoming-item';
@@ -627,18 +606,7 @@ function renderUpcoming(bookings) {
 }
 
 // ─────────────────────────────────────────────────────────
-// PLAN DISPLAY LABELS
-// ─────────────────────────────────────────────────────────
-const PLAN_LABELS = {
-  free:  'Free access',
-  beta:  'Beta access',
-  lab:   'Lab Access',
-  call1: 'Lab + 1 session / month',
-  call2: 'Lab + 2 sessions / month',
-};
-
-// ─────────────────────────────────────────────────────────
-// CAL.COM LOADING + MOUNTING
+// CAL.COM LOADING
 // ─────────────────────────────────────────────────────────
 const _calInitialised = new Set();
 
@@ -677,10 +645,7 @@ function loadAndMountCal(sections) {
     Cal.ns[sec.ns]('inline', {
       elementOrSelector: `#${sec.id}`,
       calLink: sec.calLink,
-      config: {
-        layout: 'month_view',
-        useSlotsViewOnSmallScreen: 'true',
-      },
+      config: { layout: 'month_view', useSlotsViewOnSmallScreen: 'true' },
     });
     Cal.ns[sec.ns]('ui', {
       theme: 'light',
@@ -717,9 +682,111 @@ function render(ent) {
 
   const sections = [];
 
+  // ── Derive a display badge class ──────────────────────────────────────
+  const badgeClass = ent.isBeta && ent.tier === 'lab' ? 'beta' : ent.tier;
+
+  // ── Cancel-at-period-end banner ───────────────────────────────────────
+  if (ent.cancelAtPeriodEnd && ent.isActive) {
+    const banner = document.createElement('div');
+    banner.className = 'status-banner warning';
+    banner.innerHTML = `
+      <strong>Your plan is scheduled to cancel on ${fmtDate(ent.periodEnd)}.</strong>
+      Sessions booked after this date won't be included in your subscription —
+      you would need to pay for them separately. Book any remaining sessions before then,
+      or <a href="/account/">reactivate your plan in account settings</a>.
+    `;
+    root.appendChild(banner);
+  }
+
+  // ── Past-due ──────────────────────────────────────────────────────────
+  if (ent.isPastDue) {
+    const planCard = document.createElement('div');
+    planCard.className = 'plan-card';
+    planCard.innerHTML = `
+      <div class="plan-card-left">
+        <span class="plan-card-label">Your plan</span>
+        <span class="plan-card-name">${PLAN_LABELS[ent.tier] || 'Free access'}</span>
+      </div>
+      <span class="plan-badge ${badgeClass}">${PLAN_LABELS[ent.tier] || 'Free'}</span>
+    `;
+    root.appendChild(planCard);
+
+    const banner = document.createElement('div');
+    banner.className = 'status-banner error';
+    banner.innerHTML = `
+      <strong>Your subscription payment failed.</strong>
+      Session booking is paused until your payment is resolved.
+      <a href="/account/">Update your payment method in account settings</a> to restore access.
+    `;
+    root.appendChild(banner);
+
+    // Still show upcoming if they have any (booked before payment failed)
+    return;
+  }
+
+  // ── Canceled (period ended) ───────────────────────────────────────────
+  if (ent.isCanceled) {
+    const planCard = document.createElement('div');
+    planCard.className = 'plan-card';
+    planCard.innerHTML = `
+      <div class="plan-card-left">
+        <span class="plan-card-label">Your plan</span>
+        <span class="plan-card-name">Free access</span>
+      </div>
+      <span class="plan-badge free">Free</span>
+    `;
+    root.appendChild(planCard);
+
+    // Resubscribe nudge — copy distinguishes returning vs new user
+    const nudge = document.createElement('div');
+    nudge.className = 'upgrade-nudge';
+    nudge.innerHTML = `
+      <p class="upgrade-nudge-head">Resubscribe</p>
+      <p>Your session subscription has ended. Resubscribe to get included video sessions each month — one session per month from <strong>€60</strong>, or two sessions per month for <strong>€110</strong>.</p>
+      <p class="muted" style="font-size:.78rem;color:var(--muted)">Single sessions remain available below at €75 each.</p>
+      <div class="nudge-actions">
+        <a class="nudge-btn" href="/subscribe/">View plans</a>
+      </div>
+    `;
+    root.appendChild(nudge);
+
+    // Show single session calendar so they can still book
+    if (!ent.canBookIntro) {
+      sections.push({
+        id: 'cal-session', label: 'Individual Session',
+        meta: '€75 · Book anytime', calLink: 'jordan-elias/session', ns: 'session',
+      });
+    } else {
+      sections.push({
+        id: 'cal-intro', label: 'Introductory Session',
+        meta: 'One-time · Complimentary', calLink: 'jordan-elias/intro', ns: 'intro',
+      });
+    }
+
+    buildCalSections(root, sections);
+    loadAndMountCal(sections);
+    return;
+  }
+
+  // ── Session-tier users (call1 / call2) ───────────────────────────────
   if (ent.tier === 'call1' || ent.tier === 'call2') {
-    // ── Plan status card ──
-    const sessionsLine = `<strong>${ent.sessionsRemaining}</strong> of ${ent.sessionsIncluded} included session${ent.sessionsIncluded > 1 ? 's' : ''} remaining this period${ent.periodEnd ? ` · renews ${fmtDate(ent.periodEnd)}` : ''}`;
+
+    // Period range string
+    const periodStr = (ent.windowStart && ent.windowEnd)
+      ? `${fmtShort(ent.windowStart)} – ${fmtShort(ent.windowEnd)}`
+      : null;
+
+    // Build allowance description
+    let allowanceLine = '';
+    if (ent.carryOver > 0) {
+      allowanceLine = `<strong>${ent.sessionsAvailable}</strong> sessions available this period
+        <span style="color:var(--muted);">(${ent.baseSessionsPerMonth} included
+        + ${ent.carryOver} carried over from last month)</span>`;
+    } else {
+      allowanceLine = `<strong>${ent.sessionsAvailable}</strong> session${ent.sessionsAvailable !== 1 ? 's' : ''} available this period`;
+    }
+
+    const usedLine = `${ent.sessionsUsed} used · <strong>${ent.sessionsRemaining}</strong> remaining`;
 
     const statusCard = document.createElement('div');
     statusCard.className = 'plan-card';
@@ -727,97 +794,169 @@ function render(ent) {
       <div class="plan-card-left">
         <span class="plan-card-label">Your plan</span>
         <span class="plan-card-name">${PLAN_LABELS[ent.tier]}</span>
-        <div class="plan-sessions-row">${sessionsLine}</div>
+        <div class="session-allowance">
+          <div class="session-allowance-row">${allowanceLine}</div>
+          <div class="session-allowance-sub">${usedLine}</div>
+          ${periodStr ? `<div class="session-allowance-period">Current period: ${periodStr}${ent.periodEnd ? ` · renews ${fmtDate(ent.periodEnd)}` : ''}</div>` : ''}
+        </div>
       </div>
       <span class="plan-badge ${ent.tier}">${PLAN_LABELS[ent.tier]}</span>
     `;
     root.appendChild(statusCard);
 
-    // ── Session scheduling info ──
-    const sessionsPerMonth = ent.tier === 'call2' ? 2 : 1;
+    // ── State-specific messaging ──────────────────────────────────────
+
+    if (ent.sessionsRemaining === 0) {
+      // All sessions used or booked for this period
+      const notice = document.createElement('div');
+      notice.className = 'all-used-notice';
+      const nextPeriodDate = ent.windowEnd
+        ? fmtDate(new Date(ent.windowEnd.getTime() + 1))
+        : 'your next period';
+      notice.innerHTML = `
+        <strong>You've used all your sessions for this period.</strong>
+        Your next session allowance starts on ${nextPeriodDate}.
+        You can still book sessions below for future periods — they won't count against your current allowance.
+      `;
+      root.appendChild(notice);
+    } else if (ent.tier === 'call2' && ent.sessionsUsed === 1) {
+      // call2 user has one session booked, one remaining — prompt to book the second
+      const prompt = document.createElement('div');
+      prompt.className = 'book-second-prompt';
+      prompt.innerHTML = `
+        <strong>You have one session remaining this period.</strong>
+        Book your second session below before ${periodStr ? ent.windowEnd ? fmtDate(ent.windowEnd) : 'your period ends' : 'your period ends'} — unused sessions carry over once, but expire if not used the following month.
+      `;
+      root.appendChild(prompt);
+    }
+
+    // ── Session info note ───────────────────────────────────────────────
+    const sessionsPerMonth = ent.baseSessionsPerMonth;
     const infoNote = document.createElement('div');
     infoNote.className = 'session-info-note';
     infoNote.innerHTML = `
-      <p>Your plan includes <strong>${sessionsPerMonth} session${sessionsPerMonth > 1 ? 's' : ''} per month</strong>. If you miss a session in a given month, you can carry it over and use it the following month.</p>
-      <p>You can also book sessions in advance — for example, if it's May and you'd like to lock in the same timeslot for June and July, go ahead and book both now.</p>
+      <p>Your plan includes <strong>${sessionsPerMonth} session${sessionsPerMonth > 1 ? 's' : ''} per month</strong>.
+        If you don't use a session in a given month, it carries over to the following month.
+        Unused carry-over sessions expire after one month — they don't accumulate further.</p>
+      <p>You can book sessions in advance — for example, if it's May and you'd like to lock in
+        the same slot for June and July, book both now. Sessions booked for future periods
+        won't count against your current month's allowance.</p>
     `;
     root.appendChild(infoNote);
 
-    // ── Upgrade nudge for call1 → call2 ──
-    if (ent.tier === 'call1') {
+    // ── Upgrade nudge for call1 → call2 ────────────────────────────────
+    if (ent.showUpgradeToCall2) {
       const nudge = document.createElement('div');
       nudge.className = 'upgrade-nudge';
       nudge.innerHTML = `
-        <p>Upgrade to <strong>Lab + 2 sessions</strong> to include two video sessions at a discounted rate each month.</p>
-        <a class="nudge-btn" href="/subscribe/">View plans</a>
+        <p class="upgrade-nudge-head">Add a second session</p>
+        <p><strong>Lab + 2 Calls</strong> includes two sessions per month for <strong>€110</strong> —
+          that's €55 per session, compared to €60 on your current plan or €75 for a single
+          session booked individually.</p>
+        <div class="nudge-actions">
+          <a class="nudge-btn" href="/subscribe/">View plans</a>
+        </div>
       `;
       root.appendChild(nudge);
     }
 
-    // ── Subscriber session calendar ──
+    // ── Subscriber session calendar ─────────────────────────────────────
     sections.push({
-      id:      'cal-subscriber',
-      label:   'Monthly Session',
-      meta:    'Included in your plan',
-      calLink: 'jordan-elias/subscriber-session',
-      ns:      'subscriber-session',
+      id: 'cal-subscriber', label: 'Monthly Session',
+      meta: 'Included in your plan',
+      calLink: 'jordan-elias/subscriber-session', ns: 'subscriber-session',
     });
 
   } else {
-    // ── Free / Beta / Lab ──
-    const badgeClass = ent.isBeta ? 'beta' : (ent.tier === 'lab' ? 'lab' : 'free');
-    const badgeLabel = ent.isBeta ? 'Beta' : (PLAN_LABELS[ent.tier] || 'Free access');
+    // ── Free / Beta / Lab users ─────────────────────────────────────────
+
+    const displayBadgeClass = ent.isBeta ? 'beta' : ent.tier;
+    const displayPlanLabel  = PLAN_LABELS[ent.isBeta ? 'beta' : ent.tier] || 'Free access';
 
     const statusCard = document.createElement('div');
     statusCard.className = 'plan-card';
     statusCard.innerHTML = `
       <div class="plan-card-left">
         <span class="plan-card-label">Your plan</span>
-        <span class="plan-card-name">${PLAN_LABELS[ent.isBeta ? 'beta' : ent.tier] || 'Free access'}</span>
+        <span class="plan-card-name">${displayPlanLabel}</span>
       </div>
-      <span class="plan-badge ${badgeClass}">${badgeLabel}</span>
+      <span class="plan-badge ${displayBadgeClass}">${displayPlanLabel}</span>
     `;
     root.appendChild(statusCard);
 
     if (ent.canBookIntro) {
-      // Intro not yet used — show intro calendar only
+      // ── Intro not yet used ────────────────────────────────────────────
       sections.push({
-        id:      'cal-intro',
-        label:   'Introductory Session',
-        meta:    'One-time · Complimentary',
-        calLink: 'jordan-elias/intro',
-        ns:      'intro',
+        id: 'cal-intro', label: 'Introductory Session',
+        meta: 'One-time · Complimentary', calLink: 'jordan-elias/intro', ns: 'intro',
       });
+
+      // Note beneath the calendar — sets expectation for what comes after
+      // (appended after cal section is built, handled in buildCalSections)
+
     } else {
-      // Intro already used — show single session + upgrade nudge
-      const nudge = document.createElement('div');
-      nudge.className = 'upgrade-nudge';
-      nudge.innerHTML = `
-        <p>Add a monthly video session at a discounted rate by upgrading to <strong>Lab + 1 session</strong>.</p>
-        <a class="nudge-btn" href="/subscribe/">View plans</a>
-      `;
-      root.appendChild(nudge);
+      // ── Intro already used — show upgrade nudge + single session ──────
+
+      if (ent.tier === 'lab' || ent.isBeta) {
+        // Lab / beta user: nudge toward call1
+        const nudge = document.createElement('div');
+        nudge.className = 'upgrade-nudge';
+        nudge.innerHTML = `
+          <p class="upgrade-nudge-head">Include sessions in your plan</p>
+          <p>You're currently booking at <strong>€75 per session</strong>.
+            <strong>Lab + 1 Call</strong> includes one session per month for <strong>€60</strong>
+            — saving you €15 each time you book, with full Lab access already included in your plan.</p>
+          <p><strong>Lab + 2 Calls</strong> includes two sessions per month for <strong>€110</strong>
+            — <span class="muted">€55 each</span>.</p>
+          <div class="nudge-actions">
+            <a class="nudge-btn" href="/subscribe/">View session plans</a>
+          </div>
+        `;
+        root.appendChild(nudge);
+      } else {
+        // Free user: nudge toward call1, mention lab too
+        const nudge = document.createElement('div');
+        nudge.className = 'upgrade-nudge';
+        nudge.innerHTML = `
+          <p class="upgrade-nudge-head">Subscribe and save</p>
+          <p>Single sessions are <strong>€75</strong> each.
+            <strong>Lab + 1 Call</strong> includes one session per month for <strong>€60</strong>,
+            plus full access to all Lab tools — saving you €15 every time you book.</p>
+          <p><strong>Lab + 2 Calls</strong> includes two sessions per month for <strong>€110</strong>
+            — <span class="muted">€55 each</span>.</p>
+          <div class="nudge-actions">
+            <a class="nudge-btn" href="/subscribe/">View plans</a>
+            <a class="nudge-btn secondary" href="/subscribe/">Just Lab access — €4/month</a>
+          </div>
+        `;
+        root.appendChild(nudge);
+      }
 
       sections.push({
-        id:      'cal-session',
-        label:   'Single Session',
-        meta:    '€75 · Book anytime',
-        calLink: 'jordan-elias/session',
-        ns:      'session',
+        id: 'cal-session', label: 'Individual Session',
+        meta: '€75 · Book anytime', calLink: 'jordan-elias/session', ns: 'session',
       });
     }
   }
 
-  // ── Build DOM for each calendar section ──
+  buildCalSections(root, sections, ent);
+  loadAndMountCal(sections);
+}
+
+// ─────────────────────────────────────────────────────────
+// BUILD CALENDAR DOM SECTIONS
+// ─────────────────────────────────────────────────────────
+function buildCalSections(root, sections, ent) {
   sections.forEach(sec => {
     const wrap = document.createElement('div');
     wrap.className = 'cal-section';
 
     const head = document.createElement('div');
     head.className = 'cal-section-head';
+    const isIncluded = sec.ns === 'subscriber-session';
     head.innerHTML = `
       <p class="section-label">${sec.label}</p>
-      <span class="cal-section-meta">${sec.meta}</span>
+      <span class="cal-section-meta${isIncluded ? ' included' : ''}">${sec.meta}</span>
     `;
     wrap.appendChild(head);
 
@@ -826,10 +965,18 @@ function render(ent) {
     calWrap.id = sec.id;
     wrap.appendChild(calWrap);
 
+    // Intro note — shown below the intro calendar only
+    if (sec.ns === 'intro') {
+      const note = document.createElement('div');
+      note.className = 'intro-note';
+      note.textContent =
+        'The introductory session is complimentary. After that, individual sessions are €75, ' +
+        'or included in a subscription from €60/month.';
+      wrap.appendChild(note);
+    }
+
     root.appendChild(wrap);
   });
-
-  loadAndMountCal(sections);
 }
 
 // ─────────────────────────────────────────────────────────
@@ -876,6 +1023,5 @@ onAuthReady(async () => {
 });
 
 </script>
-
 </body>
 </html>
