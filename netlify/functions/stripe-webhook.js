@@ -22,7 +22,6 @@ RESEND
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_FROM    = process.env.RESEND_FROM_ADDRESS || "Jordan Elias <hello@jordanelias.de>";
 
-// Aliases must match exactly what you named them in Resend → Templates
 const TEMPLATE_BY_TIER = {
   lab:   "subscription-successful",
   call1: "upgrade-successful-1",
@@ -30,21 +29,10 @@ const TEMPLATE_BY_TIER = {
 };
 
 async function sendTierEmail({ to, tier, variables, idempotencyKey }) {
-  if (!RESEND_API_KEY) {
-    console.error("RESEND_API_KEY not set — skipping email");
-    return;
-  }
-
+  if (!RESEND_API_KEY) { console.error("RESEND_API_KEY not set — skipping email"); return; }
   const templateAlias = TEMPLATE_BY_TIER[tier];
-  if (!templateAlias) {
-    console.log(`No email template configured for tier "${tier}" — skipping`);
-    return;
-  }
-
-  if (!to) {
-    console.error("No recipient email — skipping email");
-    return;
-  }
+  if (!templateAlias) { console.log(`No email template for tier "${tier}" — skipping`); return; }
+  if (!to)            { console.error("No recipient email — skipping email"); return; }
 
   try {
     const res = await fetch("https://api.resend.com/emails", {
@@ -54,20 +42,10 @@ async function sendTierEmail({ to, tier, variables, idempotencyKey }) {
         "Content-Type":    "application/json",
         "Idempotency-Key": idempotencyKey,
       },
-      body: JSON.stringify({
-        from:        RESEND_FROM,
-        to:          [to],
-        template_id: templateAlias,
-        variables,
-      }),
+      body: JSON.stringify({ from: RESEND_FROM, to: [to], template_id: templateAlias, variables }),
     });
-
-    if (!res.ok) {
-      const err = await res.text();
-      console.error(`Resend send failed (${res.status}):`, err);
-    } else {
-      console.log(`Email sent → ${to} (template: ${templateAlias})`);
-    }
+    if (!res.ok) console.error(`Resend send failed (${res.status}):`, await res.text());
+    else         console.log(`Email sent → ${to} (template: ${templateAlias})`);
   } catch (err) {
     console.error("Resend threw an error:", err);
   }
@@ -79,22 +57,14 @@ HELPERS
 
 function getTierFromPlan(plan) {
   switch (plan) {
-    case "lab_monthly":
-    case "lab_yearly":
-      return "lab";
-    case "call1_monthly":
-    case "call1_yearly":
-      return "call1";
-    case "call2_monthly":
-    case "call2_yearly":
-      return "call2";
-    default:
-      return "free";
+    case "lab_monthly":   case "lab_yearly":   return "lab";
+    case "call1_monthly": case "call1_yearly": return "call1";
+    case "call2_monthly": case "call2_yearly": return "call2";
+    default:                                   return "free";
   }
 }
 
-// Send an email whenever the tier changes to something paid and the subscription
-// is active or trialing — this covers both upgrades and downgrades (e.g. call2→lab).
+// Send email whenever tier changes to something paid, up or down.
 function shouldSendEmail({ status, tier, oldTier }) {
   return (
     ["active", "trialing"].includes(status) &&
@@ -104,7 +74,8 @@ function shouldSendEmail({ status, tier, oldTier }) {
 }
 
 async function upsertSubscription({
-  userId, email, plan, tier, customerId, subscriptionId, status, periodEnd,
+  userId, email, plan, tier, customerId, subscriptionId,
+  status, periodStart, periodEnd,
 }) {
   const { error } = await supabase.from("subscriptions").upsert(
     {
@@ -115,6 +86,7 @@ async function upsertSubscription({
       stripe_customer_id:     customerId,
       stripe_subscription_id: subscriptionId,
       status,
+      current_period_start:   periodStart,
       current_period_end:     periodEnd,
     },
     { onConflict: "stripe_subscription_id" }
@@ -123,7 +95,8 @@ async function upsertSubscription({
 }
 
 async function updateProfile({
-  userId, email, plan, tier, customerId, subscriptionId, status, periodEnd,
+  userId, email, plan, tier, customerId, subscriptionId,
+  status, periodStart, periodEnd,
 }) {
   const { error } = await supabase
     .from("profiles")
@@ -134,11 +107,11 @@ async function updateProfile({
       subscription_tier:      tier,
       stripe_customer_id:     customerId,
       stripe_subscription_id: subscriptionId,
+      current_period_start:   periodStart,
       current_period_end:     periodEnd,
       updated_at:             new Date(),
     })
     .eq("id", userId);
-
   if (error) console.error("Profile update error:", error);
 }
 
@@ -151,9 +124,7 @@ export async function handler(event) {
 
   try {
     stripeEvent = stripe.webhooks.constructEvent(
-      event.body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET
+      event.body, sig, process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err) {
     console.error("Webhook signature error:", err.message);
@@ -170,13 +141,13 @@ export async function handler(event) {
         const session      = stripeEvent.data.object;
         const subscription = await stripe.subscriptions.retrieve(session.subscription);
         const metadata     = session.metadata;
-        const periodEnd    = new Date(subscription.current_period_end * 1000);
-        const tier         = getTierFromPlan(metadata.plan);
 
-        // cancel_at_period_end from the subscription object
+        // Both period boundaries come from the subscription object — authoritative source.
+        const periodStart       = new Date(subscription.current_period_start * 1000);
+        const periodEnd         = new Date(subscription.current_period_end   * 1000);
         const cancelAtPeriodEnd = !!subscription.cancel_at_period_end;
+        const tier              = getTierFromPlan(metadata.plan);
 
-        // Fetch existing profile to detect tier change and get name
         const { data: profile } = await supabase
           .from("profiles")
           .select("subscription_tier, email, full_name")
@@ -186,29 +157,21 @@ export async function handler(event) {
         const oldTier = profile?.subscription_tier || "free";
 
         await upsertSubscription({
-          userId:         metadata.user_id,
-          email:          metadata.email,
-          plan:           metadata.plan,
-          tier,
-          customerId:     session.customer,
-          subscriptionId: subscription.id,
-          status:         subscription.status,
-          periodEnd,
+          userId: metadata.user_id, email: metadata.email,
+          plan: metadata.plan, tier,
+          customerId: session.customer, subscriptionId: subscription.id,
+          status: subscription.status, periodStart, periodEnd,
         });
 
         await updateProfile({
-          userId:         metadata.user_id,
-          email:          metadata.email,
-          plan:           metadata.plan,
-          tier,
-          customerId:     session.customer,
-          subscriptionId: subscription.id,
-          status:         subscription.status,
-          periodEnd,
+          userId: metadata.user_id, email: metadata.email,
+          plan: metadata.plan, tier,
+          customerId: session.customer, subscriptionId: subscription.id,
+          status: subscription.status, periodStart, periodEnd,
         });
 
-        // Write cancel_at_period_end separately (not in updateProfile helper to
-        // keep the helper reusable for the checkout flow where it's always false)
+        // cancel_at_period_end is always false on a fresh checkout, but write it
+        // explicitly for consistency.
         await supabase
           .from("profiles")
           .update({ cancel_at_period_end: cancelAtPeriodEnd })
@@ -218,7 +181,7 @@ export async function handler(event) {
 
         if (shouldSendEmail({ status: subscription.status, tier, oldTier })) {
           await sendTierEmail({
-            to:   metadata.email || profile?.email,
+            to: metadata.email || profile?.email,
             tier,
             variables: {
               NAME:       profile?.full_name || metadata.email || "",
@@ -229,7 +192,6 @@ export async function handler(event) {
             idempotencyKey: `checkout:${stripeEvent.id}`,
           });
         }
-
         break;
       }
 
@@ -241,28 +203,29 @@ export async function handler(event) {
         const subscription   = stripeEvent.data.object;
         const customerId     = subscription.customer;
         const subscriptionId = subscription.id;
-        const periodEnd      = new Date(subscription.current_period_end * 1000);
-        const status         = subscription.status;
 
-        // Capture whether the user has scheduled a cancellation at period end
+        const periodStart       = new Date(subscription.current_period_start * 1000);
+        const periodEnd         = new Date(subscription.current_period_end   * 1000);
+        const status            = subscription.status;
         const cancelAtPeriodEnd = !!subscription.cancel_at_period_end;
 
         const price     = subscription.items?.data?.[0]?.price;
         const lookupKey = price?.lookup_key;
         if (!lookupKey) {
           throw new Error(
-            `customer.subscription.updated: Stripe price ${price?.id ?? "?"} has no lookup_key — set lookup_key in the Stripe Dashboard (subscription ${subscriptionId})`
+            `customer.subscription.updated: Stripe price ${price?.id ?? "?"} has no lookup_key — ` +
+            `set lookup_key in the Stripe Dashboard (subscription ${subscriptionId})`
           );
         }
         const plan = lookupKey;
         const tier = getTierFromPlan(plan);
         if (tier === "free") {
           throw new Error(
-            `customer.subscription.updated: unrecognized plan lookup_key "${lookupKey}" (subscription ${subscriptionId})`
+            `customer.subscription.updated: unrecognized plan lookup_key "${lookupKey}" ` +
+            `(subscription ${subscriptionId})`
           );
         }
 
-        // Fetch before updating so we can detect the tier change
         const { data: profile } = await supabase
           .from("profiles")
           .select("subscription_tier, email, full_name")
@@ -274,101 +237,72 @@ export async function handler(event) {
         await supabase.from("subscriptions").upsert({
           stripe_subscription_id: subscriptionId,
           stripe_customer_id:     customerId,
-          plan,
-          tier,
-          status,
-          current_period_end: periodEnd,
+          plan, tier, status,
+          current_period_start: periodStart,
+          current_period_end:   periodEnd,
         }, { onConflict: "stripe_subscription_id" });
 
         await supabase
           .from("profiles")
           .update({
-            subscription_plan:      plan,
-            subscription_tier:      tier,
-            subscription_status:    status,
-            current_period_end:     periodEnd,
-            cancel_at_period_end:   cancelAtPeriodEnd,
-            updated_at:             new Date(),
+            subscription_plan:    plan,
+            subscription_tier:    tier,
+            subscription_status:  status,
+            current_period_start: periodStart,
+            current_period_end:   periodEnd,
+            cancel_at_period_end: cancelAtPeriodEnd,
+            updated_at:           new Date(),
           })
           .eq("stripe_subscription_id", subscriptionId);
 
         console.log(
           "Subscription updated:", subscriptionId,
-          "| Tier:", tier,
-          "| Status:", status,
+          "| Tier:", tier, "| Status:", status,
           "| cancel_at_period_end:", cancelAtPeriodEnd
         );
 
-        // Send email on any paid tier change (upgrade or downgrade)
         if (shouldSendEmail({ status, tier, oldTier })) {
           await sendTierEmail({
-            to:   profile?.email,
-            tier,
+            to: profile?.email, tier,
             variables: {
               NAME:       profile?.full_name || profile?.email || "",
               USER_EMAIL: profile?.email || "",
-              PLAN:       plan,
-              TIER:       tier,
+              PLAN:       plan, TIER: tier,
             },
             idempotencyKey: `sub-updated:${stripeEvent.id}`,
           });
         }
-
         break;
       }
 
       /* ─────────────────────────────
       PAYMENT SUCCESS
-      (monthly/yearly renewal)
+      (monthly/yearly renewal — both period boundaries advance)
       ───────────────────────────── */
       case "invoice.paid": {
-        const invoice = stripeEvent.data.object;
-        const rawSub  = invoice.subscription;
-        const subscriptionId =
-          typeof rawSub === "string" ? rawSub : rawSub?.id ?? null;
+        const invoice        = stripeEvent.data.object;
+        const rawSub         = invoice.subscription;
+        const subscriptionId = typeof rawSub === "string" ? rawSub : rawSub?.id ?? null;
 
         if (!subscriptionId) {
-          console.log(
-            "invoice.paid: no subscription on invoice — skipping DB update",
-            invoice.id
-          );
+          console.log("invoice.paid: no subscription on invoice — skipping", invoice.id);
           break;
         }
 
-        const lines = invoice.lines?.data ?? [];
-        let periodEndUnix = null;
-        for (const line of lines) {
-          if (line?.period?.end != null) {
-            periodEndUnix = line.period.end;
-            break;
-          }
-        }
-
-        const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-
-        if (periodEndUnix == null) {
-          if (subscription.current_period_end != null) {
-            periodEndUnix = subscription.current_period_end;
-          } else {
-            console.error(
-              "invoice.paid: could not resolve period end — skipping DB update",
-              { invoiceId: invoice.id, subscriptionId }
-            );
-            break;
-          }
-        }
-
-        const periodEnd = new Date(periodEndUnix * 1000);
-        const subStatus = subscription.status;
-
-        // On renewal cancel_at_period_end resets to false, so sync it
+        // Retrieve subscription for authoritative period boundaries
+        const subscription  = await stripe.subscriptions.retrieve(subscriptionId);
+        const periodStart   = new Date(subscription.current_period_start * 1000);
+        const periodEnd     = new Date(subscription.current_period_end   * 1000);
+        const subStatus     = subscription.status;
+        // cancel_at_period_end resets to false on renewal; keep DB in sync
         const cancelAtPeriodEnd = !!subscription.cancel_at_period_end;
 
         await supabase
           .from("subscriptions")
           .update({
-            status:             subStatus,
-            current_period_end: periodEnd,
+            status:               subStatus,
+            current_period_start: periodStart,
+            current_period_end:   periodEnd,
           })
           .eq("stripe_subscription_id", subscriptionId);
 
@@ -376,13 +310,17 @@ export async function handler(event) {
           .from("profiles")
           .update({
             subscription_status:  subStatus,
+            current_period_start: periodStart,
             current_period_end:   periodEnd,
             cancel_at_period_end: cancelAtPeriodEnd,
             updated_at:           new Date(),
           })
           .eq("stripe_subscription_id", subscriptionId);
 
-        console.log("Invoice paid — subscription renewed:", subscriptionId);
+        console.log(
+          "Invoice paid — subscription renewed:", subscriptionId,
+          "| Period:", periodStart.toISOString(), "→", periodEnd.toISOString()
+        );
         break;
       }
 
@@ -400,10 +338,7 @@ export async function handler(event) {
 
         await supabase
           .from("profiles")
-          .update({
-            subscription_status: "past_due",
-            updated_at:          new Date(),
-          })
+          .update({ subscription_status: "past_due", updated_at: new Date() })
           .eq("stripe_subscription_id", subscriptionId);
 
         console.log("Payment failed — subscription past due:", subscriptionId);
@@ -412,7 +347,6 @@ export async function handler(event) {
 
       /* ─────────────────────────────
       SUBSCRIPTION CANCELED
-      (fires at period end when cancel_at_period_end was true, or on immediate cancel)
       ───────────────────────────── */
       case "customer.subscription.deleted": {
         const subscription = stripeEvent.data.object;
