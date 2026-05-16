@@ -96,6 +96,37 @@
     .portal-btn:hover { background: var(--accent); color: white; }
     .portal-btn:disabled { opacity: .5; cursor: not-allowed; }
 
+    /* ── Cancellation scheduled banner ── */
+    .cancel-scheduled-banner {
+      display: none;
+      background: var(--warning-bg);
+      border: 1px solid #fcd34d;
+      border-left: 3px solid var(--warning);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+      font-size: .85rem;
+      line-height: 1.55;
+      color: var(--warning);
+    }
+    .cancel-scheduled-banner strong { font-weight: 600; }
+    .cancel-scheduled-banner .reactivate-link {
+      display: inline-block;
+      margin-top: .6rem;
+      font-family: var(--font-heading);
+      font-size: .78rem;
+      font-weight: 600;
+      padding: .5rem 1.15rem;
+      border: 1px solid var(--warning);
+      background: var(--bg);
+      color: var(--warning);
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .cancel-scheduled-banner .reactivate-link:hover {
+      background: var(--warning);
+      color: white;
+    }
+
     /* ── Past-due payment banner ── */
     .past-due-banner {
       display: none;
@@ -352,19 +383,28 @@
 
   <div class="msg" id="pageMsg"></div>
 
+  <!-- Past-due payment banner -->
   <div class="past-due-banner" id="pastDueBanner" role="alert">
     <strong>Payment did not go through.</strong>
     Your subscription is past due. Update your payment method in the billing portal to restore access. You cannot start a new subscription while a past-due subscription exists on your account.
     <div class="past-due-actions">
-      <button type="button" class="past-due-portal" onclick="openPortal()">Open billing portal</button>
+      <button type="button" class="past-due-portal" id="pastDuePortalBtn">Open billing portal</button>
     </div>
+  </div>
+
+  <!-- Cancellation scheduled banner -->
+  <div class="cancel-scheduled-banner" id="cancelScheduledBanner" role="alert">
+    <strong>Your plan is scheduled to end.</strong>
+    <span id="cancelScheduledMsg">You will lose access at the end of your current billing period.</span>
+    <br>
+    <button type="button" class="reactivate-link" id="reactivateBtn">Reactivate in billing portal</button>
   </div>
 
   <!-- Current plan banner -->
   <div class="current-plan-banner" id="currentPlanBanner" style="display:none">
     <p>You are currently on the <strong id="currentPlanLabel">—</strong> plan.
        Upgrades take effect immediately. Downgrades apply at the end of your billing period.</p>
-    <button class="portal-btn" id="portalBtn" onclick="openPortal()">Manage billing →</button>
+    <button class="portal-btn" id="portalBtn">Manage billing →</button>
   </div>
 
   <!-- Billing period toggle -->
@@ -694,15 +734,26 @@ document.getElementById('silSignOut').addEventListener('click', async function (
   }
 });
 
+// Wire portal buttons now so they're never relying on event.target
+document.getElementById('portalBtn').addEventListener('click', () => openPortal());
+document.getElementById('pastDuePortalBtn').addEventListener('click', () => openPortal());
+document.getElementById('reactivateBtn').addEventListener('click', () => openPortal());
+
 // ─────────────────────────────────────────────────────────
 // STATE
 // ─────────────────────────────────────────────────────────
 let billing  = 'monthly';
 let userTier = 'free';
-let userPlan = 'free';   // may be 'beta'
+let userPlan = 'free';   // may be 'beta' — maps to lab card for display
 let isBeta   = false;
-/** @type {string} mirrors profiles.subscription_status (e.g. active, trialing, past_due) */
+let hasActiveStripeSubscription = false;
+
+/** @type {string} mirrors profiles.subscription_status */
 let userSubscriptionStatus = '';
+/** @type {boolean} true when user has set cancel_at_period_end via portal */
+let cancelAtPeriodEnd = false;
+/** @type {Date|null} profiles.current_period_end */
+let currentPeriodEnd = null;
 
 const SESSION_CAPACITY  = 64;
 const SESSIONS_PER_TIER = { call1: 1, call2: 2 };
@@ -713,7 +764,7 @@ const PLAN_LABELS = {
   lab:   'Lab Access',
   call1: 'Lab + 1 session / month',
   call2: 'Lab + 2 sessions / month',
-  beta:  'Beta (full access)',
+  // beta users display as Lab Access
 };
 
 // ─────────────────────────────────────────────────────────
@@ -731,7 +782,7 @@ onAuthReady(async () => {
 
   const [profileResult, capacityResult] = await Promise.all([
     sb.from('profiles')
-      .select('subscription_tier, subscription_status, is_beta, current_period_end')
+      .select('subscription_tier, subscription_status, is_beta, current_period_end, stripe_subscription_id, cancel_at_period_end')
       .eq('id', user.id)
       .single(),
     sb.from('profiles')
@@ -742,10 +793,27 @@ onAuthReady(async () => {
 
   const profile = profileResult.data;
   if (profile) {
-    userTier = profile.subscription_tier || 'free';
-    isBeta   = !!profile.is_beta;
-    userPlan = isBeta ? 'beta' : userTier;
+    userTier               = profile.subscription_tier || 'free';
+    isBeta                 = !!profile.is_beta;
     userSubscriptionStatus = profile.subscription_status || '';
+    cancelAtPeriodEnd      = !!profile.cancel_at_period_end;
+    currentPeriodEnd       = profile.current_period_end
+      ? new Date(profile.current_period_end)
+      : null;
+
+    // Determine whether the user has a live Stripe subscription.
+    // This — not userTier — drives all routing decisions.
+    hasActiveStripeSubscription =
+      !!profile.stripe_subscription_id &&
+      ['active', 'trialing'].includes(userSubscriptionStatus);
+
+    // is_beta only applies when the user has no active paid subscription.
+    // A beta user who has since subscribed should see their actual tier.
+    const isActivePaidTier =
+      ['lab', 'call1', 'call2'].includes(userTier) &&
+      ['active', 'trialing'].includes(userSubscriptionStatus);
+
+    userPlan = (isBeta && !isActivePaidTier) ? 'beta' : userTier;
   }
 
   const activeRows   = capacityResult.data || [];
@@ -770,37 +838,44 @@ onAuthReady(async () => {
 // ─────────────────────────────────────────────────────────
 // RENDER PLAN STATE
 // ─────────────────────────────────────────────────────────
+
+// beta maps to the lab card for all display purposes
+const TIER_MAP = { free: 'free', lab: 'lab', call1: 'call1', call2: 'call2', beta: 'lab' };
+
+function formatDate(date) {
+  if (!date) return 'the end of your billing period';
+  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
 function renderPlanState({ call1Full = false, call2Full = false } = {}) {
-  const pastDueEl = document.getElementById('pastDueBanner');
-  if (pastDueEl) pastDueEl.style.display = 'none';
 
+  // ── Past due ────────────────────────────────────────────
   if (userSubscriptionStatus === 'past_due') {
-    if (pastDueEl) pastDueEl.style.display = 'block';
+    document.getElementById('pastDueBanner').style.display = 'block';
 
+    // Show current plan banner (no portal btn — past-due banner has its own)
+    const currentCardKey = TIER_MAP[userPlan] || 'free';
     if (['lab', 'call1', 'call2', 'beta'].includes(userPlan)) {
       const banner = document.getElementById('currentPlanBanner');
       banner.style.display = 'flex';
-      document.getElementById('currentPlanLabel').textContent = PLAN_LABELS[userPlan] || userPlan;
-      const portalBtn = document.getElementById('portalBtn');
-      if (isBeta) portalBtn.style.display = 'none';
-      else portalBtn.style.display = '';
+      document.getElementById('currentPlanLabel').textContent =
+        PLAN_LABELS[userPlan] || PLAN_LABELS[currentCardKey] || userPlan;
+      // Hide the manage billing button — the past-due banner handles portal access
+      document.getElementById('portalBtn').style.display = 'none';
     }
 
-    const tierMapPast = { free: 'free', lab: 'lab', call1: 'call1', call2: 'call2', beta: 'lab' };
-    const currentCardKeyPast = tierMapPast[userPlan] || 'free';
-    const currentCardPast = document.getElementById('card-' + currentCardKeyPast);
-    if (currentCardPast) currentCardPast.classList.add('is-current');
+    const currentCard = document.getElementById('card-' + currentCardKey);
+    if (currentCard) currentCard.classList.add('is-current');
 
     ['free', 'lab', 'call1', 'call2'].forEach(t => {
-      const cta = document.getElementById('cta-' + t);
+      const cta  = document.getElementById('cta-' + t);
+      const badge = document.getElementById('badge-' + t);
       if (!cta) return;
-      const isCurrent = t === currentCardKeyPast;
-      if (isCurrent) {
+      if (t === currentCardKey) {
         cta.textContent = 'Current plan';
         cta.className   = 'plan-cta current-cta';
         cta.disabled    = true;
         cta.onclick     = null;
-        const badge = document.getElementById('badge-' + t);
         if (badge) badge.className = 'plan-badge current-badge';
       } else {
         cta.textContent = 'Update payment in billing portal';
@@ -812,17 +887,36 @@ function renderPlanState({ call1Full = false, call2Full = false } = {}) {
     return;
   }
 
-  // Show banner for any paid/beta plan
-  if (['lab', 'call1', 'call2', 'beta'].includes(userPlan)) {
-    const banner = document.getElementById('currentPlanBanner');
-    banner.style.display = 'flex';
-    document.getElementById('currentPlanLabel').textContent = PLAN_LABELS[userPlan] || userPlan;
-    if (isBeta) document.getElementById('portalBtn').style.display = 'none';
+  // ── Canceled (period ended) — treat as free ─────────────
+  // stripe_subscription_id may still exist in DB but status is canceled.
+  // hasActiveStripeSubscription will be false, so routing already handles this.
+  // Just ensure the display reflects free status for UI purposes.
+  const effectivePlan = userSubscriptionStatus === 'canceled' ? 'free' : userPlan;
+  const currentCardKey = TIER_MAP[effectivePlan] || 'free';
+
+  // ── Cancel scheduled (cancel_at_period_end=true, status still active) ──
+  if (cancelAtPeriodEnd && hasActiveStripeSubscription) {
+    const banner = document.getElementById('cancelScheduledBanner');
+    banner.style.display = 'block';
+    document.getElementById('cancelScheduledMsg').textContent =
+      `You will lose access on ${formatDate(currentPeriodEnd)}. Reactivate to keep your plan.`;
   }
 
-  // beta maps to lab card for display purposes
-  const tierMap       = { free: 'free', lab: 'lab', call1: 'call1', call2: 'call2', beta: 'lab' };
-  const currentCardKey = tierMap[userPlan] || 'free';
+  // ── Current plan banner for any paid/beta plan ───────────
+  if (['lab', 'call1', 'call2', 'beta'].includes(effectivePlan)) {
+    const banner = document.getElementById('currentPlanBanner');
+    banner.style.display = 'flex';
+    // beta users display as "Lab Access"
+    const displayLabel = effectivePlan === 'beta'
+      ? PLAN_LABELS['lab']
+      : (PLAN_LABELS[effectivePlan] || effectivePlan);
+    document.getElementById('currentPlanLabel').textContent = displayLabel;
+
+    // Beta users with no Stripe subscription have no billing portal to open
+    if (isBeta && !hasActiveStripeSubscription) {
+      document.getElementById('portalBtn').style.display = 'none';
+    }
+  }
 
   // Mark current card
   const currentCard = document.getElementById('card-' + currentCardKey);
@@ -839,10 +933,10 @@ function renderPlanState({ call1Full = false, call2Full = false } = {}) {
     const notice = document.getElementById('downgrade-notice-' + t);
     if (!cta) return;
 
-    const isCurrent  = t === currentCardKey;
-    const tOrder     = TIER_ORDER[t]              ?? 0;
-    const curOrder   = TIER_ORDER[currentCardKey] ?? 0;
-    const isUpgrade  = tOrder > curOrder;
+    const isCurrent   = t === currentCardKey;
+    const tOrder      = TIER_ORDER[t]              ?? 0;
+    const curOrder    = TIER_ORDER[currentCardKey] ?? 0;
+    const isUpgrade   = tOrder > curOrder;
     const isDowngrade = tOrder < curOrder;
 
     if (isCurrent) {
@@ -851,7 +945,7 @@ function renderPlanState({ call1Full = false, call2Full = false } = {}) {
       cta.disabled    = true;
       cta.onclick     = null;
       if (badge) badge.className = 'plan-badge current-badge';
-      return; // skip further logic for this card
+      return;
     }
 
     // Skip if capacity already disabled this card
@@ -874,9 +968,9 @@ function renderPlanState({ call1Full = false, call2Full = false } = {}) {
       cta.textContent = 'Upgrade';
       cta.className   = 'plan-cta primary';
       cta.disabled    = false;
-      cta.onclick     = () => changePlan(t);
+      cta.onclick     = () => checkout(t);
     } else {
-      // Free user — standard "Get started" for paid tiers
+      // Free (or treated-as-free) user — standard "Get started" for paid tiers
       cta.textContent = 'Get started';
       cta.className   = 'plan-cta primary';
       cta.disabled    = false;
@@ -924,7 +1018,7 @@ window.setBilling = function(period) {
 };
 
 // ─────────────────────────────────────────────────────────
-// CHECKOUT (new subscription — free users only)
+// CHECKOUT (new subscription — no active Stripe sub)
 // ─────────────────────────────────────────────────────────
 window.checkout = async function(tier) {
   if (userSubscriptionStatus === 'past_due') {
@@ -933,8 +1027,10 @@ window.checkout = async function(tier) {
     return;
   }
 
-  // If user already has a paid subscription, route to changePlan instead
-  if (userTier !== 'free') {
+  // Route to update-subscription if the user already has an active Stripe subscription.
+  // This correctly handles beta users (no stripe_subscription_id → checkout)
+  // and canceled-period-ended users (no active sub → checkout).
+  if (hasActiveStripeSubscription) {
     return changePlan(tier);
   }
 
@@ -1034,17 +1130,21 @@ window.changePlan = async function(tier) {
 
 // ─────────────────────────────────────────────────────────
 // STRIPE PORTAL
+// openPortal takes an optional button element to disable while redirecting.
+// All callers pass the button explicitly via event listeners (not event.target).
 // ─────────────────────────────────────────────────────────
-window.openPortal = async function() {
-  const sb  = window._supabase;
+window.openPortal = async function(btn) {
+  const sb = window._supabase;
   if (!sb) return;
-  const btn = document.getElementById('portalBtn');
   if (btn) { btn.disabled = true; btn.textContent = 'Opening…'; }
   try {
     const { data: { session } } = await sb.auth.getSession();
     const res = await fetch('/.netlify/functions/create-portal-session', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
     });
     if (!res.ok) throw new Error('Could not open billing portal.');
     const { url } = await res.json();
