@@ -98,11 +98,17 @@ export async function handler(event) {
       .in("subscription_tier", ["call1", "call2"])
       .in("subscription_status", ["active", "trialing"]);
 
+    // Total sessions across all active session subscribers
     const sessionsUsed = (activeRows || []).reduce(
       (t, r) => t + (SESSIONS_PER_TIER[r.subscription_tier] ?? 0), 0
     );
 
-    if (sessionsUsed + SESSIONS_PER_TIER[newTier] > SESSION_CAPACITY) {
+    // Subtract the upgrading user's current sessions — they are already counted
+    // in sessionsUsed but will be replaced by the new tier, not added on top.
+    const currentUserSessions = SESSIONS_PER_TIER[oldTier] ?? 0;
+    const sessionsAfterChange = sessionsUsed - currentUserSessions + SESSIONS_PER_TIER[newTier];
+
+    if (sessionsAfterChange > SESSION_CAPACITY) {
       return {
         statusCode: 409,
         body: JSON.stringify({ error: "capacity_full", message: "Session slots are currently full." }),
