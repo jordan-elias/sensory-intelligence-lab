@@ -19,8 +19,8 @@ const supabase = createClient(
 /* ─────────────────────────────
 RESEND
 ───────────────────────────── */
-const RESEND_API_KEY    = process.env.RESEND_API_KEY;
-const RESEND_FROM       = process.env.RESEND_FROM_ADDRESS || "Jordan Elias <hello@jordanelias.de>";
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const RESEND_FROM    = process.env.RESEND_FROM_ADDRESS || "Jordan Elias <hello@jordanelias.de>";
 
 // Aliases must match exactly what you named them in Resend → Templates
 const TEMPLATE_BY_TIER = {
@@ -50,15 +50,15 @@ async function sendTierEmail({ to, tier, variables, idempotencyKey }) {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
-        Authorization:    `Bearer ${RESEND_API_KEY}`,
-        "Content-Type":   "application/json",
+        Authorization:     `Bearer ${RESEND_API_KEY}`,
+        "Content-Type":    "application/json",
         "Idempotency-Key": idempotencyKey,
       },
       body: JSON.stringify({
         from:        RESEND_FROM,
         to:          [to],
-        template_id: templateAlias,  // Resend accepts alias strings here
-        variables,                   // Must match variable names in your template
+        template_id: templateAlias,
+        variables,
       }),
     });
 
@@ -93,7 +93,8 @@ function getTierFromPlan(plan) {
   }
 }
 
-// Only send an email when the tier actually changes to something paid
+// Send an email whenever the tier changes to something paid and the subscription
+// is active or trialing — this covers both upgrades and downgrades (e.g. call2→lab).
 function shouldSendEmail({ status, tier, oldTier }) {
   return (
     ["active", "trialing"].includes(status) &&
@@ -172,6 +173,9 @@ export async function handler(event) {
         const periodEnd    = new Date(subscription.current_period_end * 1000);
         const tier         = getTierFromPlan(metadata.plan);
 
+        // cancel_at_period_end from the subscription object
+        const cancelAtPeriodEnd = !!subscription.cancel_at_period_end;
+
         // Fetch existing profile to detect tier change and get name
         const { data: profile } = await supabase
           .from("profiles")
@@ -203,11 +207,18 @@ export async function handler(event) {
           periodEnd,
         });
 
+        // Write cancel_at_period_end separately (not in updateProfile helper to
+        // keep the helper reusable for the checkout flow where it's always false)
+        await supabase
+          .from("profiles")
+          .update({ cancel_at_period_end: cancelAtPeriodEnd })
+          .eq("id", metadata.user_id);
+
         console.log("Subscription created:", subscription.id, "| Tier:", tier);
 
         if (shouldSendEmail({ status: subscription.status, tier, oldTier })) {
           await sendTierEmail({
-            to:             metadata.email || profile?.email,
+            to:   metadata.email || profile?.email,
             tier,
             variables: {
               NAME:       profile?.full_name || metadata.email || "",
@@ -224,7 +235,7 @@ export async function handler(event) {
 
       /* ─────────────────────────────
       SUBSCRIPTION UPDATED
-      (upgrades, downgrades, renewals)
+      (upgrades, downgrades, renewals, cancellation scheduling)
       ───────────────────────────── */
       case "customer.subscription.updated": {
         const subscription   = stripeEvent.data.object;
@@ -233,7 +244,10 @@ export async function handler(event) {
         const periodEnd      = new Date(subscription.current_period_end * 1000);
         const status         = subscription.status;
 
-        const price = subscription.items?.data?.[0]?.price;
+        // Capture whether the user has scheduled a cancellation at period end
+        const cancelAtPeriodEnd = !!subscription.cancel_at_period_end;
+
+        const price     = subscription.items?.data?.[0]?.price;
         const lookupKey = price?.lookup_key;
         if (!lookupKey) {
           throw new Error(
@@ -269,16 +283,23 @@ export async function handler(event) {
         await supabase
           .from("profiles")
           .update({
-            subscription_plan:   plan,
-            subscription_tier:   tier,
-            subscription_status: status,
-            current_period_end:  periodEnd,
-            updated_at:          new Date(),
+            subscription_plan:      plan,
+            subscription_tier:      tier,
+            subscription_status:    status,
+            current_period_end:     periodEnd,
+            cancel_at_period_end:   cancelAtPeriodEnd,
+            updated_at:             new Date(),
           })
           .eq("stripe_subscription_id", subscriptionId);
 
-        console.log("Subscription updated:", subscriptionId, "| Tier:", tier, "| Status:", status);
+        console.log(
+          "Subscription updated:", subscriptionId,
+          "| Tier:", tier,
+          "| Status:", status,
+          "| cancel_at_period_end:", cancelAtPeriodEnd
+        );
 
+        // Send email on any paid tier change (upgrade or downgrade)
         if (shouldSendEmail({ status, tier, oldTier })) {
           await sendTierEmail({
             to:   profile?.email,
@@ -302,7 +323,7 @@ export async function handler(event) {
       ───────────────────────────── */
       case "invoice.paid": {
         const invoice = stripeEvent.data.object;
-        const rawSub = invoice.subscription;
+        const rawSub  = invoice.subscription;
         const subscriptionId =
           typeof rawSub === "string" ? rawSub : rawSub?.id ?? null;
 
@@ -340,6 +361,9 @@ export async function handler(event) {
         const periodEnd = new Date(periodEndUnix * 1000);
         const subStatus = subscription.status;
 
+        // On renewal cancel_at_period_end resets to false, so sync it
+        const cancelAtPeriodEnd = !!subscription.cancel_at_period_end;
+
         await supabase
           .from("subscriptions")
           .update({
@@ -351,9 +375,10 @@ export async function handler(event) {
         await supabase
           .from("profiles")
           .update({
-            subscription_status: subStatus,
-            current_period_end:    periodEnd,
-            updated_at:            new Date(),
+            subscription_status:  subStatus,
+            current_period_end:   periodEnd,
+            cancel_at_period_end: cancelAtPeriodEnd,
+            updated_at:           new Date(),
           })
           .eq("stripe_subscription_id", subscriptionId);
 
@@ -387,6 +412,7 @@ export async function handler(event) {
 
       /* ─────────────────────────────
       SUBSCRIPTION CANCELED
+      (fires at period end when cancel_at_period_end was true, or on immediate cancel)
       ───────────────────────────── */
       case "customer.subscription.deleted": {
         const subscription = stripeEvent.data.object;
@@ -399,10 +425,11 @@ export async function handler(event) {
         await supabase
           .from("profiles")
           .update({
-            subscription_status: "canceled",
-            subscription_plan:   null,
-            subscription_tier:   "free",
-            updated_at:          new Date(),
+            subscription_status:  "canceled",
+            subscription_plan:    null,
+            subscription_tier:    "free",
+            cancel_at_period_end: false,
+            updated_at:           new Date(),
           })
           .eq("stripe_subscription_id", subscription.id);
 
