@@ -118,45 +118,39 @@
     }
     .plan-icon {
       width: 36px; height: 36px;
-      background: var(--accent-light);
-      border: 1px solid #c0d9c8;
+      background: var(--accent-light); border: 1px solid #c0d9c8;
       display: flex; align-items: center; justify-content: center;
       font-size: 1rem; flex-shrink: 0;
     }
     .plan-header-name {
       font-family: var(--font-heading);
-      font-size: .95rem; font-weight: 600;
-      letter-spacing: -.01em; color: var(--text);
+      font-size: .95rem; font-weight: 600; letter-spacing: -.01em; color: var(--text);
     }
     .plan-header-status { font-size: .72rem; color: var(--muted); margin-top: .05rem; }
-    .plan-header-status .status-active { color: var(--accent); font-weight: 500; }
-    .plan-header-status .status-beta   { color: #6b3a1a; font-weight: 500; }
-    .plan-header-status .status-free   { color: var(--muted); }
+    .plan-header-status .status-active  { color: var(--accent); font-weight: 500; }
+    .plan-header-status .status-beta    { color: #6b3a1a; font-weight: 500; }
+    .plan-header-status .status-free    { color: var(--muted); }
+    .plan-header-status .status-warning { color: var(--warning); font-weight: 500; }
+    .plan-header-status .status-error   { color: var(--error); font-weight: 500; }
 
     .plan-badge {
-      font-family: var(--font-heading);
-      font-size: .58rem; font-weight: 600;
+      font-family: var(--font-heading); font-size: .58rem; font-weight: 600;
       letter-spacing: .1em; text-transform: uppercase;
-      padding: .2rem .55rem;
-      border: 1px solid currentColor;
+      padding: .2rem .55rem; border: 1px solid currentColor;
       margin-left: auto; flex-shrink: 0;
     }
-    .badge-free  { color: var(--muted); border-color: var(--border); }
-    .badge-paid  { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
-    .badge-beta  { color: #6b3a1a; border-color: #d4a87a; background: #fdf4ec; }
+    .badge-free    { color: var(--muted); border-color: var(--border); }
+    .badge-paid    { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
+    .badge-beta    { color: #6b3a1a; border-color: #d4a87a; background: #fdf4ec; }
+    .badge-warning { color: var(--warning); border-color: var(--warning); background: var(--warning-bg); }
+    .badge-error   { color: var(--error);   border-color: var(--error);   background: var(--error-bg); }
 
     /* What's included list */
-    .includes-list {
-      list-style: none; display: flex;
-      flex-direction: column; gap: .4rem; margin-bottom: 1.25rem;
-    }
-    .includes-list li {
-      display: flex; gap: .55rem;
-      font-size: .8rem; color: var(--text); line-height: 1.45;
-    }
+    .includes-list { list-style: none; display: flex; flex-direction: column; gap: .4rem; margin-bottom: 1.25rem; }
+    .includes-list li { display: flex; gap: .55rem; font-size: .8rem; color: var(--text); line-height: 1.45; }
     .includes-list li::before { content: '—'; color: var(--accent); flex-shrink: 0; }
 
-    /* Session usage bar */
+    /* Session usage pips */
     .session-usage {
       background: var(--surface); border: 1px solid var(--border);
       padding: .75rem 1rem; margin-bottom: 1.25rem;
@@ -168,8 +162,7 @@
     .session-pips { display: flex; gap: 6px; align-items: center; }
     .session-pip {
       width: 28px; height: 28px; border: 1px solid var(--border);
-      background: var(--bg);
-      display: flex; align-items: center; justify-content: center;
+      background: var(--bg); display: flex; align-items: center; justify-content: center;
       font-size: .65rem; font-weight: 600; color: var(--muted);
     }
     .session-pip.used      { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
@@ -177,29 +170,39 @@
     .session-pip-label { font-size: .72rem; color: var(--muted); margin-left: .5rem; }
 
     /* Billing actions */
-    .billing-actions {
-      display: flex; gap: .65rem; flex-wrap: wrap;
-      padding-top: 1.1rem; border-top: 1px solid var(--border);
-    }
+    .billing-actions { display: flex; gap: .65rem; flex-wrap: wrap; padding-top: 1.1rem; border-top: 1px solid var(--border); }
     .billing-link {
-      font-family: var(--font-heading);
-      font-size: .78rem; font-weight: 600;
-      padding: .58rem 1.35rem;
-      text-decoration: none; display: inline-block;
-      transition: all .15s; cursor: pointer;
-      border: none; letter-spacing: -.01em;
+      font-family: var(--font-heading); font-size: .78rem; font-weight: 600;
+      padding: .58rem 1.35rem; text-decoration: none; display: inline-block;
+      transition: all .15s; cursor: pointer; border: none; letter-spacing: -.01em;
     }
     .billing-link.primary { background: var(--accent); color: white; }
     .billing-link.primary:hover { background: var(--accent-hover); color: white; }
     .billing-link.outline { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
     .billing-link.outline:hover { border-color: var(--accent); color: var(--accent); }
+    .billing-link.warning-btn { background: var(--warning-bg); color: var(--warning); border: 1px solid var(--warning); }
+    .billing-link.warning-btn:hover { background: var(--warning); color: white; }
     .billing-link:disabled { opacity: .5; cursor: not-allowed; }
 
-    /* ── Period info ── */
-    .period-info {
-      font-size: .75rem; color: var(--muted);
-      margin-top: .85rem; line-height: 1.55;
+    /* Period info */
+    .period-info { font-size: .75rem; color: var(--muted); margin-top: .85rem; line-height: 1.55; }
+    .period-info a { color: inherit; }
+
+    /* Cancel scheduled notice */
+    .cancel-scheduled-notice {
+      margin-top: .85rem; padding: .75rem 1rem;
+      background: var(--warning-bg); border: 1px solid #fcd34d; border-left: 3px solid var(--warning);
+      font-size: .78rem; color: var(--warning); line-height: 1.55;
     }
+    .cancel-scheduled-notice strong { font-weight: 600; }
+
+    /* Past-due notice */
+    .past-due-notice {
+      margin-top: .85rem; padding: .75rem 1rem;
+      background: var(--error-bg); border: 1px solid #f5c6c6; border-left: 3px solid var(--error);
+      font-size: .78rem; color: var(--error); line-height: 1.55;
+    }
+    .past-due-notice strong { font-weight: 600; }
 
     /* ── Password reset banner ── */
     .reset-banner { background: var(--accent-light); border: 1px solid var(--accent); padding: 1.25rem; margin-bottom: 1.5rem; }
@@ -211,69 +214,31 @@
     .danger-zone .card-head { background: #fdf2f2; }
     .danger-zone .card-head h3 { color: var(--error); }
 
-    /* ── Delete confirmation input ── */
     .delete-confirm-input {
-      width: 100%;
-      padding: .6rem .85rem;
-      border: 1px solid var(--error);
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--font-body);
-      font-size: .875rem;
-      outline: none;
-      margin-bottom: .75rem;
+      width: 100%; padding: .6rem .85rem; border: 1px solid var(--error);
+      background: var(--bg); color: var(--text); font-family: var(--font-body);
+      font-size: .875rem; outline: none; margin-bottom: .75rem;
     }
     .delete-confirm-input:focus { box-shadow: 0 0 0 3px rgba(192,57,43,.15); }
 
-    /* ── Delete subscription gate ── */
-    .delete-gate {
-      background: var(--error-bg);
-      border: 1px solid #f5c6c6;
-      padding: 1rem 1.1rem;
-      margin-bottom: 1rem;
-    }
-    .delete-gate p {
-      font-size: .8rem; color: var(--error); line-height: 1.55; margin-bottom: .75rem;
-    }
+    .delete-gate { background: var(--error-bg); border: 1px solid #f5c6c6; padding: 1rem 1.1rem; margin-bottom: 1rem; }
+    .delete-gate p { font-size: .8rem; color: var(--error); line-height: 1.55; margin-bottom: .75rem; }
     .delete-gate strong { font-weight: 600; }
 
     /* ── Notification toggles ── */
-    .notif-row {
-      display: flex; align-items: flex-start; justify-content: space-between;
-      gap: 1.25rem; padding: .85rem 0; border-bottom: 1px solid var(--border);
-    }
+    .notif-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 1.25rem; padding: .85rem 0; border-bottom: 1px solid var(--border); }
     .notif-row:last-of-type { border-bottom: none; padding-bottom: 0; }
     .notif-row-text { flex: 1; }
-    .notif-row-label {
-      font-size: .82rem; font-weight: 500; color: var(--text);
-      margin-bottom: .15rem;
-    }
+    .notif-row-label { font-size: .82rem; font-weight: 500; color: var(--text); margin-bottom: .15rem; }
     .notif-row-desc { font-size: .74rem; color: var(--muted); line-height: 1.5; }
-
-    /* Toggle switch */
     .toggle-wrap { flex-shrink: 0; margin-top: .1rem; }
-    .toggle {
-      position: relative; display: inline-block;
-      width: 36px; height: 20px;
-    }
+    .toggle { position: relative; display: inline-block; width: 36px; height: 20px; }
     .toggle input { opacity: 0; width: 0; height: 0; }
-    .toggle-slider {
-      position: absolute; cursor: pointer;
-      inset: 0; background: var(--border);
-      transition: background .18s;
-    }
-    .toggle-slider::before {
-      content: ''; position: absolute;
-      height: 14px; width: 14px;
-      left: 3px; bottom: 3px;
-      background: white;
-      transition: transform .18s;
-    }
+    .toggle-slider { position: absolute; cursor: pointer; inset: 0; background: var(--border); transition: background .18s; }
+    .toggle-slider::before { content: ''; position: absolute; height: 14px; width: 14px; left: 3px; bottom: 3px; background: white; transition: transform .18s; }
     .toggle input:checked + .toggle-slider { background: var(--accent); }
     .toggle input:checked + .toggle-slider::before { transform: translateX(16px); }
-    .toggle input:focus-visible + .toggle-slider {
-      outline: 2px solid var(--accent); outline-offset: 2px;
-    }
+    .toggle input:focus-visible + .toggle-slider { outline: 2px solid var(--accent); outline-offset: 2px; }
 
     /* ── Loading ── */
     .page-loading { opacity: 0; transition: opacity .2s; }
@@ -281,13 +246,10 @@
 
     /* ── Header ── */
     .sil-header {
-      border-bottom: 1px solid var(--border);
-      padding: 0 1.5rem; height: 56px;
-      display: flex; align-items: center;
-      justify-content: space-between;
+      border-bottom: 1px solid var(--border); padding: 0 1.5rem; height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
       position: sticky; top: 0; left: 0; right: 0;
-      background: var(--bg); z-index: 100;
-      gap: 1rem; width: 100%;
+      background: var(--bg); z-index: 100; gap: 1rem; width: 100%;
     }
     .sil-header__wordmark {
       font-family: var(--font-heading); font-size: 1rem; font-weight: 600;
@@ -298,8 +260,8 @@
     .sil-header__nav { display: flex; gap: 0.25rem; align-items: center; }
     .sil-header__nav a {
       font-family: var(--font-body); font-size: 0.8rem; font-weight: 500;
-      text-decoration: none; color: var(--muted);
-      transition: color 0.15s; white-space: nowrap; padding: 0.3rem 0.65rem;
+      text-decoration: none; color: var(--muted); transition: color 0.15s;
+      white-space: nowrap; padding: 0.3rem 0.65rem;
     }
     .sil-header__nav a:hover { color: var(--text); }
     .sil-header__nav a.sil-active { color: var(--accent); font-weight: 600; }
@@ -307,29 +269,23 @@
       font-family: var(--font-body); font-size: 0.8rem; font-weight: 500;
       color: var(--muted); background: none; border: 1px solid var(--border);
       cursor: pointer; padding: 0.3rem 0.75rem;
-      transition: color 0.15s, border-color 0.15s;
-      white-space: nowrap; line-height: 1.6;
+      transition: color 0.15s, border-color 0.15s; white-space: nowrap; line-height: 1.6;
     }
     .sil-header__signout:hover { color: var(--text); border-color: var(--text); }
     .sil-header__signout:disabled { opacity: 0.5; cursor: not-allowed; }
-    .sil-header__toggle {
-      display: none; flex-direction: column; gap: 4px;
-      background: none; border: none; cursor: pointer; padding: 4px; flex-shrink: 0;
-    }
+    .sil-header__toggle { display: none; flex-direction: column; gap: 4px; background: none; border: none; cursor: pointer; padding: 4px; flex-shrink: 0; }
     .sil-header__toggle span { display: block; width: 20px; height: 2px; background: var(--text); }
     @media (max-width: 700px) {
       .sil-header { padding: 0 1rem; }
       .sil-header__toggle { display: flex; }
       .sil-header__nav {
-        display: none; position: absolute;
-        top: 56px; left: 0; right: 0;
+        display: none; position: absolute; top: 56px; left: 0; right: 0;
         background: var(--bg); border-bottom: 1px solid var(--border);
         flex-direction: column; align-items: flex-start;
         padding: 0.75rem 1rem; gap: 0; z-index: 99;
       }
       .sil-header__nav.sil-open { display: flex; }
-      .sil-header__nav a,
-      .sil-header__signout { font-size: 0.875rem; padding: 0.55rem 0.5rem; }
+      .sil-header__nav a, .sil-header__signout { font-size: 0.875rem; padding: 0.55rem 0.5rem; }
       .sil-header__signout { border: none; }
     }
 
@@ -350,7 +306,7 @@
     <a href="/dashboard/">Dashboard</a>
     <a href="/account/">Account</a>
     <a href="/booking/">Book a session</a>
-    <button class="sil-header__signout" id="silSignOut" onclick="handleSignOut()">Sign out</button>
+    <button class="sil-header__signout" id="silSignOut">Sign out</button>
   </nav>
 </header>
 
@@ -405,7 +361,7 @@
         <input type="text" id="nameInput" placeholder="Your name" autocomplete="name">
       </div>
       <div class="btn-row">
-        <button class="btn" id="nameBtn" onclick="handleNameUpdate()">Save name</button>
+        <button class="btn" id="nameBtn">Save name</button>
       </div>
     </div>
   </div>
@@ -421,7 +377,7 @@
         <input type="email" id="emailInput" placeholder="new@email.com" autocomplete="email">
       </div>
       <div class="btn-row">
-        <button class="btn" id="emailBtn" onclick="handleEmailChange()">Send confirmation</button>
+        <button class="btn" id="emailBtn">Send confirmation</button>
       </div>
       <p style="font-size:.72rem;color:var(--muted);margin-top:.75rem;line-height:1.5;">
         A confirmation link will be sent to your new address. Your email won't change until you click it.
@@ -449,12 +405,12 @@
         <input type="password" id="newPwConfirm" placeholder="Repeat your new password" autocomplete="new-password">
       </div>
       <div class="btn-row">
-        <button class="btn" id="passwordBtn" onclick="handlePasswordChange()">Update password</button>
+        <button class="btn" id="passwordBtn">Update password</button>
       </div>
     </div>
   </div>
 
-  <!-- ── Set new password (recovery mode — hidden by default, shown on PASSWORD_RECOVERY event) ── -->
+  <!-- ── Set new password (recovery mode) ── -->
   <div class="card" id="recoveryPasswordCard" style="display:none">
     <div class="card-head"><h3>Set new password</h3></div>
     <div class="card-body">
@@ -469,7 +425,7 @@
         <input type="password" id="recoveryPwConfirm" placeholder="Repeat your new password" autocomplete="new-password">
       </div>
       <div class="btn-row">
-        <button class="btn" id="recoveryPwBtn" onclick="handleRecoveryPasswordSet()">Save new password</button>
+        <button class="btn" id="recoveryPwBtn">Save new password</button>
       </div>
     </div>
   </div>
@@ -503,7 +459,7 @@
         </div>
         <div class="toggle-wrap">
           <label class="toggle" aria-label="Post-session reminder">
-            <input type="checkbox" id="notifPostSession" onchange="handleNotifChange()">
+            <input type="checkbox" id="notifPostSession">
             <span class="toggle-slider"></span>
           </label>
         </div>
@@ -516,7 +472,7 @@
         </div>
         <div class="toggle-wrap">
           <label class="toggle" aria-label="Session booking confirmation">
-            <input type="checkbox" id="notifBookingConfirm" onchange="handleNotifChange()">
+            <input type="checkbox" id="notifBookingConfirm">
             <span class="toggle-slider"></span>
           </label>
         </div>
@@ -529,7 +485,7 @@
         </div>
         <div class="toggle-wrap">
           <label class="toggle" aria-label="Session reminder 24h before">
-            <input type="checkbox" id="notifSessionReminder" onchange="handleNotifChange()">
+            <input type="checkbox" id="notifSessionReminder">
             <span class="toggle-slider"></span>
           </label>
         </div>
@@ -542,7 +498,7 @@
         </div>
         <div class="toggle-wrap">
           <label class="toggle" aria-label="Product updates">
-            <input type="checkbox" id="notifProductUpdates" onchange="handleNotifChange()">
+            <input type="checkbox" id="notifProductUpdates">
             <span class="toggle-slider"></span>
           </label>
         </div>
@@ -560,7 +516,7 @@
         Signs you out of all devices and browsers where you are currently logged in.
       </p>
       <div class="msg" id="signoutMsg"></div>
-      <button class="btn btn-danger" onclick="handleSignOutAll()">Sign out all sessions</button>
+      <button class="btn btn-danger" id="signOutAllBtn">Sign out all sessions</button>
     </div>
   </div>
 
@@ -580,11 +536,11 @@
       <div id="deleteGateSection" style="display:none;">
         <div class="delete-gate">
           <p>
-            <strong>You have an active subscription.</strong> Please cancel your billing plan before deleting
-            your account. Deleting your account does not automatically stop future charges — you must cancel
-            through the billing portal first.
+            <strong>You have an active subscription.</strong> Please cancel your billing plan before
+            deleting your account. Deleting your account does not automatically stop future charges —
+            you must cancel through the billing portal first.
           </p>
-          <button class="btn btn-danger" onclick="openPortal()">Cancel subscription in billing portal</button>
+          <button class="btn btn-danger" id="deleteGatePortalBtn">Cancel subscription in billing portal</button>
         </div>
         <p style="font-size:.72rem;color:var(--muted);line-height:1.5;">
           Once your subscription is cancelled, return here to delete your account.
@@ -593,7 +549,7 @@
 
       <!-- INIT: shown when no active subscription -->
       <div id="deleteInitSection">
-        <button class="btn btn-danger" onclick="initiateDeleteFlow()">Delete my account…</button>
+        <button class="btn btn-danger" id="deleteInitBtn">Delete my account…</button>
       </div>
 
       <!-- CONFIRM: shown after clicking Delete my account… -->
@@ -609,10 +565,8 @@
           autocomplete="off"
         >
         <div style="display:flex;gap:.65rem;flex-wrap:wrap;">
-          <button class="btn btn-danger" id="deleteConfirmBtn" onclick="handleDeleteAccount()">
-            Yes, permanently delete my account
-          </button>
-          <button class="btn btn-outline" onclick="cancelDeleteFlow()">Cancel</button>
+          <button class="btn btn-danger" id="deleteConfirmBtn">Yes, permanently delete my account</button>
+          <button class="btn btn-outline" id="deleteCancelBtn">Cancel</button>
         </div>
       </div>
 
@@ -630,608 +584,621 @@
 
 <script type="module">
 
-  // ─────────────────────────────────────────────────────────
-  // HEADER
-  // ─────────────────────────────────────────────────────────
-  const path = window.location.pathname.replace(/\/$/, '') || '/';
-  document.querySelectorAll('.sil-header__nav a').forEach(a => {
-    const href = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
-    if (href === path) a.classList.add('sil-active');
+import { getBookingEntitlement } from '/booking/entitlement-logic.js';
+
+// ─────────────────────────────────────────────────────────
+// HEADER
+// ─────────────────────────────────────────────────────────
+const path = window.location.pathname.replace(/\/$/, '') || '/';
+document.querySelectorAll('.sil-header__nav a').forEach(a => {
+  const href = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
+  if (href === path) a.classList.add('sil-active');
+});
+
+const menuToggle = document.getElementById('silMenuToggle');
+const silNav     = document.getElementById('silNav');
+if (menuToggle && silNav) {
+  menuToggle.addEventListener('click', () => {
+    const open = silNav.classList.toggle('sil-open');
+    menuToggle.setAttribute('aria-expanded', open);
   });
+  silNav.querySelectorAll('a').forEach(a =>
+    a.addEventListener('click', () => silNav.classList.remove('sil-open'))
+  );
+}
 
-  const menuToggle = document.getElementById('silMenuToggle');
-  const silNav     = document.getElementById('silNav');
-  if (menuToggle && silNav) {
-    menuToggle.addEventListener('click', () => {
-      const open = silNav.classList.toggle('sil-open');
-      menuToggle.setAttribute('aria-expanded', open);
-    });
-    silNav.querySelectorAll('a').forEach(a =>
-      a.addEventListener('click', () => silNav.classList.remove('sil-open'))
-    );
-  }
+function onAuthReady(cb) {
+  if (window._currentUser) { cb(); return; }
+  window.addEventListener('authReady', cb, { once: true });
+}
 
-  function onAuthReady(cb) {
-    if (window._currentUser) { cb(); return; }
-    window.addEventListener('authReady', cb, { once: true });
-  }
+// ─────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────
+function showMsg(id, text, type) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = text;
+  el.className = `msg ${type} show`;
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+function clearMsg(id) {
+  const el = document.getElementById(id);
+  if (el) el.className = 'msg';
+}
+function setLoading(id, loading, label) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.disabled = loading;
+  el.textContent = loading ? 'Please wait…' : label;
+}
+function fmtDate(dateVal) {
+  if (!dateVal) return '—';
+  return new Date(dateVal).toLocaleDateString('en-GB', {
+    day: 'numeric', month: 'long', year: 'numeric',
+  });
+}
 
-  // ─────────────────────────────────────────────────────────
-  // HELPERS
-  // ─────────────────────────────────────────────────────────
-  function showMsg(id, text, type) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.textContent = text;
-    el.className = `msg ${type} show`;
-    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-  function clearMsg(id) {
-    const el = document.getElementById(id);
-    if (el) el.className = 'msg';
-  }
-  function setLoading(id, loading, label) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.disabled = loading;
-    el.textContent = loading ? 'Please wait…' : label;
-  }
-  function fmtDate(iso) {
-    if (!iso) return '—';
-    return new Date(iso).toLocaleDateString('en-GB', {
-      day: 'numeric', month: 'long', year: 'numeric',
-    });
-  }
+// ─────────────────────────────────────────────────────────
+// PASSWORD STRENGTH
+// ─────────────────────────────────────────────────────────
+function updateStrength(inputId, barId) {
+  const input = document.getElementById(inputId);
+  const bar   = document.getElementById(barId);
+  if (!input || !bar) return;
+  input.addEventListener('input', function () {
+    const v = this.value;
+    let score = 0;
+    if (v.length >= 8)           score++;
+    if (v.length >= 12)          score++;
+    if (/[A-Z]/.test(v))         score++;
+    if (/[0-9]/.test(v))         score++;
+    if (/[^A-Za-z0-9]/.test(v))  score++;
+    bar.style.width      = (score / 5 * 100) + '%';
+    bar.style.background = score <= 1 ? '#c0392b' : score <= 3 ? '#e67e22' : '#2a5c45';
+  });
+}
+updateStrength('newPw',      'newPwStrength');
+updateStrength('recoveryPw', 'recoveryPwStrength');
 
-  // ─────────────────────────────────────────────────────────
-  // PASSWORD STRENGTH
-  // Null-guarded: recovery card is hidden by default so both
-  // inputs exist in the DOM, but guard defensively anyway.
-  // ─────────────────────────────────────────────────────────
-  function updateStrength(inputId, barId) {
-    const input = document.getElementById(inputId);
-    const bar   = document.getElementById(barId);
-    if (!input || !bar) return;
-    input.addEventListener('input', function () {
-      const v = this.value;
-      let score = 0;
-      if (v.length >= 8)           score++;
-      if (v.length >= 12)          score++;
-      if (/[A-Z]/.test(v))         score++;
-      if (/[0-9]/.test(v))         score++;
-      if (/[^A-Za-z0-9]/.test(v))  score++;
-      bar.style.width      = (score / 5 * 100) + '%';
-      bar.style.background = score <= 1 ? '#c0392b' : score <= 3 ? '#e67e22' : '#2a5c45';
-    });
-  }
-  updateStrength('newPw',      'newPwStrength');
-  updateStrength('recoveryPw', 'recoveryPwStrength');
+// ─────────────────────────────────────────────────────────
+// RECOVERY MODE
+// ─────────────────────────────────────────────────────────
+function enterRecoveryMode() {
+  document.getElementById('resetBanner').style.display          = 'block';
+  document.getElementById('changePasswordCard').style.display   = 'none';
+  document.getElementById('recoveryPasswordCard').style.display = 'block';
+  setTimeout(() => {
+    document.getElementById('resetBanner').scrollIntoView({ behavior: 'smooth' });
+  }, 150);
+}
 
-  // ─────────────────────────────────────────────────────────
-  // RECOVERY MODE
-  // Listen for Supabase's PASSWORD_RECOVERY auth event.
-  // This fires when the user arrives via the reset-password
-  // email link. auth-guard.js consumes the hash tokens and
-  // signs the user in, then emits this event — so we must
-  // listen via onAuthStateChange rather than reading the hash.
-  // ─────────────────────────────────────────────────────────
-  function enterRecoveryMode() {
-    document.getElementById('resetBanner').style.display          = 'block';
-    document.getElementById('changePasswordCard').style.display   = 'none';
-    document.getElementById('recoveryPasswordCard').style.display = 'block';
-    setTimeout(() => {
-      document.getElementById('resetBanner').scrollIntoView({ behavior: 'smooth' });
-    }, 150);
-  }
+// Register as early as possible — before onAuthReady
+(async () => {
+  const waitForSupabase = () => new Promise(resolve => {
+    if (window._supabase) { resolve(window._supabase); return; }
+    const iv = setInterval(() => {
+      if (window._supabase) { clearInterval(iv); resolve(window._supabase); }
+    }, 50);
+  });
+  const sb = await waitForSupabase();
+  sb.auth.onAuthStateChange((event) => {
+    if (event === 'PASSWORD_RECOVERY') enterRecoveryMode();
+  });
+})();
 
-  // Register the listener as early as possible — before onAuthReady —
-  // so we don't miss the event if it fires during page load.
-  (async () => {
-    // Wait for _supabase to be available (set by auth-guard.js)
-    const waitForSupabase = () => new Promise(resolve => {
-      if (window._supabase) { resolve(window._supabase); return; }
-      const iv = setInterval(() => {
-        if (window._supabase) { clearInterval(iv); resolve(window._supabase); }
-      }, 50);
-    });
+// ─────────────────────────────────────────────────────────
+// PLAN CONFIG
+// ─────────────────────────────────────────────────────────
+const PLAN_CONFIG = {
+  free: {
+    label: 'Free', badgeClass: 'badge-free', icon: '◯',
+    statusText: 'Free tier — no subscription', statusClass: 'status-free',
+    includes: ['Regulation Engine', 'Breath Regulation', 'Ear Training', 'Resource Library'],
+  },
+  beta: {
+    label: 'Beta', badgeClass: 'badge-beta', icon: '◈',
+    statusText: 'Beta access — full Lab included', statusClass: 'status-beta',
+    includes: ['Full access to all modules', 'Beta tester — thank you'],
+  },
+  lab: {
+    label: 'Lab', badgeClass: 'badge-paid', icon: '◎',
+    statusText: 'Active subscription', statusClass: 'status-active',
+    includes: ['Full access to all modules', 'Check-In & journaling', 'Spatial Awareness', 'Soundscape Machine', 'Timed journal'],
+  },
+  call1: {
+    label: 'Lab + 1 session', badgeClass: 'badge-paid', icon: '◎',
+    statusText: 'Active subscription', statusClass: 'status-active',
+    includes: ['Full access to all modules', '1 × 50-min video session / month', 'Session scheduling'],
+  },
+  call2: {
+    label: 'Lab + 2 sessions', badgeClass: 'badge-paid', icon: '◎',
+    statusText: 'Active subscription', statusClass: 'status-active',
+    includes: ['Full access to all modules', '2 × 50-min video sessions / month', 'Priority scheduling'],
+  },
+  past_due: {
+    label: 'Payment failed', badgeClass: 'badge-error', icon: '◯',
+    statusText: 'Payment required', statusClass: 'status-error',
+    includes: [],
+  },
+};
 
-    const sb = await waitForSupabase();
-    sb.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        enterRecoveryMode();
-      }
-    });
-  })();
+// ─────────────────────────────────────────────────────────
+// SUBSCRIPTION RENDERING
+// Uses entitlement object from entitlement-logic.js for
+// accurate session counts and period windows.
+// ─────────────────────────────────────────────────────────
 
-  // ─────────────────────────────────────────────────────────
-  // SUBSCRIPTION RENDERING
-  // ─────────────────────────────────────────────────────────
-  const PLAN_CONFIG = {
-    free: {
-      label: 'Free',
-      badgeClass: 'badge-free',
-      icon: '◯',
-      statusText: 'Free tier — no subscription',
-      statusClass: 'status-free',
-      includes: [
-        'Regulation Engine',
-        'Breath Regulation',
-        'Ear Training',
-        'Resource Library',
-      ],
-    },
-    beta: {
-      label: 'Beta',
-      badgeClass: 'badge-beta',
-      icon: '◈',
-      statusText: 'Beta access — full Lab included',
-      statusClass: 'status-beta',
-      includes: [
-        'Full access to all modules',
-        'Beta tester — thank you',
-      ],
-    },
-    lab: {
-      label: 'Lab',
-      badgeClass: 'badge-paid',
-      icon: '◎',
-      statusText: 'Active subscription',
-      statusClass: 'status-active',
-      includes: [
-        'Full access to all modules',
-        'Check-In & journaling',
-        'Spatial Awareness',
-        'Soundscape Machine',
-        'Timed journal',
-      ],
-    },
-    call1: {
-      label: 'Lab + 1 session',
-      badgeClass: 'badge-paid',
-      icon: '◎',
-      statusText: 'Active subscription',
-      statusClass: 'status-active',
-      includes: [
-        'Full access to all modules',
-        '1 × 50-min video session / month',
-        'Session scheduling',
-      ],
-    },
-    call2: {
-      label: 'Lab + 2 sessions',
-      badgeClass: 'badge-paid',
-      icon: '◎',
-      statusText: 'Active subscription',
-      statusClass: 'status-active',
-      includes: [
-        'Full access to all modules',
-        '2 × 50-min video sessions / month',
-        'Priority scheduling',
-      ],
-    },
-  };
+// Tracks whether the user has a real Stripe subscription —
+// used by the delete account gate.
+let _userHasActiveStripeSubscription = false;
 
-  let _userHasActiveSubscription = false;
+function renderSubscription(profile, ent) {
+  const tier              = profile.subscription_tier   ?? 'free';
+  const status            = profile.subscription_status ?? 'free';
+  const isBeta            = profile.is_beta             ?? false;
+  const cancelAtPeriodEnd = profile.cancel_at_period_end ?? false;
+  const isPastDue         = status === 'past_due';
+  const isActive          = status === 'active' || status === 'trialing';
 
-  function renderSubscription(profile, bookingsUsed) {
-    const tier     = profile.subscription_tier   ?? 'free';
-    const status   = profile.subscription_status ?? 'free';
-    const isBeta   = profile.is_beta             ?? false;
-    const isActive = status === 'active' || status === 'trialing';
+  // Gate is based on real Stripe subscription presence, not just tier
+  _userHasActiveStripeSubscription =
+    !!profile.stripe_subscription_id && isActive;
 
-    _userHasActiveSubscription = isActive && !isBeta;
+  let configKey;
+  if (isPastDue)      configKey = 'past_due';
+  else if (isBeta)    configKey = 'beta';
+  else if (isActive)  configKey = tier;
+  else                configKey = 'free';
 
-    const configKey = isBeta ? 'beta' : (isActive ? tier : 'free');
-    const cfg = PLAN_CONFIG[configKey] || PLAN_CONFIG.free;
+  const cfg = PLAN_CONFIG[configKey] || PLAN_CONFIG.free;
 
-    const badge = document.getElementById('planBadge');
-    badge.textContent = cfg.label;
-    badge.className   = `plan-badge ${cfg.badgeClass}`;
+  // Update badge
+  const badge = document.getElementById('planBadge');
+  badge.textContent = cfg.label;
+  badge.className   = `plan-badge ${cfg.badgeClass}`;
 
-    const periodEnd = profile.current_period_end ? fmtDate(profile.current_period_end) : null;
-
-    let sessionPipsHtml = '';
-    if ((configKey === 'call1' || configKey === 'call2') && isActive) {
-      const total = configKey === 'call1' ? 1 : 2;
-      const used  = Math.min(bookingsUsed || 0, total);
-      const avail = total - used;
-      let pips = '';
-      for (let i = 0; i < used; i++)  pips += `<div class="session-pip used"  title="Used">✓</div>`;
-      for (let i = 0; i < avail; i++) pips += `<div class="session-pip available" title="Available">→</div>`;
-      const label = avail > 0
-        ? `${avail} session${avail > 1 ? 's' : ''} remaining this period`
-        : 'All sessions used this period';
-      sessionPipsHtml = `
-        <div class="session-usage">
-          <div class="session-usage-label">Sessions this period</div>
-          <div class="session-pips">${pips}<span class="session-pip-label">${label}</span></div>
-        </div>`;
+  // ── Session pips (call1/call2, using entitlement for accuracy) ──
+  let sessionPipsHtml = '';
+  if ((tier === 'call1' || tier === 'call2') && isActive && ent) {
+    const total = ent.sessionsAvailable;
+    const used  = ent.sessionsUsed;
+    const avail = ent.sessionsRemaining;
+    let pips = '';
+    for (let i = 0; i < used; i++)
+      pips += `<div class="session-pip used" title="Used">✓</div>`;
+    for (let i = 0; i < avail; i++)
+      pips += `<div class="session-pip available" title="Available">→</div>`;
+    // If carry-over expanded the total beyond base, show extra used pips
+    if (total > (tier === 'call2' ? 2 : 1)) {
+      // already accounted for in used/avail above
     }
-
-    const includesHtml = cfg.includes.map(f => `<li>${f}</li>`).join('');
-
-    const billingActionsHtml = (() => {
-      if (isBeta) {
-        return `<div class="billing-actions">
-          <a href="/subscribe/" class="billing-link outline">View plans</a>
-        </div>`;
-      }
-      if (isActive) {
-        return `<div class="billing-actions">
-          <button class="billing-link primary" onclick="openPortal()">Manage billing</button>
-          <a href="/subscribe/" class="billing-link outline">Change plan</a>
-        </div>`;
-      }
-      return `<div class="billing-actions">
-        <a href="/subscribe/" class="billing-link primary">Upgrade</a>
+    const label = avail > 0
+      ? `${avail} session${avail > 1 ? 's' : ''} remaining this period`
+      : 'All sessions used this period';
+    const periodStr = (ent.windowStart && ent.windowEnd)
+      ? ` · ${new Date(ent.windowStart).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}–${new Date(ent.windowEnd).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`
+      : '';
+    sessionPipsHtml = `
+      <div class="session-usage">
+        <div class="session-usage-label">Sessions this period${periodStr}</div>
+        <div class="session-pips">${pips}<span class="session-pip-label">${label}</span></div>
+        ${ent.carryOver > 0 ? `<div style="font-size:.7rem;color:var(--muted);margin-top:.4rem;">Includes ${ent.carryOver} carried over from last month</div>` : ''}
       </div>`;
-    })();
+  }
 
-    const periodHtml = isActive && periodEnd
-      ? `<p class="period-info">Next renewal: ${periodEnd}. You can cancel anytime via "Manage billing".</p>`
-      : (!isBeta && !isActive && tier !== 'free')
-        ? `<p class="period-info" style="color:var(--error)">Subscription inactive — your plan may have lapsed. <a href="/subscribe/">Renew here</a>.</p>`
-        : '';
+  // ── What's included ──
+  const includesHtml = cfg.includes.length
+    ? `<ul class="includes-list">${cfg.includes.map(f => `<li>${f}</li>`).join('')}</ul>`
+    : '';
 
-    document.getElementById('subscriptionBody').innerHTML = `
-      <div class="plan-header">
-        <div class="plan-icon">${cfg.icon}</div>
-        <div class="plan-header-text">
-          <div class="plan-header-name">${cfg.label}</div>
-          <div class="plan-header-status">
-            <span class="${cfg.statusClass}">${cfg.statusText}</span>
-          </div>
+  // ── Billing actions ──
+  let billingActionsHtml = '';
+  if (isPastDue) {
+    billingActionsHtml = `<div class="billing-actions">
+      <button class="billing-link warning-btn" id="portalBtnMain">Update payment in billing portal</button>
+    </div>`;
+  } else if (isBeta) {
+    billingActionsHtml = `<div class="billing-actions">
+      <a href="/subscribe/" class="billing-link outline">View plans</a>
+    </div>`;
+  } else if (isActive) {
+    billingActionsHtml = `<div class="billing-actions">
+      <button class="billing-link primary" id="portalBtnMain">Manage billing</button>
+      <a href="/subscribe/" class="billing-link outline">Change plan</a>
+    </div>`;
+  } else {
+    billingActionsHtml = `<div class="billing-actions">
+      <a href="/subscribe/" class="billing-link primary">Upgrade</a>
+    </div>`;
+  }
+
+  // ── Period / status info ──
+  let periodHtml = '';
+  if (isPastDue) {
+    periodHtml = `<div class="past-due-notice">
+      <strong>Your last payment failed.</strong>
+      Access to paid features may be restricted. Update your payment method via the billing portal to restore your subscription.
+    </div>`;
+  } else if (isActive && cancelAtPeriodEnd && profile.current_period_end) {
+    periodHtml = `<div class="cancel-scheduled-notice">
+      <strong>Your plan is scheduled to cancel on ${fmtDate(profile.current_period_end)}.</strong>
+      You'll keep access until then. To keep your plan, reactivate it via "Manage billing".
+    </div>`;
+  } else if (isActive && profile.current_period_end) {
+    periodHtml = `<p class="period-info">Next renewal: ${fmtDate(profile.current_period_end)}. You can cancel anytime via "Manage billing".</p>`;
+  } else if (!isBeta && !isActive && tier !== 'free') {
+    periodHtml = `<p class="period-info" style="color:var(--error)">Subscription inactive. <a href="/subscribe/">Resubscribe here</a>.</p>`;
+  }
+
+  document.getElementById('subscriptionBody').innerHTML = `
+    <div class="plan-header">
+      <div class="plan-icon">${cfg.icon}</div>
+      <div class="plan-header-text">
+        <div class="plan-header-name">${cfg.label}</div>
+        <div class="plan-header-status">
+          <span class="${cfg.statusClass}">${cfg.statusText}</span>
         </div>
       </div>
-      ${sessionPipsHtml}
-      <ul class="includes-list">${includesHtml}</ul>
-      ${billingActionsHtml}
-      ${periodHtml}
-    `;
-  }
+    </div>
+    ${sessionPipsHtml}
+    ${includesHtml}
+    ${billingActionsHtml}
+    ${periodHtml}
+  `;
 
-  // ─────────────────────────────────────────────────────────
-  // STRIPE PORTAL
-  // ─────────────────────────────────────────────────────────
-  window.openPortal = async function () {
-    const sb  = window._supabase;
-    const btn = event?.target;
-    if (btn) { btn.disabled = true; btn.textContent = 'Opening…'; }
-    try {
-      const { data: { session } } = await sb.auth.getSession();
-      const res = await fetch('/.netlify/functions/create-portal-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type':  'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-      });
-      if (!res.ok) throw new Error('Could not open billing portal.');
-      const { url } = await res.json();
-      window.location.href = url;
-    } catch (err) {
-      showMsg('signoutMsg', err.message, 'error');
-      if (btn) { btn.disabled = false; btn.textContent = 'Manage billing'; }
-    }
-  };
-
-  // ─────────────────────────────────────────────────────────
-  // NOTIFICATIONS
-  // ─────────────────────────────────────────────────────────
-  let _notifSaveTimer = null;
-
-  function getNotifPrefs() {
-    return {
-      post_session_reminder: document.getElementById('notifPostSession').checked,
-      booking_confirmation:  document.getElementById('notifBookingConfirm').checked,
-      session_reminder_24h:  document.getElementById('notifSessionReminder').checked,
-      product_updates:       document.getElementById('notifProductUpdates').checked,
-    };
-  }
-
-  function applyNotifPrefs(prefs) {
-    if (!prefs) return;
-    document.getElementById('notifPostSession').checked     = prefs.post_session_reminder ?? true;
-    document.getElementById('notifBookingConfirm').checked  = prefs.booking_confirmation  ?? true;
-    document.getElementById('notifSessionReminder').checked = prefs.session_reminder_24h  ?? true;
-    document.getElementById('notifProductUpdates').checked  = prefs.product_updates       ?? true;
-  }
-
-  window.handleNotifChange = function () {
-    const status = document.getElementById('notifSaveStatus');
-    status.textContent = 'Saving…';
-    clearTimeout(_notifSaveTimer);
-    _notifSaveTimer = setTimeout(saveNotifPrefs, 800);
-  };
-
-  async function saveNotifPrefs() {
-    const status = document.getElementById('notifSaveStatus');
-    try {
-      const { error } = await window._supabase
-        .from('profiles')
-        .update({
-          notification_preferences: getNotifPrefs(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', window._currentUser.id);
-      if (error) throw error;
-      status.textContent = 'Saved';
-      setTimeout(() => { status.textContent = ''; }, 2000);
-    } catch (err) {
-      status.textContent = '';
-      showMsg('notifMsg', 'Could not save preferences: ' + err.message, 'error');
-    }
-  }
-
-  // ─────────────────────────────────────────────────────────
-  // INIT — runs once auth is ready
-  // ─────────────────────────────────────────────────────────
-  onAuthReady(async () => {
-    const supabase = window._supabase;
-    const user     = window._currentUser;
-
-    document.getElementById('displayEmail').textContent     = user.email || '—';
-    document.getElementById('displayCreatedAt').textContent = fmtDate(user.created_at);
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('full_name, subscription_tier, subscription_status, is_beta, current_period_end, notification_preferences')
-      .eq('id', user.id)
-      .single();
-
-    if (profile) {
-      document.getElementById('displayName').textContent = profile.full_name || 'Not set';
-      document.getElementById('nameInput').value         = profile.full_name || '';
-
-      const defaultPrefs = {
-        post_session_reminder: true,
-        booking_confirmation:  true,
-        session_reminder_24h:  true,
-        product_updates:       true,
-      };
-      applyNotifPrefs(profile.notification_preferences ?? defaultPrefs);
-
-      // Load session bookings for call1/call2 users
-      let bookingsUsed = 0;
-      const tier     = profile.subscription_tier   ?? 'free';
-      const status   = profile.subscription_status ?? 'free';
-      const isActive = status === 'active' || status === 'trialing';
-
-      if (isActive && (tier === 'call1' || tier === 'call2')) {
-        const periodEnd   = profile.current_period_end ? new Date(profile.current_period_end) : null;
-        const periodStart = periodEnd
-          ? new Date(periodEnd.getFullYear(), periodEnd.getMonth() - 1, periodEnd.getDate())
-          : null;
-
-        if (periodStart && periodEnd) {
-          const { data: bookings } = await supabase
-            .from('bookings')
-            .select('id')
-            .eq('user_id', user.id)
-            .eq('event_type', 'subscriber-session')
-            .gte('scheduled_at', periodStart.toISOString())
-            .lte('scheduled_at', periodEnd.toISOString())
-            .in('status', ['scheduled']);   // counts scheduled as consumed
-          bookingsUsed = (bookings || []).length;
-        }
-      }
-
-      renderSubscription(profile, bookingsUsed);
-    }
-
-    // Page ready
-    document.getElementById('mainContent').classList.add('ready');
+  // Wire portal button(s) after innerHTML — no event.target needed
+  document.getElementById('portalBtnMain')?.addEventListener('click', function () {
+    openPortal(this);
   });
+}
 
-  // ─────────────────────────────────────────────────────────
-  // UPDATE NAME
-  // ─────────────────────────────────────────────────────────
-  window.handleNameUpdate = async function () {
-    clearMsg('nameMsg');
-    const name = document.getElementById('nameInput').value.trim();
-    if (!name) { showMsg('nameMsg', 'Please enter a name.', 'error'); return; }
-    setLoading('nameBtn', true, 'Save name');
+// ─────────────────────────────────────────────────────────
+// STRIPE PORTAL
+// Takes an explicit button reference — no event.target
+// ─────────────────────────────────────────────────────────
+async function openPortal(btn) {
+  const sb = window._supabase;
+  if (!sb) return;
+  if (btn) { btn.disabled = true; btn.textContent = 'Opening…'; }
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const res = await fetch('/.netlify/functions/create-portal-session', {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+    });
+    if (!res.ok) throw new Error('Could not open billing portal.');
+    const { url } = await res.json();
+    window.location.href = url;
+  } catch (err) {
+    showMsg('signoutMsg', err.message, 'error');
+    if (btn) { btn.disabled = false; btn.textContent = 'Manage billing'; }
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// NOTIFICATIONS
+// ─────────────────────────────────────────────────────────
+let _notifSaveTimer = null;
+
+function getNotifPrefs() {
+  return {
+    post_session_reminder: document.getElementById('notifPostSession').checked,
+    booking_confirmation:  document.getElementById('notifBookingConfirm').checked,
+    session_reminder_24h:  document.getElementById('notifSessionReminder').checked,
+    product_updates:       document.getElementById('notifProductUpdates').checked,
+  };
+}
+
+function applyNotifPrefs(prefs) {
+  if (!prefs) return;
+  document.getElementById('notifPostSession').checked     = prefs.post_session_reminder ?? true;
+  document.getElementById('notifBookingConfirm').checked  = prefs.booking_confirmation  ?? true;
+  document.getElementById('notifSessionReminder').checked = prefs.session_reminder_24h  ?? true;
+  document.getElementById('notifProductUpdates').checked  = prefs.product_updates       ?? true;
+}
+
+function handleNotifChange() {
+  const status = document.getElementById('notifSaveStatus');
+  status.textContent = 'Saving…';
+  clearTimeout(_notifSaveTimer);
+  _notifSaveTimer = setTimeout(saveNotifPrefs, 800);
+}
+
+async function saveNotifPrefs() {
+  const status = document.getElementById('notifSaveStatus');
+  try {
     const { error } = await window._supabase
       .from('profiles')
-      .update({ full_name: name, updated_at: new Date().toISOString() })
+      .update({ notification_preferences: getNotifPrefs(), updated_at: new Date().toISOString() })
       .eq('id', window._currentUser.id);
-    setLoading('nameBtn', false, 'Save name');
-    if (error) { showMsg('nameMsg', error.message, 'error'); return; }
-    document.getElementById('displayName').textContent = name;
-    showMsg('nameMsg', 'Name updated.', 'success');
-  };
+    if (error) throw error;
+    status.textContent = 'Saved';
+    setTimeout(() => { status.textContent = ''; }, 2000);
+  } catch (err) {
+    status.textContent = '';
+    showMsg('notifMsg', 'Could not save preferences: ' + err.message, 'error');
+  }
+}
 
-  // ─────────────────────────────────────────────────────────
-  // CHANGE EMAIL
-  // ─────────────────────────────────────────────────────────
-  window.handleEmailChange = async function () {
-    clearMsg('emailMsg');
-    const email = document.getElementById('emailInput').value.trim();
-    if (!email) { showMsg('emailMsg', 'Please enter an email address.', 'error'); return; }
-    if (email === window._currentUser.email) {
-      showMsg('emailMsg', 'That is your current email address.', 'warning');
-      return;
-    }
-    setLoading('emailBtn', true, 'Send confirmation');
-    const { error } = await window._supabase.auth.updateUser(
-      { email },
-      { emailRedirectTo: 'https://lab.jordanelias.de/account/' }
-    );
-    setLoading('emailBtn', false, 'Send confirmation');
-    if (error) { showMsg('emailMsg', error.message, 'error'); return; }
-    showMsg('emailMsg', `A confirmation link has been sent to ${email}.`, 'success');
-    document.getElementById('emailInput').value = '';
-  };
+// ─────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────
+onAuthReady(async () => {
+  const supabase = window._supabase;
+  const user     = window._currentUser;
 
-  // ─────────────────────────────────────────────────────────
-  // CHANGE PASSWORD (normal mode — requires current password)
-  // ─────────────────────────────────────────────────────────
-  window.handlePasswordChange = async function () {
-    clearMsg('passwordMsg');
-    const current = document.getElementById('currentPw').value;
-    const next    = document.getElementById('newPw').value;
-    const confirm = document.getElementById('newPwConfirm').value;
-    if (!current || !next || !confirm) {
-      showMsg('passwordMsg', 'Please fill in all fields.', 'error'); return;
-    }
-    if (next.length < 8) {
-      showMsg('passwordMsg', 'New password must be at least 8 characters.', 'error'); return;
-    }
-    if (next !== confirm) {
-      showMsg('passwordMsg', 'New passwords do not match.', 'error'); return;
-    }
-    setLoading('passwordBtn', true, 'Update password');
-    // Re-authenticate first to verify current password
-    const { error: reAuthError } = await window._supabase.auth.signInWithPassword({
-      email: window._currentUser.email, password: current,
+  document.getElementById('displayEmail').textContent     = user.email || '—';
+  document.getElementById('displayCreatedAt').textContent = fmtDate(user.created_at);
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select([
+      'full_name',
+      'subscription_tier',
+      'subscription_status',
+      'subscription_plan',
+      'is_beta',
+      'current_period_end',
+      'current_period_start',
+      'cancel_at_period_end',
+      'stripe_subscription_id',
+      'notification_preferences',
+    ].join(', '))
+    .eq('id', user.id)
+    .single();
+
+  if (profile) {
+    document.getElementById('displayName').textContent = profile.full_name || 'Not set';
+    document.getElementById('nameInput').value         = profile.full_name || '';
+
+    applyNotifPrefs(profile.notification_preferences ?? {
+      post_session_reminder: true,
+      booking_confirmation:  true,
+      session_reminder_24h:  true,
+      product_updates:       true,
     });
-    if (reAuthError) {
-      setLoading('passwordBtn', false, 'Update password');
-      showMsg('passwordMsg', 'Current password is incorrect.', 'error');
-      return;
+
+    // Use getBookingEntitlement for accurate session counts (anchor-day windows,
+    // carry-over) — same calculation as the booking page.
+    let ent = null;
+    const tier     = profile.subscription_tier   ?? 'free';
+    const status   = profile.subscription_status ?? 'free';
+    const isActive = status === 'active' || status === 'trialing';
+    if (isActive && (tier === 'call1' || tier === 'call2')) {
+      try {
+        ent = await getBookingEntitlement(supabase, user.id);
+      } catch (e) {
+        console.warn('Could not load entitlement for account page:', e.message);
+      }
     }
-    const { error } = await window._supabase.auth.updateUser({ password: next });
+
+    renderSubscription(profile, ent);
+  }
+
+  // Wire notification toggles
+  ['notifPostSession', 'notifBookingConfirm', 'notifSessionReminder', 'notifProductUpdates'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', handleNotifChange);
+  });
+
+  // Wire form buttons — no inline onclick handlers
+  document.getElementById('nameBtn').addEventListener('click', handleNameUpdate);
+  document.getElementById('emailBtn').addEventListener('click', handleEmailChange);
+  document.getElementById('passwordBtn').addEventListener('click', handlePasswordChange);
+  document.getElementById('recoveryPwBtn').addEventListener('click', handleRecoveryPasswordSet);
+  document.getElementById('signOutAllBtn').addEventListener('click', handleSignOutAll);
+  document.getElementById('silSignOut').addEventListener('click', handleSignOut);
+  document.getElementById('deleteInitBtn').addEventListener('click', initiateDeleteFlow);
+  document.getElementById('deleteCancelBtn').addEventListener('click', cancelDeleteFlow);
+  document.getElementById('deleteConfirmBtn').addEventListener('click', handleDeleteAccount);
+  document.getElementById('deleteGatePortalBtn').addEventListener('click', function () {
+    openPortal(this);
+  });
+
+  document.getElementById('mainContent').classList.add('ready');
+});
+
+// ─────────────────────────────────────────────────────────
+// UPDATE NAME
+// ─────────────────────────────────────────────────────────
+async function handleNameUpdate() {
+  clearMsg('nameMsg');
+  const name = document.getElementById('nameInput').value.trim();
+  if (!name) { showMsg('nameMsg', 'Please enter a name.', 'error'); return; }
+  setLoading('nameBtn', true, 'Save name');
+  const { error } = await window._supabase
+    .from('profiles')
+    .update({ full_name: name, updated_at: new Date().toISOString() })
+    .eq('id', window._currentUser.id);
+  setLoading('nameBtn', false, 'Save name');
+  if (error) { showMsg('nameMsg', error.message, 'error'); return; }
+  document.getElementById('displayName').textContent = name;
+  showMsg('nameMsg', 'Name updated.', 'success');
+}
+
+// ─────────────────────────────────────────────────────────
+// CHANGE EMAIL
+// ─────────────────────────────────────────────────────────
+async function handleEmailChange() {
+  clearMsg('emailMsg');
+  const email = document.getElementById('emailInput').value.trim();
+  if (!email) { showMsg('emailMsg', 'Please enter an email address.', 'error'); return; }
+  if (email === window._currentUser.email) {
+    showMsg('emailMsg', 'That is your current email address.', 'warning'); return;
+  }
+  setLoading('emailBtn', true, 'Send confirmation');
+  const { error } = await window._supabase.auth.updateUser(
+    { email },
+    { emailRedirectTo: 'https://lab.jordanelias.de/account/' }
+  );
+  setLoading('emailBtn', false, 'Send confirmation');
+  if (error) { showMsg('emailMsg', error.message, 'error'); return; }
+  showMsg('emailMsg', `A confirmation link has been sent to ${email}.`, 'success');
+  document.getElementById('emailInput').value = '';
+}
+
+// ─────────────────────────────────────────────────────────
+// CHANGE PASSWORD (normal mode)
+// ─────────────────────────────────────────────────────────
+async function handlePasswordChange() {
+  clearMsg('passwordMsg');
+  const current = document.getElementById('currentPw').value;
+  const next    = document.getElementById('newPw').value;
+  const confirm = document.getElementById('newPwConfirm').value;
+  if (!current || !next || !confirm) {
+    showMsg('passwordMsg', 'Please fill in all fields.', 'error'); return;
+  }
+  if (next.length < 8) {
+    showMsg('passwordMsg', 'New password must be at least 8 characters.', 'error'); return;
+  }
+  if (next !== confirm) {
+    showMsg('passwordMsg', 'New passwords do not match.', 'error'); return;
+  }
+  setLoading('passwordBtn', true, 'Update password');
+  const { error: reAuthError } = await window._supabase.auth.signInWithPassword({
+    email: window._currentUser.email, password: current,
+  });
+  if (reAuthError) {
     setLoading('passwordBtn', false, 'Update password');
-    if (error) { showMsg('passwordMsg', error.message, 'error'); return; }
-    showMsg('passwordMsg', 'Password updated successfully.', 'success');
-    ['currentPw', 'newPw', 'newPwConfirm'].forEach(id =>
-      document.getElementById(id).value = ''
-    );
-  };
+    showMsg('passwordMsg', 'Current password is incorrect.', 'error');
+    return;
+  }
+  const { error } = await window._supabase.auth.updateUser({ password: next });
+  setLoading('passwordBtn', false, 'Update password');
+  if (error) { showMsg('passwordMsg', error.message, 'error'); return; }
+  showMsg('passwordMsg', 'Password updated successfully.', 'success');
+  ['currentPw', 'newPw', 'newPwConfirm'].forEach(id =>
+    document.getElementById(id).value = ''
+  );
+}
 
-  // ─────────────────────────────────────────────────────────
-  // SET PASSWORD (recovery mode — no current password needed,
-  // user is already signed in via the magic link token)
-  // ─────────────────────────────────────────────────────────
-  window.handleRecoveryPasswordSet = async function () {
-    clearMsg('recoveryMsg');
-    const pw  = document.getElementById('recoveryPw').value;
-    const pwc = document.getElementById('recoveryPwConfirm').value;
-    if (!pw || !pwc) {
-      showMsg('recoveryMsg', 'Please fill in both fields.', 'error'); return;
-    }
-    if (pw.length < 8) {
-      showMsg('recoveryMsg', 'Password must be at least 8 characters.', 'error'); return;
-    }
-    if (pw !== pwc) {
-      showMsg('recoveryMsg', 'Passwords do not match.', 'error'); return;
-    }
+// ─────────────────────────────────────────────────────────
+// SET PASSWORD (recovery mode)
+// ─────────────────────────────────────────────────────────
+async function handleRecoveryPasswordSet() {
+  clearMsg('recoveryMsg');
+  const pw  = document.getElementById('recoveryPw').value;
+  const pwc = document.getElementById('recoveryPwConfirm').value;
+  if (!pw || !pwc) {
+    showMsg('recoveryMsg', 'Please fill in both fields.', 'error'); return;
+  }
+  if (pw.length < 8) {
+    showMsg('recoveryMsg', 'Password must be at least 8 characters.', 'error'); return;
+  }
+  if (pw !== pwc) {
+    showMsg('recoveryMsg', 'Passwords do not match.', 'error'); return;
+  }
+  setLoading('recoveryPwBtn', true, 'Save new password');
+  const { error } = await window._supabase.auth.updateUser({ password: pw });
+  setLoading('recoveryPwBtn', false, 'Save new password');
+  if (error) { showMsg('recoveryMsg', error.message, 'error'); return; }
+  history.replaceState(null, '', window.location.pathname);
+  document.getElementById('resetBanner').style.display          = 'none';
+  document.getElementById('recoveryPasswordCard').style.display = 'none';
+  document.getElementById('changePasswordCard').style.display   = 'block';
+  showMsg('passwordMsg', 'Password set successfully. You can now sign in with your new password.', 'success');
+  setTimeout(() => {
+    document.getElementById('changePasswordCard').scrollIntoView({ behavior: 'smooth' });
+  }, 100);
+}
 
-    setLoading('recoveryPwBtn', true, 'Save new password');
-    const { error } = await window._supabase.auth.updateUser({ password: pw });
-    setLoading('recoveryPwBtn', false, 'Save new password');
+// ─────────────────────────────────────────────────────────
+// SIGN OUT ALL
+// ─────────────────────────────────────────────────────────
+async function handleSignOutAll() {
+  if (!window.confirm('This will sign you out on all devices. Continue?')) return;
+  showMsg('signoutMsg', 'Signing out everywhere…', 'warning');
+  const { error } = await window._supabase.auth.signOut({ scope: 'global' });
+  if (error) { showMsg('signoutMsg', error.message, 'error'); return; }
+  window.location.replace('/');
+}
 
-    if (error) { showMsg('recoveryMsg', error.message, 'error'); return; }
-
-    // Clean up and return to normal mode
-    history.replaceState(null, '', window.location.pathname);
-    document.getElementById('resetBanner').style.display          = 'none';
-    document.getElementById('recoveryPasswordCard').style.display = 'none';
-    document.getElementById('changePasswordCard').style.display   = 'block';
-    showMsg('passwordMsg', 'Password set successfully. You can now sign in with your new password.', 'success');
-    setTimeout(() => {
-      document.getElementById('changePasswordCard').scrollIntoView({ behavior: 'smooth' });
-    }, 100);
-  };
-
-  // ─────────────────────────────────────────────────────────
-  // SIGN OUT ALL
-  // ─────────────────────────────────────────────────────────
-  window.handleSignOutAll = async function () {
-    if (!window.confirm('This will sign you out on all devices. Continue?')) return;
-    showMsg('signoutMsg', 'Signing out everywhere…', 'warning');
-    const { error } = await window._supabase.auth.signOut({ scope: 'global' });
-    if (error) { showMsg('signoutMsg', error.message, 'error'); return; }
-    window.location.replace('/');
-  };
-
-  // ─────────────────────────────────────────────────────────
-  // DELETE ACCOUNT FLOW
-  // ─────────────────────────────────────────────────────────
-  window.initiateDeleteFlow = function () {
-    clearMsg('deleteMsg');
-    if (_userHasActiveSubscription) {
-      document.getElementById('deleteInitSection').style.display  = 'none';
-      document.getElementById('deleteGateSection').style.display  = 'block';
-      document.getElementById('deleteGateSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      return;
-    }
+// ─────────────────────────────────────────────────────────
+// DELETE ACCOUNT FLOW
+// ─────────────────────────────────────────────────────────
+function initiateDeleteFlow() {
+  clearMsg('deleteMsg');
+  if (_userHasActiveStripeSubscription) {
     document.getElementById('deleteInitSection').style.display    = 'none';
-    document.getElementById('deleteConfirmSection').style.display = 'block';
-    document.getElementById('deleteConfirmInput').focus();
-  };
+    document.getElementById('deleteGateSection').style.display    = 'block';
+    document.getElementById('deleteGateSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    return;
+  }
+  document.getElementById('deleteInitSection').style.display    = 'none';
+  document.getElementById('deleteConfirmSection').style.display = 'block';
+  document.getElementById('deleteConfirmInput').focus();
+}
 
-  window.cancelDeleteFlow = function () {
-    document.getElementById('deleteInitSection').style.display    = 'block';
-    document.getElementById('deleteConfirmSection').style.display = 'none';
-    document.getElementById('deleteGateSection').style.display    = 'none';
-    document.getElementById('deleteConfirmInput').value           = '';
-    clearMsg('deleteMsg');
-  };
+function cancelDeleteFlow() {
+  document.getElementById('deleteInitSection').style.display    = 'block';
+  document.getElementById('deleteConfirmSection').style.display = 'none';
+  document.getElementById('deleteGateSection').style.display    = 'none';
+  document.getElementById('deleteConfirmInput').value           = '';
+  clearMsg('deleteMsg');
+}
 
-  window.handleDeleteAccount = async function () {
-    const input = document.getElementById('deleteConfirmInput').value.trim();
-    if (input !== 'DELETE') {
-      showMsg('deleteMsg', 'Please type DELETE exactly to confirm.', 'error');
-      return;
+async function handleDeleteAccount() {
+  const input = document.getElementById('deleteConfirmInput').value.trim();
+  if (input !== 'DELETE') {
+    showMsg('deleteMsg', 'Please type DELETE exactly to confirm.', 'error'); return;
+  }
+  if (_userHasActiveStripeSubscription) {
+    showMsg('deleteMsg', 'You still have an active subscription. Please cancel it via the billing portal before deleting your account.', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('deleteConfirmBtn');
+  btn.disabled = true; btn.textContent = 'Deleting…';
+
+  try {
+    const supabase = window._supabase;
+    const user     = window._currentUser;
+    if (!supabase || !user) throw new Error('Not signed in.');
+
+    // Remove storage objects
+    const { data: storageFiles } = await supabase.storage
+      .from('recordings').list(user.id + '/');
+    if (storageFiles && storageFiles.length > 0) {
+      const paths = storageFiles.map(f => user.id + '/' + f.name);
+      await supabase.storage.from('recordings').remove(paths);
     }
-    if (_userHasActiveSubscription) {
-      showMsg('deleteMsg', 'You still have an active subscription. Please cancel it via the billing portal before deleting your account.', 'error');
-      return;
+
+    // Server-side deletion
+    const { data: { session } } = await supabase.auth.getSession();
+    const res = await fetch('/.netlify/functions/delete-account', {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+    });
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || 'Account deletion failed. Please try again or contact support.');
     }
 
-    const btn = document.getElementById('deleteConfirmBtn');
-    btn.disabled    = true;
-    btn.textContent = 'Deleting…';
+    await supabase.auth.signOut();
+    window.location.replace('/?deleted=true');
 
-    try {
-      const supabase = window._supabase;
-      const user     = window._currentUser;
-      if (!supabase || !user) throw new Error('Not signed in.');
+  } catch (err) {
+    showMsg('deleteMsg', err.message || 'Could not delete account. Please try again.', 'error');
+    btn.disabled = false; btn.textContent = 'Yes, permanently delete my account';
+  }
+}
 
-      // Remove storage objects
-      const { data: storageFiles } = await supabase.storage
-        .from('recordings')
-        .list(user.id + '/');
-      if (storageFiles && storageFiles.length > 0) {
-        const paths = storageFiles.map(f => user.id + '/' + f.name);
-        await supabase.storage.from('recordings').remove(paths);
-      }
-
-      // Server-side deletion
-      const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch('/.netlify/functions/delete-account', {
-        method: 'POST',
-        headers: {
-          'Content-Type':  'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-      });
-
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error || 'Account deletion failed. Please try again or contact support.');
-      }
-
-      await supabase.auth.signOut();
-      window.location.replace('/?deleted=true');
-
-    } catch (err) {
-      showMsg('deleteMsg', err.message || 'Could not delete account. Please try again.', 'error');
-      btn.disabled    = false;
-      btn.textContent = 'Yes, permanently delete my account';
-    }
-  };
-
-  // ─────────────────────────────────────────────────────────
-  // SIGN OUT (header button)
-  // ─────────────────────────────────────────────────────────
-  window.handleSignOut = async function () {
-    const btn = document.getElementById('silSignOut');
-    btn.disabled = true; btn.textContent = 'Signing out…';
-    try { await window._supabase.auth.signOut(); }
-    finally { window.location.replace('/'); }
-  };
+// ─────────────────────────────────────────────────────────
+// SIGN OUT (header)
+// ─────────────────────────────────────────────────────────
+async function handleSignOut() {
+  const btn = document.getElementById('silSignOut');
+  btn.disabled = true; btn.textContent = 'Signing out…';
+  try { await window._supabase.auth.signOut(); }
+  finally { window.location.replace('/'); }
+}
 
 </script>
 </body>
