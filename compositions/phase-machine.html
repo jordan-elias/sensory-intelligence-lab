@@ -327,7 +327,7 @@
     </div>
 
     <div class="row">
-      <button class="btn primary" id="pm-play" style="min-width:80px">▶ Play</button>
+      <button class="btn primary" id="pm-play" style="min-width:80px"><svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> Play</button>
       <button class="btn" id="pm-reset" style="min-width:80px">Reset</button>
     </div>
 
@@ -490,7 +490,7 @@ function resetMachine(){
 
 function setPlayBtn(on){
   var b=document.getElementById('pm-play');
-  b.textContent=on?'⏸ Stop':'▶ Play';
+  b.innerHTML = on ? '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect x="0" y="0" width="3" height="10"/><rect x="7" y="0" width="3" height="10"/></svg> Stop' : '<svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> Play';
   b.classList.toggle('on',on);
 }
 
