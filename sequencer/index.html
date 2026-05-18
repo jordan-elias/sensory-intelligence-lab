@@ -603,7 +603,7 @@
 
     <!-- TRANSPORT -->
     <div class="transport" id="transport">
-      <button class="tbtn play-btn" id="btn-play" onclick="SEQ.togglePlay()">▶ play</button>
+      <button class="tbtn play-btn" id="btn-play" onclick="SEQ.togglePlay()"><svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> play</button>
       <div class="t-sep"></div>
 
       <div class="tempo-group">
@@ -706,7 +706,7 @@
           <button class="chain-add-btn" onclick="SEQ.addChainStep()">+ add</button>
           <button class="chain-clear-btn" onclick="SEQ.clearChain()">clear chain</button>
           <div style="flex:1"></div>
-          <button class="chain-add-btn" onclick="SEQ.exportWav()" id="btn-export" title="Render current loop or chain to WAV file">⬇ export WAV</button>
+          <button class="chain-add-btn" onclick="SEQ.exportWav()" id="btn-export" title="Render current loop or chain to WAV file"><svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M5 0v7M1 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none"/></svg> export WAV</button>
         </div>
         <div class="chain-mode-note" id="chainNote">No chain — Loop 1 repeats continuously.</div>
       </div>
@@ -1562,12 +1562,12 @@ const SEQ = window.SEQ = {
       chainPos     = 0;
       chainReps    = 0;
       nextStepTime = AC.currentTime + 0.05;
-      btn.textContent = '■ stop';
+      btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg> stop';
       btn.classList.add('playing');
       scheduler();
     } else {
       clearTimeout(scheduleTimer);
-      btn.textContent = '▶ play';
+      btn.innerHTML = '<svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> play';
       btn.classList.remove('playing');
       // Clear playhead
       document.querySelectorAll('.pad, .step-num').forEach(el => el.classList.remove('playing'));
@@ -1721,7 +1721,7 @@ const SEQ = window.SEQ = {
       console.error('Export failed', e);
     }
 
-    btn.textContent = '⬇ export WAV';
+    btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M5 0v7M1 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none"/></svg> export WAV';
     btn.style.opacity = '';
     btn.style.pointerEvents = '';
   },
