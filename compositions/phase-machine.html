@@ -272,7 +272,7 @@
       <label  class="upload-lbl" id="pm-ul-lbl" for="pm-file">upload file</label>
       <input  type="file" id="pm-file" accept="audio/*">
       <button class="pill" id="src-mic">microphone</button>
-      <button class="btn" id="pm-rec" style="display:none;min-width:80px">⏺ record</button>
+      <button class="btn" id="pm-rec" style="display:none;min-width:80px"><svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg> record</button>
       <span   class="rec-state" id="pm-rec-state" style="display:none"></span>
       <button class="pill" id="pm-rec-new" style="display:none">record new</button>
     </div>
@@ -298,7 +298,7 @@
           <button class="pill" id="wf-zoom-fit">Fit</button>
         </div>
         <div class="waveform-actions">
-          <button class="btn" id="wf-preview">▶ Preview Selection</button>
+          <button class="btn" id="wf-preview"><svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> Preview Selection</button>
           <button class="btn primary" id="wf-use">Use Selection</button>
           <button class="btn" id="wf-reset">Reset to Full</button>
         </div>
@@ -599,8 +599,8 @@ function stopRec(){if(mediaRec&&isRecording)mediaRec.stop();}
 
 function setRecUI(s){
   var rb=document.getElementById('pm-rec'),sl=document.getElementById('pm-rec-state'),nb=document.getElementById('pm-rec-new');
-  if(s==='idle'){rb.textContent='⏺ record';rb.classList.remove('on');rb.style.display='inline-block';sl.style.display='none';nb.style.display='none';}
-  else if(s==='rec'){rb.textContent='⏹ stop';rb.classList.add('on');rb.style.display='inline-block';sl.style.display='none';nb.style.display='none';}
+  if(s==='idle'){rb.innerHTML='<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg> record';rb.classList.remove('on');rb.style.display='inline-block';sl.style.display='none';nb.style.display='none';}
+  else if(s==='rec'){rb.innerHTML='<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg> stop';rb.classList.add('on');rb.style.display='inline-block';sl.style.display='none';nb.style.display='none';}
   else if(s==='has_rec'){rb.style.display='none';sl.textContent='using recording';sl.style.display='inline';nb.style.display='inline-block';}
 }
 
@@ -815,7 +815,7 @@ function previewSelection(){
   if(state.previewSrc){
     try{state.previewSrc.stop();}catch(e){}
     state.previewSrc=null;
-    document.getElementById('wf-preview').textContent='▶ Preview Selection';
+    document.getElementById('wf-preview').innerHTML='<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect x="0" y="0" width="3" height="10"/><rect x="7" y="0" width="3" height="10"/></svg> Stop Preview';
     return;
   }
   var ctx=resumeCtx(),dur=state.fullBuffer.duration;
@@ -826,9 +826,9 @@ function previewSelection(){
   state.previewSrc.connect(g);
   state.previewSrc.onended=function(){
     state.previewSrc=null;
-    document.getElementById('wf-preview').textContent='▶ Preview Selection';
+    document.getElementById('wf-preview').innerHTML='<svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> Preview Selection';
   };
-  document.getElementById('wf-preview').textContent='⏸ Stop Preview';
+  document.getElementById('wf-preview').innerHTML='<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect x="0" y="0" width="3" height="10"/><rect x="7" y="0" width="3" height="10"/></svg> Stop Preview';
   state.previewSrc.start(ctx.currentTime,start,end-start);
 }
 
