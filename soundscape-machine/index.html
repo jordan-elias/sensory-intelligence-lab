@@ -430,7 +430,7 @@
     <div class="library-upload-row">
       <label class="file-input-label" for="fileUploadInput">Upload file</label>
       <input type="file" id="fileUploadInput" accept="audio/*" multiple>
-      <button class="rec-btn" id="libRecBtn" onclick="toggleLibRecord()">⏺ Record</button>
+      <button class="rec-btn" id="libRecBtn" onclick="toggleLibRecord()"><svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg> Record</button>
       <span class="upload-status" id="uploadStatus"></span>
     </div>
     <div class="library-list" id="libraryList">
@@ -1598,7 +1598,7 @@ window.toggleLibRecord = async function () {
       libRecMR.start();
       libRecording = true;
       document.getElementById('libRecBtn').classList.add('active');
-      document.getElementById('libRecBtn').textContent = '⏹ Stop';
+      document.getElementById('libRecBtn').innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg> Stop';
       document.getElementById('uploadStatus').textContent = 'Recording…';
     } catch(e) { showGlobalMsg('Microphone access denied.', 'error'); }
   } else {
@@ -1606,7 +1606,7 @@ window.toggleLibRecord = async function () {
     libRecStream.getTracks().forEach(t => t.stop());
     libRecording = false;
     document.getElementById('libRecBtn').classList.remove('active');
-    document.getElementById('libRecBtn').textContent = '⏺ Record';
+    document.getElementById('libRecBtn').innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg> Record';
     document.getElementById('uploadStatus').textContent = 'Processing…';
   }
 };
