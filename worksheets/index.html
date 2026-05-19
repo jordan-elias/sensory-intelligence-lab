@@ -378,6 +378,17 @@
       color: var(--muted); cursor: pointer; transition: all .1s; flex-shrink: 0;
     }
     .dyn-remove:hover { border-color: var(--error); color: var(--error); }
+
+    /* FIX 3: chapter move buttons */
+    .chapter-move-btn {
+      font-size: .65rem; padding: .2rem .4rem;
+      border: 1px solid var(--border); background: var(--bg);
+      color: var(--muted); cursor: pointer; flex-shrink: 0;
+      transition: all .1s; line-height: 1;
+    }
+    .chapter-move-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .chapter-move-btn:disabled { opacity: .25; cursor: not-allowed; }
+
     .add-section-btn {
       font-family: var(--font-heading); font-size: .8rem; font-weight: 600;
       padding: .6rem 1.25rem; border: 1px dashed var(--border);
@@ -467,7 +478,6 @@
     .song-player-artist { font-size: .78rem; color: var(--muted); }
     .song-player-change { font-size: .7rem; color: var(--muted); cursor: pointer; text-decoration: underline; margin-left: auto; flex-shrink: 0; }
     .song-player-change:hover { color: var(--accent); }
-    /* Audio-only YouTube: clip to show just the control bar */
   .yt-audio-wrap {
   width: 100%;
   position: relative;
@@ -560,7 +570,7 @@
       .lyric-col-left {
         display: block;
         position: sticky;
-        top: 72px; /* clears the sticky header */
+        top: 72px;
         max-height: calc(100vh - 90px);
         overflow-y: auto;
       }
@@ -669,7 +679,6 @@
     .chapter-song-search .song-search-bar { margin-bottom: .5rem; }
     .chapter-song-search .search-results { margin-bottom: .5rem; }
     .chapter-players { display: flex; flex-direction: column; gap: .5rem; margin-bottom: .75rem; }
-
 
     /* ── Compact song card ── */
 .chapter-player {
@@ -858,7 +867,6 @@
   width: 100%;
   height: 100%;
 }
-/* Mobile */
 @media (max-width: 600px) {
   #stickyPlayer {
     right: 0;
@@ -943,9 +951,7 @@
     <p>Reflective exercises to explore music, memory, emotion, and wellbeing. Your responses are encrypted and private.</p>
   </div>
 
-  <!-- ═══════════════════════════════
-       PICKER VIEW
-  ═══════════════════════════════ -->
+  <!-- PICKER VIEW -->
   <div class="ws-picker" id="wsPicker">
     <p class="section-label">Choose a worksheet</p>
     <div class="ws-grid">
@@ -1004,9 +1010,7 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════════════
-       WORKSHEET VIEWS
-  ═══════════════════════════════ -->
+  <!-- WORKSHEET VIEWS -->
   <div class="ws-view" id="wsView">
 
     <div class="ws-view-header">
@@ -1183,7 +1187,7 @@ const S = {
   saved: [],
   viewingEntry: null,
   viewingData: null,
-  editingId: null,  // row ID of entry being edited, null for new
+  editingId: null,
 };
 
 // ═══════════════════════════════════════════════════════
@@ -1281,6 +1285,7 @@ function renderGoals() {
   `;
 }
 
+// ── FIX 3: Music Autobiography uses UUID-keyed chapters ──
 function renderMusicAuto() {
   return `
     <div class="ws-callout">
@@ -1317,19 +1322,25 @@ function renderMusicAuto() {
   `;
 }
 
+// FIX 3: addAutoSection uses UUID as stable key; counter is display-only
 let _autoSectionCount = 0;
-function addAutoSection() {
+
+function addAutoSection(uuid) {
+  // uuid is provided when restoring from saved data; generated fresh for new chapters
+  const chapterUuid = uuid || crypto.randomUUID();
   _autoSectionCount++;
-  const n = _autoSectionCount;
+  const displayNum = _autoSectionCount;
   const container = document.getElementById('autoSections');
   const div = document.createElement('div');
   div.className = 'dyn-section';
-  div.dataset.sectionId = n;
+  div.dataset.chapterUuid = chapterUuid;
   div.innerHTML = `
     <div class="dyn-section-header">
-      <span class="dyn-section-num" title="Click to collapse/expand" onclick="toggleAutoSection(this)">▾ Chapter ${n}</span>
-      <input type="text" class="dyn-section-label-input" data-field="auto_${n}_label" placeholder="Name this chapter (e.g. Age 8–12, High school, Berlin years…)">
-      <button class="dyn-remove" onclick="removeAutoSection(${n})">Remove</button>
+      <span class="dyn-section-num" title="Click to collapse/expand" onclick="toggleAutoSection(this)">▾ Chapter ${displayNum}</span>
+      <input type="text" class="dyn-section-label-input" data-field="auto_${chapterUuid}_label" placeholder="Name this chapter (e.g. Age 8–12, High school, Berlin years…)">
+      <button class="chapter-move-btn" onclick="moveChapter('${chapterUuid}', -1)" title="Move up">▲</button>
+      <button class="chapter-move-btn" onclick="moveChapter('${chapterUuid}', 1)" title="Move down">▼</button>
+      <button class="dyn-remove" onclick="removeAutoSection('${chapterUuid}')">Remove</button>
     </div>
 
     <div class="dyn-section-body">
@@ -1337,44 +1348,89 @@ function addAutoSection() {
       <label class="ws-label">Songs from this time — search to add and listen, or type them below</label>
       <div class="chapter-song-search">
         <div class="song-search-bar">
-          <input type="text" id="chSongInput_${n}" placeholder="Search for a song from this chapter…" onkeydown="if(event.key==='Enter') searchChapterSong(${n})">
-          <button class="song-search-btn" onclick="searchChapterSong(${n})">Search</button>
+          <input type="text" id="chSongInput_${chapterUuid}" placeholder="Search for a song from this chapter…" onkeydown="if(event.key==='Enter') searchChapterSong('${chapterUuid}')">
+          <button class="song-search-btn" onclick="searchChapterSong('${chapterUuid}')">Search</button>
         </div>
-        <div class="search-results" id="chSongResults_${n}"></div>
-        <div class="chapter-players" id="chPlayers_${n}"></div>
+        <div class="search-results" id="chSongResults_${chapterUuid}"></div>
+        <div class="chapter-players" id="chPlayers_${chapterUuid}"></div>
       </div>
-      <textarea class="ws-input sm" data-field="auto_${n}_songs" placeholder="Or type song and artist names here…"></textarea>
+      <textarea class="ws-input sm" data-field="auto_${chapterUuid}_songs" placeholder="Or type song and artist names here…"></textarea>
     </div>
 
     <div class="ws-field">
       <label class="ws-label">What was happening in your life during this chapter?</label>
-      <textarea class="ws-input md" data-field="auto_${n}_life" placeholder="Brief context — you don't have to share everything…"></textarea>
+      <textarea class="ws-input md" data-field="auto_${chapterUuid}_life" placeholder="Brief context — you don't have to share everything…"></textarea>
     </div>
     <div class="ws-field">
       <label class="ws-label">What did music mean to you during this time? What was it doing for you?</label>
-      <textarea class="ws-input md" data-field="auto_${n}_meaning" placeholder=""></textarea>
+      <textarea class="ws-input md" data-field="auto_${chapterUuid}_meaning" placeholder=""></textarea>
     </div>
     <div class="ws-field">
       <label class="ws-label">Is there one song that captures this chapter most? What would you want someone to understand about why?</label>
-      <textarea class="ws-input md" data-field="auto_${n}_defining" placeholder=""></textarea>
+      <textarea class="ws-input md" data-field="auto_${chapterUuid}_defining" placeholder=""></textarea>
     </div>
     </div>
   `;
   container.appendChild(div);
+  updateChapterMoveButtons();
   window._autoSectionCount = _autoSectionCount;
+  return chapterUuid;
 }
 window.addAutoSection = addAutoSection;
+
+// FIX 3: renumber chapter badges after any reorder/add/remove
+function renumberChapters() {
+  const sections = document.querySelectorAll('#autoSections .dyn-section');
+  sections.forEach((sec, i) => {
+    const badge = sec.querySelector('.dyn-section-num');
+    if (badge) {
+      const collapsed = sec.classList.contains('collapsed');
+      badge.textContent = (collapsed ? '▸' : '▾') + ' Chapter ' + (i + 1);
+    }
+  });
+}
+
+// FIX 3: update disabled state of chapter move buttons
+function updateChapterMoveButtons() {
+  const sections = Array.from(document.querySelectorAll('#autoSections .dyn-section'));
+  sections.forEach((sec, i) => {
+    const btns = sec.querySelectorAll('.chapter-move-btn');
+    if (btns.length < 2) return;
+    btns[0].disabled = i === 0;
+    btns[1].disabled = i === sections.length - 1;
+  });
+  renumberChapters();
+}
+
+// FIX 3: move a chapter (and all its content) up or down
+window.moveChapter = function(chapterUuid, direction) {
+  const container = document.getElementById('autoSections');
+  const sections = Array.from(container.querySelectorAll('.dyn-section'));
+  const sec = sections.find(s => s.dataset.chapterUuid === chapterUuid);
+  if (!sec) return;
+  const index = sections.indexOf(sec);
+  const target = index + direction;
+  if (target < 0 || target >= sections.length) return;
+  if (direction === -1) {
+    container.insertBefore(sec, sections[target]);
+  } else {
+    container.insertBefore(sec, sections[target].nextSibling);
+  }
+  updateChapterMoveButtons();
+};
 
 window.toggleAutoSection = function(badge) {
   const section = badge.closest('.dyn-section');
   if (!section) return;
   const collapsed = section.classList.toggle('collapsed');
-  badge.textContent = badge.textContent.replace(/^[▾▸]/, collapsed ? '▸' : '▾');
+  // renumber will set the correct arrow
+  renumberChapters();
 };
   
-window.removeAutoSection = function(n) {
-  const el = document.querySelector(`[data-section-id="${n}"]`);
+window.removeAutoSection = function(chapterUuid) {
+  const el = document.querySelector(`[data-chapter-uuid="${chapterUuid}"]`);
   if (el) el.remove();
+  updateChapterMoveButtons();
 };
 
 function renderSessionReflection() {
@@ -1468,6 +1524,7 @@ function initSessionScaleRow() {
   }
 }
 
+// FIX 2: added hidden field song_lyrics_auto to persist auto-fetched lyrics
 function renderLyricAnalysis() {
   return `
     <div class="ws-callout">
@@ -1500,6 +1557,7 @@ function renderLyricAnalysis() {
 
       <input type="hidden" data-field="song_title">
       <input type="hidden" data-field="song_artist">
+      <input type="hidden" data-field="song_lyrics_auto" id="songLyricsAutoField">
 
       <div class="ws-field" style="margin-top:1.25rem;">
         <label class="ws-label">If lyrics didn't load, paste or edit them here <em>(optional)</em></label>
@@ -1520,13 +1578,12 @@ function renderLyricAnalysis() {
       <!-- RIGHT: all questions -->
       <div class="lyric-col-right">
 
-        
-  <!-- Lyrics panel for mobile only -->
-  <div class="lyrics-panel" id="lyricsPanel">
-  <p class="section-label" style="margin-bottom:.5rem;">Lyrics</p>
-  <div class="lyrics-box" id="lyricsBox"></div>
-  <p class="lyrics-hint" id="lyricsHint" style="display:none;">Read through the lyrics, then add selections below to begin your reflection.</p>
-</div>
+        <!-- Lyrics panel for mobile only -->
+        <div class="lyrics-panel" id="lyricsPanel">
+          <p class="section-label" style="margin-bottom:.5rem;">Lyrics</p>
+          <div class="lyrics-box" id="lyricsBox"></div>
+          <p class="lyrics-hint" id="lyricsHint" style="display:none;">Read through the lyrics, then add selections below to begin your reflection.</p>
+        </div>
 
         <div class="ws-section" style="margin-top:0;">
           <div class="ws-section-title"><span class="ws-section-icon">○</span> First impressions</div>
@@ -1698,11 +1755,9 @@ function renderCoping() {
       <div class="ws-callout" style="margin-bottom:1rem; font-size:.8rem;">
         ACCEPTS is a DBT distraction skill. Distraction isn't avoidance — it's a way to survive a moment without acting on it. The goal is to tolerate, not to fix.
       </div>
-      
-    <div class="skill-checklist">
+      <div class="skill-checklist">
         ${renderAcceptsSkills()}
       </div>
-
     </div>
 
     <div class="ws-section" style="border-top:none; margin-top:0;">
@@ -1750,7 +1805,6 @@ function renderCoping() {
   `;
 }
 
-
 function renderAcceptsSkills() {
   const items = [
     ['Activities', 'Engage in an absorbing activity — something that demands enough attention to pull you away from the distress.'],
@@ -1771,7 +1825,6 @@ function renderAcceptsSkills() {
     </div>`
   ).join('');
 }
-
 
 function initDistressScale() {
   const row = document.getElementById('distressScale');
@@ -1928,10 +1981,9 @@ function renderInterpersonal() {
 }
 
 // ═══════════════════════════════════════════════════════
-// SONG SEARCH — shared logic for lyric analysis + autobiography
+// SONG SEARCH
 // ═══════════════════════════════════════════════════════
 
-// Lyric analysis: global song state
 let _selectedSong = null;
 
 async function _geniusSearch(query) {
@@ -1940,8 +1992,6 @@ async function _geniusSearch(query) {
   const { hits } = await res.json();
   return hits || [];
 }
-
-
 
 function _getRegionCode() {
   try {
@@ -1964,6 +2014,61 @@ async function _getVideoId(title, artist) {
   } catch (err) {
     console.warn('Video ID lookup failed:', err);
     return null;
+  }
+}
+
+// FIX 2: shared helper to display lyrics in both panels and persist to hidden field
+function _displayLyrics(lyricsText) {
+  const lyricsPanel   = document.getElementById('lyricsPanel');
+  const lyricsBox     = document.getElementById('lyricsBox');
+  const lyricsColLeft = document.getElementById('lyricsColLeft');
+  const autoField     = document.getElementById('songLyricsAutoField');
+
+  if (lyricsPanel) lyricsPanel.classList.add('visible');
+  if (lyricsBox)   lyricsBox.textContent = lyricsText;
+  if (lyricsColLeft) {
+    lyricsColLeft.innerHTML = `<div class="lyrics-box" style="max-height:none;white-space:pre-wrap;">${escHtml(lyricsText)}</div>`;
+  }
+  // FIX 2: persist auto-fetched lyrics so they survive save/load
+  if (autoField) autoField.value = lyricsText;
+
+  const hint = document.getElementById('lyricsHint');
+  if (hint) hint.style.display = 'block';
+}
+
+function _displayLyricsNotFound() {
+  const lyricsPanel   = document.getElementById('lyricsPanel');
+  const lyricsBox     = document.getElementById('lyricsBox');
+  const lyricsColLeft = document.getElementById('lyricsColLeft');
+  const notFound = '<span style="font-style:italic;color:var(--muted)">Lyrics not found automatically. Paste them in the field below if you\'d like them here.</span>';
+  if (lyricsPanel) lyricsPanel.classList.add('visible');
+  if (lyricsBox)   lyricsBox.innerHTML = notFound;
+  if (lyricsColLeft) lyricsColLeft.innerHTML = `<div class="lyrics-box-empty">${notFound}</div>`;
+  const hint = document.getElementById('lyricsHint');
+  if (hint) hint.style.display = 'none';
+}
+
+// FIX 2: shared lyrics fetch used by both selectSong and loadEntryForEditing
+async function _fetchAndDisplayLyrics(title, artist) {
+  const lyricsBox     = document.getElementById('lyricsBox');
+  const lyricsColLeft = document.getElementById('lyricsColLeft');
+  if (lyricsBox)     lyricsBox.textContent = 'Loading lyrics…';
+  if (lyricsColLeft) lyricsColLeft.innerHTML = '<div class="lyrics-box" style="max-height:none;">Loading lyrics…</div>';
+
+  try {
+    const url = `https://lrclib.net/api/get?artist_name=${encodeURIComponent(artist)}&track_name=${encodeURIComponent(title)}`;
+    const res = await fetch(url);
+    if (res.ok) {
+      const data = await res.json();
+      const lyrics = data.plainLyrics || data.syncedLyrics?.replace(/\[\d+:\d+\.\d+\]/g,'') || '';
+      if (lyrics) {
+        _displayLyrics(lyrics);
+        return;
+      }
+    }
+    _displayLyricsNotFound();
+  } catch {
+    _displayLyricsNotFound();
   }
 }
 
@@ -2005,14 +2110,12 @@ window.selectSong = async function(index) {
   document.getElementById('songPlayerTitle').textContent  = title;
   document.getElementById('songPlayerArtist').textContent = artist;
 
-  // Set hidden fields
   const tf = document.querySelector('[data-field="song_title"]');
   const af = document.querySelector('[data-field="song_artist"]');
   if (tf) tf.value = title;
   if (af) af.value = artist;
   _selectedSong = { title, artist };
 
-  // Show loading state while fetching video ID
   const wrap = document.getElementById('ytAudioWrap');
   wrap.innerHTML = `<div style="padding:.5rem;font-size:.75rem;color:var(--muted);font-style:italic;">Finding player…</div>`;
 
@@ -2021,39 +2124,8 @@ window.selectSong = async function(index) {
     ? `<iframe src="https://www.youtube-nocookie.com/embed/${videoId}?controls=1&rel=0&modestbranding=1" allow="autoplay; encrypted-media" allowfullscreen style="width:100%;height:100%;border:none;" title="Audio player"></iframe>`
     : `<div style="padding:.5rem;font-size:.75rem;color:var(--muted);font-style:italic;">No video found for this song.</div>`;
 
-// Fetch lyrics
-  const lyricsPanel  = document.getElementById('lyricsPanel');
-  const lyricsBox    = document.getElementById('lyricsBox');
-  const lyricsColLeft = document.getElementById('lyricsColLeft');
-
-  if (lyricsPanel) lyricsPanel.classList.add('visible');
-  if (lyricsBox)   lyricsBox.textContent = 'Loading lyrics…';
-  if (lyricsColLeft) lyricsColLeft.innerHTML = '<div class="lyrics-box" style="max-height:none;">Loading lyrics…</div>';
-
-  try {
-    const url = `https://lrclib.net/api/get?artist_name=${encodeURIComponent(artist)}&track_name=${encodeURIComponent(title)}`;
-    const res = await fetch(url);
-    if (res.ok) {
-      const data = await res.json();
-      const lyrics = data.plainLyrics || data.syncedLyrics?.replace(/\[\d+:\d+\.\d+\]/g,'') || '';
-      if (lyrics) {
-        if (lyricsBox) lyricsBox.textContent = lyrics;
-        if (lyricsColLeft) lyricsColLeft.innerHTML = `<div class="lyrics-box" style="max-height:none;white-space:pre-wrap;">${escHtml(lyrics)}</div>`;
-        const hint = document.getElementById('lyricsHint');
-        if (hint) hint.style.display = 'block';
-        return;
-      }
-    }
-    const notFound = '<span style="font-style:italic;color:var(--muted)">Lyrics not found automatically. Paste them in the field below if you\'d like them here.</span>';
-    if (lyricsBox)     lyricsBox.innerHTML    = notFound;
-    if (lyricsColLeft) lyricsColLeft.innerHTML = `<div class="lyrics-box-empty">${notFound}</div>`;
-    const hint = document.getElementById('lyricsHint');
-    if (hint) hint.style.display = 'none';
-  } catch {
-    const err = '<span style="font-style:italic;color:var(--muted)">Could not load lyrics. Paste them in the field below.</span>';
-    if (lyricsBox)     lyricsBox.innerHTML    = err;
-    if (lyricsColLeft) lyricsColLeft.innerHTML = `<div class="lyrics-box-empty">${err}</div>`;
-  }
+  // FIX 2: use shared fetch helper which also persists to hidden field
+  await _fetchAndDisplayLyrics(title, artist);
 };
   
 window.changeSong = function() {
@@ -2062,13 +2134,16 @@ window.changeSong = function() {
   document.getElementById('ytAudioWrap').innerHTML = '';
   document.getElementById('songSearchInput').value = '';
   document.getElementById('songSearchInput').focus();
+  const autoField = document.getElementById('songLyricsAutoField');
+  if (autoField) autoField.value = '';
   _selectedSong = null;
 };
 
 // ── Music autobiography: per-chapter song search ──
-window.searchChapterSong = async function(n) {
-  const input   = document.getElementById(`chSongInput_${n}`);
-  const results = document.getElementById(`chSongResults_${n}`);
+// FIX 3: chapter search uses chapterUuid instead of positional n
+window.searchChapterSong = async function(chapterUuid) {
+  const input   = document.getElementById(`chSongInput_${chapterUuid}`);
+  const results = document.getElementById(`chSongResults_${chapterUuid}`);
   const query   = input.value.trim(); if (!query) return;
   results.innerHTML = '<div class="search-loading">Searching…</div>';
   results.classList.add('visible');
@@ -2077,7 +2152,7 @@ window.searchChapterSong = async function(n) {
     if (!hits.length) { results.innerHTML = '<div class="search-loading">No results found.</div>'; return; }
     results.dataset.hits = JSON.stringify(hits.slice(0, 5));
     results.innerHTML = hits.slice(0, 5).map((h, i) => `
-      <div class="search-result-item" onclick="addChapterSong(${n}, ${i})">
+      <div class="search-result-item" onclick="addChapterSong('${chapterUuid}', ${i})">
         <div>
           <div class="search-result-title">${escHtml(h.result.title)}</div>
           <div class="search-result-artist">${escHtml(h.result.primary_artist.name)}</div>
@@ -2088,8 +2163,9 @@ window.searchChapterSong = async function(n) {
   }
 };
 
-window.addChapterSong = async function(n, index) {
-  const results = document.getElementById(`chSongResults_${n}`);
+// FIX 3/4: addChapterSong uses chapterUuid; song cards store data-chapter-uuid
+window.addChapterSong = async function(chapterUuid, index) {
+  const results = document.getElementById(`chSongResults_${chapterUuid}`);
   const hits    = JSON.parse(results.dataset.hits || '[]');
   const hit     = hits[index]; if (!hit) return;
   const title   = hit.result.title;
@@ -2097,22 +2173,19 @@ window.addChapterSong = async function(n, index) {
 
   results.classList.remove('visible');
   results.innerHTML = '';
-  document.getElementById(`chSongInput_${n}`).value = '';
+  document.getElementById(`chSongInput_${chapterUuid}`).value = '';
 
-  // Append to songs textarea
-  const ta = document.querySelector(`[data-field="auto_${n}_songs"]`);
+  const ta = document.querySelector(`[data-field="auto_${chapterUuid}_songs"]`);
   if (ta) ta.value = (ta.value ? ta.value + '\n' : '') + `${title} — ${artist}`;
 
-  // Fetch video ID
   const videoId = await _getVideoId(title, artist);
 
-  // Build compact card
-  const playerId = `chp_${n}_${Date.now()}`;
-  const players  = document.getElementById(`chPlayers_${n}`);
+  const playerId = `chp_${chapterUuid}_${Date.now()}`;
+  const players  = document.getElementById(`chPlayers_${chapterUuid}`);
   const div      = document.createElement('div');
   div.className  = 'chapter-player';
   div.id         = playerId;
-  div.dataset.chapter  = n;
+  div.dataset.chapterUuid = chapterUuid;  // FIX 4: use uuid not positional number
   div.dataset.videoId  = videoId || '';
   div.dataset.title    = title;
   div.dataset.artist   = artist;
@@ -2141,7 +2214,7 @@ window.addChapterSong = async function(n, index) {
 // ═══════════════════════════════════════════════════════
 
 const PLAYLIST = {
-  tracks: [],       // { videoId, title, artist, playerId }
+  tracks: [],
   currentIndex: -1,
 };
 
@@ -2149,28 +2222,22 @@ function rebuildPlaylist() {
   PLAYLIST.tracks = [];
   document.querySelectorAll('.chapter-player').forEach(card => {
     PLAYLIST.tracks.push({
-      videoId:  card.dataset.videoId  || '',
-      title:    card.dataset.title    || '',
-      artist:   card.dataset.artist   || '',
-      playerId: card.id,
+      videoId:     card.dataset.videoId     || '',
+      title:       card.dataset.title       || '',
+      artist:      card.dataset.artist      || '',
+      playerId:    card.id,
     });
   });
 }
 
 function updateMoveButtons(container) {
-  const cards = container
-    ? container.querySelectorAll('.chapter-player')
-    : document.querySelectorAll('.chapter-player');
-
-  // If a container is passed, only update within it
-  // Otherwise update all cards globally
   document.querySelectorAll('.chapter-players').forEach(c => {
     const ch = c.querySelectorAll('.chapter-player');
     ch.forEach((card, i) => {
       const btns = card.querySelectorAll('.chapter-player-move');
       if (btns.length < 2) return;
-      btns[0].disabled = i === 0;                // ▲ disabled at top
-      btns[1].disabled = i === ch.length - 1;   // ▼ disabled at bottom
+      btns[0].disabled = i === 0;
+      btns[1].disabled = i === ch.length - 1;
     });
   });
 }
@@ -2268,7 +2335,6 @@ window.closeStickyPlayer = function() {
   PLAYLIST.currentIndex = -1;
 };
 
-  
 window.onYouTubeIframeAPIReady = function() {
   window._ytPlayer = new YT.Player('ytStickyPlayer', {
     width:  '100%',
@@ -2289,7 +2355,6 @@ window.onYouTubeIframeAPIReady = function() {
   });
 };
 
-// Ensure YT callback works even if API loads before module finishes
 if (window.YT && window.YT.Player) {
   window.onYouTubeIframeAPIReady();
 }
@@ -2302,7 +2367,6 @@ function renderEntriesMenu() {
   const menu = document.getElementById('wsEntriesMenu');
   if (!menu) return;
 
-  // Only show for worksheet types that support editing
   const supported = ['music-auto', 'lyric-analysis'];
   if (!supported.includes(S.currentType)) { menu.style.display = 'none'; return; }
 
@@ -2339,38 +2403,56 @@ function renderEntriesMenu() {
     </div>`;
 }
 
+// FIX 1: fetch fresh from Supabase rather than reading stale S.saved cache
 window.loadEntryForEditing = async function(id) {
-  const entry = S.saved.find(e => e.id === id);
-  if (!entry) return;
-
   try {
     await ensureVaultReady();
-    const plaintext = isEncrypted(entry.content)
-      ? await decrypt(entry.content)
-      : entry.content;
+
+    // FIX 1: always fetch the latest content directly from the database
+    const sb = await getSupabase();
+    const { data: freshRow, error: fetchError } = await sb
+      .from('worksheets')
+      .select('id, title, type, created_at, content')
+      .eq('id', id)
+      .single();
+
+    if (fetchError || !freshRow) throw new Error(fetchError?.message || 'Entry not found');
+
+    const plaintext = isEncrypted(freshRow.content)
+      ? await decrypt(freshRow.content)
+      : freshRow.content;
     const parsed = JSON.parse(plaintext);
     const data   = parsed.data || {};
 
-    // Set editing state
     S.editingId = id;
-    document.getElementById('wsSaveNameInput').value = entry.title || '';
+    document.getElementById('wsSaveNameInput').value = freshRow.title || '';
     document.getElementById('wsSaveBtn').textContent = 'Update encrypted';
 
-    // ── MUSIC AUTOBIOGRAPHY: rebuild chapters first ──
+    // ── MUSIC AUTOBIOGRAPHY: rebuild chapters using saved order ──
     if (S.currentType === 'music-auto') {
       const container = document.getElementById('autoSections');
       container.innerHTML = '';
       _autoSectionCount = 0;
 
-      // Find how many chapters were saved
-      let n = 1;
-      while (data[`auto_${n}_label`] !== undefined || data[`auto_${n}_songs`] !== undefined || data[`auto_${n}_life`] !== undefined) {
-        addAutoSection(); // creates the DOM for chapter n
-        n++;
+      // FIX 3: chapters are stored with UUID keys; _chapterOrder lists UUIDs in saved order
+      const chapterOrder = data._chapterOrder || [];
+
+      if (chapterOrder.length > 0) {
+        // Restore chapters in their saved order using stable UUIDs
+        chapterOrder.forEach(uuid => {
+          addAutoSection(uuid);
+        });
+      } else {
+        // Fallback for entries saved before UUID migration: detect positional keys
+        let n = 1;
+        while (data[`auto_${n}_label`] !== undefined || data[`auto_${n}_songs`] !== undefined || data[`auto_${n}_life`] !== undefined) {
+          addAutoSection();
+          n++;
+        }
       }
     }
 
-    // ── LYRIC ANALYSIS: rebuild lyric blocks first ──
+    // ── LYRIC ANALYSIS: rebuild lyric blocks ──
     if (S.currentType === 'lyric-analysis') {
       const container = document.getElementById('lyricBlocks');
       container.innerHTML = '';
@@ -2391,7 +2473,7 @@ window.loadEntryForEditing = async function(id) {
       }
     });
 
-    // ── LYRIC ANALYSIS: restore song player ──
+    // ── LYRIC ANALYSIS: restore song player and lyrics ──
     if (S.currentType === 'lyric-analysis' && data.song_title && data.song_artist) {
       const title  = data.song_title;
       const artist = data.song_artist;
@@ -2410,37 +2492,48 @@ window.loadEntryForEditing = async function(id) {
           : `<div style="padding:.5rem;font-size:.75rem;color:var(--muted);font-style:italic;">No video found for this song.</div>`;
       });
 
-      // Restore lyrics
-      if (data.song_lyrics_manual) {
-        const lyricsPanel = document.getElementById('lyricsPanel');
-        const lyricsBox   = document.getElementById('lyricsBox');
-        const lyricsColLeft = document.getElementById('lyricsColLeft');
-        if (lyricsPanel) lyricsPanel.classList.add('visible');
-        if (lyricsBox)   lyricsBox.textContent = data.song_lyrics_manual;
+      // FIX 2: restore lyrics — use saved auto lyrics if available, otherwise re-fetch
+      const lyricsPanel   = document.getElementById('lyricsPanel');
+      const lyricsColLeft = document.getElementById('lyricsColLeft');
+
+      if (lyricsPanel) lyricsPanel.classList.add('visible');
+
+      if (data.song_lyrics_auto) {
+        // Saved auto lyrics available — display immediately without network call
+        _displayLyrics(data.song_lyrics_auto);
+      } else if (data.song_lyrics_manual) {
+        // Only manual lyrics — show those in the panels
+        const lyricsBox = document.getElementById('lyricsBox');
+        if (lyricsBox) lyricsBox.textContent = data.song_lyrics_manual;
         if (lyricsColLeft) lyricsColLeft.innerHTML = `<div class="lyrics-box" style="max-height:none;white-space:pre-wrap;">${escHtml(data.song_lyrics_manual)}</div>`;
+      } else {
+        // No lyrics saved — attempt fresh fetch
+        await _fetchAndDisplayLyrics(title, artist);
       }
     }
 
     // ── MUSIC AUTOBIOGRAPHY: rebuild song cards ──
+    // FIX 4: songs stored with chapterUuid; _songOrder uses chapterUuid
     if (data._songOrder && Array.isArray(data._songOrder)) {
       const byChapter = {};
       data._songOrder.forEach(s => {
-        const ch = s.chapter || '1';
-        if (!byChapter[ch]) byChapter[ch] = [];
-        byChapter[ch].push(s);
+        const cu = s.chapterUuid || s.chapter || '';
+        if (!byChapter[cu]) byChapter[cu] = [];
+        byChapter[cu].push(s);
       });
 
-      Object.entries(byChapter).forEach(([ch, songs]) => {
-        const players = document.getElementById(`chPlayers_${ch}`);
+      Object.entries(byChapter).forEach(([cu, songs]) => {
+        // Try UUID-keyed container first, fall back to positional for legacy data
+        const players = document.getElementById(`chPlayers_${cu}`);
         if (!players) return;
         players.innerHTML = '';
 
         songs.forEach(s => {
-          const playerId = `chp_${ch}_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
+          const playerId = `chp_${cu}_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
           const div      = document.createElement('div');
           div.className  = 'chapter-player';
           div.id         = playerId;
-          div.dataset.chapter = ch;
+          div.dataset.chapterUuid = cu;
           div.dataset.videoId = s.videoId || '';
           div.dataset.title   = s.title   || '';
           div.dataset.artist  = s.artist  || '';
@@ -2475,11 +2568,11 @@ window.loadEntryForEditing = async function(id) {
 
   } catch(err) {
     const msgEl = document.getElementById('wsMsg');
-    msgEl.className = 'msg error show';
+    msgEl.className = 'msg error';
     msgEl.textContent = 'Could not load entry: ' + err.message;
   }
 };
-  
+
 // ═══════════════════════════════════════════════════════
 // GOALS COMPARISON
 // ═══════════════════════════════════════════════════════
@@ -2496,10 +2589,9 @@ window.openCompareModal = function() {
   }).join('');
   selA.innerHTML = '<option value="">— Choose —</option>' + makeOptions();
   selB.innerHTML = '<option value="">— Choose —</option>' + makeOptions();
-  // Default: oldest and newest if ≥2
   if (goalsSaved.length >= 2) {
-    selA.value = goalsSaved[goalsSaved.length - 1].id; // oldest (list is newest-first)
-    selB.value = goalsSaved[0].id;                     // newest
+    selA.value = goalsSaved[goalsSaved.length - 1].id;
+    selB.value = goalsSaved[0].id;
     runComparison();
   } else {
     document.getElementById('compareContent').innerHTML = '<div class="compare-loading">You need at least two saved Goals &amp; Values worksheets to compare.</div>';
@@ -2537,7 +2629,6 @@ window.runComparison = async function() {
 
     const renderCol = (d) => {
       let html = '';
-      // Overall
       html += `<div class="compare-cat">
         <div class="compare-cat-name">Overall</div>
         <div class="compare-field"><div class="compare-field-label">What matters most</div><div class="compare-field-value ${d.overall_matters?'':'empty'}">${d.overall_matters ? escHtml(d.overall_matters) : '—'}</div></div>
@@ -2616,11 +2707,9 @@ window.openWorksheet = function(type) {
     'interpersonal':      renderInterpersonal,
   }[type]();
 
-  // Post-render initialisation
   if (type === 'session-reflection') initSessionScaleRow();
   if (type === 'coping')             initDistressScale();
 
-  // Default name
   const now = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   document.getElementById('wsSaveNameInput').value = `${meta.label} — ${now}`;
   document.getElementById('wsMsg').className = 'msg';
@@ -2640,6 +2729,7 @@ window.closeWorksheet = function() {
   S.currentType = null;
   S.editingId   = null;
 };
+
 // ═══════════════════════════════════════════════════════
 // COLLECT FORM DATA
 // ═══════════════════════════════════════════════════════
@@ -2665,7 +2755,7 @@ function collectFormData() {
   document.querySelectorAll('#wsContent .skill-item.checked .skill-item-name').forEach(n => checkedSkills.push(n.textContent));
   if (checkedSkills.length) data['_checked_skills'] = checkedSkills;
 
-  // Per-song notes — keyed by song title/artist so they survive reordering
+  // Per-song notes
   document.querySelectorAll('#wsContent .chapter-player').forEach(card => {
     const ta = card.querySelector('.chapter-player-notes textarea');
     if (!ta || !ta.value.trim()) return;
@@ -2673,17 +2763,38 @@ function collectFormData() {
     data[safeKey] = ta.value;
   });
 
-  // Per-song order — save the ordered list of all songs across chapters
-  const songOrder = [];
-  document.querySelectorAll('#wsContent .chapter-player').forEach(card => {
-    songOrder.push({
-      chapter: card.dataset.chapter || '',
-      title:   card.dataset.title   || '',
-      artist:  card.dataset.artist  || '',
-      videoId: card.dataset.videoId || '',
+  // FIX 3/4: save chapter order (array of UUIDs in current DOM order)
+  // and song order using chapterUuid
+  if (S.currentType === 'music-auto') {
+    const chapterOrder = [];
+    document.querySelectorAll('#autoSections .dyn-section').forEach(sec => {
+      if (sec.dataset.chapterUuid) chapterOrder.push(sec.dataset.chapterUuid);
     });
-  });
-  if (songOrder.length) data['_songOrder'] = songOrder;
+    if (chapterOrder.length) data['_chapterOrder'] = chapterOrder;
+
+    const songOrder = [];
+    document.querySelectorAll('#wsContent .chapter-player').forEach(card => {
+      songOrder.push({
+        chapterUuid: card.dataset.chapterUuid || '',  // FIX 4: use uuid
+        title:       card.dataset.title       || '',
+        artist:      card.dataset.artist      || '',
+        videoId:     card.dataset.videoId     || '',
+      });
+    });
+    if (songOrder.length) data['_songOrder'] = songOrder;
+  } else {
+    // Non-autobiography: keep legacy _songOrder for other worksheet types if needed
+    const songOrder = [];
+    document.querySelectorAll('#wsContent .chapter-player').forEach(card => {
+      songOrder.push({
+        chapter: card.dataset.chapter || card.dataset.chapterUuid || '',
+        title:   card.dataset.title   || '',
+        artist:  card.dataset.artist  || '',
+        videoId: card.dataset.videoId || '',
+      });
+    });
+    if (songOrder.length) data['_songOrder'] = songOrder;
+  }
 
   return data;
 }
@@ -2726,14 +2837,12 @@ window.saveWorksheet = async function() {
   const wasNew = !S.editingId;
 
   if (S.editingId) {
-    // Overwrite existing entry
     ({ error } = await sb.from('worksheets').update({
       title:        name,
       content:      encryptedContent,
       encrypted_at: new Date().toISOString(),
     }).eq('id', S.editingId).eq('user_id', user.id));
   } else {
-    // New entry
     let newRow;
     ({ data: newRow, error } = await sb.from('worksheets').insert({
       user_id:      user.id,
@@ -2754,7 +2863,7 @@ window.saveWorksheet = async function() {
   }
 
   msgEl.className = 'msg success';
- msgEl.textContent = wasNew
+  msgEl.textContent = wasNew
     ? `"${name}" saved and encrypted.`
     : `"${name}" updated.`;
   btn.textContent  = 'Update encrypted';
@@ -2762,7 +2871,7 @@ window.saveWorksheet = async function() {
   await loadSaved();
   renderEntriesMenu();
 };
-  
+
 // ═══════════════════════════════════════════════════════
 // LOAD & RENDER SAVED
 // ═══════════════════════════════════════════════════════
@@ -2801,7 +2910,6 @@ function renderSaved() {
       </div>
     `;
   }).join('');
-  // Show compare button only when ≥2 goals worksheets are saved
   const goalsCount = S.saved.filter(s => s.type === 'goals').length;
   compareBtnWrap.style.display = goalsCount >= 2 ? 'block' : 'none';
 }
@@ -2848,20 +2956,15 @@ function renderViewerBody(parsed) {
   const meta = WS_META[type] || {};
   let html = '';
 
-  // Generic renderer — iterate all fields grouped by visual sections
-  // For each non-empty field, show label and value
   const fieldLabels = {
-    // Goals
     overall_matters: "What matters most right now",
     overall_value: "Value to embody",
     closing_one: "Focus for this week",
     closing_reminder: "Compassionate reminder",
-    // Music auto
     earliest_memory: "Earliest memory of music",
     your_song: "Your song",
     patterns: "Patterns noticed",
     music_does: "What music does for me",
-    // Session reflection
     session_date: "Date", session_type: "Session type",
     session_music: "Music / activities",
     before_feeling: "Feeling on arrival",
@@ -2873,14 +2976,12 @@ function renderViewerBody(parsed) {
     bring_next: "For next session",
     session_rating: "Session rating",
     for_therapist: "Note for therapist",
-    // Lyric analysis
     song_title: "Song", song_artist: "Artist",
     song_why: "Why this song",
     song_surface: "Surface meaning",
     song_deeper: "Deeper meaning",
     song_revealed: "What it revealed",
     song_message: "What the song says to me",
-    // Coping
     situation: "The situation",
     emotion_other: "Other emotions",
     distress_level: "Distress level",
@@ -2892,7 +2993,6 @@ function renderViewerBody(parsed) {
     coping_playlist: "Coping playlist",
     what_helped: "What helped",
     what_need: "What I need more of",
-    // Interpersonal
     connection_style: "How I prefer to connect",
     social_drain: "What drains me socially",
     social_recovery: "How I recover",
@@ -2913,12 +3013,10 @@ function renderViewerBody(parsed) {
     music_connection: "Music and connection",
   };
 
-  // Category fields for goals
   const goalCats = ['work','mental','social','love','family','physical','creative'];
   const goalCatNames = { work:'Work / School', mental:'Mental Health', social:'Social', love:'Love & Romance', family:'Family', physical:'Physical Health', creative:'Creative' };
 
   if (type === 'goals') {
-    // Overall
     const overallFields = ['overall_matters','overall_value'];
     const overallContent = overallFields.map(f => d[f] ? `<div class="vb-field"><div class="vb-label">${fieldLabels[f]}</div><div class="vb-value">${escHtml(d[f])}</div></div>` : '').join('');
     if (overallContent) html += `<div class="vb-section"><div class="vb-section-title">Overall reflection</div>${overallContent}</div>`;
@@ -2933,53 +3031,63 @@ function renderViewerBody(parsed) {
     const closingContent = ['closing_one','closing_reminder'].map(f => d[f] ? `<div class="vb-field"><div class="vb-label">${fieldLabels[f]}</div><div class="vb-value">${escHtml(d[f])}</div></div>` : '').join('');
     if (closingContent) html += `<div class="vb-section"><div class="vb-section-title">Closing</div>${closingContent}</div>`;
 
- } else if (type === 'music-auto') {
+  } else if (type === 'music-auto') {
     const opening = ['earliest_memory','your_song'].map(f => d[f] ? `<div class="vb-field"><div class="vb-label">${fieldLabels[f]}</div><div class="vb-value">${escHtml(d[f])}</div></div>` : '').join('');
     if (opening) html += `<div class="vb-section"><div class="vb-section-title">Opening</div>${opening}</div>`;
 
-    // Dynamic chapters
-    let n = 1;
-    while (d[`auto_${n}_label`] || d[`auto_${n}_songs`]) {
-      const label = d[`auto_${n}_label`] || `Chapter ${n}`;
+    // FIX 3: use _chapterOrder to render chapters in saved order
+    const chapterOrder = d._chapterOrder || [];
+    if (chapterOrder.length > 0) {
+      chapterOrder.forEach(uuid => {
+        const label = d[`auto_${uuid}_label`] || 'Chapter';
+        const chapFields = [['life','Life during this chapter'],['meaning','What music meant'],['defining','Defining song']];
+        let chapContent = chapFields.map(([suf,lbl]) => d[`auto_${uuid}_${suf}`]
+          ? `<div class="vb-field"><div class="vb-label">${lbl}</div><div class="vb-value">${escHtml(d[`auto_${uuid}_${suf}`])}</div></div>`
+          : '').join('');
 
-      // Chapter-level fields
-      const chapFields = [['life','Life during this chapter'],['meaning','What music meant'],['defining','Defining song']];
-      let chapContent = chapFields.map(([suf,lbl]) => d[`auto_${n}_${suf}`]
-        ? `<div class="vb-field"><div class="vb-label">${lbl}</div><div class="vb-value">${escHtml(d[`auto_${n}_${suf}`])}</div></div>`
-        : '').join('');
-
-      // Songs from this chapter with per-song notes
-      if (d._songOrder) {
-        const chapterSongs = d._songOrder.filter(s => String(s.chapter) === String(n));
-        if (chapterSongs.length) {
-          const songsHtml = chapterSongs.map(s => {
-            const noteKey = `_songnote_${(s.title || '').replace(/\W+/g,'_')}_${(s.artist || '').replace(/\W+/g,'_')}`;
-            const note    = d[noteKey];
-            return `<div class="vb-field">
-              <div class="vb-label">${escHtml(s.title)} — ${escHtml(s.artist)}</div>
-              ${note ? `<div class="vb-value">${escHtml(note)}</div>` : '<div class="vb-value empty">No notes</div>'}
-            </div>`;
-          }).join('');
-          chapContent = `<div class="vb-field"><div class="vb-label">Songs</div></div>${songsHtml}` + chapContent;
+        if (d._songOrder) {
+          const chapterSongs = d._songOrder.filter(s => (s.chapterUuid || s.chapter) === uuid);
+          if (chapterSongs.length) {
+            const songsHtml = chapterSongs.map(s => {
+              const noteKey = `_songnote_${(s.title || '').replace(/\W+/g,'_')}_${(s.artist || '').replace(/\W+/g,'_')}`;
+              const note    = d[noteKey];
+              return `<div class="vb-field">
+                <div class="vb-label">${escHtml(s.title)} — ${escHtml(s.artist)}</div>
+                ${note ? `<div class="vb-value">${escHtml(note)}</div>` : '<div class="vb-value empty">No notes</div>'}
+              </div>`;
+            }).join('');
+            chapContent = `<div class="vb-field"><div class="vb-label">Songs</div></div>${songsHtml}` + chapContent;
+          }
+        } else if (d[`auto_${uuid}_songs`]) {
+          chapContent = `<div class="vb-field"><div class="vb-label">Songs from this time</div><div class="vb-value">${escHtml(d[`auto_${uuid}_songs`])}</div></div>` + chapContent;
         }
-      } else if (d[`auto_${n}_songs`]) {
-        // Fallback for worksheets saved before this update
-        chapContent = `<div class="vb-field"><div class="vb-label">Songs from this time</div><div class="vb-value">${escHtml(d[`auto_${n}_songs`])}</div></div>` + chapContent;
-      }
 
-      if (chapContent) html += `<div class="vb-section"><div class="vb-section-title">${escHtml(label)}</div>${chapContent}</div>`;
-      n++;
+        if (chapContent) html += `<div class="vb-section"><div class="vb-section-title">${escHtml(label)}</div>${chapContent}</div>`;
+      });
+    } else {
+      // Fallback for legacy positional-key entries
+      let n = 1;
+      while (d[`auto_${n}_label`] || d[`auto_${n}_songs`]) {
+        const label = d[`auto_${n}_label`] || `Chapter ${n}`;
+        const chapFields = [['life','Life during this chapter'],['meaning','What music meant'],['defining','Defining song']];
+        let chapContent = chapFields.map(([suf,lbl]) => d[`auto_${n}_${suf}`]
+          ? `<div class="vb-field"><div class="vb-label">${lbl}</div><div class="vb-value">${escHtml(d[`auto_${n}_${suf}`])}</div></div>`
+          : '').join('');
+        if (d[`auto_${n}_songs`]) {
+          chapContent = `<div class="vb-field"><div class="vb-label">Songs from this time</div><div class="vb-value">${escHtml(d[`auto_${n}_songs`])}</div></div>` + chapContent;
+        }
+        if (chapContent) html += `<div class="vb-section"><div class="vb-section-title">${escHtml(label)}</div>${chapContent}</div>`;
+        n++;
+      }
     }
 
     const reflection = ['patterns','music_does'].map(f => d[f] ? `<div class="vb-field"><div class="vb-label">${fieldLabels[f]}</div><div class="vb-value">${escHtml(d[f])}</div></div>` : '').join('');
     if (reflection) html += `<div class="vb-section"><div class="vb-section-title">Reflection</div>${reflection}</div>`;
 
   } else {
-    // Generic: group by known field order, show all non-empty fields
     const allKnown = Object.keys(fieldLabels);
     const shown = new Set();
 
-    // Dynamic lyric blocks
     if (type === 'lyric-analysis') {
       const songFields = ['song_title','song_artist','song_why','song_surface'];
       const songContent = songFields.map(f => d[f] ? `<div class="vb-field"><div class="vb-label">${fieldLabels[f]}</div><div class="vb-value">${escHtml(d[f])}</div></div>` : '').join('');
@@ -2998,7 +3106,6 @@ function renderViewerBody(parsed) {
       const closeContent = closeFields.map(f => d[f] ? `<div class="vb-field"><div class="vb-label">${fieldLabels[f]}</div><div class="vb-value">${escHtml(d[f])}</div></div>` : '').join('');
       if (closeContent) html += `<div class="vb-section"><div class="vb-section-title">The whole song</div>${closeContent}</div>`;
     } else {
-      // Session, coping, interpersonal — group by known fields
       const grouped = allKnown.filter(f => d[f] && !shown.has(f));
       if (grouped.length) {
         html += `<div class="vb-section"><div class="vb-section-title">${escHtml(meta.label)}</div>` +
@@ -3006,12 +3113,10 @@ function renderViewerBody(parsed) {
           '</div>';
       }
 
-      // Emotion tags
       if (d._emotion_tags?.length) {
         html += `<div class="vb-section"><div class="vb-section-title">Emotions</div><div class="vb-field"><div class="vb-value">${d._emotion_tags.map(escHtml).join(', ')}</div></div></div>`;
       }
 
-      // Checked skills
       if (d._checked_skills?.length) {
         html += `<div class="vb-section"><div class="vb-section-title">Skills used</div><div class="vb-field"><div class="vb-value">${d._checked_skills.map(escHtml).join('<br>')}</div></div></div>`;
       }
@@ -3076,7 +3181,6 @@ function onAuthReady(cb) {
   window.addEventListener('authReady', cb, { once: true });
 }
 
-
 onAuthReady(async () => {
   try {
     await ensureVaultReady();
@@ -3086,8 +3190,6 @@ onAuthReady(async () => {
   }
 });
 
-
-// Expose all inline-onclick handlers to global scope
 window.openWorksheet    = openWorksheet;
 window.closeWorksheet   = closeWorksheet;
 window.toggleTag        = toggleTag;
