@@ -576,8 +576,7 @@ function startR(){
   }
   
   R.playing=true;
-  document.getElementById('r-play').innerHTML='<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect x="0" y="0" width="3" height="10"/><rect x="7" y="0" width="3" height="10"/></svg> Stop';
-  document.getElementById('r-play').classList.add('on');
+  document.getElementById('r-play').innerHTML='<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg> Stop';  document.getElementById('r-play').classList.add('on');
   
   rTmr=setInterval(updateRDisp,200);
   updateRDisp();
