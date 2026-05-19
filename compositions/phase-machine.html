@@ -223,6 +223,12 @@
     .instructions a{color:var(--accent);text-decoration:underline}
     .instructions a:hover{color:var(--accent-hover)}
 
+    .essay{font-size:.9rem;line-height:1.85;color:var(--text);margin-top:3rem;padding-top:2.5rem;border-top:1px solid var(--border)}
+    .essay h2{font-family:var(--font-heading);font-size:1rem;font-weight:600;letter-spacing:-.01em;margin:2rem 0 .5rem}
+    .essay h2:first-child{margin-top:0}
+    .essay p{margin-bottom:1rem}
+    .essay p:last-child{margin-bottom:0}
+
     footer{border-top:1px solid var(--border);padding:1.25rem 1.5rem;text-align:center;font-size:.78rem;color:var(--muted);}
     footer a{color:var(--muted);text-decoration:none;}
     footer a:hover{color:var(--accent);}
@@ -403,6 +409,23 @@
     <p>Press <strong>Space</strong> to play/pause. Hold <strong>K</strong> to engage sync hold.</p>
   </div>
 
+  <div class="essay">
+    <h2>It's Gonna Rain</h2>
+    <p>The piece that started it was called <em>It's Gonna Rain</em>. In 1964, Steve Reich encountered a Pentecostal preacher named Brother Walter in Union Square, San Francisco, and recorded his sermon on a portable machine. He extracted a single phrase — "it's gonna rain" — and looped it on two separate tape machines that were meant to run in unison but were slightly off, one running a little faster than the other.</p>
+    <p>Over the next several minutes the loops drifted apart and gradually back together, generating a continuous process of rhythmic effects: canons, syncopations, moments of sudden unison, dense polyrhythm as the tapes slowly converged again. What had been a mechanical inconsistency became a compositional method. In later works like <em>Piano Phase</em> (1967) and <em>Violin Phase</em> (1967), Reich transferred the process to live performers — two pianists or two violinists playing the same repeating figure, with one player instructed to gradually accelerate until a new phase relationship locked in.</p>
+
+    <h2>What the ear does with drift</h2>
+    <p>When two identical loops run slightly out of phase, something unexpected happens in the auditory system: melodies, rhythms, and patterns emerge that are not present in either loop individually. The brain does not hear two separate streams so much as actively group and regroup the incoming material, finding structure in the relationship between the two signals — structure that exists only in their perceptual interaction.</p>
+    <p>This is a vivid demonstration of what Albert Bregman called auditory scene analysis: the brain's continuous work of organising acoustic input into coherent objects. In phasing, that work produces emergent melodic patterns, apparent accelerations and decelerations, moments where the two streams seem to fuse into one and moments where they pull clearly apart. None of these are composed. The perceptual effects are most pronounced around the mid-phase position — when the offset is roughly half the loop length — where the material from the two loops is most interleaved and the auditory system has the most work to do.</p>
+
+    <h2>Music as a gradual process</h2>
+    <p>Reich's 1968 essay <em>Music as a Gradual Process</em> articulates something central to how this machine is meant to be used: the listener's engagement is not passive reception but active participation. The slow perceptual tracking of a change that is too gradual to pinpoint but too large to miss. You cannot hear the moment the loops drift, but you can hear that they have drifted. The experience is one of continuous presence with something that is always already different from how it was.</p>
+    <p>The sync hold — the K key — is not present in most digital implementations of phasing. Without it, a phase machine can only simulate the original tape accident: continuous, uncontrollable drift. Reich's live performance practice made room for holding a phase position rather than endlessly moving through them. The K key returns that choice to the listener.</p>
+
+    <h2>On attending to process</h2>
+    <p>Change is rarely visible at the moment it occurs. What becomes apparent is often retrospective — a sense that something is now different, that a pattern has shifted, that a position once held with great force is now held more lightly. The phasing process is a model for this kind of attention: not watching for a specific event, but staying present with something that is continuously, almost imperceptibly, becoming otherwise.</p>
+  </div>
+
 </main>
 
 <footer>
@@ -490,7 +513,9 @@ function resetMachine(){
 
 function setPlayBtn(on){
   var b=document.getElementById('pm-play');
-  b.innerHTML = on ? '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect x="0" y="0" width="3" height="10"/><rect x="7" y="0" width="3" height="10"/></svg> Stop' : '<svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> Play';
+  b.innerHTML = on
+    ? '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg> Stop'
+    : '<svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> Play';
   b.classList.toggle('on',on);
 }
 
@@ -599,9 +624,15 @@ function stopRec(){if(mediaRec&&isRecording)mediaRec.stop();}
 
 function setRecUI(s){
   var rb=document.getElementById('pm-rec'),sl=document.getElementById('pm-rec-state'),nb=document.getElementById('pm-rec-new');
-  if(s==='idle'){rb.innerHTML='<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg> record';rb.classList.remove('on');rb.style.display='inline-block';sl.style.display='none';nb.style.display='none';}
-  else if(s==='rec'){rb.innerHTML='<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg> stop';rb.classList.add('on');rb.style.display='inline-block';sl.style.display='none';nb.style.display='none';}
-  else if(s==='has_rec'){rb.style.display='none';sl.textContent='using recording';sl.style.display='inline';nb.style.display='inline-block';}
+  if(s==='idle'){
+    rb.innerHTML='<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg> record';
+    rb.classList.remove('on');rb.style.display='inline-block';sl.style.display='none';nb.style.display='none';
+  } else if(s==='rec'){
+    rb.innerHTML='<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg> stop';
+    rb.classList.add('on');rb.style.display='inline-block';sl.style.display='none';nb.style.display='none';
+  } else if(s==='has_rec'){
+    rb.style.display='none';sl.textContent='using recording';sl.style.display='inline';nb.style.display='inline-block';
+  }
 }
 
 function setSrcUI(t){
@@ -815,7 +846,7 @@ function previewSelection(){
   if(state.previewSrc){
     try{state.previewSrc.stop();}catch(e){}
     state.previewSrc=null;
-    document.getElementById('wf-preview').innerHTML='<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect x="0" y="0" width="3" height="10"/><rect x="7" y="0" width="3" height="10"/></svg> Stop Preview';
+    document.getElementById('wf-preview').innerHTML='<svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> Preview Selection';
     return;
   }
   var ctx=resumeCtx(),dur=state.fullBuffer.duration;
@@ -828,7 +859,7 @@ function previewSelection(){
     state.previewSrc=null;
     document.getElementById('wf-preview').innerHTML='<svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> Preview Selection';
   };
-  document.getElementById('wf-preview').innerHTML='<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect x="0" y="0" width="3" height="10"/><rect x="7" y="0" width="3" height="10"/></svg> Stop Preview';
+  document.getElementById('wf-preview').innerHTML='<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg> Stop Preview';
   state.previewSrc.start(ctx.currentTime,start,end-start);
 }
 
