@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neural Synthesis</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <link rel="apple-touch-icon" href="/images/favicon.png">
+  <link rel="manifest" href="/site.webmanifest">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Auth guard: redirects unauthenticated users -->
+  <script src="/dashboard/auth-guard.js" type="module"></script>
+
+  <!-- Feature gating: locks .card for users without access -->
+  <script type="module">
+    import { applyGatingOnReady } from '/assets/js/gating.js';
+    applyGatingOnReady({
+      targetSelector: '.card',
+      moduleName: 'neural-synthesis',
+    });
+  </script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     HEADER
+     ═══════════════════════════════════════════════════════════════════ -->
+<header class="header">
+  <a class="header-logo" href="#">
+    <div class="header-logo-dot"></div>
+    Neural Synthesis
+  </a>
+  <div class="header-right">
+    <div class="header-time">
+      <div class="header-time-dot" id="hdr-dot"></div>
+      <span id="hdr-elapsed">00:00:00</span>
+    </div>
+    <button class="header-btn" id="btn-view-toggle" disabled>creature</button>
+    <button class="header-btn" id="btn-anchor" disabled>anchor</button>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     CREATURE NAMING MODAL
+     ═══════════════════════════════════════════════════════════════════ -->
+<div class="name-modal" id="name-modal">
+  <div class="name-modal-box">
+    <div class="name-modal-title">Something is beginning.</div>
+    <div class="name-modal-sub">
+      Your creature has just been born. Give it a name — this will stay
+      with it across all future sessions, through sleep and waking.
+    </div>
+    <input
+      class="name-input"
+      id="creature-name-input"
+      type="text"
+      maxlength="24"
+      placeholder="a name"
+      autocomplete="off"
+      spellcheck="false"
+    >
+    <button class="btn primary" id="btn-name-confirm">begin</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     CONTEXT MENU
+     ═══════════════════════════════════════════════════════════════════ -->
+<div class="ctx-menu" id="ctx-menu">
+  <div class="ctx-label" id="ctx-node-label">node</div>
+  <div class="ctx-item" id="ctx-inject">inject energy</div>
+  <div class="ctx-item" id="ctx-listen">listen to this node</div>
+  <div class="ctx-item" id="ctx-isolate">isolate node</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-label">change type</div>
+  <div class="ctx-item" id="ctx-to-osc">oscillator</div>
+  <div class="ctx-item" id="ctx-to-filter">filter</div>
+  <div class="ctx-item" id="ctx-to-nl">nonlinear</div>
+  <div class="ctx-item" id="ctx-to-delay">delay</div>
+  <div class="ctx-item" id="ctx-to-predictive">predictive</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" id="ctx-lock">lock weights</div>
+  <div class="ctx-item danger" id="ctx-sever">sever connections</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     MAIN
+     ═══════════════════════════════════════════════════════════════════ -->
+<main>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <h1 class="page-title">Neural <span>Synthesis</span></h1>
+    <p class="page-sub">
+      A living instrument. A growing organism. Nodes generate and transform
+      sound; connections learn; harmonies emerge and shift; a creature
+      develops in proportion to the network that produces it.
+      Sound is not composed — it grows.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       MAIN ENGINE CARD
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="card">
+
+    <!-- STATUS BAR -->
+    <div class="status-bar" id="status-bar">
+      <div class="status-item">
+        <span class="status-key">state</span>
+        <span class="status-val" id="st-state">idle</span>
+      </div>
+      <div class="status-sep"></div>
+      <div class="status-item">
+        <span class="status-key">nodes</span>
+        <span class="status-val live" id="st-nodes">4</span>
+      </div>
+      <div class="status-sep"></div>
+      <div class="status-item">
+        <span class="status-key">connections</span>
+        <span class="status-val" id="st-conns">0</span>
+      </div>
+      <div class="status-sep"></div>
+      <div class="status-item">
+        <span class="status-key">phase locks</span>
+        <span class="status-val live" id="st-locks">0</span>
+      </div>
+      <div class="status-sep"></div>
+      <div class="status-item">
+        <span class="status-key">harmonic field</span>
+        <span class="status-val" id="st-harmonic">—</span>
+      </div>
+      <div class="status-sep"></div>
+      <div class="status-item">
+        <span class="status-key">age</span>
+        <span class="status-val bio" id="st-age">—</span>
+      </div>
+      <div class="status-sep"></div>
+      <div class="status-item">
+        <span class="status-key">memory</span>
+        <span class="status-val bio" id="st-memory">—</span>
+      </div>
+    </div>
+
+    <!-- ENERGY BAR -->
+    <div class="energy-track">
+      <div class="energy-fill" id="energy-fill"></div>
+    </div>
+
+    <!-- CANVAS AREA -->
+    <div class="canvas-wrap" id="canvas-wrap">
+      <!-- Network canvas -->
+      <canvas id="ns-canvas"></canvas>
+
+      <!-- Creature canvas (toggled) -->
+      <canvas id="creature-canvas"></canvas>
+
+      <!-- Creature UI overlay (food items, name display) -->
+      <div class="creature-ui" id="creature-ui">
+        <div class="creature-food-bar" id="food-bar">
+          <!-- food items injected by creature.js -->
+        </div>
+        <div class="creature-name-display" id="creature-name-display"></div>
+      </div>
+
+      <!-- Shared overlays (visible in both views) -->
+      <div class="listen-overlay" id="listen-overlay"></div>
+      <div class="emergence-log" id="emergence-log"></div>
+      <div class="anchor-indicator" id="anchor-indicator">anchor mode</div>
+      <div class="canvas-hint" id="canvas-hint">
+        right-click node · shift+drag to connect · click to inject · drag to move
+      </div>
+
+      <!-- Tooltip (network view only) -->
+      <div class="node-tooltip" id="node-tooltip">
+        <div class="tt-name" id="tt-name">—</div>
+        <div class="tt-row">
+          <span class="tt-key">type</span>
+          <span class="tt-val" id="tt-type">—</span>
+        </div>
+        <div class="tt-row">
+          <span class="tt-key">freq</span>
+          <span class="tt-val" id="tt-freq">—</span>
+        </div>
+        <div class="tt-row">
+          <span class="tt-key">energy</span>
+          <span class="tt-val" id="tt-energy">—</span>
+        </div>
+        <div class="tt-row">
+          <span class="tt-key">phase</span>
+          <span class="tt-val" id="tt-phase">—</span>
+        </div>
+        <div class="tt-row">
+          <span class="tt-key">connections</span>
+          <span class="tt-val" id="tt-conns">—</span>
+        </div>
+        <div class="tt-desc" id="tt-desc">—</div>
+      </div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="timeline-wrap">
+      <canvas id="timeline-canvas"></canvas>
+      <div class="timeline-label">activity · 90s</div>
+    </div>
+
+    <!-- NODE PANEL -->
+    <div class="node-panel" id="node-panel">
+      <div class="node-panel-title">
+        <span>selected node</span>
+        <div class="node-panel-actions">
+          <button class="btn sm" id="np-btn-listen" disabled>listen</button>
+          <button class="btn sm" id="np-btn-isolate" disabled>isolate</button>
+          <button class="btn sm" id="np-btn-inject" disabled>inject</button>
+        </div>
+      </div>
+      <div class="node-panel-grid">
+        <div class="np-item">
+          <span class="np-key">type</span>
+          <span class="np-val" id="np-type">—</span>
+        </div>
+        <div class="np-item">
+          <span class="np-key">frequency</span>
+          <span class="np-val" id="np-freq">—</span>
+        </div>
+        <div class="np-item">
+          <span class="np-key">phase</span>
+          <span class="np-val" id="np-phase">—</span>
+        </div>
+        <div class="np-item">
+          <span class="np-key">energy</span>
+          <span class="np-val" id="np-energy">—</span>
+        </div>
+        <div class="np-item">
+          <span class="np-key">output</span>
+          <span class="np-val" id="np-output">—</span>
+        </div>
+        <div class="np-item">
+          <span class="np-key">activation</span>
+          <span class="np-val" id="np-act">—</span>
+        </div>
+        <div class="np-item">
+          <span class="np-key">specialization</span>
+          <span class="np-val" id="np-spec">—</span>
+        </div>
+        <div class="np-item">
+          <span class="np-key">locked</span>
+          <span class="np-val" id="np-locked">no</span>
+        </div>
+      </div>
+      <div class="np-desc" id="np-desc">—</div>
+      <div class="conn-section-title">incoming</div>
+      <div class="conn-chips" id="np-ins"></div>
+      <div class="conn-section-title">outgoing</div>
+      <div class="conn-chips" id="np-outs"></div>
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="controls">
+
+      <!-- TRANSPORT -->
+      <div class="transport">
+        <button class="btn primary" id="btn-start">start</button>
+        <button class="btn" id="btn-mutate" disabled>mutate</button>
+        <button class="btn" id="btn-rewire" disabled>rewire</button>
+        <button class="btn" id="btn-reset">reset</button>
+      </div>
+
+      <!-- TABS -->
+      <div class="mode-tabs">
+        <button class="mode-tab active" data-tab="parameters">Parameters</button>
+        <button class="mode-tab" data-tab="species">Species</button>
+        <button class="mode-tab" data-tab="learning">Learning</button>
+        <button class="mode-tab" data-tab="matrix">Weight Matrix</button>
+        <button class="mode-tab" data-tab="history">History</button>
+      </div>
+
+      <!-- PARAMETERS TAB -->
+      <div class="tab-content" id="tab-parameters">
+        <div class="sliders-grid" style="margin-top:1rem">
+
+          <div class="ctrl">
+            <div class="ctrl-top">
+              <span class="ctrl-name">instability</span>
+              <span class="ctrl-value" id="v-instability">40%</span>
+            </div>
+            <input type="range" id="s-instability" min="0" max="1" value="0.4" step="0.01">
+            <div class="ctrl-desc">Distance from equilibrium. Low: stable drones. High: chaotic bursts.</div>
+          </div>
+
+          <div class="ctrl">
+            <div class="ctrl-top">
+              <span class="ctrl-name">recurrence</span>
+              <span class="ctrl-value" id="v-recurrence">50%</span>
+            </div>
+            <input type="range" id="s-recurrence" min="0" max="1" value="0.5" step="0.01">
+            <div class="ctrl-desc">Feedback depth. The engine of self-reference and memory.</div>
+          </div>
+
+          <div class="ctrl">
+            <div class="ctrl-top">
+              <span class="ctrl-name">saturation</span>
+              <span class="ctrl-value" id="v-saturation">35%</span>
+            </div>
+            <input type="range" id="s-saturation" min="0" max="1" value="0.35" step="0.01">
+            <div class="ctrl-desc">Nonlinearity depth. Creates harmonics not present in sources.</div>
+          </div>
+
+          <div class="ctrl">
+            <div class="ctrl-top">
+              <span class="ctrl-name">volume</span>
+              <span class="ctrl-value" id="v-volume">70%</span>
+            </div>
+            <input type="range" id="s-volume" min="0" max="1" value="0.7" step="0.01">
+            <div class="ctrl-desc">Master output level with soft limiting.</div>
+          </div>
+
+          <div class="ctrl">
+            <div class="ctrl-top">
+              <span class="ctrl-name">learning rate</span>
+              <span class="ctrl-value" id="v-lrate">30%</span>
+            </div>
+            <input type="range" id="s-lrate" min="0" max="1" value="0.3" step="0.01">
+            <div class="ctrl-desc">Speed of Hebbian weight evolution across medium timescale.</div>
+          </div>
+
+          <div class="ctrl">
+            <div class="ctrl-top">
+              <span class="ctrl-name">metabolic rate</span>
+              <span class="ctrl-value" id="v-metabolism">40%</span>
+            </div>
+            <input type="range" id="s-metabolism" min="0" max="1" value="0.4" step="0.01">
+            <div class="ctrl-desc">Intrinsic energy decay rate. Governs internal rhythm and tempo.</div>
+          </div>
+
+          <div class="ctrl">
+            <div class="ctrl-top">
+              <span class="ctrl-name">phase coupling</span>
+              <span class="ctrl-value" id="v-coupling">35%</span>
+            </div>
+            <input type="range" id="s-coupling" min="0" max="1" value="0.35" step="0.01">
+            <div class="ctrl-desc">Kuramoto coupling strength between oscillator nodes.</div>
+          </div>
+
+          <div class="ctrl">
+            <div class="ctrl-top">
+              <span class="ctrl-name">harmonic gravity</span>
+              <span class="ctrl-value" id="v-hgravity">45%</span>
+            </div>
+            <input type="range" id="s-hgravity" min="0" max="1" value="0.45" step="0.01">
+            <div class="ctrl-desc">Attraction toward just-intoned intervals. Higher: more consonant drift.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- SPECIES TAB -->
+      <div class="tab-content" id="tab-species" style="display:none">
+        <div class="species-grid" id="species-grid">
+          <!-- Injected by main.js from SPECIES definitions -->
+        </div>
+      </div>
+
+      <!-- LEARNING TAB -->
+      <div class="tab-content" id="tab-learning" style="display:none">
+        <div style="margin-top:1rem; display:flex; flex-direction:column; gap:0.85rem">
+
+          <div class="ctrl-row">
+            <span class="row-label">mechanisms</span>
+            <button class="pill on" id="tog-hebbian">hebbian</button>
+            <button class="pill on" id="tog-drift">freq drift</button>
+            <button class="pill on" id="tog-homeostasis">homeostasis</button>
+            <button class="pill on" id="tog-depression">syn depression</button>
+            <button class="pill on" id="tog-pruning">auto-prune</button>
+            <button class="pill on" id="tog-predictive">predictive</button>
+          </div>
+
+          <div class="ctrl-row">
+            <span class="row-label">timescale</span>
+            <button class="pill on" id="tog-fast">fast · signal</button>
+            <button class="pill on" id="tog-medium">medium · texture</button>
+            <button class="pill on" id="tog-slow">slow · structure</button>
+          </div>
+
+          <div class="ctrl-row">
+            <span class="row-label">environment</span>
+            <button class="pill" id="tog-env">microphone input</button>
+            <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--dim);margin-left:4px">
+              — ambient sound shapes network energy
+            </span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- MATRIX TAB -->
+      <div class="tab-content" id="tab-matrix" style="display:none">
+        <div style="margin-top:1rem">
+          <div class="matrix-wrap">
+            <canvas id="weight-matrix"></canvas>
+          </div>
+          <p class="matrix-note">
+            green — excitatory · orange — inhibitory · brightness — magnitude · diagonal — self
+          </p>
+        </div>
+      </div>
+
+      <!-- HISTORY TAB -->
+      <div class="tab-content" id="tab-history" style="display:none">
+        <div style="margin-top:1rem">
+          <div id="history-log"
+               style="
+                 font-family: var(--font-mono);
+                 font-size: 0.65rem;
+                 color: var(--muted);
+                 line-height: 1.9;
+                 max-height: 260px;
+                 overflow-y: auto;
+                 padding-right: 0.5rem;
+               ">
+            <span style="color:var(--dim)">
+              No history yet. Start the network and let it run.
+            </span>
+          </div>
+          <div style="
+            display:flex; justify-content:space-between; align-items:center;
+            margin-top:0.75rem; padding-top:0.75rem;
+            border-top:1px solid var(--border);
+          ">
+            <span style="font-family:var(--font-mono);font-size:0.58rem;color:var(--dim)">
+              saved to your account automatically
+            </span>
+            <button class="btn sm" id="btn-clear-history">clear history</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /controls -->
+  </div><!-- /card -->
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       ESSAY
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="essay">
+    <h2 class="essay-header">On sound that thinks,<br>and networks that listen</h2>
+
+    <div class="essay-section">
+      <div class="essay-h">How it works</div>
+      <p>Neural Synthesis models a recurrent network computed at the audio sample rate. When the network runs, a matrix equation — <strong>x(t) = tanh(W · x(t-1) + I(t) + bias)</strong> — is evaluated inside a dedicated audio thread for every sample, meaning the network's feedback, saturation, and signal routing are genuinely happening at 44,100 times per second, not simulated at animation frame rate. Three simultaneous processes then unfold at different speeds above this substrate: Hebbian weight evolution at one to thirty seconds, and structural reorganization over minutes.</p>
+      <p>None of the sound is pre-composed. Every texture, every harmonic shift, every rhythmic pattern that emerges does so through the interaction of the network with itself — through feedback, through learning, through the physics of oscillating systems that want to synchronize.</p>
+      <div class="callout">
+        <strong>To begin:</strong> Choose a species, start the network, and wait.
+        The first minutes are unresolved. After two to three minutes, connections
+        begin to strengthen and you will hear something that sounds almost intentional.
+        It was not. It grew.
+      </div>
+    </div>
+
+    <div class="essay-section">
+      <div class="essay-h">Node types</div>
+      <p><strong>Oscillator nodes</strong> self-generate within the RNN matrix. Their frequency drifts slowly toward the nearest harmonic partial of the network's implicit root pitch, and they participate in phase coupling with connected oscillators via a simplified Kuramoto model.</p>
+      <p><strong>Filter nodes</strong> receive incoming signal from the weight matrix and apply a low-pass or bandpass transformation whose cutoff is driven by incoming signal strength. A filter node in a strong feedback loop develops a slowly sweeping resonance — not because anything programmed it to, but because the signal driving its cutoff is itself evolving.</p>
+      <p><strong>Nonlinear nodes</strong> apply
+        <span class="glossary-term" data-def="Mathematical functions — tanh, sigmoid, wave-folding — that bend a signal in nonlinear ways, producing output harmonics not present in the input.">activation functions</span>
+        to their input. Two signals entering a tanh function produce a spectrum containing harmonics that neither signal contained alone.</p>
+      <p><strong>Delay nodes</strong> hold their input in a buffer and replay it with a time offset. Their delay time is attracted toward sub-multiples of the network's endogenous metabolic rhythm — rhythmic structure that emerges from the network's own activity rather than an external clock.</p>
+      <p><strong>Predictive nodes</strong> maintain a rolling statistical model of their input neighborhood and output the <em>inverse</em> of their prediction. When the network is behaving predictably, these nodes are nearly silent. When something unexpected happens, they counter it — pulling harmonies in the opposite direction, creating an internal dissent voice. They are the network's skepticism made audible.</p>
+      <p><strong>Environment nodes</strong> listen. When active, they route microphone input into the network, converting the spectral qualities of ambient sound into energy that influences connected nodes. Different species have different relationships with this input — some are receptive, some averse.</p>
+    </div>
+
+    <div class="essay-section">
+      <div class="essay-h">The three timescales</div>
+      <p>The <strong>fast layer</strong> runs inside the AudioWorklet at sample rate — 44,100 evaluations per second. This is where the physics of oscillation operates: phase relationships, interference patterns, instantaneous amplitude. It is not accessible to the eye, only to the ear.</p>
+      <p>The <strong>medium layer</strong> runs every one to thirty seconds. Hebbian learning gradually strengthens connections between co-active nodes. Oscillator frequencies drift toward consonant intervals with their neighbors. This is the layer most audible as the piece changing — the sense that what you're hearing now was not what you heard two minutes ago.</p>
+      <p>The <strong>slow layer</strong> runs over minutes. Connections whose weights have remained near zero are pruned. New connections spontaneously form between consistently co-active nodes. Nodes differentiate toward committed functional identities based on their history of use. This is the timescale of the network developing character.</p>
+    </div>
+
+    <div class="essay-section">
+      <div class="essay-h">Hebbian learning</div>
+      <p><span class="glossary-term" data-def="Proposed by Donald Hebb in 1949: the strength of a connection between two neurons increases when both are active simultaneously. Neurons that fire together wire together.">Hebbian learning</span> is one of the oldest ideas in neuroscience. Every edge in the network has a weight that evolves according to this rule. When node A is active and node B is active and A connects to B, that connection strengthens. Over many ticks, the network's weight matrix sculpts itself into a map of its own history.</p>
+      <p>The consequence, musically, is that the network develops <strong>tendencies</strong>. A path that has been active many times becomes preferred. The network begins to have a characteristic sound — a set of preferred resonances — that it has generated for itself from nothing but the Hebbian rule and its initial conditions.</p>
+    </div>
+
+    <div class="essay-section">
+      <div class="essay-h">Phase coupling and harmonic events</div>
+      <p>The most audibly striking phenomenon is <strong>phase lock</strong>: when two oscillators, previously beating against each other, suddenly synchronize — their signals reinforce, and a coherent tone emerges from dissonance. This is governed by a simplified
+        <span class="glossary-term" data-def="A mathematical model of coupled oscillators developed by Yoshiki Kuramoto in 1975. When coupling exceeds a critical threshold, synchronization cascades through the population.">Kuramoto model</span>.
+      </p>
+      <p>Sitting above the continuous signal layer is a harmonic event system. When accumulated input into an oscillator node crosses a threshold, a harmonic event is triggered — the node selects a motivated interval move from a probability-weighted set of just-intoned relationships. When the lowest-frequency oscillator triggers, the entire harmonic field reorients around its new pitch. All other oscillators recalculate their consonance targets relative to the new root. You will hear this as a sudden shift — voices that were in one relationship now heard in another.</p>
+    </div>
+
+    <div class="essay-section">
+      <div class="essay-h">The creature</div>
+      <p>The network has a body. It begins small — four nodes, a minimal form — and grows as the network grows. New nodes arrive approximately every ten minutes, each one differentiating based on the neighborhood it enters, building connections through the same Hebbian and proximity mechanisms as the rest of the network. Nodes that lose all strong connections may eventually vanish; the overall trajectory is toward growth.</p>
+      <p>The creature's morphology is a legible record of the network's history. Limbs develop with connection strength. Eyes develop with predictive node activity — a creature whose predictive nodes fire often looks alert, watchful. Features develop from inhibitory dominance, rhythmic lock, harmonic richness. You can read the network's biography in its anatomy.</p>
+      <p>The creature and the network are one thing seen from two angles. Toggle between them at any time. They share the same underlying state, the same sound, the same learning.</p>
+    </div>
+
+    <div class="essay-section">
+      <div class="essay-h">Biography and memory</div>
+      <p>The network persists between sessions. What is saved is not a full snapshot but a <em>character state</em> — the probability distribution over harmonic partials each node has inhabited, the degree of specialization each node has reached, the harmonic vocabulary that has been reinforced through threshold events.</p>
+      <p>On each new session, the network initializes with a bias toward prior character. Entropy is injected proportional to time elapsed since the last session — a short sleep means strong character continuity, a long sleep means broader initialization with only faint traces of prior personality. The network forgets selectively. Topology forgets fastest. Harmonic vocabulary forgets most slowly. Like waking up — you don't remember your dreams but you're the person who had them.</p>
+    </div>
+
+    <div class="essay-section">
+      <div class="essay-h">The environment node</div>
+      <p>When the environment node is active, the network listens to the room it inhabits. Microphone input is analyzed spectrally and converted to energy injection weighted by frequency alignment — a low voice energizes low-frequency oscillators, high ambient noise energizes mid-range nodes. The network internalizes its acoustic context, weaving external frequencies into its Hebbian weight adjustments.</p>
+      <p>Different species have different relationships with this input. Some are receptive — environmental energy amplifies their activity. Some are averse — the same input suppresses their response. The network becomes a mirror of the space it lives in, developing character shaped by whether it inhabits a quiet studio or a noisy room.</p>
+    </div>
+
+    <div class="essay-section">
+      <div class="essay-h">David Tudor and feedback instruments</div>
+      <p>David Tudor spent the 1960s and 1970s building electronic instruments from scratch — networks of circuits, each feeding signal into the next, listening and responding in ways no single hand could predict or control. <em>Rainforest</em> (1968) distributed transducers across physical objects — metal sheets, ceramic bowls, wooden planks — letting each surface shape sound according to its own resonant character. No two performances were identical. The piece was the network, and the network was always changing.</p>
+      <p>Tudor's key insight was the role of the performer in a feedback system. When a circuit's output becomes its input, the performer cannot specify what will happen — they can only set the conditions under which something happens. The role shifts from expression to cultivation. Tudor would spend hours adjusting a single parameter, not to achieve a target sound but to find the boundary where the system became interesting — unstable enough to be surprising, stable enough to be coherent.</p>
+      <p>The instability parameter is this boundary in numerical form. The interesting range is the middle: where feedback accumulates but doesn't flood, where structure and surprise coexist. Tudor found this range by ear over years of practice. The search is the same.</p>
+    </div>
+
+  </div><!-- /essay -->
+
+</main>
+
+<footer>
+  <p>
+    Neural Synthesis — a living instrument —
+    inspired by David Tudor's <em>Rainforest</em> —
+    Kuramoto, Hebb, Tudor
+  </p>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     SCRIPTS — module order matters
+     ═══════════════════════════════════════════════════════════════════ -->
+<script type="module" src="audio-engine.js"></script>
+<script type="module" src="network.js"></script>
+<script type="module" src="harmonic.js"></script>
+<script type="module" src="creature.js"></script>
+<script type="module" src="persistence.js"></script>
+<script type="module" src="main.js"></script>
+
+</body>
+</html>
