@@ -2,20 +2,19 @@
  * neural-synthesis/audio-engine.js
  *
  * Owns the AudioContext and everything downstream of the worklet.
- * Responsibilities:
- *   - Create and manage AudioContext
- *   - Allocate SharedArrayBuffers and hand them to the worklet
- *   - Build output chain: worklet → dynamics → reverb → master gain → destination
- *   - Handle microphone input: getUserMedia → analyser → spectral energy → worklet
- *   - Expose read/write API to main thread (network.js, main.js)
- *   - Manage graceful start/stop with fade in/out
  *
- * SharedArrayBuffer layout — must match audio-worklet.js exactly:
- *   Float32Array, length SAB_LENGTH
- *   [0..11]       x         current node activations (read by main)
- *   [12..23]      freq      oscillator frequency targets (written by main)
- *   [24..35]      bias      per-node bias (written by main)
- *   [36..179]     W         weight matrix 12×12 row-major (written by main)
+ * SharedArrayBuffer availability:
+ *   SAB requires COOP/COEP headers. If unavailable we fall back to a
+ *   plain Float32Array (local copy) and sync state to/from the worklet
+ *   via postMessage on every parameter change and via a periodic
+ *   readback message for activations/energy. Audio quality is identical;
+ *   only the inter-thread latency for control changes increases slightly.
+ *
+ * SharedArrayBuffer layout (Float32Array, length SAB_LENGTH):
+ *   [0..11]       x         node activations  (worklet writes, main reads)
+ *   [12..23]      freq      osc targets        (main writes, worklet reads)
+ *   [24..35]      bias      per-node bias      (main writes, worklet reads)
+ *   [36..179]     W         weight matrix 12×12 row-major
  *   [180]         energyLevel
  *   [181]         nodeCount
  *   [182..193]    nodeTypes
@@ -30,9 +29,8 @@
  */
 
 const MAX_N      = 12;
-const SAB_LENGTH = 211;   /* must match worklet constant */
+const SAB_LENGTH = 211;
 
-/* ── Shared buffer offsets ─────────────────────────────────────── */
 export const OFF = Object.freeze({
   X:       0,
   FREQ:    MAX_N,
@@ -49,14 +47,13 @@ export const OFF = Object.freeze({
   ENVGAIN: MAX_N * 3 + MAX_N * MAX_N + 2 + MAX_N * 2 + 4,
 });
 
-/* ── Module-level state ────────────────────────────────────────── */
+/* ── Module-level state ─────────────────────────────────────────── */
 let _ctx          = null;
 let _workletNode  = null;
 let _masterGain   = null;
 let _limiter      = null;
 let _reverb       = null;
 let _reverbSend   = null;
-let _dryGain      = null;
 
 let _micStream    = null;
 let _micSource    = null;
@@ -65,19 +62,47 @@ let _micActive    = false;
 let _micFrameId   = null;
 let _micBuf       = null;
 
-/* SharedArrayBuffers exposed for main thread access */
-export let sab    = null;   /* Float32Array backing */
-export let panSab = null;   /* Int16Array backing */
-export let data   = null;   /* Float32Array view */
-export let pan    = null;   /* Int16Array view */
+let _isRunning    = false;
 
-let _isRunning = false;
+/* ── Shared / fallback buffers ─────────────────────────────────── */
+let _sabAvailable = false;
 
-/* ── Impulse response for convolution reverb ───────────────────── */
+/* Public buffer references */
+export let sab    = null;
+export let panSab = null;
+export let data   = null;   /* Float32Array view of sab */
+export let pan    = null;   /* Int16Array view of panSab */
+
+/* Fallback plain arrays (used when SAB unavailable) */
+let _localData    = null;   /* Float32Array */
+let _localPan     = null;   /* Int16Array via regular ArrayBuffer */
+
+/* Pending worklet messages when worklet not yet ready */
+let _workletReady = false;
+let _pendingMsgs  = [];
+
+/* Readback state (fallback mode) */
+let _readbackActivations = new Float32Array(MAX_N);
+let _readbackEnergy      = 0;
+
+/* ─────────────────────────────────────────────────────────────── */
+
+function _detectSAB() {
+  try {
+    if (typeof SharedArrayBuffer === 'undefined') return false;
+    /* Quick allocation test */
+    const test = new SharedArrayBuffer(4);
+    return !!test;
+  } catch {
+    return false;
+  }
+}
+
+/* ── Impulse response ───────────────────────────────────────────── */
 function buildImpulse(ctx, durationSec, decay) {
-  const rate   = ctx.sampleRate;
-  const len    = Math.floor(rate * durationSec);
-  const buf    = ctx.createBuffer(2, len, rate);
+  const rate = ctx.sampleRate;
+  const len  = Math.floor(rate * durationSec);
+  const buf  = ctx.createBuffer(2, len, rate);
   for (let ch = 0; ch < 2; ch++) {
     const d = buf.getChannelData(ch);
     for (let i = 0; i < len; i++) {
@@ -87,7 +112,7 @@ function buildImpulse(ctx, durationSec, decay) {
   return buf;
 }
 
-/* ── AudioContext creation ─────────────────────────────────────── */
+/* ── AudioContext ───────────────────────────────────────────────── */
 function getContext() {
   if (!_ctx) {
     _ctx = new (window.AudioContext || window.webkitAudioContext)({
@@ -104,15 +129,26 @@ async function resumeContext() {
   return ctx;
 }
 
-/* ── Allocate shared memory ────────────────────────────────────── */
+/* ── Buffer allocation ──────────────────────────────────────────── */
 function allocateSharedBuffers() {
-  const floatBytes = SAB_LENGTH * Float32Array.BYTES_PER_ELEMENT;
-  const panBytes   = MAX_N     * Int16Array.BYTES_PER_ELEMENT;
+  _sabAvailable = _detectSAB();
 
-  sab    = new SharedArrayBuffer(floatBytes);
-  panSab = new SharedArrayBuffer(panBytes);
-  data   = new Float32Array(sab);
-  pan    = new Int16Array(panSab);
+  if (_sabAvailable) {
+    sab    = new SharedArrayBuffer(SAB_LENGTH * Float32Array.BYTES_PER_ELEMENT);
+    panSab = new SharedArrayBuffer(MAX_N * Int16Array.BYTES_PER_ELEMENT);
+    data   = new Float32Array(sab);
+    pan    = new Int16Array(panSab);
+  } else {
+    /* Fallback: plain typed arrays — worklet gets a copy via postMessage */
+    const floatBuf = new ArrayBuffer(SAB_LENGTH * Float32Array.BYTES_PER_ELEMENT);
+    const panBuf   = new ArrayBuffer(MAX_N * Int16Array.BYTES_PER_ELEMENT);
+    _localData     = new Float32Array(floatBuf);
+    _localPan      = new Int16Array(panBuf);
+    /* Public references point to local arrays */
+    data = _localData;
+    pan  = _localPan;
+    console.info('[AudioEngine] SharedArrayBuffer unavailable — using postMessage fallback.');
+  }
 
   /* Default parameter values */
   data[OFF.INST]    = 0.4;
@@ -120,15 +156,14 @@ function allocateSharedBuffers() {
   data[OFF.SAT]     = 0.35;
   data[OFF.META]    = 0.4;
   data[OFF.ENVGAIN] = 0.0;
-  data[OFF.COUNT]   = 4;   /* start with 4 nodes */
+  data[OFF.COUNT]   = 4;
 
-  /* Default pan: evenly spread */
   for (let i = 0; i < MAX_N; i++) {
     pan[i] = Math.round(((i / (MAX_N - 1)) * 2 - 1) * 800);
   }
 }
 
-/* ── Build output audio graph ─────────────────────────────────── */
+/* ── Output chain ───────────────────────────────────────────────── */
 function buildOutputChain(ctx) {
   _masterGain = ctx.createGain();
   _masterGain.gain.value = 0;
@@ -146,13 +181,11 @@ function buildOutputChain(ctx) {
   _reverbSend = ctx.createGain();
   _reverbSend.gain.value = 0.14;
 
-  _dryGain    = ctx.createGain();
-  _dryGain.gain.value = 0.86;
+  const dryGain = ctx.createGain();
+  dryGain.gain.value = 0.86;
 
-  /* Routing: worklet → masterGain → dryGain → limiter → destination
-   *                                → reverbSend → reverb → destination */
-  _masterGain.connect(_dryGain);
-  _dryGain.connect(_limiter);
+  _masterGain.connect(dryGain);
+  dryGain.connect(_limiter);
   _limiter.connect(ctx.destination);
 
   _masterGain.connect(_reverbSend);
@@ -160,24 +193,114 @@ function buildOutputChain(ctx) {
   _reverb.connect(ctx.destination);
 }
 
-/* ── Load and connect the AudioWorklet ────────────────────────── */
+/* ── Worklet loading ────────────────────────────────────────────── */
 async function loadWorklet(ctx) {
   await ctx.audioWorklet.addModule('./audio-worklet.js');
 
+  const processorOptions = _sabAvailable
+    ? { sab, panSab, useSAB: true }
+    : { useSAB: false, sabLength: SAB_LENGTH, maxN: MAX_N };
+
   _workletNode = new AudioWorkletNode(ctx, 'neural-synth-processor', {
-    numberOfInputs:  0,
-    numberOfOutputs: 1,
+    numberOfInputs:     0,
+    numberOfOutputs:    1,
     outputChannelCount: [2],
-    processorOptions: {
-      sab:    sab,
-      panSab: panSab,
-    },
+    processorOptions,
   });
+
+  /* Message handler — receives activation readback in fallback mode */
+  _workletNode.port.onmessage = e => {
+    const msg = e.data;
+    if (!msg) return;
+
+    switch (msg.type) {
+      case 'ready':
+        _workletReady = true;
+        /* Flush pending messages */
+        _pendingMsgs.forEach(m => _workletNode.port.postMessage(m));
+        _pendingMsgs = [];
+        /* In fallback mode, send the initial full state */
+        if (!_sabAvailable) _sendFullState();
+        break;
+
+      case 'readback':
+        /* Worklet sending activation snapshot back (fallback mode) */
+        if (msg.activations) {
+          _readbackActivations = new Float32Array(msg.activations);
+          for (let i = 0; i < _readbackActivations.length; i++) {
+            data[OFF.X + i] = _readbackActivations[i];
+          }
+        }
+        if (msg.energy !== undefined) {
+          _readbackEnergy = msg.energy;
+          data[OFF.ENERGY] = msg.energy;
+        }
+        break;
+
+      default:
+        break;
+    }
+  };
 
   _workletNode.connect(_masterGain);
 }
 
-/* ── Microphone pipeline ──────────────────────────────────────── */
+/* ── Fallback: send full state snapshot to worklet ──────────────── */
+function _sendFullState() {
+  if (!_workletNode || !_localData) return;
+  const msg = {
+    type: 'setState',
+    data: Array.from(_localData),
+    pan:  Array.from(_localPan),
+  };
+  if (_workletReady) {
+    _workletNode.port.postMessage(msg);
+  } else {
+    _pendingMsgs.push(msg);
+  }
+}
+
+/* ── Fallback: send a targeted param update ─────────────────────── */
+function _sendParam(offset, value) {
+  if (_sabAvailable) return;   /* SAB mode: write already done */
+  const msg = { type: 'setParam', offset, value };
+  if (_workletReady && _workletNode) {
+    _workletNode.port.postMessage(msg);
+  } else {
+    _pendingMsgs.push(msg);
+  }
+}
+
+/* ── Fallback: send injection ───────────────────────────────────── */
+function _sendInjection(i, amount) {
+  if (_sabAvailable) return;
+  const msg = { type: 'inject', index: i, amount };
+  if (_workletReady && _workletNode) {
+    _workletNode.port.postMessage(msg);
+  } else {
+    _pendingMsgs.push(msg);
+  }
+}
+
+/* ── Fallback: send weight matrix ───────────────────────────────── */
+function _sendWeightMatrix(W, N) {
+  if (_sabAvailable) return;
+  /* Slice only the active portion */
+  const slice = new Float32Array(MAX_N * MAX_N);
+  for (let i = 0; i < N; i++) {
+    for (let j = 0; j < N; j++) {
+      slice[i * MAX_N + j] = W[i * N + j] ?? 0;
+    }
+  }
+  const msg = { type: 'setWeights', weights: Array.from(slice) };
+  if (_workletReady && _workletNode) {
+    _workletNode.port.postMessage(msg);
+  } else {
+    _pendingMsgs.push(msg);
+  }
+}
+
+/* ── Microphone pipeline ────────────────────────────────────────── */
 async function startMicrophone() {
   if (_micActive) return;
   try {
@@ -185,17 +308,14 @@ async function startMicrophone() {
       audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
       video: false,
     });
-
-    const ctx     = getContext();
-    _micSource    = ctx.createMediaStreamSource(_micStream);
-    _micAnalyser  = ctx.createAnalyser();
-    _micAnalyser.fftSize         = 256;
+    const ctx    = getContext();
+    _micSource   = ctx.createMediaStreamSource(_micStream);
+    _micAnalyser = ctx.createAnalyser();
+    _micAnalyser.fftSize = 256;
     _micAnalyser.smoothingTimeConstant = 0.75;
-    _micBuf       = new Uint8Array(_micAnalyser.frequencyBinCount);
-
+    _micBuf      = new Uint8Array(_micAnalyser.frequencyBinCount);
     _micSource.connect(_micAnalyser);
     _micActive = true;
-
     _pollMic();
   } catch (err) {
     console.warn('[AudioEngine] Microphone unavailable:', err.message);
@@ -208,13 +328,8 @@ function stopMicrophone() {
   if (_micFrameId) cancelAnimationFrame(_micFrameId);
   if (_micSource)  _micSource.disconnect();
   if (_micStream)  _micStream.getTracks().forEach(t => t.stop());
-  _micSource   = null;
-  _micAnalyser = null;
-  _micStream   = null;
-  _micActive   = false;
-  _micFrameId  = null;
-
-  /* Clear environment gain */
+  _micSource = _micAnalyser = _micStream = null;
+  _micActive = _micFrameId = false;
   if (data) data[OFF.ENVGAIN] = 0;
 }
 
@@ -222,44 +337,29 @@ function _pollMic() {
   if (!_micActive || !_micAnalyser) return;
   _micAnalyser.getByteFrequencyData(_micBuf);
 
-  /* Compute spectral centroid energy 0..1 */
   let sum = 0;
   for (let i = 0; i < _micBuf.length; i++) sum += _micBuf[i];
   const level = Math.min(1, sum / (_micBuf.length * 255) * 4);
 
-  /* Send to worklet via message port */
   if (_workletNode) {
     _workletNode.port.postMessage({ type: 'env', level });
   }
 
-  /* Also write spectral band energies into injection slots for
-     environment nodes — node types are read in main thread,
-     so we do a lightweight approximation here:
-     low band → node 0 injection, mid → node 1, high → node 2 */
-  if (data) {
-    const binCount  = _micBuf.length;
-    const lowEnd    = Math.floor(binCount * 0.15);
-    const midStart  = Math.floor(binCount * 0.15);
-    const midEnd    = Math.floor(binCount * 0.55);
-    const highStart = Math.floor(binCount * 0.55);
+  const bc  = _micBuf.length;
+  const lE  = Math.floor(bc * 0.15);
+  const mS  = lE;
+  const mE  = Math.floor(bc * 0.55);
+  const hS  = mE;
+  let lowE  = 0, midE = 0, highE = 0;
+  for (let i = 0;  i < lE; i++) lowE  += _micBuf[i];
+  for (let i = mS; i < mE; i++) midE  += _micBuf[i];
+  for (let i = hS; i < bc; i++) highE += _micBuf[i];
+  lowE  /= (lE       * 255);
+  midE  /= ((mE - mS)* 255);
+  highE /= ((bc - hS)* 255);
 
-    let lowE  = 0, midE = 0, highE = 0;
-    for (let i = 0;         i < lowEnd;   i++) lowE  += _micBuf[i];
-    for (let i = midStart;  i < midEnd;   i++) midE  += _micBuf[i];
-    for (let i = highStart; i < binCount; i++) highE += _micBuf[i];
-
-    lowE  = lowE  / (lowEnd              * 255);
-    midE  = midE  / ((midEnd - midStart) * 255);
-    highE = highE / ((binCount - highStart) * 255);
-
-    data[OFF.ENVGAIN] = level;
-
-    /* These will be read by network.js to distribute to env nodes */
-    if (!window._micSpectrum) window._micSpectrum = { low: 0, mid: 0, high: 0 };
-    window._micSpectrum.low  = lowE;
-    window._micSpectrum.mid  = midE;
-    window._micSpectrum.high = highE;
-  }
+  if (data) data[OFF.ENVGAIN] = level;
+  window._micSpectrum = { low: lowE, mid: midE, high: highE };
 
   _micFrameId = requestAnimationFrame(_pollMic);
 }
@@ -268,18 +368,10 @@ function _pollMic() {
    PUBLIC API
    ═══════════════════════════════════════════════════════════════════ */
 
-/**
- * Initialize shared buffers. Must be called before start().
- * Safe to call multiple times.
- */
 export function initBuffers() {
-  if (!sab) allocateSharedBuffers();
+  if (!data) allocateSharedBuffers();
 }
 
-/**
- * Start the audio engine.
- * Creates AudioContext, loads worklet, builds output chain, fades in.
- */
 export async function start(volumeNorm) {
   if (_isRunning) return;
   initBuffers();
@@ -296,42 +388,31 @@ export async function start(volumeNorm) {
   _isRunning = true;
 }
 
-/**
- * Stop the audio engine with a short fade out.
- */
 export function stop() {
   if (!_isRunning || !_ctx || !_masterGain) return;
   const now = _ctx.currentTime;
   _masterGain.gain.setValueAtTime(_masterGain.gain.value, now);
   _masterGain.gain.linearRampToValueAtTime(0, now + 0.7);
-
   setTimeout(() => {
     try { _workletNode?.disconnect(); } catch (_) {}
     try { _masterGain?.disconnect();  } catch (_) {}
-    _workletNode = null;
-    _masterGain  = null;
+    _workletNode  = null;
+    _masterGain   = null;
+    _workletReady = false;
+    _pendingMsgs  = [];
   }, 800);
-
   stopMicrophone();
   _isRunning = false;
 }
 
-/**
- * Set master volume (0..1) with smooth ramp.
- */
 export function setVolume(v) {
   if (!_masterGain || !_ctx) return;
   _masterGain.gain.setTargetAtTime(
     Math.max(0, Math.min(1, v)) * 0.75,
-    _ctx.currentTime,
-    0.08
+    _ctx.currentTime, 0.08
   );
 }
 
-/**
- * Set a scalar parameter in the shared buffer.
- * key: 'instability' | 'recurrence' | 'saturation' | 'metabolism'
- */
 export function setParam(key, value) {
   if (!data) return;
   const offsets = {
@@ -340,14 +421,13 @@ export function setParam(key, value) {
     saturation:  OFF.SAT,
     metabolism:  OFF.META,
   };
-  if (offsets[key] !== undefined) {
-    data[offsets[key]] = Math.max(0, Math.min(1, value));
-  }
+  const off = offsets[key];
+  if (off === undefined) return;
+  const clamped = Math.max(0, Math.min(1, value));
+  data[off] = clamped;
+  _sendParam(off, clamped);
 }
 
-/**
- * Write the full weight matrix (Float32Array, length N*N, row-major).
- */
 export function setWeightMatrix(W, N) {
   if (!data) return;
   for (let i = 0; i < N; i++) {
@@ -355,108 +435,88 @@ export function setWeightMatrix(W, N) {
       data[OFF.W + i * MAX_N + j] = W[i * N + j] ?? 0;
     }
   }
+  _sendWeightMatrix(W, N);
 }
 
-/**
- * Write frequency targets for oscillator nodes (Hz).
- */
 export function setFrequencies(freqs) {
   if (!data) return;
   for (let i = 0; i < freqs.length && i < MAX_N; i++) {
     data[OFF.FREQ + i] = freqs[i];
   }
+  if (!_sabAvailable) {
+    const msg = { type: 'setFreqs', freqs: Array.from(freqs) };
+    if (_workletReady && _workletNode) _workletNode.port.postMessage(msg);
+    else _pendingMsgs.push(msg);
+  }
 }
 
-/**
- * Write bias values for all nodes.
- */
 export function setBiases(biases) {
   if (!data) return;
   for (let i = 0; i < biases.length && i < MAX_N; i++) {
     data[OFF.BIAS + i] = biases[i];
   }
+  if (!_sabAvailable) {
+    const msg = { type: 'setBiases', biases: Array.from(biases) };
+    if (_workletReady && _workletNode) _workletNode.port.postMessage(msg);
+    else _pendingMsgs.push(msg);
+  }
 }
 
-/**
- * Write node types array (0=osc, 1=filter, 2=nl, 3=delay, 4=pred, 5=env).
- */
 export function setNodeTypes(types) {
   if (!data) return;
   for (let i = 0; i < types.length && i < MAX_N; i++) {
     data[OFF.TYPES + i] = types[i];
   }
+  if (!_sabAvailable) {
+    const msg = { type: 'setTypes', types: Array.from(types) };
+    if (_workletReady && _workletNode) _workletNode.port.postMessage(msg);
+    else _pendingMsgs.push(msg);
+  }
 }
 
-/**
- * Set active node count.
- */
 export function setNodeCount(n) {
   if (!data) return;
-  data[OFF.COUNT] = Math.max(1, Math.min(MAX_N, n));
+  const count = Math.max(1, Math.min(MAX_N, n));
+  data[OFF.COUNT] = count;
+  _sendParam(OFF.COUNT, count);
 }
 
-/**
- * One-shot energy injection into node i.
- * Value is added to the injection slot; worklet reads and clears it.
- */
 export function injectEnergy(i, amount) {
   if (!data || i < 0 || i >= MAX_N) return;
-  data[OFF.INJ + i] = Math.max(0, Math.min(2, (data[OFF.INJ + i] || 0) + amount));
+  const val = Math.max(0, Math.min(2, (data[OFF.INJ + i] || 0) + amount));
+  data[OFF.INJ + i] = val;
+  _sendInjection(i, val);
 }
 
-/**
- * Read current activation for node i (written by worklet).
- */
 export function getActivation(i) {
   if (!data) return 0;
   return data[OFF.X + i];
 }
 
-/**
- * Read all activations as a snapshot Float32Array (copy).
- */
 export function getActivations(N) {
   if (!data) return new Float32Array(N);
   return data.slice(OFF.X, OFF.X + N);
 }
 
-/**
- * Read current energy level scalar 0..1.
- */
 export function getEnergyLevel() {
   if (!data) return 0;
   return data[OFF.ENERGY];
 }
 
-/**
- * Update spatial pan for node i (-1..1).
- */
 export function setNodePan(i, panValue) {
   if (!pan || i < 0 || i >= MAX_N) return;
   pan[i] = Math.round(Math.max(-1, Math.min(1, panValue)) * 1000);
-}
-
-/**
- * Enable or disable microphone environment input.
- */
-export async function setEnvironmentActive(active) {
-  if (active) {
-    await startMicrophone();
-  } else {
-    stopMicrophone();
+  if (!_sabAvailable) {
+    const msg = { type: 'setPan', index: i, value: pan[i] };
+    if (_workletReady && _workletNode) _workletNode.port.postMessage(msg);
+    else _pendingMsgs.push(msg);
   }
 }
 
-/**
- * Returns whether audio engine is currently running.
- */
-export function isRunning() {
-  return _isRunning;
+export async function setEnvironmentActive(active) {
+  if (active) await startMicrophone();
+  else stopMicrophone();
 }
 
-/**
- * Returns the AudioContext (for any downstream use).
- */
-export function getAudioContext() {
-  return _ctx;
-}
+export function isRunning() { return _isRunning; }
+export function getAudioContext() { return _ctx; }
