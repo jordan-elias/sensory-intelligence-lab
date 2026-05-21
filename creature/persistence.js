@@ -64,20 +64,42 @@ import { NetworkEvents } from './network.js';
    ═══════════════════════════════════════════════════════════════════ */
 
 function getClient() {
-  if (window.supabase) return window.supabase;
-  console.warn('[Persistence] Supabase client not found on window.supabase');
+  /* auth-guard.js exposes the client as window._supabase */
+  if (window._supabase) return window._supabase;
+  /* Legacy fallback */
+  if (window.supabase)  return window.supabase;
+  console.warn('[Persistence] Supabase client not found. Ensure auth-guard.js has run.');
   return null;
 }
 
+/**
+ * Wait for auth-guard.js to finish its checkAuth() call before
+ * attempting any Supabase operations. auth-guard dispatches
+ * 'authReady' once the user is confirmed.
+ * Returns the authenticated user id, or null if unavailable.
+ */
+async function waitForAuth() {
+  /* Already available synchronously */
+  if (window._currentUser) return window._currentUser.id;
+
+  return new Promise(resolve => {
+    const handler = e => {
+      window.removeEventListener('authReady', handler);
+      resolve(e.detail?.user?.id ?? null);
+    };
+    window.addEventListener('authReady', handler);
+    /* Safety timeout — 8 seconds */
+    setTimeout(() => {
+      window.removeEventListener('authReady', handler);
+      resolve(null);
+    }, 8000);
+  });
+}
+
 async function getUserId() {
-  const sb = getClient();
-  if (!sb) return null;
-  try {
-    const { data: { user } } = await sb.auth.getUser();
-    return user?.id ?? null;
-  } catch {
-    return null;
-  }
+  /* Prefer the already-resolved user from auth-guard */
+  if (window._currentUser?.id) return window._currentUser.id;
+  return waitForAuth();
 }
 
 /* ═══════════════════════════════════════════════════════════════════
