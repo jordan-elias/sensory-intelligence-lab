@@ -1,10 +1,11 @@
 /**
  * neural-synthesis/persistence.js
  *
- * Supabase persistence layer for Neural Synthesis.
- * Manages two tables:
+ * Supabase persistence layer.
  *
- * ── neural_instruments ──────────────────────────────────────────
+ * Tables (SQL in comments below):
+ *
+ * neural_instruments:
  *   id              uuid primary key default gen_random_uuid()
  *   user_id         uuid references auth.users(id) not null
  *   species_id      text not null default 'lull'
@@ -12,45 +13,33 @@
  *   session_count   integer default 0
  *   total_runtime_s integer default 0
  *   last_session_at timestamptz
- *   biography       jsonb          -- character state (see getBiographySnapshot)
- *   harmonic_vocab  jsonb          -- interval weight array
+ *   biography       jsonb
+ *   harmonic_vocab  jsonb
  *   created_at      timestamptz default now()
  *   updated_at      timestamptz default now()
+ *   RLS: all operations require auth.uid() = user_id
  *
- *   RLS:
- *     enable row level security
- *     policy "owner only" using (auth.uid() = user_id)
- *       for all using (auth.uid() = user_id)
- *       with check (auth.uid() = user_id)
- *
- * ── neural_history ──────────────────────────────────────────────
+ * neural_history:
  *   id              uuid primary key default gen_random_uuid()
  *   user_id         uuid references auth.users(id) not null
- *   instrument_id   uuid references neural_instruments(id)
+ *   instrument_id   uuid references neural_instruments(id) on delete cascade
  *   session_start   timestamptz not null
  *   session_end     timestamptz
  *   runtime_s       integer default 0
  *   species_id      text
- *   events          jsonb          -- array of {t, text} annotation objects
- *   snapshot        jsonb          -- biography snapshot at session end
+ *   events          jsonb
+ *   snapshot        jsonb
  *   created_at      timestamptz default now()
- *
- *   RLS:
- *     enable row level security
- *     policy "owner only" using (auth.uid() = user_id)
- *       for all using (auth.uid() = user_id)
- *       with check (auth.uid() = user_id)
+ *   RLS: all operations require auth.uid() = user_id
  *
  * Sleep/wake model:
- *   On load: fetch instrument record → compute sleep duration →
- *   pass retention factor to network.js and harmonic.js.
- *   On session end: write updated biography + increment counters.
- *   Auto-save: every AUTO_SAVE_INTERVAL_MS while running.
+ *   Retention = exp(-k * sleepDays), k = ln(50)/14
+ *   0 days → 1.0 (full memory)
+ *   14 days → ~0.02 (nearly forgotten)
  *
- * History log:
- *   Emergence events emitted by NetworkEvents are accumulated
- *   in a session buffer. On session end (or auto-save) they are
- *   written to neural_history. The History tab reads from this table.
+ * Session picker:
+ *   loadAllInstruments() returns all user instruments for display
+ *   in the session picker gate on page load.
  */
 
 import { getBiographySnapshot, applyBiography, NS } from './network.js';
@@ -59,45 +48,30 @@ import { NetworkEvents } from './network.js';
 
 /* ═══════════════════════════════════════════════════════════════════
    SUPABASE CLIENT
-   Assumes window.supabase is initialised by the app shell before
-   this module loads. Falls back gracefully if unavailable.
+   auth-guard.js exposes the client as window._supabase
+   and fires 'authReady' when user is confirmed.
    ═══════════════════════════════════════════════════════════════════ */
 
 function getClient() {
-  /* auth-guard.js exposes the client as window._supabase */
-  if (window._supabase) return window._supabase;
-  /* Legacy fallback */
-  if (window.supabase)  return window.supabase;
-  console.warn('[Persistence] Supabase client not found. Ensure auth-guard.js has run.');
-  return null;
+  return window._supabase || window.supabase || null;
 }
 
-/**
- * Wait for auth-guard.js to finish its checkAuth() call before
- * attempting any Supabase operations. auth-guard dispatches
- * 'authReady' once the user is confirmed.
- * Returns the authenticated user id, or null if unavailable.
- */
 async function waitForAuth() {
-  /* Already available synchronously */
-  if (window._currentUser) return window._currentUser.id;
-
+  if (window._currentUser?.id) return window._currentUser.id;
   return new Promise(resolve => {
     const handler = e => {
       window.removeEventListener('authReady', handler);
       resolve(e.detail?.user?.id ?? null);
     };
     window.addEventListener('authReady', handler);
-    /* Safety timeout — 8 seconds */
     setTimeout(() => {
       window.removeEventListener('authReady', handler);
       resolve(null);
-    }, 8000);
+    }, 10000);
   });
 }
 
 async function getUserId() {
-  /* Prefer the already-resolved user from auth-guard */
   if (window._currentUser?.id) return window._currentUser.id;
   return waitForAuth();
 }
@@ -106,103 +80,81 @@ async function getUserId() {
    CONSTANTS
    ═══════════════════════════════════════════════════════════════════ */
 
-const AUTO_SAVE_INTERVAL_MS  = 3 * 60 * 1000;   /* 3 minutes */
-const MAX_HISTORY_EVENTS      = 200;             /* cap per session */
-const SLEEP_FULL_MEMORY_DAYS  = 0;              /* 0 days → full retention */
-const SLEEP_NO_MEMORY_DAYS    = 14;             /* 14 days → near-zero retention */
+const AUTO_SAVE_MS       = 3 * 60 * 1000;
+const MAX_EVENTS         = 200;
+const FORGET_DAYS        = 14;
 
 /* ═══════════════════════════════════════════════════════════════════
    MODULE STATE
    ═══════════════════════════════════════════════════════════════════ */
 
 const P = {
-  instrumentId:   null,   /* uuid of current neural_instruments row */
-  historyId:      null,   /* uuid of current neural_history row */
-  userId:         null,
-  sessionStart:   null,   /* Date object */
-  sessionEvents:  [],     /* accumulated emergence events this session */
-  lastAutoSave:   0,
-  isRunning:      false,
-  totalRuntime:   0,      /* seconds, loaded from DB */
-  sessionCount:   0,      /* loaded from DB */
-  creatureName:   null,
-  speciesId:      null,
+  instrumentId:  null,
+  historyId:     null,
+  userId:        null,
+  sessionStart:  null,
+  sessionEvents: [],
+  lastAutoSave:  0,
+  isRunning:     false,
+  totalRuntime:  0,
+  sessionCount:  0,
+  creatureName:  null,
+  speciesId:     null,
 };
 
 /* ═══════════════════════════════════════════════════════════════════
-   SLEEP RETENTION CALCULATION
+   SLEEP / RETENTION
    ═══════════════════════════════════════════════════════════════════ */
 
-/**
- * Compute retention factor 0..1 from time since last session.
- * 0 days → 1.0 (full memory)
- * 14 days → ~0.0 (nearly forgotten)
- * Uses a smooth exponential decay.
- */
 function computeRetention(lastSessionAt) {
-  if (!lastSessionAt) return 0;   /* never played — fresh start */
-  const sleepMs   = Date.now() - new Date(lastSessionAt).getTime();
-  const sleepDays = sleepMs / (1000 * 60 * 60 * 24);
-  /* Exponential: retention = exp(-k * days), k chosen so 14 days ≈ 0.02 */
-  const k = Math.log(50) / SLEEP_NO_MEMORY_DAYS;   /* ≈ 0.278 */
-  return Math.max(0, Math.min(1, Math.exp(-k * sleepDays)));
+  if (!lastSessionAt) return 0;
+  const days = (Date.now() - new Date(lastSessionAt).getTime()) / 86400000;
+  const k    = Math.log(50) / FORGET_DAYS;
+  return Math.max(0, Math.min(1, Math.exp(-k * days)));
 }
 
-/**
- * Returns a human-readable sleep state label for the status bar.
- */
 export function getSleepLabel(lastSessionAt) {
   if (!lastSessionAt) return 'first awakening';
-  const sleepMs   = Date.now() - new Date(lastSessionAt).getTime();
-  const sleepMins = sleepMs / 60000;
-  const sleepDays = sleepMins / 1440;
-
-  if (sleepMins < 5)    return 'just woken';
-  if (sleepMins < 60)   return 'well rested';
-  if (sleepDays < 1)    return 'rested';
-  if (sleepDays < 3)    return 'light sleep';
-  if (sleepDays < 7)    return 'long sleep';
-  if (sleepDays < 14)   return 'deep sleep';
+  const mins = (Date.now() - new Date(lastSessionAt).getTime()) / 60000;
+  if (mins <    5) return 'just woken';
+  if (mins <   60) return 'well rested';
+  if (mins < 1440) return 'rested';
+  const days = mins / 1440;
+  if (days <  3)   return 'light sleep';
+  if (days <  7)   return 'long sleep';
+  if (days < 14)   return 'deep sleep';
   return 'nearly forgotten';
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   LOAD — fetch instrument record for current user
+   LOAD — single instrument for current user (most recent)
    ═══════════════════════════════════════════════════════════════════ */
 
 /**
- * Load the instrument biography for the current user.
- * If no record exists, returns null (first session).
- * Applies biography priors to network and harmonic systems.
- *
- * Returns: { speciesId, creatureName, retention, sleepLabel, totalRuntime, sessionCount }
- * or null on first session.
+ * Load a specific instrument by id, applying biography priors.
+ * Returns session info object or null on failure.
  */
-export async function loadInstrument() {
+export async function loadInstrument(instrumentId) {
   const sb = getClient();
   if (!sb) return null;
-
   P.userId = await getUserId();
   if (!P.userId) return null;
 
   try {
-    const { data, error } = await sb
+    const query = sb
       .from('neural_instruments')
       .select('*')
-      .eq('user_id', P.userId)
-      .maybeSingle();
+      .eq('user_id', P.userId);
 
-    if (error) {
-      console.warn('[Persistence] Load error:', error.message);
-      return null;
+    if (instrumentId) {
+      query.eq('id', instrumentId);
+    } else {
+      query.order('last_session_at', { ascending: false }).limit(1);
     }
 
-    if (!data) {
-      /* First session — no record yet */
-      return null;
-    }
+    const { data, error } = await query.maybeSingle();
+    if (error || !data) return null;
 
-    /* Existing record */
     P.instrumentId = data.id;
     P.creatureName = data.creature_name;
     P.speciesId    = data.species_id;
@@ -212,20 +164,16 @@ export async function loadInstrument() {
     const retention  = computeRetention(data.last_session_at);
     const sleepLabel = getSleepLabel(data.last_session_at);
 
-    /* Apply biography to network */
     if (data.biography) {
       const bio = typeof data.biography === 'string'
-        ? JSON.parse(data.biography)
-        : data.biography;
+        ? JSON.parse(data.biography) : data.biography;
       bio.lastSessionAt = data.last_session_at;
       applyBiography(bio);
     }
 
-    /* Apply harmonic vocabulary */
     if (data.harmonic_vocab) {
       const vocab = typeof data.harmonic_vocab === 'string'
-        ? JSON.parse(data.harmonic_vocab)
-        : data.harmonic_vocab;
+        ? JSON.parse(data.harmonic_vocab) : data.harmonic_vocab;
       applyHarmonicVocabulary(vocab, retention);
     }
 
@@ -237,46 +185,81 @@ export async function loadInstrument() {
       totalRuntime: P.totalRuntime,
       sessionCount: P.sessionCount,
       lastSessionAt:data.last_session_at,
+      instrumentId: data.id,
     };
 
   } catch (err) {
-    console.warn('[Persistence] Load exception:', err);
+    console.warn('[Persistence] loadInstrument:', err);
     return null;
   }
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   CREATE — first-session record creation
+   LOAD ALL — session picker
+   Returns all instruments for the current user, newest first.
    ═══════════════════════════════════════════════════════════════════ */
 
 /**
- * Create a new instrument record for a first-time user.
- * Called after species selection and creature naming.
+ * Returns array of { id, speciesId, creatureName, lastSessionAt,
+ *                    totalRuntimeS, sessionCount, sleepLabel }
+ * for display in the session picker.
  */
+export async function loadAllInstruments() {
+  const sb = getClient();
+  if (!sb) return [];
+  const userId = await getUserId();
+  if (!userId) return [];
+
+  try {
+    const { data, error } = await sb
+      .from('neural_instruments')
+      .select('id, species_id, creature_name, last_session_at, total_runtime_s, session_count')
+      .eq('user_id', userId)
+      .order('last_session_at', { ascending: false })
+      .limit(10);
+
+    if (error) return [];
+
+    return (data || []).map(row => ({
+      id:           row.id,
+      speciesId:    row.species_id,
+      creatureName: row.creature_name || 'unnamed',
+      lastSessionAt:row.last_session_at,
+      totalRuntimeS:row.total_runtime_s ?? 0,
+      sessionCount: row.session_count   ?? 0,
+      sleepLabel:   getSleepLabel(row.last_session_at),
+    }));
+
+  } catch (err) {
+    console.warn('[Persistence] loadAllInstruments:', err);
+    return [];
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CREATE — first session for a new instrument
+   ═══════════════════════════════════════════════════════════════════ */
+
 export async function createInstrument(speciesId, creatureName) {
   const sb = getClient();
-  if (!sb || !P.userId) return null;
+  if (!sb) return null;
+  P.userId = await getUserId();
+  if (!P.userId) return null;
 
   try {
     const { data, error } = await sb
       .from('neural_instruments')
       .insert({
-        user_id:       P.userId,
-        species_id:    speciesId,
-        creature_name: creatureName,
-        session_count: 0,
+        user_id:         P.userId,
+        species_id:      speciesId,
+        creature_name:   creatureName,
+        session_count:   0,
         total_runtime_s: 0,
-        last_session_at: null,
-        biography:     null,
-        harmonic_vocab:null,
       })
       .select()
       .single();
 
-    if (error) {
-      console.warn('[Persistence] Create error:', error.message);
-      return null;
-    }
+    if (error) { console.warn('[Persistence] createInstrument:', error.message); return null; }
 
     P.instrumentId = data.id;
     P.creatureName = creatureName;
@@ -284,7 +267,7 @@ export async function createInstrument(speciesId, creatureName) {
     return data.id;
 
   } catch (err) {
-    console.warn('[Persistence] Create exception:', err);
+    console.warn('[Persistence] createInstrument exception:', err);
     return null;
   }
 }
@@ -293,19 +276,14 @@ export async function createInstrument(speciesId, creatureName) {
    SESSION LIFECYCLE
    ═══════════════════════════════════════════════════════════════════ */
 
-/**
- * Begin a session — create a history row, start event accumulation.
- */
 export async function beginSession() {
   P.sessionStart  = new Date();
   P.sessionEvents = [];
   P.isRunning     = true;
   P.lastAutoSave  = Date.now();
 
-  /* Subscribe to emergence events */
   NetworkEvents.on('emergence', _onEmergence);
 
-  /* Create history row */
   const sb = getClient();
   if (!sb || !P.userId || !P.instrumentId) return;
 
@@ -318,48 +296,33 @@ export async function beginSession() {
         session_start: P.sessionStart.toISOString(),
         species_id:    P.speciesId ?? NS.currentSpecies?.id ?? 'lull',
         events:        [],
-        snapshot:      null,
       })
       .select('id')
       .single();
 
     if (!error && data) P.historyId = data.id;
   } catch (err) {
-    console.warn('[Persistence] beginSession error:', err);
+    console.warn('[Persistence] beginSession:', err);
   }
 }
 
-/**
- * End session — write final biography snapshot, update instrument record.
- */
 export async function endSession() {
   if (!P.isRunning) return;
   P.isRunning = false;
   NetworkEvents.off('emergence', _onEmergence);
-
   const runtimeS = P.sessionStart
-    ? Math.round((Date.now() - P.sessionStart.getTime()) / 1000)
-    : 0;
-
+    ? Math.round((Date.now() - P.sessionStart.getTime()) / 1000) : 0;
   await _saveState(runtimeS, true);
 }
 
-/**
- * Auto-save — called periodically while running.
- */
 export async function autoSave(nowMs) {
   if (!P.isRunning) return;
-  if (nowMs - P.lastAutoSave < AUTO_SAVE_INTERVAL_MS) return;
+  if (nowMs - P.lastAutoSave < AUTO_SAVE_MS) return;
   P.lastAutoSave = nowMs;
-
   const runtimeS = P.sessionStart
-    ? Math.round((Date.now() - P.sessionStart.getTime()) / 1000)
-    : 0;
-
+    ? Math.round((Date.now() - P.sessionStart.getTime()) / 1000) : 0;
   await _saveState(runtimeS, false);
 }
-
-/* ─── Core save ──────────────────────────────────────────────────── */
 
 async function _saveState(runtimeS, isFinal) {
   const sb = getClient();
@@ -370,12 +333,11 @@ async function _saveState(runtimeS, isFinal) {
   const totalRuntime  = P.totalRuntime + runtimeS;
   const sessionCount  = isFinal ? P.sessionCount + 1 : P.sessionCount;
 
-  /* Update instrument record */
   try {
     await sb
       .from('neural_instruments')
       .update({
-        biography:       biography,
+        biography,
         harmonic_vocab:  harmonicVocab,
         last_session_at: new Date().toISOString(),
         total_runtime_s: totalRuntime,
@@ -390,32 +352,31 @@ async function _saveState(runtimeS, isFinal) {
       P.sessionCount = sessionCount;
     }
   } catch (err) {
-    console.warn('[Persistence] Instrument update error:', err);
+    console.warn('[Persistence] instrument update:', err);
   }
 
-  /* Update history row */
   if (!P.historyId) return;
   try {
-    const updatePayload = {
-      events:   _trimEvents(P.sessionEvents),
-      runtime_s:runtimeS,
+    const payload = {
+      events:    P.sessionEvents.slice(-MAX_EVENTS),
+      runtime_s: runtimeS,
     };
     if (isFinal) {
-      updatePayload.session_end = new Date().toISOString();
-      updatePayload.snapshot    = biography;
+      payload.session_end = new Date().toISOString();
+      payload.snapshot    = biography;
     }
     await sb
       .from('neural_history')
-      .update(updatePayload)
+      .update(payload)
       .eq('id', P.historyId)
       .eq('user_id', P.userId);
   } catch (err) {
-    console.warn('[Persistence] History update error:', err);
+    console.warn('[Persistence] history update:', err);
   }
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   CREATURE NAME UPDATE
+   CREATURE NAME
    ═══════════════════════════════════════════════════════════════════ */
 
 export async function saveCreatureName(name) {
@@ -429,23 +390,17 @@ export async function saveCreatureName(name) {
       .eq('id', P.instrumentId)
       .eq('user_id', P.userId);
   } catch (err) {
-    console.warn('[Persistence] Name save error:', err);
+    console.warn('[Persistence] saveCreatureName:', err);
   }
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   HISTORY LOG — read for History tab
+   HISTORY TAB
    ═══════════════════════════════════════════════════════════════════ */
 
-/**
- * Load recent history entries for the current user's instrument.
- * Returns array of { sessionStart, runtimeS, speciesId, events, snapshot }
- * ordered newest first, limited to last 20 sessions.
- */
 export async function loadHistory() {
   const sb = getClient();
   if (!sb || !P.userId || !P.instrumentId) return [];
-
   try {
     const { data, error } = await sb
       .from('neural_history')
@@ -454,24 +409,14 @@ export async function loadHistory() {
       .eq('user_id', P.userId)
       .order('session_start', { ascending: false })
       .limit(20);
-
-    if (error) {
-      console.warn('[Persistence] History load error:', error.message);
-      return [];
-    }
-
+    if (error) return [];
     return data ?? [];
-
   } catch (err) {
-    console.warn('[Persistence] History load exception:', err);
+    console.warn('[Persistence] loadHistory:', err);
     return [];
   }
 }
 
-/**
- * Clear all history rows for this instrument.
- * Does not delete the instrument record itself.
- */
 export async function clearHistory() {
   const sb = getClient();
   if (!sb || !P.userId || !P.instrumentId) return;
@@ -483,24 +428,14 @@ export async function clearHistory() {
       .eq('user_id', P.userId);
     P.sessionEvents = [];
   } catch (err) {
-    console.warn('[Persistence] Clear history error:', err);
+    console.warn('[Persistence] clearHistory:', err);
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   HISTORY TAB RENDERING
-   ═══════════════════════════════════════════════════════════════════ */
-
-/**
- * Render history entries into the #history-log element.
- * Called by main.js when the History tab is opened.
- */
 export async function renderHistoryTab() {
   const el = document.getElementById('history-log');
   if (!el) return;
-
   el.innerHTML = '<span style="color:var(--dim)">loading...</span>';
-
   const entries = await loadHistory();
 
   if (!entries.length) {
@@ -509,75 +444,39 @@ export async function renderHistoryTab() {
   }
 
   const lines = [];
+  entries.forEach((entry, si) => {
+    const d    = new Date(entry.session_start);
+    const date = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    const rt   = _fmtRuntime(entry.runtime_s ?? 0);
 
-  entries.forEach((entry, sessionIdx) => {
-    const startDate = new Date(entry.session_start);
-    const dateStr   = startDate.toLocaleDateString('en-GB', {
-      day: 'numeric', month: 'short', year: 'numeric',
-    });
-    const timeStr   = startDate.toLocaleTimeString('en-GB', {
-      hour: '2-digit', minute: '2-digit',
-    });
-    const runtimeStr = _formatRuntime(entry.runtime_s ?? 0);
-    const species    = entry.species_id ?? '—';
-
-    lines.push(`<div style="
-      padding: 0.6rem 0;
-      border-bottom: 1px solid var(--border);
-      ${sessionIdx === 0 ? 'padding-top:0' : ''}
-    ">`);
-
-    lines.push(`<div style="
-      color: var(--text);
-      margin-bottom: 0.3rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-    ">
-      <span>${dateStr} ${timeStr}</span>
-      <span style="color:var(--muted)">${species} · ${runtimeStr}</span>
+    lines.push(`<div style="padding:0.6rem 0;border-bottom:1px solid var(--border)">`);
+    lines.push(`<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.3rem">
+      <span style="color:var(--text)">${date} ${time}</span>
+      <span style="color:var(--muted)">${entry.species_id ?? '—'} · ${rt}</span>
     </div>`);
 
-    /* Render events from this session */
     const events = Array.isArray(entry.events) ? entry.events : [];
     if (events.length) {
-      lines.push('<div style="display:flex;flex-direction:column;gap:2px;margin-top:0.3rem">');
       events.forEach(ev => {
-        const ts  = ev.t ? _formatElapsed(ev.t) : '';
-        const txt = ev.text ?? ev;
-        lines.push(`<div style="color:var(--dim);font-size:0.6rem">
-          <span style="color:var(--accent-dark);margin-right:0.5rem">${ts}</span>${_escapeHtml(txt)}
+        const ts  = ev.t !== undefined ? _fmtElapsed(ev.t) : '';
+        const txt = ev.text ?? String(ev);
+        lines.push(`<div style="color:var(--dim);font-size:0.6rem;padding:1px 0">
+          <span style="color:var(--accent-dark);margin-right:0.5rem">${ts}</span>${_esc(txt)}
         </div>`);
       });
-      lines.push('</div>');
-    } else {
-      lines.push('<div style="color:var(--dim);font-size:0.6rem">no events recorded</div>');
     }
 
-    /* Snapshot summary */
     if (entry.snapshot) {
-      const snap = typeof entry.snapshot === 'string'
-        ? JSON.parse(entry.snapshot)
-        : entry.snapshot;
-      if (snap.dominantHarmonic || snap.totalPhaseLocks !== undefined) {
-        lines.push(`<div style="
-          color: var(--muted);
-          font-size: 0.58rem;
-          margin-top: 0.35rem;
-          padding-top: 0.35rem;
-          border-top: 1px solid var(--border);
-          display: flex; gap: 1rem;
-        ">`);
-        if (snap.dominantHarmonic) {
-          lines.push(`<span>root ${snap.dominantHarmonic}</span>`);
-        }
-        if (snap.totalPhaseLocks !== undefined) {
-          lines.push(`<span>${snap.totalPhaseLocks} phase locks</span>`);
-        }
-        if (snap.nodeCount !== undefined) {
-          lines.push(`<span>${snap.nodeCount} nodes at close</span>`);
-        }
-        lines.push('</div>');
+      const sn = typeof entry.snapshot === 'string'
+        ? JSON.parse(entry.snapshot) : entry.snapshot;
+      const parts = [];
+      if (sn.dominantHarmonic)          parts.push(`root ${sn.dominantHarmonic}`);
+      if (sn.totalPhaseLocks != null)    parts.push(`${sn.totalPhaseLocks} phase locks`);
+      if (sn.nodeCount != null)          parts.push(`${sn.nodeCount} nodes`);
+      if (parts.length) {
+        lines.push(`<div style="color:var(--muted);font-size:0.58rem;margin-top:0.35rem;
+          padding-top:0.35rem;border-top:1px solid var(--border)">${parts.join(' · ')}</div>`);
       }
     }
 
@@ -588,46 +487,28 @@ export async function renderHistoryTab() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   CURRENT SESSION EVENT ACCUMULATION
+   EVENT ACCUMULATION
    ═══════════════════════════════════════════════════════════════════ */
 
 function _onEmergence({ text }) {
   if (!P.isRunning) return;
-  const elapsedS = P.sessionStart
-    ? Math.round((Date.now() - P.sessionStart.getTime()) / 1000)
-    : 0;
-  P.sessionEvents.push({ t: elapsedS, text });
-  if (P.sessionEvents.length > MAX_HISTORY_EVENTS) {
-    P.sessionEvents = P.sessionEvents.slice(-MAX_HISTORY_EVENTS);
+  const t = P.sessionStart
+    ? Math.round((Date.now() - P.sessionStart.getTime()) / 1000) : 0;
+  P.sessionEvents.push({ t, text });
+  if (P.sessionEvents.length > MAX_EVENTS) {
+    P.sessionEvents = P.sessionEvents.slice(-MAX_EVENTS);
   }
-  _appendEventToTab(elapsedS, text);
-}
-
-/**
- * Append a single event line to the live history tab
- * without reloading all history from the database.
- */
-function _appendEventToTab(elapsedS, text) {
-  /* Only update if History tab is currently active */
-  const histTab = document.querySelector('.mode-tab[data-tab="history"]');
-  if (!histTab?.classList.contains('active')) return;
+  /* Live append to history tab if open */
+  const tab = document.querySelector('.mode-tab[data-tab="history"]');
+  if (!tab?.classList.contains('active')) return;
   const el = document.getElementById('history-log');
   if (!el) return;
-
-  /* Remove placeholder */
-  const placeholder = el.querySelector('span[style*="dim"]');
-  if (placeholder) placeholder.remove();
-
+  const placeholder = el.querySelector('span');
+  if (placeholder && placeholder.style.color === 'var(--dim)') placeholder.remove();
   const line = document.createElement('div');
   line.style.cssText = 'color:var(--dim);font-size:0.6rem;padding:1px 0';
-  line.innerHTML = `
-    <span style="color:var(--accent-dark);margin-right:0.5rem">${_formatElapsed(elapsedS)}</span>
-    ${_escapeHtml(text)}
-  `;
-  /* Prepend so newest is at top */
+  line.innerHTML = `<span style="color:var(--accent-dark);margin-right:.5rem">${_fmtElapsed(t)}</span>${_esc(text)}`;
   el.insertBefore(line, el.firstChild);
-
-  /* Keep display trim */
   while (el.children.length > 60) el.removeChild(el.lastChild);
 }
 
@@ -635,30 +516,21 @@ function _appendEventToTab(elapsedS, text) {
    UTILITY
    ═══════════════════════════════════════════════════════════════════ */
 
-function _trimEvents(events) {
-  return events.slice(-MAX_HISTORY_EVENTS);
+function _fmtRuntime(s) {
+  if (s < 60)   return `${s}s`;
+  if (s < 3600) return `${Math.floor(s/60)}m ${s%60}s`;
+  return `${Math.floor(s/3600)}h ${Math.floor((s%3600)/60)}m`;
 }
 
-function _formatRuntime(seconds) {
-  if (seconds < 60)   return `${seconds}s`;
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  return `${h}h ${m}m`;
+function _fmtElapsed(s) {
+  const m = Math.floor(s / 60);
+  return `${String(m).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
 }
 
-function _formatElapsed(seconds) {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-}
-
-function _escapeHtml(str) {
+function _esc(str) {
   return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -670,5 +542,4 @@ export function getCreatureName()  { return P.creatureName; }
 export function getSpeciesId()     { return P.speciesId; }
 export function getTotalRuntime()  { return P.totalRuntime; }
 export function getSessionCount()  { return P.sessionCount; }
-export function isFirstSession()   { return !P.instrumentId; }
-export function getCurrentEvents() { return P.sessionEvents.slice(); }
+export function hasInstrument()    { return !!P.instrumentId; }
