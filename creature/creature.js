@@ -4,800 +4,399 @@
  * Pixel sprite renderer for the living creature.
  * Renders to #creature-canvas when creature view is active.
  *
- * Architecture:
+ * Design principles:
  *   - PIXEL_SCALE: 5px per creature pixel
- *   - Working grid: ~canvas_w/5 x ~canvas_h/5 creature pixels
- *   - Creature centered, scaled by node count (10% canvas at birth → 30% at max)
- *   - All body parts defined as pixel arrays (2D integer grids)
- *   - Growth state derived entirely from NS and harmonic.js state
- *   - Habitat layer drawn behind creature (water, sky, ground per species)
- *   - Food/object items placed as habitat elements on drop
- *   - Fray: two bilateral halves, each driven by its cluster (nodes 0-N/2 vs N/2-N)
+ *   - Creature size: 10% of canvas height at birth (3 nodes) → 30% at max (12 nodes)
+ *   - All body parts are pixel arrays grown additively as network complexity increases
+ *   - Movement is driven directly by audio state (energy, phase locks, events)
+ *   - No shadow. No anchor indicator overlap.
+ *   - Three environmental objects: water, light, wind
+ *   - Each object produces an audible parameter shift and a creature reaction
+ *   - Fray is a single bilateral creature — distinctive shape, not dual rendering
  *
- * Rendering order each frame:
- *   1. Black background
- *   2. Habitat layer (sky gradient pixels, ground, water, placed objects)
- *   3. Creature shadow (subtle)
- *   4. Creature body (species base + grown appendages)
- *   5. Animation overlays (event flashes, startle, phase lock glow)
- *   6. Name display (handled by CSS overlay)
+ * Growth grammar:
+ *   Body size        ← node count
+ *   Limb length      ← average connection strength
+ *   Eye size         ← predictive node activity
+ *   Antlers/spines   ← inhibitory connection ratio
+ *   Tail             ← delay node activity
+ *   Surface texture  ← harmonic vocabulary richness (phase lock count)
+ *   Wings/tendrils   ← phase lock count and duration
+ *   Mouth state      ← current energy level
+ *
+ * Animation:
+ *   Breathing  — procedural sine, rate = metabolism
+ *   Rhythm     — limbs/tail animate at metabolic period from harmonic.js
+ *   Events     — keyframed sequences triggered by NetworkEvents
+ *   Idle       — occasional slow eye movement, blink
  */
 
-import { NS, NODE_TYPES, NetworkEvents } from './network.js';
-import { getGlideState, getMetabolicPeriod, getDominantInterval } from './harmonic.js';
-import { getEnergyLevel } from './audio-engine.js';
+import { NS, NODE_TYPES, NetworkEvents }            from './network.js';
+import { getMetabolicPeriod, getDominantInterval,
+         forceHarmonicEvent }                       from './harmonic.js';
+import { setParam }                                 from './network.js';
+import { injectNode }                               from './network.js';
+import { setNodePan }                               from './audio-engine.js';
 
 /* ═══════════════════════════════════════════════════════════════════
    CONSTANTS
    ═══════════════════════════════════════════════════════════════════ */
 
-const PIXEL_SCALE   = 5;
-const BIRTH_SCALE   = 0.10;   /* fraction of canvas height at 4 nodes */
-const MAX_SCALE     = 0.30;   /* fraction of canvas height at 12 nodes */
-const INIT_NODES    = 4;
-const MAX_NODES     = 12;
+const PIXEL_SCALE  = 5;
+const BIRTH_SCALE  = 0.10;
+const MAX_SCALE    = 0.30;
+const INIT_NODES   = 3;
+const MAX_NODES    = 12;
 
-/* Color palette — maps to CSS variables resolved at init */
+/* ═══════════════════════════════════════════════════════════════════
+   COLOR PALETTE
+   ═══════════════════════════════════════════════════════════════════ */
+
 const PAL = {
-  accent:      '#7db5a0',
-  accent2:     '#a6d0be',
-  accentDark:  '#3a7560',
-  warn:        '#c07850',
-  cold:        '#7898c0',
-  hot:         '#c07898',
-  dim:         '#333649',
-  muted:       '#636678',
-  lull:        '#8ab0c8',
-  weft:        '#98b888',
-  brine:       '#8878a8',
-  murk:        '#909090',
-  fray:        '#c8a068',
-  loam:        '#a87858',
-  bg:          '#07080b',
-  surface:     '#0d0f17',
+  bg:         '#07080b',
+  lull:       '#8ab0c8',
+  lull2:      '#c8dce8',
+  lull3:      '#3a6080',
+  weft:       '#98b888',
+  weft2:      '#b8ccb0',
+  weft3:      '#405030',
+  brine:      '#8878a8',
+  brine2:     '#6858a0',
+  brine3:     '#382848',
+  murk:       '#909090',
+  murk2:      '#b0b0b0',
+  murk3:      '#505050',
+  fray:       '#c8a068',
+  fray2:      '#e0b888',
+  fray3:      '#604828',
+  loam:       '#a87858',
+  loam2:      '#c89870',
+  loam3:      '#504030',
+  accent:     '#7db5a0',
+  accent2:    '#a6d0be',
+  warn:       '#c07850',
+  cold:       '#7898c0',
+};
+
+/* Per-species palettes: [null, primary, light, dark, accent] */
+const SPECIES_PAL = {
+  lull:  [null, PAL.lull,  PAL.lull2,  PAL.lull3,  PAL.accent2],
+  weft:  [null, PAL.weft,  PAL.weft2,  PAL.weft3,  PAL.accent],
+  brine: [null, PAL.brine, PAL.brine2, PAL.brine3, PAL.cold],
+  murk:  [null, PAL.murk,  PAL.murk2,  PAL.murk3,  '#787878'],
+  fray:  [null, PAL.fray,  PAL.fray2,  PAL.fray3,  PAL.accent],
+  loam:  [null, PAL.loam,  PAL.loam2,  PAL.loam3,  PAL.accent2],
 };
 
 /* ═══════════════════════════════════════════════════════════════════
-   PIXEL ART PRIMITIVES
-   ═══════════════════════════════════════════════════════════════════
-   Each sprite is a 2D array. Values:
-     0 = transparent
-     1..N = palette index (see SPECIES_DEFS[id].palette)
-   Drawn with fillRect at PIXEL_SCALE size.
+   SPRITE PIXEL ARRAYS
+   0 = transparent, 1..4 = palette index
    ═══════════════════════════════════════════════════════════════════ */
 
-/* Shared appendage pixel arrays — species color them differently */
+const SPR = {
+  /* Eyes */
+  eye_tiny:   [[0,1,0],[1,2,1],[0,1,0]],
+  eye_sm:     [[0,1,1,0],[1,2,2,1],[1,2,3,1],[0,1,1,0]],
+  eye_lg:     [[0,0,1,1,0,0],[0,1,2,2,1,0],[1,2,2,3,2,1],[1,2,3,3,2,1],[0,1,2,2,1,0],[0,0,1,1,0,0]],
+  eye_closed: [[0,0,0],[1,1,1],[0,0,0]],
 
-const SPRITES = {
+  /* Mouth */
+  mouth_shut: [[1,1,1,1]],
+  mouth_open: [[1,0,0,1],[1,1,1,1]],
+  mouth_wide: [[1,0,0,0,1],[1,4,4,4,1],[1,1,1,1,1]],
 
-  /* ── Eyes ─────────────────────────────────────────────────── */
-  eye_small: [
-    [0,1,0],
-    [1,2,1],
-    [0,1,0],
+  /* Bodies — per species, three growth stages */
+  body_lull: [
+    /* birth */    [[0,1,1,0],[1,2,2,1],[1,2,2,1],[0,1,1,0]],
+    /* mid */      [[0,0,1,1,1,0,0],[0,1,2,2,2,1,0],[1,1,2,3,2,1,1],[1,1,2,3,2,1,1],[0,1,2,2,2,1,0],[0,0,1,1,1,0,0]],
+    /* mature */   [[0,0,0,1,1,1,0,0,0],[0,0,1,2,2,2,1,0,0],[0,1,2,2,3,2,2,1,0],[1,1,2,3,3,3,2,1,1],[1,1,2,3,3,3,2,1,1],[0,1,2,2,3,2,2,1,0],[0,0,1,2,2,2,1,0,0],[0,0,0,1,1,1,0,0,0]],
   ],
-  eye_medium: [
-    [0,1,1,0],
-    [1,2,2,1],
-    [1,2,3,1],
-    [0,1,1,0],
+  body_weft: [
+    [[0,1,1,0],[1,2,2,1],[1,2,2,1],[0,1,1,0]],
+    [[0,0,1,1,1,0,0],[0,1,2,2,2,1,0],[1,1,2,3,2,1,1],[0,1,2,2,2,1,0],[0,0,1,1,1,0,0]],
+    [[0,0,0,1,1,0,0,0],[0,0,1,2,2,1,0,0],[0,1,2,2,2,2,1,0],[1,1,2,3,3,2,1,1],[1,1,2,3,3,2,1,1],[0,1,2,2,2,2,1,0],[0,0,1,2,2,1,0,0],[0,0,0,1,1,0,0,0]],
   ],
-  eye_large: [
-    [0,0,1,1,0,0],
-    [0,1,2,2,1,0],
-    [1,2,2,3,2,1],
-    [1,2,3,3,2,1],
-    [0,1,2,2,1,0],
-    [0,0,1,1,0,0],
+  body_brine: [
+    [[0,1,1,0],[1,3,3,1],[1,3,2,1],[0,1,1,0]],
+    [[0,1,1,1,1,0],[1,1,3,3,1,1],[1,3,3,2,3,1],[1,3,2,2,3,1],[0,1,3,3,1,0],[0,0,1,1,0,0]],
+    [[0,0,1,1,1,1,0,0],[0,1,1,3,3,1,1,0],[1,1,3,3,2,3,1,1],[1,3,3,2,2,3,3,1],[1,3,2,2,2,2,3,1],[0,1,3,3,3,3,1,0],[0,0,1,1,1,1,0,0]],
   ],
-  eye_closed: [
-    [0,0,0],
-    [1,1,1],
-    [0,0,0],
+  body_murk: [
+    [[1,1,0],[1,2,1],[0,1,1]],
+    [[0,1,1,1,0],[1,1,2,1,0],[1,2,2,1,1],[0,1,1,2,1],[0,0,1,1,0]],
+    [[0,0,1,1,1,0,0],[0,1,1,2,1,0,0],[1,1,2,2,1,1,0],[1,2,2,3,2,1,1],[0,1,1,2,2,1,1],[0,0,1,1,2,1,0],[0,0,0,1,1,0,0]],
   ],
-
-  /* ── Mouth states ─────────────────────────────────────────── */
-  mouth_closed: [
-    [1,1,1,1],
+  body_fray: [
+    /* Fray: single body, bilateral — slightly asymmetric */
+    [[0,1,1,1,0],[1,2,3,2,1],[1,2,3,2,1],[0,1,2,1,0]],
+    [[0,0,1,1,1,1,0],[0,1,2,2,3,1,0],[1,1,2,3,3,2,1],[1,2,2,3,2,2,1],[0,1,2,2,2,1,0],[0,0,1,1,1,0,0]],
+    [[0,0,0,1,1,1,1,0,0],[0,0,1,2,2,3,1,0,0],[0,1,2,2,3,3,2,1,0],[1,1,2,3,3,3,2,1,1],[1,2,2,3,3,2,2,2,1],[0,1,2,2,3,2,2,1,0],[0,0,1,2,2,2,1,0,0],[0,0,0,1,1,1,0,0,0]],
   ],
-  mouth_open_sm: [
-    [1,0,0,1],
-    [1,1,1,1],
-  ],
-  mouth_open_lg: [
-    [1,0,0,0,1],
-    [1,4,4,4,1],
-    [1,1,1,1,1],
-  ],
-
-  /* ── Limb segments — used to build variable-length limbs ──── */
-  limb_stub: [
-    [1],
-    [1],
-  ],
-  limb_mid: [
-    [1,1],
-    [1,1],
-    [1,1],
-    [1,1],
-  ],
-  limb_tip: [
-    [1],
-    [2],
-  ],
-  tendril_seg: [
-    [0,1,0],
-    [1,1,0],
-    [0,1,1],
-    [1,1,0],
-  ],
-  spine_seg: [
-    [0,1],
-    [1,1],
-    [0,1],
+  body_loam: [
+    [[0,1,0],[1,1,1],[1,2,1],[0,1,0]],
+    [[0,1,1,1,0],[1,1,2,1,1],[1,2,2,2,1],[1,2,3,2,1],[0,1,2,1,0],[0,0,1,0,0]],
+    [[0,0,1,1,1,0,0],[0,1,1,2,1,1,0],[1,1,2,2,2,1,1],[1,2,2,3,2,2,1],[1,2,3,3,3,2,1],[0,1,2,2,2,1,0],[0,0,1,2,1,0,0],[0,0,0,1,0,0,0]],
   ],
 
-  /* ── Antlers — built from two mirrored arms ───────────────── */
-  antler_base: [
-    [0,1,0],
-    [1,1,1],
-  ],
-  antler_branch: [
-    [1,0,1],
-    [0,1,0],
-    [0,1,0],
-  ],
-  antler_tine: [
-    [1,0],
-    [1,0],
-  ],
-
-  /* ── Tail segments ────────────────────────────────────────── */
-  tail_seg: [
-    [1,1],
-    [1,0],
-  ],
-  tail_tip: [
-    [1],
-    [2],
-    [1],
-  ],
-
-  /* ── Wings / antennae ─────────────────────────────────────── */
-  wing_sm: [
-    [0,1,1,0],
-    [1,1,1,0],
-    [0,1,0,0],
-  ],
-  wing_lg: [
-    [0,0,1,1,1,0],
-    [0,1,1,1,1,0],
-    [1,1,1,1,0,0],
-    [0,1,1,0,0,0],
-  ],
-  antenna: [
-    [0,1],
-    [1,1],
-    [0,1],
-    [0,1],
-    [0,2],
-  ],
-
-  /* ── Fur / texture overlays (1 pixel dots) ────────────────── */
-  fur_patch: [
-    [2,0,2],
-    [0,2,0],
-    [2,0,2],
-  ],
-
-  /* ── Habitat elements ─────────────────────────────────────── */
-  sun: [
-    [0,0,2,0,0],
-    [0,2,2,2,0],
-    [2,2,3,2,2],
-    [0,2,2,2,0],
-    [0,0,2,0,0],
-  ],
-  moon: [
-    [0,1,1,0],
-    [0,1,1,1],
-    [0,1,1,1],
-    [0,1,1,0],
-  ],
-  water_surface: [
-    [0,1,0,0,1,0,0,1,0,0,1,0],
-    [1,1,1,1,1,1,1,1,1,1,1,1],
-  ],
-  water_body: [
-    [1,1,1,1,1,1,1,1,1,1,1,1],
-  ],
-  ground_tuft: [
-    [0,1,0],
-    [1,1,1],
-  ],
-  stone_sm: [
-    [0,1,1,0],
-    [1,1,1,1],
-    [1,1,1,1],
-    [0,1,1,0],
-  ],
-  spark_px: [
-    [0,1,0],
-    [1,2,1],
-    [0,1,0],
-  ],
-  moss_patch: [
-    [1,0,1,0,1],
-    [1,1,1,1,1],
-  ],
-  void_cloud: [
-    [0,1,1,0],
-    [1,1,1,1],
-    [1,1,1,1],
-    [0,1,1,0],
-  ],
-  wind_line: [
-    [1,1,0,0,0],
-    [0,1,1,0,0],
-    [0,0,1,1,0],
-    [0,0,0,1,1],
-  ],
-};
-
-/* ═══════════════════════════════════════════════════════════════════
-   SPECIES DEFINITIONS
-   Each species defines:
-     palette  — array of colors indexed by sprite values (0=transparent, 1..4)
-     bodyFn   — function(growthStage 0..1) → pixel grid for base body
-     appendages — ordered list of what grows and when (growthStage threshold)
-     habitat  — background character: 'deep_water'|'forest'|'void'|'fog'|'dusk'|'earth'
-     movement — base animation character
-   ═══════════════════════════════════════════════════════════════════ */
-
-const SPECIES_DEFS = {
-
-  /* ── LULL — soft, hanging, luminous, jellyfish-like ─────────── */
-  lull: {
-    palette: [null, PAL.lull, PAL.accent2, '#c8dce8', PAL.accentDark],
-    habitat: 'deep_water',
-    movement: 'float',
-    bodyStages: [
-      /* stage 0 — birth: tiny oval */
-      [
-        [0,1,1,0],
-        [1,1,1,1],
-        [1,2,2,1],
-        [0,1,1,0],
-      ],
-      /* stage 1 — growing */
-      [
-        [0,0,1,1,1,0,0],
-        [0,1,1,1,1,1,0],
-        [1,1,2,2,2,1,1],
-        [1,1,2,3,2,1,1],
-        [0,1,1,2,1,1,0],
-        [0,0,1,1,1,0,0],
-      ],
-      /* stage 2 — mature */
-      [
-        [0,0,0,1,1,1,0,0,0],
-        [0,0,1,1,1,1,1,0,0],
-        [0,1,1,2,2,2,1,1,0],
-        [1,1,2,2,3,2,2,1,1],
-        [1,1,2,3,3,3,2,1,1],
-        [0,1,1,2,2,2,1,1,0],
-        [0,0,1,1,1,1,1,0,0],
-        [0,0,0,1,1,1,0,0,0],
-      ],
-    ],
-    appendageOrder: [
-      { type: 'tendrils',  threshold: 0.15 },
-      { type: 'eye_pair',  threshold: 0.25 },
-      { type: 'tendrils2', threshold: 0.55 },
-      { type: 'glow',      threshold: 0.75 },
-    ],
-  },
-
-  /* ── WEFT — segmented, bilateral, geometric ──────────────────── */
-  weft: {
-    palette: [null, PAL.weft, PAL.accent, '#b8ccb0', PAL.accentDark],
-    habitat: 'forest',
-    movement: 'precise',
-    bodyStages: [
-      [
-        [0,1,1,0],
-        [1,2,2,1],
-        [1,2,2,1],
-        [0,1,1,0],
-      ],
-      [
-        [0,0,1,1,1,0,0],
-        [0,1,2,2,2,1,0],
-        [1,1,2,3,2,1,1],
-        [1,1,2,3,2,1,1],
-        [0,1,2,2,2,1,0],
-        [0,0,1,1,1,0,0],
-      ],
-      [
-        [0,0,0,1,1,0,0,0],
-        [0,0,1,2,2,1,0,0],
-        [0,1,2,2,2,2,1,0],
-        [1,1,2,3,3,2,1,1],
-        [1,1,2,3,3,2,1,1],
-        [0,1,2,2,2,2,1,0],
-        [0,0,1,2,2,1,0,0],
-        [0,0,0,1,1,0,0,0],
-      ],
-    ],
-    appendageOrder: [
-      { type: 'antennae',  threshold: 0.15 },
-      { type: 'eye_pair',  threshold: 0.20 },
-      { type: 'limb_pair', threshold: 0.40 },
-      { type: 'limb_pair2',threshold: 0.65 },
-      { type: 'wing_pair', threshold: 0.80 },
-    ],
-  },
-
-  /* ── BRINE — dense, spined, watchful, pressurized ────────────── */
-  brine: {
-    palette: [null, PAL.brine, '#6858a0', '#382848', PAL.cold],
-    habitat: 'void',
-    movement: 'still_burst',
-    bodyStages: [
-      [
-        [0,1,1,0],
-        [1,3,3,1],
-        [1,3,2,1],
-        [0,1,1,0],
-      ],
-      [
-        [0,1,1,1,1,0],
-        [1,1,3,3,1,1],
-        [1,3,3,2,3,1],
-        [1,3,2,2,3,1],
-        [0,1,3,3,1,0],
-        [0,0,1,1,0,0],
-      ],
-      [
-        [0,0,1,1,1,1,0,0],
-        [0,1,1,3,3,1,1,0],
-        [1,1,3,3,2,3,1,1],
-        [1,3,3,2,2,3,3,1],
-        [1,3,2,2,2,2,3,1],
-        [0,1,3,3,3,3,1,0],
-        [0,0,1,1,1,1,0,0],
-      ],
-    ],
-    appendageOrder: [
-      { type: 'eye_pair',   threshold: 0.10 },
-      { type: 'spines_top', threshold: 0.20 },
-      { type: 'spines_side',threshold: 0.45 },
-      { type: 'eye_large',  threshold: 0.60 },
-      { type: 'spines_bot', threshold: 0.75 },
-    ],
-  },
-
-  /* ── MURK — asymmetric, wandering, muted ─────────────────────── */
-  murk: {
-    palette: [null, PAL.murk, '#b0b0b0', '#505050', '#787878'],
-    habitat: 'fog',
-    movement: 'wander',
-    bodyStages: [
-      [
-        [1,1,0],
-        [1,2,1],
-        [0,1,1],
-      ],
-      [
-        [0,1,1,1,0],
-        [1,1,2,1,0],
-        [1,2,2,1,1],
-        [0,1,1,2,1],
-        [0,0,1,1,0],
-      ],
-      [
-        [0,0,1,1,1,0,0],
-        [0,1,1,2,1,0,0],
-        [1,1,2,2,1,1,0],
-        [1,2,2,3,2,1,1],
-        [0,1,1,2,2,1,1],
-        [0,0,1,1,2,1,0],
-        [0,0,0,1,1,0,0],
-      ],
-    ],
-    appendageOrder: [
-      { type: 'eye_offset', threshold: 0.15 },
-      { type: 'limb_odd',   threshold: 0.30 },
-      { type: 'tail_short', threshold: 0.50 },
-      { type: 'limb_odd2',  threshold: 0.70 },
-    ],
-  },
-
-  /* ── FRAY — bilateral two-half, merging, reactive ────────────── */
-  fray: {
-    palette: [null, PAL.fray, '#e0b888', '#a08050', PAL.accent],
-    habitat: 'dusk',
-    movement: 'call_response',
-    bodyStages: [
-      /* Two minimal forms side by side */
-      [
-        [1,0,1],
-        [2,0,2],
-        [1,0,1],
-      ],
-      [
-        [1,1,0,1,1],
-        [1,2,0,2,1],
-        [1,2,1,2,1],
-        [0,1,1,1,0],
-      ],
-      [
-        [0,1,1,0,1,1,0],
-        [1,1,2,1,2,1,1],
-        [1,2,2,1,2,2,1],
-        [1,2,2,2,2,2,1],
-        [0,1,2,2,2,1,0],
-        [0,0,1,1,1,0,0],
-      ],
-    ],
-    appendageOrder: [
-      { type: 'eye_pair_split', threshold: 0.15 },
-      { type: 'ear_pair',       threshold: 0.30 },
-      { type: 'tail_dual',      threshold: 0.50 },
-      { type: 'merge_bridge',   threshold: 0.70 },
-    ],
-  },
-
-  /* ── LOAM — massive, furred, patient, antlered ───────────────── */
-  loam: {
-    palette: [null, PAL.loam, '#c89870', '#785838', PAL.accent],
-    habitat: 'earth',
-    movement: 'slow_weight',
-    bodyStages: [
-      [
-        [0,1,0],
-        [1,1,1],
-        [1,2,1],
-        [0,1,0],
-      ],
-      [
-        [0,1,1,1,0],
-        [1,1,2,1,1],
-        [1,2,2,2,1],
-        [1,2,3,2,1],
-        [0,1,2,1,0],
-        [0,0,1,0,0],
-      ],
-      [
-        [0,0,1,1,1,0,0],
-        [0,1,1,2,1,1,0],
-        [1,1,2,2,2,1,1],
-        [1,2,2,3,2,2,1],
-        [1,2,3,3,3,2,1],
-        [0,1,2,2,2,1,0],
-        [0,0,1,2,1,0,0],
-        [0,0,0,1,0,0,0],
-      ],
-    ],
-    appendageOrder: [
-      { type: 'eye_pair',    threshold: 0.15 },
-      { type: 'antler_sm',   threshold: 0.25 },
-      { type: 'fur_overlay', threshold: 0.40 },
-      { type: 'limb_pair',   threshold: 0.55 },
-      { type: 'antler_lg',   threshold: 0.70 },
-      { type: 'fur_dense',   threshold: 0.85 },
-    ],
-  },
+  /* Habitat elements */
+  sun_sm:    [[0,0,2,0,0],[0,2,2,2,0],[2,2,3,2,2],[0,2,2,2,0],[0,0,2,0,0]],
+  sun_lg:    [[0,0,0,2,0,0,0],[0,0,2,3,2,0,0],[0,2,3,3,3,2,0],[2,3,3,4,3,3,2],[0,2,3,3,3,2,0],[0,0,2,3,2,0,0],[0,0,0,2,0,0,0]],
+  water_surf:[[0,1,0,0,1,0,0,1,0,0,1,0],[1,1,1,1,1,1,1,1,1,1,1,1]],
+  water_body:[[1,1,1,1,1,1,1,1,1,1,1,1]],
+  wind_line: [[1,1,0,0,0,0],[0,1,1,0,0,0],[0,0,1,1,0,0],[0,0,0,1,1,0],[0,0,0,0,1,1]],
 };
 
 /* ═══════════════════════════════════════════════════════════════════
    HABITAT DEFINITIONS
-   Each habitat: sky color rows, ground elements, object palette
    ═══════════════════════════════════════════════════════════════════ */
 
 const HABITATS = {
-  deep_water: {
-    skyColor:    '#050810',
-    groundColor: '#0a1220',
-    waterColor:  '#1a3450',
-    waterPal:    [null, PAL.lull, PAL.cold, '#3a6080'],
-    skyObjects:  [],     /* no sky objects underwater */
-    groundItems: [],
-  },
-  forest: {
-    skyColor:    '#0a120a',
-    groundColor: '#0d1a08',
-    waterColor:  null,
-    groundPal:   [null, PAL.weft, '#507840', '#304820'],
-    skyObjects:  ['moon'],
-    groundItems: ['ground_tuft'],
-  },
-  void: {
-    skyColor:    '#04040a',
-    groundColor: '#080814',
-    waterColor:  null,
-    groundPal:   [null, PAL.brine, '#2a2040', '#181428'],
-    skyObjects:  [],
-    groundItems: ['void_cloud'],
-  },
-  fog: {
-    skyColor:    '#0c0c0e',
-    groundColor: '#101012',
-    waterColor:  null,
-    groundPal:   [null, PAL.murk, '#707070', '#404040'],
-    skyObjects:  [],
-    groundItems: [],
-  },
-  dusk: {
-    skyColor:    '#100808',
-    groundColor: '#180c08',
-    waterColor:  null,
-    groundPal:   [null, PAL.fray, '#a06840', '#604828'],
-    skyObjects:  ['sun'],
-    groundItems: ['ground_tuft'],
-  },
-  earth: {
-    skyColor:    '#080a06',
-    groundColor: '#100e08',
-    waterColor:  null,
-    groundPal:   [null, PAL.loam, '#907050', '#504030'],
-    skyObjects:  ['moon'],
-    groundItems: ['ground_tuft', 'stone_sm'],
-  },
+  lull:  { sky: '#050810', ground: '#0a1220', water: '#1a3450', hasSky: false },
+  weft:  { sky: '#060c06', ground: '#0a1408', water: null,      hasSky: true  },
+  brine: { sky: '#04040a', ground: '#080814', water: null,      hasSky: false },
+  murk:  { sky: '#0a0a0c', ground: '#101012', water: null,      hasSky: false },
+  fray:  { sky: '#100808', ground: '#180c08', water: null,      hasSky: true  },
+  loam:  { sky: '#080a06', ground: '#100e08', water: null,      hasSky: true  },
 };
 
 /* ═══════════════════════════════════════════════════════════════════
-   FOOD / OBJECT VOCABULARY
+   ENVIRONMENTAL OBJECTS — water, light, wind only
    ═══════════════════════════════════════════════════════════════════ */
 
-export const FOOD_ITEMS = [
+export const ENV_ITEMS = [
   {
-    id: 'light',
-    label: 'light',
-    sprite: 'sun',
-    palette: [null, '#f0e080', '#fff8a0', '#c0b040'],
-    habitatPlacement: 'sky_right',
+    id:       'water',
+    label:    'water',
+    placement:'ground_left',
+    duration: 60000,
+    palFn:    () => [null, PAL.cold, PAL.lull2, PAL.lull3, '#6090b0'],
     effect(ns) {
-      ns.instability = Math.min(1, ns.instability + 0.08);
+      /* Increases phase coupling — oscillators pull toward each other */
+      ns.phaseCoupling = Math.min(1, ns.phaseCoupling + 0.12);
+      setParam('phaseCoupling', ns.phaseCoupling);
+      /* Slightly calms instability */
+      ns.instability = Math.max(0, ns.instability - 0.06);
+      setParam('instability', ns.instability);
+    },
+    creatureAnim: 'sip',
+  },
+  {
+    id:       'light',
+    label:    'light',
+    placement:'sky_right',
+    duration: 15000,
+    palFn:    () => [null, '#f0e050', '#fff8a0', '#c0b030', '#ffe060'],
+    effect(ns) {
+      /* Brief instability burst — energy injection into most active oscillator */
+      ns.instability = Math.min(1, ns.instability + 0.10);
+      setParam('instability', ns.instability);
       const oscs = ns.nodes.filter(n => n.type === NODE_TYPES.OSCILLATOR);
       if (oscs.length) {
-        const target = oscs[Math.floor(Math.random() * oscs.length)];
-        import('./network.js').then(m => m.injectNode(target.id, 0.6));
+        const target = oscs.reduce((best, n) =>
+          n.smoothEnergy > best.smoothEnergy ? n : best, oscs[0]);
+        injectNode(target.id, 0.7);
+      }
+      /* Instability decays back after duration */
+    },
+    creatureAnim: 'alert',
+  },
+  {
+    id:       'wind',
+    label:    'wind',
+    placement:'sky_sweep',
+    duration: 20000,
+    palFn:    () => [null, '#c0d0e0', '#e0eef8', '#a0b8c8', '#d0e8f0'],
+    effect(ns) {
+      /* Randomize pan positions — audible spatial movement */
+      ns.nodes.forEach((n, i) => {
+        const newPan = (Math.random() * 2 - 1) * 0.9;
+        setNodePan(n.id, newPan);
+      });
+      /* Excite delay nodes */
+      ns.nodes
+        .filter(n => n.type === NODE_TYPES.DELAY)
+        .forEach(n => injectNode(n.id, 0.5));
+      /* Trigger a harmonic event on a random oscillator */
+      const oscs = ns.nodes.filter(n => n.type === NODE_TYPES.OSCILLATOR);
+      if (oscs.length) {
+        const osc = oscs[Math.floor(Math.random() * oscs.length)];
+        forceHarmonicEvent(osc.id, 'fifth', Math.random() < 0.5 ? 'up' : 'down');
       }
     },
-    affinity: ['lull', 'weft'],
-    duration: 30000,
-  },
-  {
-    id: 'water',
-    label: 'water',
-    sprite: 'water_surface',
-    palette: [null, PAL.cold, '#a0c8e0', '#6090b0'],
-    habitatPlacement: 'ground_left',
-    effect(ns) {
-      ns.phaseCoupling = Math.min(1, ns.phaseCoupling + 0.1);
-      ns.instability   = Math.max(0, ns.instability   - 0.05);
-    },
-    affinity: ['lull', 'murk'],
-    duration: 45000,
-  },
-  {
-    id: 'stone',
-    label: 'stone',
-    sprite: 'stone_sm',
-    palette: [null, '#888898', '#a0a0b0', '#606070'],
-    habitatPlacement: 'ground_center',
-    effect(ns) {
-      ns.metabolism    = Math.max(0, ns.metabolism    - 0.06);
-      ns.harmonicGravity = Math.min(1, ns.harmonicGravity + 0.08);
-    },
-    affinity: ['loam', 'murk'],
-    duration: 60000,
-  },
-  {
-    id: 'spark',
-    label: 'spark',
-    sprite: 'spark_px',
-    palette: [null, PAL.warn, '#f0c080', '#c08040'],
-    habitatPlacement: 'sky_random',
-    effect(ns) {
-      const idx = Math.floor(Math.random() * ns.nodes.length);
-      import('./network.js').then(m => m.injectNode(ns.nodes[idx]?.id, 0.9));
-      ns.learningRate = Math.min(1, ns.learningRate + 0.12);
-    },
-    affinity: ['brine', 'fray'],
-    duration: 8000,
-  },
-  {
-    id: 'void',
-    label: 'void',
-    sprite: 'void_cloud',
-    palette: [null, '#1a1430', '#0c0c20', '#080810'],
-    habitatPlacement: 'sky_left',
-    effect(ns) {
-      ns.recurrence  = Math.min(1, ns.recurrence  + 0.1);
-      ns.envOn = false;
-    },
-    affinity: ['brine'],
-    duration: 25000,
-  },
-  {
-    id: 'moss',
-    label: 'moss',
-    sprite: 'moss_patch',
-    palette: [null, '#607850', '#809060', '#405040'],
-    habitatPlacement: 'ground_right',
-    effect(ns) {
-      ns.learningRate  = Math.max(0, ns.learningRate  - 0.08);
-      ns.homeostasisOn = true;
-    },
-    affinity: ['loam', 'lull'],
-    duration: 60000,
-  },
-  {
-    id: 'wind',
-    label: 'wind',
-    sprite: 'wind_line',
-    palette: [null, '#c0d0e0', '#e0eef8', '#a0b8c8'],
-    habitatPlacement: 'sky_sweep',
-    effect(ns) {
-      ns.nodes.forEach((n, i) => {
-        import('./audio-engine.js').then(m =>
-          m.setNodePan(i, (Math.random() * 2 - 1))
-        );
-      });
-      const delays = ns.nodes.filter(n => n.type === NODE_TYPES.DELAY);
-      delays.forEach(n => {
-        import('./network.js').then(m => m.injectNode(n.id, 0.5));
-      });
-    },
-    affinity: ['weft', 'fray'],
-    duration: 12000,
+    creatureAnim: 'sway',
   },
 ];
 
 /* ═══════════════════════════════════════════════════════════════════
-   ANIMATION KEYFRAMES
+   KEYFRAMED ANIMATION SEQUENCES
+   dt: ms from sequence start
+   bobY: vertical pixel offset
+   scaleBoost: fractional scale addition
+   eyeOpen: 1=normal, >1=wide, <1=squint/closed
+   tilt: degrees of body tilt
    ═══════════════════════════════════════════════════════════════════ */
 
-const ANIM = {
-  /* Keyframed event response sequences */
-  sequences: {
-    harmonic_event: [
-      { dt: 0,    bobOffset: 0,    scaleBoost: 0,    eyeOpen: 1.0 },
-      { dt: 80,   bobOffset: -2,   scaleBoost: 0.04, eyeOpen: 1.2 },
-      { dt: 200,  bobOffset: -1,   scaleBoost: 0.02, eyeOpen: 1.1 },
-      { dt: 400,  bobOffset: 0,    scaleBoost: 0,    eyeOpen: 1.0 },
-    ],
-    phase_lock: [
-      { dt: 0,    bobOffset: 0,    scaleBoost: 0,    eyeOpen: 1.0 },
-      { dt: 150,  bobOffset: 1,    scaleBoost: -0.02,eyeOpen: 0.7 },
-      { dt: 350,  bobOffset: 0,    scaleBoost: 0,    eyeOpen: 0.9 },
-      { dt: 600,  bobOffset: 0,    scaleBoost: 0,    eyeOpen: 1.0 },
-    ],
-    startle: [
-      { dt: 0,    bobOffset: 0,    scaleBoost: 0,    eyeOpen: 1.0 },
-      { dt: 60,   bobOffset: -3,   scaleBoost: 0.06, eyeOpen: 1.4 },
-      { dt: 180,  bobOffset: 2,    scaleBoost: -0.03,eyeOpen: 1.2 },
-      { dt: 350,  bobOffset: 0,    scaleBoost: 0,    eyeOpen: 1.0 },
-    ],
-    inject: [
-      { dt: 0,    bobOffset: 0,    scaleBoost: 0,    eyeOpen: 1.0 },
-      { dt: 50,   bobOffset: -1,   scaleBoost: 0.03, eyeOpen: 1.1 },
-      { dt: 200,  bobOffset: 0,    scaleBoost: 0,    eyeOpen: 1.0 },
-    ],
-    node_born: [
-      { dt: 0,    bobOffset: 0,    scaleBoost: 0,    eyeOpen: 1.2 },
-      { dt: 120,  bobOffset: -2,   scaleBoost: 0.05, eyeOpen: 1.3 },
-      { dt: 400,  bobOffset: 0,    scaleBoost: 0.02, eyeOpen: 1.1 },
-      { dt: 700,  bobOffset: 0,    scaleBoost: 0,    eyeOpen: 1.0 },
-    ],
-  },
-
-  /* Active animation state */
-  current:     null,     /* sequence name */
-  startTime:   0,
-  frameIdx:    0,
-  state: {
-    bobOffset:  0,
-    scaleBoost: 0,
-    eyeOpen:    1.0,
-    mouthOpen:  0,
-    tilt:       0,
-  },
-};
-
-/* ── Fray cluster animation (independent halves) ──────────────── */
-const FRAY_STATE = {
-  leftOffset:  { x: 0, y: 0 },
-  rightOffset: { x: 0, y: 0 },
-  leftPhase:   0,
-  rightPhase:  Math.PI,
+const SEQUENCES = {
+  harmonic_event: [
+    { dt:   0, bobY:  0, scaleBoost: 0,     eyeOpen: 1.0, tilt:  0 },
+    { dt:  80, bobY: -2, scaleBoost: 0.04,  eyeOpen: 1.2, tilt:  2 },
+    { dt: 220, bobY: -1, scaleBoost: 0.015, eyeOpen: 1.1, tilt:  1 },
+    { dt: 420, bobY:  0, scaleBoost: 0,     eyeOpen: 1.0, tilt:  0 },
+  ],
+  phase_lock: [
+    { dt:   0, bobY:  0, scaleBoost:  0,     eyeOpen: 1.0, tilt: 0 },
+    { dt: 150, bobY:  1, scaleBoost: -0.02,  eyeOpen: 0.6, tilt: 0 },
+    { dt: 380, bobY:  0, scaleBoost:  0,     eyeOpen: 0.9, tilt: 0 },
+    { dt: 650, bobY:  0, scaleBoost:  0,     eyeOpen: 1.0, tilt: 0 },
+  ],
+  startle: [
+    { dt:   0, bobY:  0, scaleBoost: 0,    eyeOpen: 1.0, tilt:  0 },
+    { dt:  55, bobY: -3, scaleBoost: 0.07, eyeOpen: 1.5, tilt: -3 },
+    { dt: 170, bobY:  2, scaleBoost:-0.02, eyeOpen: 1.2, tilt:  2 },
+    { dt: 360, bobY:  0, scaleBoost: 0,    eyeOpen: 1.0, tilt:  0 },
+  ],
+  inject: [
+    { dt:   0, bobY:  0, scaleBoost: 0,    eyeOpen: 1.0, tilt: 0 },
+    { dt:  50, bobY: -1, scaleBoost: 0.03, eyeOpen: 1.1, tilt: 1 },
+    { dt: 220, bobY:  0, scaleBoost: 0,    eyeOpen: 1.0, tilt: 0 },
+  ],
+  node_born: [
+    { dt:   0, bobY:  0, scaleBoost: 0,    eyeOpen: 1.2, tilt: 0 },
+    { dt: 120, bobY: -2, scaleBoost: 0.05, eyeOpen: 1.3, tilt: 0 },
+    { dt: 420, bobY:  0, scaleBoost: 0.01, eyeOpen: 1.1, tilt: 0 },
+    { dt: 750, bobY:  0, scaleBoost: 0,    eyeOpen: 1.0, tilt: 0 },
+  ],
+  sip: [
+    { dt:   0, bobY: 0, scaleBoost: 0,   eyeOpen: 1.0, tilt:  0 },
+    { dt: 200, bobY: 2, scaleBoost: 0,   eyeOpen: 0.7, tilt:  3 },
+    { dt: 500, bobY: 1, scaleBoost: 0,   eyeOpen: 0.9, tilt:  2 },
+    { dt: 800, bobY: 0, scaleBoost: 0,   eyeOpen: 1.0, tilt:  0 },
+  ],
+  alert: [
+    { dt:   0, bobY:  0, scaleBoost: 0,    eyeOpen: 1.0, tilt:  0 },
+    { dt:  80, bobY: -2, scaleBoost: 0.05, eyeOpen: 1.4, tilt: -2 },
+    { dt: 350, bobY:  0, scaleBoost: 0,    eyeOpen: 1.2, tilt:  0 },
+    { dt: 600, bobY:  0, scaleBoost: 0,    eyeOpen: 1.0, tilt:  0 },
+  ],
+  sway: [
+    { dt:   0, bobY: 0, scaleBoost: 0, eyeOpen: 1.0, tilt:  0 },
+    { dt: 200, bobY: 0, scaleBoost: 0, eyeOpen: 0.9, tilt:  4 },
+    { dt: 500, bobY: 0, scaleBoost: 0, eyeOpen: 0.9, tilt: -4 },
+    { dt: 800, bobY: 0, scaleBoost: 0, eyeOpen: 1.0, tilt:  0 },
+  ],
+  env_emerge: [
+    { dt:    0, bobY:  0, scaleBoost: 0,    eyeOpen: 1.0, tilt:  0 },
+    { dt:  200, bobY: -3, scaleBoost: 0.06, eyeOpen: 1.5, tilt: -3 },
+    { dt:  600, bobY: -1, scaleBoost: 0.03, eyeOpen: 1.3, tilt:  0 },
+    { dt: 1200, bobY:  0, scaleBoost: 0,    eyeOpen: 1.1, tilt:  0 },
+    { dt: 2000, bobY:  0, scaleBoost: 0,    eyeOpen: 1.0, tilt:  0 },
+  ],
 };
 
 /* ═══════════════════════════════════════════════════════════════════
    MODULE STATE
    ═══════════════════════════════════════════════════════════════════ */
 
-let _canvas      = null;
-let _ctx         = null;
-let _creatureName= '';
-let _speciesId   = 'lull';
-let _isVisible   = false;
+let _canvas       = null;
+let _ctx          = null;
+let _speciesId    = 'lull';
+let _creatureName = '';
+let _isVisible    = false;
 
-/* Placed habitat objects */
-let _habitatObjects = [];   /* [{ item, x, y, addedAt, palette }] */
+/* Animation state */
+const _anim = {
+  current:   null,
+  startTime: 0,
+  state: { bobY: 0, scaleBoost: 0, eyeOpen: 1.0, tilt: 0, mouthOpen: 0 },
+};
 
-/* Phase for procedural animations */
-let _breathPhase = 0;
-let _idlePhase   = 0;
-let _wanderX     = 0;
-let _wanderY     = 0;
-let _wanderVX    = 0;
-let _wanderVY    = 0;
+/* Procedural animation phases */
+let _breathPhase  = 0;
+let _tailPhase    = 0;
+let _idlePhase    = 0;
+let _blinkTimer   = 0;
+let _wanderX      = 0;
+let _wanderY      = 0;
+let _wanderVX     = 0;
+let _wanderVY     = 0;
+
+/* Placed environmental objects */
+let _envObjects   = [];   /* [{ item, x, y, addedAt, pal }] */
+
+/* Stable fur seed — updated slowly */
+let _furSeed      = 0;
+let _furDots      = [];   /* precomputed fur dot positions */
 
 /* ═══════════════════════════════════════════════════════════════════
    INIT
    ═══════════════════════════════════════════════════════════════════ */
 
-export function initCreature(canvas, speciesId, creatureName) {
+export function initCreature(canvas, speciesId, name) {
   _canvas       = canvas;
   _ctx          = canvas.getContext('2d');
   _speciesId    = speciesId || 'lull';
-  _creatureName = creatureName || '';
-  _habitatObjects = [];
+  _creatureName = name || '';
+  _envObjects   = [];
+  _furDots      = [];
+  _breathPhase  = 0;
+  _tailPhase    = 0;
+  _idlePhase    = 0;
+  _blinkTimer   = Math.random() * 200;
 
-  /* Wire network events to animation triggers */
-  NetworkEvents.on('harmonicEvent', _onHarmonicEvent);
-  NetworkEvents.on('phaseLock',     _onPhaseLock);
-  NetworkEvents.on('nodeAdded',     _onNodeAdded);
+  _buildEnvBar();
+  _updateNameDisplay();
 
-  /* Build food bar UI */
-  _buildFoodBar();
-
-  /* Update name display */
-  const nameEl = document.getElementById('creature-name-display');
-  if (nameEl) nameEl.textContent = _creatureName
-    ? _creatureName
-    : '';
+  /* Wire events */
+  NetworkEvents.on('harmonicEvent',       _onHarmonicEvent);
+  NetworkEvents.on('phaseLock',           _onPhaseLock);
+  NetworkEvents.on('nodeAdded',           _onNodeAdded);
+  NetworkEvents.on('environmentNodeEmerged', _onEnvNodeEmerged);
 }
 
 export function setCreatureName(name) {
   _creatureName = name;
-  const nameEl = document.getElementById('creature-name-display');
-  if (nameEl) nameEl.textContent = name;
+  _updateNameDisplay();
 }
 
-export function setVisible(visible) {
-  _isVisible = visible;
+export function setSpeciesId(id) {
+  _speciesId = id;
+  _envObjects = [];
+  _furDots    = [];
+}
+
+export function setVisible(v) { _isVisible = v; }
+
+function _updateNameDisplay() {
+  const el = document.getElementById('creature-name-display');
+  if (el) el.textContent = _creatureName || '';
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   FOOD BAR
+   ENVIRONMENTAL OBJECT BAR
    ═══════════════════════════════════════════════════════════════════ */
 
-function _buildFoodBar() {
+function _buildEnvBar() {
   const bar = document.getElementById('food-bar');
   if (!bar) return;
   bar.innerHTML = '';
 
-  FOOD_ITEMS.forEach(item => {
+  ENV_ITEMS.forEach(item => {
     const btn = document.createElement('button');
-    btn.className   = 'food-item';
-    btn.title       = item.label;
-    btn.textContent = item.label[0].toUpperCase();   /* single letter, no emoji */
     btn.style.cssText = `
       font-family: var(--font-mono);
-      font-size: 0.6rem;
-      letter-spacing: 0.06em;
+      font-size: 0.58rem;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--muted);
-      background: rgba(7,8,11,0.7);
+      background: rgba(7,8,11,0.75);
       border: 1px solid var(--border2);
-      padding: 3px 7px;
+      padding: 3px 9px;
       cursor: pointer;
-      transition: all 0.15s;
+      transition: color 0.15s, border-color 0.15s;
     `;
+    btn.textContent = item.label;
+    btn.title = item.label;
+
     btn.addEventListener('mouseenter', () => {
       btn.style.color       = 'var(--accent)';
       btn.style.borderColor = 'var(--accent)';
@@ -806,599 +405,546 @@ function _buildFoodBar() {
       btn.style.color       = 'var(--muted)';
       btn.style.borderColor = 'var(--border2)';
     });
-    btn.addEventListener('click', () => _placeItem(item));
+    btn.addEventListener('click', () => _placeEnvItem(item));
     bar.appendChild(btn);
   });
 }
 
-function _placeItem(item) {
-  /* Determine habitat placement position */
-  const cw = _canvas?.width  || 700;
-  const ch = _canvas?.height || 400;
+function _placeEnvItem(item) {
+  if (!_canvas) return;
+  const cw = _canvas.width, ch = _canvas.height;
   let px = cw / 2, py = ch / 2;
 
-  switch (item.habitatPlacement) {
-    case 'sky_right':   px = cw * 0.78; py = ch * 0.12; break;
-    case 'sky_left':    px = cw * 0.15; py = ch * 0.10; break;
-    case 'sky_random':  px = cw * (0.2 + Math.random() * 0.6); py = ch * (0.05 + Math.random() * 0.2); break;
-    case 'sky_sweep':   px = cw * 0.1;  py = ch * 0.2;  break;
-    case 'ground_left': px = cw * 0.12; py = ch * 0.82; break;
-    case 'ground_right':px = cw * 0.82; py = ch * 0.85; break;
-    case 'ground_center':px= cw * 0.5;  py = ch * 0.88; break;
+  switch (item.placement) {
+    case 'sky_right': px = cw * 0.80; py = ch * 0.11; break;
+    case 'sky_sweep': px = cw * 0.10; py = ch * 0.18; break;
+    case 'ground_left': px = cw * 0.06; py = ch * 0.78; break;
   }
 
-  /* Remove existing instance of same item */
-  _habitatObjects = _habitatObjects.filter(o => o.item.id !== item.id);
+  /* Remove existing instance */
+  _envObjects = _envObjects.filter(o => o.item.id !== item.id);
 
-  /* Add new placement */
-  _habitatObjects.push({
+  _envObjects.push({
     item,
-    x: px, y: py,
+    x:       px,
+    y:       py,
     addedAt: Date.now(),
-    palette: item.palette,
+    pal:     item.palFn(),
   });
 
   /* Apply network effect */
-  try { item.effect(NS); } catch (e) { console.warn('[Creature] food effect:', e); }
+  try { item.effect(NS); } catch (e) { console.warn('[Creature] env effect:', e); }
 
-  /* Trigger creature response */
-  _triggerAnimation('inject');
+  /* Creature reaction */
+  _triggerAnim(item.creatureAnim || 'inject');
 }
 
-/* Expire old habitat objects */
 function _expireObjects(nowMs) {
-  _habitatObjects = _habitatObjects.filter(o =>
-    nowMs - o.addedAt < o.item.duration
-  );
+  _envObjects = _envObjects.filter(o => nowMs - o.addedAt < o.item.duration);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   MAIN DRAW — called from main.js RAF loop
+   MAIN DRAW
    ═══════════════════════════════════════════════════════════════════ */
 
 export function drawCreature(nowMs) {
   if (!_isVisible || !_ctx || !_canvas) return;
 
-  const cw = _canvas.width;
-  const ch = _canvas.height;
+  const cw = _canvas.width, ch = _canvas.height;
 
   _expireObjects(nowMs);
-  _updateAnimation(nowMs);
+  _updateAnim(nowMs);
   _updateProcedural(nowMs);
 
   const N       = NS.nodes.length;
-  const growth  = (N - INIT_NODES) / (MAX_NODES - INIT_NODES);   /* 0..1 */
-  const species = SPECIES_DEFS[_speciesId] || SPECIES_DEFS.lull;
-  const habitat = HABITATS[species.habitat] || HABITATS.deep_water;
+  const growth  = Math.max(0, Math.min(1,
+    (N - INIT_NODES) / (MAX_NODES - INIT_NODES)
+  ));
 
-  /* ── 1. Background ────────────────────────────────────────────── */
+  const palette = SPECIES_PAL[_speciesId] || SPECIES_PAL.lull;
+  const habitat = HABITATS[_speciesId]    || HABITATS.lull;
+
+  /* 1. Background */
   _drawBackground(cw, ch, habitat);
 
-  /* ── 2. Habitat objects ───────────────────────────────────────── */
-  _drawHabitatObjects(nowMs);
+  /* 2. Environmental objects (placed by user) */
+  _drawEnvObjects(cw, ch, nowMs);
 
-  /* ── 3. Creature ──────────────────────────────────────────────── */
-  _drawCreatureBody(cw, ch, growth, species);
+  /* 3. Creature */
+  _drawBody(cw, ch, growth, palette);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   BACKGROUND + HABITAT
+   BACKGROUND
    ═══════════════════════════════════════════════════════════════════ */
 
 function _drawBackground(cw, ch, habitat) {
   const ctx = _ctx;
-  ctx.fillStyle = PAL.bg;
-  ctx.fillRect(0, 0, cw, ch);
 
-  /* Sky gradient — top 65% */
-  const skyH  = Math.floor(ch * 0.65);
-  const skyPx = Math.ceil(cw  / PIXEL_SCALE);
-
-  ctx.fillStyle = habitat.skyColor;
-  ctx.fillRect(0, 0, cw, skyH);
-
-  /* Ground band — bottom 35% */
-  ctx.fillStyle = habitat.groundColor;
-  ctx.fillRect(0, skyH, cw, ch - skyH);
-
-  /* Water layer (habitat-specific) */
-  if (habitat.waterColor) {
-    /* Full water — deep_water habitat */
-    ctx.fillStyle = habitat.waterColor;
+  if (habitat.water) {
+    /* Underwater habitat — full water fill with depth gradient */
+    ctx.fillStyle = habitat.water;
     ctx.fillRect(0, 0, cw, ch);
-
-    /* Water column depth gradient — pixel rows */
     for (let row = 0; row < Math.floor(ch / PIXEL_SCALE); row++) {
-      const alpha = Math.min(0.6, row / (ch / PIXEL_SCALE) * 0.8);
-      ctx.fillStyle = `rgba(10,20,40,${alpha.toFixed(2)})`;
+      const alpha = Math.min(0.55, (row / (ch / PIXEL_SCALE)) * 0.75);
+      ctx.fillStyle = `rgba(5,10,20,${alpha.toFixed(2)})`;
       ctx.fillRect(0, row * PIXEL_SCALE, cw, PIXEL_SCALE);
     }
-  }
-
-  /* Default sky objects from habitat definition */
-  const habitatDef = HABITATS[Object.keys(HABITATS).find(k =>
-    HABITATS[k] === habitat
-  )];
-  if (habitat.skyObjects) {
-    habitat.skyObjects.forEach(objName => {
-      const sprite = SPRITES[objName];
-      if (!sprite) return;
-      const pal = objName === 'sun'
-        ? [null, '#f0e050', '#fff8a0', '#e0c030', '#ffd060']
-        : [null, '#c0c8d8', '#e0e8f0', '#9090a8'];
-      const sx = cw - sprite[0].length * PIXEL_SCALE - PIXEL_SCALE * 3;
-      const sy = PIXEL_SCALE * 2;
-      _drawSprite(sprite, pal, sx, sy, 1, 0);
-    });
+  } else {
+    /* Sky + ground */
+    const skyH = Math.floor(ch * 0.62);
+    ctx.fillStyle = habitat.sky;
+    ctx.fillRect(0, 0, cw, skyH);
+    ctx.fillStyle = habitat.ground;
+    ctx.fillRect(0, skyH, cw, ch - skyH);
   }
 }
 
-function _drawHabitatObjects(nowMs) {
-  _habitatObjects.forEach(obj => {
-    const sprite = SPRITES[obj.item.sprite];
-    if (!sprite) return;
-    const age    = nowMs - obj.addedAt;
-    const fade   = Math.min(1, age / 500);
-    _drawSprite(sprite, obj.palette, obj.x, obj.y, fade, 0);
+/* ═══════════════════════════════════════════════════════════════════
+   ENVIRONMENTAL OBJECTS
+   ═══════════════════════════════════════════════════════════════════ */
+
+function _drawEnvObjects(cw, ch, nowMs) {
+  _envObjects.forEach(obj => {
+    const age   = nowMs - obj.addedAt;
+    const alpha = Math.min(1, age / 400);
+    /* Fade out in last 3s */
+    const remaining = obj.item.duration - age;
+    const fadeAlpha = remaining < 3000 ? remaining / 3000 : alpha;
+
+    switch (obj.item.id) {
+
+      case 'water': {
+        /* Water body on left ground */
+        const ww = Math.floor(cw * 0.22);
+        const wy = Math.floor(ch * 0.72);
+        const wh = ch - wy;
+
+        /* Water body — tiled rows */
+        _ctx.fillStyle = obj.pal[3] || PAL.cold;
+        _ctx.globalAlpha = fadeAlpha * 0.7;
+        _ctx.fillRect(0, wy + PIXEL_SCALE * 2, ww, wh - PIXEL_SCALE * 2);
+
+        /* Water surface — pixel wave */
+        _ctx.globalAlpha = fadeAlpha;
+        _drawSprite(SPR.water_surf, obj.pal, 0, wy, fadeAlpha, 1);
+
+        _ctx.globalAlpha = 1;
+        break;
+      }
+
+      case 'light': {
+        /* Sun in sky top-right */
+        const timeInto = age / obj.item.duration;
+        const pulse    = 1 + Math.sin(nowMs * 0.003) * 0.08;
+        const spr      = timeInto < 0.5 ? SPR.sun_lg : SPR.sun_sm;
+        _drawSprite(spr, obj.pal, obj.x - spr[0].length * PIXEL_SCALE / 2,
+          obj.y - spr.length * PIXEL_SCALE / 2, fadeAlpha * pulse, 1);
+
+        /* Light rays — simple pixel lines */
+        _ctx.save();
+        _ctx.globalAlpha = fadeAlpha * 0.18;
+        _ctx.strokeStyle = obj.pal[1] || '#f0e050';
+        _ctx.lineWidth   = 1;
+        for (let r = 0; r < 6; r++) {
+          const ang = (r / 6) * Math.PI * 2 + nowMs * 0.0003;
+          const len = 20 + Math.sin(nowMs * 0.002 + r) * 8;
+          _ctx.beginPath();
+          _ctx.moveTo(obj.x, obj.y);
+          _ctx.lineTo(obj.x + Math.cos(ang) * len * PIXEL_SCALE * 0.4,
+                      obj.y + Math.sin(ang) * len * PIXEL_SCALE * 0.4);
+          _ctx.stroke();
+        }
+        _ctx.restore();
+        break;
+      }
+
+      case 'wind': {
+        /* Diagonal wind lines sweeping across */
+        const elapsed  = age / 1000;
+        const sweep    = (elapsed * 0.15) % 1;
+        for (let line = 0; line < 4; line++) {
+          const ox   = (sweep + line * 0.25) % 1;
+          const sx   = ox * cw * 1.2 - cw * 0.1;
+          const sy   = ch * 0.1 + line * ch * 0.15;
+          _drawSprite(SPR.wind_line, obj.pal,
+            sx, sy, fadeAlpha * (0.5 + Math.sin(nowMs * 0.004 + line) * 0.2), 1);
+        }
+        break;
+      }
+    }
   });
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   CREATURE BODY RENDERING
+   CREATURE BODY
    ═══════════════════════════════════════════════════════════════════ */
 
-function _drawCreatureBody(cw, ch, growth, species) {
-  const energy    = getEnergyLevel();
-  const animState = ANIM.state;
+function _drawBody(cw, ch, growth, palette) {
+  const energy    = NS.energyLevel;
+  const anim      = _anim.state;
 
-  /* ── Compute creature scale ──────────────────────────────────── */
-  const targetScale = BIRTH_SCALE + (MAX_SCALE - BIRTH_SCALE) * growth;
-  const baseH       = ch * targetScale;
-  const bodySprite  = _getBodySprite(species, growth);
-  const spriteH     = bodySprite.length;
-  const spriteW     = bodySprite[0]?.length || 1;
-  const pixelSz     = Math.max(2, Math.floor(baseH / spriteH));
-  const totalScale  = pixelSz * (1 + animState.scaleBoost);
+  /* Body sprite stage */
+  const bodyKey  = `body_${_speciesId}`;
+  const stages   = SPR[bodyKey] || SPR.body_lull;
+  const stageIdx = growth < 0.38 ? 0 : growth < 0.72 ? 1 : 2;
+  const body     = stages[Math.min(stageIdx, stages.length - 1)];
 
-  /* ── Base position — centered, with bob and wander ───────────── */
-  const isFray    = _speciesId === 'fray';
-  const isMurk    = _speciesId === 'murk';
+  /* Pixel size derived from target height */
+  const targetH  = ch * (BIRTH_SCALE + (MAX_SCALE - BIRTH_SCALE) * growth);
+  const pixelSz  = Math.max(2, Math.floor(targetH / body.length));
+  const scale    = pixelSz * (1 + anim.scaleBoost);
 
-  let cx = cw / 2 + (isMurk ? _wanderX : 0);
-  let cy = ch * 0.52 + animState.bobOffset * pixelSz + (isMurk ? _wanderY : 0);
+  /* Center position with bob, wander, tilt */
+  const isMurk   = _speciesId === 'murk';
+  const cx       = cw / 2 + (isMurk ? _wanderX : 0);
+  const cy       = ch * 0.50 + anim.bobY * pixelSz + (isMurk ? _wanderY : 0)
+                 + Math.sin(_breathPhase) * pixelSz * 0.6;
 
-  /* ── Shadow ──────────────────────────────────────────────────── */
-  const shadowW = spriteW * totalScale * 0.8;
-  const shadowH = pixelSz * 0.4;
-  const shadowY = ch * 0.78;
-  const ctx = _ctx;
-  ctx.save();
-  ctx.globalAlpha = 0.12 * (1 + energy * 0.3);
-  ctx.fillStyle   = '#000';
-  ctx.beginPath();
-  ctx.ellipse(cx, shadowY, shadowW, shadowH, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
+  const sprW     = body[0].length;
+  const sprH     = body.length;
+  const hw       = (sprW * scale) / 2;
+  const hh       = (sprH * scale) / 2;
 
-  if (isFray) {
-    _drawFrayCreature(cx, cy, growth, species, totalScale, pixelSz);
-    return;
-  }
+  /* Tilt via canvas transform */
+  _ctx.save();
+  _ctx.translate(cx, cy);
+  _ctx.rotate((anim.tilt * Math.PI) / 180);
+  _ctx.translate(-cx, -cy);
 
-  /* ── Body sprite ─────────────────────────────────────────────── */
-  const bx = cx - (spriteW * totalScale) / 2;
-  const by = cy - (spriteH * totalScale) / 2;
-  _drawSprite(bodySprite, species.palette, bx, by, 1.0, 0, totalScale / PIXEL_SCALE);
+  /* Body */
+  _drawSprite(body, palette, cx - hw, cy - hh, 1.0, scale);
 
-  /* ── Appendages ──────────────────────────────────────────────── */
-  _drawAppendages(species, growth, cx, cy, spriteW, spriteH, totalScale, animState);
+  /* Appendages */
+  _drawAppendages(cx, cy, hw, hh, growth, scale, pixelSz, palette, energy, anim);
 
-  /* ── Energy glow ─────────────────────────────────────────────── */
-  if (energy > 0.2) {
-    ctx.save();
-    ctx.globalAlpha = energy * 0.08;
-    const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, spriteW * totalScale * 0.9);
-    grd.addColorStop(0, species.palette[2] || PAL.accent2);
+  /* Mouth */
+  const mouthSpr = energy > 0.55 ? SPR.mouth_wide
+                 : anim.mouthOpen > 0.25 ? SPR.mouth_open
+                 : SPR.mouth_shut;
+  const ms = scale;
+  _drawSprite(mouthSpr, palette,
+    cx - mouthSpr[0].length * ms / 2,
+    cy + hh * 0.4,
+    1.0, ms);
+
+  _ctx.restore();
+
+  /* Energy glow — drawn outside tilt transform */
+  if (energy > 0.18) {
+    _ctx.save();
+    _ctx.globalAlpha = energy * 0.07;
+    const grd = _ctx.createRadialGradient(cx, cy, 0, cx, cy, hw * 2.2);
+    grd.addColorStop(0, palette[2] || PAL.accent2);
     grd.addColorStop(1, 'transparent');
-    ctx.fillStyle = grd;
-    ctx.fillRect(
-      cx - spriteW * totalScale,
-      cy - spriteH * totalScale,
-      spriteW * totalScale * 2,
-      spriteH * totalScale * 2
-    );
-    ctx.restore();
+    _ctx.fillStyle = grd;
+    _ctx.fillRect(cx - hw * 2.2, cy - hh * 2.2, hw * 4.4, hh * 4.4);
+    _ctx.restore();
   }
 }
 
-/* ── Fray: two bilateral halves ───────────────────────────────── */
-function _drawFrayCreature(cx, cy, growth, species, totalScale, pixelSz) {
-  const bodySprite  = _getBodySprite(species, growth);
-  const spriteW     = bodySprite[0]?.length || 1;
-  const spriteH     = bodySprite.length;
+/* ═══════════════════════════════════════════════════════════════════
+   APPENDAGES
+   ═══════════════════════════════════════════════════════════════════ */
 
-  /* Left cluster energy — nodes 0..N/2 */
-  const N = NS.nodes.length;
-  const half = Math.floor(N / 2);
-  const leftEnergy = NS.nodes.slice(0, half).reduce((s, n) => s + n.smoothEnergy, 0) / Math.max(1, half);
-  const rightEnergy= NS.nodes.slice(half).reduce((s, n) => s + n.smoothEnergy, 0) / Math.max(1, N - half);
-
-  /* Update fray offsets */
-  FRAY_STATE.leftPhase  += 0.018 * (0.5 + leftEnergy);
-  FRAY_STATE.rightPhase += 0.018 * (0.5 + rightEnergy);
-  const sep = pixelSz * (2 - growth * 1.5);   /* halves merge as growth increases */
-  const lox = -sep + Math.sin(FRAY_STATE.leftPhase)  * pixelSz * 0.5;
-  const rox =  sep + Math.sin(FRAY_STATE.rightPhase) * pixelSz * 0.5;
-  const loy = Math.cos(FRAY_STATE.leftPhase)  * pixelSz * 0.3;
-  const roy = Math.cos(FRAY_STATE.rightPhase) * pixelSz * 0.3;
-
-  FRAY_STATE.leftOffset  = { x: lox, y: loy };
-  FRAY_STATE.rightOffset = { x: rox, y: roy };
-
-  /* Draw left half (slightly tinted) */
-  _ctx.save();
-  _ctx.globalAlpha = 0.85 + leftEnergy * 0.15;
-  const lbx = cx + lox - (spriteW * totalScale) / 2;
-  const lby = cy + loy - (spriteH * totalScale) / 2;
-  _drawSprite(bodySprite, species.palette, lbx, lby, 1.0, 0, totalScale / PIXEL_SCALE);
-  _ctx.restore();
-
-  /* Draw right half (mirrored) */
-  _ctx.save();
-  _ctx.globalAlpha = 0.85 + rightEnergy * 0.15;
-  const rbx = cx + rox - (spriteW * totalScale) / 2;
-  const rby = cy + roy - (spriteH * totalScale) / 2;
-  _drawSpriteMirrored(bodySprite, species.palette, rbx, rby, 1.0, 0, totalScale / PIXEL_SCALE);
-  _ctx.restore();
-}
-
-/* ── Get body sprite for current growth stage ─────────────────── */
-function _getBodySprite(species, growth) {
-  const stages = species.bodyStages;
-  if (!stages || stages.length === 0) return [[1]];
-  const idx = growth < 0.4 ? 0 : growth < 0.75 ? 1 : 2;
-  return stages[Math.min(idx, stages.length - 1)];
-}
-
-/* ── Appendage drawing ────────────────────────────────────────── */
-function _drawAppendages(species, growth, cx, cy, spriteW, spriteH, totalScale, animState) {
-  const order = species.appendageOrder || [];
-  const ctx   = _ctx;
-
-  /* Derived network metrics for appendage visibility */
-  const inhibRatio  = _inhibitoryRatio();
-  const predActivity= _predictiveActivity();
+function _drawAppendages(cx, cy, hw, hh, growth, scale, pixelSz, palette, energy, anim) {
+  /* Network metrics driving appendage state */
+  const inhibRatio  = _inhibRatio();
+  const predAct     = _predActivity();
   const delayAct    = _delayActivity();
+  const connStr     = _avgConnStr();
   const lockCount   = NS.phaseLockCount;
-  const harmRichness= _harmonicRichness();
-  const energy      = getEnergyLevel();
+  const harmRich    = Math.min(1, NS.totalPhaseLocks / 12 + connStr * 0.4);
 
-  order.forEach(({ type, threshold }) => {
-    if (growth < threshold) return;
-    const tGrowth = Math.min(1, (growth - threshold) / (1 - threshold + 0.01));
+  /* ── Eyes ── */
+  if (growth >= 0) {
+    const eyeSpr   = predAct > 0.38 ? SPR.eye_lg
+                   : predAct > 0.18 ? SPR.eye_sm
+                   : SPR.eye_tiny;
+    const eyeScale = (scale / PIXEL_SCALE) * Math.max(0.3, anim.eyeOpen);
+    /* Blink */
+    const blink    = _blinkTimer < 3;
+    const actualSpr= blink ? SPR.eye_closed : eyeSpr;
+    const eyeOff   = hw * 0.22;
 
-    const hw = spriteW  * totalScale / 2;
-    const hh = spriteH  * totalScale / 2;
-    const px  = PIXEL_SCALE;
+    _drawSprite(actualSpr, palette,
+      cx - eyeOff - actualSpr[0].length * eyeScale / 2,
+      cy - hh * 0.05,
+      Math.min(1, growth * 4), eyeScale);
+    _drawSprite(actualSpr, palette,
+      cx + eyeOff - actualSpr[0].length * eyeScale / 2,
+      cy - hh * 0.05,
+      Math.min(1, growth * 4), eyeScale);
+  }
 
-    switch (type) {
+  /* ── Limbs (grow with connection strength) ── */
+  if (growth >= 0.15) {
+    const limLen = Math.round(1 + connStr * 3.5 + growth * 2);
+    const limAlpha = Math.min(1, (growth - 0.15) / 0.25);
+    _drawLimb(cx - hw, cy + hh * 0.1, -1, limLen, pixelSz, palette, limAlpha);
+    _drawLimb(cx + hw, cy + hh * 0.1,  1, limLen, pixelSz, palette, limAlpha);
+  }
 
-      case 'tendrils':
-      case 'tendrils2': {
-        const count  = type === 'tendrils2' ? 4 : 3;
-        const len    = Math.round(2 + delayAct * 4 + tGrowth * 3);
-        const eyeOff = animState.eyeOpen * 0.5;
+  /* ── Tail (delay activity) ── */
+  if (growth >= 0.25 && delayAct > 0.05) {
+    const tailLen = Math.round(1 + delayAct * 4 + growth * 2);
+    const tAlpha  = Math.min(1, (growth - 0.25) / 0.2);
+    _drawTail(cx, cy + hh, tailLen, pixelSz, palette, tAlpha);
+  }
+
+  /* ── Species-specific appendages ── */
+  switch (_speciesId) {
+
+    case 'lull': {
+      /* Tendrils — grow downward, wave with breath */
+      if (growth >= 0.3) {
+        const count = 2 + Math.round(growth * 3);
+        const tLen  = Math.round(2 + delayAct * 3 + growth * 3);
+        const alpha = Math.min(1, (growth - 0.3) / 0.3);
         for (let t = 0; t < count; t++) {
-          const angle = (Math.PI * 0.3) + (t / (count - 1)) * (Math.PI * 0.4);
-          const ox    = cx + Math.cos(angle + Math.PI) * hw;
-          const oy    = cy + hh + Math.sin(Math.PI) * 2;
-          _drawTendril(ox, oy, angle + Math.PI/2, len, totalScale, species.palette, eyeOff);
+          const ox = cx - hw * 0.7 + (t / (count - 1)) * hw * 1.4;
+          _drawTendril(ox, cy + hh, tLen, pixelSz, palette, alpha,
+            _breathPhase + t * 0.9);
         }
-        break;
       }
+      break;
+    }
 
-      case 'antennae': {
-        const len = Math.round(2 + lockCount * 0.5 + tGrowth * 2);
-        _drawSprite(SPRITES.antenna, species.palette,
-          cx - hw - totalScale * 0.2, cy - hh - len * totalScale * 0.4,
-          tGrowth, 0, totalScale / PIXEL_SCALE);
-        _drawSpriteMirrored(SPRITES.antenna, species.palette,
-          cx + hw - totalScale * 0.6, cy - hh - len * totalScale * 0.4,
-          tGrowth, 0, totalScale / PIXEL_SCALE);
-        break;
+    case 'weft': {
+      /* Antennae — bilateral, grow with phase locks */
+      if (growth >= 0.2) {
+        const aLen  = Math.round(2 + lockCount * 0.4 + growth * 2);
+        const alpha = Math.min(1, (growth - 0.2) / 0.25);
+        _drawAntenna(cx - hw * 0.25, cy - hh, -1, aLen, pixelSz, palette, alpha);
+        _drawAntenna(cx + hw * 0.25, cy - hh,  1, aLen, pixelSz, palette, alpha);
       }
-
-      case 'eye_pair':
-      case 'eye_pair_split': {
-        const eyeSprite = predActivity > 0.4 ? SPRITES.eye_large
-                        : predActivity > 0.2 ? SPRITES.eye_medium
-                        : SPRITES.eye_small;
-        const eyeScale  = (totalScale / PIXEL_SCALE) * animState.eyeOpen;
-        const eyeOffset = type === 'eye_pair_split' ? hw * 0.3 : hw * 0.2;
-        _drawSprite(eyeSprite, species.palette,
-          cx - eyeOffset - eyeSprite[0].length * eyeScale / 2,
-          cy - hh * 0.1,
-          tGrowth, 0, eyeScale);
-        _drawSprite(eyeSprite, species.palette,
-          cx + eyeOffset - eyeSprite[0].length * eyeScale / 2,
-          cy - hh * 0.1,
-          tGrowth, 0, eyeScale);
-        break;
+      /* Second limb pair */
+      if (growth >= 0.55) {
+        const limLen = Math.round(1 + connStr * 2 + growth);
+        const alpha  = Math.min(1, (growth - 0.55) / 0.25);
+        _drawLimb(cx - hw, cy + hh * 0.55, -1, limLen, pixelSz, palette, alpha);
+        _drawLimb(cx + hw, cy + hh * 0.55,  1, limLen, pixelSz, palette, alpha);
       }
+      break;
+    }
 
-      case 'eye_offset': {
-        const eyeSprite = SPRITES.eye_small;
-        const eyeScale  = totalScale / PIXEL_SCALE;
-        _drawSprite(eyeSprite, species.palette,
-          cx - hw * 0.5, cy - hh * 0.3,
-          tGrowth, 0, eyeScale * animState.eyeOpen);
-        _drawSprite(eyeSprite, species.palette,
-          cx + hw * 0.2, cy + hh * 0.1,
-          tGrowth, 0, eyeScale * animState.eyeOpen * 0.8);
-        break;
-      }
-
-      case 'eye_large': {
-        const eyeScale = (totalScale / PIXEL_SCALE) * 1.2 * animState.eyeOpen;
-        _drawSprite(SPRITES.eye_large, species.palette,
-          cx - SPRITES.eye_large[0].length * eyeScale / 2,
-          cy - hh * 0.15,
-          tGrowth, 0, eyeScale);
-        break;
-      }
-
-      case 'limb_pair':
-      case 'limb_pair2': {
-        const connStr  = _avgConnectionStrength();
-        const limLen   = Math.round(1 + connStr * 3 + tGrowth * 2);
-        const yOff     = type === 'limb_pair2' ? hh * 0.5 : hh * 0.0;
-        _drawLimb(cx - hw, cy + yOff, -1, limLen, totalScale, species.palette);
-        _drawLimb(cx + hw, cy + yOff,  1, limLen, totalScale, species.palette);
-        break;
-      }
-
-      case 'limb_odd': {
-        const limLen = Math.round(1 + tGrowth * 2);
-        _drawLimb(cx - hw, cy - hh * 0.1, -1, limLen, totalScale, species.palette);
-        _drawLimb(cx + hw * 0.3, cy + hh * 0.3, 1, limLen - 1, totalScale, species.palette);
-        break;
-      }
-
-      case 'limb_odd2': {
-        const limLen = Math.round(1 + tGrowth * 2);
-        _drawLimb(cx + hw, cy - hh * 0.2, 1, limLen, totalScale, species.palette);
-        break;
-      }
-
-      case 'spines_top': {
-        const count = Math.round(2 + inhibRatio * 4 + tGrowth * 2);
+    case 'brine': {
+      /* Spines — driven by inhibitory ratio */
+      if (growth >= 0.2 && inhibRatio > 0.1) {
+        const count = Math.round(2 + inhibRatio * 5 + growth * 2);
+        const sLen  = Math.round(1 + inhibRatio * 3) * pixelSz;
+        const alpha = Math.min(1, (growth - 0.2) / 0.25);
         for (let s = 0; s < count; s++) {
-          const sx = cx - hw * 0.7 + (s / (count - 1)) * hw * 1.4;
-          const sh = Math.round(1 + inhibRatio * 2 + tGrowth) * totalScale;
-          ctx.fillStyle = species.palette[2] || PAL.accent;
-          ctx.fillRect(Math.round(sx), Math.round(cy - hh - sh), totalScale, sh);
+          const sx = cx - hw * 0.8 + (s / (count - 1)) * hw * 1.6;
+          _ctx.save();
+          _ctx.globalAlpha = alpha;
+          _ctx.fillStyle   = palette[2] || PAL.brine2;
+          _ctx.fillRect(Math.round(sx), Math.round(cy - hh - sLen), pixelSz, sLen);
+          _ctx.restore();
         }
-        break;
       }
-
-      case 'spines_side': {
-        const count = Math.round(2 + tGrowth * 3);
+      /* Side spines */
+      if (growth >= 0.45) {
+        const count  = Math.round(2 + growth * 3);
+        const alpha  = Math.min(1, (growth - 0.45) / 0.3);
         [-1, 1].forEach(side => {
           for (let s = 0; s < count; s++) {
-            const sy = cy - hh * 0.5 + (s / (count - 1)) * hh;
-            const sl = Math.round(1 + inhibRatio * 3 + tGrowth) * totalScale;
-            ctx.fillStyle = species.palette[3] || PAL.brine;
-            ctx.fillRect(
-              Math.round(cx + side * (hw + 1)),
-              Math.round(sy),
-              side * sl, totalScale
-            );
+            const sy  = cy - hh * 0.5 + (s / (count - 1)) * hh;
+            const sLen= Math.round(1 + inhibRatio * 2 + growth) * pixelSz;
+            _ctx.save();
+            _ctx.globalAlpha = alpha;
+            _ctx.fillStyle   = palette[3] || PAL.brine3;
+            _ctx.fillRect(Math.round(cx + side * (hw + 1)),
+              Math.round(sy), side * sLen, pixelSz);
+            _ctx.restore();
           }
         });
-        break;
       }
-
-      case 'spines_bot': {
-        const count = Math.round(2 + tGrowth * 3);
-        for (let s = 0; s < count; s++) {
-          const sx = cx - hw * 0.6 + (s / (count - 1)) * hw * 1.2;
-          const sl = Math.round(1 + tGrowth * 2) * totalScale;
-          ctx.fillStyle = species.palette[2] || PAL.warn;
-          ctx.fillRect(Math.round(sx), Math.round(cy + hh), totalScale, sl);
-        }
-        break;
-      }
-
-      case 'tail_short':
-      case 'tail_dual': {
-        const len     = Math.round(2 + delayAct * 3 + tGrowth * 3);
-        const tailOff = type === 'tail_dual' ? [-hw * 0.3, hw * 0.3] : [0];
-        tailOff.forEach(xOff => {
-          _drawTail(cx + xOff, cy + hh, len, totalScale, species.palette,
-            _breathPhase + (xOff > 0 ? Math.PI : 0));
-        });
-        break;
-      }
-
-      case 'wing_pair': {
-        const wingSprite = lockCount > 2 ? SPRITES.wing_lg : SPRITES.wing_sm;
-        const ws         = (totalScale / PIXEL_SCALE) * (0.8 + lockCount * 0.1);
-        _drawSprite(wingSprite, species.palette,
-          cx - hw - wingSprite[0].length * ws * 0.6,
-          cy - hh * 0.3,
-          tGrowth, 0, ws);
-        _drawSpriteMirrored(wingSprite, species.palette,
-          cx + hw - wingSprite[0].length * ws * 0.4,
-          cy - hh * 0.3,
-          tGrowth, 0, ws);
-        break;
-      }
-
-      case 'antler_sm':
-      case 'antler_lg': {
-        const branches = type === 'antler_lg'
-          ? Math.round(1 + tGrowth * 3)
-          : 1;
-        _drawAntler(cx - hw * 0.3, cy - hh, -1, branches, totalScale, species.palette);
-        _drawAntler(cx + hw * 0.3, cy - hh,  1, branches, totalScale, species.palette);
-        break;
-      }
-
-      case 'fur_overlay':
-      case 'fur_dense': {
-        const density = type === 'fur_dense' ? 0.55 : 0.3;
-        _drawFurOverlay(cx, cy, hw, hh, density, harmRichness, species.palette);
-        break;
-      }
-
-      case 'ear_pair': {
-        const ew = totalScale;
-        const eh = totalScale * (1 + tGrowth * 1.5);
-        ctx.fillStyle = species.palette[1] || PAL.fray;
-        ctx.fillRect(Math.round(cx - hw - ew), Math.round(cy - hh), ew, eh);
-        ctx.fillRect(Math.round(cx + hw),       Math.round(cy - hh), ew, eh);
-        break;
-      }
-
-      case 'merge_bridge': {
-        /* Visual bridge between Fray halves as they merge */
-        const bridgeW = Math.round(tGrowth * spriteW * totalScale * 0.4);
-        if (bridgeW > 0) {
-          ctx.fillStyle = species.palette[3] || PAL.fray;
-          ctx.fillRect(
-            Math.round(cx - bridgeW / 2),
-            Math.round(cy - totalScale * 0.5),
-            bridgeW, totalScale
-          );
-        }
-        break;
-      }
-
-      case 'glow': {
-        /* Lull luminous glow ring */
-        ctx.save();
-        ctx.globalAlpha = 0.06 + energy * 0.1;
-        const glowGrd = ctx.createRadialGradient(cx, cy, hw * 0.5, cx, cy, hw * 2);
-        glowGrd.addColorStop(0, species.palette[3] || PAL.accent2);
-        glowGrd.addColorStop(1, 'transparent');
-        ctx.fillStyle = glowGrd;
-        ctx.fillRect(cx - hw * 2, cy - hw * 2, hw * 4, hw * 4);
-        ctx.restore();
-        break;
-      }
+      break;
     }
-  });
 
-  /* ── Mouth ── */
-  const mouthSprite = energy > 0.5 ? SPRITES.mouth_open_lg
-                    : ANIM.state.mouthOpen > 0.3 ? SPRITES.mouth_open_sm
-                    : SPRITES.mouth_closed;
-  const ms = totalScale / PIXEL_SCALE;
-  _drawSprite(mouthSprite, species.palette,
-    cx - mouthSprite[0].length * ms / 2,
-    cy + hh * 0.35,
-    1.0, 0, ms);
+    case 'murk': {
+      /* Single asymmetric limb offset */
+      if (growth >= 0.4) {
+        const alpha = Math.min(1, (growth - 0.4) / 0.3);
+        _drawLimb(cx + hw * 0.5, cy - hh * 0.2, 1,
+          Math.round(1 + growth * 2), pixelSz, palette, alpha);
+      }
+      break;
+    }
+
+    case 'fray': {
+      /* Bilateral asymmetric ears/horns — Fray has tension in its form */
+      if (growth >= 0.2) {
+        const alpha = Math.min(1, (growth - 0.2) / 0.25);
+        _ctx.save();
+        _ctx.globalAlpha = alpha;
+        _ctx.fillStyle   = palette[1] || PAL.fray;
+        /* Left ear */
+        _ctx.fillRect(Math.round(cx - hw - pixelSz), Math.round(cy - hh),
+          pixelSz, Math.round(pixelSz * (1.5 + growth * 1.5)));
+        /* Right ear — slightly different height = tension */
+        _ctx.fillRect(Math.round(cx + hw), Math.round(cy - hh - pixelSz),
+          pixelSz, Math.round(pixelSz * (2 + growth)));
+        _ctx.restore();
+      }
+      /* Bridge between halves grows with connection density */
+      if (growth >= 0.65) {
+        const bridgeW = Math.round((growth - 0.65) / 0.35 * hw * 0.5);
+        if (bridgeW > 0) {
+          _ctx.fillStyle = palette[3] || PAL.fray3;
+          _ctx.fillRect(Math.round(cx - bridgeW / 2),
+            Math.round(cy), bridgeW, pixelSz);
+        }
+      }
+      break;
+    }
+
+    case 'loam': {
+      /* Antlers — grow with node count, branch count with harmonic richness */
+      if (growth >= 0.25) {
+        const branches = Math.round(1 + harmRich * 3 + growth * 1.5);
+        const alpha    = Math.min(1, (growth - 0.25) / 0.3);
+        _drawAntler(cx - hw * 0.3, cy - hh, -1, branches, pixelSz, palette, alpha);
+        _drawAntler(cx + hw * 0.3, cy - hh,  1, branches, pixelSz, palette, alpha);
+      }
+      /* Fur dots */
+      if (growth >= 0.4 && harmRich > 0.1) {
+        _drawFur(cx, cy, hw, hh, harmRich, growth, palette);
+      }
+      break;
+    }
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════
    APPENDAGE DRAW HELPERS
    ═══════════════════════════════════════════════════════════════════ */
 
-function _drawTendril(x, y, angle, length, scale, palette, waveFactor) {
-  const ctx = _ctx;
-  let cx = x, cy = y;
-  for (let i = 0; i < length; i++) {
-    const wave = Math.sin(_breathPhase + i * 0.8 + waveFactor) * scale * 0.5;
-    const nx   = cx + Math.cos(angle + wave * 0.15) * scale;
-    const ny   = cy + Math.sin(angle + wave * 0.15) * scale + wave;
-    ctx.fillStyle = i === length - 1 ? (palette[2] || PAL.accent2) : (palette[1] || PAL.accent);
-    ctx.fillRect(Math.round(nx), Math.round(ny), scale, scale);
-    cx = nx; cy = ny;
-  }
-}
-
-function _drawLimb(x, y, dir, length, scale, palette) {
-  const ctx = _ctx;
+function _drawLimb(x, y, dir, length, pixelSz, palette, alpha) {
+  _ctx.save();
+  _ctx.globalAlpha = alpha;
   let lx = x, ly = y;
   for (let i = 0; i < length; i++) {
-    const wave = Math.sin(_breathPhase + i * 0.6) * scale * 0.3;
-    ctx.fillStyle = i === length - 1 ? (palette[2] || PAL.accent2) : (palette[1] || PAL.accent);
-    ctx.fillRect(Math.round(lx + wave), Math.round(ly), scale, scale);
-    lx += dir * scale * 0.7;
-    ly += scale * 0.8;
+    const wave = Math.sin(_breathPhase + i * 0.7) * pixelSz * 0.35;
+    _ctx.fillStyle = i === length - 1 ? (palette[2] || PAL.accent2) : (palette[1] || PAL.accent);
+    _ctx.fillRect(Math.round(lx + wave), Math.round(ly), pixelSz, pixelSz);
+    lx += dir * pixelSz * 0.65;
+    ly += pixelSz * 0.85;
   }
+  _ctx.restore();
 }
 
-function _drawTail(x, y, length, scale, palette, phase) {
-  const ctx = _ctx;
+function _drawTail(x, y, length, pixelSz, palette, alpha) {
+  _ctx.save();
+  _ctx.globalAlpha = alpha;
+  let tx = x, ty = y;
+  const period = Math.max(200, getMetabolicPeriod());
+  for (let i = 0; i < length; i++) {
+    const wave = Math.sin(_tailPhase + i * 0.65) * pixelSz * (0.35 + i * 0.1);
+    _ctx.fillStyle = i === length - 1 ? (palette[2] || PAL.accent2) : (palette[1] || PAL.accent);
+    _ctx.fillRect(Math.round(tx + wave), Math.round(ty), pixelSz, pixelSz);
+    ty += pixelSz * 0.88;
+  }
+  _ctx.restore();
+}
+
+function _drawTendril(x, y, length, pixelSz, palette, alpha, phase) {
+  _ctx.save();
+  _ctx.globalAlpha = alpha;
   let tx = x, ty = y;
   for (let i = 0; i < length; i++) {
-    const wave = Math.sin(phase + i * 0.7) * scale * (0.3 + i * 0.12);
-    ctx.fillStyle = i === length - 1 ? (palette[2] || PAL.accent2) : (palette[1] || PAL.accent);
-    ctx.fillRect(Math.round(tx + wave), Math.round(ty), scale, scale);
-    ty += scale * 0.9;
+    const wave = Math.sin(phase + i * 0.75) * pixelSz * 0.55;
+    _ctx.fillStyle = i === length - 1 ? (palette[2] || PAL.accent2) : (palette[1] || PAL.accent);
+    _ctx.fillRect(Math.round(tx + wave), Math.round(ty), pixelSz, pixelSz);
+    ty += pixelSz * 0.9;
+    tx += wave * 0.08;
   }
+  _ctx.restore();
 }
 
-function _drawAntler(x, y, dir, branches, scale, palette) {
-  const ctx = _ctx;
-  /* Main stalk */
+function _drawAntenna(x, y, dir, length, pixelSz, palette, alpha) {
+  _ctx.save();
+  _ctx.globalAlpha = alpha;
   let ax = x, ay = y;
-  const stalkLen = 2 + branches;
+  for (let i = 0; i < length; i++) {
+    _ctx.fillStyle = i === length - 1 ? (palette[2] || PAL.accent2) : (palette[1] || PAL.accent);
+    _ctx.fillRect(Math.round(ax), Math.round(ay - i * pixelSz), pixelSz, pixelSz);
+  }
+  /* Tip dot */
+  _ctx.fillStyle = palette[4] || PAL.accent;
+  _ctx.fillRect(Math.round(ax + dir * pixelSz), Math.round(ay - length * pixelSz), pixelSz, pixelSz);
+  _ctx.restore();
+}
+
+function _drawAntler(x, y, dir, branches, pixelSz, palette, alpha) {
+  _ctx.save();
+  _ctx.globalAlpha = alpha;
+  const stalkLen = 2 + Math.ceil(branches * 0.6);
+  /* Main stalk */
   for (let i = 0; i < stalkLen; i++) {
-    ctx.fillStyle = palette[1] || PAL.loam;
-    ctx.fillRect(Math.round(ax), Math.round(ay - i * scale), scale, scale);
+    _ctx.fillStyle = palette[1] || PAL.loam;
+    _ctx.fillRect(Math.round(x), Math.round(y - i * pixelSz), pixelSz, pixelSz);
   }
   /* Branches */
   for (let b = 0; b < branches; b++) {
-    const bx = ax + dir * scale * (b + 1);
-    const by = ay - (b + 1) * scale;
-    ctx.fillStyle = palette[2] || PAL.accent;
-    ctx.fillRect(Math.round(bx), Math.round(by), scale, scale);
-    ctx.fillRect(Math.round(bx), Math.round(by - scale), scale, scale);
+    const bx = x + dir * pixelSz * (b + 1);
+    const by = y - (b + 1) * pixelSz;
+    _ctx.fillStyle = palette[2] || PAL.loam2;
+    _ctx.fillRect(Math.round(bx), Math.round(by), pixelSz, pixelSz);
+    _ctx.fillRect(Math.round(bx), Math.round(by - pixelSz), pixelSz, pixelSz);
   }
+  _ctx.restore();
 }
 
-function _drawFurOverlay(cx, cy, hw, hh, density, richness, palette) {
-  const ctx   = _ctx;
-  const count = Math.round(density * 20 + richness * 10);
-  ctx.fillStyle = palette[2] || PAL.accent2;
-  for (let i = 0; i < count; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const r     = Math.random() * hw * 0.8;
-    const fx    = cx + Math.cos(angle) * r;
-    const fy    = cy + Math.sin(angle) * r * 0.7;
-    ctx.fillRect(Math.round(fx), Math.round(fy), 2, 2);
+function _drawFur(cx, cy, hw, hh, richness, growth, palette) {
+  /* Stable fur dots — regenerate when seed changes */
+  const newSeed = Math.floor(Date.now() / 800);
+  if (newSeed !== _furSeed || _furDots.length === 0) {
+    _furSeed  = newSeed;
+    const count = Math.round(richness * 18 + growth * 10);
+    _furDots  = [];
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const r     = Math.random() * hw * 0.75;
+      _furDots.push({
+        x: Math.cos(angle) * r,
+        y: Math.sin(angle) * r * 0.65,
+      });
+    }
   }
+  _ctx.save();
+  _ctx.fillStyle = palette[2] || PAL.loam2;
+  _ctx.globalAlpha = 0.6;
+  _furDots.forEach(d => {
+    _ctx.fillRect(Math.round(cx + d.x), Math.round(cy + d.y), 2, 2);
+  });
+  _ctx.restore();
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   PIXEL SPRITE RENDERER
+   SPRITE RENDERER
    ═══════════════════════════════════════════════════════════════════ */
 
 /**
  * Draw a pixel sprite.
- * @param {Array} sprite  2D array of palette indices
- * @param {Array} palette Color array [null, color1, color2, ...]
- * @param {number} x      Top-left x in canvas pixels
- * @param {number} y      Top-left y in canvas pixels
- * @param {number} alpha  Global alpha 0..1
- * @param {number} _      Unused (future: rotation)
- * @param {number} scale  Pixels per sprite pixel (default PIXEL_SCALE)
+ * sprite: 2D array of palette indices (0 = transparent)
+ * palette: color array [null, color1, color2, ...]
+ * x, y: top-left position in canvas pixels
+ * alpha: global alpha 0..1
+ * scale: pixels per sprite pixel (default PIXEL_SCALE)
  */
-function _drawSprite(sprite, palette, x, y, alpha, _, scale) {
+function _drawSprite(sprite, palette, x, y, alpha, scale) {
   if (!sprite || !_ctx) return;
-  const ps  = scale ?? PIXEL_SCALE;
-  const ctx = _ctx;
-  ctx.save();
-  ctx.globalAlpha = Math.max(0, Math.min(1, alpha ?? 1));
+  const ps = scale ?? PIXEL_SCALE;
+  _ctx.save();
+  _ctx.globalAlpha = Math.max(0, Math.min(1, alpha ?? 1));
   for (let row = 0; row < sprite.length; row++) {
     for (let col = 0; col < sprite[row].length; col++) {
       const v = sprite[row][col];
       if (v === 0) continue;
-      const color = palette[v] || PAL.accent;
-      ctx.fillStyle = color;
-      ctx.fillRect(
+      _ctx.fillStyle = palette[v] || PAL.accent;
+      _ctx.fillRect(
         Math.round(x + col * ps),
         Math.round(y + row * ps),
         Math.max(1, Math.floor(ps)),
@@ -1406,97 +952,98 @@ function _drawSprite(sprite, palette, x, y, alpha, _, scale) {
       );
     }
   }
-  ctx.restore();
-}
-
-function _drawSpriteMirrored(sprite, palette, x, y, alpha, _, scale) {
-  if (!sprite || !_ctx) return;
-  const mirrored = sprite.map(row => [...row].reverse());
-  _drawSprite(mirrored, palette, x, y, alpha, _, scale);
+  _ctx.restore();
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   ANIMATION SYSTEM
+   ANIMATION
    ═══════════════════════════════════════════════════════════════════ */
 
-function _triggerAnimation(name) {
-  const seq = ANIM.sequences[name];
+export function triggerStartle() { _triggerAnim('startle'); }
+
+function _triggerAnim(name) {
+  const seq = SEQUENCES[name];
   if (!seq) return;
-  ANIM.current   = name;
-  ANIM.startTime = Date.now();
-  ANIM.frameIdx  = 0;
+  _anim.current   = name;
+  _anim.startTime = Date.now();
 }
 
-function _updateAnimation(nowMs) {
-  if (!ANIM.current) {
-    /* Procedural idle — reset toward defaults */
-    ANIM.state.scaleBoost = ANIM.state.scaleBoost * 0.92;
-    ANIM.state.eyeOpen    = ANIM.state.eyeOpen * 0.95 + 1.0 * 0.05;
-    ANIM.state.mouthOpen  = ANIM.state.mouthOpen * 0.9;
+function _updateAnim(nowMs) {
+  const state = _anim.state;
+
+  if (!_anim.current) {
+    /* Settle toward defaults */
+    state.scaleBoost = state.scaleBoost * 0.90;
+    state.eyeOpen    = state.eyeOpen    * 0.94 + 1.0 * 0.06;
+    state.tilt       = state.tilt       * 0.88;
+    state.mouthOpen  = state.mouthOpen  * 0.88;
     return;
   }
 
-  const seq     = ANIM.sequences[ANIM.current];
-  const elapsed = nowMs - ANIM.startTime;
+  const seq     = SEQUENCES[_anim.current];
+  const elapsed = nowMs - _anim.startTime;
   const last    = seq[seq.length - 1];
 
   if (elapsed >= last.dt) {
-    /* Sequence complete */
-    ANIM.current  = null;
-    ANIM.frameIdx = 0;
+    _anim.current = null;
     return;
   }
 
-  /* Interpolate between frames */
-  let frameA = seq[0], frameB = seq[1];
+  /* Interpolate between keyframes */
+  let fA = seq[0], fB = seq[1];
   for (let i = 0; i < seq.length - 1; i++) {
     if (elapsed >= seq[i].dt && elapsed < seq[i + 1].dt) {
-      frameA = seq[i];
-      frameB = seq[i + 1];
+      fA = seq[i]; fB = seq[i + 1];
       break;
     }
   }
 
-  const t = (elapsed - frameA.dt) / Math.max(1, frameB.dt - frameA.dt);
-  ANIM.state.bobOffset  = frameA.bobOffset  + (frameB.bobOffset  - frameA.bobOffset)  * t;
-  ANIM.state.scaleBoost = frameA.scaleBoost + (frameB.scaleBoost - frameA.scaleBoost) * t;
-  ANIM.state.eyeOpen    = frameA.eyeOpen    + (frameB.eyeOpen    - frameA.eyeOpen)    * t;
+  const t = (elapsed - fA.dt) / Math.max(1, fB.dt - fA.dt);
+  const lerp = (a, b) => a + (b - a) * t;
+
+  state.bobY      = lerp(fA.bobY,      fB.bobY);
+  state.scaleBoost= lerp(fA.scaleBoost,fB.scaleBoost);
+  state.eyeOpen   = lerp(fA.eyeOpen,   fB.eyeOpen);
+  state.tilt      = lerp(fA.tilt,      fB.tilt);
 }
 
 function _updateProcedural(nowMs) {
   const metabolism = NS.metabolism ?? 0.4;
-  const energy     = getEnergyLevel();
+  const energy     = NS.energyLevel;
+  const period     = Math.max(300, getMetabolicPeriod());
 
-  /* Breathing */
-  _breathPhase += 0.012 * (0.5 + metabolism * 1.5);
+  /* Breathing — rate tied to metabolism */
+  _breathPhase += 0.010 * (0.4 + metabolism * 1.8);
 
-  /* Idle curiosity */
-  _idlePhase += 0.005;
-  if (Math.random() < 0.002 && !ANIM.current) {
-    ANIM.state.eyeOpen = 0.6 + Math.random() * 0.4;   /* blink */
+  /* Tail rhythm — tied to metabolic period */
+  _tailPhase += (2 * Math.PI / period) * 16;   /* ~1 frame at 60fps */
+
+  /* Idle */
+  _idlePhase += 0.004;
+
+  /* Blink timer */
+  _blinkTimer -= 1;
+  if (_blinkTimer < 0) {
+    _blinkTimer = 120 + Math.random() * 280;
   }
 
-  /* Mouth opens with energy */
-  ANIM.state.mouthOpen = Math.max(ANIM.state.mouthOpen * 0.95, energy * 0.8);
+  /* Mouth driven by energy */
+  _anim.state.mouthOpen = Math.max(_anim.state.mouthOpen * 0.92, energy * 0.9);
 
-  /* Bob offset from breathing (base) */
-  if (!ANIM.current) {
-    ANIM.state.bobOffset = Math.sin(_breathPhase) * (0.5 + energy * 0.5);
+  /* Base bob from breathing (when no animation active) */
+  if (!_anim.current) {
+    _anim.state.bobY = Math.sin(_breathPhase) * (0.4 + energy * 0.5);
   }
 
-  /* Wander (Murk only) */
-  if (_speciesId === 'murk') {
-    _wanderVX += (Math.random() - 0.5) * 0.4;
-    _wanderVY += (Math.random() - 0.5) * 0.2;
-    _wanderVX *= 0.96;
-    _wanderVY *= 0.96;
-    _wanderX  += _wanderVX;
-    _wanderY  += _wanderVY;
-    /* Soft boundary */
-    const cw = _canvas?.width  || 700;
-    const ch = _canvas?.height || 400;
-    if (Math.abs(_wanderX) > cw * 0.2) _wanderVX *= -0.5;
-    if (Math.abs(_wanderY) > ch * 0.12) _wanderVY *= -0.5;
+  /* Murk wander */
+  if (_speciesId === 'murk' && _canvas) {
+    _wanderVX += (Math.random() - 0.5) * 0.5;
+    _wanderVY += (Math.random() - 0.5) * 0.22;
+    _wanderVX *= 0.95; _wanderVY *= 0.95;
+    _wanderX  += _wanderVX; _wanderY  += _wanderVY;
+    const cw = _canvas.width, ch = _canvas.height;
+    if (Math.abs(_wanderX) > cw * 0.18) _wanderVX *= -0.6;
+    if (Math.abs(_wanderY) > ch * 0.10) _wanderVY *= -0.6;
   }
 }
 
@@ -1504,14 +1051,12 @@ function _updateProcedural(nowMs) {
    NETWORK METRIC HELPERS
    ═══════════════════════════════════════════════════════════════════ */
 
-function _inhibitoryRatio() {
-  const total = NS.edges.length;
-  if (!total) return 0;
-  const inhib = NS.edges.filter(e => e.weight < 0).length;
-  return inhib / total;
+function _inhibRatio() {
+  if (!NS.edges.length) return 0;
+  return NS.edges.filter(e => e.weight < 0).length / NS.edges.length;
 }
 
-function _predictiveActivity() {
+function _predActivity() {
   const preds = NS.nodes.filter(n => n.type === NODE_TYPES.PREDICTIVE);
   if (!preds.length) return 0;
   return preds.reduce((s, n) => s + n.smoothEnergy, 0) / preds.length;
@@ -1523,14 +1068,9 @@ function _delayActivity() {
   return delays.reduce((s, n) => s + n.smoothEnergy, 0) / delays.length;
 }
 
-function _avgConnectionStrength() {
+function _avgConnStr() {
   if (!NS.edges.length) return 0;
   return NS.edges.reduce((s, e) => s + Math.abs(e.weight), 0) / NS.edges.length;
-}
-
-function _harmonicRichness() {
-  /* Approximated by number of phase locks and distinct active freq bands */
-  return Math.min(1, NS.totalPhaseLocks / 10 + _avgConnectionStrength() * 0.5);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -1538,21 +1078,11 @@ function _harmonicRichness() {
    ═══════════════════════════════════════════════════════════════════ */
 
 function _onHarmonicEvent({ isBass }) {
-  _triggerAnimation(isBass ? 'harmonic_event' : 'inject');
+  _triggerAnim(isBass ? 'harmonic_event' : 'inject');
 }
-
-function _onPhaseLock() {
-  _triggerAnimation('phase_lock');
-}
-
-function _onNodeAdded() {
-  _triggerAnimation('node_born');
-}
-
-/* Public trigger for predictive node startle (called from main.js) */
-export function triggerStartle() {
-  _triggerAnimation('startle');
-}
+function _onPhaseLock()                  { _triggerAnim('phase_lock'); }
+function _onNodeAdded()                  { _triggerAnim('node_born'); }
+function _onEnvNodeEmerged()             { _triggerAnim('env_emerge'); }
 
 /* ═══════════════════════════════════════════════════════════════════
    GETTERS
@@ -1560,4 +1090,3 @@ export function triggerStartle() {
 
 export function getCreatureName() { return _creatureName; }
 export function getSpeciesId()    { return _speciesId; }
-export function setSpeciesId(id)  { _speciesId = id; }
