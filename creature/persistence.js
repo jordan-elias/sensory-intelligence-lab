@@ -42,9 +42,8 @@
  *   in the session picker gate on page load.
  */
 
-import { getBiographySnapshot, applyBiography, NS } from './network.js';
+import { getBiographySnapshot, applyBiography, NS, NetworkEvents } from './network.js';
 import { getVocabularyWeights, applyHarmonicVocabulary } from './harmonic.js';
-import { NetworkEvents } from './network.js';
 
 /* ═══════════════════════════════════════════════════════════════════
    SUPABASE CLIENT
