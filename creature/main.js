@@ -505,12 +505,6 @@ function _transitionToStopped() {
     getCreatureName()
   );
 
-  /* Remove species tab from controls — cannot change mid-instrument */
-  const speciesTab = document.querySelector('.mode-tab[data-tab="species"]');
-  if (speciesTab) speciesTab.style.display = 'none';
-  const speciesContent = document.getElementById('tab-species');
-  if (speciesContent) speciesContent.style.display = 'none';
-
   /* Enable view toggle and anchor */
   document.getElementById('btn-view-toggle')?.removeAttribute('disabled');
   document.getElementById('btn-anchor')?.removeAttribute('disabled');
