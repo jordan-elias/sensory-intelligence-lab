@@ -107,7 +107,7 @@
   <!-- ═══════════════════════════════════════════════════════════════
        MAIN ENGINE CARD
        ═══════════════════════════════════════════════════════════════ -->
-  <div class="card">
+  <div class="card" id="main-card">
 
     <!-- STATUS BAR -->
     <div class="status-bar" id="status-bar">
@@ -274,7 +274,6 @@
       <!-- TABS -->
       <div class="mode-tabs">
         <button class="mode-tab active" data-tab="parameters">Parameters</button>
-        <button class="mode-tab" data-tab="species">Species</button>
         <button class="mode-tab" data-tab="learning">Learning</button>
         <button class="mode-tab" data-tab="matrix">Weight Matrix</button>
         <button class="mode-tab" data-tab="history">History</button>
@@ -360,11 +359,6 @@
       </div>
 
       <!-- SPECIES TAB -->
-      <div class="tab-content" id="tab-species" style="display:none">
-        <div class="species-grid" id="species-grid">
-          <!-- Injected by main.js from SPECIES definitions -->
-        </div>
-      </div>
 
       <!-- LEARNING TAB -->
       <div class="tab-content" id="tab-learning" style="display:none">
@@ -387,13 +381,7 @@
             <button class="pill on" id="tog-slow">slow · structure</button>
           </div>
 
-          <div class="ctrl-row">
-            <span class="row-label">environment</span>
-            <button class="pill" id="tog-env">microphone input</button>
-            <span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--dim);margin-left:4px">
-              — ambient sound shapes network energy
-            </span>
-          </div>
+
 
         </div>
       </div>
@@ -520,20 +508,6 @@
       <p>The instability parameter is this boundary in numerical form. The interesting range is the middle: where feedback accumulates but doesn't flood, where structure and surprise coexist. Tudor found this range by ear over years of practice. The search is the same.</p>
     </div>
 
-    <div class="essay-section">
-      <div class="essay-h">Neural networks</div>
-      <p>A neural network, in its most abstract form, is a graph: a set of nodes and the weighted connections between them. Each <strong>node</strong> receives signals from its neighbors, combines them, and produces a new output. The combination is shaped by a <strong>weight</strong> — a number that scales how strongly one node influences another. Positive weights amplify; negative weights suppress; weights near zero allow signals to pass but barely notice them.</p>
-      <p>The output of a node is not simply the sum of its inputs. It passes through an <strong>activation function</strong> — a mathematical transform that introduces <strong>nonlinearity</strong>. Without nonlinearity, a network of any depth reduces to a single linear equation; there is no complexity, no emergence. Activation functions like tanh, sigmoid, and wave-folding bend and saturate the signal, enabling a small network to represent vastly more complex relationships than its size would suggest. They are the origin of the harmonic richness you hear as nodes interact: two pure sine waves entering a tanh function produce a spectrum that neither wave contained on its own.</p>
-      <p>In machine learning, weights are adjusted through training — repeated exposure to examples, with errors propagated backward through the graph. In this instrument, weights evolve through Hebbian learning: nodes that activate together strengthen their connection. There is no target, no error signal, no optimization toward a goal. The network learns only what it does — a self-referential loop that slowly sculpts its own behavior through the act of running.</p>
-    </div>
-      
-    <div class="essay-section">
-    <div class="essay-h">The brain</div>
-    <p>The brain is, at its substrate, a network: roughly 86 billion neurons, each connected to thousands of others, exchanging electrochemical signals across synapses whose strength changes with activity. What makes it remarkable is not the complexity of any individual neuron — a single cell is relatively simple — but the patterns of coordinated activity that emerge across millions of them simultaneously. Consciousness, perception, memory: none of these live in a single place. They are processes, distributed across the network's behavior in time.</p>
-    <p>One of the most persistent features of brain activity is <strong>oscillation</strong>. Neurons across distant regions synchronize their firing into rhythmic waves — alpha, beta, theta, gamma — at frequencies that shift with attention, sleep, emotion, and cognitive load. These oscillations are not noise; they are the brain's coordination mechanism. When two regions need to communicate, they synchronize. When they need to decouple, their oscillations drift apart. The <strong>coupling</strong> between oscillators — the degree to which one region's rhythm entrains another's — is a fundamental computational operation of the nervous system.</p>
-    <p><strong>Emergence</strong> is what happens when local interactions produce global behavior that no individual element contains or could predict. A single neuron does not hear; billions of them, organized into the right patterns of connectivity and timing, produce auditory experience. In Neural Synthesis, individual oscillator nodes are trivial — a sine wave at a harmonic frequency. But as connections form, weights evolve, and feedback propagates through delay and nonlinear transformation, textures arise that none of the nodes produce alone. This is not a metaphor for neural emergence. It is the same phenomenon at a different scale: local rules, global behavior, and the irreducible surprise of a system listening to itself.</p>
-    </div>
-
   </div><!-- /essay -->
 
 </main>
@@ -549,11 +523,7 @@
 <!-- ═══════════════════════════════════════════════════════════════════
      SCRIPTS — module order matters
      ═══════════════════════════════════════════════════════════════════ -->
-<script type="module" src="audio-engine.js"></script>
-<script type="module" src="network.js"></script>
-<script type="module" src="harmonic.js"></script>
-<script type="module" src="creature.js"></script>
-<script type="module" src="persistence.js"></script>
+<!-- All modules loaded via ES import chain from main.js -->
 <script type="module" src="main.js"></script>
 
 </body>
