@@ -1681,8 +1681,8 @@ const SEQ = window.SEQ = {
 
     const sr = 44100;
     const loopDur = (NUM_STEPS * stepDuration()); // seconds per loop pass
-    const totalDur = renderPlan.length * loopDur + 0.8; // +0.8s tail
-    const offCtx = new OfflineAudioContext(2, Math.ceil(totalDur * sr), sr);
+    const totalDur = renderPlan.length * loopDur;
+    const offCtx = new OfflineAudioContext(2, Math.ceil((totalDur + 1.0) * sr), sr);
 
     // Render each loop pass
     let t = 0;
@@ -1710,7 +1710,13 @@ const SEQ = window.SEQ = {
 
     try {
       const rendered = await offCtx.startRendering();
-      const wav = audioBufferToWav(rendered);
+      // Trim to exact loop length so the file loops seamlessly
+      const exactSamples = Math.round(totalDur * sr);
+      const trimmedBuf = offCtx.createBuffer(2, exactSamples, sr);
+      for (let ch = 0; ch < 2; ch++) {
+        trimmedBuf.getChannelData(ch).set(rendered.getChannelData(ch).subarray(0, exactSamples));
+      }
+      const wav = audioBufferToWav(trimmedBuf);
       const url = URL.createObjectURL(wav);
       const a = document.createElement('a');
       a.href = url;
