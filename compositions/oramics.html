@@ -557,7 +557,7 @@
     }
     input[type=range].brush-slider {
       -webkit-appearance: none;
-      width: 90px;
+      width: 140px;
       height: 2px;
       background: var(--film-edge);
       outline: none;
@@ -656,7 +656,7 @@
       .layer-tabs { flex-wrap: wrap; }
       .layer-tab { min-height: 40px; }
       .tool-btn { min-height: 40px; padding: .45rem .7rem; }
-      input[type=range].brush-slider { width: 120px; }
+      input[type=range].brush-slider { width: 160px; }
       .canvas-area { min-height: 280px; }
       .inspector-row { flex-wrap: wrap; }
       .insp-cell { min-width: 70px; }
@@ -755,8 +755,7 @@
 
     <!-- Transport bar -->
     <div class="transport-bar" id="toolbar">
-      <button class="tbtn play-btn" id="btn-play" onclick="ORM.play()"><svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> play</button>
-      <button class="tbtn stop-btn" id="btn-stop" onclick="ORM.stop()"><svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg> stop</button>
+      <button class="tbtn play-btn" id="btn-play" onclick="ORM.togglePlay()"><svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> play</button>
       <button class="tbtn" id="btn-loop" onclick="ORM.toggleLoop()" title="Loop playback">↺ loop</button>
       <div class="toolbar-sep"></div>
 
@@ -902,32 +901,7 @@
         </div>
       </div>
 
-      <!-- Inspector section -->
-      <div class="bp-section" style="flex: 1; min-width: 300px;">
-        <div class="bp-section-title">live values</div>
-        <div class="inspector-row">
-          <div class="insp-cell">
-            <div class="insp-label">Pitch</div>
-            <div class="insp-val" id="insp-pitch">— Hz</div>
-            <div class="insp-bar"><div class="insp-bar-fill" id="ibar-pitch" style="background:var(--pitch-col)"></div></div>
-          </div>
-          <div class="insp-cell">
-            <div class="insp-label">Amplitude</div>
-            <div class="insp-val" id="insp-amp">—</div>
-            <div class="insp-bar"><div class="insp-bar-fill" id="ibar-amp" style="background:var(--amp-col)"></div></div>
-          </div>
-          <div class="insp-cell">
-            <div class="insp-label">Filter</div>
-            <div class="insp-val" id="insp-filter">— Hz</div>
-            <div class="insp-bar"><div class="insp-bar-fill" id="ibar-filter" style="background:var(--timbre-col)"></div></div>
-          </div>
-          <div class="insp-cell">
-            <div class="insp-label">Mod</div>
-            <div class="insp-val" id="insp-mod">—</div>
-            <div class="insp-bar"><div class="insp-bar-fill" id="ibar-mod" style="background:var(--mod-col)"></div></div>
-          </div>
-        </div>
-      </div>
+      
 
 
     </div><!-- /bottom-panel -->
@@ -1500,14 +1474,6 @@ function sampleAndApply() {
 }
 
 function updateInspector(pitch, amp, filter, mod, t) {
-  document.getElementById('insp-pitch').textContent  = pitch > 0 ? pitch.toFixed(0)+' Hz' : '—';
-  document.getElementById('insp-amp').textContent    = amp > 0 ? (amp*100).toFixed(0)+'%' : '—';
-  document.getElementById('insp-filter').textContent = filter.toFixed(0)+' Hz';
-  document.getElementById('insp-mod').textContent    = (mod*100).toFixed(0)+'%';
-  document.getElementById('ibar-pitch').style.width  = pitch > 0 ? Math.min(100, pitch/20)+'%' : '0%';
-  document.getElementById('ibar-amp').style.width    = (amp*100)+'%';
-  document.getElementById('ibar-filter').style.width = Math.min(100, filter/80)+'%';
-  document.getElementById('ibar-mod').style.width    = (mod*100)+'%';
   document.getElementById('st-pos').textContent      = t.toFixed(2)+'s';
   document.getElementById('st-pitch').textContent    = pitch > 0 ? pitch.toFixed(0)+' Hz' : '—';
   document.getElementById('st-amp').textContent      = amp > 0 ? (amp*100).toFixed(0)+'%' : '—';
@@ -1791,12 +1757,18 @@ function onKeyDown(e) {
 const ORM = window.ORM = {
   _previewTimeout: null,
 
+  togglePlay() {
+    playing ? ORM.stop() : ORM.play();
+  },
+
   play() {
     if (!AC) initAudio();
     if (AC.state === 'suspended') AC.resume();
     playing = true;
     lastRafT = 0;
-    document.getElementById('btn-play').classList.add('active');
+    const btn = document.getElementById('btn-play');
+    btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg> stop';
+    btn.classList.add('active');
     rafId = requestAnimationFrame(raf);
   },
 
@@ -1804,10 +1776,12 @@ const ORM = window.ORM = {
     playing = false;
     cancelAnimationFrame(rafId);
     if (AC) voices.forEach(v => v.oscGain.gain.setTargetAtTime(0, AC.currentTime, 0.08));
-    document.getElementById('btn-play').classList.remove('active');
+    const btn = document.getElementById('btn-play');
+    btn.innerHTML = '<svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> play';
+    btn.classList.remove('active');
     drawUI();
   },
-
+  
   toggleLoop() {
     looping = !looping;
     document.getElementById('btn-loop').classList.toggle('active', looping);
