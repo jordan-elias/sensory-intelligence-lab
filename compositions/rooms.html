@@ -776,7 +776,7 @@ function wfPreview(){
     wfState.previewSrc = null;
     document.getElementById('wf-preview').innerHTML = '<svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> Preview Selection';
   };
-  document.getElementById('wf-preview').innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect x="0" y="0" width="3" height="10"/><rect x="7" y="0" width="3" height="10"/></svg> Stop Preview';
+  document.getElementById('wf-preview').innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg> Stop Preview';
   wfState.previewSrc.start(ctx.currentTime, start, end - start);
 }
 
