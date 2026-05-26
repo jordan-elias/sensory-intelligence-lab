@@ -4,417 +4,204 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spatial Awareness</title>
-
   <meta name="robots" content="noindex, nofollow">
-
   <link rel="icon" type="image/png" href="/images/favicon.png">
   <link rel="apple-touch-icon" href="/images/favicon.png">
   <link rel="manifest" href="/site.webmanifest">
-
   <script src="/dashboard/auth-guard.js" type="module"></script>
-
   <script type="module">
   import { applyGatingOnReady } from '/assets/js/gating.js';
-  applyGatingOnReady({
-    targetSelector: '.lab-section',
-    moduleName: 'spatial-game',
-  });
+  applyGatingOnReady({ targetSelector: '.lab-section', moduleName: 'spatial-game' });
   </script>
-
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
-
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
       --font-body: 'Inter', sans-serif;
       --font-heading: 'Space Grotesk', sans-serif;
-      --bg: #ffffff;
-      --surface: #f9f9f7;
-      --border: #e5e5e0;
-      --text: #1a1a1a;
-      --muted: #6b6b6b;
-      --accent: #2a5c45;
-      --accent-light: #edf4f0;
-      --accent-hover: #1e4433;
+      --bg: #ffffff; --surface: #f9f9f7; --border: #e5e5e0;
+      --text: #1a1a1a; --muted: #6b6b6b;
+      --accent: #2a5c45; --accent-light: #edf4f0; --accent-hover: #1e4433;
     }
-
     html { font-size: 16px; }
-    body {
-      font-family: var(--font-body);
-      color: var(--text);
-      background: var(--bg);
-      line-height: 1.6;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+    body { font-family: var(--font-body); color: var(--text); background: var(--bg); line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; }
     a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
     a:hover { color: var(--accent); }
 
-    /* ══════════════════════════════════════
-       HEADER
-    ══════════════════════════════════════ */
-    .sil-header {
-      border-bottom: 1px solid var(--border);
-      padding: 0 1.5rem;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0; left: 0; right: 0;
-      background: var(--bg);
-      z-index: 100;
-      gap: 1rem;
-      width: 100%;
-    }
-    .sil-header__wordmark {
-      font-family: var(--font-heading);
-      font-size: 1rem; font-weight: 600;
-      letter-spacing: -0.01em;
-      white-space: nowrap; flex-shrink: 0;
-      text-decoration: none; color: var(--text);
-    }
+    .sil-header { border-bottom: 1px solid var(--border); padding: 0 1.5rem; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; left: 0; right: 0; background: var(--bg); z-index: 100; gap: 1rem; width: 100%; }
+    .sil-header__wordmark { font-family: var(--font-heading); font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; flex-shrink: 0; text-decoration: none; color: var(--text); }
     .sil-header__wordmark:hover { color: var(--accent); }
     .sil-header__nav { display: flex; gap: 0.25rem; align-items: center; }
-    .sil-header__nav a {
-      font-family: var(--font-body);
-      font-size: 0.8rem; font-weight: 500;
-      text-decoration: none; color: var(--muted);
-      transition: color 0.15s; white-space: nowrap;
-      padding: 0.3rem 0.65rem;
-    }
+    .sil-header__nav a { font-family: var(--font-body); font-size: 0.8rem; font-weight: 500; text-decoration: none; color: var(--muted); transition: color 0.15s; white-space: nowrap; padding: 0.3rem 0.65rem; }
     .sil-header__nav a:hover { color: var(--text); }
     .sil-header__nav a.sil-active { color: var(--accent); font-weight: 600; }
-    .sil-header__signout {
-      font-family: var(--font-body);
-      font-size: 0.8rem; font-weight: 500;
-      color: var(--muted); background: none;
-      border: 1px solid var(--border); cursor: pointer;
-      padding: 0.3rem 0.75rem;
-      transition: color 0.15s, border-color 0.15s;
-      white-space: nowrap; line-height: 1.6;
-    }
+    .sil-header__signout { font-family: var(--font-body); font-size: 0.8rem; font-weight: 500; color: var(--muted); background: none; border: 1px solid var(--border); cursor: pointer; padding: 0.3rem 0.75rem; transition: color 0.15s, border-color 0.15s; white-space: nowrap; line-height: 1.6; }
     .sil-header__signout:hover { color: var(--text); border-color: var(--text); }
     .sil-header__signout:disabled { opacity: 0.5; cursor: not-allowed; }
-    .sil-header__toggle {
-      display: none; flex-direction: column; gap: 4px;
-      background: none; border: none; cursor: pointer; padding: 4px; flex-shrink: 0;
-    }
+    .sil-header__toggle { display: none; flex-direction: column; gap: 4px; background: none; border: none; cursor: pointer; padding: 4px; flex-shrink: 0; }
     .sil-header__toggle span { display: block; width: 20px; height: 2px; background: var(--text); }
     @media (max-width: 700px) {
       .sil-header { padding: 0 1rem; }
       .sil-header__toggle { display: flex; }
-      .sil-header__nav {
-        display: none; position: absolute;
-        top: 56px; left: 0; right: 0;
-        background: var(--bg); border-bottom: 1px solid var(--border);
-        flex-direction: column; align-items: flex-start;
-        padding: 0.75rem 1rem; gap: 0; z-index: 99;
-      }
+      .sil-header__nav { display: none; position: absolute; top: 56px; left: 0; right: 0; background: var(--bg); border-bottom: 1px solid var(--border); flex-direction: column; align-items: flex-start; padding: 0.75rem 1rem; gap: 0; z-index: 99; }
       .sil-header__nav.sil-open { display: flex; }
-      .sil-header__nav a,
-      .sil-header__signout { font-size: 0.875rem; padding: 0.55rem 0.5rem; }
+      .sil-header__nav a, .sil-header__signout { font-size: 0.875rem; padding: 0.55rem 0.5rem; }
       .sil-header__signout { border: none; }
     }
 
-    /* ── Breadcrumb ── */
     .bc { padding: .75rem 1.5rem 0; max-width: 860px; margin: 0 auto; width: 100%; }
     .bc ol { list-style: none; display: flex; gap: .3rem; align-items: center; font-size: .75rem; color: var(--muted); flex-wrap: wrap; }
     .bc li + li::before { content: '/'; margin-right: .3rem; color: var(--border); }
     .bc a { color: var(--muted); text-decoration: none; }
     .bc a:hover { color: var(--accent); text-decoration: underline; }
 
-    /* ── Main ── */
     main { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; flex: 1; width: 100%; }
     @media (max-width: 600px) { main { padding: 1.5rem 1rem 3rem; } }
 
-    /* ── Page header ── */
     .ph { margin-bottom: 2rem; padding-bottom: 1.75rem; border-bottom: 1px solid var(--border); }
     .ph h2 { font-family: var(--font-heading); font-size: 2rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; margin-bottom: .4rem; }
     .ph p { font-size: .9rem; color: var(--muted); }
 
-    /* ── Game container ── */
-    .lab-section {
-      border: 1px solid var(--border);
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-      background: var(--surface);
-    }
-    .lab-section > h3 {
-      font-family: var(--font-heading);
-      font-size: .65rem; font-weight: 600; letter-spacing: .12em;
-      text-transform: uppercase; color: var(--muted);
-      margin-bottom: 1.25rem;
-    }
+    .lab-section { border: 1px solid var(--border); padding: 1.5rem; margin-bottom: 1.5rem; background: var(--surface); }
+    .lab-section > h3 { font-family: var(--font-heading); font-size: .65rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.25rem; }
 
-    /* ══════════════════════════════════════
-       LEVEL SELECTOR
-    ══════════════════════════════════════ */
-    .level-selector {
-      display: flex;
-      gap: 4px;
-      flex-wrap: wrap;
-      margin-bottom: .85rem;
-      align-items: center;
-    }
-    .level-selector-label {
-      font-size: .62rem; letter-spacing: .1em;
-      text-transform: uppercase; color: var(--muted);
-      white-space: nowrap; margin-right: 2px;
-    }
+    /* Level selector */
+    .level-selector { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: .85rem; align-items: center; }
+    .level-selector-label { font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; margin-right: 2px; }
     .level-btn {
-      font-family: var(--font-heading);
-      font-size: .72rem; font-weight: 600;
-      width: 30px; height: 30px;
-      border: 1px solid var(--border);
-      background: var(--bg); color: var(--muted);
-      cursor: pointer;
-      transition: all .12s;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
+      font-family: var(--font-heading); font-size: .72rem; font-weight: 600;
+      width: 38px; height: 38px;
+      border: 1px solid var(--border); background: var(--bg); color: var(--muted);
+      cursor: pointer; transition: all .12s;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 1px; flex-shrink: 0; padding: 2px;
     }
     .level-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
     .level-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
     .level-btn.level-hard { border-color: #c0a080; }
     .level-btn.level-hard:hover { border-color: #8b4513; color: #8b4513; background: #fdf8f0; }
     .level-btn.level-hard.active { background: #8b4513; border-color: #8b4513; color: white; }
+    .level-btn .lvl-num { font-size: .78rem; line-height: 1; }
+    .level-btn .lvl-best { font-size: .48rem; font-weight: 500; letter-spacing: .03em; color: var(--muted); white-space: nowrap; line-height: 1; }
+    .level-btn.active .lvl-best { color: rgba(255,255,255,.7); }
+    .level-btn .lvl-best.perfect { color: var(--accent); font-weight: 600; }
+    .level-btn.active .lvl-best.perfect { color: #a8e6cf; }
 
-    /* Level description badge */
-    .level-desc {
-      font-size: .72rem; color: var(--muted);
-      margin-bottom: .75rem;
-      min-height: 1.4em;
-    }
+    .level-desc { font-size: .72rem; color: var(--muted); margin-bottom: .75rem; min-height: 1.4em; }
     .level-desc strong { color: var(--text); font-weight: 500; }
 
-    /* ── Stats ── */
-    .spatial-stats {
-      display: flex; gap: 1.5rem; justify-content: center;
-      margin: .75rem 0; padding: .5rem 0;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      flex-wrap: wrap;
-    }
+    /* Level status bar */
+    .level-status { display: flex; align-items: center; justify-content: space-between; margin-bottom: .85rem; flex-wrap: wrap; gap: .5rem; }
+    .level-status-left { display: flex; align-items: center; gap: 1rem; }
+    .level-badge { font-family: var(--font-heading); font-size: .72rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); background: var(--accent-light); border: 1px solid #c0d9c8; padding: .2rem .65rem; }
+    .trial-counter { font-family: var(--font-heading); font-size: .82rem; font-weight: 600; color: var(--text); }
+    .trial-counter span { color: var(--muted); font-weight: 400; }
+
+    /* Trial progress pips */
+    .trial-pips { display: flex; gap: 4px; margin-bottom: .85rem; }
+    .trial-pip { height: 4px; flex: 1; background: var(--border); transition: background .2s; }
+    .trial-pip.correct { background: var(--accent); }
+    .trial-pip.incorrect { background: #c0a080; }
+    .trial-pip.current { background: var(--muted); }
+
+    /* Stats */
+    .spatial-stats { display: flex; gap: 1.5rem; justify-content: center; margin: .75rem 0; padding: .5rem 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
     .stat-item { display: flex; align-items: baseline; gap: .35rem; }
     .stat-label { font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
     .stat-value { font-family: var(--font-heading); font-size: .9rem; font-weight: 600; color: var(--text); }
 
-    /* ── Buttons ── */
-    .lab-btn {
-      font-family: var(--font-heading);
-      font-size: .78rem; font-weight: 600;
-      background: var(--bg); color: var(--text);
-      border: 1px solid var(--border);
-      padding: .5rem 1.2rem; cursor: pointer;
-      transition: all .12s; white-space: nowrap;
-    }
+    /* Buttons */
+    .lab-btn { font-family: var(--font-heading); font-size: .78rem; font-weight: 600; background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: .5rem 1.2rem; cursor: pointer; transition: all .12s; white-space: nowrap; }
     .lab-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
     .lab-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
     .lab-btn.primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
     .lab-btn:disabled { opacity: .35; cursor: not-allowed; }
 
-    /* ── Rows ── */
-    .control-row {
-      display: flex; align-items: center;
-      gap: 8px; margin-bottom: .6rem; flex-wrap: wrap;
-    }
+    .control-row { display: flex; align-items: center; gap: 8px; margin-bottom: .6rem; flex-wrap: wrap; }
 
-    /* ── Feedback ── */
-    .feedback-msg {
-      flex: 1; min-width: 120px;
-      font-size: .8rem; color: var(--text);
-      padding: .45rem 1rem;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      text-align: center; min-height: 38px;
-      display: flex; align-items: center; justify-content: center;
-    }
+    .feedback-msg { flex: 1; min-width: 120px; font-size: .8rem; color: var(--text); padding: .45rem 1rem; border: 1px solid var(--border); background: var(--bg); text-align: center; min-height: 38px; display: flex; align-items: center; justify-content: center; }
     .feedback-msg.success { border-color: var(--accent); background: var(--accent-light); color: var(--accent-hover); font-weight: 500; }
-    .feedback-msg.error   { border-color: #c0a080; background: #fdf8f0; color: #6b4a1a; font-weight: 500; }
+    .feedback-msg.error { border-color: #c0a080; background: #fdf8f0; color: #6b4a1a; font-weight: 500; }
 
-    /* ── Spatial diagram ── */
-    .spatial-diagram-container {
-      border: 1px solid var(--border);
-      padding: 1.25rem;
-      margin: .85rem 0;
-      display: flex; justify-content: center; align-items: center;
-      background: var(--bg);
-    }
-    .spatial-diagram {
-      position: relative;
-      width: 300px; height: 300px;
-      border: 1px solid var(--border);
-      border-radius: 50%;
-      background: transparent;
-    }
-    @media (max-width: 400px) {
-      .spatial-diagram { width: 240px; height: 240px; }
-    }
+    /* Spatial diagram */
+    .spatial-diagram-container { border: 1px solid var(--border); padding: 1.25rem; margin: .85rem 0; display: flex; justify-content: center; align-items: center; background: var(--bg); }
+    .spatial-diagram { position: relative; width: 300px; height: 300px; border: 1px solid var(--border); border-radius: 50%; background: transparent; }
+    @media (max-width: 400px) { .spatial-diagram { width: 240px; height: 240px; } }
 
-    /* ── Sound sources ── */
-    .sound-source {
-      position: absolute;
-      width: 14px; height: 14px;
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      transition: opacity .4s ease;
-    }
-    .source-target {
-      background: var(--text);
-      border: 2px solid var(--text);
-      z-index: 10;
-    }
-    .source-distractor {
-      background: transparent;
-      border: 2px solid var(--border);
-      z-index: 5;
-    }
+    .sound-source { position: absolute; width: 14px; height: 14px; border-radius: 50%; transform: translate(-50%, -50%); transition: opacity .4s ease; }
+    .source-target { background: var(--text); border: 2px solid var(--text); z-index: 10; }
+    .source-distractor { background: transparent; border: 2px solid var(--border); z-index: 5; }
     .source-clickable { cursor: pointer; }
     .source-clickable:hover { transform: translate(-50%, -50%) scale(1.3); border-color: var(--accent); }
     .source-selected { background: var(--accent); border-color: var(--accent); }
     .source-revealed { background: var(--text); border-color: var(--text); box-shadow: 0 0 0 3px var(--accent-light); }
 
-    /* ── Pulse animation keyframes ── */
-    @keyframes pulse-pluck {
-      0%   { box-shadow: 0 0 0 0px rgba(42,92,69,0.55); }
-      15%  { box-shadow: 0 0 0 7px rgba(42,92,69,0.0); }
-      100% { box-shadow: 0 0 0 0px rgba(42,92,69,0.0); }
-    }
-    @keyframes pulse-hum {
-      0%   { box-shadow: 0 0 0 0px rgba(42,92,69,0.35); }
-      50%  { box-shadow: 0 0 0 6px rgba(42,92,69,0.0); }
-      100% { box-shadow: 0 0 0 0px rgba(42,92,69,0.0); }
-    }
-    @keyframes pulse-chirp {
-      0%   { box-shadow: 0 0 0 0px rgba(42,92,69,0.45); }
-      12%  { box-shadow: 0 0 0 5px rgba(42,92,69,0.0); }
-      100% { box-shadow: 0 0 0 0px rgba(42,92,69,0.0); }
-    }
-    .pulse-pluck  { animation: pulse-pluck  667ms ease-out infinite; }
-    .pulse-hum    { animation: pulse-hum    444ms ease-in-out infinite; }
-    .pulse-chirp  { animation: pulse-chirp  333ms ease-out infinite; }
+    @keyframes pulse-string { 0% { box-shadow: 0 0 0 0px rgba(42,92,69,0.6); } 18% { box-shadow: 0 0 0 8px rgba(42,92,69,0.0); } 100% { box-shadow: 0 0 0 0px rgba(42,92,69,0.0); } }
+    @keyframes pulse-pad  { 0%,100% { box-shadow: 0 0 0 0px rgba(26,77,107,0.4); } 50% { box-shadow: 0 0 0 7px rgba(26,77,107,0.0); } }
+    @keyframes pulse-block { 0% { box-shadow: 0 0 0 0px rgba(92,42,92,0.5); } 14% { box-shadow: 0 0 0 6px rgba(92,42,92,0.0); } 100% { box-shadow: 0 0 0 0px rgba(92,42,92,0.0); } }
+    .pulse-string { animation: pulse-string 800ms ease-out infinite; }
+    .pulse-pad    { animation: pulse-pad    500ms ease-in-out infinite; }
+    .pulse-block  { animation: pulse-block  380ms ease-out infinite; }
 
     .path-trace { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+    .phase-indicator { font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); text-align: center; margin: .5rem 0; min-height: 1.2em; }
+    .lab-hint { font-size: .72rem; color: var(--muted); margin-top: .65rem; text-align: center; line-height: 1.5; }
 
-    /* Phase indicator */
-    .phase-indicator {
-      font-size: .65rem; letter-spacing: .1em; text-transform: uppercase;
-      color: var(--muted); text-align: center;
-      margin: .5rem 0; min-height: 1.2em;
-    }
+    /* Level complete overlay */
+    .level-complete { display: none; position: fixed; inset: 0; background: rgba(255,255,255,.97); z-index: 300; align-items: center; justify-content: center; flex-direction: column; padding: 2rem; }
+    .level-complete.visible { display: flex; }
+    .level-complete-inner { max-width: 440px; width: 100%; text-align: center; }
+    .level-complete-title { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 600; letter-spacing: -.02em; margin-bottom: .5rem; }
+    .level-complete-score { font-family: var(--font-heading); font-size: 3rem; font-weight: 600; color: var(--accent); line-height: 1; margin-bottom: .25rem; }
+    .level-complete-score-label { font-size: .75rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 1.5rem; }
+    .level-complete-stats { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: 1.75rem; border: 1px solid var(--border); padding: 1rem; background: var(--surface); }
+    .lc-stat { text-align: center; }
+    .lc-stat-val { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 600; color: var(--text); display: block; }
+    .lc-stat-label { font-size: .65rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
+    .level-complete-msg { font-size: .85rem; color: var(--muted); line-height: 1.65; margin-bottom: 1.5rem; font-style: italic; }
+    .lc-record { font-size: .75rem; color: var(--accent); font-weight: 500; margin-bottom: 1rem; display: none; }
+    .lc-record.visible { display: block; }
+    .level-complete-btns { display: flex; gap: .65rem; justify-content: center; flex-wrap: wrap; }
+    .lc-pip-row { display: flex; gap: 4px; justify-content: center; margin-bottom: 1.25rem; }
+    .lc-pip { width: 24px; height: 4px; background: var(--border); }
+    .lc-pip.correct { background: var(--accent); }
+    .lc-pip.incorrect { background: #c0a080; }
 
-    .lab-hint {
-      font-size: .72rem; color: var(--muted);
-      margin-top: .65rem; text-align: center; line-height: 1.5;
-    }
+    /* Tutorial overlay */
+    .tutorial-overlay { position: fixed; inset: 0; background: rgba(26,26,26,0.72); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+    .tutorial-overlay.hidden { display: none; }
+    .tutorial-card { background: var(--bg); border: 1px solid var(--border); max-width: 420px; width: 100%; padding: 2rem; position: relative; }
+    .tutorial-card h2 { font-family: var(--font-heading); font-size: 1.2rem; font-weight: 600; letter-spacing: -.01em; margin-bottom: .5rem; }
+    .tutorial-card p { font-size: .88rem; color: var(--muted); line-height: 1.7; margin-bottom: 1.25rem; }
+    .tutorial-diagram-wrap { display: flex; justify-content: center; margin-bottom: 1.25rem; }
+    .tutorial-diagram { position: relative; width: 200px; height: 200px; border: 1px solid var(--border); border-radius: 50%; background: var(--surface); overflow: hidden; }
+    .tutorial-dot { position: absolute; width: 14px; height: 14px; border-radius: 50%; background: var(--text); border: 2px solid var(--text); transform: translate(-50%, -50%); }
+    .tutorial-step-label { font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: .4rem; }
+    .tutorial-actions { display: flex; gap: .65rem; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+    .tutorial-skip { font-size: .78rem; color: var(--muted); background: none; border: none; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; padding: .3rem 0; }
+    .tutorial-skip:hover { color: var(--text); }
+    .tutorial-dots-nav { display: flex; gap: 6px; align-items: center; }
+    .tutorial-dots-nav span { width: 6px; height: 6px; border-radius: 50%; background: var(--border); display: block; transition: background .2s; }
+    .tutorial-dots-nav span.active { background: var(--accent); }
 
-    /* ── Article text ── */
+    /* How to play button */
+    .how-to-play-btn { font-family: var(--font-body); font-size: .72rem; color: var(--muted); background: none; border: none; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; padding: 0; }
+    .how-to-play-btn:hover { color: var(--accent); }
+
     .article-text { margin-top: 2rem; }
     .article-text h3 { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 600; margin-bottom: .6rem; }
     .article-text p { font-size: .9rem; color: var(--muted); line-height: 1.75; margin-bottom: 1rem; }
 
-    /* ── Footer ── */
     footer { border-top: 1px solid var(--border); padding: 1.25rem 1.5rem; text-align: center; font-size: .78rem; color: var(--muted); }
     footer a { color: var(--muted); text-decoration: none; }
     footer a:hover { color: var(--accent); }
-
-    /* ══════════════════════════════════════
-       TUTORIAL OVERLAY
-    ══════════════════════════════════════ */
-    .tutorial-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(26,26,26,0.72);
-      z-index: 500;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem;
-    }
-    .tutorial-overlay.hidden { display: none; }
-
-    .tutorial-card {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      max-width: 420px;
-      width: 100%;
-      padding: 2rem;
-      position: relative;
-    }
-
-    .tutorial-card h2 {
-      font-family: var(--font-heading);
-      font-size: 1.2rem; font-weight: 600;
-      letter-spacing: -.01em;
-      margin-bottom: .5rem;
-    }
-    .tutorial-card p {
-      font-size: .88rem; color: var(--muted);
-      line-height: 1.7; margin-bottom: 1.25rem;
-    }
-
-    /* Mini demo diagram inside tutorial */
-    .tutorial-diagram-wrap {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 1.25rem;
-    }
-    .tutorial-diagram {
-      position: relative;
-      width: 200px; height: 200px;
-      border: 1px solid var(--border);
-      border-radius: 50%;
-      background: var(--surface);
-      overflow: hidden;
-    }
-    .tutorial-dot {
-      position: absolute;
-      width: 14px; height: 14px;
-      border-radius: 50%;
-      background: var(--text);
-      border: 2px solid var(--text);
-      transform: translate(-50%, -50%);
-    }
-
-    .tutorial-step-label {
-      font-size: .62rem; letter-spacing: .1em;
-      text-transform: uppercase; color: var(--accent);
-      font-weight: 600; margin-bottom: .4rem;
-    }
-
-    .tutorial-actions {
-      display: flex; gap: .65rem; align-items: center;
-      justify-content: space-between; flex-wrap: wrap;
-    }
-    .tutorial-skip {
-      font-size: .78rem; color: var(--muted);
-      background: none; border: none; cursor: pointer;
-      text-decoration: underline; text-underline-offset: 3px;
-      padding: .3rem 0;
-    }
-    .tutorial-skip:hover { color: var(--text); }
-
-    .tutorial-dots-nav {
-      display: flex; gap: 6px; align-items: center;
-    }
-    .tutorial-dots-nav span {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--border); display: block;
-      transition: background .2s;
-    }
-    .tutorial-dots-nav span.active { background: var(--accent); }
   </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════
-     TUTORIAL OVERLAY
-══════════════════════════════════════ -->
+<!-- Tutorial overlay -->
 <div class="tutorial-overlay hidden" id="tutorial-overlay" role="dialog" aria-modal="true" aria-label="Tutorial">
   <div class="tutorial-card">
-    <!-- Step 1 -->
     <div id="tut-step-1">
       <div class="tutorial-step-label">Introduction · Step 1 of 2</div>
       <h2>Sound moving through space</h2>
@@ -427,36 +214,25 @@
       <p>Watch the dot move around the circle and notice how the sound follows it through space.</p>
       <div class="tutorial-actions">
         <button class="tutorial-skip" id="tut-skip">Skip tutorial</button>
-        <div class="tutorial-dots-nav">
-          <span class="active" id="tut-nav-1"></span>
-          <span id="tut-nav-2"></span>
-        </div>
+        <div class="tutorial-dots-nav"><span class="active" id="tut-nav-1"></span><span id="tut-nav-2"></span></div>
         <button class="lab-btn primary" id="tut-next-1">Next →</button>
       </div>
     </div>
-
-    <!-- Step 2 -->
     <div id="tut-step-2" style="display:none;">
       <div class="tutorial-step-label">Introduction · Step 2 of 2</div>
       <h2>The shell game</h2>
-      <p>You'll see the <strong>target dot</strong> (filled) and one or two distractor dots (hollow rings) playing at the same time. Then all the dots fade out and keep moving — your job is to track the target through the sound alone.</p>
+      <p>You'll hear three distinct sounds — a plucked string, a soft pad, and a woodblock. The <strong>filled dot</strong> plays the plucked string. Watch it move, then track it by ear when the dots fade out.</p>
       <p>When the movement stops, the dots reappear — all identical. <strong>Tap the one you were tracking.</strong></p>
       <p style="font-size:.8rem; color: var(--accent); font-weight:500;">Headphones are strongly recommended for the full spatial effect.</p>
       <div class="tutorial-actions">
         <button class="tutorial-skip" id="tut-skip-2">Skip</button>
-        <div class="tutorial-dots-nav">
-          <span id="tut-nav-1b"></span>
-          <span class="active" id="tut-nav-2b"></span>
-        </div>
+        <div class="tutorial-dots-nav"><span id="tut-nav-1b"></span><span class="active" id="tut-nav-2b"></span></div>
         <button class="lab-btn primary" id="tut-finish">Let's go →</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     HEADER
-══════════════════════════════════════ -->
 <header class="sil-header">
   <a class="sil-header__wordmark" href="/dashboard/">Sensory Intelligence Lab</a>
   <button class="sil-header__toggle" id="silMenuToggle" aria-label="Toggle navigation" aria-expanded="false">
@@ -478,7 +254,6 @@
 </nav>
 
 <main>
-
   <div class="ph">
     <h2>Spatial Awareness</h2>
     <p>Track a moving sound source through 3D space. Trains auditory attention, scene analysis, and sound localisation.</p>
@@ -487,146 +262,139 @@
   <div class="lab-section">
     <h3>The auditory shell game</h3>
 
-    <!-- Level Selector -->
     <div class="level-selector" id="level-selector">
       <span class="level-selector-label">Level</span>
     </div>
     <div class="level-desc" id="level-desc"></div>
 
-    <!-- Spatial Diagram -->
+    <!-- Level status bar -->
+    <div class="level-status">
+      <div class="level-status-left">
+        <span class="level-badge" id="level-badge">Level 1</span>
+        <span class="trial-counter">Trial <strong id="trial-num">—</strong><span> / 10</span></span>
+      </div>
+      <button class="how-to-play-btn" id="how-to-play-btn">How to play</button>
+    </div>
+
+    <!-- Trial pips -->
+    <div class="trial-pips" id="trial-pips"></div>
+
     <div class="spatial-diagram-container">
       <div class="spatial-diagram" id="spatial-diagram">
         <svg class="path-trace" id="path-trace"></svg>
       </div>
     </div>
 
-    <!-- Phase Indicator -->
     <div class="phase-indicator" id="phase-indicator"></div>
 
-    <!-- Controls + feedback -->
     <div class="control-row">
       <button class="lab-btn primary" id="btn-play"><svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> Play</button>
-      <button class="lab-btn" id="btn-next" disabled>Next</button>
       <div class="feedback-msg" id="feedback-msg"></div>
     </div>
 
-    <!-- Stats -->
     <div class="spatial-stats">
-      <div class="stat-item">
-        <span class="stat-label">Trials</span>
-        <span class="stat-value" id="stat-trials">0</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Correct</span>
-        <span class="stat-value" id="stat-correct">0</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Accuracy</span>
-        <span class="stat-value" id="stat-accuracy">—</span>
-      </div>
+      <div class="stat-item"><span class="stat-label">Trials</span><span class="stat-value" id="stat-trials">0</span></div>
+      <div class="stat-item"><span class="stat-label">Correct</span><span class="stat-value" id="stat-correct">0</span></div>
+      <div class="stat-item"><span class="stat-label">Accuracy</span><span class="stat-value" id="stat-accuracy">—</span></div>
     </div>
 
-    <p class="lab-hint">Headphones recommended · Listen to the distinct sound · Click where it ends</p>
+    <p class="lab-hint">Headphones recommended · The filled dot plays the plucked string sound · Click where it ends up</p>
   </div>
 
-  <!-- Context -->
+  <!-- Level complete overlay -->
+  <div class="level-complete" id="levelComplete">
+    <div class="level-complete-inner">
+      <div class="level-complete-title" id="lc-title">Level complete</div>
+      <div class="level-complete-score" id="lc-score">7 / 10</div>
+      <div class="level-complete-score-label">correct answers</div>
+      <div class="lc-pip-row" id="lc-pips"></div>
+      <div class="level-complete-stats">
+        <div class="lc-stat"><span class="lc-stat-val" id="lc-accuracy">70%</span><span class="lc-stat-label">Accuracy</span></div>
+        <div class="lc-stat"><span class="lc-stat-val" id="lc-prev-best">—</span><span class="lc-stat-label">Previous best</span></div>
+      </div>
+      <div class="lc-record" id="lc-record">★ New personal best</div>
+      <div class="level-complete-msg" id="lc-msg"></div>
+      <div class="level-complete-btns">
+        <button class="lab-btn" onclick="retryLevel()">Try again</button>
+        <button class="lab-btn primary" id="lc-next-btn">Next level →</button>
+      </div>
+    </div>
+  </div>
+
   <div class="article-text">
     <h3>How spatial hearing works</h3>
     <p>The auditory system locates sound in space using interaural time differences (ITD) — the tiny delay between a sound reaching each ear — and interaural level differences (ILD), the difference in loudness between ears. For sounds above and below, the shape of the outer ear (the pinna) introduces frequency-dependent filtering that the brain learns to decode as elevation.</p>
     <p>Practising active sound tracking exercises the superior colliculus and auditory cortex circuits responsible for reflexive and voluntary spatial attention. The shell game format — watching a target, then selecting its resting position from among identical-looking distractors — separates perceptual tracking from motor response, isolating the attentional component.</p>
     <p>This exercise is adapted from research on auditory scene analysis (Bregman, 1990) and the cocktail party effect. Consistent practice improves the ability to selectively attend to a single sound source in noisy environments.</p>
   </div>
-
 </main>
 
 <footer>
-  <p>Jordan Elias Music Therapy · Berlin ·
-    <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a>
-  </p>
+  <p>Jordan Elias Music Therapy · Berlin · <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a></p>
 </footer>
 
-<!-- Resonance Audio for binaural spatialisation -->
 <script src="https://cdn.jsdelivr.net/npm/resonance-audio/build/resonance-audio.min.js"></script>
 
 <script type="module">
 'use strict';
 
-// ─────────────────────────────────────────────────────────
-// SUPABASE
-// ─────────────────────────────────────────────────────────
+// ─── SUPABASE ───────────────────────────────────────────
 let _sb = null;
 async function getSupabase() {
   if (_sb) return _sb;
   const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-  _sb = createClient(
-    'https://lrjuufvrgkuvfxcmybtf.supabase.co',
-    'sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1'
-  );
+  _sb = createClient('https://lrjuufvrgkuvfxcmybtf.supabase.co','sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1');
   return _sb;
 }
-
 async function getCurrentUserId() {
-  try {
-    const sb = await getSupabase();
-    const { data: { user } } = await sb.auth.getUser();
-    return user ? user.id : null;
-  } catch { return null; }
+  try { const sb = await getSupabase(); const { data: { user } } = await sb.auth.getUser(); return user ? user.id : null; } catch { return null; }
 }
 
-async function saveTrialToSupabase(level, correct) {
+// ─── PERSISTENCE ────────────────────────────────────────
+async function loadBestScores() {
   try {
     const sb = await getSupabase();
-    const userId = await getCurrentUserId();
-    if (!userId) return;
-    await sb.from('spatial_game_stats').insert({
-      user_id:    userId,
-      level:      level,
-      correct:    correct,
-      played_at:  new Date().toISOString(),
-    });
-  } catch (e) {
-    console.warn('Could not save stat:', e.message);
-  }
+    const uid = window._currentUser?.id;
+    if (!sb || !uid) return;
+    const { data } = await sb.from('game_best_scores').select('level, correct, trials, accuracy').eq('user_id', uid).eq('game', 'spatial');
+    if (data) data.forEach(row => { G.bestScores[row.level] = { correct: row.correct, trials: row.trials, accuracy: row.accuracy }; });
+  } catch(e) { console.warn('Could not load scores:', e); }
+  updateLevelButtons();
 }
 
-// ─────────────────────────────────────────────────────────
-// HEADER BEHAVIOUR
-// ─────────────────────────────────────────────────────────
+async function saveBestScore(level, correct, trials, accuracy) {
+  try {
+    const sb = await getSupabase(); const uid = window._currentUser?.id;
+    if (!sb || !uid) return;
+    await sb.from('game_best_scores').upsert({ user_id: uid, game: 'spatial', level, correct, trials, accuracy, updated_at: new Date().toISOString() }, { onConflict: 'user_id,game,level' });
+  } catch(e) { console.warn('Could not save score:', e); }
+}
+
+async function saveSession(level, correct, trials, accuracy) {
+  try {
+    const sb = await getSupabase(); const uid = window._currentUser?.id;
+    if (!sb || !uid) return;
+    await sb.from('game_sessions').insert({ user_id: uid, game: 'spatial', level, correct, trials, accuracy, played_at: new Date().toISOString() });
+  } catch(e) { console.warn('Could not save session:', e); }
+}
+
+// ─── HEADER ─────────────────────────────────────────────
 const pathName = window.location.pathname.replace(/\/$/, '') || '/';
 document.querySelectorAll('.sil-header__nav a').forEach(a => {
   const href = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
   if (href === pathName) a.classList.add('sil-active');
 });
-
 const menuToggle = document.getElementById('silMenuToggle');
-const silNav     = document.getElementById('silNav');
-menuToggle.addEventListener('click', () => {
-  const open = silNav.classList.toggle('sil-open');
-  menuToggle.setAttribute('aria-expanded', open);
-});
-silNav.querySelectorAll('a').forEach(a =>
-  a.addEventListener('click', () => silNav.classList.remove('sil-open'))
-);
-
+const silNav = document.getElementById('silNav');
+menuToggle.addEventListener('click', () => { const open = silNav.classList.toggle('sil-open'); menuToggle.setAttribute('aria-expanded', open); });
+silNav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => silNav.classList.remove('sil-open')));
 document.getElementById('silSignOut').addEventListener('click', async function () {
-  this.disabled = true;
-  this.textContent = 'Signing out…';
-  try {
-    const sb = await getSupabase();
-    await sb.auth.signOut();
-  } finally {
-    window.location.replace('/');
-  }
+  this.disabled = true; this.textContent = 'Signing out…';
+  try { const sb = await getSupabase(); await sb.auth.signOut(); } finally { window.location.replace('/'); }
 });
 
-// ═══════════════════════════════════════════════════════
-// 10-LEVEL CONFIGURATION
-// Levels 1-4: 2 sources. Levels 5-10: 3 sources.
-// minSeparationDeg: minimum angular separation between
-// final dot positions (enforced at path generation time).
-// ═══════════════════════════════════════════════════════
+// ═══ LEVELS ═════════════════════════════════════════════
 const LEVELS = [
-  // lvl  sources  complexity  speedMul  minSepDeg  label
   { num: 1,  sources: 2, complexity: 'simple',  speed: 0.5,  minSep: 120, label: '2 sources · slow · wide spacing' },
   { num: 2,  sources: 2, complexity: 'simple',  speed: 0.7,  minSep: 100, label: '2 sources · gentle pace · wide spacing' },
   { num: 3,  sources: 2, complexity: 'medium',  speed: 0.9,  minSep:  70, label: '2 sources · moderate speed · medium spacing' },
@@ -636,394 +404,320 @@ const LEVELS = [
   { num: 7,  sources: 3, complexity: 'medium',  speed: 1.4,  minSep:  35, label: '3 sources · fast paths · narrow spacing' },
   { num: 8,  sources: 3, complexity: 'complex', speed: 1.6,  minSep:  25, label: '3 sources · complex paths · narrow spacing' },
   { num: 9,  sources: 3, complexity: 'complex', speed: 1.8,  minSep:  15, label: '3 sources · complex paths · tight spacing' },
-  { num: 10, sources: 3, complexity: 'complex', speed: 2.2,  minSep:   5, label: '3 sources · maximum speed · can cluster' },
+  { num: 10, sources: 3, complexity: 'complex', speed: 2.2,  minSep:  10, label: '3 sources · maximum speed · can cluster' },
 ];
 
-// ═══════════════════════════════════════════════════════
-// TONE SOURCE
-// ═══════════════════════════════════════════════════════
+const LEVEL_MESSAGES = [
+  'A clear first step. The target sound stands out easily in open space.',
+  'Still accessible — two sources with a comfortable gap between them.',
+  'Paths are more varied now. Notice how the sound leads the eye.',
+  'Faster movement. The tracking phase demands more sustained attention.',
+  'A third sound enters — a woodblock. Three distinct voices to untangle.',
+  'Three sources at medium complexity. Your ear must choose and hold.',
+  'Fast, interweaving paths with narrower final spacing.',
+  'Complex movement and tight final positions. Elite-level tracking.',
+  'Very tight spacing. You are near the perceptual limits of localisation.',
+  'Maximum difficulty. The sources converge — only the sound can guide you.',
+];
+
+// ═══ TONE SOURCE ════════════════════════════════════════
 class ToneSource {
   constructor(audioCtx, resonanceScene, config) {
-    this.audioCtx        = audioCtx;
-    this.resonanceScene  = resonanceScene;
-    this.frequency       = config.frequency;
-    this.timbre          = config.timbre;
-    this.rhythmMs        = config.rhythmMs;
-    this.isTarget        = config.isTarget;
-    this.position        = { x: 0, y: 0, z: -1 };
-    this.resonanceSource = null;
-    this._intervalId     = null;
+    this.audioCtx = audioCtx; this.resonanceScene = resonanceScene;
+    this.frequency = config.frequency; this.timbre = config.timbre;
+    this.rhythmMs = config.rhythmMs; this.isTarget = config.isTarget;
+    this.position = { x: 0, y: 0, z: -1 }; this.resonanceSource = null; this._intervalId = null;
   }
-
-  init() {
-    this.resonanceSource = this.resonanceScene.createSource();
-    this.resonanceSource.setPosition(this.position.x, this.position.y, this.position.z);
-  }
+  init() { this.resonanceSource = this.resonanceScene.createSource(); this.resonanceSource.setPosition(this.position.x, this.position.y, this.position.z); }
 
   _playNote() {
-    const ctx = this.audioCtx;
-    const now = ctx.currentTime;
-    const osc  = ctx.createOscillator();
-    const gain = ctx.createGain();
+    const ctx = this.audioCtx; const now = ctx.currentTime;
 
-    switch (this.timbre) {
-      case 'pluck':
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(this.frequency, now);
-        gain.gain.setValueAtTime(0.32, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-        osc.connect(gain);
-        gain.connect(this.resonanceSource.input);
-        osc.start(now); osc.stop(now + 0.25);
-        break;
+    if (this.timbre === 'string') {
+      // Karplus-Strong plucked string synthesis
+      const bufLen = Math.floor(ctx.sampleRate / this.frequency);
+      const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
 
-      case 'hum':
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(this.frequency, now);
-        gain.gain.setValueAtTime(0.0, now);
-        gain.gain.linearRampToValueAtTime(0.22, now + 0.06);
-        gain.gain.linearRampToValueAtTime(0.16, now + 0.32);
-        gain.gain.linearRampToValueAtTime(0.0,  now + 0.42);
-        osc.connect(gain);
-        gain.connect(this.resonanceSource.input);
-        osc.start(now); osc.stop(now + 0.45);
-        break;
+      const delay = ctx.createDelay();
+      delay.delayTime.value = 1 / this.frequency;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass'; filter.frequency.value = 2200; filter.Q.value = 0.5;
+      const gain = ctx.createGain(); gain.gain.value = 0.42;
 
-      case 'chirp': {
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(this.frequency, now);
-        const filt = ctx.createBiquadFilter();
-        filt.type = 'lowpass';
-        filt.frequency.value = 1400;
-        filt.Q.value = 1.2;
-        gain.gain.setValueAtTime(0.14, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
-        osc.connect(filt);
-        filt.connect(gain);
-        gain.connect(this.resonanceSource.input);
-        osc.start(now); osc.stop(now + 0.20);
-        break;
-      }
+      const noise = ctx.createBufferSource(); noise.buffer = buf;
+      noise.connect(delay); delay.connect(filter); filter.connect(delay);
+      filter.connect(gain); gain.connect(this.resonanceSource.input);
+
+      // Decay envelope
+      gain.gain.setValueAtTime(0.42, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
+      noise.start(now); noise.stop(now + 1.45);
+
+    } else if (this.timbre === 'pad') {
+      // Two detuned oscillators with LFO amplitude
+      const osc1 = ctx.createOscillator(); osc1.type = 'triangle'; osc1.frequency.value = this.frequency;
+      const osc2 = ctx.createOscillator(); osc2.type = 'triangle'; osc2.frequency.value = this.frequency * 1.006;
+      const lfo = ctx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 3.2;
+      const lfoGain = ctx.createGain(); lfoGain.gain.value = 0.04;
+      const gain = ctx.createGain();
+      const filter = ctx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 1600; filter.Q.value = 0.8;
+
+      lfo.connect(lfoGain); lfoGain.connect(gain.gain);
+      osc1.connect(gain); osc2.connect(gain); gain.connect(filter); filter.connect(this.resonanceSource.input);
+
+      gain.gain.setValueAtTime(0.0, now);
+      gain.gain.linearRampToValueAtTime(0.18, now + 0.08);
+      gain.gain.linearRampToValueAtTime(0.13, now + 0.35);
+      gain.gain.linearRampToValueAtTime(0.0, now + 0.48);
+
+      osc1.start(now); osc2.start(now); lfo.start(now);
+      osc1.stop(now + 0.5); osc2.stop(now + 0.5); lfo.stop(now + 0.5);
+
+    } else if (this.timbre === 'woodblock') {
+      // Pitched woodblock strike
+      const osc = ctx.createOscillator(); osc.type = 'square'; osc.frequency.value = this.frequency;
+      const filter = ctx.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.value = this.frequency * 1.5; filter.Q.value = 4;
+      const gain = ctx.createGain();
+
+      osc.connect(filter); filter.connect(gain); gain.connect(this.resonanceSource.input);
+      gain.gain.setValueAtTime(0.28, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      osc.start(now); osc.stop(now + 0.14);
     }
   }
 
-  startRhythm() {
-    this._playNote();
-    this._intervalId = setInterval(() => this._playNote(), this.rhythmMs);
-  }
-
-  stopRhythm() {
-    if (this._intervalId !== null) {
-      clearInterval(this._intervalId);
-      this._intervalId = null;
-    }
-  }
-
-  setPosition(x, y, z) {
-    this.position = { x, y, z };
-    if (this.resonanceSource) this.resonanceSource.setPosition(x, y, z);
-  }
+  startRhythm() { this._playNote(); this._intervalId = setInterval(() => this._playNote(), this.rhythmMs); }
+  stopRhythm() { if (this._intervalId !== null) { clearInterval(this._intervalId); this._intervalId = null; } }
+  setPosition(x, y, z) { this.position = { x, y, z }; if (this.resonanceSource) this.resonanceSource.setPosition(x, y, z); }
 }
 
-// ═══════════════════════════════════════════════════════
-// PATH GENERATOR
-// ═══════════════════════════════════════════════════════
+// Bell/chime for reveal tone (incorrect answer)
+function playRevealTone(audioCtx, resonanceScene, x, y, z) {
+  const src = resonanceScene.createSource();
+  src.setPosition(x, y, z);
+  const osc = audioCtx.createOscillator(); osc.type = 'sine'; osc.frequency.value = 880;
+  const gain = audioCtx.createGain();
+  const now = audioCtx.currentTime;
+  osc.connect(gain); gain.connect(src.input);
+  gain.gain.setValueAtTime(0.0, now);
+  gain.gain.linearRampToValueAtTime(0.3, now + 0.008);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
+  osc.start(now); osc.stop(now + 1.85);
+  // Second partial for warmth
+  const osc2 = audioCtx.createOscillator(); osc2.type = 'sine'; osc2.frequency.value = 1318;
+  const g2 = audioCtx.createGain();
+  osc2.connect(g2); g2.connect(src.input);
+  g2.gain.setValueAtTime(0.0, now);
+  g2.gain.linearRampToValueAtTime(0.12, now + 0.006);
+  g2.gain.exponentialRampToValueAtTime(0.001, now + 1.1);
+  osc2.start(now); osc2.stop(now + 1.15);
+}
+
+// ═══ PATH GENERATOR ═════════════════════════════════════
 const DIAGRAM_RADIUS = 150;
-
-function polarToXY(angleDeg, distance) {
-  const rad = (angleDeg - 90) * Math.PI / 180;
-  return { x: distance * Math.cos(rad), y: distance * Math.sin(rad) };
-}
-
-function xyToSpatial(x, y) {
-  return {
-    sx:  (x / DIAGRAM_RADIUS) * 2,
-    sy:  0,
-    sz: -(y / DIAGRAM_RADIUS) * 2,
-  };
-}
+function polarToXY(angleDeg, distance) { const rad = (angleDeg - 90) * Math.PI / 180; return { x: distance * Math.cos(rad), y: distance * Math.sin(rad) }; }
+function xyToSpatial(x, y) { return { sx: (x / DIAGRAM_RADIUS) * 2, sy: 0, sz: -(y / DIAGRAM_RADIUS) * 2 }; }
 
 function generatePath(complexity, durationSec, startAngleDeg, speedMul) {
-  const FPS    = 60;
-  const frames = Math.round((durationSec / speedMul) * FPS);
-  const pts    = [];
-
+  const FPS = 60; const frames = Math.round((durationSec / speedMul) * FPS); const pts = [];
   if (complexity === 'simple') {
     const r = DIAGRAM_RADIUS * 0.70;
-    for (let i = 0; i <= frames; i++) {
-      const angle = startAngleDeg + (180 * i / frames);
-      const { x, y } = polarToXY(angle, r);
-      const { sx, sy, sz } = xyToSpatial(x, y);
-      pts.push({ x, y, sx, sy, sz });
-    }
-
+    for (let i = 0; i <= frames; i++) { const angle = startAngleDeg + (180 * i / frames); const { x, y } = polarToXY(angle, r); const { sx, sy, sz } = xyToSpatial(x, y); pts.push({ x, y, sx, sy, sz }); }
   } else if (complexity === 'medium') {
-    const A = DIAGRAM_RADIUS * 0.62;
-    const offset = startAngleDeg * Math.PI / 180;
-    for (let i = 0; i <= frames; i++) {
-      const t = (i / frames) * Math.PI * 2;
-      const x = A * Math.sin(3 * t + offset);
-      const y = A * Math.sin(2 * t);
-      const { sx, sy, sz } = xyToSpatial(x, y);
-      pts.push({ x, y, sx, sy, sz });
-    }
-
+    const A = DIAGRAM_RADIUS * 0.62; const offset = startAngleDeg * Math.PI / 180;
+    for (let i = 0; i <= frames; i++) { const t = (i / frames) * Math.PI * 2; const x = A * Math.sin(3 * t + offset); const y = A * Math.sin(2 * t); const { sx, sy, sz } = xyToSpatial(x, y); pts.push({ x, y, sx, sy, sz }); }
   } else {
-    let angle    = startAngleDeg;
-    let distance = DIAGRAM_RADIUS * 0.50;
-    const raw = [];
-    for (let i = 0; i <= frames; i++) {
-      angle    += (Math.random() - 0.5) * 28;
-      distance += (Math.random() - 0.5) * 18;
-      distance  = Math.max(24, Math.min(DIAGRAM_RADIUS * 0.82, distance));
-      const { x, y } = polarToXY(angle, distance);
-      raw.push({ x, y });
-    }
+    let angle = startAngleDeg; let distance = DIAGRAM_RADIUS * 0.50; const raw = [];
+    for (let i = 0; i <= frames; i++) { angle += (Math.random() - 0.5) * 28; distance += (Math.random() - 0.5) * 18; distance = Math.max(24, Math.min(DIAGRAM_RADIUS * 0.82, distance)); const { x, y } = polarToXY(angle, distance); raw.push({ x, y }); }
     const W = 5;
-    for (let i = 0; i <= frames; i++) {
-      const lo = Math.max(0, i - W), hi = Math.min(frames, i + W);
-      let ax = 0, ay = 0;
-      for (let j = lo; j <= hi; j++) { ax += raw[j].x; ay += raw[j].y; }
-      const n = hi - lo + 1;
-      const x = ax / n, y = ay / n;
-      const sp = xyToSpatial(x, y);
-      pts.push({ x, y, sx: sp.sx, sy: sp.sy, sz: sp.sz });
-    }
+    for (let i = 0; i <= frames; i++) { const lo = Math.max(0, i - W); const hi = Math.min(frames, i + W); let ax = 0; let ay = 0; for (let j = lo; j <= hi; j++) { ax += raw[j].x; ay += raw[j].y; } const n = hi - lo + 1; const x = ax / n; const y = ay / n; const sp = xyToSpatial(x, y); pts.push({ x, y, sx: sp.sx, sy: sp.sy, sz: sp.sz }); }
   }
-
   return pts;
 }
 
-// Compute angle in degrees of a point (x,y) from centre
-function pointAngle(x, y) {
-  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-}
+function pointAngle(x, y) { return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360; }
+function angularDist(a1, a2) { const d = Math.abs(a1 - a2) % 360; return d > 180 ? 360 - d : d; }
+function pixelDist(p1, p2, scale) { return Math.hypot((p1.x - p2.x) * scale, (p1.y - p2.y) * scale); }
 
-// Angular distance between two angles (0–180)
-function angularDist(a1, a2) {
-  const d = Math.abs(a1 - a2) % 360;
-  return d > 180 ? 360 - d : d;
-}
-
-// Build paths for all sources, retrying until final positions
-// satisfy the minimum angular separation for the current level.
 function buildPathsWithSeparation(levelCfg) {
   const { sources: numSrc, complexity, speed: speedMul, minSep } = levelCfg;
-  const MAX_ATTEMPTS = 20;
+  const MAX_ATTEMPTS = 30;
+  const MIN_PIXEL_DIST = 22; // hard pixel floor regardless of level
 
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     const paths = [];
-    for (let i = 0; i < numSrc; i++) {
-      const startAngle = Math.random() * 360;
-      paths.push(generatePath(complexity, 5.0, startAngle, speedMul));
-    }
+    for (let i = 0; i < numSrc; i++) { paths.push(generatePath(complexity, 5.0, Math.random() * 360, speedMul)); }
 
-    // Check all pairs of final positions
+    const r = 150; // diagram radius used for pixel check
+    const scale = 1; // path coords are already in diagram space
     let ok = true;
+
     for (let i = 0; i < numSrc && ok; i++) {
       for (let j = i + 1; j < numSrc && ok; j++) {
         const fi = paths[i][paths[i].length - 1];
         const fj = paths[j][paths[j].length - 1];
-        const ai = pointAngle(fi.x, fi.y);
-        const aj = pointAngle(fj.x, fj.y);
-        if (angularDist(ai, aj) < minSep) ok = false;
+        const ai = pointAngle(fi.x, fi.y); const aj = pointAngle(fj.x, fj.y);
+        if (angularDist(ai, aj) < minSep) { ok = false; break; }
+        // Pixel distance check
+        if (pixelDist(fi, fj, scale) < MIN_PIXEL_DIST) { ok = false; break; }
       }
     }
-
     if (ok) return paths;
   }
 
-  // Fallback: return last attempt even if separation not met
+  // Fallback: force well-separated final positions
   const paths = [];
+  const angleStep = 360 / numSrc;
   for (let i = 0; i < numSrc; i++) {
-    paths.push(generatePath(complexity, 5.0, Math.random() * 360, speedMul));
+    const p = generatePath(complexity, 5.0, Math.random() * 360, speedMul);
+    // Override final position to a guaranteed separation
+    const forcedAngle = (i * angleStep) + Math.random() * (angleStep * 0.4);
+    const forcedR = DIAGRAM_RADIUS * 0.65;
+    const { x, y } = polarToXY(forcedAngle, forcedR);
+    const { sx, sy, sz } = xyToSpatial(x, y);
+    p[p.length - 1] = { x, y, sx, sy, sz };
+    paths.push(p);
   }
   return paths;
 }
 
-// ═══════════════════════════════════════════════════════
-// GAME STATE
-// ═══════════════════════════════════════════════════════
+// ═══ GAME STATE ══════════════════════════════════════════
 const G = {
-  audioCtx:       null,
-  resonanceScene: null,
-  sources:        [],
-  paths:          [],
-  targetIndex:    0,
-  phase:          'idle',
-  trials:         0,
-  correct:        0,
-  currentLevel:   1,    // 1-indexed
-  animRaf:        null,
-  trackStart:     null,
-  trackDuration:  0,
+  audioCtx: null, resonanceScene: null, sources: [], paths: [],
+  targetIndex: 0, phase: 'idle',
+  trialsInLevel: 0, trialResults: [],
+  trials: 0, correct: 0,
+  currentLevel: 1, animRaf: null, trackStart: null, trackDuration: 0,
+  bestScores: {},
 };
 
-// ─────────────────────────────────────────────────────────
-// AUDIO INIT
-// ─────────────────────────────────────────────────────────
+// ─── AUDIO INIT ──────────────────────────────────────────
 function initAudio() {
   if (G.audioCtx) return;
   G.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   G.resonanceScene = new ResonanceAudio(G.audioCtx);
+  // Warmer brick room with longer tail
   G.resonanceScene.setRoomProperties(
-    { width: 8, height: 3, depth: 8 },
-    {
-      left: 'acoustic-ceiling-tiles', right:  'acoustic-ceiling-tiles',
-      front:'acoustic-ceiling-tiles', back:   'acoustic-ceiling-tiles',
-      down: 'acoustic-ceiling-tiles', up:     'acoustic-ceiling-tiles',
-    }
+    { width: 7, height: 3.5, depth: 7 },
+    { left: 'brick-bare', right: 'brick-bare', front: 'brick-bare', back: 'brick-bare', down: 'concrete-block', up: 'acoustic-ceiling-tiles' }
   );
   G.resonanceScene.output.connect(G.audioCtx.destination);
 }
 
-// ─────────────────────────────────────────────────────────
-// SOURCE CONFIGS — distinct timbres, pitches, rhythms
-// ─────────────────────────────────────────────────────────
+// Source configs: string (target ~A3), pad (G3), woodblock (C5)
 const SOURCE_CONFIGS = [
-  { frequency: 329.63, timbre: 'pluck',  rhythmMs: 667, isTarget: true  },  // E4
-  { frequency: 392.00, timbre: 'hum',    rhythmMs: 444, isTarget: false },  // G4
-  { frequency: 523.25, timbre: 'chirp',  rhythmMs: 333, isTarget: false },  // C5
+  { frequency: 220.00, timbre: 'string',    rhythmMs: 750,  isTarget: true  },
+  { frequency: 196.00, timbre: 'pad',       rhythmMs: 480,  isTarget: false },
+  { frequency: 523.25, timbre: 'woodblock', rhythmMs: 350,  isTarget: false },
 ];
-
-const PULSE_CLASSES = ['pulse-pluck', 'pulse-hum', 'pulse-chirp'];
+const PULSE_CLASSES = ['pulse-string', 'pulse-pad', 'pulse-block'];
 
 function buildSources() {
-  G.sources.forEach(s => s.stopRhythm());
-  G.sources = [];
+  G.sources.forEach(s => s.stopRhythm()); G.sources = [];
   const lvl = LEVELS[G.currentLevel - 1];
-  for (let i = 0; i < lvl.sources; i++) {
-    const src = new ToneSource(G.audioCtx, G.resonanceScene, SOURCE_CONFIGS[i]);
-    src.init();
-    G.sources.push(src);
-  }
+  for (let i = 0; i < lvl.sources; i++) { const src = new ToneSource(G.audioCtx, G.resonanceScene, SOURCE_CONFIGS[i]); src.init(); G.sources.push(src); }
   G.targetIndex = 0;
 }
 
-// ─────────────────────────────────────────────────────────
-// DOM HELPERS
-// ─────────────────────────────────────────────────────────
+// ─── DOM HELPERS ─────────────────────────────────────────
 const diagram    = document.getElementById('spatial-diagram');
 const pathSvg    = document.getElementById('path-trace');
 const phaseEl    = document.getElementById('phase-indicator');
 const feedbackEl = document.getElementById('feedback-msg');
 const btnPlay    = document.getElementById('btn-play');
-const btnNext    = document.getElementById('btn-next');
 
-function setPhase(text)       { phaseEl.textContent = text; }
-function setFeedback(msg, cls) {
-  feedbackEl.textContent = msg;
-  feedbackEl.className   = 'feedback-msg' + (cls ? ' ' + cls : '');
-}
-function clearDots()  { diagram.querySelectorAll('.sound-source').forEach(d => d.remove()); }
-function clearPath()  { pathSvg.innerHTML = ''; }
+function setPhase(text) { phaseEl.textContent = text; }
+function setFeedback(msg, cls) { feedbackEl.textContent = msg; feedbackEl.className = 'feedback-msg' + (cls ? ' ' + cls : ''); }
+function clearDots() { diagram.querySelectorAll('.sound-source').forEach(d => d.remove()); }
+function clearPath() { pathSvg.innerHTML = ''; }
 
 function drawDots(showTarget, withPulse) {
   clearDots();
   G.sources.forEach((src, i) => {
-    const dot = document.createElement('div');
-    dot.className   = 'sound-source';
-    dot.dataset.idx = i;
-    if (showTarget && i === G.targetIndex) {
-      dot.classList.add('source-target');
-    } else {
-      dot.classList.add('source-distractor');
-    }
-    if (withPulse) {
-      dot.classList.add(PULSE_CLASSES[i]);
-    }
+    const dot = document.createElement('div'); dot.className = 'sound-source'; dot.dataset.idx = i;
+    if (showTarget && i === G.targetIndex) dot.classList.add('source-target');
+    else dot.classList.add('source-distractor');
+    if (withPulse) dot.classList.add(PULSE_CLASSES[i]);
     diagram.appendChild(dot);
   });
 }
 
-function removePulseClasses() {
-  diagram.querySelectorAll('.sound-source').forEach((dot, i) => {
-    PULSE_CLASSES.forEach(c => dot.classList.remove(c));
-  });
-}
+function removePulseClasses() { diagram.querySelectorAll('.sound-source').forEach(dot => { PULSE_CLASSES.forEach(c => dot.classList.remove(c)); }); }
 
 function placeDots() {
-  const r = diagram.offsetWidth / 2;  // actual rendered radius
-  const scale = r / DIAGRAM_RADIUS;   // ratio vs path generation radius
+  const r = diagram.offsetWidth / 2; const scale = r / DIAGRAM_RADIUS;
   G.sources.forEach((src, i) => {
-    const dot = diagram.querySelector(`.sound-source[data-idx="${i}"]`);
-    if (!dot) return;
-    const frame = currentFrame(i);
-    const pos   = G.paths[i][frame];
-    dot.style.left = (r + pos.x * scale) + 'px';
-    dot.style.top  = (r + pos.y * scale) + 'px';
+    const dot = diagram.querySelector(`.sound-source[data-idx="${i}"]`); if (!dot) return;
+    const frame = currentFrame(i); const pos = G.paths[i][frame];
+    dot.style.left = (r + pos.x * scale) + 'px'; dot.style.top = (r + pos.y * scale) + 'px';
     src.setPosition(pos.sx, pos.sy, pos.sz);
   });
 }
-  
+
 function currentFrame(sourceIndex) {
   if (G.trackStart === null) return 0;
   const elapsed = performance.now() - G.trackStart;
-  const total   = G.paths[sourceIndex].length - 1;
+  const total = G.paths[sourceIndex].length - 1;
   return Math.min(total, Math.floor((elapsed / G.trackDuration) * total));
 }
 
-function setDotsOpacity(opacity) {
-  diagram.querySelectorAll('.sound-source').forEach(d => { d.style.opacity = opacity; });
-}
+function setDotsOpacity(opacity) { diagram.querySelectorAll('.sound-source').forEach(d => { d.style.opacity = opacity; }); }
 
 function drawPathTrace(sourceIndex) {
   clearPath();
-  const pts = G.paths[sourceIndex];
-  if (pts.length < 2) return;
-
-  const r     = diagram.offsetWidth / 2;
-  const scale = r / DIAGRAM_RADIUS;
-
-  const d = pts.map((p, i) => {
-    const px = r + p.x * scale;
-    const py = r + p.y * scale;
-    return (i === 0 ? 'M' : 'L') + px.toFixed(1) + ',' + py.toFixed(1);
-  }).join(' ');
-
+  const pts = G.paths[sourceIndex]; if (pts.length < 2) return;
+  const r = diagram.offsetWidth / 2; const scale = r / DIAGRAM_RADIUS;
+  const d = pts.map((p, i) => { const px = r + p.x * scale; const py = r + p.y * scale; return (i === 0 ? 'M' : 'L') + px.toFixed(1) + ',' + py.toFixed(1); }).join(' ');
   const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  el.setAttribute('d', d);
-  el.setAttribute('fill', 'none');
-  el.setAttribute('stroke', 'var(--accent)');
-  el.setAttribute('stroke-width', '1.5');
-  el.setAttribute('stroke-dasharray', '5 3');
-  el.setAttribute('opacity', '0.45');
+  el.setAttribute('d', d); el.setAttribute('fill', 'none'); el.setAttribute('stroke', 'var(--accent)');
+  el.setAttribute('stroke-width', '1.5'); el.setAttribute('stroke-dasharray', '5 3'); el.setAttribute('opacity', '0.45');
   pathSvg.appendChild(el);
-
   const sp = pts[0];
   const startDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  startDot.setAttribute('cx', r + sp.x * scale);
-  startDot.setAttribute('cy', r + sp.y * scale);
-  startDot.setAttribute('r', '4');
-  startDot.setAttribute('fill', 'var(--accent)');
-  startDot.setAttribute('opacity', '0.5');
+  startDot.setAttribute('cx', r + sp.x * scale); startDot.setAttribute('cy', r + sp.y * scale);
+  startDot.setAttribute('r', '4'); startDot.setAttribute('fill', 'var(--accent)'); startDot.setAttribute('opacity', '0.5');
   pathSvg.appendChild(startDot);
 }
 
 function updateStats() {
   document.getElementById('stat-trials').textContent  = G.trials;
   document.getElementById('stat-correct').textContent = G.correct;
-  const pct = G.trials > 0
-    ? Math.round((G.correct / G.trials) * 100) + '%'
-    : '—';
+  const pct = G.trials > 0 ? Math.round((G.correct / G.trials) * 100) + '%' : '—';
   document.getElementById('stat-accuracy').textContent = pct;
 }
 
-// ─────────────────────────────────────────────────────────
-// FIVE-PHASE TRIAL
-// ─────────────────────────────────────────────────────────
+function renderPips() {
+  const container = document.getElementById('trial-pips'); container.innerHTML = '';
+  for (let i = 0; i < 10; i++) {
+    const pip = document.createElement('div'); pip.className = 'trial-pip';
+    if (i < G.trialResults.length) pip.classList.add(G.trialResults[i].correct ? 'correct' : 'incorrect');
+    else if (i === G.trialsInLevel && G.trialsInLevel < 10) pip.classList.add('current');
+    container.appendChild(pip);
+  }
+}
+
+function updateLevelButtons() {
+  document.querySelectorAll('.level-btn').forEach(btn => {
+    const num = parseInt(btn.dataset.level); const best = G.bestScores[num];
+    let sub = btn.querySelector('.lvl-best');
+    if (!sub) { sub = document.createElement('span'); sub.className = 'lvl-best'; btn.appendChild(sub); }
+    if (best) { const isPerfect = best.accuracy === 100; sub.textContent = isPerfect ? '100% ★' : best.accuracy + '%'; sub.classList.toggle('perfect', isPerfect); }
+    else { sub.textContent = '—'; sub.classList.remove('perfect'); }
+  });
+}
+
+// ─── TRIAL FLOW ──────────────────────────────────────────
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 function fadeOpacity(fromVal, toVal, ms) {
   return new Promise(resolve => {
-    const start = performance.now();
-    const dots  = diagram.querySelectorAll('.sound-source');
+    const start = performance.now(); const dots = diagram.querySelectorAll('.sound-source');
     function step(now) {
-      const t = Math.min((now - start) / ms, 1);
-      const v = fromVal + (toVal - fromVal) * t;
+      const t = Math.min((now - start) / ms, 1); const v = fromVal + (toVal - fromVal) * t;
       dots.forEach(d => { d.style.opacity = v; });
-      if (t < 1) requestAnimationFrame(step);
-      else resolve();
+      if (t < 1) requestAnimationFrame(step); else resolve();
     }
     requestAnimationFrame(step);
   });
@@ -1031,89 +725,56 @@ function fadeOpacity(fromVal, toVal, ms) {
 
 async function runTrial() {
   btnPlay.disabled = true;
-  btnNext.disabled = true;
   setFeedback('');
-  clearPath();
 
   const lvl = LEVELS[G.currentLevel - 1];
-
-  // One path set for the entire trial (identity → motion → reveal). Never rebuild mid-trial.
   G.paths = buildPathsWithSeparation(lvl);
-  G.trackDuration = (5.0 / lvl.speed) * 1000; // ms
-  G.trackStart = null; // motion clock starts at handoff only — full path duration for fade + tracking
+  G.trackDuration = (5.0 / lvl.speed) * 1000;
+  G.trackStart = null;
 
-  // ── PHASE 1: IDENTITY (0–3s) ──────────────────────────
-  // Target plays solo for 1.5s, then distractors join for 1.5s.
-  // Dots are visible with rhythmic pulse animation.
+  // Update trial counter
+  document.getElementById('trial-num').textContent = G.trialsInLevel + 1;
+  renderPips();
+
+  // ── PHASE 1: IDENTITY ────────────────────────────────
   G.phase = 'identity';
-  setPhase('listen — the filled dot is the target');
-
-  drawDots(true, true);   // target = solid, distractors = hollow, all pulse
-  setDotsOpacity(1);
-  placeDots();
-
-  // Target plays solo
+  setPhase('listen — the filled dot plays the plucked string');
+  drawDots(true, true); setDotsOpacity(1); placeDots();
   G.sources[G.targetIndex].startRhythm();
   await sleep(1500);
-
-  // Distractors join
-  G.sources.forEach((src, i) => {
-    if (i !== G.targetIndex) src.startRhythm();
-  });
+  G.sources.forEach((src, i) => { if (i !== G.targetIndex) src.startRhythm(); });
   await sleep(1500);
 
-  // ── PHASE 2: HANDOFF (3–4s) ──────────────────────────
+  // ── PHASE 2: HANDOFF ─────────────────────────────────
   G.phase = 'handoff';
-  setPhase('track the target as it moves');
-
-  // Same G.paths — only restart the motion clock so the path runs from frame 0 for a full
-  // G.trackDuration (visible move + 1s fade + invisible tracking). No path rebuild → no jump.
+  setPhase('track the plucked string as it moves');
   G.trackStart = performance.now();
-
   let animRunning = true;
-  function animate() {
-    if (!animRunning) return;
-    placeDots();
-    G.animRaf = requestAnimationFrame(animate);
-  }
+  function animate() { if (!animRunning) return; placeDots(); G.animRaf = requestAnimationFrame(animate); }
   animate();
-
-  // Remove pulse right as fade-out begins (clean transition)
   removePulseClasses();
-
-  // Fade dots out over 1s
   await fadeOpacity(1, 0, 1000);
 
-  // ── PHASE 3: TRACKING (4–9s) ─────────────────────────
+  // ── PHASE 3: TRACKING ────────────────────────────────
   G.phase = 'tracking';
   setPhase('tracking…');
   await sleep(Math.max(0, G.trackDuration - 1000));
 
-  // ── PHASE 4: REVEAL ───────────────────────────────────
+  // ── PHASE 4: REVEAL ──────────────────────────────────
   G.phase = 'reveal';
-  setPhase('where did the target end up?');
-
+  setPhase('where did the plucked string end up?');
   animRunning = false;
   if (G.animRaf) cancelAnimationFrame(G.animRaf);
   G.sources.forEach(s => s.stopRhythm());
 
-  // Redraw as identical hollow dots — no target distinction
   drawDots(false, false);
+  const r = diagram.offsetWidth / 2; const scale = r / DIAGRAM_RADIUS;
+  G.sources.forEach((src, i) => {
+    const dot = diagram.querySelector(`.sound-source[data-idx="${i}"]`);
+    const final = G.paths[i][G.paths[i].length - 1];
+    if (dot) { dot.style.left = (r + final.x * scale) + 'px'; dot.style.top = (r + final.y * scale) + 'px'; dot.style.opacity = 1; }
+  });
 
-  // Place at final positions
-const r = diagram.offsetWidth / 2;
-const scale = r / DIAGRAM_RADIUS;
-G.sources.forEach((src, i) => {
-  const dot   = diagram.querySelector(`.sound-source[data-idx="${i}"]`);
-  const final = G.paths[i][G.paths[i].length - 1];
-  if (dot) {
-    dot.style.left    = (r + final.x * scale) + 'px';
-    dot.style.top     = (r + final.y * scale) + 'px';
-    dot.style.opacity = 1;
-  }
-});
-
-  // Make clickable
   diagram.querySelectorAll('.sound-source').forEach(dot => {
     dot.classList.add('source-clickable');
     dot.addEventListener('click', () => handleGuess(parseInt(dot.dataset.idx)), { once: true });
@@ -1122,25 +783,28 @@ G.sources.forEach((src, i) => {
   G.phase = 'guess';
 }
 
-// ─────────────────────────────────────────────────────────
-// GUESS HANDLING
-// ─────────────────────────────────────────────────────────
+// ─── GUESS ───────────────────────────────────────────────
 async function handleGuess(selectedIndex) {
   if (G.phase !== 'guess') return;
   G.phase = 'result';
 
-  diagram.querySelectorAll('.sound-source').forEach(d => {
-    d.classList.remove('source-clickable');
-    d.style.cursor = 'default';
-  });
+  diagram.querySelectorAll('.sound-source').forEach(d => { d.classList.remove('source-clickable'); d.style.cursor = 'default'; });
 
   const correct = selectedIndex === G.targetIndex;
-  G.trials++;
+  G.trials++; G.trialsInLevel++;
   if (correct) G.correct++;
-  updateStats();
+  G.trialResults.push({ correct });
+  updateStats(); renderPips();
 
-  // Save to Supabase (fire and forget)
-  saveTrialToSupabase(G.currentLevel, correct);
+  // Update best scores
+  const accuracy = Math.round((G.correct / G.trials) * 100);
+  const prev = G.bestScores[G.currentLevel];
+  const isNewBest = !prev || accuracy > prev.accuracy || (accuracy === prev.accuracy && G.correct > (prev.correct || 0));
+  if (isNewBest) {
+    G.bestScores[G.currentLevel] = { correct: G.correct, trials: G.trials, accuracy };
+    saveBestScore(G.currentLevel, G.correct, G.trials, accuracy);
+    updateLevelButtons();
+  }
 
   const selectedDot = diagram.querySelector(`.sound-source[data-idx="${selectedIndex}"]`);
   if (selectedDot) selectedDot.classList.add('source-selected');
@@ -1148,46 +812,94 @@ async function handleGuess(selectedIndex) {
   if (correct) {
     setFeedback('Correct', 'success');
     setPhase('');
+    btnPlay.disabled = false;
+    if (G.trialsInLevel >= 10) {
+      await sleep(1000);
+      showLevelComplete();
+    } else {
+      await sleep(1800);
+      resetTrial();
+    }
   } else {
     setFeedback('Incorrect — target revealed', 'error');
     const targetDot = diagram.querySelector(`.sound-source[data-idx="${G.targetIndex}"]`);
     if (targetDot) targetDot.classList.add('source-revealed');
+    // Draw path trace and keep it visible until next play
     drawPathTrace(G.targetIndex);
     setPhase('');
-  }
 
-  btnNext.disabled = false;
-  btnPlay.disabled = false;
+    // Play reveal chime from correct location
+    const finalPos = G.paths[G.targetIndex][G.paths[G.targetIndex].length - 1];
+    if (G.audioCtx && G.resonanceScene) {
+      if (G.audioCtx.state === 'suspended') G.audioCtx.resume();
+      playRevealTone(G.audioCtx, G.resonanceScene, finalPos.sx, finalPos.sy, finalPos.sz);
+    }
+
+    btnPlay.disabled = false;
+    if (G.trialsInLevel >= 10) {
+      await sleep(1200);
+      showLevelComplete();
+    } else {
+      await sleep(3000);
+      resetTrial();
+    }
+  }
 }
 
-// ─────────────────────────────────────────────────────────
-// RESET
-// ─────────────────────────────────────────────────────────
+// ─── LEVEL COMPLETE ──────────────────────────────────────
+async function showLevelComplete() {
+  const results = G.trialResults;
+  const correct = results.filter(r => r.correct).length;
+  const accuracy = Math.round((correct / 10) * 100);
+  const prev = G.bestScores[G.currentLevel];
+  const isNewBest = !prev || correct > (prev.correct || 0);
+
+  // Save session log
+  saveSession(G.currentLevel, correct, 10, accuracy);
+
+  document.getElementById('lc-title').textContent = correct === 10 ? '★ Perfect score' : correct >= 7 ? 'Level complete' : 'Level finished';
+  document.getElementById('lc-score').textContent = `${correct} / 10`;
+  document.getElementById('lc-accuracy').textContent = accuracy + '%';
+  document.getElementById('lc-prev-best').textContent = prev ? prev.accuracy + '%' : '—';
+
+  const recordEl = document.getElementById('lc-record');
+  recordEl.classList.toggle('visible', isNewBest && !!prev);
+
+  const pipRow = document.getElementById('lc-pips');
+  pipRow.innerHTML = results.map(r => `<div class="lc-pip ${r.correct ? 'correct' : 'incorrect'}"></div>`).join('');
+
+  document.getElementById('lc-msg').textContent = LEVEL_MESSAGES[G.currentLevel - 1];
+
+  const nextBtn = document.getElementById('lc-next-btn');
+  if (G.currentLevel >= 10) { nextBtn.textContent = 'Try level 1 again'; nextBtn.onclick = () => { closeLevelComplete(); setLevel(1); }; }
+  else { nextBtn.textContent = `Next: Level ${G.currentLevel + 1} →`; nextBtn.onclick = () => { closeLevelComplete(); setLevel(G.currentLevel + 1); }; }
+
+  document.getElementById('levelComplete').classList.add('visible');
+}
+
+function closeLevelComplete() { document.getElementById('levelComplete').classList.remove('visible'); }
+window.retryLevel = function() { closeLevelComplete(); setLevel(G.currentLevel); };
+
+// ─── RESET ───────────────────────────────────────────────
 function resetTrial() {
   G.phase = 'idle';
   if (G.animRaf) { cancelAnimationFrame(G.animRaf); G.animRaf = null; }
   G.trackStart = null;
   G.sources.forEach(s => s.stopRhythm());
-  clearDots();
-  clearPath();
-  setPhase('');
-  setFeedback('');
-  btnPlay.disabled  = false;
-  btnNext.disabled  = true;
+  clearDots(); clearPath(); setPhase(''); setFeedback('');
+  btnPlay.disabled = false;
 }
 
-// ─────────────────────────────────────────────────────────
-// LEVEL SELECTOR UI
-// ─────────────────────────────────────────────────────────
+// ─── LEVEL SELECTOR ──────────────────────────────────────
 const levelSelector = document.getElementById('level-selector');
-const levelDesc     = document.getElementById('level-desc');
+const levelDesc = document.getElementById('level-desc');
 
 function buildLevelUI() {
   LEVELS.forEach(lvl => {
     const btn = document.createElement('button');
-    btn.className    = 'level-btn' + (lvl.num >= 8 ? ' level-hard' : '');
+    btn.className = 'level-btn' + (lvl.num >= 8 ? ' level-hard' : '');
     btn.dataset.level = lvl.num;
-    btn.textContent  = lvl.num;
+    btn.innerHTML = `<span class="lvl-num">${lvl.num}</span><span class="lvl-best">—</span>`;
     btn.setAttribute('aria-label', `Level ${lvl.num}`);
     btn.addEventListener('click', () => setLevel(lvl.num));
     levelSelector.appendChild(btn);
@@ -1196,143 +908,81 @@ function buildLevelUI() {
 
 function setLevel(num) {
   G.currentLevel = num;
-  document.querySelectorAll('.level-btn').forEach(b => {
-    b.classList.toggle('active', parseInt(b.dataset.level) === num);
-  });
+  G.trialsInLevel = 0; G.trialResults = [];
+  G.trials = 0; G.correct = 0;
+  document.querySelectorAll('.level-btn').forEach(b => { b.classList.toggle('active', parseInt(b.dataset.level) === num); });
   const lvl = LEVELS[num - 1];
   levelDesc.innerHTML = `<strong>Level ${num}:</strong> ${lvl.label}`;
-  resetTrial();
+  document.getElementById('level-badge').textContent = `Level ${num}`;
+  document.getElementById('trial-num').textContent = '—';
+  resetTrial(); updateStats(); renderPips();
 }
 
-// ─────────────────────────────────────────────────────────
-// PLAY / NEXT BUTTONS
-// ─────────────────────────────────────────────────────────
+// ─── PLAY BUTTON ─────────────────────────────────────────
 btnPlay.addEventListener('click', async () => {
   initAudio();
   if (G.audioCtx.state === 'suspended') await G.audioCtx.resume();
+  if (G.trialsInLevel >= 10) { setLevel(G.currentLevel); }
   buildSources();
   runTrial();
 });
 
-btnNext.addEventListener('click', () => {
-  resetTrial();
-});
-
-// ─────────────────────────────────────────────────────────
-// TUTORIAL
-// ─────────────────────────────────────────────────────────
+// ─── TUTORIAL ────────────────────────────────────────────
 const tutOverlay = document.getElementById('tutorial-overlay');
-const tutDot     = document.getElementById('tut-dot');
+const tutDot = document.getElementById('tut-dot');
+let tutAnimRaf = null, tutAudioCtx = null, tutResonance = null, tutSource = null;
 
-let tutAnimRaf = null;
-let tutAudioCtx = null;
-let tutResonance = null;
-let tutSource = null;
-let tutRhythmId = null;
-
-function tutPointOnCircle(angleDeg, r) {
-  const rad = (angleDeg - 90) * Math.PI / 180;
-  return {
-    x: 100 + r * Math.cos(rad),
-    y: 100 + r * Math.sin(rad),
-  };
-}
+function tutPointOnCircle(angleDeg, r) { const rad = (angleDeg - 90) * Math.PI / 180; return { x: 100 + r * Math.cos(rad), y: 100 + r * Math.sin(rad) }; }
 
 function startTutorialDemo() {
   let angle = 0;
-  const r   = 68; // px, within 200px circle
-
-  function animStep(ts) {
-    angle = (ts / 20) % 360; // slow orbit
-    const { x, y } = tutPointOnCircle(angle, r);
-    tutDot.style.left = x + 'px';
-    tutDot.style.top  = y + 'px';
-    tutAnimRaf = requestAnimationFrame(animStep);
-
-    // Update Resonance position if audio running
-    if (tutSource && tutSource.resonanceSource) {
-      const sx =  (x - 100) / 50;  // roughly -2 to 2
-      const sz = -(y - 100) / 50;
-      tutSource.resonanceSource.setPosition(sx, 0, sz);
-    }
-  }
+  function animStep(ts) { angle = (ts / 20) % 360; const { x, y } = tutPointOnCircle(angle, 68); tutDot.style.left = x + 'px'; tutDot.style.top = y + 'px'; if (tutSource?.resonanceSource) { tutSource.resonanceSource.setPosition((x - 100) / 50, 0, -(y - 100) / 50); } tutAnimRaf = requestAnimationFrame(animStep); }
   tutAnimRaf = requestAnimationFrame(animStep);
-
-  // Attempt to start audio (may fail until user interaction)
   startTutorialAudio();
 }
 
 function startTutorialAudio() {
   try {
     if (!tutAudioCtx) {
-      tutAudioCtx   = new (window.AudioContext || window.webkitAudioContext)();
-      tutResonance  = new ResonanceAudio(tutAudioCtx);
-      tutResonance.setRoomProperties(
-        { width: 8, height: 3, depth: 8 },
-        { left: 'acoustic-ceiling-tiles', right: 'acoustic-ceiling-tiles',
-          front:'acoustic-ceiling-tiles', back:  'acoustic-ceiling-tiles',
-          down: 'acoustic-ceiling-tiles', up:    'acoustic-ceiling-tiles' }
-      );
+      tutAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      tutResonance = new ResonanceAudio(tutAudioCtx);
+      tutResonance.setRoomProperties({ width: 7, height: 3.5, depth: 7 }, { left: 'brick-bare', right: 'brick-bare', front: 'brick-bare', back: 'brick-bare', down: 'concrete-block', up: 'acoustic-ceiling-tiles' });
       tutResonance.output.connect(tutAudioCtx.destination);
       tutSource = new ToneSource(tutAudioCtx, tutResonance, SOURCE_CONFIGS[0]);
       tutSource.init();
     }
     if (tutAudioCtx.state === 'suspended') tutAudioCtx.resume();
-    if (!tutRhythmId) tutSource.startRhythm();
-  } catch(e) { /* audio not available */ }
+    tutSource.startRhythm();
+  } catch(e) {}
 }
 
 function stopTutorialDemo() {
-  if (tutAnimRaf)  { cancelAnimationFrame(tutAnimRaf); tutAnimRaf = null; }
-  if (tutSource)   { tutSource.stopRhythm(); tutRhythmId = null; }
-  if (tutAudioCtx) { tutAudioCtx.close().catch(()=>{}); tutAudioCtx = null; tutResonance = null; tutSource = null; }
+  if (tutAnimRaf) { cancelAnimationFrame(tutAnimRaf); tutAnimRaf = null; }
+  if (tutSource) tutSource.stopRhythm();
+  if (tutAudioCtx) { tutAudioCtx.close().catch(() => {}); tutAudioCtx = null; tutResonance = null; tutSource = null; }
 }
 
-function closeTutorial() {
-  stopTutorialDemo();
-  tutOverlay.classList.add('hidden');
-  try { localStorage.setItem('sil_spatial_tutorial_seen', '1'); } catch(e){}
-}
+function closeTutorial() { stopTutorialDemo(); tutOverlay.classList.add('hidden'); try { localStorage.setItem('sil_spatial_tutorial_seen', '1'); } catch(e) {} }
+function openTutorial() { tutOverlay.classList.remove('hidden'); document.getElementById('tut-step-1').style.display = 'block'; document.getElementById('tut-step-2').style.display = 'none'; setTimeout(startTutorialDemo, 200); }
+function showTutorialStep2() { document.getElementById('tut-step-1').style.display = 'none'; document.getElementById('tut-step-2').style.display = 'block'; }
 
-function showTutorialStep2() {
-  document.getElementById('tut-step-1').style.display = 'none';
-  document.getElementById('tut-step-2').style.display = 'block';
-}
+document.getElementById('tut-skip').addEventListener('click', closeTutorial);
+document.getElementById('tut-skip-2').addEventListener('click', closeTutorial);
+document.getElementById('tut-finish').addEventListener('click', closeTutorial);
+document.getElementById('tut-next-1').addEventListener('click', () => { showTutorialStep2(); startTutorialAudio(); });
+document.getElementById('how-to-play-btn').addEventListener('click', openTutorial);
+tutOverlay.addEventListener('click', () => { startTutorialAudio(); }, { once: true });
 
-// Wire tutorial buttons
-document.getElementById('tut-skip').addEventListener('click',    closeTutorial);
-document.getElementById('tut-skip-2').addEventListener('click',  closeTutorial);
-document.getElementById('tut-finish').addEventListener('click',  closeTutorial);
-document.getElementById('tut-next-1').addEventListener('click',  () => {
-  showTutorialStep2();
-  // Try starting audio on this interaction
-  startTutorialAudio();
-});
-
-// Auto-advance on first interaction (click anywhere in tutorial card)
-tutOverlay.addEventListener('click', () => {
-  startTutorialAudio();
-}, { once: true });
-
-// ─────────────────────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────────────────────
+// ─── INIT ────────────────────────────────────────────────
 buildLevelUI();
 setLevel(1);
 
-// Show tutorial if first visit
+function onAuthReady(cb) { if (window._currentUser) { cb(); return; } window.addEventListener('authReady', cb, { once: true }); }
+onAuthReady(async () => { await loadBestScores(); });
+
 try {
-  if (!localStorage.getItem('sil_spatial_tutorial_seen')) {
-    tutOverlay.classList.remove('hidden');
-    // Start the dot animation (audio will start on first interaction)
-    // Small delay so the overlay renders first
-    setTimeout(startTutorialDemo, 200);
-  }
-} catch(e) {
-  // localStorage blocked — just don't show tutorial
-}
-
+  if (!localStorage.getItem('sil_spatial_tutorial_seen')) { tutOverlay.classList.remove('hidden'); setTimeout(startTutorialDemo, 200); }
+} catch(e) {}
 </script>
-
 </body>
 </html>
