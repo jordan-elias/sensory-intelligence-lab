@@ -4,376 +4,168 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cocktail Party Problem</title>
-
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" type="image/png" href="/images/favicon.png">
   <link rel="apple-touch-icon" href="/images/favicon.png">
   <link rel="manifest" href="/site.webmanifest">
-
   <script src="/dashboard/auth-guard.js" type="module"></script>
-
   <script type="module">
     import { applyGatingOnReady } from '/assets/js/gating.js';
-    applyGatingOnReady({
-      targetSelector: '.lab-section',
-      moduleName: 'cocktail-party',
-    });
+    applyGatingOnReady({ targetSelector: '.lab-section', moduleName: 'cocktail-party' });
   </script>
-
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
-
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --font-body: 'Inter', sans-serif;
-      --font-heading: 'Space Grotesk', sans-serif;
-      --bg: #ffffff;
-      --surface: #f9f9f7;
-      --border: #e5e5e0;
-      --text: #1a1a1a;
-      --muted: #6b6b6b;
-      --accent: #2a5c45;
-      --accent-light: #edf4f0;
-      --accent-hover: #1e4433;
-      --error: #c0392b;
-      --error-bg: #fdf2f2;
-      --warn: #92610a;
-      --warn-bg: #fdf8ee;
+      --font-body: 'Inter', sans-serif; --font-heading: 'Space Grotesk', sans-serif;
+      --bg: #ffffff; --surface: #f9f9f7; --border: #e5e5e0;
+      --text: #1a1a1a; --muted: #6b6b6b;
+      --accent: #2a5c45; --accent-light: #edf4f0; --accent-hover: #1e4433;
+      --error: #c0392b; --error-bg: #fdf2f2; --warn: #92610a; --warn-bg: #fdf8ee;
     }
-
     html { font-size: 16px; }
-    body {
-      font-family: var(--font-body);
-      color: var(--text);
-      background: var(--bg);
-      line-height: 1.6;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+    body { font-family: var(--font-body); color: var(--text); background: var(--bg); line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; }
     a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
     a:hover { color: var(--accent); }
 
-    /* ── HEADER ── */
-    .sil-header {
-      border-bottom: 1px solid var(--border);
-      padding: 0 1.5rem; height: 56px;
-      display: flex; align-items: center; justify-content: space-between;
-      position: sticky; top: 0; left: 0; right: 0;
-      background: var(--bg); z-index: 100; gap: 1rem; width: 100%;
-    }
-    .sil-header__wordmark {
-      font-family: var(--font-heading); font-size: 1rem; font-weight: 600;
-      letter-spacing: -0.01em; white-space: nowrap; flex-shrink: 0;
-      text-decoration: none; color: var(--text);
-    }
+    .sil-header { border-bottom: 1px solid var(--border); padding: 0 1.5rem; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; left: 0; right: 0; background: var(--bg); z-index: 100; gap: 1rem; width: 100%; }
+    .sil-header__wordmark { font-family: var(--font-heading); font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; flex-shrink: 0; text-decoration: none; color: var(--text); }
     .sil-header__wordmark:hover { color: var(--accent); }
     .sil-header__nav { display: flex; gap: 0.25rem; align-items: center; }
-    .sil-header__nav a {
-      font-family: var(--font-body); font-size: 0.8rem; font-weight: 500;
-      text-decoration: none; color: var(--muted); transition: color 0.15s;
-      white-space: nowrap; padding: 0.3rem 0.65rem;
-    }
+    .sil-header__nav a { font-family: var(--font-body); font-size: 0.8rem; font-weight: 500; text-decoration: none; color: var(--muted); transition: color 0.15s; white-space: nowrap; padding: 0.3rem 0.65rem; }
     .sil-header__nav a:hover { color: var(--text); }
     .sil-header__nav a.sil-active { color: var(--accent); font-weight: 600; }
-    .sil-header__signout {
-      font-family: var(--font-body); font-size: 0.8rem; font-weight: 500;
-      color: var(--muted); background: none; border: 1px solid var(--border);
-      cursor: pointer; padding: 0.3rem 0.75rem;
-      transition: color 0.15s, border-color 0.15s; white-space: nowrap; line-height: 1.6;
-    }
+    .sil-header__signout { font-family: var(--font-body); font-size: 0.8rem; font-weight: 500; color: var(--muted); background: none; border: 1px solid var(--border); cursor: pointer; padding: 0.3rem 0.75rem; transition: color 0.15s, border-color 0.15s; white-space: nowrap; line-height: 1.6; }
     .sil-header__signout:hover { color: var(--text); border-color: var(--text); }
     .sil-header__signout:disabled { opacity: 0.5; cursor: not-allowed; }
-    .sil-header__toggle {
-      display: none; flex-direction: column; gap: 4px;
-      background: none; border: none; cursor: pointer; padding: 4px; flex-shrink: 0;
-    }
+    .sil-header__toggle { display: none; flex-direction: column; gap: 4px; background: none; border: none; cursor: pointer; padding: 4px; flex-shrink: 0; }
     .sil-header__toggle span { display: block; width: 20px; height: 2px; background: var(--text); }
     @media (max-width: 700px) {
       .sil-header { padding: 0 1rem; }
       .sil-header__toggle { display: flex; }
-      .sil-header__nav {
-        display: none; position: absolute; top: 56px; left: 0; right: 0;
-        background: var(--bg); border-bottom: 1px solid var(--border);
-        flex-direction: column; align-items: flex-start;
-        padding: 0.75rem 1rem; gap: 0; z-index: 99;
-      }
+      .sil-header__nav { display: none; position: absolute; top: 56px; left: 0; right: 0; background: var(--bg); border-bottom: 1px solid var(--border); flex-direction: column; align-items: flex-start; padding: 0.75rem 1rem; gap: 0; z-index: 99; }
       .sil-header__nav.sil-open { display: flex; }
       .sil-header__nav a, .sil-header__signout { font-size: 0.875rem; padding: 0.55rem 0.5rem; }
       .sil-header__signout { border: none; }
     }
 
-    /* ── BREADCRUMB ── */
     .bc { padding: .75rem 1.5rem 0; max-width: 860px; margin: 0 auto; width: 100%; }
     .bc ol { list-style: none; display: flex; gap: .3rem; align-items: center; font-size: .75rem; color: var(--muted); flex-wrap: wrap; }
     .bc li + li::before { content: '/'; margin-right: .3rem; color: var(--border); }
     .bc a { color: var(--muted); text-decoration: none; }
     .bc a:hover { color: var(--accent); text-decoration: underline; }
 
-    /* ── MAIN ── */
     main { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; flex: 1; width: 100%; }
     @media (max-width: 600px) { main { padding: 1.5rem 1rem 3rem; } }
 
-    /* ── PAGE HEADER ── */
     .ph { margin-bottom: 2rem; padding-bottom: 1.75rem; border-bottom: 1px solid var(--border); }
     .ph h2 { font-family: var(--font-heading); font-size: 2rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; margin-bottom: .4rem; }
     .ph p { font-size: .9rem; color: var(--muted); }
 
-    /* ── LEVEL SELECTOR ── */
-    .level-selector {
-      border: 1px solid var(--border);
-      padding: 1.25rem;
-      margin-bottom: 1rem;
-      background: var(--surface);
-    }
-    .level-selector-head {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 1rem; flex-wrap: wrap; gap: .5rem;
-    }
-    .level-selector-title {
-      font-family: var(--font-heading); font-size: .67rem; font-weight: 600;
-      letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
-    }
+    /* Level selector */
+    .level-selector { border: 1px solid var(--border); padding: 1.25rem; margin-bottom: 1rem; background: var(--surface); }
+    .level-selector-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: .5rem; }
+    .level-selector-title { font-family: var(--font-heading); font-size: .67rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
     .word-set-row { display: flex; gap: .35rem; align-items: center; }
     .word-set-label { font-size: .72rem; color: var(--muted); margin-right: .2rem; }
-    .level-grid {
-      display: grid;
-      grid-template-columns: repeat(10, 1fr);
-      gap: .4rem;
-    }
-    @media (max-width: 600px) {
-      .level-grid { grid-template-columns: repeat(5, 1fr); }
-    }
-    .level-btn {
-      font-family: var(--font-heading); font-size: .72rem; font-weight: 600;
-      background: var(--bg); color: var(--muted);
-      border: 1px solid var(--border);
-      padding: .5rem .25rem; cursor: pointer;
-      transition: all .12s; text-align: center;
-      display: flex; flex-direction: column; gap: .15rem;
-      align-items: center;
-    }
+    .level-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: .4rem; }
+    @media (max-width: 600px) { .level-grid { grid-template-columns: repeat(5, 1fr); } }
+    .level-btn { font-family: var(--font-heading); font-size: .72rem; font-weight: 600; background: var(--bg); color: var(--muted); border: 1px solid var(--border); padding: .5rem .25rem; cursor: pointer; transition: all .12s; text-align: center; display: flex; flex-direction: column; gap: .15rem; align-items: center; }
     .level-btn:hover { border-color: var(--accent); color: var(--accent); }
     .level-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
     .level-btn .lvl-num { font-size: .82rem; }
-    .level-btn .lvl-best {
-      font-size: .55rem; font-weight: 500; letter-spacing: .04em;
-      color: var(--muted); white-space: nowrap;
-    }
+    .level-btn .lvl-best { font-size: .55rem; font-weight: 500; letter-spacing: .04em; color: var(--muted); white-space: nowrap; }
     .level-btn.active .lvl-best { color: rgba(255,255,255,.7); }
     .level-btn .lvl-best.perfect { color: var(--accent); font-weight: 600; }
     .level-btn.active .lvl-best.perfect { color: #a8e6cf; }
 
-    /* ── MAIN GAME SECTION ── */
-    .lab-section {
-      border: 1px solid var(--border);
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-      background: var(--surface);
-    }
-    .lab-section > h3 {
-      font-family: var(--font-heading); font-size: .67rem; font-weight: 600;
-      letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
-      margin-bottom: 1.25rem;
-    }
+    /* Main game section */
+    .lab-section { border: 1px solid var(--border); padding: 1.5rem; margin-bottom: 1.5rem; background: var(--surface); }
+    .lab-section > h3 { font-family: var(--font-heading); font-size: .67rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.25rem; }
 
-    /* ── LEVEL STATUS BAR ── */
-    .level-status {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: .85rem; flex-wrap: wrap; gap: .5rem;
-    }
-    .level-status-left {
-      display: flex; align-items: center; gap: 1rem;
-    }
-    .level-badge {
-      font-family: var(--font-heading); font-size: .72rem; font-weight: 600;
-      letter-spacing: .08em; text-transform: uppercase;
-      color: var(--accent); background: var(--accent-light);
-      border: 1px solid #c0d9c8; padding: .2rem .65rem;
-    }
-    .trial-counter {
-      font-family: var(--font-heading); font-size: .82rem; font-weight: 600;
-      color: var(--text);
-    }
+    .level-status { display: flex; align-items: center; justify-content: space-between; margin-bottom: .85rem; flex-wrap: wrap; gap: .5rem; }
+    .level-status-left { display: flex; align-items: center; gap: 1rem; }
+    .level-badge { font-family: var(--font-heading); font-size: .72rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); background: var(--accent-light); border: 1px solid #c0d9c8; padding: .2rem .65rem; }
+    .trial-counter { font-family: var(--font-heading); font-size: .82rem; font-weight: 600; color: var(--text); }
     .trial-counter span { color: var(--muted); font-weight: 400; }
-    .streak-display {
-      display: flex; align-items: center; gap: .3rem;
-      font-family: var(--font-heading); font-size: .78rem; font-weight: 600;
-    }
+    .streak-display { display: flex; align-items: center; gap: .3rem; font-family: var(--font-heading); font-size: .78rem; font-weight: 600; }
     .streak-num { color: var(--accent); }
     .streak-label { font-size: .62rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
     .streak-display.hot .streak-num { color: #c0392b; }
 
-    /* ── TRIAL PROGRESS PIPS ── */
-    .trial-pips {
-      display: flex; gap: 4px; margin-bottom: .85rem;
-    }
-    .trial-pip {
-      height: 4px; flex: 1; background: var(--border);
-      transition: background .2s;
-    }
+    .trial-pips { display: flex; gap: 4px; margin-bottom: .85rem; }
+    .trial-pip { height: 4px; flex: 1; background: var(--border); transition: background .2s; }
     .trial-pip.correct { background: var(--accent); }
     .trial-pip.incorrect { background: #c0a080; }
     .trial-pip.current { background: var(--muted); }
 
-    /* ── SPECTROGRAM ── */
-    .spectrogram-container {
-      border: 1px solid var(--border);
-      margin-bottom: .85rem; height: 80px;
-      background: #0a0a0a; overflow: hidden;
-    }
+    .spectrogram-container { border: 1px solid var(--border); margin-bottom: .85rem; height: 80px; background: #0a0a0a; overflow: hidden; }
     canvas#spectrogram { width: 100%; height: 80px; display: block; }
 
-    /* ── CONTROLS ROW ── */
-    .control-row {
-      display: flex; align-items: center;
-      gap: 8px; margin-bottom: .75rem; flex-wrap: wrap;
-    }
+    .control-row { display: flex; align-items: center; gap: 8px; margin-bottom: .75rem; flex-wrap: wrap; }
 
-    /* ── BUTTONS ── */
-    .lab-btn {
-      font-family: var(--font-heading); font-size: .78rem; font-weight: 600;
-      background: var(--bg); color: var(--text);
-      border: 1px solid var(--border);
-      padding: .5rem 1.2rem; cursor: pointer;
-      transition: all .12s; white-space: nowrap; flex-shrink: 0;
-    }
+    .lab-btn { font-family: var(--font-heading); font-size: .78rem; font-weight: 600; background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: .5rem 1.2rem; cursor: pointer; transition: all .12s; white-space: nowrap; flex-shrink: 0; }
     .lab-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
     .lab-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
     .lab-btn.primary:hover:not(:disabled) { background: var(--accent-hover); }
     .lab-btn:disabled { opacity: .35; cursor: not-allowed; }
-
-    .lab-preset-btn {
-      font-family: var(--font-body); font-size: .72rem; font-weight: 500;
-      background: var(--bg); color: var(--muted);
-      border: 1px solid var(--border);
-      padding: .28rem .8rem; cursor: pointer; transition: all .12s;
-    }
+    .lab-preset-btn { font-family: var(--font-body); font-size: .72rem; font-weight: 500; background: var(--bg); color: var(--muted); border: 1px solid var(--border); padding: .28rem .8rem; cursor: pointer; transition: all .12s; }
     .lab-preset-btn:hover { border-color: var(--accent); color: var(--accent); }
     .lab-preset-btn.on { background: var(--accent); color: white; border-color: var(--accent); }
 
-    /* ── FEEDBACK ── */
-    .feedback-msg {
-      flex: 1; min-width: 100px; font-size: .8rem; color: var(--text);
-      padding: .45rem 1rem; border: 1px solid var(--border); background: var(--bg);
-      text-align: center; min-height: 38px;
-      display: flex; align-items: center; justify-content: center;
-    }
+    .feedback-msg { flex: 1; min-width: 100px; font-size: .8rem; color: var(--text); padding: .45rem 1rem; border: 1px solid var(--border); background: var(--bg); text-align: center; min-height: 38px; display: flex; align-items: center; justify-content: center; }
     .feedback-msg.success { border-color: var(--accent); background: var(--accent-light); color: var(--accent-hover); font-weight: 500; }
     .feedback-msg.error { border-color: #c0a080; background: #fdf8f0; color: #6b4a1a; font-weight: 500; }
 
-    /* ── CHOICE BUTTONS ── */
-    .choice-buttons {
-      display: grid; grid-template-columns: repeat(2, 1fr);
-      gap: .5rem; margin: .75rem 0;
-    }
-    .choice-btn {
-      font-family: var(--font-heading); font-size: .9rem; font-weight: 600;
-      background: var(--bg); color: var(--text);
-      border: 1px solid var(--border);
-      padding: .85rem .5rem; cursor: pointer;
-      transition: all .12s; min-height: 52px; letter-spacing: -.01em;
-    }
+    /* Choice buttons — hidden until word finishes */
+    .choice-buttons { display: grid; grid-template-columns: repeat(2, 1fr); gap: .5rem; margin: .75rem 0; }
+    .choice-btn { font-family: var(--font-heading); font-size: .9rem; font-weight: 600; background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: .85rem .5rem; cursor: pointer; transition: all .12s; min-height: 52px; letter-spacing: -.01em; visibility: hidden; }
+    .choice-btn.revealed { visibility: visible; }
     .choice-btn:hover:not(:disabled):not(:empty) { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
     .choice-btn:disabled { opacity: .4; cursor: not-allowed; }
     .choice-btn.correct { background: var(--accent); color: white; border-color: var(--accent); opacity: 1; }
     .choice-btn.incorrect { border-color: #c0a080; color: #6b4a1a; background: #fdf8f0; }
-    .choice-btn:empty { visibility: hidden; }
 
-    /* ── STATS ── */
-    .cocktail-stats {
-      display: flex; gap: 1.5rem; justify-content: center;
-      margin: .75rem 0; padding: .5rem 0;
-      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
-      flex-wrap: wrap;
-    }
+    .cocktail-stats { display: flex; gap: 1.5rem; justify-content: center; margin: .75rem 0; padding: .5rem 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
     .stat-item { display: flex; align-items: baseline; gap: .35rem; }
     .stat-label { font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
     .stat-value { font-family: var(--font-heading); font-size: .9rem; font-weight: 600; color: var(--text); }
     .stat-value.accent { color: var(--accent); }
 
-    .lab-hint {
-      font-size: .72rem; color: var(--muted);
-      margin-top: .65rem; text-align: center; line-height: 1.5;
-    }
+    .difficulty-info { display: flex; align-items: center; gap: .6rem; padding: .5rem .75rem; background: var(--bg); border: 1px solid var(--border); margin-bottom: .85rem; font-size: .72rem; color: var(--muted); }
+    .difficulty-info-label { font-family: var(--font-heading); font-size: .6rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); flex-shrink: 0; }
 
-    /* ── DIFFICULTY INFO ── */
-    .difficulty-info {
-      display: flex; align-items: center; gap: .6rem;
-      padding: .5rem .75rem; background: var(--bg); border: 1px solid var(--border);
-      margin-bottom: .85rem; font-size: .72rem; color: var(--muted);
-    }
-    .difficulty-info-label {
-      font-family: var(--font-heading); font-size: .6rem; font-weight: 600;
-      letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
-      flex-shrink: 0;
-    }
-    .diff-pip { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .lab-hint { font-size: .72rem; color: var(--muted); margin-top: .65rem; text-align: center; line-height: 1.5; }
 
-    /* ── LEVEL COMPLETE OVERLAY ── */
-    .level-complete {
-      display: none; position: fixed; inset: 0;
-      background: rgba(255,255,255,.97); z-index: 300;
-      align-items: center; justify-content: center; flex-direction: column;
-      padding: 2rem;
-    }
+    /* Loading indicator */
+    .loading-bar { height: 2px; background: var(--border); margin-bottom: .75rem; position: relative; overflow: hidden; display: none; }
+    .loading-bar.visible { display: block; }
+    .loading-bar-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--accent); transition: width .3s; }
+
+    /* Level complete overlay */
+    .level-complete { display: none; position: fixed; inset: 0; background: rgba(255,255,255,.97); z-index: 300; align-items: center; justify-content: center; flex-direction: column; padding: 2rem; }
     .level-complete.visible { display: flex; }
-    .level-complete-inner {
-      max-width: 440px; width: 100%; text-align: center;
-    }
-    .level-complete-title {
-      font-family: var(--font-heading); font-size: 1.5rem; font-weight: 600;
-      letter-spacing: -.02em; margin-bottom: .5rem;
-    }
-    .level-complete-score {
-      font-family: var(--font-heading); font-size: 3rem; font-weight: 600;
-      color: var(--accent); line-height: 1; margin-bottom: .25rem;
-    }
-    .level-complete-score-label {
-      font-size: .75rem; color: var(--muted); letter-spacing: .08em;
-      text-transform: uppercase; margin-bottom: 1.5rem;
-    }
-    .level-complete-stats {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: .75rem; margin-bottom: 1.75rem;
-      border: 1px solid var(--border); padding: 1rem;
-      background: var(--surface);
-    }
+    .level-complete-inner { max-width: 440px; width: 100%; text-align: center; }
+    .level-complete-title { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 600; letter-spacing: -.02em; margin-bottom: .5rem; }
+    .level-complete-score { font-family: var(--font-heading); font-size: 3rem; font-weight: 600; color: var(--accent); line-height: 1; margin-bottom: .25rem; }
+    .level-complete-score-label { font-size: .75rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 1.5rem; }
+    .level-complete-stats { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: 1.75rem; border: 1px solid var(--border); padding: 1rem; background: var(--surface); }
     .lc-stat { text-align: center; }
-    .lc-stat-val {
-      font-family: var(--font-heading); font-size: 1.1rem; font-weight: 600;
-      color: var(--text); display: block;
-    }
+    .lc-stat-val { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 600; color: var(--text); display: block; }
     .lc-stat-label { font-size: .65rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
-    .level-complete-msg {
-      font-size: .85rem; color: var(--muted); line-height: 1.65;
-      margin-bottom: 1.5rem; font-style: italic;
-    }
-    .lc-record {
-      font-size: .75rem; color: var(--accent); font-weight: 500;
-      margin-bottom: 1rem; display: none;
-    }
+    .level-complete-msg { font-size: .85rem; color: var(--muted); line-height: 1.65; margin-bottom: 1.5rem; font-style: italic; }
+    .lc-record { font-size: .75rem; color: var(--accent); font-weight: 500; margin-bottom: 1rem; display: none; }
     .lc-record.visible { display: block; }
-    .level-complete-btns {
-      display: flex; gap: .65rem; justify-content: center; flex-wrap: wrap;
-    }
-    .lc-pip-row {
-      display: flex; gap: 4px; justify-content: center; margin-bottom: 1.25rem;
-    }
-    .lc-pip {
-      width: 24px; height: 4px;
-      background: var(--border);
-    }
+    .level-complete-btns { display: flex; gap: .65rem; justify-content: center; flex-wrap: wrap; }
+    .lc-pip-row { display: flex; gap: 4px; justify-content: center; margin-bottom: 1.25rem; }
+    .lc-pip { width: 24px; height: 4px; background: var(--border); }
     .lc-pip.correct { background: var(--accent); }
     .lc-pip.incorrect { background: #c0a080; }
 
-    /* ── ARTICLE ── */
     .article-text { margin-top: 2rem; }
     .article-text h3 { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 600; margin-bottom: .6rem; }
     .article-text p { font-size: .9rem; color: var(--muted); line-height: 1.75; margin-bottom: 1rem; }
 
-    /* ── FOOTER ── */
     footer { border-top: 1px solid var(--border); padding: 1.25rem 1.5rem; text-align: center; font-size: .78rem; color: var(--muted); }
     footer a { color: var(--muted); text-decoration: none; }
     footer a:hover { color: var(--accent); }
@@ -409,13 +201,12 @@
 </nav>
 
 <main>
-
   <div class="ph">
     <h2>Cocktail Party Problem</h2>
     <p>Train selective auditory attention. Identify a target word against competing background noise. Ten levels of increasing difficulty.</p>
   </div>
 
-  <!-- ── LEVEL SELECTOR ── -->
+  <!-- Level selector -->
   <div class="level-selector" id="levelSelector">
     <div class="level-selector-head">
       <span class="level-selector-title">Select level</span>
@@ -425,16 +216,16 @@
         <button class="lab-preset-btn" data-wordset="numbers">Numbers</button>
       </div>
     </div>
-    <div class="level-grid" id="levelGrid">
-      <!-- populated by JS -->
-    </div>
+    <div class="level-grid" id="levelGrid"></div>
   </div>
 
-  <!-- ── MAIN GAME ── -->
+  <!-- Loading bar -->
+  <div class="loading-bar" id="loading-bar"><div class="loading-bar-fill" id="loading-bar-fill"></div></div>
+
+  <!-- Main game -->
   <div class="lab-section">
     <h3 id="section-title">Cocktail party problem — level 1</h3>
 
-    <!-- Level status bar -->
     <div class="level-status">
       <div class="level-status-left">
         <span class="level-badge" id="level-badge">Level 1</span>
@@ -446,30 +237,23 @@
       </div>
     </div>
 
-    <!-- Trial progress pips -->
-    <div class="trial-pips" id="trial-pips">
-      <!-- 10 pips populated by JS -->
-    </div>
+    <div class="trial-pips" id="trial-pips"></div>
 
-    <!-- Difficulty info bar -->
     <div class="difficulty-info" id="difficulty-info">
       <span class="difficulty-info-label">Level 1</span>
       <span id="diff-desc">One background · target clearly above noise · easy to identify</span>
     </div>
 
-    <!-- Spectrogram -->
     <div class="spectrogram-container">
       <canvas id="spectrogram" width="800" height="80"></canvas>
     </div>
 
-    <!-- Controls + feedback -->
     <div class="control-row">
       <button class="lab-btn primary" id="btn-play"><svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> Play</button>
       <button class="lab-btn" id="btn-repeat" disabled>↺ Repeat</button>
       <div class="feedback-msg" id="feedback-msg"></div>
     </div>
 
-    <!-- Choice buttons -->
     <div class="choice-buttons" id="choice-buttons">
       <button class="choice-btn" disabled></button>
       <button class="choice-btn" disabled></button>
@@ -477,34 +261,18 @@
       <button class="choice-btn" disabled></button>
     </div>
 
-    <!-- Stats -->
     <div class="cocktail-stats">
-      <div class="stat-item">
-        <span class="stat-label">Trials</span>
-        <span class="stat-value" id="stat-trials">0</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Correct</span>
-        <span class="stat-value" id="stat-correct">0</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Accuracy</span>
-        <span class="stat-value" id="stat-accuracy">—</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Avg reaction</span>
-        <span class="stat-value accent" id="stat-reaction">—</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Best streak</span>
-        <span class="stat-value" id="stat-best-streak">0</span>
-      </div>
+      <div class="stat-item"><span class="stat-label">Trials</span><span class="stat-value" id="stat-trials">0</span></div>
+      <div class="stat-item"><span class="stat-label">Correct</span><span class="stat-value" id="stat-correct">0</span></div>
+      <div class="stat-item"><span class="stat-label">Accuracy</span><span class="stat-value" id="stat-accuracy">—</span></div>
+      <div class="stat-item"><span class="stat-label">Avg reaction</span><span class="stat-value accent" id="stat-reaction">—</span></div>
+      <div class="stat-item"><span class="stat-label">Best streak</span><span class="stat-value" id="stat-best-streak">0</span></div>
     </div>
 
-    <p class="lab-hint">Headphones recommended · Listen for the target word · Select from the four options</p>
+    <p class="lab-hint">Headphones recommended · Listen for the target word · Select from the four options after it plays</p>
   </div>
 
-  <!-- ── LEVEL COMPLETE OVERLAY ── -->
+  <!-- Level complete overlay -->
   <div class="level-complete" id="levelComplete">
     <div class="level-complete-inner">
       <div class="level-complete-title" id="lc-title">Level complete</div>
@@ -512,22 +280,10 @@
       <div class="level-complete-score-label">correct answers</div>
       <div class="lc-pip-row" id="lc-pips"></div>
       <div class="level-complete-stats">
-        <div class="lc-stat">
-          <span class="lc-stat-val" id="lc-accuracy">70%</span>
-          <span class="lc-stat-label">Accuracy</span>
-        </div>
-        <div class="lc-stat">
-          <span class="lc-stat-val" id="lc-reaction">—</span>
-          <span class="lc-stat-label">Avg reaction</span>
-        </div>
-        <div class="lc-stat">
-          <span class="lc-stat-val" id="lc-streak">0</span>
-          <span class="lc-stat-label">Best streak</span>
-        </div>
-        <div class="lc-stat">
-          <span class="lc-stat-val" id="lc-prev-best">—</span>
-          <span class="lc-stat-label">Previous best</span>
-        </div>
+        <div class="lc-stat"><span class="lc-stat-val" id="lc-accuracy">70%</span><span class="lc-stat-label">Accuracy</span></div>
+        <div class="lc-stat"><span class="lc-stat-val" id="lc-reaction">—</span><span class="lc-stat-label">Avg reaction</span></div>
+        <div class="lc-stat"><span class="lc-stat-val" id="lc-streak">0</span><span class="lc-stat-label">Best streak</span></div>
+        <div class="lc-stat"><span class="lc-stat-val" id="lc-prev-best">—</span><span class="lc-stat-label">Previous best</span></div>
       </div>
       <div class="lc-record" id="lc-record">★ New personal best</div>
       <div class="level-complete-msg" id="lc-msg"></div>
@@ -538,45 +294,34 @@
     </div>
   </div>
 
-  <!-- ── ARTICLE ── -->
   <div class="article-text">
     <h3>The cocktail party problem</h3>
     <p>The term was coined by Colin Cherry in 1953 to describe the auditory system's remarkable ability to selectively attend to a single voice or sound source within a complex acoustic scene. At a crowded party, you can focus on one conversation while filtering out others — not by reducing the volume of competing sounds, but by directing attentional resources toward specific auditory streams.</p>
     <p>This capacity depends on a network of auditory and prefrontal cortex regions that work together to segregate sound sources using spatial cues (where the sound comes from), spectral cues (its frequency content), and temporal cues (its rhythmic and timing patterns). As you progress through the levels, the signal-to-noise ratio decreases and additional competing sound sources are added — requiring increasing reliance on selective attention rather than simple loudness detection.</p>
     <p>Training on this task is associated with improved performance in real-world noisy environments, and is used in auditory rehabilitation contexts for hearing loss and auditory processing difficulties.</p>
   </div>
-
 </main>
 
 <footer>
-  <p>Jordan Elias Music Therapy · Berlin ·
-    <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a>
-  </p>
+  <p>Jordan Elias Music Therapy · Berlin · <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a></p>
 </footer>
 
-<!-- Resonance Audio -->
 <script src="https://cdn.jsdelivr.net/npm/resonance-audio/build/resonance-audio.min.js"></script>
 
 <script type="module">
 'use strict';
 
-// ─────────────────────────────────────────────────────────
-// HEADER
-// ─────────────────────────────────────────────────────────
+// ─── HEADER ─────────────────────────────────────────────
 const path = window.location.pathname.replace(/\/$/, '') || '/';
 document.querySelectorAll('.sil-header__nav a').forEach(a => {
   const href = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
   if (href === path) a.classList.add('sil-active');
 });
 const menuToggle = document.getElementById('silMenuToggle');
-const silNav     = document.getElementById('silNav');
-menuToggle.addEventListener('click', () => {
-  const open = silNav.classList.toggle('sil-open');
-  menuToggle.setAttribute('aria-expanded', open);
-});
-silNav.querySelectorAll('a').forEach(a =>
-  a.addEventListener('click', () => silNav.classList.remove('sil-open'))
-);
+const silNav = document.getElementById('silNav');
+menuToggle.addEventListener('click', () => { const open = silNav.classList.toggle('sil-open'); menuToggle.setAttribute('aria-expanded', open); });
+silNav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => silNav.classList.remove('sil-open')));
+
 async function getSupabase() {
   if (window._supabase) return window._supabase;
   const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
@@ -584,13 +329,10 @@ async function getSupabase() {
 }
 document.getElementById('silSignOut').addEventListener('click', async function () {
   this.disabled = true; this.textContent = 'Signing out…';
-  try { const sb = await getSupabase(); await sb.auth.signOut(); }
-  finally { window.location.replace('/'); }
+  try { const sb = await getSupabase(); await sb.auth.signOut(); } finally { window.location.replace('/'); }
 });
 
-// ═══════════════════════════════════════════════════════
-// LEVEL CONFIG
-// ═══════════════════════════════════════════════════════
+// ═══ LEVEL CONFIG ════════════════════════════════════════
 const LEVEL_CONFIG = [
   { level: 1,  snr:  15, maskers: ['nature'],                      desc: 'One background · target clearly above noise · easy to identify' },
   { level: 2,  snr:  10, maskers: ['nature'],                      desc: 'One background · target noticeably louder than noise' },
@@ -617,279 +359,190 @@ const LEVEL_MESSAGES = [
   'Expert level. This is the true cocktail party problem in its hardest form.',
 ];
 
-// ═══════════════════════════════════════════════════════
-// WORD SETS
-// ═══════════════════════════════════════════════════════
+// ═══ WORD SETS ═══════════════════════════════════════════
 const WORD_SETS = {
-  colors:  ['red','blue','green','yellow','orange','purple','pink','brown',
-             'black','white','gray','silver','gold','violet','indigo','cyan',
-             'magenta','turquoise','lime','maroon'],
+  colors:  ['red','blue','green','yellow','orange','purple','pink','brown','black','white','gray','silver','gold','violet','indigo','cyan','magenta','turquoise','lime','maroon'],
   numbers: ['one','two','three','four','five','six','seven','eight','nine','ten'],
 };
 const MASKER_TYPES = ['nature', 'traffic', 'voices'];
-/** Target clips per word: `word_0.mp3` … `word_${TARGET_VARIANT_COUNT - 1}.mp3` */
 const TARGET_VARIANT_COUNT = 6;
 
-// ═══════════════════════════════════════════════════════
-// AUDIO ENGINE
-// ═══════════════════════════════════════════════════════
+// ═══ AUDIO ENGINE ════════════════════════════════════════
 class AudioEngine {
-  constructor() {
-    this.audioCtx = null;
-    this.resonanceScene = null;
-    this.analyser = null;
-    this.sources  = [];
-    this.isInitialized = false;
-  }
+  constructor() { this.audioCtx = null; this.resonanceScene = null; this.analyser = null; this.sources = []; this.isInitialized = false; }
   async init() {
     if (this.isInitialized) return;
     this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     this.resonanceScene = new ResonanceAudio(this.audioCtx);
     this.resonanceScene.setRoomProperties(
       { width: 10, height: 3, depth: 8 },
-      { left:'brick-bare', right:'brick-bare', front:'brick-bare',
-        back:'brick-bare', down:'wood-panel', up:'acoustic-ceiling-tiles' }
+      { left:'brick-bare', right:'brick-bare', front:'brick-bare', back:'brick-bare', down:'wood-panel', up:'acoustic-ceiling-tiles' }
     );
     this.analyser = this.audioCtx.createAnalyser();
-    this.analyser.fftSize = 2048;
-    this.analyser.smoothingTimeConstant = 0.8;
+    this.analyser.fftSize = 2048; this.analyser.smoothingTimeConstant = 0.8;
     this.resonanceScene.output.connect(this.analyser);
     this.analyser.connect(this.audioCtx.destination);
     this.isInitialized = true;
   }
-  resume() {
-    if (this.audioCtx && this.audioCtx.state === 'suspended') this.audioCtx.resume();
-  }
-  calcMaskerGain(snr, targetGain = 1.0) {
-    return targetGain * Math.pow(10, -snr / 20);
-  }
+  resume() { if (this.audioCtx && this.audioCtx.state === 'suspended') this.audioCtx.resume(); }
+  calcMaskerGain(snr, targetGain = 1.0) { return targetGain * Math.pow(10, -snr / 20); }
   _makeSource(buffer, gain, position) {
-    const src = this.audioCtx.createBufferSource();
-    src.buffer = buffer;
+    const src = this.audioCtx.createBufferSource(); src.buffer = buffer;
     const resSrc = this.resonanceScene.createSource();
     if (position) resSrc.setPosition(position.x, position.y, position.z);
-    else          resSrc.setPosition(0, 0, -1);
-    const gainNode = this.audioCtx.createGain();
-    gainNode.gain.value = gain;
-    src.connect(gainNode);
-    gainNode.connect(resSrc.input);
+    else resSrc.setPosition(0, 0, -1);
+    const gainNode = this.audioCtx.createGain(); gainNode.gain.value = gain;
+    src.connect(gainNode); gainNode.connect(resSrc.input);
     return src;
   }
   playTrial(targetBuffer, maskerBuffers, settings) {
     this.stopAll();
-    const now = this.audioCtx.currentTime;
-    const duration = 5.0;
+    const now = this.audioCtx.currentTime; const duration = 5.0;
     const wordStart = now + 0.3 + Math.random() * 0.5;
-    const positions = [
-      { x: -2,   y: 0, z:  0   },
-      { x: -1.5, y: 0, z: -1.5 },
-      { x:  1.5, y: 0, z: -1.5 },
-      { x:  0,   y: 0, z:  2   },
-    ];
+    const positions = [{ x: -2, y: 0, z: 0 }, { x: -1.5, y: 0, z: -1.5 }, { x: 1.5, y: 0, z: -1.5 }, { x: 0, y: 0, z: 2 }];
     maskerBuffers.forEach((buf, i) => {
       if (!buf) return;
       const src = this._makeSource(buf, settings.maskerGain, positions[i] || positions[0]);
-      src.start(now); src.stop(now + duration);
-      this.sources.push(src);
+      src.start(now); src.stop(now + duration); this.sources.push(src);
     });
     const tSrc = this._makeSource(targetBuffer, settings.targetGain, { x: 0, y: 0, z: -1 });
-    tSrc.start(wordStart); tSrc.stop(now + duration);
-    this.sources.push(tSrc);
+    tSrc.start(wordStart); tSrc.stop(now + duration); this.sources.push(tSrc);
     return { duration, wordStart: (wordStart - now) };
   }
-  stopAll() {
-    this.sources.forEach(src => { try { src.stop(); } catch(e){} });
-    this.sources = [];
-  }
+  stopAll() { this.sources.forEach(src => { try { src.stop(); } catch(e){} }); this.sources = []; }
 }
 
-// ═══════════════════════════════════════════════════════
-// ASSET LOADER
-// ═══════════════════════════════════════════════════════
+// ═══ ASSET LOADER ════════════════════════════════════════
 class AssetLoader {
-  constructor(audioCtx) {
-    this.audioCtx = audioCtx;
-    this.targets  = {};
-    this.maskers  = {};
-  }
+  constructor(audioCtx) { this.audioCtx = audioCtx; this.targets = {}; this.maskers = {}; this.loading = new Set(); }
   async _fetch(url) {
-    try {
-      const res = await fetch(url);
-      const ab  = await res.arrayBuffer();
-      return await this.audioCtx.decodeAudioData(ab);
-    } catch(e) { console.warn('Audio load failed:', url, e); return null; }
+    try { const res = await fetch(url); const ab = await res.arrayBuffer(); return await this.audioCtx.decodeAudioData(ab); }
+    catch(e) { console.warn('Audio load failed:', url, e); return null; }
   }
   async loadWord(word, variant = 0) {
+    const key = `${word}_${variant}`;
+    if (this.loading.has(key)) return;
+    this.loading.add(key);
     const buf = await this._fetch(`/audio/targets/${word}_${variant}.mp3`);
     if (!this.targets[word]) this.targets[word] = [];
     this.targets[word][variant] = buf;
-    return buf;
   }
   async loadMasker(type) {
     const buf = await this._fetch(`/audio/maskers/${type}.mp3`);
-    this.maskers[type] = buf;
-    return buf;
+    this.maskers[type] = buf; return buf;
   }
-  getWord(word) {
-    const variants = (this.targets[word] || []).filter(Boolean);
-    return variants.length ? variants[Math.floor(Math.random() * variants.length)] : null;
-  }
+  getWord(word) { const variants = (this.targets[word] || []).filter(Boolean); return variants.length ? variants[Math.floor(Math.random() * variants.length)] : null; }
   getMasker(type) { return this.maskers[type] || null; }
+  isWordReady(word) { return this.targets[word] && this.targets[word].some(Boolean); }
   excerpt(buf, duration = 4.0) {
     if (!buf) return null;
-    const sr = this.audioCtx.sampleRate;
-    const len = Math.floor(sr * duration);
-    const maxStart = buf.length - len;
+    const sr = this.audioCtx.sampleRate; const len = Math.floor(sr * duration); const maxStart = buf.length - len;
     if (maxStart <= 0) return buf;
     const start = Math.floor(Math.random() * maxStart);
-    const out   = this.audioCtx.createBuffer(buf.numberOfChannels, len, sr);
-    for (let c = 0; c < buf.numberOfChannels; c++) {
-      out.getChannelData(c).set(buf.getChannelData(c).subarray(start, start + len));
-    }
+    const out = this.audioCtx.createBuffer(buf.numberOfChannels, len, sr);
+    for (let c = 0; c < buf.numberOfChannels; c++) out.getChannelData(c).set(buf.getChannelData(c).subarray(start, start + len));
     return out;
   }
 }
 
-// ═══════════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════════
+// ═══ STATE ═══════════════════════════════════════════════
 const engine = new AudioEngine();
-let loader   = null;
+let loader = null;
 
 const S = {
-  // Session
-  currentLevel: 1,
-  wordSet: 'colors',
-  isPlaying: false,
-
-  // Level run
-  trialsInLevel: 0,        // 0-9 (how many completed)
-  trialResults: [],        // array of { correct, reactionMs }
-  currentWord: null,
-  currentTarget: null,
-  currentMaskers: null,
-  choices: [],
-  attempts: 0,
-  trialAnswered: false,
-  wordEndTime: null,       // performance.now() when word finishes, for reaction time
-  reactionStart: null,
-
-  // Running game stats
-  streak: 0,
-  bestStreak: 0,
-  totalTrials: 0,
-  totalCorrect: 0,
-  reactionTimes: [],
-
-  // Persistent best scores per level — loaded from Supabase
-  // bestScores[level] = { correct, accuracy, avgReaction }
-  bestScores: {},
-
-  // Word frequency weighting — tracks error counts per word
-  // wordErrors[word] = count
-  wordErrors: {},
+  currentLevel: 1, wordSet: 'colors', isPlaying: false,
+  trialsInLevel: 0, trialResults: [], currentWord: null,
+  currentTarget: null, currentMaskers: null, choices: [],
+  attempts: 0, trialAnswered: false, reactionStart: null,
+  streak: 0, bestStreak: 0, totalTrials: 0, totalCorrect: 0, reactionTimes: [],
+  bestScores: {}, wordErrors: {},
+  preloadedSets: new Set(),
 };
 
-// ═══════════════════════════════════════════════════════
-// SUPABASE PERSISTENCE
-// ═══════════════════════════════════════════════════════
+// ═══ PERSISTENCE ═════════════════════════════════════════
 async function loadBestScores() {
   try {
-    const sb   = window._supabase;
-    const uid  = window._currentUser?.id;
+    const sb = window._supabase; const uid = window._currentUser?.id;
     if (!sb || !uid) return;
-    const { data } = await sb
-      .from('cocktail_scores')
-      .select('level, correct, accuracy, avg_reaction_ms')
-      .eq('user_id', uid);
-    if (data) {
-      data.forEach(row => {
-        S.bestScores[row.level] = {
-          correct:    row.correct,
-          accuracy:   row.accuracy,
-          avgReaction: row.avg_reaction_ms,
-        };
-      });
-    }
+    const { data } = await sb.from('game_best_scores').select('level, correct, accuracy, avg_reaction_ms').eq('user_id', uid).eq('game', 'cocktail');
+    if (data) data.forEach(row => { S.bestScores[row.level] = { correct: row.correct, accuracy: row.accuracy, avgReaction: row.avg_reaction_ms }; });
   } catch(e) { console.warn('Could not load scores:', e); }
   renderLevelGrid();
 }
 
 async function saveBestScore(level, correct, accuracy, avgReactionMs) {
   try {
-    const sb  = window._supabase;
-    const uid = window._currentUser?.id;
+    const sb = window._supabase; const uid = window._currentUser?.id;
     if (!sb || !uid) return;
-    await sb.from('cocktail_scores').upsert({
-      user_id:         uid,
-      level,
-      correct,
-      accuracy,
-      avg_reaction_ms: avgReactionMs,
-      updated_at:      new Date().toISOString(),
-    }, { onConflict: 'user_id,level' });
+    await sb.from('game_best_scores').upsert({ user_id: uid, game: 'cocktail', level, correct, accuracy, avg_reaction_ms: avgReactionMs, updated_at: new Date().toISOString() }, { onConflict: 'user_id,game,level' });
   } catch(e) { console.warn('Could not save score:', e); }
 }
 
-// ═══════════════════════════════════════════════════════
-// SPECTROGRAM
-// ═══════════════════════════════════════════════════════
+async function saveSession(level, correct, trials, accuracy, avgReactionMs) {
+  try {
+    const sb = window._supabase; const uid = window._currentUser?.id;
+    if (!sb || !uid) return;
+    await sb.from('game_sessions').insert({ user_id: uid, game: 'cocktail', level, correct, trials, accuracy, avg_reaction_ms: avgReactionMs, played_at: new Date().toISOString() });
+  } catch(e) { console.warn('Could not save session:', e); }
+}
+
+// ═══ PRELOADING ══════════════════════════════════════════
+async function preloadWordSet(wordSet, onProgress) {
+  if (S.preloadedSets.has(wordSet)) return;
+  const words = WORD_SETS[wordSet];
+  const total = words.length * TARGET_VARIANT_COUNT;
+  let done = 0;
+
+  // Load all variants in parallel using Promise.all
+  const tasks = [];
+  for (const word of words) {
+    for (let v = 0; v < TARGET_VARIANT_COUNT; v++) {
+      tasks.push(loader.loadWord(word, v).then(() => { done++; if (onProgress) onProgress(done / total); }));
+    }
+  }
+  await Promise.all(tasks);
+  S.preloadedSets.add(wordSet);
+}
+
+async function preloadMaskers() {
+  await Promise.all(MASKER_TYPES.map(t => loader.loadMasker(t)));
+}
+
+// ═══ SPECTROGRAM ═════════════════════════════════════════
 let spectroRaf = null;
 function startSpectrogram() {
   if (spectroRaf) cancelAnimationFrame(spectroRaf);
-  const analyser = engine.analyser;
-  const bufLen   = analyser.frequencyBinCount;
-  const dataArr  = new Uint8Array(bufLen);
-  const canvas   = document.getElementById('spectrogram');
-  const ctx      = canvas.getContext('2d');
-  const maxBin   = Math.floor(bufLen * 0.5);
+  const analyser = engine.analyser; const bufLen = analyser.frequencyBinCount;
+  const dataArr = new Uint8Array(bufLen); const canvas = document.getElementById('spectrogram');
+  const ctx = canvas.getContext('2d'); const maxBin = Math.floor(bufLen * 0.5);
   function draw() {
-    spectroRaf = requestAnimationFrame(draw);
-    analyser.getByteFrequencyData(dataArr);
-    const img = ctx.getImageData(2, 0, canvas.width - 2, canvas.height);
-    ctx.putImageData(img, 0, 0);
-    ctx.fillStyle = '#0a0a0a';
-    ctx.fillRect(canvas.width - 2, 0, 2, canvas.height);
+    spectroRaf = requestAnimationFrame(draw); analyser.getByteFrequencyData(dataArr);
+    const img = ctx.getImageData(2, 0, canvas.width - 2, canvas.height); ctx.putImageData(img, 0, 0);
+    ctx.fillStyle = '#0a0a0a'; ctx.fillRect(canvas.width - 2, 0, 2, canvas.height);
     for (let i = 0; i < maxBin; i++) {
-      const val = dataArr[i];
-      const y   = canvas.height - Math.round((i / maxBin) * canvas.height);
-      const h   = Math.max(1, Math.round(canvas.height / maxBin));
-      const r   = Math.round(val * 0.18);
-      const g   = Math.round(val * 0.38 + 20);
-      const b   = Math.round(val * 0.14);
-      ctx.fillStyle = `rgb(${r},${g},${b})`;
+      const val = dataArr[i]; const y = canvas.height - Math.round((i / maxBin) * canvas.height);
+      const h = Math.max(1, Math.round(canvas.height / maxBin));
+      ctx.fillStyle = `rgb(${Math.round(val * 0.18)},${Math.round(val * 0.38 + 20)},${Math.round(val * 0.14)})`;
       ctx.fillRect(canvas.width - 2, y, 2, h);
     }
   }
   draw();
 }
 
-// ═══════════════════════════════════════════════════════
-// WORD FREQUENCY WEIGHTING
-// ═══════════════════════════════════════════════════════
+// ═══ WORD WEIGHTING ══════════════════════════════════════
 function pickWeightedWord(words) {
-  // Words that have been answered incorrectly more often get higher weight
   const weights = words.map(w => 1 + (S.wordErrors[w] || 0) * 1.5);
-  const total   = weights.reduce((a, b) => a + b, 0);
-  let rand      = Math.random() * total;
-  for (let i = 0; i < words.length; i++) {
-    rand -= weights[i];
-    if (rand <= 0) return words[i];
-  }
+  const total = weights.reduce((a, b) => a + b, 0); let rand = Math.random() * total;
+  for (let i = 0; i < words.length; i++) { rand -= weights[i]; if (rand <= 0) return words[i]; }
   return words[words.length - 1];
 }
 
-// ═══════════════════════════════════════════════════════
-// LEVEL GRID RENDER
-// ═══════════════════════════════════════════════════════
+// ═══ LEVEL GRID ══════════════════════════════════════════
 function renderLevelGrid() {
   const grid = document.getElementById('levelGrid');
   grid.innerHTML = LEVEL_CONFIG.map(cfg => {
-    const best   = S.bestScores[cfg.level];
-    const active = cfg.level === S.currentLevel;
-    const bestTxt = best
-      ? (best.correct === 10 ? '10/10 ★' : `${best.correct}/10`)
-      : '—';
+    const best = S.bestScores[cfg.level]; const active = cfg.level === S.currentLevel;
+    const bestTxt = best ? (best.correct === 10 ? '10/10 ★' : `${best.correct}/10`) : '—';
     const isPerfect = best && best.correct === 10;
     return `<button class="level-btn ${active ? 'active' : ''}" onclick="selectLevel(${cfg.level})">
       <span class="lvl-num">${cfg.level}</span>
@@ -899,189 +552,145 @@ function renderLevelGrid() {
 }
 
 window.selectLevel = function(level) {
-  if (S.isPlaying) {
-    engine.stopAll();
-    S.isPlaying = false;
-  }
-  S.currentLevel    = level;
-  S.trialsInLevel   = 0;
-  S.trialResults    = [];
-  S.streak          = 0;
-  S.bestStreak      = 0;
-
-  renderLevelGrid();
-  updateLevelUI();
-  resetTrialUI();
-  updateStats();
+  if (S.isPlaying) { engine.stopAll(); S.isPlaying = false; }
+  S.currentLevel = level; S.trialsInLevel = 0; S.trialResults = [];
+  S.streak = 0; S.bestStreak = 0;
+  renderLevelGrid(); updateLevelUI(); resetTrialUI(); updateStats();
 };
 
 function updateLevelUI() {
   const cfg = LEVEL_CONFIG[S.currentLevel - 1];
-  document.getElementById('section-title').textContent =
-    `Cocktail party problem — level ${S.currentLevel}`;
+  document.getElementById('section-title').textContent = `Cocktail party problem — level ${S.currentLevel}`;
   document.getElementById('level-badge').textContent = `Level ${S.currentLevel}`;
-
-  const diffInfo = document.getElementById('difficulty-info');
-  diffInfo.querySelector('.difficulty-info-label').textContent = `Level ${S.currentLevel}`;
+  document.getElementById('difficulty-info').querySelector('.difficulty-info-label').textContent = `Level ${S.currentLevel}`;
   document.getElementById('diff-desc').textContent = cfg.desc;
-
   document.getElementById('trial-num').textContent = '—';
   renderPips();
 }
 
-// ═══════════════════════════════════════════════════════
-// TRIAL PIPS
-// ═══════════════════════════════════════════════════════
+// ═══ TRIAL PIPS ══════════════════════════════════════════
 function renderPips() {
-  const container = document.getElementById('trial-pips');
-  container.innerHTML = '';
+  const container = document.getElementById('trial-pips'); container.innerHTML = '';
   for (let i = 0; i < 10; i++) {
-    const pip = document.createElement('div');
-    pip.className = 'trial-pip';
-    pip.id = `pip-${i}`;
-    if (i < S.trialResults.length) {
-      pip.classList.add(S.trialResults[i].correct ? 'correct' : 'incorrect');
-    } else if (i === S.trialsInLevel && S.trialsInLevel < 10) {
-      pip.classList.add('current');
-    }
+    const pip = document.createElement('div'); pip.className = 'trial-pip';
+    if (i < S.trialResults.length) pip.classList.add(S.trialResults[i].correct ? 'correct' : 'incorrect');
+    else if (i === S.trialsInLevel && S.trialsInLevel < 10) pip.classList.add('current');
     container.appendChild(pip);
   }
 }
 
-// ═══════════════════════════════════════════════════════
-// PLAY TRIAL
-// ═══════════════════════════════════════════════════════
+// ═══ PLAY TRIAL ══════════════════════════════════════════
 async function play() {
-  if (S.isPlaying) {
-    engine.stopAll();
-    S.isPlaying = false;
-    document.getElementById('btn-play').textContent = '▶ Play';
-    document.getElementById('btn-play').classList.add('primary');
-    return;
-  }
+  if (S.isPlaying) { engine.stopAll(); S.isPlaying = false; setPlayBtn(false); return; }
   if (S.trialsInLevel >= 10) return;
 
   engine.resume();
-
-  const cfg   = LEVEL_CONFIG[S.currentLevel - 1];
+  const cfg = LEVEL_CONFIG[S.currentLevel - 1];
   const words = WORD_SETS[S.wordSet];
-
-  // Pick weighted word
   S.currentWord = pickWeightedWord(words);
 
-  // Lazy-load word audio
-  let targetBuf = loader.getWord(S.currentWord);
-  if (!targetBuf) {
-    setFeedback('Loading audio...');
+  // Ensure word is loaded (should already be from preload, but guard anyway)
+  if (!loader.isWordReady(S.currentWord)) {
+    setFeedback('Loading audio…');
     for (let v = 0; v < TARGET_VARIANT_COUNT; v++) await loader.loadWord(S.currentWord, v);
-    targetBuf = loader.getWord(S.currentWord);
   }
+
+  const targetBuf = loader.getWord(S.currentWord);
   if (!targetBuf) { setFeedback('Audio not found for this word.', 'error'); return; }
 
   S.currentTarget = targetBuf;
-
-  // Build choices
-  const others = words.filter(w => w !== S.currentWord)
-    .sort(() => Math.random() - 0.5).slice(0, 3);
+  const others = words.filter(w => w !== S.currentWord).sort(() => Math.random() - 0.5).slice(0, 3);
   S.choices = [S.currentWord, ...others].sort(() => Math.random() - 0.5);
-  S.attempts      = 0;
-  S.trialAnswered = false;
-  S.reactionStart = null;
+  S.attempts = 0; S.trialAnswered = false; S.reactionStart = null;
 
-  // Populate choice buttons (hidden until audio finishes)
+  // Populate buttons but keep them hidden until word ends
   const btns = document.querySelectorAll('#choice-buttons .choice-btn');
   S.choices.forEach((word, i) => {
     btns[i].textContent = word.charAt(0).toUpperCase() + word.slice(1);
-    btns[i].disabled    = true;
-    btns[i].className   = 'choice-btn';
-    btns[i].onclick     = () => checkAnswer(word);
+    btns[i].disabled = true;
+    btns[i].className = 'choice-btn'; // hidden via CSS (visibility: hidden, no 'revealed' class)
+    btns[i].onclick = () => checkAnswer(word);
   });
 
-  // Update trial counter
   document.getElementById('trial-num').textContent = S.trialsInLevel + 1;
   renderPips();
 
-  // Maskers
   S.currentMaskers = cfg.maskers.map(t => loader.excerpt(loader.getMasker(t)));
   const maskerGain = engine.calcMaskerGain(cfg.snr, 1.0);
-
-  const { duration, wordStart } = engine.playTrial(S.currentTarget, S.currentMaskers, {
-    targetGain: 1.0,
-    maskerGain,
-  });
+  const { duration, wordStart } = engine.playTrial(S.currentTarget, S.currentMaskers, { targetGain: 1.0, maskerGain });
 
   S.isPlaying = true;
   setFeedback('Listening…');
-  document.getElementById('btn-play').textContent = '■ Stop';
-  document.getElementById('btn-play').classList.remove('primary');
+  setPlayBtn(true);
   document.getElementById('btn-repeat').disabled = false;
 
-  // Enable choice buttons after word would have finished (~wordStart + ~0.8s)
-  const enableDelay = (wordStart + 0.85) * 1000;
+  // Reveal buttons only after the target word has finished playing
+  // wordStart = delay before word, assume word is ~0.7s long
+  const revealDelay = (wordStart + 0.75) * 1000;
   setTimeout(() => {
     if (!S.trialAnswered) {
-      btns.forEach(b => { if (b.textContent) b.disabled = false; });
+      btns.forEach(b => {
+        if (b.textContent) {
+          b.classList.add('revealed');
+          b.disabled = false;
+        }
+      });
       S.reactionStart = performance.now();
       setFeedback('What did you hear?');
     }
-  }, enableDelay);
+  }, revealDelay);
 
   setTimeout(() => {
     S.isPlaying = false;
-    document.getElementById('btn-play').textContent = '▶ Play';
-    document.getElementById('btn-play').classList.add('primary');
+    setPlayBtn(false);
   }, duration * 1000);
+}
+
+function setPlayBtn(playing) {
+  const btn = document.getElementById('btn-play');
+  btn.innerHTML = playing
+    ? '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg> Stop'
+    : '<svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> Play';
+  btn.classList.toggle('primary', !playing);
 }
 
 function repeat() {
   if (!S.currentTarget || !S.currentMaskers || S.trialAnswered) return;
   engine.resume();
-  const cfg        = LEVEL_CONFIG[S.currentLevel - 1];
+  const cfg = LEVEL_CONFIG[S.currentLevel - 1];
   const maskerGain = engine.calcMaskerGain(cfg.snr, 1.0);
-  const { duration, wordStart } = engine.playTrial(S.currentTarget, S.currentMaskers, {
-    targetGain: 1.0,
-    maskerGain,
-  });
+  const { duration, wordStart } = engine.playTrial(S.currentTarget, S.currentMaskers, { targetGain: 1.0, maskerGain });
   S.isPlaying = true;
   setFeedback('Listening…');
-  document.getElementById('btn-play').textContent = '■ Stop';
-  document.getElementById('btn-play').classList.remove('primary');
+  setPlayBtn(true);
 
+  // Hide buttons again during repeat
   const btns = document.querySelectorAll('#choice-buttons .choice-btn');
-  btns.forEach(b => { if (b.textContent) b.disabled = true; });
+  btns.forEach(b => { b.classList.remove('revealed'); b.disabled = true; });
+
   setTimeout(() => {
     if (!S.trialAnswered) {
-      btns.forEach(b => { if (b.textContent) b.disabled = false; });
+      btns.forEach(b => { if (b.textContent) { b.classList.add('revealed'); b.disabled = false; } });
       S.reactionStart = performance.now();
       setFeedback('What did you hear?');
     }
-  }, (wordStart + 0.85) * 1000);
+  }, (wordStart + 0.75) * 1000);
 
-  setTimeout(() => {
-    S.isPlaying = false;
-    document.getElementById('btn-play').textContent = '▶ Play';
-    document.getElementById('btn-play').classList.add('primary');
-  }, duration * 1000);
+  setTimeout(() => { S.isPlaying = false; setPlayBtn(false); }, duration * 1000);
 }
 
-// ═══════════════════════════════════════════════════════
-// CHECK ANSWER
-// ═══════════════════════════════════════════════════════
+// ═══ CHECK ANSWER ════════════════════════════════════════
 function checkAnswer(selected) {
   if (S.trialAnswered) return;
   S.attempts++;
-
-  const correct      = selected === S.currentWord;
-  const reactionMs   = S.reactionStart ? Math.round(performance.now() - S.reactionStart) : null;
+  const correct = selected === S.currentWord;
+  const reactionMs = S.reactionStart ? Math.round(performance.now() - S.reactionStart) : null;
 
   if (correct) {
     S.trialAnswered = true;
-    S.streak++;
-    if (S.streak > S.bestStreak) S.bestStreak = S.streak;
-    S.totalCorrect++;
-    S.totalTrials++;
+    S.streak++; if (S.streak > S.bestStreak) S.bestStreak = S.streak;
+    S.totalCorrect++; S.totalTrials++;
     if (reactionMs) S.reactionTimes.push(reactionMs);
-
     S.trialResults.push({ correct: true, reactionMs });
 
     document.querySelectorAll('#choice-buttons .choice-btn').forEach(b => {
@@ -1091,37 +700,21 @@ function checkAnswer(selected) {
 
     const reactionStr = reactionMs ? ` (${(reactionMs/1000).toFixed(2)}s)` : '';
     setFeedback('Correct' + reactionStr, 'success');
-
-    updateStreakDisplay();
-    updateStats();
-    renderPips();
-
+    updateStreakDisplay(); updateStats(); renderPips();
     document.getElementById('btn-repeat').disabled = true;
 
-    if (S.trialsInLevel + 1 >= 10) {
-      S.trialsInLevel++;
-      setTimeout(showLevelComplete, 900);
-    } else {
-      S.trialsInLevel++;
-    }
+    if (S.trialsInLevel + 1 >= 10) { S.trialsInLevel++; setTimeout(showLevelComplete, 900); }
+    else { S.trialsInLevel++; }
 
   } else if (S.attempts < 2) {
     setFeedback('Try again', 'error');
     document.querySelectorAll('#choice-buttons .choice-btn').forEach(b => {
-      if (b.textContent.toLowerCase() === selected) {
-        b.classList.add('incorrect');
-        setTimeout(() => b.classList.remove('incorrect'), 900);
-      }
+      if (b.textContent.toLowerCase() === selected) { b.classList.add('incorrect'); setTimeout(() => b.classList.remove('incorrect'), 900); }
     });
 
   } else {
-    // Second wrong — reveal
-    S.trialAnswered = true;
-    S.streak = 0;
-    S.totalTrials++;
-    // Track word error for weighting
+    S.trialAnswered = true; S.streak = 0; S.totalTrials++;
     S.wordErrors[S.currentWord] = (S.wordErrors[S.currentWord] || 0) + 1;
-
     S.trialResults.push({ correct: false, reactionMs });
 
     document.querySelectorAll('#choice-buttons .choice-btn').forEach(b => {
@@ -1131,89 +724,54 @@ function checkAnswer(selected) {
 
     const wordCap = S.currentWord.charAt(0).toUpperCase() + S.currentWord.slice(1);
     setFeedback('The word was: ' + wordCap, 'error');
-
-    updateStreakDisplay();
-    updateStats();
-    renderPips();
-
+    updateStreakDisplay(); updateStats(); renderPips();
     document.getElementById('btn-repeat').disabled = true;
 
-    if (S.trialsInLevel + 1 >= 10) {
-      S.trialsInLevel++;
-      setTimeout(showLevelComplete, 1200);
-    } else {
-      S.trialsInLevel++;
-    }
+    if (S.trialsInLevel + 1 >= 10) { S.trialsInLevel++; setTimeout(showLevelComplete, 1200); }
+    else { S.trialsInLevel++; }
   }
 }
 
 function nextTrial() {
-  engine.stopAll();
-  S.isPlaying = false;
-  document.getElementById('btn-play').textContent = '▶ Play';
-  document.getElementById('btn-play').classList.add('primary');
+  engine.stopAll(); S.isPlaying = false; setPlayBtn(false);
   document.getElementById('btn-repeat').disabled = true;
   setFeedback('');
   const btns = document.querySelectorAll('#choice-buttons .choice-btn');
-  btns.forEach(b => {
-    b.textContent = '';
-    b.disabled    = true;
-    b.className   = 'choice-btn';
-    b.onclick     = null;
-  });
+  btns.forEach(b => { b.textContent = ''; b.disabled = true; b.className = 'choice-btn'; b.onclick = null; });
   renderPips();
 }
 
-function resetTrialUI() {
-  nextTrial();
-  document.getElementById('trial-num').textContent = '—';
-  renderPips();
-}
+function resetTrialUI() { nextTrial(); document.getElementById('trial-num').textContent = '—'; renderPips(); }
 
-// ═══════════════════════════════════════════════════════
-// STREAK DISPLAY
-// ═══════════════════════════════════════════════════════
+// ═══ STREAK ══════════════════════════════════════════════
 function updateStreakDisplay() {
   const el = document.getElementById('streak-display');
   document.getElementById('streak-num').textContent = S.streak;
   el.classList.toggle('hot', S.streak >= 3);
 }
 
-// ═══════════════════════════════════════════════════════
-// STATS
-// ═══════════════════════════════════════════════════════
+// ═══ STATS ═══════════════════════════════════════════════
 function updateStats() {
-  document.getElementById('stat-trials').textContent    = S.totalTrials;
-  document.getElementById('stat-correct').textContent   = S.totalCorrect;
+  document.getElementById('stat-trials').textContent  = S.totalTrials;
+  document.getElementById('stat-correct').textContent = S.totalCorrect;
   document.getElementById('stat-best-streak').textContent = S.bestStreak;
-  const pct = S.totalTrials > 0
-    ? Math.round((S.totalCorrect / S.totalTrials) * 100) + '%' : '—';
-  document.getElementById('stat-accuracy').textContent  = pct;
-  const avgR = S.reactionTimes.length > 0
-    ? (S.reactionTimes.reduce((a,b)=>a+b,0) / S.reactionTimes.length / 1000).toFixed(2) + 's'
-    : '—';
-  document.getElementById('stat-reaction').textContent  = avgR;
+  const pct = S.totalTrials > 0 ? Math.round((S.totalCorrect / S.totalTrials) * 100) + '%' : '—';
+  document.getElementById('stat-accuracy').textContent = pct;
+  const avgR = S.reactionTimes.length > 0 ? (S.reactionTimes.reduce((a,b)=>a+b,0) / S.reactionTimes.length / 1000).toFixed(2) + 's' : '—';
+  document.getElementById('stat-reaction').textContent = avgR;
 }
 
-// ═══════════════════════════════════════════════════════
-// LEVEL COMPLETE
-// ═══════════════════════════════════════════════════════
+// ═══ LEVEL COMPLETE ══════════════════════════════════════
 async function showLevelComplete() {
-  const results  = S.trialResults;
-  const correct  = results.filter(r => r.correct).length;
+  const results = S.trialResults;
+  const correct = results.filter(r => r.correct).length;
   const accuracy = Math.round((correct / 10) * 100);
-  const times    = results.filter(r => r.reactionMs).map(r => r.reactionMs);
-  const avgReact = times.length
-    ? (times.reduce((a,b)=>a+b,0) / times.length / 1000).toFixed(2) + 's'
-    : '—';
-  const avgReactMs = times.length
-    ? Math.round(times.reduce((a,b)=>a+b,0) / times.length)
-    : null;
+  const times = results.filter(r => r.reactionMs).map(r => r.reactionMs);
+  const avgReact = times.length ? (times.reduce((a,b)=>a+b,0) / times.length / 1000).toFixed(2) + 's' : '—';
+  const avgReactMs = times.length ? Math.round(times.reduce((a,b)=>a+b,0) / times.length) : null;
 
-  // Check if new best
   const prev = S.bestScores[S.currentLevel];
-  const isNewBest = !prev || correct > prev.correct ||
-    (correct === prev.correct && avgReactMs && avgReactMs < (prev.avgReaction || Infinity));
+  const isNewBest = !prev || correct > prev.correct || (correct === prev.correct && avgReactMs && avgReactMs < (prev.avgReaction || Infinity));
 
   if (isNewBest) {
     S.bestScores[S.currentLevel] = { correct, accuracy, avgReaction: avgReactMs };
@@ -1221,110 +779,100 @@ async function showLevelComplete() {
     renderLevelGrid();
   }
 
-  // Populate overlay
-  document.getElementById('lc-title').textContent =
-    correct === 10 ? '★ Perfect score' : correct >= 7 ? 'Level complete' : 'Level finished';
+  // Save session log
+  saveSession(S.currentLevel, correct, 10, accuracy, avgReactMs);
+
+  document.getElementById('lc-title').textContent = correct === 10 ? '★ Perfect score' : correct >= 7 ? 'Level complete' : 'Level finished';
   document.getElementById('lc-score').textContent = `${correct} / 10`;
   document.getElementById('lc-accuracy').textContent = accuracy + '%';
   document.getElementById('lc-reaction').textContent = avgReact;
-  document.getElementById('lc-streak').textContent   = S.bestStreak;
+  document.getElementById('lc-streak').textContent = S.bestStreak;
   document.getElementById('lc-prev-best').textContent = prev ? `${prev.correct}/10` : '—';
 
-  const recordEl = document.getElementById('lc-record');
-  recordEl.classList.toggle('visible', isNewBest && !!prev);
-
-  // Pip row
-  const pipRow = document.getElementById('lc-pips');
-  pipRow.innerHTML = results.map(r =>
-    `<div class="lc-pip ${r.correct ? 'correct' : 'incorrect'}"></div>`
-  ).join('');
-
-  // Message
+  document.getElementById('lc-record').classList.toggle('visible', isNewBest && !!prev);
+  document.getElementById('lc-pips').innerHTML = results.map(r => `<div class="lc-pip ${r.correct ? 'correct' : 'incorrect'}"></div>`).join('');
   document.getElementById('lc-msg').textContent = LEVEL_MESSAGES[S.currentLevel - 1];
 
-  // Next level button
   const nextBtn = document.getElementById('lc-next-btn');
-  if (S.currentLevel >= 10) {
-    nextBtn.textContent = 'Try level 1 again';
-    nextBtn.onclick = () => { closeLevelComplete(); window.selectLevel(1); };
-  } else {
-    nextBtn.textContent = `Next: Level ${S.currentLevel + 1} →`;
-    nextBtn.onclick = nextLevel;
-  }
+  if (S.currentLevel >= 10) { nextBtn.textContent = 'Try level 1 again'; nextBtn.onclick = () => { closeLevelComplete(); window.selectLevel(1); }; }
+  else { nextBtn.textContent = `Next: Level ${S.currentLevel + 1} →`; nextBtn.onclick = nextLevel; }
 
   document.getElementById('levelComplete').classList.add('visible');
 }
 
-function closeLevelComplete() {
-  document.getElementById('levelComplete').classList.remove('visible');
-}
+function closeLevelComplete() { document.getElementById('levelComplete').classList.remove('visible'); }
+window.retryLevel = function() { closeLevelComplete(); selectLevel(S.currentLevel); };
+window.nextLevel = function() { closeLevelComplete(); if (S.currentLevel < 10) selectLevel(S.currentLevel + 1); };
 
-window.retryLevel = function() {
-  closeLevelComplete();
-  selectLevel(S.currentLevel);
-};
+// ═══ FEEDBACK ════════════════════════════════════════════
+function setFeedback(msg, cls) { const el = document.getElementById('feedback-msg'); el.textContent = msg; el.className = 'feedback-msg' + (cls ? ' ' + cls : ''); }
 
-window.nextLevel = function() {
-  closeLevelComplete();
-  if (S.currentLevel < 10) selectLevel(S.currentLevel + 1);
-};
-
-// ═══════════════════════════════════════════════════════
-// FEEDBACK
-// ═══════════════════════════════════════════════════════
-function setFeedback(msg, cls) {
-  const el = document.getElementById('feedback-msg');
-  el.textContent = msg;
-  el.className   = 'feedback-msg' + (cls ? ' ' + cls : '');
-}
-
-// ═══════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════
+// ═══ INIT ════════════════════════════════════════════════
 async function init() {
   await engine.init();
   loader = new AssetLoader(engine.audioCtx);
-  setFeedback('Loading audio...');
 
-  // Preload maskers and seed words
-  for (const t of MASKER_TYPES) await loader.loadMasker(t);
-  const seedWords = ['red','blue','one','two','three','green'];
-  for (const w of seedWords) {
-    for (let v = 0; v < TARGET_VARIANT_COUNT; v++) await loader.loadWord(w, v);
-  }
+  // Show loading bar while preloading active set (colors by default)
+  const loadingBar = document.getElementById('loading-bar');
+  const loadingFill = document.getElementById('loading-bar-fill');
+  loadingBar.classList.add('visible');
+  setFeedback('Loading audio…');
+  document.getElementById('btn-play').disabled = true;
 
+  // Preload maskers first (fast, only 3 files)
+  await preloadMaskers();
+
+  // Preload active word set with progress
+  await preloadWordSet('colors', (progress) => {
+    loadingFill.style.width = Math.round(progress * 100) + '%';
+  });
+
+  loadingBar.classList.remove('visible');
+  loadingFill.style.width = '0%';
   setFeedback('');
+  document.getElementById('btn-play').disabled = false;
+
   startSpectrogram();
   renderLevelGrid();
   updateLevelUI();
   updateStats();
 
-  // Wire up buttons
+  // Background-load numbers set
+  setTimeout(() => { preloadWordSet('numbers'); }, 500);
+
   document.getElementById('btn-play').addEventListener('click', play);
   document.getElementById('btn-repeat').addEventListener('click', repeat);
 
-  // Word set toggles
   document.querySelectorAll('[data-wordset]').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('[data-wordset]').forEach(b => b.classList.remove('on'));
       btn.classList.add('on');
-      S.wordSet = btn.dataset.wordset;
-      // Reset if mid-level
-      if (S.trialsInLevel > 0) selectLevel(S.currentLevel);
+      const newSet = btn.dataset.wordset;
+      if (newSet !== S.wordSet) {
+        S.wordSet = newSet;
+        // Preload this set if not already done
+        if (!S.preloadedSets.has(newSet)) {
+          const loadingBar = document.getElementById('loading-bar');
+          const loadingFill = document.getElementById('loading-bar-fill');
+          loadingBar.classList.add('visible');
+          document.getElementById('btn-play').disabled = true;
+          preloadWordSet(newSet, (p) => { loadingFill.style.width = Math.round(p * 100) + '%'; }).then(() => {
+            loadingBar.classList.remove('visible'); loadingFill.style.width = '0%';
+            document.getElementById('btn-play').disabled = false;
+          });
+        }
+        if (S.trialsInLevel > 0) selectLevel(S.currentLevel);
+      }
     });
   });
 }
 
-function onAuthReady(cb) {
-  if (window._currentUser) { cb(); return; }
-  window.addEventListener('authReady', cb, { once: true });
-}
+function onAuthReady(cb) { if (window._currentUser) { cb(); return; } window.addEventListener('authReady', cb, { once: true }); }
 
 onAuthReady(async () => {
   await loadBestScores();
   await init();
 });
-
 </script>
 </body>
 </html>
