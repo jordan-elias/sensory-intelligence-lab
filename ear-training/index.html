@@ -4,16 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ear Training</title>
-
   <meta name="robots" content="noindex, nofollow">
-
   <link rel="icon" type="image/png" href="/images/favicon.png">
   <link rel="apple-touch-icon" href="/images/favicon.png">
   <link rel="manifest" href="/site.webmanifest">
-
-
   <script src="/dashboard/auth-guard.js" type="module"></script>
-
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
 
   <style>
@@ -22,494 +17,170 @@
     :root {
       --font-body: 'Inter', sans-serif;
       --font-heading: 'Space Grotesk', sans-serif;
-      --color-bg: #ffffff;
-      --color-surface: #f9f9f7;
-      --color-border: #e5e5e0;
-      --color-text: #1a1a1a;
-      --color-muted: #6b6b6b;
-      --color-accent: #2a5c45;
-      --color-accent-light: #edf4f0;
-      --color-accent-hover: #1e4433;
-      --color-correct: #2a5c45;
-      --color-correct-bg: #edf4f0;
-      --color-correct-border: #b8d9c8;
-      --color-wrong: #7a2e2e;
-      --color-wrong-bg: #fdf2f2;
-      --color-wrong-border: #e8c4c4;
-      --header-height: 56px;
+      --bg: #ffffff; --surface: #f9f9f7; --border: #e5e5e0;
+      --text: #1a1a1a; --muted: #6b6b6b;
+      --accent: #2a5c45; --accent-light: #edf4f0; --accent-hover: #1e4433;
+      --correct: #2a5c45; --correct-bg: #edf4f0; --correct-border: #b8d9c8;
+      --wrong: #7a2e2e; --wrong-bg: #fdf2f2; --wrong-border: #e8c4c4;
     }
 
     html { font-size: 16px; }
+    body { font-family: var(--font-body); color: var(--text); background: var(--bg); line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; }
+    a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+    a:hover { color: var(--accent); }
 
-    body {
-      font-family: var(--font-body);
-      color: var(--color-text);
-      background: var(--color-bg);
-      line-height: 1.6;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    a { color: var(--color-text); text-decoration: underline; text-underline-offset: 3px; }
-    a:hover { color: var(--color-accent); }
-
-    /* ══════════════════════════════════════
-       HEADER
-    ══════════════════════════════════════ */
-    .sil-header {
-      border-bottom: 1px solid var(--color-border);
-      padding: 0 1.5rem;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      left: 0;
-      right: 0;
-      background: var(--color-bg);
-      z-index: 10;
-      gap: 1rem;
-      width: 100%;
-    }
-    .sil-header__wordmark {
-      font-family: var(--font-heading);
-      font-size: 1rem;
-      font-weight: 600;
-      letter-spacing: -0.01em;
-      white-space: nowrap;
-      flex-shrink: 0;
-      text-decoration: none;
-      color: var(--color-text);
-    }
-    .sil-header__wordmark:hover { color: var(--color-accent); }
-    .sil-header__nav {
-      display: flex;
-      gap: 0.25rem;
-      align-items: center;
-    }
-    .sil-header__nav a {
-      font-family: var(--font-body);
-      font-size: 0.8rem;
-      font-weight: 500;
-      text-decoration: none;
-      color: var(--color-muted);
-      transition: color 0.15s;
-      white-space: nowrap;
-      padding: 0.3rem 0.65rem;
-    }
-    .sil-header__nav a:hover { color: var(--color-text); }
-    .sil-header__nav a.sil-active { color: var(--color-accent); font-weight: 600; }
-    .sil-header__signout {
-      font-family: var(--font-body);
-      font-size: 0.8rem;
-      font-weight: 500;
-      color: var(--color-muted);
-      background: none;
-      border: 1px solid var(--color-border);
-      cursor: pointer;
-      padding: 0.3rem 0.75rem;
-      transition: color 0.15s, border-color 0.15s;
-      white-space: nowrap;
-      line-height: 1.6;
-    }
-    .sil-header__signout:hover { color: var(--color-text); border-color: var(--color-text); }
+    /* ── HEADER ── */
+    .sil-header { border-bottom: 1px solid var(--border); padding: 0 1.5rem; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; left: 0; right: 0; background: var(--bg); z-index: 100; gap: 1rem; width: 100%; }
+    .sil-header__wordmark { font-family: var(--font-heading); font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; flex-shrink: 0; text-decoration: none; color: var(--text); }
+    .sil-header__wordmark:hover { color: var(--accent); }
+    .sil-header__nav { display: flex; gap: 0.25rem; align-items: center; }
+    .sil-header__nav a { font-family: var(--font-body); font-size: 0.8rem; font-weight: 500; text-decoration: none; color: var(--muted); transition: color 0.15s; white-space: nowrap; padding: 0.3rem 0.65rem; }
+    .sil-header__nav a:hover { color: var(--text); }
+    .sil-header__nav a.sil-active { color: var(--accent); font-weight: 600; }
+    .sil-header__signout { font-family: var(--font-body); font-size: 0.8rem; font-weight: 500; color: var(--muted); background: none; border: 1px solid var(--border); cursor: pointer; padding: 0.3rem 0.75rem; transition: color 0.15s, border-color 0.15s; white-space: nowrap; line-height: 1.6; }
+    .sil-header__signout:hover { color: var(--text); border-color: var(--text); }
     .sil-header__signout:disabled { opacity: 0.5; cursor: not-allowed; }
-    .sil-header__toggle {
-      display: none;
-      flex-direction: column;
-      gap: 4px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 4px;
-      flex-shrink: 0;
-    }
-    .sil-header__toggle span { display: block; width: 20px; height: 2px; background: var(--color-text); }
+    .sil-header__toggle { display: none; flex-direction: column; gap: 4px; background: none; border: none; cursor: pointer; padding: 4px; flex-shrink: 0; }
+    .sil-header__toggle span { display: block; width: 20px; height: 2px; background: var(--text); }
     @media (max-width: 700px) {
       .sil-header { padding: 0 1rem; }
       .sil-header__toggle { display: flex; }
-      .sil-header__nav {
-        display: none;
-        position: absolute;
-        top: 56px; left: 0; right: 0;
-        background: var(--color-bg);
-        border-bottom: 1px solid var(--color-border);
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 0.75rem 1rem;
-        gap: 0;
-        z-index: 99;
-      }
+      .sil-header__nav { display: none; position: absolute; top: 56px; left: 0; right: 0; background: var(--bg); border-bottom: 1px solid var(--border); flex-direction: column; align-items: flex-start; padding: 0.75rem 1rem; gap: 0; z-index: 99; }
       .sil-header__nav.sil-open { display: flex; }
-      .sil-header__nav a,
-      .sil-header__signout { font-size: 0.875rem; padding: 0.55rem 0.5rem; }
+      .sil-header__nav a, .sil-header__signout { font-size: 0.875rem; padding: 0.55rem 0.5rem; }
       .sil-header__signout { border: none; }
     }
 
-    /* ── Breadcrumb ── */
-    .breadcrumb-nav {
-      padding: 0.75rem 1.5rem 0;
-      max-width: 860px;
-      margin: 0 auto;
+    /* ── BREADCRUMB ── */
+    .bc { padding: .75rem 1.5rem 0; max-width: 1100px; margin: 0 auto; width: 100%; }
+    .bc ol { list-style: none; display: flex; gap: .3rem; align-items: center; font-size: .75rem; color: var(--muted); flex-wrap: wrap; }
+    .bc li + li::before { content: '/'; margin-right: .3rem; color: var(--border); }
+    .bc a { color: var(--muted); text-decoration: none; }
+    .bc a:hover { color: var(--accent); text-decoration: underline; }
+
+    /* ── PAGE LAYOUT ── */
+    main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 4rem; flex: 1; width: 100%; }
+    @media (max-width: 700px) { main { padding: 1.25rem 1rem 3rem; } }
+
+    .page-header { margin-bottom: 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border); }
+    .page-header h2 { font-family: var(--font-heading); font-size: 1.75rem; font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; margin-bottom: .3rem; }
+    .page-header p { font-size: .88rem; color: var(--muted); }
+
+    .section-label { font-family: var(--font-heading); font-size: .62rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: .6rem; display: block; }
+
+    /* ══════════════════════════════════════════
+       TWO-COLUMN LAYOUT
+    ══════════════════════════════════════════ */
+    .app-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    @media (max-width: 700px) {
+      .app-layout { grid-template-columns: 1fr; gap: 1rem; }
     }
 
-    .breadcrumb-nav ol {
-      list-style: none;
-      display: flex;
-      gap: 0.3rem;
-      align-items: center;
-      font-size: 0.75rem;
-      color: var(--color-muted);
-      flex-wrap: wrap;
-    }
-
-    .breadcrumb-nav li + li::before {
-      content: '/';
-      margin-right: 0.3rem;
-      color: var(--color-border);
-    }
-
-    .breadcrumb-nav a { color: var(--color-muted); text-decoration: none; }
-    .breadcrumb-nav a:hover { color: var(--color-accent); text-decoration: underline; }
-
-    @media (max-width: 400px) {
-      .breadcrumb-nav li.bc-mid { display: none; }
-      .breadcrumb-nav li.bc-mid + li::before { display: none; }
-    }
-
-    /* ── Main ── */
-    main {
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 2.5rem 2rem 4rem;
-      flex: 1;
-    }
-
-    .page-header {
-      margin-bottom: 2rem;
-      padding-bottom: 1.75rem;
-      border-bottom: 1px solid var(--color-border);
-    }
-
-    .page-header h2 {
-      font-family: var(--font-heading);
-      font-size: 2rem;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-      line-height: 1.2;
-      margin-bottom: 0.4rem;
-    }
-
-    .page-header p { font-size: 0.9rem; color: var(--color-muted); }
-
-    .section-label {
-      font-family: var(--font-heading);
-      font-size: 0.65rem;
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--color-muted);
-      margin-bottom: 0.75rem;
-    }
-
-    /* ── Mode selector ── */
-    .mode-selector { margin-bottom: 2rem; }
-
-    .mode-btns {
-      display: flex;
-      gap: 1px;
-      background: var(--color-border);
-      border: 1px solid var(--color-border);
-      overflow: hidden;
-      width: fit-content;
-    }
-
-    .mode-btn {
-      font-family: var(--font-heading);
-      font-size: 0.875rem;
-      font-weight: 600;
-      padding: 0.65rem 2rem;
-      border: none;
-      background: var(--color-bg);
-      color: var(--color-muted);
-      cursor: pointer;
-      transition: background 0.15s, color 0.15s;
-      letter-spacing: -0.01em;
-    }
-
-    .mode-btn.active { background: var(--color-accent); color: white; }
-    .mode-btn:not(.active):hover { background: var(--color-accent-light); color: var(--color-accent); }
-
-    /* ── Settings panel ── */
-    .settings-panel {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      padding: 1.25rem 1.5rem;
-      margin-bottom: 2rem;
-      display: none;
-    }
-
-    .settings-panel.visible { display: block; }
-
-    .settings-row {
-      display: flex;
-      gap: 2rem;
-      flex-wrap: wrap;
-      align-items: flex-start;
-    }
-
-    .settings-group {
+    /* ── LEFT PANEL ── */
+    .left-panel {
+      position: sticky;
+      top: 72px;
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
+      gap: .85rem;
+    }
+    @media (max-width: 700px) {
+      .left-panel { position: static; }
     }
 
-    .settings-group-label {
-      font-size: 0.72rem;
-      font-weight: 500;
-      color: var(--color-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
+    /* Mode selector */
+    .mode-btns { display: flex; gap: 1px; background: var(--border); border: 1px solid var(--border); overflow: hidden; }
+    .mode-btn { font-family: var(--font-heading); font-size: .82rem; font-weight: 600; padding: .55rem 0; flex: 1; border: none; background: var(--bg); color: var(--muted); cursor: pointer; transition: background .15s, color .15s; letter-spacing: -.01em; text-align: center; }
+    .mode-btn.active { background: var(--accent); color: white; }
+    .mode-btn:not(.active):hover { background: var(--accent-light); color: var(--accent); }
+
+    /* Settings panel */
+    .settings-panel { background: var(--surface); border: 1px solid var(--border); padding: 1rem; display: flex; flex-direction: column; gap: .85rem; }
+    .settings-group { display: flex; flex-direction: column; gap: .4rem; }
+    .settings-group-label { font-size: .62rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
+    .toggle-row { display: flex; gap: 3px; flex-wrap: wrap; }
+    .toggle-btn { font-family: var(--font-body); font-size: .75rem; font-weight: 500; padding: .32rem .7rem; border: 1px solid var(--border); background: var(--bg); color: var(--muted); cursor: pointer; transition: all .12s; min-height: 32px; }
+    .toggle-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+    .toggle-btn:not(.active):hover { border-color: var(--accent); color: var(--accent); }
+    .toggle-btn.staged { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+    /* Apply button */
+    .apply-btn { font-family: var(--font-heading); font-size: .82rem; font-weight: 600; padding: .6rem 1rem; border: none; background: var(--accent); color: white; cursor: pointer; transition: background .15s; letter-spacing: -.01em; width: 100%; }
+    .apply-btn:hover { background: var(--accent-hover); }
+    .apply-btn.has-changes { background: var(--accent); box-shadow: 0 0 0 2px var(--accent-light); }
+
+    /* ── RIGHT PANEL ── */
+    .right-panel { display: flex; flex-direction: column; gap: .75rem; min-height: 0; }
+
+    /* Transport / score bar */
+    .transport-bar { display: flex; align-items: center; gap: .75rem; padding: .6rem .85rem; background: var(--surface); border: 1px solid var(--border); flex-wrap: wrap; }
+    .play-btn { font-family: var(--font-heading); font-size: .78rem; font-weight: 600; padding: .42rem 1rem; border: none; background: var(--accent); color: white; cursor: pointer; transition: background .15s; display: flex; align-items: center; gap: .45rem; flex-shrink: 0; }
+    .play-btn:hover { background: var(--accent-hover); }
+    .play-icon { width: 0; height: 0; border-left: 8px solid white; border-top: 5px solid transparent; border-bottom: 5px solid transparent; display: inline-block; flex-shrink: 0; }
+    .score-items { display: flex; gap: 1.25rem; font-size: .8rem; color: var(--muted); align-items: baseline; flex-wrap: wrap; }
+    .score-items strong { font-weight: 600; color: var(--text); }
+    .streak-val { color: var(--accent); font-weight: 600; }
+    .streak-val.hot { color: #c0392b; }
+    .transport-hint { font-size: .7rem; color: var(--muted); margin-left: auto; font-style: italic; white-space: nowrap; }
+    @media (max-width: 700px) { .transport-hint { display: none; } }
+
+    /* Answer area */
+    .answer-area { background: var(--bg); border: 1px solid var(--border); padding: 1.1rem 1.25rem; min-height: 180px; display: flex; flex-direction: column; gap: .75rem; }
+    .answer-prompt { font-size: .82rem; color: var(--muted); font-style: italic; }
+
+    /* Interval grid */
+    .interval-grid { display: flex; flex-wrap: wrap; gap: 5px; }
+    .ans-btn { font-family: var(--font-body); font-size: .82rem; font-weight: 500; padding: .45rem .95rem; border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; transition: all .12s; min-height: 44px; display: flex; align-items: center; justify-content: center; }
+    .ans-btn:hover:not(.selected):not([disabled]) { border-color: var(--accent); color: var(--accent); }
+    .ans-btn.selected { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+    .ans-btn.reveal-correct { background: var(--correct-bg); border-color: var(--correct); color: var(--correct); font-weight: 600; }
+    .ans-btn.wrong { background: var(--wrong-bg); border-color: var(--wrong-border); color: var(--wrong); }
+    .ans-btn[disabled] { cursor: not-allowed; opacity: .5; }
+
+    /* Chord answer rows */
+    .chord-answer-rows { display: flex; flex-direction: column; gap: .7rem; }
+    .chord-answer-row { display: flex; align-items: flex-start; gap: .75rem; flex-wrap: wrap; }
+    .chord-row-label { font-size: .62rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); width: 62px; flex-shrink: 0; padding-top: .65rem; }
+    .chord-row-btns { display: flex; flex-wrap: wrap; gap: 4px; flex: 1; }
+    .chord-row-sep { display: inline-block; width: 6px; }
+    @media (max-width: 700px) {
+      .chord-answer-row { gap: .4rem; }
+      .chord-row-label { width: 100%; padding-top: 0; }
+      .ans-btn { font-size: .8rem; min-height: 44px; }
     }
 
-    .toggle-row { display: flex; gap: 4px; flex-wrap: wrap; }
-
-    .toggle-btn {
-      font-family: var(--font-body);
-      font-size: 0.8rem;
-      font-weight: 500;
-      padding: 0.35rem 0.85rem;
-      border: 1px solid var(--color-border);
-      background: var(--color-bg);
-      color: var(--color-muted);
-      cursor: pointer;
-      transition: all 0.12s;
-    }
-
-    .toggle-btn.active { background: var(--color-accent); border-color: var(--color-accent); color: white; }
-    .toggle-btn:not(.active):hover { border-color: var(--color-accent); color: var(--color-accent); }
-
-    .start-zone { margin-top: 1.25rem; }
-
-    .start-btn {
-      font-family: var(--font-heading);
-      font-size: 0.9rem;
-      font-weight: 600;
-      padding: 0.8rem 2.5rem;
-      border: none;
-      background: var(--color-accent);
-      color: white;
-      cursor: pointer;
-      transition: background 0.15s;
-      letter-spacing: -0.01em;
-    }
-
-    .start-btn:hover { background: var(--color-accent-hover); }
-
-    /* ── Exercise area ── */
-    .exercise-area { display: none; }
-    .exercise-area.visible { display: block; }
-
-    /* ── Score strip ── */
-    .score-strip {
-      display: flex;
-      gap: 2rem;
-      padding: 1rem 1.5rem;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      margin-bottom: 2rem;
-      font-size: 0.82rem;
-      color: var(--color-muted);
-    }
-
-    .score-strip span strong { font-weight: 600; color: var(--color-text); }
-
-    /* ── Listen zone ── */
-    .listen-zone {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-      padding: 1.5rem;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-    }
-
-    .listen-btn {
-      font-family: var(--font-heading);
-      font-size: 0.875rem;
-      font-weight: 600;
-      padding: 0.7rem 1.6rem;
-      border: none;
-      background: var(--color-accent);
-      color: white;
-      cursor: pointer;
-      transition: background 0.15s;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .listen-btn:hover { background: var(--color-accent-hover); }
-
-    .play-icon {
-      width: 0;
-      height: 0;
-      border-left: 10px solid white;
-      border-top: 6px solid transparent;
-      border-bottom: 6px solid transparent;
-      display: inline-block;
-      flex-shrink: 0;
-    }
-
-    .listen-hint { font-size: 0.82rem; color: var(--color-muted); line-height: 1.5; }
-    .listen-hint strong {
-      display: block;
-      font-weight: 500;
-      color: var(--color-text);
-      margin-bottom: 0.1rem;
-      font-size: 0.875rem;
-    }
-
-    /* ── Answer buttons ── */
-    .answer-section { margin-bottom: 1.25rem; }
-
-    .interval-grid { display: flex; flex-wrap: wrap; gap: 6px; }
-
-    .ans-btn {
-      font-family: var(--font-body);
-      font-size: 0.82rem;
-      font-weight: 500;
-      padding: 0.45rem 1rem;
-      border: 1px solid var(--color-border);
-      background: var(--color-bg);
-      color: var(--color-text);
-      cursor: pointer;
-      transition: all 0.12s;
-      user-select: none;
-    }
-
-    .ans-btn:hover:not(.selected) { border-color: var(--color-accent); color: var(--color-accent); }
-    .ans-btn.selected { background: var(--color-accent-light); border-color: var(--color-accent); color: var(--color-accent); }
-    .ans-btn.reveal-correct { background: var(--color-correct-bg); border-color: var(--color-correct); color: var(--color-correct); font-weight: 600; }
-    .ans-btn.wrong { background: var(--color-wrong-bg); border-color: var(--color-wrong-border); color: var(--color-wrong); }
-
-    /* ── Chord answer rows ── */
-    .chord-answer-rows { display: flex; flex-direction: column; gap: 0.85rem; }
-
-    .chord-answer-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .chord-row-label {
-      font-size: 0.65rem;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--color-muted);
-      width: 56px;
-      flex-shrink: 0;
-      padding-top: 0.5rem;
-    }
-
-    .chord-row-btns { display: flex; flex-wrap: wrap; gap: 5px; }
-
-    .chord-row-sep {
-      display: inline-block;
-      width: 8px;
-    }
-
-    /* ── Submit row ── */
-    .submit-row {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-top: 1.75rem;
-      flex-wrap: wrap;
-    }
-
-    .submit-btn {
-      font-family: var(--font-heading);
-      font-size: 0.875rem;
-      font-weight: 600;
-      padding: 0.7rem 2rem;
-      border: none;
-      background: var(--color-accent);
-      color: white;
-      cursor: pointer;
-      transition: background 0.15s;
-      letter-spacing: -0.01em;
-    }
-
-    .submit-btn:hover { background: var(--color-accent-hover); }
-    .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    .next-btn {
-      font-family: var(--font-heading);
-      font-size: 0.875rem;
-      font-weight: 600;
-      padding: 0.7rem 2rem;
-      border: 1px solid var(--color-border);
-      background: var(--color-bg);
-      color: var(--color-text);
-      cursor: pointer;
-      transition: all 0.15s;
-      display: none;
-    }
-
+    /* Submit row */
+    .submit-row { display: flex; align-items: center; gap: .85rem; flex-wrap: wrap; }
+    .submit-btn { font-family: var(--font-heading); font-size: .82rem; font-weight: 600; padding: .6rem 1.75rem; border: none; background: var(--accent); color: white; cursor: pointer; transition: background .15s; letter-spacing: -.01em; }
+    .submit-btn:hover:not(:disabled) { background: var(--accent-hover); }
+    .submit-btn:disabled { opacity: .35; cursor: not-allowed; }
+    .next-btn { font-family: var(--font-heading); font-size: .82rem; font-weight: 600; padding: .6rem 1.75rem; border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; transition: all .15s; display: none; }
     .next-btn.visible { display: inline-block; }
-    .next-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+    .next-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .answer-hint { font-size: .72rem; color: var(--muted); font-style: italic; }
+    .feedback { padding: .5rem .85rem; font-size: .82rem; font-weight: 500; display: none; }
+    .feedback.correct { background: var(--correct-bg); border: 1px solid var(--correct-border); color: var(--correct); display: block; }
+    .feedback.wrong { background: var(--wrong-bg); border: 1px solid var(--wrong-border); color: var(--wrong); display: block; }
 
-    .feedback {
-      padding: 0.55rem 0.9rem;
-      font-size: 0.875rem;
-      font-weight: 500;
-      display: none;
-    }
+    /* ── ARTICLE ── */
+    .article-text { margin-top: 2.5rem; padding-top: 2rem; border-top: 1px solid var(--border); max-width: 680px; }
+    .article-text h3 { font-family: var(--font-heading); font-size: 1rem; font-weight: 600; letter-spacing: -.01em; margin: 1.5rem 0 .4rem; }
+    .article-text h3:first-child { margin-top: 0; }
+    .article-text p { font-size: .9rem; color: var(--muted); line-height: 1.75; margin-bottom: .75rem; }
+    .article-text strong { color: var(--text); font-weight: 500; }
 
-    .feedback.correct {
-      background: var(--color-correct-bg);
-      border: 1px solid var(--color-correct-border);
-      color: var(--color-correct);
-      display: block;
-    }
-
-    .feedback.wrong {
-      background: var(--color-wrong-bg);
-      border: 1px solid var(--color-wrong-border);
-      color: var(--color-wrong);
-      display: block;
-    }
-
-    /* ── Footer ── */
-    footer {
-      border-top: 1px solid var(--color-border);
-      padding: 1.5rem 2rem;
-      text-align: center;
-      font-size: 0.8rem;
-      color: var(--color-muted);
-    }
-
-    @media (max-width: 600px) {
-      main { padding: 1.5rem 1rem 3rem; }
-      .settings-row { flex-direction: column; gap: 1rem; }
-      .chord-row-label { width: auto; padding-top: 0; }
-      .listen-zone { flex-direction: column; align-items: flex-start; gap: 1rem; }
-    }
+    footer { border-top: 1px solid var(--border); padding: 1.25rem 1.5rem; text-align: center; font-size: .78rem; color: var(--muted); }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
   </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════
-     HEADER
-══════════════════════════════════════ -->
 <header class="sil-header">
   <a class="sil-header__wordmark" href="/dashboard/">Sensory Intelligence Lab</a>
   <button class="sil-header__toggle" id="silMenuToggle" aria-label="Toggle navigation" aria-expanded="false">
@@ -523,174 +194,179 @@
   </nav>
 </header>
 
-<nav aria-label="Breadcrumb" class="breadcrumb-nav">
+<nav aria-label="Breadcrumb" class="bc">
   <ol>
     <li><a href="/dashboard/">Dashboard</a></li>
-  
     <li>Ear Training</li>
   </ol>
 </nav>
 
 <main>
-
   <div class="page-header">
     <h2>Ear Training</h2>
-    <p>Intervals and chords. Build your answer from components, then submit.</p>
+    <p>Identify intervals and chords by ear. Settings on the left — apply to begin or restart.</p>
   </div>
 
-  <div class="mode-selector">
-    <p class="section-label">Select mode</p>
-    <div class="mode-btns">
-      <button class="mode-btn" id="modeIntervals" onclick="setMode('intervals')">Intervals</button>
-      <button class="mode-btn" id="modeChords" onclick="setMode('chords')">Chords</button>
+  <div class="app-layout">
+
+    <!-- ── LEFT PANEL ── -->
+    <div class="left-panel">
+
+      <div>
+        <span class="section-label">Mode</span>
+        <div class="mode-btns">
+          <button class="mode-btn active" id="modeIntervals" onclick="UI.setMode('intervals')">Intervals</button>
+          <button class="mode-btn" id="modeChords" onclick="UI.setMode('chords')">Chords</button>
+        </div>
+      </div>
+
+      <!-- Interval settings -->
+      <div class="settings-panel" id="intervalSettings">
+        <div class="settings-group">
+          <span class="settings-group-label">Root</span>
+          <div class="toggle-row">
+            <button class="toggle-btn active" data-setting="root" data-value="fixed">Fixed (C)</button>
+            <button class="toggle-btn" data-setting="root" data-value="random">Random</button>
+          </div>
+        </div>
+        <div class="settings-group">
+          <span class="settings-group-label">Pitch set</span>
+          <div class="toggle-row">
+            <button class="toggle-btn active" data-setting="pitchSet" data-value="diatonic">Diatonic</button>
+            <button class="toggle-btn" data-setting="pitchSet" data-value="chromatic">Chromatic</button>
+          </div>
+        </div>
+        <div class="settings-group">
+          <span class="settings-group-label">Presentation</span>
+          <div class="toggle-row">
+            <button class="toggle-btn active" data-setting="presentation" data-value="simultaneous">Together</button>
+            <button class="toggle-btn" data-setting="presentation" data-value="sequential">Ascending</button>
+            <button class="toggle-btn" data-setting="presentation" data-value="descending">Descending</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chord settings -->
+      <div class="settings-panel" id="chordSettings" style="display:none;">
+        <div class="settings-group">
+          <span class="settings-group-label">Root</span>
+          <div class="toggle-row">
+            <button class="toggle-btn active" data-setting="chordRoot" data-value="fixed">Fixed (C)</button>
+            <button class="toggle-btn" data-setting="chordRoot" data-value="random">Random</button>
+          </div>
+        </div>
+        <div class="settings-group">
+          <span class="settings-group-label">Chord set</span>
+          <div class="toggle-row">
+            <button class="toggle-btn active" data-setting="chordSet" data-value="triads">Maj &amp; Min</button>
+            <button class="toggle-btn" data-setting="chordSet" data-value="allTriads">All triads</button>
+            <button class="toggle-btn" data-setting="chordSet" data-value="sevenths">Sevenths</button>
+            <button class="toggle-btn" data-setting="chordSet" data-value="extended">9 / 11 / 13</button>
+          </div>
+        </div>
+        <div class="settings-group" id="inversionGroup">
+          <span class="settings-group-label">Inversions</span>
+          <div class="toggle-row">
+            <button class="toggle-btn active" data-setting="inversions" data-value="off">Root only</button>
+            <button class="toggle-btn" data-setting="inversions" data-value="on">Include</button>
+          </div>
+        </div>
+        <div class="settings-group">
+          <span class="settings-group-label">Voicing</span>
+          <div class="toggle-row">
+            <button class="toggle-btn active" data-setting="voicing" data-value="simultaneous">Together</button>
+            <button class="toggle-btn" data-setting="voicing" data-value="arpUp">Arp ↑</button>
+            <button class="toggle-btn" data-setting="voicing" data-value="arpDown">Arp ↓</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="apply-btn" id="applyBtn" onclick="UI.apply()">▶ Apply &amp; begin</button>
+    </div>
+
+    <!-- ── RIGHT PANEL ── -->
+    <div class="right-panel" id="rightPanel">
+
+      <!-- Transport bar -->
+      <div class="transport-bar">
+        <button class="play-btn" id="playBtn" onclick="Game.playSound()">
+          <span class="play-icon"></span> Play again
+        </button>
+        <div class="score-items">
+          <span>Correct <strong id="scoreCorrect">0</strong></span>
+          <span>Tried <strong id="scoreTotal">0</strong></span>
+          <span id="scoreAccuracy"></span>
+          <span>Streak <span class="streak-val" id="streakVal">0</span></span>
+        </div>
+        <span class="transport-hint">Space = replay · Enter = submit</span>
+      </div>
+
+      <!-- Answer area -->
+      <div class="answer-area" id="answerArea">
+        <p class="answer-prompt">Choose settings on the left and press Apply to begin.</p>
+      </div>
+
+      <!-- Submit row -->
+      <div class="submit-row">
+        <button class="submit-btn" id="submitBtn" onclick="Game.checkAnswer()" disabled>Submit</button>
+        <button class="next-btn" id="nextBtn" onclick="Game.next()">Next →</button>
+        <div class="feedback" id="feedback"></div>
+      </div>
+
     </div>
   </div>
 
-  <!-- INTERVAL SETTINGS -->
-  <div class="settings-panel" id="intervalSettings">
-    <div class="settings-row">
-      <div class="settings-group">
-        <span class="settings-group-label">Root</span>
-        <div class="toggle-row">
-          <button class="toggle-btn active" id="rootFixed" onclick="setSetting('root','fixed')">Fixed (C)</button>
-          <button class="toggle-btn" id="rootRandom" onclick="setSetting('root','random')">Random</button>
-        </div>
-      </div>
-      <div class="settings-group">
-        <span class="settings-group-label">Pitch set</span>
-        <div class="toggle-row">
-          <button class="toggle-btn active" id="pitchDiatonic" onclick="setSetting('pitchSet','diatonic')">Diatonic</button>
-          <button class="toggle-btn" id="pitchChromatic" onclick="setSetting('pitchSet','chromatic')">Chromatic</button>
-        </div>
-      </div>
-      <div class="settings-group">
-        <span class="settings-group-label">Presentation</span>
-        <div class="toggle-row">
-          <button class="toggle-btn active" id="presSimultaneous" onclick="setSetting('presentation','simultaneous')">Together</button>
-          <button class="toggle-btn" id="presSequential" onclick="setSetting('presentation','sequential')">Ascending</button>
-          <button class="toggle-btn" id="presDescending" onclick="setSetting('presentation','descending')">Descending</button>
-        </div>
-      </div>
-    </div>
-    <div class="start-zone">
-      <button class="start-btn" onclick="startSession()">Begin</button>
-    </div>
-  </div>
+  <!-- Article -->
+  <div class="article-text">
+    <h3>Intervals</h3>
+    <p>An interval is the distance in pitch between two notes, measured in semitones. The smallest interval in Western music is the <strong>minor second</strong> (one semitone — like E to F). The largest in this exercise is the <strong>octave</strong> (twelve semitones — the same note at double the frequency). In between are all the intervals that give music its characteristic tension, colour, and movement: the perfect fifth (seven semitones, stable and open), the tritone (six, unstable and dissonant), the major third (four, bright and settled).</p>
+    <p>Diatonic mode presents only the intervals found in the major scale — a more manageable set to begin with. Chromatic mode includes all twelve semitones, requiring finer discrimination. Together presentation plays both notes simultaneously, which develops harmonic hearing. Ascending and descending play the notes in sequence, which develops melodic interval recognition — a different and complementary skill.</p>
 
-  <!-- CHORD SETTINGS -->
-  <div class="settings-panel" id="chordSettings">
-    <div class="settings-row">
-      <div class="settings-group">
-        <span class="settings-group-label">Root</span>
-        <div class="toggle-row">
-          <button class="toggle-btn active" id="chordRootFixed" onclick="setChordSetting('root','fixed')">Fixed (C)</button>
-          <button class="toggle-btn" id="chordRootRandom" onclick="setChordSetting('root','random')">Random</button>
-        </div>
-      </div>
-      <div class="settings-group">
-        <span class="settings-group-label">Chord set</span>
-        <div class="toggle-row">
-          <button class="toggle-btn active" id="chordSetTriads" onclick="setChordSetting('chordSet','triads')">Major &amp; Minor</button>
-          <button class="toggle-btn" id="chordSetAllTriads" onclick="setChordSetting('chordSet','allTriads')">All triads</button>
-          <button class="toggle-btn" id="chordSetSevenths" onclick="setChordSetting('chordSet','sevenths')">Sevenths</button>
-          <button class="toggle-btn" id="chordSetExtended" onclick="setChordSetting('chordSet','extended')">9 / 11 / 13</button>
-        </div>
-      </div>
-      <div class="settings-group">
-        <span class="settings-group-label">Voicing</span>
-        <div class="toggle-row">
-          <button class="toggle-btn active" id="voicingSimultaneous" onclick="setChordSetting('voicing','simultaneous')">Together</button>
-          <button class="toggle-btn" id="voicingArpUp" onclick="setChordSetting('voicing','arpUp')">Arpeggio ↑</button>
-          <button class="toggle-btn" id="voicingArpDown" onclick="setChordSetting('voicing','arpDown')">Arpeggio ↓</button>
-        </div>
-      </div>
-    </div>
-    <div class="start-zone">
-      <button class="start-btn" onclick="startSession()">Begin</button>
-    </div>
-  </div>
+    <h3>Chords</h3>
+    <p>A chord is three or more notes sounded together. The most fundamental are <strong>triads</strong> — three notes built from a root, a third, and a fifth. Major triads (root, major third, perfect fifth) are bright and stable. Minor triads (root, minor third, perfect fifth) are darker. Augmented (root, major third, augmented fifth) and diminished (root, minor third, diminished fifth) are less common but important colours.</p>
+    <p><strong>Seventh chords</strong> add a fourth note a seventh above the root, creating richer, more complex sounds. The dominant seventh (major triad plus minor seventh) is the most important in tonal music — its tension resolves strongly to the tonic. <strong>Extended chords</strong> (ninths, elevenths, thirteenths) are the language of jazz harmony, adding layers of colour above the seventh.</p>
+    <p><strong>Inversions</strong> change which note is at the bottom without changing the chord's identity. A C major chord in first inversion has E in the bass; in second inversion it has G in the bass. The same three notes — but the sound changes significantly. Training with inversions develops the ability to identify a chord regardless of how it is voiced, which is essential for real-world listening.</p>
 
-  <!-- EXERCISE AREA -->
-  <div class="exercise-area" id="exerciseArea">
+    <h3>Settings guide</h3>
+    <p><strong>Fixed root</strong> always uses C as the lowest note, removing one variable and letting you focus purely on interval quality or chord type. <strong>Random root</strong> transposes to a different starting pitch each time, which is more challenging but more musically realistic. <strong>Arpeggio voicing</strong> plays chord notes one at a time, making the individual intervals more audible — useful when learning new chord types. <strong>Together</strong> presents the full sonority at once, which is closer to how chords appear in music.</p>
 
-    <div class="score-strip">
-      <span>Correct <strong id="scoreCorrect">0</strong></span>
-      <span>Attempted <strong id="scoreTotal">0</strong></span>
-      <span id="scorePercent"></span>
-    </div>
-
-    <div class="listen-zone">
-      <button class="listen-btn" onclick="playCurrentSound()">
-        <span class="play-icon"></span>
-        Play again
-      </button>
-      <div class="listen-hint">
-        <strong id="listenLabel">Listen carefully</strong>
-        <span id="listenSub"></span>
-      </div>
-    </div>
-
-    <div id="answerArea"></div>
-
-    <div class="submit-row">
-      <button class="submit-btn" id="submitBtn" onclick="checkAnswer()" disabled>Submit</button>
-      <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next</button>
-      <div class="feedback" id="feedback"></div>
-    </div>
-
+    <h3>Why train your ear</h3>
+    <p>Ear training develops the connection between sound and understanding — the ability to hear music and know what you are hearing, not just feel it. For music therapy it has particular relevance: clients working with music often benefit from developing a more conscious relationship to the sounds they encounter, whether that means recognising familiar intervals in songs that carry emotional significance, understanding the harmonic movement in pieces they are working with, or simply building the confidence that comes from knowing what something is. The skills trained here transfer directly to listening, to instrument playing, and to the broader capacity for active musical engagement.</p>
   </div>
 
 </main>
 
 <footer>
-  <p>Jordan Elias Music Therapy · Berlin · <a href="/contact/">Contact</a></p>
+  <p>Jordan Elias Music Therapy · Berlin · <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a></p>
 </footer>
 
 <script type="module">
+'use strict';
 
-// ─────────────────────────────────────────────────────────
-// HEADER BEHAVIOUR
-// ─────────────────────────────────────────────────────────
+// ─── HEADER ─────────────────────────────────────────────
 const path = window.location.pathname.replace(/\/$/, '') || '/';
 document.querySelectorAll('.sil-header__nav a').forEach(a => {
   const href = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
   if (href === path) a.classList.add('sil-active');
 });
-
 const menuToggle = document.getElementById('silMenuToggle');
-const silNav     = document.getElementById('silNav');
-menuToggle.addEventListener('click', () => {
-  const open = silNav.classList.toggle('sil-open');
-  menuToggle.setAttribute('aria-expanded', open);
-});
-silNav.querySelectorAll('a').forEach(a =>
-  a.addEventListener('click', () => silNav.classList.remove('sil-open'))
-);
+const silNav = document.getElementById('silNav');
+menuToggle.addEventListener('click', () => { const open = silNav.classList.toggle('sil-open'); menuToggle.setAttribute('aria-expanded', open); });
+silNav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => silNav.classList.remove('sil-open')));
 
 async function getSupabase() {
   if (window._supabase) return window._supabase;
   const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-  return createClient(
-    'https://lrjuufvrgkuvfxcmybtf.supabase.co',
-    'sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1'
-  );
+  return createClient('https://lrjuufvrgkuvfxcmybtf.supabase.co','sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1');
 }
-
 document.getElementById('silSignOut').addEventListener('click', async function () {
-  this.disabled = true;
-  this.textContent = 'Signing out…';
-  try {
-    const sb = await getSupabase();
-    await sb.auth.signOut();
-  } finally {
-    window.location.replace('/');
-  }
+  this.disabled = true; this.textContent = 'Signing out…';
+  try { const sb = await getSupabase(); await sb.auth.signOut(); } finally { window.location.replace('/'); }
 });
 
-// ══════════════════════════════════════════════
-// AUDIO ENGINE
-// ══════════════════════════════════════════════
-
+// ═══════════════════════════════════════════════════════
+// AUDIO ENGINE — additive synthesis
+// ═══════════════════════════════════════════════════════
 let audioCtx = null;
 
 function getCtx() {
@@ -699,59 +375,44 @@ function getCtx() {
   return audioCtx;
 }
 
-function sineTone(freq, startOffset, duration, amp) {
-  if (amp === undefined) amp = 0.15;
+function midiToHz(midi) { return 440 * Math.pow(2, (midi - 69) / 12); }
+
+// Rich additive tone: fundamental + octave (×0.45) + fifth (×0.25) + 2nd harmonic (×0.15)
+// Each partial has a different decay rate so attack is harmonically rich, sustain is cleaner
+function richTone(freq, startOffset, duration, amp) {
+  amp = amp !== undefined ? amp : 0.14;
   const ctx = getCtx();
-  const t0  = ctx.currentTime + startOffset;
+  const t0 = ctx.currentTime + startOffset;
 
-  const osc  = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.connect(gain);
-  gain.connect(ctx.destination);
+  const partials = [
+    { mult: 1,    amp: amp,        decay: duration + 0.12 },
+    { mult: 2,    amp: amp * 0.45, decay: duration * 0.55 },
+    { mult: 3,    amp: amp * 0.25, decay: duration * 0.35 },
+    { mult: 4,    amp: amp * 0.15, decay: duration * 0.22 },
+  ];
 
-  osc.type            = 'sine';
-  osc.frequency.value = freq;
+  const master = ctx.createGain();
+  master.connect(ctx.destination);
+  master.gain.setValueAtTime(0, t0);
+  master.gain.linearRampToValueAtTime(1, t0 + 0.018);
+  master.gain.setValueAtTime(1, t0 + 0.018);
+  master.gain.linearRampToValueAtTime(0, t0 + duration + 0.18);
 
-  const atk = 0.03;
-  const rel = 0.10;
-  const sus = Math.max(duration - atk, 0.01);
-
-  gain.gain.setValueAtTime(0,   t0);
-  gain.gain.linearRampToValueAtTime(amp, t0 + atk);
-  gain.gain.setValueAtTime(amp, t0 + atk + sus);
-  gain.gain.linearRampToValueAtTime(0,   t0 + atk + sus + rel);
-
-  osc.start(t0);
-  osc.stop(t0 + atk + sus + rel + 0.05);
+  partials.forEach(p => {
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(master);
+    osc.type = 'sine';
+    osc.frequency.value = freq * p.mult;
+    gain.gain.setValueAtTime(p.amp, t0);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + p.decay);
+    osc.start(t0); osc.stop(t0 + p.decay + 0.05);
+  });
 }
 
-function midiToHz(midi) {
-  return 440 * Math.pow(2, (midi - 69) / 12);
-}
-
-// ══════════════════════════════════════════════
-// STATE
-// ══════════════════════════════════════════════
-
-const state = {
-  mode: null,
-  root: 'fixed',
-  pitchSet: 'diatonic',
-  presentation: 'simultaneous',
-  chordRoot: 'fixed',
-  chordSet: 'triads',
-  voicing: 'simultaneous',
-  currentAnswer: null,
-  userAnswer: {},
-  submitted: false,
-  scoreCorrect: 0,
-  scoreTotal: 0,
-};
-
-// ══════════════════════════════════════════════
-// INTERVAL DATA
-// ══════════════════════════════════════════════
-
+// ═══════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════
 const DIATONIC_INTERVALS = [
   { semitones: 0,  name: 'Unison',      short: 'P1' },
   { semitones: 2,  name: 'Major 2nd',   short: 'M2' },
@@ -779,10 +440,6 @@ const CHROMATIC_INTERVALS = [
   { semitones: 12, name: 'Octave',      short: 'P8' },
 ];
 
-// ══════════════════════════════════════════════
-// CHORD DATA
-// ══════════════════════════════════════════════
-
 const CHORD_SETS = {
   triads: [
     { name: 'Major',      symbol: '',    intervals: [0, 4, 7] },
@@ -809,7 +466,6 @@ const CHORD_SETS = {
     { name: 'Minor 9',    symbol: 'm9',    intervals: [0, 3, 7, 10, 14] },
     { name: 'Dom ♭9',     symbol: '♭9',    intervals: [0, 4, 7, 10, 13] },
     { name: 'Dom ♯9',     symbol: '♯9',    intervals: [0, 4, 7, 10, 15] },
-    { name: 'Major ♭9',   symbol: 'maj♭9', intervals: [0, 4, 7, 11, 13] },
     { name: 'Major 11',   symbol: 'maj11', intervals: [0, 4, 7, 11, 14, 17] },
     { name: 'Dom 11',     symbol: '11',    intervals: [0, 4, 7, 10, 14, 17] },
     { name: 'Minor 11',   symbol: 'm11',   intervals: [0, 3, 7, 10, 14, 17] },
@@ -821,384 +477,525 @@ const CHORD_SETS = {
   ],
 };
 
-// ══════════════════════════════════════════════
-// UI HELPERS
-// ══════════════════════════════════════════════
-
-function setMode(mode) {
-  state.mode = mode;
-  document.getElementById('modeIntervals').classList.toggle('active', mode === 'intervals');
-  document.getElementById('modeChords').classList.toggle('active', mode === 'chords');
-  document.getElementById('intervalSettings').classList.toggle('visible', mode === 'intervals');
-  document.getElementById('chordSettings').classList.toggle('visible', mode === 'chords');
-  document.getElementById('exerciseArea').classList.remove('visible');
-  state.scoreCorrect = 0;
-  state.scoreTotal   = 0;
+// Level integer mapping for persistence
+function getLevelInt(mode, settings) {
+  if (mode === 'intervals') return settings.pitchSet === 'diatonic' ? 1 : 2;
+  const s = settings.chordSet;
+  if (s === 'triads' && settings.inversions === 'on') return 7;
+  if (s === 'triads')    return 3;
+  if (s === 'allTriads') return 4;
+  if (s === 'sevenths')  return 5;
+  return 6; // extended
 }
 
-function setSetting(key, value) {
-  state[key] = value;
-  const map = {
-    root:         { fixed: 'rootFixed',           random: 'rootRandom'              },
-    pitchSet:     { diatonic: 'pitchDiatonic',     chromatic: 'pitchChromatic'       },
-    presentation: { simultaneous: 'presSimultaneous', sequential: 'presSequential', descending: 'presDescending' },
-  };
-  Object.values(map[key]).forEach(id => document.getElementById(id)?.classList.remove('active'));
-  document.getElementById(map[key][value])?.classList.add('active');
+// ═══════════════════════════════════════════════════════
+// SETTINGS STATE
+// Staged = what toggles show, Active = what game uses
+// ═══════════════════════════════════════════════════════
+const staged = {
+  mode: 'intervals',
+  root: 'fixed', pitchSet: 'diatonic', presentation: 'simultaneous',
+  chordRoot: 'fixed', chordSet: 'triads', inversions: 'off', voicing: 'simultaneous',
+};
+const active = { ...staged };
+
+function settingsChanged() {
+  return JSON.stringify(staged) !== JSON.stringify(active);
 }
 
-function setChordSetting(key, value) {
-  const sk = key === 'root' ? 'chordRoot' : key;
-  state[sk] = value;
-  const map = {
-    root:     { fixed: 'chordRootFixed',     random: 'chordRootRandom'    },
-    chordSet: { triads: 'chordSetTriads',    allTriads: 'chordSetAllTriads', sevenths: 'chordSetSevenths', extended: 'chordSetExtended' },
-    voicing:  { simultaneous: 'voicingSimultaneous', arpUp: 'voicingArpUp', arpDown: 'voicingArpDown' },
-  };
-  Object.values(map[key]).forEach(id => document.getElementById(id)?.classList.remove('active'));
-  document.getElementById(map[key][value])?.classList.add('active');
+function updateApplyBtn() {
+  const btn = document.getElementById('applyBtn');
+  if (settingsChanged()) {
+    btn.textContent = '▶ Apply changes';
+    btn.classList.add('has-changes');
+  } else {
+    btn.textContent = '▶ Apply & begin';
+    btn.classList.remove('has-changes');
+  }
 }
+
+// ═══════════════════════════════════════════════════════
+// GAME STATE
+// ═══════════════════════════════════════════════════════
+const G = {
+  started: false,
+  currentAnswer: null,
+  userAnswer: {},
+  submitted: false,
+  scoreCorrect: 0,
+  scoreTotal: 0,
+  streak: 0,
+  bestStreak: 0,
+  errors: {}, // name → count for weighting
+  // Cumulative per-level stats for best score upsert
+  levelStats: {}, // levelInt → { correct, trials }
+};
 
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
-// ══════════════════════════════════════════════
-// SESSION
-// ══════════════════════════════════════════════
-
-function startSession() {
-  state.scoreCorrect = 0;
-  state.scoreTotal   = 0;
-  updateScore();
-  document.getElementById('exerciseArea').classList.add('visible');
-  nextQuestion();
+function pickWeighted(items, getKey) {
+  const weights = items.map(it => 1 + (G.errors[getKey(it)] || 0) * 1.5);
+  const total = weights.reduce((a, b) => a + b, 0);
+  let r = Math.random() * total;
+  for (let i = 0; i < items.length; i++) { r -= weights[i]; if (r <= 0) return items[i]; }
+  return items[items.length - 1];
 }
 
-function nextQuestion() {
-  state.submitted  = false;
-  state.userAnswer = {};
-  document.getElementById('feedback').className   = 'feedback';
-  document.getElementById('feedback').textContent = '';
-  document.getElementById('nextBtn').classList.remove('visible');
-  document.getElementById('submitBtn').disabled = true;
-
-  if (state.mode === 'intervals') generateInterval();
-  else generateChord();
-
-  playCurrentSound();
+// ═══════════════════════════════════════════════════════
+// PERSISTENCE
+// ═══════════════════════════════════════════════════════
+async function saveAnswer(levelInt, correct) {
+  try {
+    const sb = await getSupabase(); const uid = window._currentUser?.id;
+    if (!sb || !uid) return;
+    await sb.from('game_sessions').insert({
+      user_id: uid, game: 'ear-training', level: levelInt,
+      correct: correct ? 1 : 0, trials: 1,
+      accuracy: correct ? 100 : 0, played_at: new Date().toISOString(),
+    });
+    // Update best score upsert
+    if (!G.levelStats[levelInt]) G.levelStats[levelInt] = { correct: 0, trials: 0 };
+    G.levelStats[levelInt].trials++;
+    if (correct) G.levelStats[levelInt].correct++;
+    const ls = G.levelStats[levelInt];
+    const accuracy = Math.round((ls.correct / ls.trials) * 100);
+    await sb.from('game_best_scores').upsert({
+      user_id: uid, game: 'ear-training', level: levelInt,
+      correct: ls.correct, trials: ls.trials, accuracy,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'user_id,game,level' });
+  } catch(e) { console.warn('Could not save answer:', e); }
 }
 
-// ══════════════════════════════════════════════
-// INTERVALS
-// ══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// UI CONTROLLER
+// ═══════════════════════════════════════════════════════
+const UI = window.UI = {
+  setMode(mode) {
+    staged.mode = mode;
+    document.getElementById('modeIntervals').classList.toggle('active', mode === 'intervals');
+    document.getElementById('modeChords').classList.toggle('active', mode === 'chords');
+    document.getElementById('intervalSettings').style.display = mode === 'intervals' ? '' : 'none';
+    document.getElementById('chordSettings').style.display = mode === 'chords' ? '' : 'none';
+    updateApplyBtn();
+  },
 
-function generateInterval() {
-  const pool     = state.pitchSet === 'diatonic' ? DIATONIC_INTERVALS : CHROMATIC_INTERVALS;
-  const interval = pick(pool);
-  const rootMidi = state.root === 'fixed' ? 60 : 60 + Math.floor(Math.random() * 12);
-  state.currentAnswer = { type: 'interval', interval, rootMidi, pool };
+  stageSetting(setting, value) {
+    staged[setting] = value;
+    // Update toggle button appearances for this setting's group
+    document.querySelectorAll(`[data-setting="${setting}"]`).forEach(btn => {
+      const isActive = btn.dataset.value === active[setting];
+      const isStaged = btn.dataset.value === value;
+      btn.classList.toggle('active', isActive && !settingsChanged());
+      btn.classList.toggle('staged', isStaged && value !== active[setting]);
+      if (!settingsChanged()) btn.classList.remove('staged');
+    });
+    // Show/hide inversions toggle (only for triads / allTriads)
+    if (setting === 'chordSet') {
+      const showInv = value === 'triads' || value === 'allTriads';
+      document.getElementById('inversionGroup').style.display = showInv ? '' : 'none';
+    }
+    updateApplyBtn();
+  },
 
-  document.getElementById('listenLabel').textContent = 'Identify the interval';
-  document.getElementById('listenSub').textContent =
-    state.presentation === 'simultaneous' ? 'Both notes together.'
-    : state.presentation === 'sequential'  ? 'Notes played ascending.'
-    : 'Notes played descending.';
+  apply() {
+    Object.assign(active, staged);
+    // Reset score for new session
+    G.scoreCorrect = 0; G.scoreTotal = 0; G.streak = 0;
+    updateScoreDisplay();
+    // Refresh toggle button states
+    document.querySelectorAll('[data-setting]').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.value === active[btn.dataset.setting]);
+      btn.classList.remove('staged');
+    });
+    updateApplyBtn();
+    G.started = true;
+    Game.next();
+  },
+};
 
-  renderIntervalAnswer(pool);
-}
+// Wire up toggle buttons
+document.querySelectorAll('[data-setting]').forEach(btn => {
+  btn.addEventListener('click', () => UI.stageSetting(btn.dataset.setting, btn.dataset.value));
+});
 
-function playInterval() {
-  const { interval, rootMidi } = state.currentAnswer;
-  const upper  = rootMidi + interval.semitones;
-  const noteDur = 1.4;
+// ═══════════════════════════════════════════════════════
+// GAME CONTROLLER
+// ═══════════════════════════════════════════════════════
+const Game = window.Game = {
 
-  if (state.presentation === 'simultaneous') {
-    sineTone(midiToHz(rootMidi), 0, noteDur, 0.12);
-    sineTone(midiToHz(upper),    0, noteDur, 0.12);
-  } else {
-    const gap = noteDur + 0.13 + 0.20;
-    if (state.presentation === 'sequential') {
-      sineTone(midiToHz(rootMidi), 0,   noteDur, 0.15);
-      sineTone(midiToHz(upper),    gap, noteDur, 0.15);
+  next() {
+    G.submitted = false;
+    G.userAnswer = {};
+    document.getElementById('feedback').className = 'feedback';
+    document.getElementById('feedback').textContent = '';
+    document.getElementById('nextBtn').classList.remove('visible');
+    document.getElementById('submitBtn').disabled = true;
+
+    if (active.mode === 'intervals') this._genInterval();
+    else this._genChord();
+
+    this.playSound();
+  },
+
+  playSound() {
+    if (!G.currentAnswer) return;
+    if (G.currentAnswer.type === 'interval') this._playInterval();
+    else this._playChord();
+  },
+
+  // ── INTERVALS ──────────────────────────────────────
+  _genInterval() {
+    const pool = active.pitchSet === 'diatonic' ? DIATONIC_INTERVALS : CHROMATIC_INTERVALS;
+    const interval = pickWeighted(pool, iv => iv.name);
+    const rootMidi = active.root === 'fixed' ? 60 : 60 + Math.floor(Math.random() * 12);
+    G.currentAnswer = { type: 'interval', interval, rootMidi, pool };
+    this._renderInterval(pool);
+  },
+
+  _playInterval() {
+    const { interval, rootMidi } = G.currentAnswer;
+    const upper = rootMidi + interval.semitones;
+    const dur = 0.9;
+    const gap = dur + 0.35;
+
+    if (active.presentation === 'simultaneous') {
+      richTone(midiToHz(rootMidi), 0, dur, 0.11);
+      richTone(midiToHz(upper),    0, dur, 0.11);
+    } else if (active.presentation === 'sequential') {
+      richTone(midiToHz(rootMidi), 0,   dur, 0.13);
+      richTone(midiToHz(upper),    gap, dur, 0.13);
     } else {
-      sineTone(midiToHz(upper),    0,   noteDur, 0.15);
-      sineTone(midiToHz(rootMidi), gap, noteDur, 0.15);
+      richTone(midiToHz(upper),    0,   dur, 0.13);
+      richTone(midiToHz(rootMidi), gap, dur, 0.13);
     }
-  }
-}
+  },
 
-function renderIntervalAnswer(pool) {
-  const area = document.getElementById('answerArea');
-  area.innerHTML = `
-    <div class="answer-section">
-      <p class="section-label">Select the interval</p>
+  _renderInterval(pool) {
+    const area = document.getElementById('answerArea');
+    area.innerHTML = `
+      <span class="section-label">Select the interval</span>
       <div class="interval-grid" id="intervalGrid"></div>
-    </div>`;
+      <p class="answer-hint" id="answerHint">Select an answer to submit.</p>`;
 
-  const grid = document.getElementById('intervalGrid');
-  pool.forEach(iv => {
-    const btn = document.createElement('button');
-    btn.className         = 'ans-btn';
-    btn.textContent       = iv.name;
-    btn.dataset.semitones = iv.semitones;
-    btn.onclick = () => {
-      if (state.submitted) return;
-      grid.querySelectorAll('.ans-btn').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      state.userAnswer = { semitones: iv.semitones, name: iv.name };
-      document.getElementById('submitBtn').disabled = false;
-    };
-    grid.appendChild(btn);
-  });
-}
-
-// ══════════════════════════════════════════════
-// CHORDS
-// ══════════════════════════════════════════════
-
-function generateChord() {
-  const pool     = CHORD_SETS[state.chordSet];
-  const chord    = pick(pool);
-  const rootMidi = state.chordRoot === 'fixed' ? 60 : 60 + Math.floor(Math.random() * 12);
-  state.currentAnswer = { type: 'chord', chord, rootMidi };
-
-  document.getElementById('listenLabel').textContent = 'Identify the chord';
-  document.getElementById('listenSub').textContent =
-    state.voicing === 'simultaneous' ? 'All notes together.'
-    : state.voicing === 'arpUp'       ? 'Arpeggio — low to high.'
-    : 'Arpeggio — high to low.';
-
-  renderChordAnswer();
-}
-
-function playChord() {
-  const { chord, rootMidi } = state.currentAnswer;
-  const midiNotes = chord.intervals.map(iv => rootMidi + iv);
-  const noteDur   = 1.4;
-
-  if (state.voicing === 'simultaneous') {
-    const amp = Math.max(0.07, 0.16 / Math.sqrt(midiNotes.length));
-    midiNotes.forEach(m => sineTone(midiToHz(m), 0, noteDur, amp));
-  } else {
-    const step = noteDur + 0.03 + 0.10 + 0.15;
-    const notes = state.voicing === 'arpUp' ? midiNotes : [...midiNotes].reverse();
-    notes.forEach((m, i) => sineTone(midiToHz(m), i * step, noteDur, 0.15));
-  }
-}
-
-function renderChordAnswer() {
-  const set  = state.chordSet;
-  const area = document.getElementById('answerArea');
-
-  const show7th      = set === 'sevenths' || set === 'extended';
-  const showExtended = set === 'extended';
-
-  let qualityOptions = [];
-  if (set === 'triads') {
-    qualityOptions = [{ label: 'Major', value: 'major' }, { label: 'Minor', value: 'minor' }];
-  } else if (set === 'allTriads') {
-    qualityOptions = [
-      { label: 'Major', value: 'major' }, { label: 'Minor', value: 'minor' },
-      { label: 'Augmented', value: 'aug' }, { label: 'Diminished', value: 'dim' },
-    ];
-  } else if (set === 'sevenths') {
-    qualityOptions = [
-      { label: 'Major', value: 'major' }, { label: 'Minor', value: 'minor' },
-      { label: 'Augmented', value: 'aug' }, { label: 'Diminished', value: 'dim' },
-      { label: 'Half-dim', value: 'halfdim' },
-    ];
-  } else if (set === 'extended') {
-    qualityOptions = [
-      { label: 'Major', value: 'major' }, { label: 'Minor', value: 'minor' },
-      { label: 'Dominant', value: 'dom' },
-    ];
-  }
-
-  const btnHtml = (grp, val, label) =>
-    `<button class="ans-btn" data-grp="${grp}" data-val="${val}">${label}</button>`;
-
-  let rows = `<div class="chord-answer-rows">`;
-
-  rows += `<div class="chord-answer-row">
-    <span class="chord-row-label">Quality</span>
-    <div class="chord-row-btns">
-      ${qualityOptions.map(o => btnHtml('quality', o.value, o.label)).join('')}
-    </div>
-  </div>`;
-
-  if (show7th) {
-    rows += `<div class="chord-answer-row">
-      <span class="chord-row-label">7th</span>
-      <div class="chord-row-btns">
-        ${btnHtml('seventh','none','None')}
-        ${btnHtml('seventh','maj7','maj7')}
-        ${btnHtml('seventh','dom7','♭7')}
-        ${btnHtml('seventh','dim7','dim7 (°)')}
-      </div>
-    </div>`;
-  }
-
-  if (showExtended) {
-    rows += `<div class="chord-answer-row">
-      <span class="chord-row-label">9 / 11 / 13</span>
-      <div class="chord-row-btns">
-        ${btnHtml('ninth','none','no 9')}
-        ${btnHtml('ninth','nat9','9')}
-        ${btnHtml('ninth','flat9','♭9')}
-        ${btnHtml('ninth','sharp9','♯9')}
-        <span class="chord-row-sep"></span>
-        ${btnHtml('eleventh','none','no 11')}
-        ${btnHtml('eleventh','nat11','11')}
-        ${btnHtml('eleventh','sharp11','♯11')}
-        <span class="chord-row-sep"></span>
-        ${btnHtml('thirteenth','none','no 13')}
-        ${btnHtml('thirteenth','nat13','13')}
-        ${btnHtml('thirteenth','flat13','♭13')}
-      </div>
-    </div>`;
-  }
-
-  rows += `</div>`;
-
-  area.innerHTML = `<div class="answer-section"><p class="section-label">Build your answer</p>${rows}</div>`;
-
-  area.querySelectorAll('.ans-btn[data-grp]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (state.submitted) return;
-      const grp = btn.dataset.grp;
-      area.querySelectorAll(`.ans-btn[data-grp="${grp}"]`).forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      state.userAnswer[grp] = btn.dataset.val;
-      document.getElementById('submitBtn').disabled = !state.userAnswer.quality;
+    const grid = document.getElementById('intervalGrid');
+    pool.forEach((iv, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'ans-btn'; btn.textContent = iv.name;
+      btn.dataset.semitones = iv.semitones; btn.dataset.idx = idx;
+      btn.addEventListener('click', () => {
+        if (G.submitted) return;
+        grid.querySelectorAll('.ans-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        G.userAnswer = { semitones: iv.semitones, name: iv.name };
+        document.getElementById('submitBtn').disabled = false;
+        document.getElementById('answerHint').style.display = 'none';
+      });
+      grid.appendChild(btn);
     });
-  });
-}
+  },
 
-// ══════════════════════════════════════════════
-// PLAY DISPATCHER
-// ══════════════════════════════════════════════
+  // ── CHORDS ─────────────────────────────────────────
+  _genChord() {
+    const pool = CHORD_SETS[active.chordSet];
+    const chord = pickWeighted(pool, c => c.name);
+    const rootMidi = active.chordRoot === 'fixed' ? 60 : 60 + Math.floor(Math.random() * 12);
 
-function playCurrentSound() {
-  if (!state.currentAnswer) return;
-  if (state.currentAnswer.type === 'interval') playInterval();
-  else playChord();
-}
+    // Inversions (triads only)
+    let inversion = 0;
+    const canInvert = (active.chordSet === 'triads' || active.chordSet === 'allTriads') && active.inversions === 'on';
+    if (canInvert) inversion = Math.floor(Math.random() * 3); // 0, 1, 2
 
-// ══════════════════════════════════════════════
-// CHORD → COMPONENTS (grading)
-// ══════════════════════════════════════════════
+    G.currentAnswer = { type: 'chord', chord, rootMidi, inversion };
+    this._renderChord();
+  },
 
-function chordToComponents(chord) {
-  const n   = chord.name;
-  const ivs = chord.intervals;
-  const set = state.chordSet;
-  const c   = { quality: null, seventh: 'none', ninth: 'none', eleventh: 'none', thirteenth: 'none' };
-
-  if      (ivs[1] === 4 && ivs[2] === 7) c.quality = 'major';
-  else if (ivs[1] === 3 && ivs[2] === 7) c.quality = 'minor';
-  else if (ivs[1] === 4 && ivs[2] === 8) c.quality = 'aug';
-  else if (ivs[1] === 3 && ivs[2] === 6) c.quality = n.includes('Half') ? 'halfdim' : 'dim';
-
-  if (set === 'extended' && (n.startsWith('Dom') || n.startsWith('Dominant'))) {
-    c.quality = 'dom';
-  }
-
-  if (ivs.length >= 4) {
-    if      (ivs[3] === 11) c.seventh = 'maj7';
-    else if (ivs[3] === 10) c.seventh = 'dom7';
-    else if (ivs[3] === 9)  c.seventh = 'dim7';
-  }
-
-  const ninth = ivs.find(i => i === 13 || i === 14 || i === 15);
-  if      (ninth === 13) c.ninth = 'flat9';
-  else if (ninth === 14) c.ninth = 'nat9';
-  else if (ninth === 15) c.ninth = 'sharp9';
-
-  const el = ivs.find(i => i === 17 || i === 18);
-  if      (el === 17) c.eleventh = 'nat11';
-  else if (el === 18) c.eleventh = 'sharp11';
-
-  const th = ivs.find(i => i === 20 || i === 21);
-  if      (th === 20) c.thirteenth = 'flat13';
-  else if (th === 21) c.thirteenth = 'nat13';
-
-  return c;
-}
-
-// ══════════════════════════════════════════════
-// CHECK + SCORE
-// ══════════════════════════════════════════════
-
-function checkAnswer() {
-  if (state.submitted) return;
-  state.submitted = true;
-  state.scoreTotal++;
-
-  const feedbackEl = document.getElementById('feedback');
-  document.getElementById('submitBtn').disabled = true;
-
-  let correct = false;
-
-  if (state.currentAnswer.type === 'interval') {
-    const right = state.currentAnswer.interval.semitones;
-    correct     = parseInt(state.userAnswer.semitones) === right;
-
-    document.querySelectorAll('#intervalGrid .ans-btn').forEach(btn => {
-      if (parseInt(btn.dataset.semitones) === right) btn.classList.add('reveal-correct');
-      else if (btn.classList.contains('selected') && !correct) btn.classList.add('wrong');
-    });
-
-    feedbackEl.textContent = correct
-      ? 'Correct!'
-      : `${state.currentAnswer.interval.name} (${state.currentAnswer.interval.short})`;
-
-  } else {
-    const cc  = chordToComponents(state.currentAnswer.chord);
-    const u   = state.userAnswer;
-    const set = state.chordSet;
-
-    let matches = u.quality === cc.quality;
-    if (set === 'sevenths' || set === 'extended') matches = matches && (u.seventh || 'none') === cc.seventh;
-    if (set === 'extended') {
-      matches = matches
-        && (u.ninth      || 'none') === cc.ninth
-        && (u.eleventh   || 'none') === cc.eleventh
-        && (u.thirteenth || 'none') === cc.thirteenth;
+  _playChord() {
+    const { chord, rootMidi, inversion } = G.currentAnswer;
+    // Build MIDI notes with inversion
+    let midiNotes = chord.intervals.map(iv => rootMidi + iv);
+    if (inversion === 1) {
+      // First inversion: move lowest note up an octave
+      midiNotes = [...midiNotes.slice(1), midiNotes[0] + 12];
+    } else if (inversion === 2) {
+      // Second inversion: move bottom two notes up
+      midiNotes = [...midiNotes.slice(2), midiNotes[0] + 12, midiNotes[1] + 12];
     }
 
-    correct = matches;
-    feedbackEl.textContent = correct
-      ? 'Correct!'
-      : `${state.currentAnswer.chord.name} (${state.currentAnswer.chord.symbol || 'triad'})`;
+    const dur = 0.95;
+    const step = dur + 0.08 + 0.18;
+
+    if (active.voicing === 'simultaneous') {
+      const amp = Math.max(0.07, 0.14 / Math.sqrt(midiNotes.length));
+      midiNotes.forEach(m => richTone(midiToHz(m), 0, dur, amp));
+    } else {
+      const notes = active.voicing === 'arpUp' ? midiNotes : [...midiNotes].reverse();
+      notes.forEach((m, i) => richTone(midiToHz(m), i * step, dur, 0.13));
+    }
+  },
+
+  _renderChord() {
+    const set = active.chordSet;
+    const area = document.getElementById('answerArea');
+    const show7th  = set === 'sevenths' || set === 'extended';
+    const showExt  = set === 'extended';
+    const showInv  = (set === 'triads' || set === 'allTriads') && active.inversions === 'on';
+
+    // Quality options — triads get 4, sevenths and extended get 5
+    const qualityOptions = set === 'triads'
+      ? [{ label: 'Major', value: 'major' }, { label: 'Minor', value: 'minor' }]
+      : [
+          { label: 'Major',    value: 'major'   },
+          { label: 'Minor',    value: 'minor'   },
+          { label: 'Aug',      value: 'aug'     },
+          { label: 'Dim',      value: 'dim'     },
+          ...(show7th ? [{ label: 'Half-dim', value: 'halfdim' }] : []),
+        ];
+
+    const mkRow = (label, grp, inner) => `
+      <div class="chord-answer-row">
+        <span class="chord-row-label">${label}</span>
+        <div class="chord-row-btns">${inner}</div>
+      </div>`;
+    const mkBtn = (grp, val, label, toggle = false) =>
+      `<button class="ans-btn${toggle ? ' ext-toggle' : ''}" data-grp="${grp}" data-val="${val}">${label}</button>`;
+
+    let rows = mkRow('Quality', 'quality',
+      qualityOptions.map(o => mkBtn('quality', o.value, o.label)).join(''));
+
+    if (show7th) rows += mkRow('7th', 'seventh',
+      [mkBtn('seventh','maj7','maj7'), mkBtn('seventh','b7','♭7'), mkBtn('seventh','dim7','dim7')].join(''));
+
+    if (showExt) rows += mkRow('Extensions', 'ext',
+      [
+        mkBtn('ext','b9','♭9', true), mkBtn('ext','9','9', true), mkBtn('ext','s9','♯9', true),
+        '<span class="chord-row-sep"></span>',
+        mkBtn('ext','11','11', true), mkBtn('ext','s11','♯11', true),
+        '<span class="chord-row-sep"></span>',
+        mkBtn('ext','13','13', true), mkBtn('ext','b13','♭13', true),
+      ].join(''));
+
+    if (showInv) rows += mkRow('Inversion', 'inversion',
+      [mkBtn('inversion','root','Root'), mkBtn('inversion','first','1st'), mkBtn('inversion','second','2nd')].join(''));
+
+    area.innerHTML = `
+      <span class="section-label">Build your answer</span>
+      <div class="chord-answer-rows">${rows}</div>
+      <p class="answer-hint" id="answerHint">Select quality${show7th ? ' and 7th' : ''} to submit.</p>`;
+
+    // Wire single-select rows (quality, seventh, inversion)
+    area.querySelectorAll('.ans-btn[data-grp]:not(.ext-toggle)').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (G.submitted) return;
+        const grp = btn.dataset.grp;
+        area.querySelectorAll(`.ans-btn[data-grp="${grp}"]`).forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        G.userAnswer[grp] = btn.dataset.val;
+        _updateSubmitState(show7th, showExt, showInv, area);
+      });
+    });
+
+    // Wire multi-select extension toggles
+    area.querySelectorAll('.ext-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (G.submitted) return;
+        btn.classList.toggle('selected');
+        // Collect all selected extensions as a Set
+        G.userAnswer.ext = new Set(
+          [...area.querySelectorAll('.ext-toggle.selected')].map(b => b.dataset.val)
+        );
+        _updateSubmitState(show7th, showExt, showInv, area);
+      });
+    });
+
+    // Initialise userAnswer.ext as empty Set for extended mode
+    if (showExt) G.userAnswer.ext = new Set();
+  },
+
+  // ── CHECK ANSWER ───────────────────────────────────
+  checkAnswer() {
+    if (G.submitted || !G.currentAnswer) return;
+    G.submitted = true;
+    G.scoreTotal++;
+    document.getElementById('submitBtn').disabled = true;
+
+    let correct = false;
+    const feedbackEl = document.getElementById('feedback');
+    const levelInt = getLevelInt(active.mode, active);
+
+    if (G.currentAnswer.type === 'interval') {
+      const right = G.currentAnswer.interval.semitones;
+      correct = parseInt(G.userAnswer.semitones) === right;
+
+      document.querySelectorAll('#intervalGrid .ans-btn').forEach(btn => {
+        if (parseInt(btn.dataset.semitones) === right) btn.classList.add('reveal-correct');
+        else if (btn.classList.contains('selected') && !correct) btn.classList.add('wrong');
+        btn.disabled = true;
+      });
+
+      const name = G.currentAnswer.interval.name;
+      feedbackEl.textContent = correct ? `Correct — ${name}` : `${name} (${G.currentAnswer.interval.short})`;
+      if (!correct) G.errors[name] = (G.errors[name] || 0) + 1;
+
+} else {
+      // Chord grading
+      const chord = G.currentAnswer.chord;
+      const set = active.chordSet;
+      const cc = _chordComponents(chord);
+      const u = G.userAnswer;
+      const show7th = set === 'sevenths' || set === 'extended';
+      const showExt = set === 'extended';
+      const showInv = (set === 'triads' || set === 'allTriads') && active.inversions === 'on';
+
+      // Quality match
+      let match = u.quality === cc.quality;
+
+      // Seventh match (required for sevenths and extended sets)
+      if (show7th) match = match && u.seventh === cc.seventh;
+
+      // Extension match — exact Set equality
+      if (showExt) {
+        const userExt = u.ext instanceof Set ? u.ext : new Set();
+        const setsEqual = userExt.size === cc.ext.size && [...cc.ext].every(v => userExt.has(v));
+        match = match && setsEqual;
+      }
+
+      // Inversion match
+      if (showInv) {
+        const invNames = ['root', 'first', 'second'];
+        match = match && u.inversion === invNames[G.currentAnswer.inversion];
+      }
+
+      correct = match;
+
+      const invStr = G.currentAnswer.inversion > 0
+        ? ` — ${['','1st','2nd'][G.currentAnswer.inversion]} inversion` : '';
+      feedbackEl.textContent = correct
+        ? `Correct — ${chord.name}${invStr}`
+        : `${chord.name} (${chord.symbol || 'triad'})${invStr}`;
+
+      if (!correct) G.errors[chord.name] = (G.errors[chord.name] || 0) + 1;
+
+      // Reveal correct answers
+      document.querySelectorAll('[data-grp]').forEach(btn => {
+        btn.disabled = true;
+        const grp = btn.dataset.grp; const val = btn.dataset.val;
+        let isCorrect = false;
+        if (grp === 'quality')   isCorrect = val === cc.quality;
+        if (grp === 'seventh')   isCorrect = val === cc.seventh;
+        if (grp === 'ext')       isCorrect = cc.ext.has(val);
+        if (grp === 'inversion') {
+          const invNames = ['root', 'first', 'second'];
+          isCorrect = val === invNames[G.currentAnswer.inversion];
+        }
+        if (isCorrect) btn.classList.add('reveal-correct');
+        else if (btn.classList.contains('selected')) btn.classList.add('wrong');
+      });
+    }
+
+    feedbackEl.className = correct ? 'feedback correct' : 'feedback wrong';
+
+    if (correct) { G.scoreCorrect++; G.streak++; if (G.streak > G.bestStreak) G.bestStreak = G.streak; }
+    else { G.streak = 0; }
+
+    updateScoreDisplay();
+    document.getElementById('nextBtn').classList.add('visible');
+
+    // If wrong, replay after short delay
+    if (!correct) setTimeout(() => Game.playSound(), 600);
+
+    // Save to Supabase
+    saveAnswer(levelInt, correct);
+  },
+};
+
+// Explicit lookup table — each chord name maps to its exact correct answer components.
+// ext is a Set of string keys matching the extension button data-val values.
+const CHORD_COMPONENTS = {
+  // Triads
+  'Major':      { quality: 'major',   seventh: null, ext: new Set() },
+  'Minor':      { quality: 'minor',   seventh: null, ext: new Set() },
+  'Augmented':  { quality: 'aug',     seventh: null, ext: new Set() },
+  'Diminished': { quality: 'dim',     seventh: null, ext: new Set() },
+  // Sevenths
+  'Major 7th':      { quality: 'major',   seventh: 'maj7', ext: new Set() },
+  'Dominant 7th':   { quality: 'major',   seventh: 'b7',   ext: new Set() },
+  'Minor 7th':      { quality: 'minor',   seventh: 'b7',   ext: new Set() },
+  'Minor maj7':     { quality: 'minor',   seventh: 'maj7', ext: new Set() },
+  'Half-dim 7th':   { quality: 'halfdim', seventh: 'b7',   ext: new Set() },
+  'Diminished 7th': { quality: 'dim',     seventh: 'dim7', ext: new Set() },
+  'Augmented maj7': { quality: 'aug',     seventh: 'maj7', ext: new Set() },
+  // Extended
+  'Major 9':    { quality: 'major', seventh: 'maj7', ext: new Set(['9']) },
+  'Dominant 9': { quality: 'major', seventh: 'b7',   ext: new Set(['9']) },
+  'Minor 9':    { quality: 'minor', seventh: 'b7',   ext: new Set(['9']) },
+  'Dom ♭9':     { quality: 'major', seventh: 'b7',   ext: new Set(['b9']) },
+  'Dom ♯9':     { quality: 'major', seventh: 'b7',   ext: new Set(['s9']) },
+  'Major 11':   { quality: 'major', seventh: 'maj7', ext: new Set(['9', '11']) },
+  'Dom 11':     { quality: 'major', seventh: 'b7',   ext: new Set(['9', '11']) },
+  'Minor 11':   { quality: 'minor', seventh: 'b7',   ext: new Set(['9', '11']) },
+  'Dom ♯11':    { quality: 'major', seventh: 'b7',   ext: new Set(['9', 's11']) },
+  'Major 13':   { quality: 'major', seventh: 'maj7', ext: new Set(['9', '11', '13']) },
+  'Dom 13':     { quality: 'major', seventh: 'b7',   ext: new Set(['9', '11', '13']) },
+  'Minor 13':   { quality: 'minor', seventh: 'b7',   ext: new Set(['9', '11', '13']) },
+  'Dom ♭13':    { quality: 'major', seventh: 'b7',   ext: new Set(['9', '11', 'b13']) },
+};
+
+function _chordComponents(chord) {
+  return CHORD_COMPONENTS[chord.name] || { quality: null, seventh: null, ext: new Set() };
+}
+
+function _updateSubmitState(show7th, showExt, showInv, area) {
+  const u = G.userAnswer;
+  const qualityOk  = !!u.quality;
+  const seventhOk  = !show7th || !!u.seventh;
+  const inversionOk = !showInv || !!u.inversion;
+  // Extensions are always optional to select (empty set is valid — user may select none)
+  // but we still require quality and seventh before enabling submit
+  const canSubmit = qualityOk && seventhOk && inversionOk;
+  document.getElementById('submitBtn').disabled = !canSubmit;
+  if (canSubmit) { const h = document.getElementById('answerHint'); if (h) h.style.display = 'none'; }
+}
+  
+function updateScoreDisplay() {
+  document.getElementById('scoreCorrect').textContent = G.scoreCorrect;
+  document.getElementById('scoreTotal').textContent   = G.scoreTotal;
+  const pct = G.scoreTotal > 0 ? Math.round((G.scoreCorrect / G.scoreTotal) * 100) + '%' : '';
+  document.getElementById('scoreAccuracy').innerHTML = pct ? `Accuracy <strong>${pct}</strong>` : '';
+  const sv = document.getElementById('streakVal');
+  sv.textContent = G.streak;
+  sv.classList.toggle('hot', G.streak >= 3);
+}
+
+// ── KEYBOARD SHORTCUTS ──────────────────────────────────
+document.addEventListener('keydown', e => {
+  const tag = (e.target || e.srcElement).tagName;
+  if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+  if (!G.started) return;
+
+  if (e.code === 'Space') { e.preventDefault(); Game.playSound(); return; }
+  if (e.code === 'Enter') {
+    e.preventDefault();
+    if (!document.getElementById('submitBtn').disabled && !G.submitted) Game.checkAnswer();
+    else if (document.getElementById('nextBtn').classList.contains('visible')) Game.next();
+    return;
   }
 
-  feedbackEl.className = correct ? 'feedback correct' : 'feedback wrong';
+  // Number keys select interval buttons by position
+  if (G.currentAnswer?.type === 'interval' && !G.submitted) {
+    const n = parseInt(e.key);
+    if (n >= 1 && n <= 9) {
+      const btns = document.querySelectorAll('#intervalGrid .ans-btn');
+      if (btns[n - 1]) btns[n - 1].click();
+    }
+  }
+});
 
-  if (!correct) setTimeout(() => playCurrentSound(), 500);
-
-  if (correct) state.scoreCorrect++;
-  updateScore();
-  document.getElementById('nextBtn').classList.add('visible');
-}
-
-function updateScore() {
-  document.getElementById('scoreCorrect').textContent = state.scoreCorrect;
-  document.getElementById('scoreTotal').textContent   = state.scoreTotal;
-  const pct = state.scoreTotal > 0
-    ? Math.round((state.scoreCorrect / state.scoreTotal) * 100) + '%' : '';
-  document.getElementById('scorePercent').innerHTML =
-    pct ? `Accuracy <strong>${pct}</strong>` : '';
-}
-
-// expose for inline onclick handlers
-window.setMode          = setMode;
-window.setSetting       = setSetting;
-window.setChordSetting  = setChordSetting;
-window.startSession     = startSession;
-window.playCurrentSound = playCurrentSound;
-window.checkAnswer      = checkAnswer;
-window.nextQuestion     = nextQuestion;
-
+// ── INIT ────────────────────────────────────────────────
+// Show inversion toggle only for triads by default
+document.getElementById('inversionGroup').style.display = 'block';
+updateApplyBtn();
+updateScoreDisplay();
 </script>
-
 </body>
 </html>
