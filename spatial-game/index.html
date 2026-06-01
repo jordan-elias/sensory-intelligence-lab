@@ -434,27 +434,44 @@ class ToneSource {
     const ctx = this.audioCtx; const now = ctx.currentTime;
 
     if (this.timbre === 'string') {
-      // Karplus-Strong plucked string synthesis
-      const bufLen = Math.floor(ctx.sampleRate / this.frequency);
-      const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
-      const data = buf.getChannelData(0);
-      for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+  const bufLen = Math.floor(ctx.sampleRate / this.frequency);
+  const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
 
-      const delay = ctx.createDelay();
-      delay.delayTime.value = 1 / this.frequency;
-      const filter = ctx.createBiquadFilter();
-      filter.type = 'lowpass'; filter.frequency.value = 2200; filter.Q.value = 0.5;
-      const gain = ctx.createGain(); gain.gain.value = 0.42;
+  const delay = ctx.createDelay();
+  delay.delayTime.value = 1 / this.frequency;
 
-      const noise = ctx.createBufferSource(); noise.buffer = buf;
-      noise.connect(delay); delay.connect(filter); filter.connect(delay);
-      filter.connect(gain); gain.connect(this.resonanceSource.input);
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.value = 2200;
+  filter.Q.value = 0.5;
 
-      // Decay envelope
-      gain.gain.setValueAtTime(0.42, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
-      noise.start(now); noise.stop(now + 1.45);
+  // ✅ FIX: attenuation gain inside the feedback loop
+  const loopGain = ctx.createGain();
+  loopGain.gain.value = 0.49; // < 1.0 so energy decays each cycle
 
+  const outGain = ctx.createGain();
+  outGain.gain.value = 0.42;
+
+  const noise = ctx.createBufferSource();
+  noise.buffer = buf;
+
+  // Signal path: noise → delay → filter → loopGain → delay (loop)
+  //                                      └→ outGain → resonanceSource
+  noise.connect(delay);
+  delay.connect(filter);
+  filter.connect(loopGain);
+  loopGain.connect(delay);        // feedback with attenuation
+  filter.connect(outGain);        // tap output after filter
+  outGain.connect(this.resonanceSource.input);
+
+  outGain.gain.setValueAtTime(0.42, now);
+  outGain.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
+  noise.start(now);
+  noise.stop(now + 1.45);
+
+    
     } else if (this.timbre === 'pad') {
       // Two detuned oscillators with LFO amplitude
       const osc1 = ctx.createOscillator(); osc1.type = 'triangle'; osc1.frequency.value = this.frequency;
