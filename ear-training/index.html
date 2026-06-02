@@ -749,7 +749,6 @@ const Game = window.Game = {
           { label: 'Minor',    value: 'minor'   },
           { label: 'Aug',      value: 'aug'     },
           { label: 'Dim',      value: 'dim'     },
-          ...(show7th ? [{ label: 'Half-dim', value: 'halfdim' }] : []),
         ];
 
     const mkRow = (label, grp, inner) => `
@@ -922,7 +921,7 @@ const CHORD_COMPONENTS = {
   'Dominant 7th':   { quality: 'major',   seventh: 'b7',   ext: new Set() },
   'Minor 7th':      { quality: 'minor',   seventh: 'b7',   ext: new Set() },
   'Minor maj7':     { quality: 'minor',   seventh: 'maj7', ext: new Set() },
-  'Half-dim 7th':   { quality: 'halfdim', seventh: 'b7',   ext: new Set() },
+  'Half-dim 7th':   { quality: 'dim',     seventh: 'b7',   ext: new Set() },
   'Diminished 7th': { quality: 'dim',     seventh: 'dim7', ext: new Set() },
   'Augmented maj7': { quality: 'aug',     seventh: 'maj7', ext: new Set() },
   // Extended
