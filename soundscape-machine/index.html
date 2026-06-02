@@ -9,7 +9,18 @@
   <link rel="apple-touch-icon" href="/images/favicon.png">
   <link rel="manifest" href="/site.webmanifest">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
-  
+
+  <script src="/dashboard/auth-guard.js" type="module"></script>
+
+  <script type="module">
+    import { applyMultipleGating } from '/assets/js/gating.js';
+    applyMultipleGating([
+      { targetSelector: '.transport',        moduleName: 'tape-laboratory' },
+
+      
+    ]);
+  </script>
+
  
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
