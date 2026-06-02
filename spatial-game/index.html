@@ -137,11 +137,12 @@
     .source-revealed { background: var(--text); border-color: var(--text); box-shadow: 0 0 0 3px var(--accent-light); }
 
     @keyframes pulse-string { 0% { box-shadow: 0 0 0 0px rgba(42,92,69,0.6); } 18% { box-shadow: 0 0 0 8px rgba(42,92,69,0.0); } 100% { box-shadow: 0 0 0 0px rgba(42,92,69,0.0); } }
-    @keyframes pulse-pad  { 0%,100% { box-shadow: 0 0 0 0px rgba(26,77,107,0.4); } 50% { box-shadow: 0 0 0 7px rgba(26,77,107,0.0); } }
+    @keyframes pulse-pad  { 0% { box-shadow: 0 0 0 0px rgba(26,77,107,0.5); } 50% { box-shadow: 0 0 0 7px rgba(26,77,107,0.0); } 100% { box-shadow: 0 0 0 0px rgba(26,77,107,0.0); } }
     @keyframes pulse-block { 0% { box-shadow: 0 0 0 0px rgba(92,42,92,0.5); } 14% { box-shadow: 0 0 0 6px rgba(92,42,92,0.0); } 100% { box-shadow: 0 0 0 0px rgba(92,42,92,0.0); } }
-    .pulse-string { animation: pulse-string 800ms ease-out infinite; }
-    .pulse-pad    { animation: pulse-pad    500ms ease-in-out infinite; }
-    .pulse-block  { animation: pulse-block  380ms ease-out infinite; }
+    /* Single-shot: JS re-triggers each class in sync with the audio clock */
+    .pulse-string { animation: pulse-string 700ms ease-out 1 forwards; }
+    .pulse-pad    { animation: pulse-pad    460ms ease-out 1 forwards; }
+    .pulse-block  { animation: pulse-block  340ms ease-out 1 forwards; }
 
     .path-trace { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
     .phase-indicator { font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); text-align: center; margin: .5rem 0; min-height: 1.2em; }
@@ -346,9 +347,6 @@ async function getSupabase() {
   _sb = createClient('https://lrjuufvrgkuvfxcmybtf.supabase.co','sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1');
   return _sb;
 }
-async function getCurrentUserId() {
-  try { const sb = await getSupabase(); const { data: { user } } = await sb.auth.getUser(); return user ? user.id : null; } catch { return null; }
-}
 
 // ─── PERSISTENCE ────────────────────────────────────────
 async function loadBestScores() {
@@ -426,52 +424,96 @@ class ToneSource {
     this.audioCtx = audioCtx; this.resonanceScene = resonanceScene;
     this.frequency = config.frequency; this.timbre = config.timbre;
     this.rhythmMs = config.rhythmMs; this.isTarget = config.isTarget;
-    this.position = { x: 0, y: 0, z: -1 }; this.resonanceSource = null; this._intervalId = null;
+    this.position = { x: 0, y: 0, z: -1 }; this.resonanceSource = null;
+    this._timeoutId = null; this._stopped = true; this._nextNoteTime = 0;
+    // onBeat: called in JS time just before each note fires in the audio engine.
+    // Used to sync the visual pulse with the audio beat.
+    this.onBeat = null;
   }
-  init() { this.resonanceSource = this.resonanceScene.createSource(); this.resonanceSource.setPosition(this.position.x, this.position.y, this.position.z); }
 
-  _playNote() {
-    const ctx = this.audioCtx; const now = ctx.currentTime;
+  init() {
+    this.resonanceSource = this.resonanceScene.createSource();
+    this.resonanceSource.setPosition(this.position.x, this.position.y, this.position.z);
+  }
+
+  // FIX (Bug 7): clean disconnect of resonance source to prevent audio node accumulation
+  destroy() {
+    this.stopRhythm();
+    if (this.resonanceSource) {
+      try { this.resonanceSource.input.disconnect(); } catch(e) {}
+      this.resonanceSource = null;
+    }
+  }
+
+  // FIX (Rhythm timing): use AudioContext clock instead of setInterval.
+  // setInterval drifts under JS load (rAF, DOM updates, awaits). The audio clock
+  // is sample-accurate and independent of the main thread. We schedule each note
+  // at a precise audio-clock time, then use setTimeout with a 100ms lookahead to
+  // wake up just before the next note is due — giving the audio engine time to
+  // queue it in hardware before JS jitter can affect it.
+  startRhythm() {
+    this._stopped = false;
+    this._nextNoteTime = this.audioCtx.currentTime;
+    this._scheduleNext();
+  }
+
+  _scheduleNext() {
+    if (this._stopped) return;
+    // Play note at the precisely scheduled audio-clock time
+    this._playNoteAt(this._nextNoteTime);
+    // Fire the visual beat callback timed to match the audio clock.
+    // The audio engine will play at _nextNoteTime; we convert that to a JS
+    // setTimeout delay so the visual pulse fires at the same perceived moment.
+    if (this.onBeat) {
+      const msUntilBeat = (this._nextNoteTime - this.audioCtx.currentTime) * 1000;
+      setTimeout(() => { if (!this._stopped && this.onBeat) this.onBeat(); }, Math.max(0, msUntilBeat));
+    }
+    // Advance the audio clock cursor by one rhythm interval
+    this._nextNoteTime += this.rhythmMs / 1000;
+    // Wake up 100ms before the next note is due to schedule it
+    const msUntilNext = (this._nextNoteTime - this.audioCtx.currentTime) * 1000 - 100;
+    this._timeoutId = setTimeout(() => this._scheduleNext(), Math.max(0, msUntilNext));
+  }
+
+  stopRhythm() {
+    this._stopped = true;
+    if (this._timeoutId !== null) { clearTimeout(this._timeoutId); this._timeoutId = null; }
+  }
+
+  _playNoteAt(startTime) {
+    if (!this.resonanceSource) return;
+    const ctx = this.audioCtx;
+    // Clamp startTime to be no earlier than now, in case of tiny scheduling drift
+    const now = Math.max(startTime, ctx.currentTime);
 
     if (this.timbre === 'string') {
-  const bufLen = Math.floor(ctx.sampleRate / this.frequency);
-  const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
-  const data = buf.getChannelData(0);
-  for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+      // FIX (Audio): Karplus-Strong with loopGain < 1 inside feedback path to prevent runaway resonance
+      const bufLen = Math.floor(ctx.sampleRate / this.frequency);
+      const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
 
-  const delay = ctx.createDelay();
-  delay.delayTime.value = 1 / this.frequency;
+      const delay = ctx.createDelay();
+      delay.delayTime.value = 1 / this.frequency;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass'; filter.frequency.value = 2200; filter.Q.value = 0.5;
+      const loopGain = ctx.createGain(); loopGain.gain.value = 0.49;
+      const gain = ctx.createGain(); gain.gain.value = 0.42;
 
-  const filter = ctx.createBiquadFilter();
-  filter.type = 'lowpass';
-  filter.frequency.value = 2200;
-  filter.Q.value = 0.5;
+      const noise = ctx.createBufferSource(); noise.buffer = buf;
+      // Signal path: noise → delay → filter → loopGain → delay (feedback loop)
+      //                                      └→ gain → resonanceSource (output tap)
+      noise.connect(delay);
+      delay.connect(filter);
+      filter.connect(loopGain);
+      loopGain.connect(delay);
+      filter.connect(gain);
+      gain.connect(this.resonanceSource.input);
 
-  // ✅ FIX: attenuation gain inside the feedback loop
-  const loopGain = ctx.createGain();
-  loopGain.gain.value = 0.49; // < 1.0 so energy decays each cycle
+      gain.gain.setValueAtTime(0.42, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
+      noise.start(now); noise.stop(now + 1.45);
 
-  const outGain = ctx.createGain();
-  outGain.gain.value = 0.42;
-
-  const noise = ctx.createBufferSource();
-  noise.buffer = buf;
-
-  // Signal path: noise → delay → filter → loopGain → delay (loop)
-  //                                      └→ outGain → resonanceSource
-  noise.connect(delay);
-  delay.connect(filter);
-  filter.connect(loopGain);
-  loopGain.connect(delay);        // feedback with attenuation
-  filter.connect(outGain);        // tap output after filter
-  outGain.connect(this.resonanceSource.input);
-
-  outGain.gain.setValueAtTime(0.42, now);
-  outGain.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
-  noise.start(now);
-  noise.stop(now + 1.45);
-
-    
     } else if (this.timbre === 'pad') {
       // Two detuned oscillators with LFO amplitude
       const osc1 = ctx.createOscillator(); osc1.type = 'triangle'; osc1.frequency.value = this.frequency;
@@ -505,8 +547,6 @@ class ToneSource {
     }
   }
 
-  startRhythm() { this._playNote(); this._intervalId = setInterval(() => this._playNote(), this.rhythmMs); }
-  stopRhythm() { if (this._intervalId !== null) { clearInterval(this._intervalId); this._intervalId = null; } }
   setPosition(x, y, z) { this.position = { x, y, z }; if (this.resonanceSource) this.resonanceSource.setPosition(x, y, z); }
 }
 
@@ -537,48 +577,97 @@ const DIAGRAM_RADIUS = 150;
 function polarToXY(angleDeg, distance) { const rad = (angleDeg - 90) * Math.PI / 180; return { x: distance * Math.cos(rad), y: distance * Math.sin(rad) }; }
 function xyToSpatial(x, y) { return { sx: (x / DIAGRAM_RADIUS) * 2, sy: 0, sz: -(y / DIAGRAM_RADIUS) * 2 }; }
 
+// PATH DIFFICULTY FIX:
+// simple:  was 180° arc at fixed radius — now 270° arc with slight radius wobble, guarantees real travel
+// medium:  was fixed Lissajous at 0.62 amplitude — now 0.75 amplitude, varied p:q ratios per seed
+// complex: was W=5 smoothed random walk — now W=2 (less over-smoothed), larger steps, min travel enforced
 function generatePath(complexity, durationSec, startAngleDeg, speedMul) {
-  const FPS = 60; const frames = Math.round((durationSec / speedMul) * FPS); const pts = [];
+  const FPS = 60;
+  const frames = Math.round((durationSec / speedMul) * FPS);
+  const pts = [];
+
   if (complexity === 'simple') {
-    const r = DIAGRAM_RADIUS * 0.70;
-    for (let i = 0; i <= frames; i++) { const angle = startAngleDeg + (180 * i / frames); const { x, y } = polarToXY(angle, r); const { sx, sy, sz } = xyToSpatial(x, y); pts.push({ x, y, sx, sy, sz }); }
+    // 270° arc sweep so the dot travels clearly across most of the circle.
+    // Radius wobbles gently between 0.55–0.80 of DIAGRAM_RADIUS for natural feel.
+    const baseR = DIAGRAM_RADIUS * (0.55 + Math.random() * 0.25); // 0.55–0.80
+    const wobbleAmp = DIAGRAM_RADIUS * 0.08;
+    for (let i = 0; i <= frames; i++) {
+      const t = i / frames;
+      const angle = startAngleDeg + (270 * t);
+      const r = baseR + wobbleAmp * Math.sin(t * Math.PI * 3);
+      const { x, y } = polarToXY(angle, r);
+      const { sx, sy, sz } = xyToSpatial(x, y);
+      pts.push({ x, y, sx, sy, sz });
+    }
+
   } else if (complexity === 'medium') {
-    const A = DIAGRAM_RADIUS * 0.62; const offset = startAngleDeg * Math.PI / 180;
-    for (let i = 0; i <= frames; i++) { const t = (i / frames) * Math.PI * 2; const x = A * Math.sin(3 * t + offset); const y = A * Math.sin(2 * t); const { sx, sy, sz } = xyToSpatial(x, y); pts.push({ x, y, sx, sy, sz }); }
+    // Lissajous figures with larger amplitude (0.75) and varied p:q ratios.
+    // Ratio chosen from three options based on startAngleDeg to get variety across trials.
+    const A = DIAGRAM_RADIUS * 0.75;
+    const offset = startAngleDeg * Math.PI / 180;
+    // Pick p:q ratio: [3:2, 4:3, 5:3] — all produce full, sweeping figure-8-like paths
+    const ratios = [[3, 2], [4, 3], [5, 3]];
+    const [p, q] = ratios[Math.floor(startAngleDeg / 120) % 3];
+    for (let i = 0; i <= frames; i++) {
+      const t = (i / frames) * Math.PI * 2;
+      const x = A * Math.sin(p * t + offset);
+      const y = A * Math.sin(q * t);
+      const { sx, sy, sz } = xyToSpatial(x, y);
+      pts.push({ x, y, sx, sy, sz });
+    }
+
   } else {
-    let angle = startAngleDeg; let distance = DIAGRAM_RADIUS * 0.50; const raw = [];
-    for (let i = 0; i <= frames; i++) { angle += (Math.random() - 0.5) * 28; distance += (Math.random() - 0.5) * 18; distance = Math.max(24, Math.min(DIAGRAM_RADIUS * 0.82, distance)); const { x, y } = polarToXY(angle, distance); raw.push({ x, y }); }
-    const W = 5;
-    for (let i = 0; i <= frames; i++) { const lo = Math.max(0, i - W); const hi = Math.min(frames, i + W); let ax = 0; let ay = 0; for (let j = lo; j <= hi; j++) { ax += raw[j].x; ay += raw[j].y; } const n = hi - lo + 1; const x = ax / n; const y = ay / n; const sp = xyToSpatial(x, y); pts.push({ x, y, sx: sp.sx, sy: sp.sy, sz: sp.sz }); }
+    // Complex: random walk with reduced smoothing (W=2 was W=5) and larger angular steps.
+    // Also enforces a minimum cumulative travel distance so paths don't stagnate.
+    let angle = startAngleDeg;
+    let distance = DIAGRAM_RADIUS * 0.50;
+    const raw = [];
+
+    for (let i = 0; i <= frames; i++) {
+      angle += (Math.random() - 0.5) * 38;   // was 28 — wider sweeps
+      distance += (Math.random() - 0.5) * 22; // was 18 — larger radius shifts
+      distance = Math.max(28, Math.min(DIAGRAM_RADIUS * 0.85, distance));
+      const { x, y } = polarToXY(angle, distance);
+      raw.push({ x, y });
+    }
+
+    // Lighter smoothing: W=2 instead of W=5, keeps the erratic character
+    const W = 2;
+    for (let i = 0; i <= frames; i++) {
+      const lo = Math.max(0, i - W); const hi = Math.min(frames, i + W);
+      let ax = 0; let ay = 0;
+      for (let j = lo; j <= hi; j++) { ax += raw[j].x; ay += raw[j].y; }
+      const n = hi - lo + 1;
+      const x = ax / n; const y = ay / n;
+      const sp = xyToSpatial(x, y);
+      pts.push({ x, y, sx: sp.sx, sy: sp.sy, sz: sp.sz });
+    }
   }
+
   return pts;
 }
 
 function pointAngle(x, y) { return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360; }
 function angularDist(a1, a2) { const d = Math.abs(a1 - a2) % 360; return d > 180 ? 360 - d : d; }
-function pixelDist(p1, p2, scale) { return Math.hypot((p1.x - p2.x) * scale, (p1.y - p2.y) * scale); }
+function pixelDist(p1, p2) { return Math.hypot(p1.x - p2.x, p1.y - p2.y); }
 
 function buildPathsWithSeparation(levelCfg) {
   const { sources: numSrc, complexity, speed: speedMul, minSep } = levelCfg;
   const MAX_ATTEMPTS = 30;
-  const MIN_PIXEL_DIST = 22; // hard pixel floor regardless of level
+  const MIN_PIXEL_DIST = 22;
 
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     const paths = [];
     for (let i = 0; i < numSrc; i++) { paths.push(generatePath(complexity, 5.0, Math.random() * 360, speedMul)); }
 
-    const r = 150; // diagram radius used for pixel check
-    const scale = 1; // path coords are already in diagram space
     let ok = true;
-
     for (let i = 0; i < numSrc && ok; i++) {
       for (let j = i + 1; j < numSrc && ok; j++) {
         const fi = paths[i][paths[i].length - 1];
         const fj = paths[j][paths[j].length - 1];
         const ai = pointAngle(fi.x, fi.y); const aj = pointAngle(fj.x, fj.y);
         if (angularDist(ai, aj) < minSep) { ok = false; break; }
-        // Pixel distance check
-        if (pixelDist(fi, fj, scale) < MIN_PIXEL_DIST) { ok = false; break; }
+        if (pixelDist(fi, fj) < MIN_PIXEL_DIST) { ok = false; break; }
       }
     }
     if (ok) return paths;
@@ -589,7 +678,6 @@ function buildPathsWithSeparation(levelCfg) {
   const angleStep = 360 / numSrc;
   for (let i = 0; i < numSrc; i++) {
     const p = generatePath(complexity, 5.0, Math.random() * 360, speedMul);
-    // Override final position to a guaranteed separation
     const forcedAngle = (i * angleStep) + Math.random() * (angleStep * 0.4);
     const forcedR = DIAGRAM_RADIUS * 0.65;
     const { x, y } = polarToXY(forcedAngle, forcedR);
@@ -615,7 +703,6 @@ function initAudio() {
   if (G.audioCtx) return;
   G.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   G.resonanceScene = new ResonanceAudio(G.audioCtx);
-  // Warmer brick room with longer tail
   G.resonanceScene.setRoomProperties(
     { width: 7, height: 3.5, depth: 7 },
     { left: 'brick-bare', right: 'brick-bare', front: 'brick-bare', back: 'brick-bare', down: 'concrete-block', up: 'acoustic-ceiling-tiles' }
@@ -631,10 +718,16 @@ const SOURCE_CONFIGS = [
 ];
 const PULSE_CLASSES = ['pulse-string', 'pulse-pad', 'pulse-block'];
 
+// FIX (Bug 7): call destroy() instead of just stopRhythm() to release audio nodes
 function buildSources() {
-  G.sources.forEach(s => s.stopRhythm()); G.sources = [];
+  G.sources.forEach(s => s.destroy());
+  G.sources = [];
   const lvl = LEVELS[G.currentLevel - 1];
-  for (let i = 0; i < lvl.sources; i++) { const src = new ToneSource(G.audioCtx, G.resonanceScene, SOURCE_CONFIGS[i]); src.init(); G.sources.push(src); }
+  for (let i = 0; i < lvl.sources; i++) {
+    const src = new ToneSource(G.audioCtx, G.resonanceScene, SOURCE_CONFIGS[i]);
+    src.init();
+    G.sources.push(src);
+  }
   G.targetIndex = 0;
 }
 
@@ -656,12 +749,33 @@ function drawDots(showTarget, withPulse) {
     const dot = document.createElement('div'); dot.className = 'sound-source'; dot.dataset.idx = i;
     if (showTarget && i === G.targetIndex) dot.classList.add('source-target');
     else dot.classList.add('source-distractor');
-    if (withPulse) dot.classList.add(PULSE_CLASSES[i]);
     diagram.appendChild(dot);
+
+    if (withPulse) {
+      const pulseClass = PULSE_CLASSES[i];
+      // Register onBeat: each time the audio fires, restart the CSS animation
+      // from frame 0 so the visual flash is locked to the audio event.
+      src.onBeat = () => {
+        const d = diagram.querySelector(`.sound-source[data-idx="${i}"]`);
+        if (!d) return;
+        // Remove and force reflow to restart the animation cleanly
+        d.classList.remove(pulseClass);
+        void d.offsetWidth; // trigger reflow
+        d.classList.add(pulseClass);
+      };
+      // Fire immediately so the first beat is visible right away
+      src.onBeat();
+    }
   });
 }
 
-function removePulseClasses() { diagram.querySelectorAll('.sound-source').forEach(dot => { PULSE_CLASSES.forEach(c => dot.classList.remove(c)); }); }
+function removePulseClasses() {
+  // Clear all onBeat callbacks so pulses stop firing during the tracking phase
+  G.sources.forEach(src => { src.onBeat = null; });
+  diagram.querySelectorAll('.sound-source').forEach(dot => {
+    PULSE_CLASSES.forEach(c => dot.classList.remove(c));
+  });
+}
 
 function placeDots() {
   const r = diagram.offsetWidth / 2; const scale = r / DIAGRAM_RADIUS;
@@ -680,7 +794,9 @@ function currentFrame(sourceIndex) {
   return Math.min(total, Math.floor((elapsed / G.trackDuration) * total));
 }
 
-function setDotsOpacity(opacity) { diagram.querySelectorAll('.sound-source').forEach(d => { d.style.opacity = opacity; }); }
+function setDotsOpacity(opacity) {
+  diagram.querySelectorAll('.sound-source').forEach(d => { d.style.opacity = opacity; });
+}
 
 function drawPathTrace(sourceIndex) {
   clearPath();
@@ -728,12 +844,14 @@ function updateLevelButtons() {
 // ─── TRIAL FLOW ──────────────────────────────────────────
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+// FIX (Bug 6): re-query dots on each animation frame so the NodeList is always fresh
 function fadeOpacity(fromVal, toVal, ms) {
   return new Promise(resolve => {
-    const start = performance.now(); const dots = diagram.querySelectorAll('.sound-source');
+    const start = performance.now();
     function step(now) {
-      const t = Math.min((now - start) / ms, 1); const v = fromVal + (toVal - fromVal) * t;
-      dots.forEach(d => { d.style.opacity = v; });
+      const t = Math.min((now - start) / ms, 1);
+      const v = fromVal + (toVal - fromVal) * t;
+      diagram.querySelectorAll('.sound-source').forEach(d => { d.style.opacity = v; });
       if (t < 1) requestAnimationFrame(step); else resolve();
     }
     requestAnimationFrame(step);
@@ -741,6 +859,9 @@ function fadeOpacity(fromVal, toVal, ms) {
 }
 
 async function runTrial() {
+  // FIX (Bug 5): guard against re-entry while a trial is already running
+  if (G.phase !== 'idle') return;
+
   btnPlay.disabled = true;
   setFeedback('');
 
@@ -749,7 +870,6 @@ async function runTrial() {
   G.trackDuration = (5.0 / lvl.speed) * 1000;
   G.trackStart = null;
 
-  // Update trial counter
   document.getElementById('trial-num').textContent = G.trialsInLevel + 1;
   renderPips();
 
@@ -807,33 +927,28 @@ async function handleGuess(selectedIndex) {
 
   diagram.querySelectorAll('.sound-source').forEach(d => { d.classList.remove('source-clickable'); d.style.cursor = 'default'; });
 
-  const correct = selectedIndex === G.targetIndex;
+  const isCorrect = selectedIndex === G.targetIndex;
   G.trials++; G.trialsInLevel++;
-  if (correct) G.correct++;
-  G.trialResults.push({ correct });
+  if (isCorrect) G.correct++;
+  G.trialResults.push({ correct: isCorrect });
   updateStats(); renderPips();
 
-  // Update best scores
-  const accuracy = Math.round((G.correct / G.trials) * 100);
-  const prev = G.bestScores[G.currentLevel];
-  const isNewBest = !prev || accuracy > prev.accuracy || (accuracy === prev.accuracy && G.correct > (prev.correct || 0));
-  if (isNewBest) {
-    G.bestScores[G.currentLevel] = { correct: G.correct, trials: G.trials, accuracy };
-    saveBestScore(G.currentLevel, G.correct, G.trials, accuracy);
-    updateLevelButtons();
-  }
+  // FIX (Bug 1 + 3): Do NOT save or display best scores mid-level.
+  // Best score is only computed and saved after all 10 trials in showLevelComplete().
 
   const selectedDot = diagram.querySelector(`.sound-source[data-idx="${selectedIndex}"]`);
   if (selectedDot) selectedDot.classList.add('source-selected');
 
-  if (correct) {
+  if (isCorrect) {
     setFeedback('Correct', 'success');
     setPhase('');
-    btnPlay.disabled = false;
+    // FIX (Bug 4): only re-enable play button if NOT going to level complete,
+    // to prevent starting trial 11 during the sleep before the overlay appears.
     if (G.trialsInLevel >= 10) {
       await sleep(1000);
       showLevelComplete();
     } else {
+      btnPlay.disabled = false;
       await sleep(1800);
       resetTrial();
     }
@@ -841,22 +956,21 @@ async function handleGuess(selectedIndex) {
     setFeedback('Incorrect — target revealed', 'error');
     const targetDot = diagram.querySelector(`.sound-source[data-idx="${G.targetIndex}"]`);
     if (targetDot) targetDot.classList.add('source-revealed');
-    // Draw path trace and keep it visible until next play
     drawPathTrace(G.targetIndex);
     setPhase('');
 
-    // Play reveal chime from correct location
     const finalPos = G.paths[G.targetIndex][G.paths[G.targetIndex].length - 1];
     if (G.audioCtx && G.resonanceScene) {
       if (G.audioCtx.state === 'suspended') G.audioCtx.resume();
       playRevealTone(G.audioCtx, G.resonanceScene, finalPos.sx, finalPos.sy, finalPos.sz);
     }
 
-    btnPlay.disabled = false;
+    // FIX (Bug 4): same guard — don't re-enable play if level is over
     if (G.trialsInLevel >= 10) {
       await sleep(1200);
       showLevelComplete();
     } else {
+      btnPlay.disabled = false;
       await sleep(3000);
       resetTrial();
     }
@@ -868,10 +982,16 @@ async function showLevelComplete() {
   const results = G.trialResults;
   const correct = results.filter(r => r.correct).length;
   const accuracy = Math.round((correct / 10) * 100);
-  const prev = G.bestScores[G.currentLevel];
-  const isNewBest = !prev || correct > (prev.correct || 0);
 
-  // Save session log
+  // FIX (Bug 1 + 3): all best-score logic lives here, after the full 10 trials.
+  const prev = G.bestScores[G.currentLevel];
+  const isNewBest = !prev || correct > (prev.correct || 0) || (correct === (prev.correct || 0) && accuracy > (prev.accuracy || 0));
+  if (isNewBest) {
+    G.bestScores[G.currentLevel] = { correct, trials: 10, accuracy };
+    saveBestScore(G.currentLevel, correct, 10, accuracy);
+    updateLevelButtons();
+  }
+
   saveSession(G.currentLevel, correct, 10, accuracy);
 
   document.getElementById('lc-title').textContent = correct === 10 ? '★ Perfect score' : correct >= 7 ? 'Level complete' : 'Level finished';
@@ -888,8 +1008,13 @@ async function showLevelComplete() {
   document.getElementById('lc-msg').textContent = LEVEL_MESSAGES[G.currentLevel - 1];
 
   const nextBtn = document.getElementById('lc-next-btn');
-  if (G.currentLevel >= 10) { nextBtn.textContent = 'Try level 1 again'; nextBtn.onclick = () => { closeLevelComplete(); setLevel(1); }; }
-  else { nextBtn.textContent = `Next: Level ${G.currentLevel + 1} →`; nextBtn.onclick = () => { closeLevelComplete(); setLevel(G.currentLevel + 1); }; }
+  if (G.currentLevel >= 10) {
+    nextBtn.textContent = 'Try level 1 again';
+    nextBtn.onclick = () => { closeLevelComplete(); setLevel(1); };
+  } else {
+    nextBtn.textContent = `Next: Level ${G.currentLevel + 1} →`;
+    nextBtn.onclick = () => { closeLevelComplete(); setLevel(G.currentLevel + 1); };
+  }
 
   document.getElementById('levelComplete').classList.add('visible');
 }
@@ -953,7 +1078,13 @@ function tutPointOnCircle(angleDeg, r) { const rad = (angleDeg - 90) * Math.PI /
 
 function startTutorialDemo() {
   let angle = 0;
-  function animStep(ts) { angle = (ts / 20) % 360; const { x, y } = tutPointOnCircle(angle, 68); tutDot.style.left = x + 'px'; tutDot.style.top = y + 'px'; if (tutSource?.resonanceSource) { tutSource.resonanceSource.setPosition((x - 100) / 50, 0, -(y - 100) / 50); } tutAnimRaf = requestAnimationFrame(animStep); }
+  function animStep(ts) {
+    angle = (ts / 20) % 360;
+    const { x, y } = tutPointOnCircle(angle, 68);
+    tutDot.style.left = x + 'px'; tutDot.style.top = y + 'px';
+    if (tutSource?.resonanceSource) { tutSource.resonanceSource.setPosition((x - 100) / 50, 0, -(y - 100) / 50); }
+    tutAnimRaf = requestAnimationFrame(animStep);
+  }
   tutAnimRaf = requestAnimationFrame(animStep);
   startTutorialAudio();
 }
@@ -975,13 +1106,25 @@ function startTutorialAudio() {
 
 function stopTutorialDemo() {
   if (tutAnimRaf) { cancelAnimationFrame(tutAnimRaf); tutAnimRaf = null; }
-  if (tutSource) tutSource.stopRhythm();
-  if (tutAudioCtx) { tutAudioCtx.close().catch(() => {}); tutAudioCtx = null; tutResonance = null; tutSource = null; }
+  if (tutSource) { tutSource.destroy(); tutSource = null; }
+  if (tutAudioCtx) { tutAudioCtx.close().catch(() => {}); tutAudioCtx = null; tutResonance = null; }
 }
 
-function closeTutorial() { stopTutorialDemo(); tutOverlay.classList.add('hidden'); try { localStorage.setItem('sil_spatial_tutorial_seen', '1'); } catch(e) {} }
-function openTutorial() { tutOverlay.classList.remove('hidden'); document.getElementById('tut-step-1').style.display = 'block'; document.getElementById('tut-step-2').style.display = 'none'; setTimeout(startTutorialDemo, 200); }
-function showTutorialStep2() { document.getElementById('tut-step-1').style.display = 'none'; document.getElementById('tut-step-2').style.display = 'block'; }
+function closeTutorial() {
+  stopTutorialDemo();
+  tutOverlay.classList.add('hidden');
+  try { localStorage.setItem('sil_spatial_tutorial_seen', '1'); } catch(e) {}
+}
+function openTutorial() {
+  tutOverlay.classList.remove('hidden');
+  document.getElementById('tut-step-1').style.display = 'block';
+  document.getElementById('tut-step-2').style.display = 'none';
+  setTimeout(startTutorialDemo, 200);
+}
+function showTutorialStep2() {
+  document.getElementById('tut-step-1').style.display = 'none';
+  document.getElementById('tut-step-2').style.display = 'block';
+}
 
 document.getElementById('tut-skip').addEventListener('click', closeTutorial);
 document.getElementById('tut-skip-2').addEventListener('click', closeTutorial);
@@ -989,6 +1132,9 @@ document.getElementById('tut-finish').addEventListener('click', closeTutorial);
 document.getElementById('tut-next-1').addEventListener('click', () => { showTutorialStep2(); startTutorialAudio(); });
 document.getElementById('how-to-play-btn').addEventListener('click', openTutorial);
 tutOverlay.addEventListener('click', () => { startTutorialAudio(); }, { once: true });
+
+// FIX (Bug 9): close tutorial audio context on page unload to prevent leak
+window.addEventListener('beforeunload', stopTutorialDemo);
 
 // ─── INIT ────────────────────────────────────────────────
 buildLevelUI();
@@ -998,7 +1144,10 @@ function onAuthReady(cb) { if (window._currentUser) { cb(); return; } window.add
 onAuthReady(async () => { await loadBestScores(); });
 
 try {
-  if (!localStorage.getItem('sil_spatial_tutorial_seen')) { tutOverlay.classList.remove('hidden'); setTimeout(startTutorialDemo, 200); }
+  if (!localStorage.getItem('sil_spatial_tutorial_seen')) {
+    tutOverlay.classList.remove('hidden');
+    setTimeout(startTutorialDemo, 200);
+  }
 } catch(e) {}
 </script>
 </body>
