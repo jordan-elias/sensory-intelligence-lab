@@ -136,13 +136,31 @@
     .source-selected { background: var(--accent); border-color: var(--accent); }
     .source-revealed { background: var(--text); border-color: var(--text); box-shadow: 0 0 0 3px var(--accent-light); }
 
-    @keyframes pulse-string { 0% { box-shadow: 0 0 0 0px rgba(42,92,69,0.6); } 18% { box-shadow: 0 0 0 8px rgba(42,92,69,0.0); } 100% { box-shadow: 0 0 0 0px rgba(42,92,69,0.0); } }
-    @keyframes pulse-pad  { 0% { box-shadow: 0 0 0 0px rgba(26,77,107,0.5); } 50% { box-shadow: 0 0 0 7px rgba(26,77,107,0.0); } 100% { box-shadow: 0 0 0 0px rgba(26,77,107,0.0); } }
-    @keyframes pulse-block { 0% { box-shadow: 0 0 0 0px rgba(92,42,92,0.5); } 14% { box-shadow: 0 0 0 6px rgba(92,42,92,0.0); } 100% { box-shadow: 0 0 0 0px rgba(92,42,92,0.0); } }
-    /* Single-shot: JS re-triggers each class in sync with the audio clock */
-    .pulse-string { animation: pulse-string 700ms ease-out 1 forwards; }
-    .pulse-pad    { animation: pulse-pad    460ms ease-out 1 forwards; }
-    .pulse-block  { animation: pulse-block  340ms ease-out 1 forwards; }
+    /* pulse-string: sharp ring on quarter-note beat (600ms interval).
+       Fast expand then fade — mirrors the quick attack / bow-stroke accent. */
+    @keyframes pulse-string {
+      0%   { box-shadow: 0 0 0 0px  rgba(42,92,69,0.75); }
+      12%  { box-shadow: 0 0 0 9px  rgba(42,92,69,0.0);  }
+      100% { box-shadow: 0 0 0 0px  rgba(42,92,69,0.0);  }
+    }
+    /* pulse-pad: slow swell on half-note beat (1200ms interval).
+       Gentle bloom that lingers — mirrors the long attack/release envelope. */
+    @keyframes pulse-pad {
+      0%   { box-shadow: 0 0 0 0px  rgba(26,77,107,0.5); }
+      35%  { box-shadow: 0 0 0 10px rgba(26,77,107,0.2); }
+      100% { box-shadow: 0 0 0 0px  rgba(26,77,107,0.0); }
+    }
+    /* pulse-block: sharp pop with medium tail on dotted-quarter (900ms interval).
+       Quick expand, slow fade — mirrors the percussive hit + resonant tail. */
+    @keyframes pulse-block {
+      0%   { box-shadow: 0 0 0 0px rgba(92,42,92,0.65); }
+      10%  { box-shadow: 0 0 0 8px rgba(92,42,92,0.15); }
+      100% { box-shadow: 0 0 0 0px rgba(92,42,92,0.0);  }
+    }
+    /* Duration < interval so the ring clears before the next beat fires */
+    .pulse-string { animation: pulse-string  560ms ease-out 1 forwards; }
+    .pulse-pad    { animation: pulse-pad     1080ms ease-out 1 forwards; }
+    .pulse-block  { animation: pulse-block   820ms  ease-out 1 forwards; }
 
     .path-trace { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
     .phase-indicator { font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); text-align: center; margin: .5rem 0; min-height: 1.2em; }
@@ -222,7 +240,7 @@
     <div id="tut-step-2" style="display:none;">
       <div class="tutorial-step-label">Introduction · Step 2 of 2</div>
       <h2>The shell game</h2>
-      <p>You'll hear three distinct sounds — a plucked string, a soft pad, and a woodblock. The <strong>filled dot</strong> plays the plucked string. Watch it move, then track it by ear when the dots fade out.</p>
+      <p>You'll hear three distinct sounds — a bowed string, a soft pad, and a woodblock. The <strong>filled dot</strong> plays the bowed string. Watch it move, then track it by ear when the dots fade out.</p>
       <p>When the movement stops, the dots reappear — all identical. <strong>Tap the one you were tracking.</strong></p>
       <p style="font-size:.8rem; color: var(--accent); font-weight:500;">Headphones are strongly recommended for the full spatial effect.</p>
       <div class="tutorial-actions">
@@ -299,7 +317,7 @@
       <div class="stat-item"><span class="stat-label">Accuracy</span><span class="stat-value" id="stat-accuracy">—</span></div>
     </div>
 
-    <p class="lab-hint">Headphones recommended · The filled dot plays the plucked string sound · Click where it ends up</p>
+    <p class="lab-hint">Headphones recommended · The filled dot plays the bowed string · Click where it ends up</p>
   </div>
 
   <!-- Level complete overlay -->
@@ -418,139 +436,280 @@ const LEVEL_MESSAGES = [
   'Maximum difficulty. The sources converge — only the sound can guide you.',
 ];
 
-// ═══ TONE SOURCE ════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
+// SHARED BPM GRID + CONTINUOUS TONE SOURCE
+// ═══════════════════════════════════════════════════════════════════
+//
+// All sources share a BPM of 100 (quarter note = 600ms).
+// Rhythm roles:
+//   string (target)  — quarter notes (every 1 beat = 600ms)
+//                      Prominent, bowed-string timbre, loudest accent
+//   pad (distractor) — half notes (every 2 beats = 1200ms)
+//                      Softer, sustained triangle pad
+//   woodblock        — dotted-quarter + eighth triplet feel
+//                      Accent every 1.5 beats (900ms) for syncopation
+//
+// Each source runs *continuously* — oscillators never stop.
+// Volume is shaped by a repeating gain envelope scheduled on the audio
+// clock so beats are sample-accurate and never drift.
+// Between beats the gain drops to a low sustain (~0.08) rather than
+// zero, so the spatial position is always audible and trackable.
+//
+// Visual pulses are triggered by the same audio-clock scheduler,
+// converting beat time → setTimeout delay so the CSS animation fires
+// exactly when the ear hears the accent.
+
+const BPM        = 100;
+const BEAT_SEC   = 60 / BPM;          // 0.600 s  — quarter note
+const HALF_SEC   = BEAT_SEC * 2;      // 1.200 s
+const DOT_Q_SEC  = BEAT_SEC * 1.5;    // 0.900 s  — dotted quarter
+
 class ToneSource {
   constructor(audioCtx, resonanceScene, config) {
-    this.audioCtx = audioCtx; this.resonanceScene = resonanceScene;
-    this.frequency = config.frequency; this.timbre = config.timbre;
-    this.rhythmMs = config.rhythmMs; this.isTarget = config.isTarget;
-    this.position = { x: 0, y: 0, z: -1 }; this.resonanceSource = null;
-    this._timeoutId = null; this._stopped = true; this._nextNoteTime = 0;
-    // onBeat: called in JS time just before each note fires in the audio engine.
-    // Used to sync the visual pulse with the audio beat.
-    this.onBeat = null;
+    this.audioCtx       = audioCtx;
+    this.resonanceScene = resonanceScene;
+    this.timbre         = config.timbre;
+    this.frequency      = config.frequency;
+    this.beatInterval   = config.beatInterval; // seconds between accents
+    this.isTarget       = config.isTarget;
+
+    this.position       = { x: 0, y: 0, z: -1 };
+    this.resonanceSource = null;
+
+    // continuous oscillator nodes (kept alive for the whole trial)
+    this._osc1      = null;
+    this._osc2      = null;
+    this._lfo       = null;
+    this._lfoGain   = null;  // vibrato depth gain (string only)
+    this._osc2Gain  = null;  // secondary oscillator gain (woodblock only)
+    this._masterGain = null;
+    this._filterNode = null;
+
+    this._stopped      = true;
+    this._nextBeatTime = 0;
+    this._schedTid     = null;
+
+    this.onBeat = null; // visual callback
   }
 
+  // ── init: create resonance source and build the continuous audio graph ──
   init() {
     this.resonanceSource = this.resonanceScene.createSource();
     this.resonanceSource.setPosition(this.position.x, this.position.y, this.position.z);
+    this._buildGraph();
   }
 
-  // FIX (Bug 7): clean disconnect of resonance source to prevent audio node accumulation
-  destroy() {
-    this.stopRhythm();
-    if (this.resonanceSource) {
-      try { this.resonanceSource.input.disconnect(); } catch(e) {}
-      this.resonanceSource = null;
+  _buildGraph() {
+    const ctx = this.audioCtx;
+
+    // Master gain — shaped by the beat envelope scheduler
+    this._masterGain = ctx.createGain();
+    this._masterGain.gain.value = 0.0;
+    this._masterGain.connect(this.resonanceSource.input);
+
+    if (this.timbre === 'string') {
+      // Bowed string: sawtooth + lowpass + vibrato LFO on pitch
+      this._osc1 = ctx.createOscillator();
+      this._osc1.type = 'sawtooth';
+      this._osc1.frequency.value = this.frequency;
+
+      // Vibrato
+      this._lfo = ctx.createOscillator();
+      this._lfo.type = 'sine';
+      this._lfo.frequency.value = 5.2; // Hz
+      this._lfoGain = ctx.createGain();
+      this._lfoGain.gain.value = 3.5; // cents-equivalent pitch deviation
+      this._lfo.connect(this._lfoGain);
+      this._lfoGain.connect(this._osc1.frequency);
+
+      // Tone shaping: lowpass removes harshness of raw sawtooth
+      this._filterNode = ctx.createBiquadFilter();
+      this._filterNode.type = 'lowpass';
+      this._filterNode.frequency.value = 1100;
+      this._filterNode.Q.value = 1.2;
+
+      // Second partial for warmth (one octave up, quieter)
+      this._osc2 = ctx.createOscillator();
+      this._osc2.type = 'sawtooth';
+      this._osc2.frequency.value = this.frequency * 2;
+      const osc2Gain = ctx.createGain();
+      osc2Gain.gain.value = 0.18;
+
+      this._osc1.connect(this._filterNode);
+      this._filterNode.connect(this._masterGain);
+      this._osc2.connect(osc2Gain);
+      osc2Gain.connect(this._masterGain);
+
+      this._lfo.start();
+      this._osc1.start();
+      this._osc2.start();
+
+    } else if (this.timbre === 'pad') {
+      // Sustained pad: two detuned triangle oscillators
+      this._osc1 = ctx.createOscillator();
+      this._osc1.type = 'triangle';
+      this._osc1.frequency.value = this.frequency;
+
+      this._osc2 = ctx.createOscillator();
+      this._osc2.type = 'triangle';
+      this._osc2.frequency.value = this.frequency * 1.007; // slight detune
+
+      this._filterNode = ctx.createBiquadFilter();
+      this._filterNode.type = 'lowpass';
+      this._filterNode.frequency.value = 1400;
+      this._filterNode.Q.value = 0.7;
+
+      this._osc1.connect(this._filterNode);
+      this._osc2.connect(this._filterNode);
+      this._filterNode.connect(this._masterGain);
+
+      this._osc1.start();
+      this._osc2.start();
+
+    } else if (this.timbre === 'woodblock') {
+      // Resonant woodblock: square wave + bandpass, continuous with percussive envelope
+      this._osc1 = ctx.createOscillator();
+      this._osc1.type = 'square';
+      this._osc1.frequency.value = this.frequency;
+
+      // Add a slightly detuned sine for body/resonance
+      this._osc2 = ctx.createOscillator();
+      this._osc2.type = 'sine';
+      this._osc2.frequency.value = this.frequency * 1.5;
+      this._osc2Gain = ctx.createGain();
+      this._osc2Gain.gain.value = 0.4;
+
+      this._filterNode = ctx.createBiquadFilter();
+      this._filterNode.type = 'bandpass';
+      this._filterNode.frequency.value = this.frequency * 1.4;
+      this._filterNode.Q.value = 3.5;
+
+      this._osc1.connect(this._filterNode);
+      this._filterNode.connect(this._masterGain);
+      this._osc2.connect(this._osc2Gain);
+      this._osc2Gain.connect(this._masterGain);
+
+      this._osc1.start();
+      this._osc2.start();
     }
   }
 
-  // FIX (Rhythm timing): use AudioContext clock instead of setInterval.
-  // setInterval drifts under JS load (rAF, DOM updates, awaits). The audio clock
-  // is sample-accurate and independent of the main thread. We schedule each note
-  // at a precise audio-clock time, then use setTimeout with a 100ms lookahead to
-  // wake up just before the next note is due — giving the audio engine time to
-  // queue it in hardware before JS jitter can affect it.
+  // ── startRhythm: begin the beat-envelope scheduler ──
   startRhythm() {
     this._stopped = false;
-    this._nextNoteTime = this.audioCtx.currentTime;
+    this._nextBeatTime = this.audioCtx.currentTime + 0.05; // tiny offset so first note isn't clipped
     this._scheduleNext();
   }
 
   _scheduleNext() {
     if (this._stopped) return;
-    // Play note at the precisely scheduled audio-clock time
-    this._playNoteAt(this._nextNoteTime);
-    // Fire the visual beat callback timed to match the audio clock.
-    // The audio engine will play at _nextNoteTime; we convert that to a JS
-    // setTimeout delay so the visual pulse fires at the same perceived moment.
+
+    const beatTime = this._nextBeatTime;
+    this._shapeEnvelope(beatTime);
+
+    // Visual callback: fire in JS time aligned to audio beat
     if (this.onBeat) {
-      const msUntilBeat = (this._nextNoteTime - this.audioCtx.currentTime) * 1000;
-      setTimeout(() => { if (!this._stopped && this.onBeat) this.onBeat(); }, Math.max(0, msUntilBeat));
+      const msUntil = Math.max(0, (beatTime - this.audioCtx.currentTime) * 1000);
+      setTimeout(() => { if (!this._stopped && this.onBeat) this.onBeat(); }, msUntil);
     }
-    // Advance the audio clock cursor by one rhythm interval
-    this._nextNoteTime += this.rhythmMs / 1000;
-    // Wake up 100ms before the next note is due to schedule it
-    const msUntilNext = (this._nextNoteTime - this.audioCtx.currentTime) * 1000 - 100;
-    this._timeoutId = setTimeout(() => this._scheduleNext(), Math.max(0, msUntilNext));
+
+    this._nextBeatTime += this.beatInterval;
+
+    // Wake up 120ms before next beat to schedule it
+    const msUntilNext = (this._nextBeatTime - this.audioCtx.currentTime) * 1000 - 120;
+    this._schedTid = setTimeout(() => this._scheduleNext(), Math.max(0, msUntilNext));
+  }
+
+  // ── _shapeEnvelope: schedule gain curve for one accent at beatTime ──
+  // Each timbre has its own character:
+  //   string — strong accent, quick attack, slow decay to sustained hum
+  //   pad    — gentle swell, very slow attack/release, high sustain
+  //   woodblock — sharp percussive hit, fast decay to low resonant tail
+  _shapeEnvelope(beatTime) {
+    const g = this._masterGain.gain;
+    const now = this.audioCtx.currentTime;
+    // Clamp: never schedule into the past — use whichever is later
+    const t0 = Math.max(now, beatTime);
+    // Cancel from now so any still-running ramp is cleanly cut before we write new values
+    g.cancelScheduledValues(now);
+    // Snapshot current value so the ramp starts from wherever the gain actually is
+    g.setValueAtTime(g.value, now);
+
+    if (this.timbre === 'string') {
+      // Sustain level between beats: 0.09 (always audible)
+      // Accent peak: 0.52
+      const sustain   = 0.09;
+      const peak      = 0.52;
+      const attackSec = 0.018;
+      const decaySec  = 0.20;
+      g.setValueAtTime(sustain, t0);
+      g.linearRampToValueAtTime(peak, t0 + attackSec);
+      g.exponentialRampToValueAtTime(sustain + 0.001, t0 + attackSec + decaySec);
+      g.linearRampToValueAtTime(sustain, t0 + attackSec + decaySec + 0.01);
+
+    } else if (this.timbre === 'pad') {
+      // Sustain: 0.06 — always present but background
+      // Accent peak: 0.22 — gentle swell that fills the half-note gap
+      const sustain   = 0.06;
+      const peak      = 0.22;
+      const attackSec = 0.14;
+      const decaySec  = 0.70;
+      g.setValueAtTime(sustain, t0);
+      g.linearRampToValueAtTime(peak, t0 + attackSec);
+      g.exponentialRampToValueAtTime(sustain + 0.001, t0 + attackSec + decaySec);
+      g.linearRampToValueAtTime(sustain, t0 + attackSec + decaySec + 0.02);
+
+    } else if (this.timbre === 'woodblock') {
+      // Sustain: 0.04 — faint resonant tail keeps it spatially present
+      // Accent peak: 0.34 — sharp strike
+      const sustain   = 0.04;
+      const peak      = 0.34;
+      const attackSec = 0.005;
+      const decaySec  = 0.28;
+      g.setValueAtTime(sustain, t0);
+      g.linearRampToValueAtTime(peak, t0 + attackSec);
+      g.exponentialRampToValueAtTime(sustain + 0.001, t0 + attackSec + decaySec);
+      g.linearRampToValueAtTime(sustain, t0 + attackSec + decaySec + 0.02);
+    }
   }
 
   stopRhythm() {
     this._stopped = true;
-    if (this._timeoutId !== null) { clearTimeout(this._timeoutId); this._timeoutId = null; }
-  }
-
-  _playNoteAt(startTime) {
-    if (!this.resonanceSource) return;
-    const ctx = this.audioCtx;
-    // Clamp startTime to be no earlier than now, in case of tiny scheduling drift
-    const now = Math.max(startTime, ctx.currentTime);
-
-    if (this.timbre === 'string') {
-      // FIX (Audio): Karplus-Strong with loopGain < 1 inside feedback path to prevent runaway resonance
-      const bufLen = Math.floor(ctx.sampleRate / this.frequency);
-      const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
-      const data = buf.getChannelData(0);
-      for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
-
-      const delay = ctx.createDelay();
-      delay.delayTime.value = 1 / this.frequency;
-      const filter = ctx.createBiquadFilter();
-      filter.type = 'lowpass'; filter.frequency.value = 2200; filter.Q.value = 0.5;
-      const loopGain = ctx.createGain(); loopGain.gain.value = 0.49;
-      const gain = ctx.createGain(); gain.gain.value = 0.42;
-
-      const noise = ctx.createBufferSource(); noise.buffer = buf;
-      // Signal path: noise → delay → filter → loopGain → delay (feedback loop)
-      //                                      └→ gain → resonanceSource (output tap)
-      noise.connect(delay);
-      delay.connect(filter);
-      filter.connect(loopGain);
-      loopGain.connect(delay);
-      filter.connect(gain);
-      gain.connect(this.resonanceSource.input);
-
-      gain.gain.setValueAtTime(0.42, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
-      noise.start(now); noise.stop(now + 1.45);
-
-    } else if (this.timbre === 'pad') {
-      // Two detuned oscillators with LFO amplitude
-      const osc1 = ctx.createOscillator(); osc1.type = 'triangle'; osc1.frequency.value = this.frequency;
-      const osc2 = ctx.createOscillator(); osc2.type = 'triangle'; osc2.frequency.value = this.frequency * 1.006;
-      const lfo = ctx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 3.2;
-      const lfoGain = ctx.createGain(); lfoGain.gain.value = 0.04;
-      const gain = ctx.createGain();
-      const filter = ctx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 1600; filter.Q.value = 0.8;
-
-      lfo.connect(lfoGain); lfoGain.connect(gain.gain);
-      osc1.connect(gain); osc2.connect(gain); gain.connect(filter); filter.connect(this.resonanceSource.input);
-
-      gain.gain.setValueAtTime(0.0, now);
-      gain.gain.linearRampToValueAtTime(0.18, now + 0.08);
-      gain.gain.linearRampToValueAtTime(0.13, now + 0.35);
-      gain.gain.linearRampToValueAtTime(0.0, now + 0.48);
-
-      osc1.start(now); osc2.start(now); lfo.start(now);
-      osc1.stop(now + 0.5); osc2.stop(now + 0.5); lfo.stop(now + 0.5);
-
-    } else if (this.timbre === 'woodblock') {
-      // Pitched woodblock strike
-      const osc = ctx.createOscillator(); osc.type = 'square'; osc.frequency.value = this.frequency;
-      const filter = ctx.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.value = this.frequency * 1.5; filter.Q.value = 4;
-      const gain = ctx.createGain();
-
-      osc.connect(filter); filter.connect(gain); gain.connect(this.resonanceSource.input);
-      gain.gain.setValueAtTime(0.28, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-      osc.start(now); osc.stop(now + 0.14);
+    if (this._schedTid !== null) { clearTimeout(this._schedTid); this._schedTid = null; }
+    // Fade out quickly rather than abrupt cut
+    if (this._masterGain) {
+      const g = this._masterGain.gain;
+      const now = this.audioCtx.currentTime;
+      g.cancelScheduledValues(now);
+      g.setValueAtTime(g.value, now);
+      g.linearRampToValueAtTime(0.0, now + 0.08);
     }
   }
 
-  setPosition(x, y, z) { this.position = { x, y, z }; if (this.resonanceSource) this.resonanceSource.setPosition(x, y, z); }
+  destroy() {
+    this.stopRhythm();
+    // Stop all oscillators
+    [this._osc1, this._osc2, this._lfo].forEach(n => {
+      if (n) { try { n.stop(); n.disconnect(); } catch(e) {} }
+    });
+    [this._lfoGain, this._osc2Gain, this._filterNode, this._masterGain].forEach(n => {
+      if (n) { try { n.disconnect(); } catch(e) {} }
+    });
+    if (this.resonanceSource) {
+      try { this.resonanceSource.input.disconnect(); } catch(e) {}
+      this.resonanceSource = null;
+    }
+    this._osc1 = this._osc2 = this._lfo = this._lfoGain = this._osc2Gain = null;
+    this._filterNode = this._masterGain = null;
+  }
+
+  setPosition(x, y, z) {
+    this.position = { x, y, z };
+    if (this.resonanceSource) this.resonanceSource.setPosition(x, y, z);
+  }
 }
 
-// Bell/chime for reveal tone (incorrect answer)
+// Bell/chime for reveal tone (incorrect answer) — unchanged
 function playRevealTone(audioCtx, resonanceScene, x, y, z) {
   const src = resonanceScene.createSource();
   src.setPosition(x, y, z);
@@ -562,7 +721,6 @@ function playRevealTone(audioCtx, resonanceScene, x, y, z) {
   gain.gain.linearRampToValueAtTime(0.3, now + 0.008);
   gain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
   osc.start(now); osc.stop(now + 1.85);
-  // Second partial for warmth
   const osc2 = audioCtx.createOscillator(); osc2.type = 'sine'; osc2.frequency.value = 1318;
   const g2 = audioCtx.createGain();
   osc2.connect(g2); g2.connect(src.input);
@@ -577,19 +735,13 @@ const DIAGRAM_RADIUS = 150;
 function polarToXY(angleDeg, distance) { const rad = (angleDeg - 90) * Math.PI / 180; return { x: distance * Math.cos(rad), y: distance * Math.sin(rad) }; }
 function xyToSpatial(x, y) { return { sx: (x / DIAGRAM_RADIUS) * 2, sy: 0, sz: -(y / DIAGRAM_RADIUS) * 2 }; }
 
-// PATH DIFFICULTY FIX:
-// simple:  was 180° arc at fixed radius — now 270° arc with slight radius wobble, guarantees real travel
-// medium:  was fixed Lissajous at 0.62 amplitude — now 0.75 amplitude, varied p:q ratios per seed
-// complex: was W=5 smoothed random walk — now W=2 (less over-smoothed), larger steps, min travel enforced
 function generatePath(complexity, durationSec, startAngleDeg, speedMul) {
   const FPS = 60;
   const frames = Math.round((durationSec / speedMul) * FPS);
   const pts = [];
 
   if (complexity === 'simple') {
-    // 270° arc sweep so the dot travels clearly across most of the circle.
-    // Radius wobbles gently between 0.55–0.80 of DIAGRAM_RADIUS for natural feel.
-    const baseR = DIAGRAM_RADIUS * (0.55 + Math.random() * 0.25); // 0.55–0.80
+    const baseR = DIAGRAM_RADIUS * (0.55 + Math.random() * 0.25);
     const wobbleAmp = DIAGRAM_RADIUS * 0.08;
     for (let i = 0; i <= frames; i++) {
       const t = i / frames;
@@ -601,11 +753,8 @@ function generatePath(complexity, durationSec, startAngleDeg, speedMul) {
     }
 
   } else if (complexity === 'medium') {
-    // Lissajous figures with larger amplitude (0.75) and varied p:q ratios.
-    // Ratio chosen from three options based on startAngleDeg to get variety across trials.
     const A = DIAGRAM_RADIUS * 0.75;
     const offset = startAngleDeg * Math.PI / 180;
-    // Pick p:q ratio: [3:2, 4:3, 5:3] — all produce full, sweeping figure-8-like paths
     const ratios = [[3, 2], [4, 3], [5, 3]];
     const [p, q] = ratios[Math.floor(startAngleDeg / 120) % 3];
     for (let i = 0; i <= frames; i++) {
@@ -617,21 +766,18 @@ function generatePath(complexity, durationSec, startAngleDeg, speedMul) {
     }
 
   } else {
-    // Complex: random walk with reduced smoothing (W=2 was W=5) and larger angular steps.
-    // Also enforces a minimum cumulative travel distance so paths don't stagnate.
     let angle = startAngleDeg;
     let distance = DIAGRAM_RADIUS * 0.50;
     const raw = [];
 
     for (let i = 0; i <= frames; i++) {
-      angle += (Math.random() - 0.5) * 38;   // was 28 — wider sweeps
-      distance += (Math.random() - 0.5) * 22; // was 18 — larger radius shifts
+      angle += (Math.random() - 0.5) * 38;
+      distance += (Math.random() - 0.5) * 22;
       distance = Math.max(28, Math.min(DIAGRAM_RADIUS * 0.85, distance));
       const { x, y } = polarToXY(angle, distance);
       raw.push({ x, y });
     }
 
-    // Lighter smoothing: W=2 instead of W=5, keeps the erratic character
     const W = 2;
     for (let i = 0; i <= frames; i++) {
       const lo = Math.max(0, i - W); const hi = Math.min(frames, i + W);
@@ -673,7 +819,6 @@ function buildPathsWithSeparation(levelCfg) {
     if (ok) return paths;
   }
 
-  // Fallback: force well-separated final positions
   const paths = [];
   const angleStep = 360 / numSrc;
   for (let i = 0; i < numSrc; i++) {
@@ -710,26 +855,25 @@ function initAudio() {
   G.resonanceScene.output.connect(G.audioCtx.destination);
 }
 
-// Source configs: string (target ~A3), pad (G3), woodblock (C5)
+// ─── SOURCE CONFIGS ──────────────────────────────────────
+// Major triad: A3 (220 Hz) · C#4 (277.18 Hz) · E4 (329.63 Hz)
+// Rhythm roles on a 100 BPM grid:
+//   string    — quarter note  (BEAT_SEC   = 0.600 s) — most prominent
+//   pad       — half note     (HALF_SEC   = 1.200 s) — gentle, background
+//   woodblock — dotted quarter(DOT_Q_SEC  = 0.900 s) — syncopated accent
 const SOURCE_CONFIGS = [
-  { frequency: 220.00, timbre: 'string',    rhythmMs: 750,  isTarget: true  },
-  { frequency: 196.00, timbre: 'pad',       rhythmMs: 480,  isTarget: false },
-  { frequency: 523.25, timbre: 'woodblock', rhythmMs: 350,  isTarget: false },
+  { frequency: 220.00,  timbre: 'string',    beatInterval: BEAT_SEC,  isTarget: true  },
+  { frequency: 277.18,  timbre: 'pad',       beatInterval: HALF_SEC,  isTarget: false },
+  { frequency: 329.63,  timbre: 'woodblock', beatInterval: DOT_Q_SEC, isTarget: false },
 ];
-const PULSE_CLASSES = ['pulse-string', 'pulse-pad', 'pulse-block'];
 
-// FIX (Bug 7): call destroy() instead of just stopRhythm() to release audio nodes
-function buildSources() {
-  G.sources.forEach(s => s.destroy());
-  G.sources = [];
-  const lvl = LEVELS[G.currentLevel - 1];
-  for (let i = 0; i < lvl.sources; i++) {
-    const src = new ToneSource(G.audioCtx, G.resonanceScene, SOURCE_CONFIGS[i]);
-    src.init();
-    G.sources.push(src);
-  }
-  G.targetIndex = 0;
-}
+// ─── CSS PULSE ANIMATIONS ────────────────────────────────
+// Durations match the feel of each timbre's envelope:
+//   string  — sharp ring, matches accent attack + short decay
+//   pad     — slow swell, matches long attack/release
+//   woodblock — quick pop, matches percussive strike
+// Colours match the original scheme (green, blue, purple).
+// The JS scheduler re-triggers these in sync with the audio clock.
 
 // ─── DOM HELPERS ─────────────────────────────────────────
 const diagram    = document.getElementById('spatial-diagram');
@@ -743,6 +887,21 @@ function setFeedback(msg, cls) { feedbackEl.textContent = msg; feedbackEl.classN
 function clearDots() { diagram.querySelectorAll('.sound-source').forEach(d => d.remove()); }
 function clearPath() { pathSvg.innerHTML = ''; }
 
+// PULSE_CLASSES indexed by source index — same as original
+const PULSE_CLASSES = ['pulse-string', 'pulse-pad', 'pulse-block'];
+
+function buildSources() {
+  G.sources.forEach(s => s.destroy());
+  G.sources = [];
+  const lvl = LEVELS[G.currentLevel - 1];
+  for (let i = 0; i < lvl.sources; i++) {
+    const src = new ToneSource(G.audioCtx, G.resonanceScene, SOURCE_CONFIGS[i]);
+    src.init();
+    G.sources.push(src);
+  }
+  G.targetIndex = 0;
+}
+
 function drawDots(showTarget, withPulse) {
   clearDots();
   G.sources.forEach((src, i) => {
@@ -753,24 +912,19 @@ function drawDots(showTarget, withPulse) {
 
     if (withPulse) {
       const pulseClass = PULSE_CLASSES[i];
-      // Register onBeat: each time the audio fires, restart the CSS animation
-      // from frame 0 so the visual flash is locked to the audio event.
       src.onBeat = () => {
         const d = diagram.querySelector(`.sound-source[data-idx="${i}"]`);
         if (!d) return;
-        // Remove and force reflow to restart the animation cleanly
         d.classList.remove(pulseClass);
-        void d.offsetWidth; // trigger reflow
+        void d.offsetWidth;
         d.classList.add(pulseClass);
       };
-      // Fire immediately so the first beat is visible right away
       src.onBeat();
     }
   });
 }
 
 function removePulseClasses() {
-  // Clear all onBeat callbacks so pulses stop firing during the tracking phase
   G.sources.forEach(src => { src.onBeat = null; });
   diagram.querySelectorAll('.sound-source').forEach(dot => {
     PULSE_CLASSES.forEach(c => dot.classList.remove(c));
@@ -844,7 +998,6 @@ function updateLevelButtons() {
 // ─── TRIAL FLOW ──────────────────────────────────────────
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-// FIX (Bug 6): re-query dots on each animation frame so the NodeList is always fresh
 function fadeOpacity(fromVal, toVal, ms) {
   return new Promise(resolve => {
     const start = performance.now();
@@ -859,7 +1012,6 @@ function fadeOpacity(fromVal, toVal, ms) {
 }
 
 async function runTrial() {
-  // FIX (Bug 5): guard against re-entry while a trial is already running
   if (G.phase !== 'idle') return;
 
   btnPlay.disabled = true;
@@ -875,16 +1027,44 @@ async function runTrial() {
 
   // ── PHASE 1: IDENTITY ────────────────────────────────
   G.phase = 'identity';
-  setPhase('listen — the filled dot plays the plucked string');
-  drawDots(true, true); setDotsOpacity(1); placeDots();
+  setPhase('listen — the filled dot plays the bowed string');
+  // Draw dots with pulse only for the target initially; distractors get plain dots
+  drawDots(true, false);
+  setDotsOpacity(1);
+  placeDots();
+
+  // Register and fire onBeat for target only
+  const targetPulseClass = PULSE_CLASSES[G.targetIndex];
+  G.sources[G.targetIndex].onBeat = () => {
+    const d = diagram.querySelector(`.sound-source[data-idx="${G.targetIndex}"]`);
+    if (!d) return;
+    d.classList.remove(targetPulseClass);
+    void d.offsetWidth;
+    d.classList.add(targetPulseClass);
+  };
   G.sources[G.targetIndex].startRhythm();
+  G.sources[G.targetIndex].onBeat(); // fire immediately so first beat is visible
   await sleep(1500);
-  G.sources.forEach((src, i) => { if (i !== G.targetIndex) src.startRhythm(); });
+
+  // Now start distractors and register their pulses in sync with their audio
+  G.sources.forEach((src, i) => {
+    if (i === G.targetIndex) return;
+    const pc = PULSE_CLASSES[i];
+    src.onBeat = () => {
+      const d = diagram.querySelector(`.sound-source[data-idx="${i}"]`);
+      if (!d) return;
+      d.classList.remove(pc);
+      void d.offsetWidth;
+      d.classList.add(pc);
+    };
+    src.startRhythm();
+    src.onBeat(); // fire immediately so first beat is visible
+  });
   await sleep(1500);
 
   // ── PHASE 2: HANDOFF ─────────────────────────────────
   G.phase = 'handoff';
-  setPhase('track the plucked string as it moves');
+  setPhase('track the bowed string as it moves');
   G.trackStart = performance.now();
   let animRunning = true;
   function animate() { if (!animRunning) return; placeDots(); G.animRaf = requestAnimationFrame(animate); }
@@ -899,7 +1079,7 @@ async function runTrial() {
 
   // ── PHASE 4: REVEAL ──────────────────────────────────
   G.phase = 'reveal';
-  setPhase('where did the plucked string end up?');
+  setPhase('where did the bowed string end up?');
   animRunning = false;
   if (G.animRaf) cancelAnimationFrame(G.animRaf);
   G.sources.forEach(s => s.stopRhythm());
@@ -933,17 +1113,12 @@ async function handleGuess(selectedIndex) {
   G.trialResults.push({ correct: isCorrect });
   updateStats(); renderPips();
 
-  // FIX (Bug 1 + 3): Do NOT save or display best scores mid-level.
-  // Best score is only computed and saved after all 10 trials in showLevelComplete().
-
   const selectedDot = diagram.querySelector(`.sound-source[data-idx="${selectedIndex}"]`);
   if (selectedDot) selectedDot.classList.add('source-selected');
 
   if (isCorrect) {
     setFeedback('Correct', 'success');
     setPhase('');
-    // FIX (Bug 4): only re-enable play button if NOT going to level complete,
-    // to prevent starting trial 11 during the sleep before the overlay appears.
     if (G.trialsInLevel >= 10) {
       await sleep(1000);
       showLevelComplete();
@@ -965,7 +1140,6 @@ async function handleGuess(selectedIndex) {
       playRevealTone(G.audioCtx, G.resonanceScene, finalPos.sx, finalPos.sy, finalPos.sz);
     }
 
-    // FIX (Bug 4): same guard — don't re-enable play if level is over
     if (G.trialsInLevel >= 10) {
       await sleep(1200);
       showLevelComplete();
@@ -983,7 +1157,6 @@ async function showLevelComplete() {
   const correct = results.filter(r => r.correct).length;
   const accuracy = Math.round((correct / 10) * 100);
 
-  // FIX (Bug 1 + 3): all best-score logic lives here, after the full 10 trials.
   const prev = G.bestScores[G.currentLevel];
   const isNewBest = !prev || correct > (prev.correct || 0) || (correct === (prev.correct || 0) && accuracy > (prev.accuracy || 0));
   if (isNewBest) {
@@ -1133,7 +1306,6 @@ document.getElementById('tut-next-1').addEventListener('click', () => { showTuto
 document.getElementById('how-to-play-btn').addEventListener('click', openTutorial);
 tutOverlay.addEventListener('click', () => { startTutorialAudio(); }, { once: true });
 
-// FIX (Bug 9): close tutorial audio context on page unload to prevent leak
 window.addEventListener('beforeunload', stopTutorialDemo);
 
 // ─── INIT ────────────────────────────────────────────────
