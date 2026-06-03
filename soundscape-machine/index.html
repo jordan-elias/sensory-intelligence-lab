@@ -9,19 +9,13 @@
   <link rel="apple-touch-icon" href="/images/favicon.png">
   <link rel="manifest" href="/site.webmanifest">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
-
   <script src="/dashboard/auth-guard.js" type="module"></script>
-
   <script type="module">
     import { applyMultipleGating } from '/assets/js/gating.js';
     applyMultipleGating([
-      { targetSelector: '.transport',        moduleName: 'tape-laboratory' },
-
-      
+      { targetSelector: '.transport', moduleName: 'tape-laboratory' }
     ]);
   </script>
-
- 
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -35,8 +29,6 @@
     }
     html{font-size:16px}
     body{font-family:var(--font-body);color:var(--text);background:var(--bg);min-height:100vh;display:flex;flex-direction:column;}
-
-    /* ── HEADER ── */
     .sil-header{border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:100;gap:1rem;width:100%;}
     .sil-header__wordmark{font-family:var(--font-heading);font-size:1rem;font-weight:600;letter-spacing:-0.01em;white-space:nowrap;flex-shrink:0;text-decoration:none;color:var(--text);}
     .sil-header__wordmark:hover{color:var(--accent);}
@@ -57,8 +49,15 @@
       .sil-header__nav a,.sil-header__signout{font-size:.875rem;padding:.55rem .5rem;}
       .sil-header__signout{border:none;}
     }
-
-    /* ── LAYOUT ── */
+    /* TOAST — fixed bottom-centre, always visible regardless of scroll */
+    .toast{position:fixed;bottom:1.25rem;left:50%;transform:translateX(-50%);z-index:500;
+      min-width:260px;max-width:480px;width:max-content;padding:.65rem 1rem;
+      font-size:.8rem;line-height:1.5;background:var(--bg);
+      border:1px solid var(--border);box-shadow:0 4px 16px rgba(0,0,0,.1);
+      opacity:0;pointer-events:none;transition:opacity .2s;}
+    .toast.show{opacity:1;pointer-events:auto;}
+    .toast.error{border-left:3px solid var(--error);color:var(--error);background:var(--error-bg);}
+    .toast.success{border-left:3px solid var(--accent);color:var(--accent-hover);background:var(--accent-light);}
     .bc{padding:.75rem 1.5rem 0;max-width:1100px;margin:0 auto;width:100%}
     .bc ol{list-style:none;display:flex;gap:.3rem;align-items:center;font-size:.75rem;color:var(--muted);}
     .bc li+li::before{content:'/';margin-right:.3rem;color:var(--border)}
@@ -66,13 +65,9 @@
     .bc a:hover{color:var(--accent);text-decoration:underline;}
     main{max-width:1100px;margin:0 auto;padding:1.5rem 1.5rem 4rem;flex:1;width:100%;}
     @media(max-width:600px){main{padding:1rem .75rem 3rem}}
-
-    /* ── PAGE HEADER ── */
     .ph{margin-bottom:1.5rem;padding-bottom:1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
     .ph-left h2{font-family:var(--font-heading);font-size:1.5rem;font-weight:600;letter-spacing:-.02em;line-height:1.2;margin-bottom:.2rem;}
     .ph-left p{font-size:.82rem;color:var(--muted);}
-
-    /* ── SESSION BAR ── */
     .session-bar{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;}
     .session-bar label{font-size:.75rem;font-weight:500;color:var(--muted);}
     select.session-select{font-family:var(--font-body);font-size:.8rem;padding:.4rem .7rem;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer;outline:none;min-width:140px;}
@@ -82,8 +77,6 @@
     .sbtn.primary{background:var(--accent);color:white;border-color:var(--accent);}
     .sbtn.primary:hover{background:var(--accent-hover);}
     .sbtn:disabled{opacity:.45;cursor:not-allowed;}
-
-    /* ── TRANSPORT ── */
     .transport{display:flex;align-items:center;gap:.75rem;padding:.85rem 1rem;border:1px solid var(--border);background:var(--surface);margin-bottom:1rem;flex-wrap:wrap;}
     .t-btn{font-family:var(--font-heading);font-size:.78rem;font-weight:600;padding:.55rem 1.25rem;border:none;cursor:pointer;transition:all .12s;display:flex;align-items:center;gap:.45rem;letter-spacing:-.01em;}
     .t-btn.play{background:var(--accent);color:white;}
@@ -104,12 +97,8 @@
     .dl-mix-btn{font-family:var(--font-heading);font-size:.72rem;font-weight:600;padding:.38rem .9rem;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;transition:all .12s;}
     .dl-mix-btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent);}
     .dl-mix-btn:disabled{opacity:.4;cursor:not-allowed;}
-
-    /* ── KEYBOARD HINT ── */
     .kbd-hint{font-size:.65rem;color:var(--muted);border-top:1px solid var(--border);padding:.5rem 0 0;margin-top:.5rem;width:100%;letter-spacing:.01em;}
     .kbd-hint kbd{font-family:var(--font-heading);font-size:.62rem;background:var(--surface);border:1px solid var(--border);padding:.05rem .3rem;border-radius:2px;color:var(--text);}
-
-    /* ── RATIO PANEL (collapsible) ── */
     .ratio-panel{border:1px solid var(--border);background:var(--surface);margin-bottom:1rem;}
     .ratio-panel-summary{display:flex;align-items:center;justify-content:space-between;padding:.7rem 1rem;cursor:pointer;user-select:none;list-style:none;gap:.75rem;flex-wrap:wrap;}
     .ratio-panel-summary::-webkit-details-marker{display:none;}
@@ -125,20 +114,15 @@
     .ratio-cell{background:var(--bg);border:1px solid var(--border);padding:.6rem .75rem;}
     .ratio-cell-label{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem;}
     .ratio-cell-main{display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem;}
-    .ratio-num{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:var(--text);}
-    .ratio-slash{color:var(--muted);font-size:.9rem;}
     .ratio-input{font-family:var(--font-heading);font-size:.85rem;font-weight:600;width:36px;padding:.15rem .3rem;border:1px solid var(--border);background:var(--bg);color:var(--text);text-align:center;outline:none;}
     .ratio-input:focus{border-color:var(--accent);}
     .ratio-cell-freq{font-size:.7rem;color:var(--accent);font-weight:600;font-variant-numeric:tabular-nums;}
     .ratio-cell-interval{font-size:.65rem;color:var(--muted);margin-top:.1rem;}
-    .ratio-cell-pitch{font-size:.68rem;color:var(--muted);}
     .ratio-cell-actions{display:flex;gap:.35rem;margin-top:.4rem;flex-wrap:wrap;}
     .ratio-apply{font-family:var(--font-heading);font-size:.72rem;font-weight:600;padding:.35rem .85rem;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;transition:all .12s;}
     .ratio-apply:hover{background:var(--accent);color:white;}
     .ratio-revert{font-family:var(--font-heading);font-size:.62rem;font-weight:600;padding:.2rem .5rem;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .12s;}
     .ratio-revert:hover{border-color:var(--text);color:var(--text);}
-
-    /* ── TRACKS ── */
     .tracks{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem;}
     .track{border:1px solid var(--border);background:var(--bg);}
     .track.has-audio{border-color:#c8ddd4;}
@@ -162,20 +146,14 @@
     .track-osc-btn{font-family:var(--font-heading);font-size:.68rem;font-weight:600;padding:.3rem .75rem;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;transition:all .12s;white-space:nowrap;}
     .track-osc-btn:hover{border-color:var(--ring);color:var(--ring);}
     .track-osc-btn.active{background:var(--ring);color:white;border-color:var(--ring);}
-
-    /* Waveform */
     .track-wave{height:44px;background:var(--surface);border-bottom:1px solid var(--border);position:relative;}
     .track-wave canvas{width:100%;height:100%;display:block;}
-
-    /* ── CONTROLS GRID ── */
     .track-controls{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:0;}
     .ctrl-group{padding:.6rem .75rem;border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
     .ctrl-group:last-child{border-right:none;}
     .ctrl-label{font-size:.62rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;display:flex;align-items:center;justify-content:space-between;gap:.25rem;flex-wrap:wrap;}
     .ctrl-val{font-size:.7rem;font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums;}
     .ctrl-val.ring{color:var(--ring);}
-
-    /* Toggle */
     .toggle-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem;}
     .toggle{position:relative;width:32px;height:18px;flex-shrink:0;}
     .toggle input{opacity:0;width:0;height:0;position:absolute;}
@@ -185,38 +163,24 @@
     .toggle input:checked+.toggle-slider::before{transform:translateX(14px);}
     .toggle.ring-toggle input:checked+.toggle-slider{background:var(--ring);}
     .toggle-label{font-size:.72rem;font-weight:500;color:var(--muted);}
-
-    /* Sliders */
     input[type=range]{-webkit-appearance:none;width:100%;height:3px;background:var(--border);outline:none;cursor:pointer;}
     input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--accent);cursor:pointer;}
     input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:var(--accent);cursor:pointer;border:none;}
     input[type=range].ring-range::-webkit-slider-thumb{background:var(--ring);}
     input[type=range].ring-range::-moz-range-thumb{background:var(--ring);}
-
-    /* Speed exact input */
     .speed-row{display:flex;align-items:center;gap:.4rem;margin-top:.3rem;}
     .speed-exact{font-family:var(--font-heading);font-size:.72rem;font-weight:600;width:52px;padding:.15rem .3rem;border:1px solid var(--border);background:var(--bg);color:var(--text);text-align:center;outline:none;}
     .speed-exact:focus{border-color:var(--accent);}
-
-    /* LFO shapes / osc types */
     .lfo-shapes{display:flex;gap:.25rem;margin-top:.3rem;flex-wrap:wrap;}
     .lfo-shape-btn{font-family:var(--font-heading);font-size:.6rem;font-weight:600;padding:.2rem .4rem;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;transition:all .1s;}
     .lfo-shape-btn:hover{border-color:var(--accent);color:var(--accent);}
     .lfo-shape-btn.active{background:var(--accent);color:white;border-color:var(--accent);}
     .lfo-shape-btn:disabled{opacity:.4;cursor:not-allowed;}
-
-    /* Ring mod */
     .ring-freqs{font-size:.65rem;color:var(--ring);margin-top:.3rem;line-height:1.5;font-variant-numeric:tabular-nums;}
-
-    /* Tape meter */
     .tape-meter{height:3px;background:var(--border);margin-top:.4rem;position:relative;}
     .tape-meter-fill{height:100%;width:0%;background:var(--accent);transition:width .5s,background .5s;}
     .tape-loop-count{font-size:.6rem;color:var(--muted);margin-top:.2rem;font-variant-numeric:tabular-nums;}
-
-    /* Pitch display */
     .pitch-label{font-size:.65rem;color:var(--muted);margin-top:.2rem;}
-
-    /* ── LIBRARY ── */
     .library{border:1px solid var(--border);margin-bottom:1rem;}
     .library-head{padding:.7rem 1rem;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;}
     .library-head h3{font-family:var(--font-heading);font-size:.82rem;font-weight:600;}
@@ -243,8 +207,6 @@
     .lib-action.danger:hover{border-color:var(--error);color:var(--error);}
     .lib-action.add-to{font-weight:600;border-color:#c8ddd4;color:var(--accent);}
     .lib-empty{padding:2rem;text-align:center;font-size:.82rem;color:var(--muted);}
-
-    /* ── MODALS ── */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:none;align-items:center;justify-content:center;padding:1rem;}
     .modal-overlay.open{display:flex;}
     .modal{background:var(--bg);border:1px solid var(--border);width:100%;max-width:560px;max-height:90vh;overflow-y:auto;}
@@ -256,15 +218,9 @@
     .modal-footer{padding:.85rem 1.1rem;border-top:1px solid var(--border);display:flex;gap:.65rem;justify-content:flex-end;}
     .modal-input{width:100%;padding:.6rem .85rem;border:1px solid var(--border);font-family:var(--font-body);font-size:.875rem;color:var(--text);background:var(--bg);outline:none;}
     .modal-input:focus{border-color:var(--accent);}
-
-    /* ── MESSAGES ── */
-    .msg{padding:.65rem .9rem;font-size:.78rem;line-height:1.5;margin-bottom:.8rem;display:none;}
-    .msg.error{background:var(--error-bg);border-left:3px solid var(--error);color:var(--error);}
-    .msg.success{background:var(--accent-light);border-left:3px solid var(--accent);color:var(--accent);}
-    .msg.show{display:block;}
-    #renameMsg{margin:0 0 .8rem;}
-
-    /* ── INSTRUCTIONS + ESSAY ── */
+    .modal-msg{padding:.5rem .75rem;font-size:.78rem;margin-bottom:.75rem;display:none;}
+    .modal-msg.error{background:var(--error-bg);border-left:3px solid var(--error);color:var(--error);}
+    .modal-msg.show{display:block;}
     .instructions{font-size:.9rem;line-height:1.75;color:var(--text);margin-top:2.5rem;padding-top:2rem;border-top:1px solid var(--border);}
     .instructions h2{font-family:var(--font-heading);font-size:1rem;font-weight:600;letter-spacing:-.01em;margin:1.5rem 0 .4rem;}
     .instructions h2:first-child{margin-top:0;}
@@ -278,11 +234,9 @@
     .pull-quote{border-left:3px solid var(--accent);padding:.75rem 1rem;margin:1.25rem 0;background:var(--surface);}
     .pull-quote p{font-size:.88rem;color:var(--text);font-style:italic;line-height:1.65;}
     .pull-quote cite{display:block;font-size:.72rem;color:var(--muted);font-style:normal;margin-top:.35rem;}
-
     footer{border-top:1px solid var(--border);padding:1.25rem 2rem;text-align:center;font-size:.78rem;color:var(--muted);margin-top:1rem;}
     footer a{color:var(--muted);text-decoration:none;}
     footer a:hover{color:var(--accent);}
-
     @media(max-width:600px){
       .track-controls{grid-template-columns:repeat(2,1fr);}
       .ratio-grid{grid-template-columns:repeat(2,1fr);}
@@ -330,26 +284,21 @@
     </div>
   </div>
 
-  <!-- Transport — prominent, first thing to see -->
   <div class="transport">
     <button class="t-btn play" id="playBtn" onclick="transportPlay()" disabled>
-      <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg>
-      Play
+      <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> Play
     </button>
     <button class="t-btn stop" id="stopBtn" onclick="transportStop()" disabled>
-      <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg>
-      Stop
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg> Stop
     </button>
     <button class="t-btn record" id="mixRecordBtn" onclick="toggleMixRecord()" disabled>
-      <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg>
-      Rec mix
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg> Rec mix
     </button>
     <span class="transport-time" id="transportTime">0:00.0</span>
     <div class="transport-right">
       <div class="master-ctrl">
         <label for="masterVol">Master</label>
-        <input type="range" id="masterVol" min="0" max="1" step="0.01" value="0.82"
-          oninput="setMasterVolume(+this.value)">
+        <input type="range" id="masterVol" min="0" max="1" step="0.01" value="0.82" oninput="setMasterVolume(+this.value)">
         <span class="master-vol-val" id="masterVolVal">82%</span>
       </div>
       <button class="dl-mix-btn" id="dlMixBtn" disabled onclick="downloadMix()">Download mix WAV</button>
@@ -363,10 +312,8 @@
     </div>
   </div>
 
-  <!-- Four tracks -->
   <div class="tracks" id="tracksContainer"></div>
 
-  <!-- Frequency ratio panel — collapsed by default -->
   <details class="ratio-panel" id="ratioPanelDetails">
     <summary class="ratio-panel-summary">
       <span class="ratio-panel-title">frequency ratios &amp; serial structure</span>
@@ -388,7 +335,6 @@
     </div>
   </details>
 
-  <!-- Library -->
   <div class="library">
     <div class="library-head">
       <h3>Recordings library</h3>
@@ -410,9 +356,6 @@
     </div>
   </div>
 
-  <div class="msg" id="globalMsg"></div>
-
-  <!-- INSTRUCTIONS -->
   <div class="instructions">
     <h2>How to use the Tape Laboratory</h2>
     <p>Each of the four tracks can be loaded with a recording from your library, or switched to oscillator mode to generate a pure tone directly — just as Derbyshire combined field recordings with tones produced by the BBC Radiophonic Workshop's test-tone generators. Use the speed controls to shift pitch exactly as she did: slowing tape by half drops the sound exactly one octave, doubling it raises one octave. The pitch interval is displayed alongside the multiplier. For exact values, type directly into the speed field. Musical snap points (octave, fifth, third) engage automatically when dragging near them.</p>
@@ -436,37 +379,29 @@
     <h2>The woman from Coventry</h2>
     <p>Delia Derbyshire was born in Coventry in 1937, and the city's wartime bombing shaped her relationship to sound before she had the vocabulary to describe it. She later recalled the all-clear siren sounding after raids — a pure, sustained tone floating over rubble, sound completely detached from its source, from instrument, from player, from intention. She heard it not as music but as something more fundamental: organised frequency. That early impression became a kind of compass for the rest of her life.</p>
     <p>She read mathematics and music at Girton College, Cambridge, graduating in 1959 — one of the few women in either department. Mathematics gave her a way of thinking about sound structurally, as relationships between quantities rather than as expression. When she applied for a job at Decca Records shortly after graduation, she was told the studio was not a place for women. The BBC, less overtly, was not much different — but it had the Radiophonic Workshop.</p>
-
     <h2>The BBC Radiophonic Workshop</h2>
     <p>The Radiophonic Workshop was established in 1958 to produce sound effects and incidental music for BBC radio programmes. It was not considered a prestigious posting. Composers and musicians in the BBC's mainstream departments generally regarded it as a technical backwater; the Workshop's staff were not permitted to claim composer credits for many years. Derbyshire joined in 1962 and stayed until 1973. During that decade, working without synthesisers, she produced some of the most significant electronic music of the twentieth century — though she would not be widely recognised for it until long after she left.</p>
     <p>Her tools were tape, scissors, splicing blocks, variable-speed playback decks, ring modulators, filters, and oscillators that produced test tones. To transpose a sound up a major third, she sped up the tape. To create a chord, she recorded and layered individual notes. Every texture, every rhythm, every timbral transformation required physical intervention — cutting, splicing, re-recording. The studio was as much a craft workshop as a music room.</p>
-
     <div class="pull-quote">
       <p>I could hear sounds in my head that I couldn't produce on any instrument. The tape gave me a way to reach them — but it cost you. Every second of music might take a day of cutting.</p>
       <cite>— Delia Derbyshire, from an interview, c. 1996</cite>
     </div>
-
     <h2>The Doctor Who theme</h2>
     <p>In 1963 Derbyshire realised Ron Grainer's sketch for the <em>Doctor Who</em> theme — the first piece of electronic music to reach a truly mass audience. She began with white noise and individual notes plucked from a single string of a plucked instrument, chose specific recordings from among dozens based on their overtone character, then cut, transposed, and assembled them on tape. The bass line was filtered noise. The melody was a combination of oscillator tones and tape-manipulated recordings of a single plucked string, each note cut from a different region of the recording to vary timbre slightly. The whole was assembled in segments and layered by bouncing between tape machines.</p>
     <p>When Grainer heard the result, he reportedly asked, "Did I write that?" She replied, "Most of it." She received no composer credit. The BBC's policy at the time was that Workshop staff produced sound effects rather than compositions, and the distinction was administrative rather than aesthetic. The theme was revised numerous times by subsequent producers; Derbyshire's original realisation was not broadcast again after 1980.</p>
-
     <h2>Ring modulation and the Delian mode</h2>
     <p>Ring modulation — multiplying two audio signals to produce sum and difference frequencies — was a technique Derbyshire returned to throughout her career. The BBC Workshop had a hardware ring modulator, a circuit whose output contained none of the original frequencies but only their mathematical combinations. The effect is immediately distinctive: harmonic, metallic, hovering outside conventional musical scales. Derbyshire used it to transform recordings of everyday objects into sounds that had no origin in the physical world — or seemed not to.</p>
     <p>She spoke of a "Delian mode" — her own term for a kind of non-tonal, frequency-space harmony that existed outside equal temperament. The ring modulator was its primary instrument: by choosing carrier and source frequencies whose sum and difference fell into specific arithmetic relationships, she could construct chords and textures that had the internal consistency of tonal music without any of its referents. It was harmony derived from mathematics rather than from tradition.</p>
-
     <h2>The notebooks: serial structure and number</h2>
     <p>Among the materials found in Derbyshire's attic after her death in 2001 were dozens of notebooks — grids of numbers, frequency ratios, integer sequences mapped to pitch, duration, and dynamics. She had been working with serial compositional methods, but not in the twelve-tone tradition of Schoenberg or Webern. Her serial structures were arithmetical: she would choose a set of integer ratios — 1:2:3:5:8, or 4:7:11:13 — and use them to determine the frequency relationships between layers, the timing of entries, the modulation depths of filters.</p>
     <p>The unrealised work <em>Amor Dei</em> (begun c. 1971) shows this most clearly: a large-scale structure in which theological texts were mapped to frequency grids derived from number sequences, the proportions of Gregorian chant intervals converted into ratios governing the electronic texture. It was never completed. The notebooks show a composer working at the intersection of mathematics, theology, and acoustics — a convergence that had no obvious audience in 1971, and perhaps not much larger an audience now, but whose internal rigour is undeniable.</p>
-
     <h2>Departure and rediscovery</h2>
     <p>By 1973 the BBC had acquired the first commercially available synthesisers. Derbyshire left the Workshop that year, reportedly feeling that the instrument had made her painstaking methods — and the particular sensibility they produced — redundant overnight. A synthesiser could produce in seconds sounds that had taken her days to construct by hand. The comparison was not entirely fair: the sounds were not equivalent, and much of what she heard in her tapes came precisely from the resistance of the physical process. But the institutional enthusiasm for the new technology left little room for that argument.</p>
     <p>She spent the following decades largely outside music — at one point working in a record shop in Coventry — while her work at the Radiophonic Workshop became increasingly canonical in the histories being written around her. The BBC radiophonic archive was not systematically preserved; significant quantities of tape from the Workshop's early years were reused or destroyed.</p>
     <p>In the late 1990s a new generation of electronic musicians — working in ambient, techno, and experimental music — began to rediscover the Workshop's output, and Derbyshire's name in particular. She gave a handful of interviews and appeared at a small number of events. She was working on new music when she died in July 2001, aged 64. The notebooks, tapes, and recordings found in her home in Northampton subsequently became the Delia Derbyshire Archive, held at the University of Manchester. Researchers, musicians, and sound artists continue to work with this material; new pieces continue to be completed from her sketches.</p>
-
     <h2>What she contributed</h2>
     <p>Derbyshire's contribution to the field of electronic music is threefold. First, she demonstrated — on a programme watched by millions — that electronic sound could carry melody, rhythm, and emotion as effectively as any acoustic instrument, at a moment when this was genuinely contested. Second, she developed a compositional practice that treated the physical properties of tape — speed, splice, layering — as primary musical parameters, anticipating by decades the aesthetic of music made from recorded material. Third, her use of mathematics as compositional structure — ratio, sequence, arithmetic proportion — offered a model for electronic music that was neither the serialism of the academy nor the improvisation of popular music, but something more quietly rigorous: number as the grammar of sound.</p>
     <p>She did this largely without credit, without institutional support, and without synthesisers, in a decade when the technology available to her was a tape recorder, a pair of scissors, and a ring modulator. The sounds she made from those materials remain, fifty years later, essentially inimitable.</p>
-
   </div>
 </main>
 
@@ -475,10 +410,10 @@
   <div class="modal">
     <div class="modal-head">
       <h3>Rename recording</h3>
-      <button class="modal-close" onclick="closeModal('renameModal')">✕</button>
+      <button class="modal-close" onclick="closeModal('renameModal')">&#x2715;</button>
     </div>
     <div class="modal-body">
-      <div class="msg" id="renameMsg"></div>
+      <div class="modal-msg" id="renameMsg"></div>
       <label style="font-size:.78rem;font-weight:500;display:block;margin-bottom:.3rem;">Name</label>
       <input type="text" class="modal-input" id="renameInput" placeholder="Recording name">
     </div>
@@ -489,12 +424,31 @@
   </div>
 </div>
 
+<!-- Save as modal (replaces prompt()) -->
+<div class="modal-overlay" id="saveAsModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Save session as</h3>
+      <button class="modal-close" onclick="closeModal('saveAsModal')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-msg" id="saveAsMsg"></div>
+      <label style="font-size:.78rem;font-weight:500;display:block;margin-bottom:.3rem;">Session name</label>
+      <input type="text" class="modal-input" id="saveAsInput" placeholder="My session">
+    </div>
+    <div class="modal-footer">
+      <button class="sbtn" onclick="closeModal('saveAsModal')">Cancel</button>
+      <button class="sbtn primary" onclick="applySaveAs()">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- Add to track modal -->
 <div class="modal-overlay" id="addToTrackModal">
   <div class="modal">
     <div class="modal-head">
       <h3 id="addToTrackTitle">Add to track</h3>
-      <button class="modal-close" onclick="closeModal('addToTrackModal')">✕</button>
+      <button class="modal-close" onclick="closeModal('addToTrackModal')">&#x2715;</button>
     </div>
     <div class="modal-body">
       <p style="font-size:.8rem;color:var(--muted);margin-bottom:1rem;">Select a recording to load.</p>
@@ -502,6 +456,9 @@
     </div>
   </div>
 </div>
+
+<!-- Fixed toast notification -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <footer>
   <p>Jordan Elias Music Therapy · Berlin ·
@@ -511,9 +468,9 @@
 </footer>
 
 <script type="module">
-/* ═══════════════════════════════════════════════════════════
+/* =========================================================
    HEADER
-═══════════════════════════════════════════════════════════ */
+========================================================= */
 const path = window.location.pathname.replace(/\/$/, '') || '/';
 document.querySelectorAll('.sil-header__nav a').forEach(a => {
   const href = (a.getAttribute('href') || '').replace(/\/$/, '') || '/';
@@ -527,77 +484,66 @@ menuToggle.addEventListener('click', () => {
 });
 silNav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => silNav.classList.remove('sil-open')));
 
-async function getSupabase() {
-  if (window._supabase) return window._supabase;
-  const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-  return createClient('https://lrjuufvrgkuvfxcmybtf.supabase.co','sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1');
-}
+// auth-guard.js sets window._supabase before dispatching authReady.
+// Direct access is safe; we null-guard every DB call defensively.
 document.getElementById('silSignOut').addEventListener('click', async function () {
-  this.disabled = true; this.textContent = 'Signing out…';
-  try { const sb = await getSupabase(); await sb.auth.signOut(); }
+  this.disabled = true; this.textContent = 'Signing out\u2026';
+  try { const sb = window._supabase; if (sb) await sb.auth.signOut(); }
   finally { window.location.replace('/'); }
 });
 
-/* ═══════════════════════════════════════════════════════════
+/* =========================================================
    CONSTANTS
-═══════════════════════════════════════════════════════════ */
+========================================================= */
 const QUOTA_BYTES  = 26214400; // 25 MB
 const N_TRACKS     = 4;
 const TRACK_COLORS = ['#2a5c45','#1a4d6b','#6b3a1a','#4a1a6b'];
 const TRACK_NAMES  = ['Track 1','Track 2','Track 3','Track 4'];
-const BASE_FREQ    = 220; // A3 reference
+const BASE_FREQ    = 220;
 
-// Speed snap points for musical intervals (ratio to 1.0)
-const SPEED_SNAPS = [0.25, 0.5, 2/3, 0.75, 1.0, 4/3, 1.5, 2.0, 4.0];
-const SNAP_THRESH = 0.025; // snap within this fraction
+// Speed snap in log2 space — equal feel at all speeds (fix #8)
+const SPEED_SNAPS       = [0.25, 0.5, 2/3, 0.75, 1.0, 4/3, 1.5, 2.0, 4.0];
+const SNAP_THRESH_LOG2  = 0.04;
 
-/* ═══════════════════════════════════════════════════════════
+/* =========================================================
    AUDIO ENGINE STATE
-═══════════════════════════════════════════════════════════ */
+========================================================= */
 let AC = null, masterGain = null, masterDest = null;
 let mixRecorder = null, mixChunks = [], mixRecording = false;
 let isPlaying = false, wallStart = 0, timerRaf = null;
 let ratioLocked = false;
 
-/* ── Track model ── */
 const tracks = Array.from({ length: N_TRACKS }, (_, i) => ({
   id: i, name: TRACK_NAMES[i],
-  // File mode
   buffer: null, fullBuffer: null, fileName: null, recordingId: null,
   selStart: 0, selEnd: 1,
-  // Oscillator mode
   oscMode: false, oscType: 'sine', oscFreq: BASE_FREQ,
-  // Common
   volume: 0.75, pan: 0, speed: 1.0, loop: true,
-  muted: false, soloed: false,
-  crossfade: 0, // ms, 0 = hard cut
+  muted: false, soloed: false, crossfade: 0,
   reverbEnabled: false, reverbAmount: 0.3,
-  lfoEnabled: false, lfoRate: 0.5, lfoDepth: 800, lfoShape: 'sine',
-  lfoTarget: 'filter', // 'filter' | 'volume' | 'pan' | 'ring'
+  lfoEnabled: false, lfoRate: 0.5, lfoDepth: 800, lfoShape: 'sine', lfoTarget: 'filter',
   tapeEnabled: false, tapeDegradation: 0, tapeRate: 0.05, tapeLoopCount: 0,
   ringEnabled: false, ringCarrier: 150,
   ratioNum: i === 0 ? 1 : i + 1, ratioDen: 1,
-  // Audio nodes (runtime, all null at rest)
+  // Audio nodes
   sourceNode: null, oscNode: null, noiseNode: null,
   gainNode: null, panNode: null,
-  tapeHighShelf: null, tapeLowPass: null,
+  tapeHighShelf: null, tapeLowPass: null, tapeNoiseLPF: null,
   reverbNode: null, reverbGain: null, dryGain: null,
   lfoOsc: null, lfoGain: null,
   tapeWowOsc: null, tapeFlutterOsc: null, tapeWowGain: null, tapeFlutterGain: null,
   tapeNoiseNode: null, tapeNoiseGain: null,
   tapeEchoDelay: null, tapeEchoGain: null,
   ringOsc: null, ringWet: null, ringDry: null,
-  // ring mod internal waveshaper nodes
   _ringSum: null, _ringDiff: null, _ringSqSum: null, _ringSqDiff: null,
   _ringInv: null, _ringOut: null,
-  // Dropout state
   _dropoutTimeout: null,
   playheadPct: 0,
 }));
 
-/* ═══════════════════════════════════════════════════════════
+/* =========================================================
    AUDIO INIT
-═══════════════════════════════════════════════════════════ */
+========================================================= */
 function initAudio() {
   if (AC) return;
   AC = new (window.AudioContext || window.webkitAudioContext)();
@@ -606,7 +552,8 @@ function initAudio() {
   masterDest = AC.createMediaStreamDestination();
   masterGain.connect(AC.destination);
   masterGain.connect(masterDest);
-  createReverbImpulse().then(ir => { window._reverbIR = ir; });
+  // Non-fatal if reverb impulse fails
+  createReverbImpulse().then(ir => { window._reverbIR = ir; }).catch(() => {});
 }
 
 async function createReverbImpulse() {
@@ -625,1450 +572,1048 @@ window.setMasterVolume = function(val) {
   document.getElementById('masterVolVal').textContent = Math.round(val * 100) + '%';
 };
 
-/* ═══════════════════════════════════════════════════════════
-   RING MODULATOR — TRUE MULTIPLICATION via WaveShaper squaring
-   Uses the identity: A×B = ((A+B)² − (A−B)²) / 4
-   This gives genuine ring mod: output contains only sum and
-   difference frequencies, with no carrier bleed-through.
-═══════════════════════════════════════════════════════════ */
+/* =========================================================
+   RING MODULATOR  A*B = ((A+B)^2 - (A-B)^2) / 4
+========================================================= */
 function makeSquaringCurve(n = 4096) {
-  // WaveShaper curve that computes x² (normalised to keep gain reasonable)
   const curve = new Float32Array(n);
-  for (let i = 0; i < n; i++) {
-    const x = (i * 2) / n - 1; // -1 to +1
-    curve[i] = x * x;
-  }
+  for (let i = 0; i < n; i++) { const x = (i * 2) / n - 1; curve[i] = x * x; }
   return curve;
 }
 
 function buildRingMod(t, sourceNode) {
-  // carrier oscillator
   const ringOsc = AC.createOscillator();
-  ringOsc.type = 'sine';
-  ringOsc.frequency.value = t.ringCarrier;
-  ringOsc.start();
+  ringOsc.type = 'sine'; ringOsc.frequency.value = t.ringCarrier; ringOsc.start();
 
-  // Sum path: (source + carrier)
   const sumGain = AC.createGain(); sumGain.gain.value = 1;
-  sourceNode.connect(sumGain);
-  ringOsc.connect(sumGain);
+  sourceNode.connect(sumGain); ringOsc.connect(sumGain);
 
-  // Diff path: (source − carrier)  [carrier inverted via -1 gain]
   const invGain = AC.createGain(); invGain.gain.value = -1;
   ringOsc.connect(invGain);
   const diffGain = AC.createGain(); diffGain.gain.value = 1;
-  sourceNode.connect(diffGain);
-  invGain.connect(diffGain);
+  sourceNode.connect(diffGain); invGain.connect(diffGain);
 
-  // Square each
-  const sqSum = AC.createWaveShaper(); sqSum.curve = makeSquaringCurve(); sqSum.oversample = '4x';
+  const sqSum  = AC.createWaveShaper(); sqSum.curve  = makeSquaringCurve(); sqSum.oversample  = '4x';
   const sqDiff = AC.createWaveShaper(); sqDiff.curve = makeSquaringCurve(); sqDiff.oversample = '4x';
-  sumGain.connect(sqSum);
-  diffGain.connect(sqDiff);
+  sumGain.connect(sqSum); diffGain.connect(sqDiff);
 
-  // Subtract: sqSum − sqDiff, scale by 0.25
-  // Negate sqDiff then sum into ringOut
-  const negDiff = AC.createGain(); negDiff.gain.value = -1;
-  sqDiff.connect(negDiff);
-
+  const negDiff = AC.createGain(); negDiff.gain.value = -1; sqDiff.connect(negDiff);
   const ringOut = AC.createGain(); ringOut.gain.value = 0.25;
-  sqSum.connect(ringOut);
-  negDiff.connect(ringOut);
+  sqSum.connect(ringOut); negDiff.connect(ringOut);
 
-  // Wet/dry blend
   const ringWet = AC.createGain(); ringWet.gain.value = t.ringEnabled ? 1 : 0;
   const ringDry = AC.createGain(); ringDry.gain.value = t.ringEnabled ? 0 : 1;
-  ringOut.connect(ringWet);
-  sourceNode.connect(ringDry);
+  ringOut.connect(ringWet); sourceNode.connect(ringDry);
 
-  // Store all nodes for cleanup and parameter control
-  t.ringOsc       = ringOsc;
-  t.ringWet       = ringWet;
-  t.ringDry       = ringDry;
-  t._ringSum      = sumGain;
-  t._ringDiff     = diffGain;
-  t._ringSqSum    = sqSum;
-  t._ringSqDiff   = sqDiff;
-  t._ringInv      = invGain;
-  t._ringOut      = ringOut;
+  t.ringOsc = ringOsc; t.ringWet = ringWet; t.ringDry = ringDry;
+  t._ringSum = sumGain; t._ringDiff = diffGain;
+  t._ringSqSum = sqSum; t._ringSqDiff = sqDiff;
+  t._ringInv = invGain; t._ringOut = ringOut;
 
-  // Return a merger node that downstream can connect from
   const merger = AC.createGain(); merger.gain.value = 1;
-  ringWet.connect(merger);
-  ringDry.connect(merger);
+  ringWet.connect(merger); ringDry.connect(merger);
   return merger;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   CROSSFADE — bake loop crossfade into buffer
-   Returns a new AudioBuffer with end blended into start.
-═══════════════════════════════════════════════════════════ */
+/* =========================================================
+   CROSSFADE
+========================================================= */
 function applyCrossfadeToBuffer(buffer, fadeMs) {
   if (!buffer || fadeMs <= 0) return buffer;
   const fadeSamples = Math.floor((fadeMs / 1000) * buffer.sampleRate);
-  if (fadeSamples >= buffer.length / 2) return buffer; // clamp
-  const numCh = buffer.numberOfChannels;
-  const len = buffer.length;
+  if (fadeSamples >= buffer.length / 2) return buffer;
+  const numCh = buffer.numberOfChannels, len = buffer.length;
   const out = AC.createBuffer(numCh, len, buffer.sampleRate);
   for (let c = 0; c < numCh; c++) {
-    const inData  = buffer.getChannelData(c);
-    const outData = out.getChannelData(c);
-    // Copy all samples
+    const inData = buffer.getChannelData(c), outData = out.getChannelData(c);
     outData.set(inData);
-    // Blend end into beginning and beginning into end
     for (let i = 0; i < fadeSamples; i++) {
-      const t = i / fadeSamples;
-      const fadeIn  = t;         // 0→1 at start
-      const fadeOut = 1 - t;     // 1→0 at end
-      const startIdx = i;
-      const endIdx   = len - fadeSamples + i;
-      // Start: blend from end
-      outData[startIdx] = inData[startIdx] * fadeIn + inData[endIdx] * fadeOut;
-      // End: mirror fade
-      outData[endIdx] = inData[endIdx] * fadeOut + inData[startIdx] * fadeIn;
+      const fi = i / fadeSamples, fo = 1 - fi;
+      const si = i, ei = len - fadeSamples + i;
+      outData[si] = inData[si] * fi + inData[ei] * fo;
+      outData[ei] = inData[ei] * fo + inData[si] * fi;
     }
   }
   return out;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   TAPE DEGRADATION — multi-stage audio model
-   Stage 1 (0–0.3): high-shelf attenuation (tape losing brilliance)
-   Stage 2 (0.3–0.6): wow/flutter + very subtle bias noise
-   Stage 3 (0.6–0.8): random dropouts (handled in tick)
-   Stage 4 (0.8–1.0): pre-echo (delay node at low gain)
-═══════════════════════════════════════════════════════════ */
+/* =========================================================
+   TAPE DEGRADATION
+========================================================= */
 function applyTapeDegradationToNodes(t) {
   const d = t.tapeDegradation;
-
-  // High-shelf filter: attenuates above 6kHz, deeper with age
   if (t.tapeHighShelf) {
-    const shelfFreq = t.tapeEnabled ? Math.max(2000, 18000 * Math.pow(1 - d, 1.5)) : 20000;
-    const shelfGain = t.tapeEnabled ? Math.max(-30, -40 * d) : 0;
-    t.tapeHighShelf.frequency.setTargetAtTime(shelfFreq, AC.currentTime, 0.3);
-    t.tapeHighShelf.gain.setTargetAtTime(shelfGain, AC.currentTime, 0.3);
+    t.tapeHighShelf.frequency.setTargetAtTime(t.tapeEnabled ? Math.max(2000, 18000 * Math.pow(1-d,1.5)) : 20000, AC.currentTime, 0.3);
+    t.tapeHighShelf.gain.setTargetAtTime(t.tapeEnabled ? Math.max(-30, -40*d) : 0, AC.currentTime, 0.3);
   }
-  // Secondary lowpass for extreme ages
-  if (t.tapeLowPass) {
-    const lpFreq = t.tapeEnabled && d > 0.5
-      ? Math.max(800, 20000 * Math.pow(1 - (d - 0.5) * 1.5, 2))
-      : 20000;
-    t.tapeLowPass.frequency.setTargetAtTime(lpFreq, AC.currentTime, 0.3);
-  }
-  // Wow/flutter (stage 2)
-  if (t.tapeWowGain) {
-    const wowAmt = t.tapeEnabled && d > 0.3 ? (d - 0.3) * 22 : 0;
-    t.tapeWowGain.gain.setTargetAtTime(wowAmt, AC.currentTime, 0.3);
-  }
-  if (t.tapeFlutterGain) {
-    const flutterAmt = t.tapeEnabled && d > 0.3 ? (d - 0.3) * 0.012 : 0;
-    t.tapeFlutterGain.gain.setTargetAtTime(flutterAmt, AC.currentTime, 0.3);
-  }
-  // Bias noise (stage 2)
-  if (t.tapeNoiseGain) {
-    const noiseAmt = t.tapeEnabled && d > 0.3 ? (d - 0.3) * 0.04 : 0;
-    t.tapeNoiseGain.gain.setTargetAtTime(noiseAmt, AC.currentTime, 0.3);
-  }
-  // Pre-echo (stage 4)
-  if (t.tapeEchoGain) {
-    const echoAmt = t.tapeEnabled && d > 0.8 ? (d - 0.8) * 0.3 : 0;
-    t.tapeEchoGain.gain.setTargetAtTime(echoAmt, AC.currentTime, 0.3);
-  }
+  if (t.tapeLowPass)
+    t.tapeLowPass.frequency.setTargetAtTime((t.tapeEnabled && d>0.5) ? Math.max(800,20000*Math.pow(1-(d-0.5)*1.5,2)) : 20000, AC.currentTime, 0.3);
+  if (t.tapeWowGain)
+    t.tapeWowGain.gain.setTargetAtTime((t.tapeEnabled && d>0.3) ? (d-0.3)*22 : 0, AC.currentTime, 0.3);
+  if (t.tapeFlutterGain)
+    t.tapeFlutterGain.gain.setTargetAtTime((t.tapeEnabled && d>0.3) ? (d-0.3)*0.012 : 0, AC.currentTime, 0.3);
+  if (t.tapeNoiseGain)
+    t.tapeNoiseGain.gain.setTargetAtTime((t.tapeEnabled && d>0.3) ? (d-0.3)*0.04 : 0, AC.currentTime, 0.3);
+  if (t.tapeEchoGain)
+    t.tapeEchoGain.gain.setTargetAtTime((t.tapeEnabled && d>0.8) ? (d-0.8)*0.3 : 0, AC.currentTime, 0.3);
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* =========================================================
    TRACK AUDIO GRAPH
-═══════════════════════════════════════════════════════════ */
-function buildTrackGraph(t) {
+========================================================= */
+function buildTrackGraph(t, offsetSec = 0) {
   if (!AC) initAudio();
   teardownTrackGraph(t);
   if (!t.buffer && !t.oscMode) return;
 
-  /* ── Source ── */
   let sourceNode = null;
   if (t.oscMode) {
     if (t.oscType === 'noise') {
-      const nLen = AC.sampleRate * 4;
-      const nBuf = AC.createBuffer(1, nLen, AC.sampleRate);
-      const nd = nBuf.getChannelData(0);
-      let b0=0,b1=0,b2=0;
-      for (let i = 0; i < nLen; i++) {
-        const w = Math.random() * 2 - 1;
-        b0 = .99886*b0+w*.0555179; b1 = .99332*b1+w*.0750759; b2 = .96900*b2+w*.1538520;
-        nd[i] = (b0+b1+b2)*0.18;
-      }
-      const nSrc = AC.createBufferSource(); nSrc.buffer = nBuf; nSrc.loop = true;
-      t.noiseNode = nSrc; sourceNode = nSrc;
+      const nLen = AC.sampleRate * 4, nBuf = AC.createBuffer(1, nLen, AC.sampleRate);
+      const nd = nBuf.getChannelData(0); let b0=0,b1=0,b2=0;
+      for (let i=0;i<nLen;i++){const w=Math.random()*2-1;b0=.99886*b0+w*.0555179;b1=.99332*b1+w*.0750759;b2=.96900*b2+w*.1538520;nd[i]=(b0+b1+b2)*0.18;}
+      const nSrc=AC.createBufferSource();nSrc.buffer=nBuf;nSrc.loop=true;t.noiseNode=nSrc;sourceNode=nSrc;
     } else {
-      const osc = AC.createOscillator(); osc.type = t.oscType; osc.frequency.value = t.oscFreq;
-      t.oscNode = osc; sourceNode = osc;
+      const osc=AC.createOscillator();osc.type=t.oscType;osc.frequency.value=t.oscFreq;t.oscNode=osc;sourceNode=osc;
     }
   } else {
-    // Apply crossfade bake if needed
-    const buf = (t.loop && t.crossfade > 0) ? applyCrossfadeToBuffer(t.buffer, t.crossfade) : t.buffer;
-    const src = AC.createBufferSource();
-    src.buffer = buf;
-    src.playbackRate.value = t.speed;
-    src.loop = t.loop;
-    t.sourceNode = src; sourceNode = src;
+    const buf = (t.loop && t.crossfade>0) ? applyCrossfadeToBuffer(t.buffer, t.crossfade) : t.buffer;
+    const src=AC.createBufferSource();src.buffer=buf;src.playbackRate.value=t.speed;src.loop=t.loop;
+    t.sourceNode=src;sourceNode=src;
   }
 
-  /* ── Tape degradation filters ── */
-  // High-shelf (stage 1+): loses HF brilliance like real tape
-  const tapeHighShelf = AC.createBiquadFilter();
-  tapeHighShelf.type = 'highshelf';
-  tapeHighShelf.frequency.value = t.tapeEnabled ? Math.max(2000, 18000 * Math.pow(1 - t.tapeDegradation, 1.5)) : 20000;
-  tapeHighShelf.gain.value = t.tapeEnabled ? Math.max(-30, -40 * t.tapeDegradation) : 0;
-  t.tapeHighShelf = tapeHighShelf;
+  // Tape filters
+  const tapeHighShelf=AC.createBiquadFilter();tapeHighShelf.type='highshelf';
+  tapeHighShelf.frequency.value=t.tapeEnabled?Math.max(2000,18000*Math.pow(1-t.tapeDegradation,1.5)):20000;
+  tapeHighShelf.gain.value=t.tapeEnabled?Math.max(-30,-40*t.tapeDegradation):0;
+  t.tapeHighShelf=tapeHighShelf;
 
-  // Secondary lowpass (stage 2+)
-  const tapeLowPass = AC.createBiquadFilter();
-  tapeLowPass.type = 'lowpass';
-  tapeLowPass.frequency.value = (t.tapeEnabled && t.tapeDegradation > 0.5)
-    ? Math.max(800, 20000 * Math.pow(1 - (t.tapeDegradation - 0.5) * 1.5, 2)) : 20000;
-  tapeLowPass.Q.value = 0.6;
-  t.tapeLowPass = tapeLowPass;
+  const tapeLowPass=AC.createBiquadFilter();tapeLowPass.type='lowpass';
+  tapeLowPass.frequency.value=(t.tapeEnabled&&t.tapeDegradation>0.5)?Math.max(800,20000*Math.pow(1-(t.tapeDegradation-0.5)*1.5,2)):20000;
+  tapeLowPass.Q.value=0.6;t.tapeLowPass=tapeLowPass;
 
-  /* ── Tape wow/flutter (file mode only) ── */
-  let tapeWowOsc=null, tapeWowGain=null, tapeFlutterOsc=null, tapeFlutterGain=null;
+  // Tape wow/flutter (file mode only)
+  let tapeWowOsc=null,tapeWowGain=null,tapeFlutterOsc=null,tapeFlutterGain=null;
   if (!t.oscMode && t.sourceNode) {
-    tapeWowOsc = AC.createOscillator(); tapeWowGain = AC.createGain();
-    tapeWowOsc.type = 'sine'; tapeWowOsc.frequency.value = 0.8 + Math.random() * 0.7;
-    tapeWowGain.gain.value = t.tapeEnabled && t.tapeDegradation > 0.3 ? (t.tapeDegradation - 0.3) * 22 : 0;
-    tapeWowOsc.connect(tapeWowGain); tapeWowGain.connect(t.sourceNode.playbackRate); tapeWowOsc.start();
-
-    tapeFlutterOsc = AC.createOscillator(); tapeFlutterGain = AC.createGain();
-    tapeFlutterOsc.type = 'sine'; tapeFlutterOsc.frequency.value = 7 + Math.random() * 4;
-    tapeFlutterGain.gain.value = t.tapeEnabled && t.tapeDegradation > 0.3 ? (t.tapeDegradation - 0.3) * 0.012 : 0;
-    tapeFlutterOsc.connect(tapeFlutterGain); tapeFlutterGain.connect(t.sourceNode.playbackRate); tapeFlutterOsc.start();
+    tapeWowOsc=AC.createOscillator();tapeWowGain=AC.createGain();
+    tapeWowOsc.type='sine';tapeWowOsc.frequency.value=0.8+Math.random()*0.7;
+    tapeWowGain.gain.value=(t.tapeEnabled&&t.tapeDegradation>0.3)?(t.tapeDegradation-0.3)*22:0;
+    tapeWowOsc.connect(tapeWowGain);tapeWowGain.connect(t.sourceNode.playbackRate);tapeWowOsc.start();
+    tapeFlutterOsc=AC.createOscillator();tapeFlutterGain=AC.createGain();
+    tapeFlutterOsc.type='sine';tapeFlutterOsc.frequency.value=7+Math.random()*4;
+    tapeFlutterGain.gain.value=(t.tapeEnabled&&t.tapeDegradation>0.3)?(t.tapeDegradation-0.3)*0.012:0;
+    tapeFlutterOsc.connect(tapeFlutterGain);tapeFlutterGain.connect(t.sourceNode.playbackRate);tapeFlutterOsc.start();
   }
-  t.tapeWowOsc = tapeWowOsc; t.tapeFlutterOsc = tapeFlutterOsc;
-  t.tapeWowGain = tapeWowGain; t.tapeFlutterGain = tapeFlutterGain;
+  t.tapeWowOsc=tapeWowOsc;t.tapeFlutterOsc=tapeFlutterOsc;t.tapeWowGain=tapeWowGain;t.tapeFlutterGain=tapeFlutterGain;
 
-  /* ── Tape bias noise (stage 2+) ── */
-  const noiseLen = AC.sampleRate * 2;
-  const noiseBuf = AC.createBuffer(1, noiseLen, AC.sampleRate);
-  const noiseData = noiseBuf.getChannelData(0);
-  for (let i = 0; i < noiseLen; i++) noiseData[i] = (Math.random() * 2 - 1) * 0.5;
-  const tapeNoiseNode = AC.createBufferSource(); tapeNoiseNode.buffer = noiseBuf; tapeNoiseNode.loop = true;
-  const tapeNoiseLPF = AC.createBiquadFilter(); tapeNoiseLPF.type = 'lowpass'; tapeNoiseLPF.frequency.value = 4000;
-  const tapeNoiseGain = AC.createGain();
-  tapeNoiseGain.gain.value = t.tapeEnabled && t.tapeDegradation > 0.3 ? (t.tapeDegradation - 0.3) * 0.04 : 0;
-  t.tapeNoiseNode = tapeNoiseNode; t.tapeNoiseGain = tapeNoiseGain;
+  // Tape bias noise — tapeNoiseLPF stored on track (fix #3) for clean teardown
+  const noiseLen=AC.sampleRate*2,noiseBuf=AC.createBuffer(1,noiseLen,AC.sampleRate);
+  const noiseData=noiseBuf.getChannelData(0);
+  for(let i=0;i<noiseLen;i++)noiseData[i]=(Math.random()*2-1)*0.5;
+  const tapeNoiseNode=AC.createBufferSource();tapeNoiseNode.buffer=noiseBuf;tapeNoiseNode.loop=true;
+  const tapeNoiseLPF=AC.createBiquadFilter();tapeNoiseLPF.type='lowpass';tapeNoiseLPF.frequency.value=4000;
+  const tapeNoiseGain=AC.createGain();
+  tapeNoiseGain.gain.value=(t.tapeEnabled&&t.tapeDegradation>0.3)?(t.tapeDegradation-0.3)*0.04:0;
+  t.tapeNoiseNode=tapeNoiseNode;t.tapeNoiseGain=tapeNoiseGain;t.tapeNoiseLPF=tapeNoiseLPF;
 
-  /* ── Pre-echo delay (stage 4) ── */
-  const tapeEchoDelay = AC.createDelay(2.0);
-  tapeEchoDelay.delayTime.value = 0.08; // ~80ms pre-echo
-  const tapeEchoGain = AC.createGain();
-  tapeEchoGain.gain.value = t.tapeEnabled && t.tapeDegradation > 0.8 ? (t.tapeDegradation - 0.8) * 0.3 : 0;
-  t.tapeEchoDelay = tapeEchoDelay; t.tapeEchoGain = tapeEchoGain;
+  // Pre-echo delay
+  const tapeEchoDelay=AC.createDelay(2.0);tapeEchoDelay.delayTime.value=0.08;
+  const tapeEchoGain=AC.createGain();
+  tapeEchoGain.gain.value=(t.tapeEnabled&&t.tapeDegradation>0.8)?(t.tapeDegradation-0.8)*0.3:0;
+  t.tapeEchoDelay=tapeEchoDelay;t.tapeEchoGain=tapeEchoGain;
 
-  /* ── LFO ── */
-  const lfoOsc = AC.createOscillator(); const lfoGain = AC.createGain();
-  lfoOsc.type = t.lfoShape; lfoOsc.frequency.value = t.lfoRate;
-  lfoGain.gain.value = t.lfoEnabled ? getLfoDepth(t) : 0;
-  lfoOsc.connect(lfoGain); lfoOsc.start();
-  t.lfoOsc = lfoOsc; t.lfoGain = lfoGain;
+  // LFO
+  const lfoOsc=AC.createOscillator(),lfoGain=AC.createGain();
+  lfoOsc.type=t.lfoShape;lfoOsc.frequency.value=t.lfoRate;
+  lfoGain.gain.value=t.lfoEnabled?getLfoDepth(t):0;
+  lfoOsc.connect(lfoGain);lfoOsc.start();
+  t.lfoOsc=lfoOsc;t.lfoGain=lfoGain;
 
-  /* ── Main gain and pan ── */
-  const gainNode = AC.createGain();
-  // Apply mute/solo state
-  gainNode.gain.value = computeEffectiveGain(t);
-  const panNode = AC.createStereoPanner(); panNode.pan.value = t.pan;
-  t.gainNode = gainNode; t.panNode = panNode;
+  // Main gain + pan
+  const gainNode=AC.createGain();gainNode.gain.value=computeEffectiveGain(t);
+  const panNode=AC.createStereoPanner();panNode.pan.value=t.pan;
+  t.gainNode=gainNode;t.panNode=panNode;
 
-  /* ── Reverb ── */
-  const dryGain = AC.createGain(); const reverbGain = AC.createGain(); const convolver = AC.createConvolver();
-  if (window._reverbIR) convolver.buffer = window._reverbIR;
-  dryGain.gain.value = t.reverbEnabled ? 1 - t.reverbAmount : 1;
-  reverbGain.gain.value = t.reverbEnabled ? t.reverbAmount : 0;
-  t.dryGain = dryGain; t.reverbGain = reverbGain; t.reverbNode = convolver;
+  // Reverb — convolver stored as t.reverbNode and disconnected in teardown (fix #2)
+  const dryGain=AC.createGain(),reverbGain=AC.createGain(),convolver=AC.createConvolver();
+  if(window._reverbIR)convolver.buffer=window._reverbIR;
+  dryGain.gain.value=t.reverbEnabled?1-t.reverbAmount:1;
+  reverbGain.gain.value=t.reverbEnabled?t.reverbAmount:0;
+  t.dryGain=dryGain;t.reverbGain=reverbGain;t.reverbNode=convolver;
 
-  /* ── Connect LFO to its target ── */
-  connectLfoTarget(t, lfoGain, gainNode, panNode, tapeHighShelf);
+  connectLfoTarget(t,lfoGain,gainNode,panNode,tapeHighShelf);
 
-  /* ── Build ring modulator ── */
-  // Route source through tape filters first, then into ring mod
+  // Signal chain
   sourceNode.connect(tapeHighShelf);
   tapeHighShelf.connect(tapeLowPass);
-
-  // Ring mod takes from tapeLowPass output
-  const ringMerge = buildRingMod(t, tapeLowPass);
-
-  /* ── Connect tape noise and pre-echo in parallel ── */
-  tapeNoiseLPF.connect(tapeNoiseGain);
-  tapeNoiseGain.connect(gainNode);
-  tapeNoiseNode.start();
-
-  sourceNode.connect(tapeEchoDelay);
-  tapeEchoDelay.connect(tapeEchoGain);
-  tapeEchoGain.connect(gainNode);
-
-  /* ── Main chain: ringMerge → gain → pan → reverb split → master ── */
+  const ringMerge=buildRingMod(t,tapeLowPass);
+  tapeNoiseLPF.connect(tapeNoiseGain);tapeNoiseGain.connect(gainNode);tapeNoiseNode.start();
+  sourceNode.connect(tapeEchoDelay);tapeEchoDelay.connect(tapeEchoGain);tapeEchoGain.connect(gainNode);
   ringMerge.connect(gainNode);
   gainNode.connect(panNode);
-  panNode.connect(dryGain); panNode.connect(convolver);
-  dryGain.connect(masterGain); convolver.connect(reverbGain); reverbGain.connect(masterGain);
+  panNode.connect(dryGain);panNode.connect(convolver);
+  dryGain.connect(masterGain);convolver.connect(reverbGain);reverbGain.connect(masterGain);
 }
 
 function getLfoDepth(t) {
-  switch (t.lfoTarget) {
-    case 'filter': return t.lfoDepth;          // Hz sweep of filter
-    case 'volume': return t.volume * 0.6;       // gain modulation depth
-    case 'pan':    return 0.8;                  // pan swing ±0.8
-    case 'ring':   return t.ringCarrier * 0.5;  // carrier frequency wobble
-    default: return t.lfoDepth;
-  }
+  if(t.lfoTarget==='filter')return t.lfoDepth;
+  if(t.lfoTarget==='volume')return t.volume*0.6;
+  if(t.lfoTarget==='pan')return 0.8;
+  if(t.lfoTarget==='ring')return t.ringCarrier*0.5;
+  return t.lfoDepth;
 }
 
-function connectLfoTarget(t, lfoGain, gainNode, panNode, filterNode) {
-  switch (t.lfoTarget) {
-    case 'filter': lfoGain.connect(filterNode.frequency); break;
-    case 'volume': lfoGain.connect(gainNode.gain); break;
-    case 'pan':    lfoGain.connect(panNode.pan); break;
-    case 'ring':   if (t.ringOsc) lfoGain.connect(t.ringOsc.frequency); break;
-  }
+function connectLfoTarget(t,lfoGain,gainNode,panNode,filterNode){
+  if(t.lfoTarget==='filter')lfoGain.connect(filterNode.frequency);
+  else if(t.lfoTarget==='volume')lfoGain.connect(gainNode.gain);
+  else if(t.lfoTarget==='pan')lfoGain.connect(panNode.pan);
+  else if(t.lfoTarget==='ring'&&t.ringOsc)lfoGain.connect(t.ringOsc.frequency);
 }
 
-function computeEffectiveGain(t) {
-  // A track is silent if muted, OR if any other track is soloed and this one isn't
-  const anySoloed = tracks.some(tr => tr.soloed);
-  if (t.muted) return 0;
-  if (anySoloed && !t.soloed) return 0;
+function computeEffectiveGain(t){
+  const anySoloed=tracks.some(tr=>tr.soloed);
+  if(t.muted)return 0;
+  if(anySoloed&&!t.soloed)return 0;
   return t.volume;
 }
 
-function teardownTrackGraph(t) {
-  if (t._dropoutTimeout) { clearTimeout(t._dropoutTimeout); t._dropoutTimeout = null; }
-  const tryStop = n => { try { n && n.stop(); } catch(e){} };
-  [t.sourceNode,t.oscNode,t.noiseNode,t.lfoOsc,t.tapeWowOsc,t.tapeFlutterOsc,
-   t.ringOsc,t.tapeNoiseNode].forEach(tryStop);
-  [
-    'sourceNode','oscNode','noiseNode','gainNode','panNode',
-    'tapeHighShelf','tapeLowPass','reverbNode','reverbGain','dryGain',
-    'lfoOsc','lfoGain','tapeWowOsc','tapeFlutterOsc','tapeWowGain','tapeFlutterGain',
-    'tapeNoiseNode','tapeNoiseGain','tapeEchoDelay','tapeEchoGain',
-    'ringOsc','ringWet','ringDry','_ringSum','_ringDiff','_ringSqSum','_ringSqDiff','_ringInv','_ringOut',
-  ].forEach(k => { t[k] = null; });
+function teardownTrackGraph(t){
+  if(t._dropoutTimeout){clearTimeout(t._dropoutTimeout);t._dropoutTimeout=null;}
+  const tryStop=n=>{try{n&&n.stop();}catch(e){}};
+  const tryDC=n=>{try{n&&n.disconnect();}catch(e){}};
+  [t.sourceNode,t.oscNode,t.noiseNode,t.lfoOsc,t.tapeWowOsc,t.tapeFlutterOsc,t.ringOsc,t.tapeNoiseNode].forEach(tryStop);
+  // fix #2: reverbNode (convolver) disconnected; fix #3: tapeNoiseLPF disconnected
+  ['sourceNode','oscNode','noiseNode','gainNode','panNode',
+   'tapeHighShelf','tapeLowPass','tapeNoiseLPF',
+   'reverbNode','reverbGain','dryGain',
+   'lfoOsc','lfoGain','tapeWowOsc','tapeFlutterOsc','tapeWowGain','tapeFlutterGain',
+   'tapeNoiseNode','tapeNoiseGain','tapeEchoDelay','tapeEchoGain',
+   'ringOsc','ringWet','ringDry','_ringSum','_ringDiff','_ringSqSum','_ringSqDiff','_ringInv','_ringOut',
+  ].forEach(k=>{tryDC(t[k]);t[k]=null;});
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* =========================================================
    MUTE / SOLO
-═══════════════════════════════════════════════════════════ */
-window.setMute = function(id) {
-  const t = tracks[id];
-  t.muted = !t.muted;
-  if (t.muted) t.soloed = false; // can't be both
-  applyMuteSolo();
-  renderMuteSoloUI();
-};
-
-window.setSolo = function(id) {
-  const t = tracks[id];
-  const wasSoloed = t.soloed;
-  // Toggle: un-solo all, then re-solo this one if it wasn't soloed
-  tracks.forEach(tr => { tr.soloed = false; });
-  if (!wasSoloed) t.soloed = true;
-  applyMuteSolo();
-  renderMuteSoloUI();
-};
-
-function applyMuteSolo() {
-  tracks.forEach(t => {
-    const g = computeEffectiveGain(t);
-    if (t.gainNode) t.gainNode.gain.setTargetAtTime(g, AC.currentTime, 0.04);
+========================================================= */
+window.setMute=function(id){const t=tracks[id];t.muted=!t.muted;if(t.muted)t.soloed=false;applyMuteSolo();renderMuteSoloUI();};
+window.setSolo=function(id){const t=tracks[id];const was=t.soloed;tracks.forEach(tr=>{tr.soloed=false;});if(!was)t.soloed=true;applyMuteSolo();renderMuteSoloUI();};
+function applyMuteSolo(){tracks.forEach(t=>{const g=computeEffectiveGain(t);if(t.gainNode)t.gainNode.gain.setTargetAtTime(g,AC.currentTime,0.04);});}
+function renderMuteSoloUI(){
+  tracks.forEach(t=>{
+    const mb=document.getElementById('mute-'+t.id),sb=document.getElementById('solo-'+t.id),el=document.getElementById('track-'+t.id);
+    if(mb)mb.classList.toggle('active',t.muted);if(sb)sb.classList.toggle('active',t.soloed);
+    if(el){el.classList.toggle('is-muted',t.muted);el.classList.toggle('is-soloed',t.soloed);}
   });
 }
 
-function renderMuteSoloUI() {
-  tracks.forEach(t => {
-    const muteBtn = document.getElementById(`mute-${t.id}`);
-    const soloBtn = document.getElementById(`solo-${t.id}`);
-    const trackEl = document.getElementById(`track-${t.id}`);
-    if (muteBtn) muteBtn.classList.toggle('active', t.muted);
-    if (soloBtn) soloBtn.classList.toggle('active', t.soloed);
-    if (trackEl) {
-      trackEl.classList.toggle('is-muted', t.muted);
-      trackEl.classList.toggle('is-soloed', t.soloed);
-    }
-  });
-}
-
-/* ═══════════════════════════════════════════════════════════
+/* =========================================================
    TRANSPORT
-═══════════════════════════════════════════════════════════ */
-window.transportPlay = function() {
-  if (!AC) initAudio();
-  if (AC.state === 'suspended') AC.resume();
-  if (isPlaying) return;
-  const hasAny = tracks.some(t => t.buffer || t.oscMode);
-  if (!hasAny) return;
-  isPlaying = true; wallStart = performance.now();
-  tracks.forEach(t => {
-    if (!t.buffer && !t.oscMode) return;
-    buildTrackGraph(t);
-    const node = t.oscNode || t.noiseNode || t.sourceNode;
-    if (node) node.start(0);
-    t.tapeLoopCount = 0;
+========================================================= */
+window.transportPlay=function(){
+  if(!AC)initAudio();
+  if(AC.state==='suspended')AC.resume();
+  if(isPlaying)return;
+  if(!tracks.some(t=>t.buffer||t.oscMode))return;
+  isPlaying=true;wallStart=performance.now();
+  tracks.forEach(t=>{
+    if(!t.buffer&&!t.oscMode)return;
+    buildTrackGraph(t,0);
+    const node=t.oscNode||t.noiseNode||t.sourceNode;if(node)node.start(0);
+    t.tapeLoopCount=0;
   });
   updateTransportUI(true);
-  timerRaf = requestAnimationFrame(transportTick);
+  timerRaf=requestAnimationFrame(transportTick);
 };
 
-window.transportStop = function() {
-  if (!isPlaying) return;
-  isPlaying = false;
-  cancelAnimationFrame(timerRaf);
-  tracks.forEach(t => { teardownTrackGraph(t); t.playheadPct = 0; drawWaveform(t); });
-  document.getElementById('transportTime').textContent = '0:00.0';
+window.transportStop=function(){
+  if(!isPlaying)return;
+  isPlaying=false;cancelAnimationFrame(timerRaf);
+  tracks.forEach(t=>{teardownTrackGraph(t);t.playheadPct=0;drawWaveform(t);});
+  document.getElementById('transportTime').textContent='0:00.0';
   updateTransportUI(false);
-  if (mixRecording) stopMixRecord();
+  if(mixRecording)stopMixRecord();
 };
 
-function transportTick() {
-  if (!isPlaying) return;
-  const elapsed = (performance.now() - wallStart) / 1000;
-  const m = Math.floor(elapsed / 60);
-  const s = (elapsed % 60).toFixed(1);
-  document.getElementById('transportTime').textContent = `${m}:${s.padStart(4,'0')}`;
-
-  tracks.forEach(t => {
-    if (!t.buffer || !t.sourceNode) return;
-    const dur = t.buffer.duration / t.speed;
-    const pos = t.loop ? (elapsed % dur) / dur : Math.min(elapsed / dur, 1);
-    t.playheadPct = pos;
+function transportTick(){
+  if(!isPlaying)return;
+  const elapsed=(performance.now()-wallStart)/1000;
+  const m=Math.floor(elapsed/60),s=(elapsed%60).toFixed(1);
+  document.getElementById('transportTime').textContent=m+':'+s.padStart(4,'0');
+  tracks.forEach(t=>{
+    if(!t.buffer||!t.sourceNode)return;
+    const dur=t.buffer.duration/t.speed;
+    t.playheadPct=t.loop?(elapsed%dur)/dur:Math.min(elapsed/dur,1);
     drawWaveform(t);
-
-    // Tape degradation per loop
-    if (t.tapeEnabled && t.loop && dur > 0) {
-      const loopCount = Math.floor(elapsed / dur);
-      if (loopCount > t.tapeLoopCount) {
-        t.tapeLoopCount = loopCount;
-        t.tapeDegradation = Math.min(1, t.tapeDegradation + t.tapeRate);
-        applyTapeDegradationToNodes(t);
-        updateTapeMeter(t);
-
-        // Stage 3: random dropouts (degradation > 0.6)
-        if (t.tapeEnabled && t.tapeDegradation > 0.6 && !t._dropoutTimeout) {
-          scheduleDropout(t);
-        }
+    if(t.tapeEnabled&&t.loop&&dur>0){
+      const lc=Math.floor(elapsed/dur);
+      if(lc>t.tapeLoopCount){
+        t.tapeLoopCount=lc;
+        t.tapeDegradation=Math.min(1,t.tapeDegradation+t.tapeRate);
+        applyTapeDegradationToNodes(t);updateTapeMeter(t);
+        if(t.tapeDegradation>0.6&&!t._dropoutTimeout)scheduleDropout(t);
       }
     }
   });
-  timerRaf = requestAnimationFrame(transportTick);
+  timerRaf=requestAnimationFrame(transportTick);
 }
 
-function scheduleDropout(t) {
-  if (!t.tapeEnabled || t.tapeDegradation <= 0.6 || !isPlaying) return;
-  // Dropout interval: more frequent as degradation increases
-  const meanInterval = Math.max(500, 6000 * (1 - (t.tapeDegradation - 0.6) * 2.5));
-  const interval = meanInterval * (0.5 + Math.random());
-  t._dropoutTimeout = setTimeout(() => {
-    if (!isPlaying || !t.gainNode || !t.tapeEnabled) return;
-    // Brief amplitude dip: 5–40ms
-    const dipDur = 0.005 + Math.random() * 0.035;
-    const dipDepth = 0.1 + Math.random() * 0.5;
-    const now = AC.currentTime;
-    const baseGain = computeEffectiveGain(t);
-    t.gainNode.gain.setTargetAtTime(baseGain * dipDepth, now, 0.002);
-    t.gainNode.gain.setTargetAtTime(baseGain, now + dipDur, 0.002);
-    t._dropoutTimeout = null;
-    scheduleDropout(t); // schedule next
-  }, interval);
+function scheduleDropout(t){
+  if(!t.tapeEnabled||t.tapeDegradation<=0.6||!isPlaying)return;
+  const mean=Math.max(500,6000*(1-(t.tapeDegradation-0.6)*2.5));
+  t._dropoutTimeout=setTimeout(()=>{
+    if(!isPlaying||!t.gainNode||!t.tapeEnabled)return;
+    const dur=0.005+Math.random()*0.035,dip=0.1+Math.random()*0.5,now=AC.currentTime,base=computeEffectiveGain(t);
+    t.gainNode.gain.setTargetAtTime(base*dip,now,0.002);
+    t.gainNode.gain.setTargetAtTime(base,now+dur,0.002);
+    t._dropoutTimeout=null;scheduleDropout(t);
+  },mean*(0.5+Math.random()));
 }
 
-function updateTransportUI(playing) {
-  document.getElementById('playBtn').disabled  = playing;
-  document.getElementById('stopBtn').disabled  = !playing;
-  document.getElementById('mixRecordBtn').disabled = !playing;
-  if (!playing) {
-    const hasAny = tracks.some(t => t.buffer || t.oscMode);
-    document.getElementById('playBtn').disabled = !hasAny;
-  }
+function updateTransportUI(playing){
+  document.getElementById('playBtn').disabled=playing;
+  document.getElementById('stopBtn').disabled=!playing;
+  document.getElementById('mixRecordBtn').disabled=!playing;
+  if(!playing)document.getElementById('playBtn').disabled=!tracks.some(t=>t.buffer||t.oscMode);
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* =========================================================
    MIX RECORD
-═══════════════════════════════════════════════════════════ */
-window.toggleMixRecord = function() { if (!mixRecording) startMixRecord(); else stopMixRecord(); };
-function startMixRecord() {
-  mixChunks = [];
-  mixRecorder = new MediaRecorder(masterDest.stream);
-  mixRecorder.ondataavailable = e => { if (e.data.size > 0) mixChunks.push(e.data); };
-  mixRecorder.onstop = onMixRecordStop; mixRecorder.start();
-  mixRecording = true;
+========================================================= */
+window.toggleMixRecord=function(){if(!mixRecording)startMixRecord();else stopMixRecord();};
+function startMixRecord(){
+  mixChunks=[];mixRecorder=new MediaRecorder(masterDest.stream);
+  mixRecorder.ondataavailable=e=>{if(e.data.size>0)mixChunks.push(e.data);};
+  mixRecorder.onstop=onMixRecordStop;mixRecorder.start();mixRecording=true;
   document.getElementById('mixRecordBtn').classList.add('active');
 }
-function stopMixRecord() {
-  if (!mixRecorder) return; mixRecorder.stop(); mixRecording = false;
-  document.getElementById('mixRecordBtn').classList.remove('active');
+function stopMixRecord(){if(!mixRecorder)return;mixRecorder.stop();mixRecording=false;document.getElementById('mixRecordBtn').classList.remove('active');}
+function onMixRecordStop(){
+  const blob=new Blob(mixChunks,{type:'audio/webm'}),url=URL.createObjectURL(blob),btn=document.getElementById('dlMixBtn');
+  btn.disabled=false;btn._url=url;showToast('Mix recording ready \u2014 click Download mix WAV to save.','success');
 }
-function onMixRecordStop() {
-  const blob = new Blob(mixChunks, { type: 'audio/webm' });
-  const url  = URL.createObjectURL(blob);
-  const btn  = document.getElementById('dlMixBtn');
-  btn.disabled = false; btn._url = url;
-  showGlobalMsg('Mix recording ready — click Download mix WAV to save.', 'success');
-}
-window.downloadMix = function() {
-  const btn = document.getElementById('dlMixBtn');
-  if (!btn._url) return;
-  const a = document.createElement('a'); a.href = btn._url;
-  a.download = `tape-lab-mix-${Date.now()}.webm`; a.click();
+window.downloadMix=function(){const btn=document.getElementById('dlMixBtn');if(!btn._url)return;const a=document.createElement('a');a.href=btn._url;a.download='tape-lab-mix-'+Date.now()+'.webm';a.click();};
+
+/* =========================================================
+   BAKE TAPE
+========================================================= */
+window.bakeTrack=async function(id){
+  const t=tracks[id];if(!t.buffer||!t.tapeEnabled)return;
+  showToast('Baking degraded audio\u2026','success');
+  try{
+    const sr=t.buffer.sampleRate,offline=new OfflineAudioContext(t.buffer.numberOfChannels,t.buffer.length,sr);
+    const src=offline.createBufferSource();src.buffer=t.buffer;
+    const shelf=offline.createBiquadFilter();shelf.type='highshelf';
+    shelf.frequency.value=Math.max(2000,18000*Math.pow(1-t.tapeDegradation,1.5));
+    shelf.gain.value=Math.max(-30,-40*t.tapeDegradation);
+    const lp=offline.createBiquadFilter();lp.type='lowpass';
+    lp.frequency.value=t.tapeDegradation>0.5?Math.max(800,20000*Math.pow(1-(t.tapeDegradation-0.5)*1.5,2)):20000;
+    src.connect(shelf);shelf.connect(lp);lp.connect(offline.destination);src.start(0);
+    const rendered=await offline.startRendering();
+    const wavBlob=audioBufferToWav(rendered),name=(t.fileName||'track')+'-baked-'+Date.now();
+    const file=new File([wavBlob],name+'.wav',{type:'audio/wav'});
+    await uploadFile(file);await loadLibrary();
+    showToast('Baked "'+name+'" added to library.','success');
+  }catch(e){showToast('Bake failed: '+e.message,'error');}
 };
 
-/* ═══════════════════════════════════════════════════════════
-   BAKE TAPE — render degraded buffer via OfflineAudioContext
-═══════════════════════════════════════════════════════════ */
-window.bakeTrack = async function(id) {
-  const t = tracks[id];
-  if (!t.buffer || !t.tapeEnabled) return;
-  showGlobalMsg('Baking degraded audio…', 'success');
-  try {
-    const sr = t.buffer.sampleRate;
-    const offline = new OfflineAudioContext(t.buffer.numberOfChannels, t.buffer.length, sr);
-    const src = offline.createBufferSource(); src.buffer = t.buffer;
-    // Apply high-shelf degradation
-    const shelf = offline.createBiquadFilter(); shelf.type = 'highshelf';
-    shelf.frequency.value = Math.max(2000, 18000 * Math.pow(1 - t.tapeDegradation, 1.5));
-    shelf.gain.value = Math.max(-30, -40 * t.tapeDegradation);
-    const lp = offline.createBiquadFilter(); lp.type = 'lowpass';
-    lp.frequency.value = t.tapeDegradation > 0.5
-      ? Math.max(800, 20000 * Math.pow(1 - (t.tapeDegradation - 0.5) * 1.5, 2)) : 20000;
-    src.connect(shelf); shelf.connect(lp); lp.connect(offline.destination);
-    src.start(0);
-    const rendered = await offline.startRendering();
-    // Convert to WAV blob and upload
-    const wavBlob = audioBufferToWav(rendered);
-    const name = `${t.fileName || 'track'}-baked-${Date.now()}`;
-    const file = new File([wavBlob], name + '.wav', { type: 'audio/wav' });
-    await uploadFile(file);
-    await loadLibrary();
-    showGlobalMsg(`Baked "${name}" added to library.`, 'success');
-  } catch(e) { showGlobalMsg('Bake failed: ' + e.message, 'error'); }
-};
-
-function audioBufferToWav(buffer) {
-  const numCh = buffer.numberOfChannels;
-  const sr = buffer.sampleRate;
-  const len = buffer.length;
-  const dataLen = len * numCh * 2;
-  const ab = new ArrayBuffer(44 + dataLen);
-  const view = new DataView(ab);
-  const writeStr = (off, str) => { for (let i = 0; i < str.length; i++) view.setUint8(off + i, str.charCodeAt(i)); };
-  writeStr(0,'RIFF'); view.setUint32(4, 36 + dataLen, true); writeStr(8,'WAVE');
-  writeStr(12,'fmt '); view.setUint32(16,16,true); view.setUint16(20,1,true);
-  view.setUint16(22,numCh,true); view.setUint32(24,sr,true);
-  view.setUint32(28,sr*numCh*2,true); view.setUint16(32,numCh*2,true); view.setUint16(34,16,true);
-  writeStr(36,'data'); view.setUint32(40,dataLen,true);
-  let off = 44;
-  for (let i = 0; i < len; i++) {
-    for (let c = 0; c < numCh; c++) {
-      const s = Math.max(-1, Math.min(1, buffer.getChannelData(c)[i]));
-      view.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
-      off += 2;
-    }
+function audioBufferToWav(buffer){
+  const numCh=buffer.numberOfChannels,sr=buffer.sampleRate,len=buffer.length,dataLen=len*numCh*2;
+  const ab=new ArrayBuffer(44+dataLen),view=new DataView(ab);
+  const ws=(off,str)=>{for(let i=0;i<str.length;i++)view.setUint8(off+i,str.charCodeAt(i));};
+  ws(0,'RIFF');view.setUint32(4,36+dataLen,true);ws(8,'WAVE');
+  ws(12,'fmt ');view.setUint32(16,16,true);view.setUint16(20,1,true);
+  view.setUint16(22,numCh,true);view.setUint32(24,sr,true);
+  view.setUint32(28,sr*numCh*2,true);view.setUint16(32,numCh*2,true);view.setUint16(34,16,true);
+  ws(36,'data');view.setUint32(40,dataLen,true);
+  let off=44;
+  for(let i=0;i<len;i++)for(let c=0;c<numCh;c++){
+    const s=Math.max(-1,Math.min(1,buffer.getChannelData(c)[i]));
+    view.setInt16(off,s<0?s*0x8000:s*0x7FFF,true);off+=2;
   }
-  return new Blob([ab], { type: 'audio/wav' });
+  return new Blob([ab],{type:'audio/wav'});
 }
 
-/* ═══════════════════════════════════════════════════════════
-   WAVEFORM DRAW
-═══════════════════════════════════════════════════════════ */
-function drawWaveform(t) {
-  const canvas = document.getElementById(`wave-${t.id}`);
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = canvas.offsetWidth * dpr;
-  canvas.height = 44 * dpr;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  if (t.oscMode) {
-    const W = canvas.width, H = canvas.height;
-    ctx.strokeStyle = TRACK_COLORS[t.id]; ctx.lineWidth = 1.5; ctx.beginPath();
-    const freq = t.oscType === 'noise' ? 30 : t.oscFreq;
-    const cycles = Math.min(8, freq / 20);
-    for (let x = 0; x < W; x++) {
-      const phase = (x / W) * cycles * Math.PI * 2;
-      const amp = t.oscType === 'noise' ? (Math.sin(phase*3.7)*.5+Math.sin(phase*7.3)*.3)*.6
-        : t.oscType === 'square' ? Math.sign(Math.sin(phase))*.7
-        : t.oscType === 'triangle' ? (2/Math.PI)*Math.asin(Math.sin(phase))*.75
-        : Math.sin(phase)*.75;
-      const y = H/2 - amp*(H/2-4);
-      x === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+/* =========================================================
+   WAVEFORM
+========================================================= */
+function drawWaveform(t){
+  const canvas=document.getElementById('wave-'+t.id);if(!canvas)return;
+  const ctx=canvas.getContext('2d'),dpr=window.devicePixelRatio||1;
+  canvas.width=canvas.offsetWidth*dpr;canvas.height=44*dpr;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(t.oscMode){
+    const W=canvas.width,H=canvas.height;
+    ctx.strokeStyle=TRACK_COLORS[t.id];ctx.lineWidth=1.5;ctx.beginPath();
+    const freq=t.oscType==='noise'?30:t.oscFreq,cycles=Math.min(8,freq/20);
+    for(let x=0;x<W;x++){
+      const ph=(x/W)*cycles*Math.PI*2;
+      const amp=t.oscType==='noise'?(Math.sin(ph*3.7)*.5+Math.sin(ph*7.3)*.3)*.6
+        :t.oscType==='square'?Math.sign(Math.sin(ph))*.7
+        :t.oscType==='triangle'?(2/Math.PI)*Math.asin(Math.sin(ph))*.75
+        :Math.sin(ph)*.75;
+      const y=H/2-amp*(H/2-4);x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
     }
-    ctx.stroke(); return;
+    ctx.stroke();return;
   }
-
-  if (!t.buffer) {
-    ctx.fillStyle = '#e5e5e0';
-    ctx.fillRect(0, canvas.height/2-1, canvas.width, 2); return;
-  }
-
-  const data = t.buffer.getChannelData(0);
-  const W = canvas.width, H = canvas.height;
-  const step = Math.ceil(data.length / W);
-  const color = TRACK_COLORS[t.id];
-  ctx.fillStyle = color + '28'; ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.beginPath();
-  for (let x = 0; x < W; x++) {
-    let max = 0, min = 0;
-    for (let j = 0; j < step; j++) {
-      const s = data[x*step+j]||0;
-      if (s > max) max = s; if (s < min) min = s;
-    }
-    const y1 = (1-max)*H/2, y2 = (1-min)*H/2;
-    if (x === 0) ctx.moveTo(x,y1); else ctx.lineTo(x,y1);
+  if(!t.buffer){ctx.fillStyle='#e5e5e0';ctx.fillRect(0,canvas.height/2-1,canvas.width,2);return;}
+  const data=t.buffer.getChannelData(0),W=canvas.width,H=canvas.height,step=Math.ceil(data.length/W);
+  const color=TRACK_COLORS[t.id];
+  ctx.fillStyle=color+'28';ctx.strokeStyle=color;ctx.lineWidth=1;ctx.beginPath();
+  for(let x=0;x<W;x++){
+    let max=0,min=0;
+    for(let j=0;j<step;j++){const s=data[x*step+j]||0;if(s>max)max=s;if(s<min)min=s;}
+    const y1=(1-max)*H/2,y2=(1-min)*H/2;
+    if(x===0)ctx.moveTo(x,y1);else ctx.lineTo(x,y1);
     ctx.fillRect(x,y1,1,y2-y1);
   }
   ctx.stroke();
-
-  // Playhead
-  if (isPlaying && t.sourceNode) {
-    ctx.strokeStyle = color; ctx.lineWidth = 2*dpr; ctx.globalAlpha = 0.9;
-    ctx.beginPath(); ctx.moveTo(t.playheadPct*W,0); ctx.lineTo(t.playheadPct*W,H); ctx.stroke();
-    ctx.globalAlpha = 1;
+  if(isPlaying&&t.sourceNode){
+    ctx.strokeStyle=color;ctx.lineWidth=2*dpr;ctx.globalAlpha=0.9;
+    ctx.beginPath();ctx.moveTo(t.playheadPct*W,0);ctx.lineTo(t.playheadPct*W,H);ctx.stroke();
+    ctx.globalAlpha=1;
   }
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* =========================================================
    TRACK PARAM SETTERS
-═══════════════════════════════════════════════════════════ */
-window.setTrackParam = function(id, param, value) {
-  const t = tracks[id];
-  t[param] = value;
-  if (!t.gainNode) return;
-
-  if (param === 'volume') {
-    const g = computeEffectiveGain(t);
-    t.gainNode.gain.setTargetAtTime(g, AC.currentTime, 0.05);
+========================================================= */
+window.setTrackParam=function(id,param,value){
+  const t=tracks[id];t[param]=value;
+  if(!t.gainNode)return;
+  if(param==='volume')t.gainNode.gain.setTargetAtTime(computeEffectiveGain(t),AC.currentTime,0.05);
+  if(param==='pan'&&t.panNode)t.panNode.pan.setTargetAtTime(value,AC.currentTime,0.05);
+  if(param==='speed'&&t.sourceNode){
+    t.sourceNode.playbackRate.setTargetAtTime(value,AC.currentTime,0.05);
+    if(ratioLocked&&id===0)applyRatiosFromTrack0Speed(value);
   }
-  if (param === 'pan'    && t.panNode)    t.panNode.pan.setTargetAtTime(value, AC.currentTime, 0.05);
-  if (param === 'speed'  && t.sourceNode) {
-    t.sourceNode.playbackRate.setTargetAtTime(value, AC.currentTime, 0.05);
-    if (ratioLocked && id === 0) applyRatiosFromTrack0Speed(value);
+  if(param==='loop'&&t.sourceNode)t.sourceNode.loop=value;
+  if(param==='reverbAmount'){
+    if(t.reverbGain)t.reverbGain.gain.setTargetAtTime(t.reverbEnabled?value:0,AC.currentTime,0.05);
+    if(t.dryGain)t.dryGain.gain.setTargetAtTime(t.reverbEnabled?1-value:1,AC.currentTime,0.05);
   }
-  if (param === 'loop'   && t.sourceNode) t.sourceNode.loop = value;
-  if (param === 'reverbAmount') {
-    if (t.reverbGain) t.reverbGain.gain.setTargetAtTime(t.reverbEnabled ? value : 0, AC.currentTime, 0.05);
-    if (t.dryGain)    t.dryGain.gain.setTargetAtTime(t.reverbEnabled ? 1-value : 1, AC.currentTime, 0.05);
-  }
-  if (param === 'lfoRate' && t.lfoOsc) t.lfoOsc.frequency.setTargetAtTime(value, AC.currentTime, 0.05);
-  if (param === 'ringCarrier' && t.ringOsc) {
-    t.ringOsc.frequency.setTargetAtTime(value, AC.currentTime, 0.05);
-    updateRingFreqDisplay(id);
-  }
-  if (param === 'oscFreq' && t.oscNode) {
-    t.oscNode.frequency.setTargetAtTime(value, AC.currentTime, 0.05);
-    updateRingFreqDisplay(id);
-  }
-  if (param === 'crossfade') {
-    // Rebuild graph if playing to apply the baked crossfade
-    if (isPlaying && t.buffer && t.loop) {
-      teardownTrackGraph(t); buildTrackGraph(t);
-      const node = t.sourceNode; if (node) node.start(0);
-    }
+  if(param==='lfoRate'&&t.lfoOsc)t.lfoOsc.frequency.setTargetAtTime(value,AC.currentTime,0.05);
+  if(param==='ringCarrier'&&t.ringOsc){t.ringOsc.frequency.setTargetAtTime(value,AC.currentTime,0.05);updateRingFreqDisplay(id);}
+  if(param==='oscFreq'&&t.oscNode){t.oscNode.frequency.setTargetAtTime(value,AC.currentTime,0.05);updateRingFreqDisplay(id);}
+  if(param==='crossfade'&&isPlaying&&t.buffer&&t.loop){
+    // fix #5: resume from current playhead position rather than restarting at zero
+    const elapsed=(performance.now()-wallStart)/1000;
+    const dur=t.buffer.duration/t.speed;
+    const offsetInBuffer=dur>0?(elapsed%dur):0;
+    buildTrackGraph(t,offsetInBuffer);
+    if(t.sourceNode)t.sourceNode.start(0,offsetInBuffer);
   }
 };
 
-window.setTrackEffect = function(id, effect, enabled) {
-  const t = tracks[id];
-  t[effect] = enabled;
-
-  const sliderMap = { reverbEnabled:`reverb-slider-${id}`, lfoEnabled:`lfo-rate-${id}`, tapeEnabled:`tape-rate-${id}`, ringEnabled:`ring-carrier-${id}` };
-  const slider = document.getElementById(sliderMap[effect]);
-  if (slider) slider.disabled = !enabled;
-
-  if (effect === 'lfoEnabled') {
-    document.querySelectorAll(`#lfo-shapes-${id} .lfo-shape-btn`).forEach(b => b.disabled = !enabled);
-    document.querySelectorAll(`#lfo-target-${id} .lfo-shape-btn`).forEach(b => b.disabled = !enabled);
-    if (t.lfoGain) t.lfoGain.gain.setTargetAtTime(enabled ? getLfoDepth(t) : 0, AC.currentTime, 0.05);
+window.setTrackEffect=function(id,effect,enabled){
+  const t=tracks[id];t[effect]=enabled;
+  const sliderMap={reverbEnabled:'reverb-slider-'+id,lfoEnabled:'lfo-rate-'+id,tapeEnabled:'tape-rate-'+id,ringEnabled:'ring-carrier-'+id};
+  const slider=document.getElementById(sliderMap[effect]);if(slider)slider.disabled=!enabled;
+  if(effect==='lfoEnabled'){
+    document.querySelectorAll('#lfo-shapes-'+id+' .lfo-shape-btn').forEach(b=>b.disabled=!enabled);
+    document.querySelectorAll('#lfo-target-'+id+' .lfo-shape-btn').forEach(b=>b.disabled=!enabled);
+    if(t.lfoGain)t.lfoGain.gain.setTargetAtTime(enabled?getLfoDepth(t):0,AC.currentTime,0.05);
   }
-  if (effect === 'reverbEnabled') {
-    if (t.reverbGain) t.reverbGain.gain.setTargetAtTime(enabled ? t.reverbAmount : 0, AC.currentTime, 0.05);
-    if (t.dryGain)    t.dryGain.gain.setTargetAtTime(enabled ? 1-t.reverbAmount : 1, AC.currentTime, 0.05);
+  if(effect==='reverbEnabled'){
+    if(t.reverbGain)t.reverbGain.gain.setTargetAtTime(enabled?t.reverbAmount:0,AC.currentTime,0.05);
+    if(t.dryGain)t.dryGain.gain.setTargetAtTime(enabled?1-t.reverbAmount:1,AC.currentTime,0.05);
   }
-  if (effect === 'tapeEnabled') {
+  if(effect==='tapeEnabled'){
     applyTapeDegradationToNodes(t);
-    // Show/hide crossfade & bake controls
-    const xfRow = document.getElementById(`xf-group-${id}`);
-    if (xfRow) xfRow.style.display = (enabled || t.loop) ? '' : 'none';
+    const xfRow=document.getElementById('xf-group-'+id);if(xfRow)xfRow.style.display=(enabled||t.loop)?'':'none';
   }
-  if (effect === 'ringEnabled') {
-    if (t.ringWet) t.ringWet.gain.setTargetAtTime(enabled ? 1 : 0, AC.currentTime, 0.05);
-    if (t.ringDry) t.ringDry.gain.setTargetAtTime(enabled ? 0 : 1, AC.currentTime, 0.05);
-    const display = document.getElementById(`ring-freqs-${id}`);
-    if (display) display.style.opacity = enabled ? '1' : '0.4';
+  if(effect==='ringEnabled'){
+    if(t.ringWet)t.ringWet.gain.setTargetAtTime(enabled?1:0,AC.currentTime,0.05);
+    if(t.ringDry)t.ringDry.gain.setTargetAtTime(enabled?0:1,AC.currentTime,0.05);
+    const d=document.getElementById('ring-freqs-'+id);if(d)d.style.opacity=enabled?'1':'0.4';
   }
 };
 
-window.setLfoShape = function(id, shape) {
-  const t = tracks[id];
-  t.lfoShape = shape;
-  if (t.lfoOsc) t.lfoOsc.type = shape;
-  document.querySelectorAll(`#lfo-shapes-${id} .lfo-shape-btn`).forEach(b => b.classList.toggle('active', b.dataset.shape === shape));
+window.setLfoShape=function(id,shape){
+  const t=tracks[id];t.lfoShape=shape;if(t.lfoOsc)t.lfoOsc.type=shape;
+  document.querySelectorAll('#lfo-shapes-'+id+' .lfo-shape-btn').forEach(b=>b.classList.toggle('active',b.dataset.shape===shape));
 };
 
-window.setLfoTarget = function(id, target) {
-  const t = tracks[id];
-  // Disconnect current lfoGain target
-  if (t.lfoGain) {
-    try { t.lfoGain.disconnect(); } catch(e) {}
-    t.lfoTarget = target;
-    // Reconnect to new target
-    if (t.lfoEnabled) {
-      t.lfoGain.gain.value = getLfoDepth(t);
-      connectLfoTarget(t, t.lfoGain, t.gainNode, t.panNode, t.tapeHighShelf);
-    }
-  } else {
-    t.lfoTarget = target;
-  }
-  document.querySelectorAll(`#lfo-target-${id} .lfo-shape-btn`).forEach(b => b.classList.toggle('active', b.dataset.target === target));
+window.setLfoTarget=function(id,target){
+  const t=tracks[id];
+  if(t.lfoGain){
+    try{t.lfoGain.disconnect();}catch(e){}
+    t.lfoTarget=target;
+    if(t.lfoEnabled){t.lfoGain.gain.value=getLfoDepth(t);connectLfoTarget(t,t.lfoGain,t.gainNode,t.panNode,t.tapeHighShelf);}
+  } else {t.lfoTarget=target;}
+  document.querySelectorAll('#lfo-target-'+id+' .lfo-shape-btn').forEach(b=>b.classList.toggle('active',b.dataset.target===target));
 };
 
-window.setOscType = function(id, type) {
-  const t = tracks[id]; t.oscType = type;
-  document.querySelectorAll(`#osc-type-btns-${id} .lfo-shape-btn`).forEach(b => b.classList.toggle('active', b.dataset.type === type));
+window.setOscType=function(id,type){
+  const t=tracks[id];t.oscType=type;
+  document.querySelectorAll('#osc-type-btns-'+id+' .lfo-shape-btn').forEach(b=>b.classList.toggle('active',b.dataset.type===type));
   drawWaveform(t);
-  if (isPlaying) { teardownTrackGraph(t); buildTrackGraph(t); const node = t.oscNode||t.noiseNode; if(node) node.start(0); }
+  if(isPlaying){buildTrackGraph(t,0);const node=t.oscNode||t.noiseNode;if(node)node.start(0);}
 };
 
-window.toggleOscMode = function(id) {
-  const t = tracks[id];
-  if (isPlaying) transportStop();
-  t.oscMode = !t.oscMode;
-  renderTracks(); updatePlayBtn();
+window.toggleOscMode=function(id){
+  const t=tracks[id];if(isPlaying)transportStop();t.oscMode=!t.oscMode;renderTracks();updatePlayBtn();
 };
 
-window.updatePanLabel = function(id, val) {
-  document.getElementById(`pan-label-${id}`).textContent =
-    val == 0 ? 'C' : val > 0 ? 'R'+Math.round(val*100) : 'L'+Math.round(Math.abs(val)*100);
+window.updatePanLabel=function(id,val){
+  document.getElementById('pan-label-'+id).textContent=val==0?'C':val>0?'R'+Math.round(val*100):'L'+Math.round(Math.abs(val)*100);
 };
 
-/* ── Speed: logarithmic mapping + snap ── */
-// UI slider is linear from -3 to 2 (log2 of speed range 0.125 to 4)
-window.speedSliderToSpeed = function(sliderVal) {
-  return Math.pow(2, parseFloat(sliderVal));
-};
-window.speedToSlider = function(speed) {
-  return Math.log2(Math.max(0.125, Math.min(4, speed)));
+/* Speed — log scale + log-space snap (fix #8) */
+window.speedSliderToSpeed=function(v){return Math.pow(2,parseFloat(v));};
+window.speedToSlider=function(s){return Math.log2(Math.max(0.125,Math.min(4,s)));};
+
+window.onSpeedSlider=function(id,sliderVal){
+  let speed=speedSliderToSpeed(sliderVal);
+  const l2=Math.log2(speed);
+  for(const snap of SPEED_SNAPS){if(Math.abs(l2-Math.log2(snap))<SNAP_THRESH_LOG2){speed=snap;break;}}
+  speed=parseFloat(speed.toFixed(4));tracks[id].speed=speed;
+  const exact=document.getElementById('spd-exact-'+id);if(exact)exact.value=speed.toFixed(3);
+  document.getElementById('spd-label-'+id).textContent=speed.toFixed(2)+'\xd7';
+  document.getElementById('spd-pitch-'+id).textContent=speedToPitch(speed);
+  if(tracks[id].sourceNode)tracks[id].sourceNode.playbackRate.setTargetAtTime(speed,AC.currentTime,0.05);
+  if(ratioLocked&&id===0)applyRatiosFromTrack0Speed(speed);
 };
 
-window.onSpeedSlider = function(id, sliderVal) {
-  let speed = speedSliderToSpeed(sliderVal);
-  // Snap to musical intervals
-  for (const snap of SPEED_SNAPS) {
-    if (Math.abs(speed - snap) / snap < SNAP_THRESH) { speed = snap; break; }
-  }
-  speed = parseFloat(speed.toFixed(4));
-  tracks[id].speed = speed;
-  // Update exact input
-  const exact = document.getElementById(`spd-exact-${id}`);
-  if (exact) exact.value = speed.toFixed(3);
-  document.getElementById(`spd-label-${id}`).textContent = speed.toFixed(2) + '×';
-  document.getElementById(`spd-pitch-${id}`).textContent = speedToPitch(speed);
-  if (tracks[id].sourceNode) tracks[id].sourceNode.playbackRate.setTargetAtTime(speed, AC.currentTime, 0.05);
-  if (ratioLocked && id === 0) applyRatiosFromTrack0Speed(speed);
+window.onSpeedExact=function(id,val){
+  let speed=parseFloat(val);if(isNaN(speed)||speed<=0)return;
+  speed=Math.max(0.125,Math.min(4,speed));tracks[id].speed=speed;
+  const slider=document.getElementById('spd-slider-'+id);if(slider)slider.value=speedToSlider(speed);
+  document.getElementById('spd-label-'+id).textContent=speed.toFixed(2)+'\xd7';
+  document.getElementById('spd-pitch-'+id).textContent=speedToPitch(speed);
+  if(tracks[id].sourceNode)tracks[id].sourceNode.playbackRate.setTargetAtTime(speed,AC.currentTime,0.05);
+  if(ratioLocked&&id===0)applyRatiosFromTrack0Speed(speed);
 };
 
-window.onSpeedExact = function(id, val) {
-  let speed = parseFloat(val);
-  if (isNaN(speed) || speed <= 0) return;
-  speed = Math.max(0.125, Math.min(4, speed));
-  tracks[id].speed = speed;
-  const slider = document.getElementById(`spd-slider-${id}`);
-  if (slider) slider.value = speedToSlider(speed);
-  document.getElementById(`spd-label-${id}`).textContent = speed.toFixed(2) + '×';
-  document.getElementById(`spd-pitch-${id}`).textContent = speedToPitch(speed);
-  if (tracks[id].sourceNode) tracks[id].sourceNode.playbackRate.setTargetAtTime(speed, AC.currentTime, 0.05);
-  if (ratioLocked && id === 0) applyRatiosFromTrack0Speed(speed);
-};
-
-/* ── Pitch interval label ── */
-function speedToPitch(speed) {
-  if (speed === 1) return 'original';
-  const semis = Math.round(Math.log2(speed) * 12);
-  if (semis === 0) return 'original';
-  const abs = Math.abs(semis), dir = semis > 0 ? '↑' : '↓';
-  const names = ['','m2','M2','m3','M3','P4','A4','P5','m6','M6','m7','M7','P8'];
-  if (abs <= 12) return dir + (names[abs] || abs+'st');
-  const oct = Math.floor(abs/12), rem = abs%12;
-  return dir + oct + 'oct' + (rem ? '+'+rem+'st' : '');
+function speedToPitch(speed){
+  if(speed===1)return'original';
+  const semis=Math.round(Math.log2(speed)*12);if(semis===0)return'original';
+  const abs=Math.abs(semis),dir=semis>0?'\u2191':'\u2193';
+  const names=['','m2','M2','m3','M3','P4','A4','P5','m6','M6','m7','M7','P8'];
+  if(abs<=12)return dir+(names[abs]||abs+'st');
+  const oct=Math.floor(abs/12),rem=abs%12;
+  return dir+oct+'oct'+(rem?'+'+rem+'st':'');
 }
 
-/* ── Ring mod freq display ── */
-function updateRingFreqDisplay(id) {
-  const t = tracks[id];
-  const display = document.getElementById(`ring-freqs-${id}`); if (!display) return;
-  const srcFreq = t.oscMode ? t.oscFreq : BASE_FREQ * t.speed;
-  const sum = Math.round(srcFreq + t.ringCarrier);
-  const diff = Math.round(Math.abs(srcFreq - t.ringCarrier));
-  display.textContent = `carrier: ${t.ringCarrier} Hz · sum: ${sum} Hz · diff: ${diff} Hz`;
+function updateRingFreqDisplay(id){
+  const t=tracks[id],d=document.getElementById('ring-freqs-'+id);if(!d)return;
+  const sf=t.oscMode?t.oscFreq:BASE_FREQ*t.speed;
+  d.textContent='carrier: '+t.ringCarrier+' Hz \xb7 sum: '+Math.round(sf+t.ringCarrier)+' Hz \xb7 diff: '+Math.round(Math.abs(sf-t.ringCarrier))+' Hz';
 }
 
-/* ── Tape meter ── */
-function updateTapeMeter(t) {
-  const fill = document.getElementById(`tape-meter-${t.id}`); if (!fill) return;
-  fill.style.width = (t.tapeDegradation * 100) + '%';
-  fill.style.background = t.tapeDegradation > 0.7 ? '#c0392b' : t.tapeDegradation > 0.4 ? '#e67e22' : 'var(--accent)';
-  const lc = document.getElementById(`tape-loop-${t.id}`);
-  if (lc) lc.textContent = t.tapeLoopCount > 0 ? `Loop ${t.tapeLoopCount}` : '';
+function updateTapeMeter(t){
+  const fill=document.getElementById('tape-meter-'+t.id);if(!fill)return;
+  fill.style.width=(t.tapeDegradation*100)+'%';
+  fill.style.background=t.tapeDegradation>0.7?'#c0392b':t.tapeDegradation>0.4?'#e67e22':'var(--accent)';
+  const lc=document.getElementById('tape-loop-'+t.id);
+  if(lc)lc.textContent=t.tapeLoopCount>0?'Loop '+t.tapeLoopCount:'';
 }
 
-window.resetTape = function(id) {
-  const t = tracks[id];
-  t.tapeDegradation = 0; t.tapeLoopCount = 0;
-  if (t._dropoutTimeout) { clearTimeout(t._dropoutTimeout); t._dropoutTimeout = null; }
-  applyTapeDegradationToNodes(t);
-  updateTapeMeter(t);
+window.resetTape=function(id){
+  const t=tracks[id];t.tapeDegradation=0;t.tapeLoopCount=0;
+  if(t._dropoutTimeout){clearTimeout(t._dropoutTimeout);t._dropoutTimeout=null;}
+  applyTapeDegradationToNodes(t);updateTapeMeter(t);
 };
 
-/* ═══════════════════════════════════════════════════════════
-   FREQUENCY RATIO PANEL
-═══════════════════════════════════════════════════════════ */
-function ratioToInterval(num, den) {
-  // Convert ratio to nearest named musical interval
-  const r = num / den;
-  const cents = Math.round(Math.log2(r) * 1200);
-  if (cents === 0)    return 'unison';
-  if (cents === 100)  return 'm2';
-  if (cents === 200)  return 'M2';
-  if (cents === 300)  return 'm3';
-  if (cents === 400)  return 'M3';
-  if (cents === 500)  return 'P4';
-  if (cents === 600)  return 'tritone';
-  if (cents === 700)  return 'P5';
-  if (cents === 800)  return 'm6';
-  if (cents === 900)  return 'M6';
-  if (cents === 1000) return 'm7';
-  if (cents === 1100) return 'M7';
-  if (cents === 1200) return 'P8';
-  if (cents === 1900) return 'P5+8va';
-  if (cents === 2400) return '2 oct';
-  // For others show cents deviation from nearest semitone
-  const nearestSemitone = Math.round(cents / 100) * 100;
-  const deviation = cents - nearestSemitone;
-  const semiName = ratioToInterval(Math.pow(2, nearestSemitone / 1200), 1) || `${Math.round(nearestSemitone/100)}st`;
-  return deviation === 0 ? semiName : `${semiName} ${deviation > 0 ? '+' : ''}${deviation}¢`;
+/* =========================================================
+   RATIO PANEL
+   Lookup table prevents infinite recursion in the cents
+   deviation path (fix for recursive ratioToInterval).
+========================================================= */
+const INTERVAL_NAMES=['unison','m2','M2','m3','M3','P4','tritone','P5','m6','M6','m7','M7','P8'];
+function centsToName(c){
+  const st=Math.round(c/100);
+  if(st>=0&&st<=12)return INTERVAL_NAMES[st];
+  if(st===19)return'P5+8va';if(st===24)return'2 oct';return st+'st';
+}
+function ratioToInterval(num,den){
+  const cents=Math.round(Math.log2(num/den)*1200);
+  const near=Math.round(cents/100)*100,dev=cents-near;
+  return dev===0?centsToName(near):centsToName(near)+' '+(dev>0?'+':'')+dev+'\xa2';
 }
 
-function renderRatioGrid() {
-  const grid = document.getElementById('ratioGrid'); if (!grid) return;
-  grid.innerHTML = tracks.map(t => {
-    const freqHz = t.oscMode ? (t.oscFreq * t.ratioNum / t.ratioDen).toFixed(1) : (BASE_FREQ * t.speed * t.ratioNum / t.ratioDen).toFixed(1);
-    const intervalName = t.id === 0 ? 'reference' : ratioToInterval(t.ratioNum, t.ratioDen);
-    const isDefault = t.ratioNum === (t.id === 0 ? 1 : t.id + 1) && t.ratioDen === 1 && Math.abs(t.speed - 1) < 0.001;
-    return `<div class="ratio-cell" id="ratio-cell-${t.id}">
-      <div class="ratio-cell-label">Track ${t.id+1}</div>
-      <div class="ratio-cell-main">
-        <input class="ratio-input" type="number" min="1" max="32" value="${t.ratioNum}" id="ratio-num-${t.id}" onchange="updateRatio(${t.id})">
-        <span class="ratio-slash">:</span>
-        <input class="ratio-input" type="number" min="1" max="32" value="${t.ratioDen}" id="ratio-den-${t.id}" onchange="updateRatio(${t.id})">
-      </div>
-      <div class="ratio-cell-freq" id="ratio-freq-${t.id}">${freqHz} Hz</div>
-      <div class="ratio-cell-interval" id="ratio-interval-${t.id}">${intervalName}</div>
-      <div class="ratio-cell-actions">
-        ${t.id > 0 ? `<button class="ratio-revert" onclick="revertTrackRatio(${t.id})">revert</button>` : ''}
-      </div>
-    </div>`;
+function renderRatioGrid(){
+  const grid=document.getElementById('ratioGrid');if(!grid)return;
+  grid.innerHTML=tracks.map(t=>{
+    const fHz=(t.oscMode?t.oscFreq:BASE_FREQ*t.speed).toFixed(1);
+    const intv=t.id===0?'reference':ratioToInterval(t.ratioNum,t.ratioDen);
+    return '<div class="ratio-cell" id="ratio-cell-'+t.id+'">'
+      +'<div class="ratio-cell-label">Track '+(t.id+1)+'</div>'
+      +'<div class="ratio-cell-main">'
+      +'<input class="ratio-input" type="number" min="1" max="32" value="'+t.ratioNum+'" id="ratio-num-'+t.id+'" onchange="updateRatio('+t.id+')">'
+      +'<span class="ratio-slash">:</span>'
+      +'<input class="ratio-input" type="number" min="1" max="32" value="'+t.ratioDen+'" id="ratio-den-'+t.id+'" onchange="updateRatio('+t.id+')">'
+      +'</div>'
+      +'<div class="ratio-cell-freq" id="ratio-freq-'+t.id+'">'+fHz+' Hz</div>'
+      +'<div class="ratio-cell-interval" id="ratio-interval-'+t.id+'">'+intv+'</div>'
+      +'<div class="ratio-cell-actions">'+(t.id>0?'<button class="ratio-revert" onclick="revertTrackRatio('+t.id+')">revert</button>':'')+'</div>'
+      +'</div>';
   }).join('');
 }
 
-window.updateRatio = function(id) {
-  const t = tracks[id];
-  const num = parseInt(document.getElementById(`ratio-num-${id}`).value) || 1;
-  const den = parseInt(document.getElementById(`ratio-den-${id}`).value) || 1;
-  t.ratioNum = Math.max(1, Math.min(32, num));
-  t.ratioDen = Math.max(1, Math.min(32, den));
-  // Update interval display live
-  const intEl = document.getElementById(`ratio-interval-${id}`);
-  if (intEl) intEl.textContent = id === 0 ? 'reference' : ratioToInterval(t.ratioNum, t.ratioDen);
+window.updateRatio=function(id){
+  const t=tracks[id];
+  t.ratioNum=Math.max(1,Math.min(32,parseInt(document.getElementById('ratio-num-'+id).value)||1));
+  t.ratioDen=Math.max(1,Math.min(32,parseInt(document.getElementById('ratio-den-'+id).value)||1));
+  const el=document.getElementById('ratio-interval-'+id);
+  if(el)el.textContent=id===0?'reference':ratioToInterval(t.ratioNum,t.ratioDen);
 };
 
-window.revertTrackRatio = function(id) {
-  const t = tracks[id];
-  t.ratioNum = id + 1; t.ratioDen = 1;
-  t.speed = 1.0;
-  // Update UI
-  const numInput = document.getElementById(`ratio-num-${id}`);
-  const denInput = document.getElementById(`ratio-den-${id}`);
-  if (numInput) numInput.value = t.ratioNum;
-  if (denInput) denInput.value = t.ratioDen;
-  const intEl = document.getElementById(`ratio-interval-${id}`);
-  if (intEl) intEl.textContent = ratioToInterval(t.ratioNum, t.ratioDen);
-  const freqEl = document.getElementById(`ratio-freq-${id}`);
-  if (freqEl) freqEl.textContent = (BASE_FREQ * t.speed).toFixed(1) + ' Hz';
-  // Update track speed slider
-  const slider = document.getElementById(`spd-slider-${id}`);
-  if (slider) slider.value = speedToSlider(1.0);
-  const exact = document.getElementById(`spd-exact-${id}`);
-  if (exact) exact.value = '1.000';
-  const lbl = document.getElementById(`spd-label-${id}`);
-  if (lbl) lbl.textContent = '1.00×';
-  const pch = document.getElementById(`spd-pitch-${id}`);
-  if (pch) pch.textContent = 'original';
-  if (t.sourceNode) t.sourceNode.playbackRate.setTargetAtTime(1.0, AC.currentTime, 0.1);
+window.revertTrackRatio=function(id){
+  const t=tracks[id];t.ratioNum=id+1;t.ratioDen=1;t.speed=1.0;
+  const n=document.getElementById('ratio-num-'+id),d=document.getElementById('ratio-den-'+id);
+  if(n)n.value=t.ratioNum;if(d)d.value=t.ratioDen;
+  const ie=document.getElementById('ratio-interval-'+id);if(ie)ie.textContent=ratioToInterval(t.ratioNum,t.ratioDen);
+  const fe=document.getElementById('ratio-freq-'+id);if(fe)fe.textContent=(BASE_FREQ*t.speed).toFixed(1)+' Hz';
+  const sl=document.getElementById('spd-slider-'+id);if(sl)sl.value=speedToSlider(1.0);
+  const ex=document.getElementById('spd-exact-'+id);if(ex)ex.value='1.000';
+  const lb=document.getElementById('spd-label-'+id);if(lb)lb.textContent='1.00\xd7';
+  const pc=document.getElementById('spd-pitch-'+id);if(pc)pc.textContent='original';
+  if(t.sourceNode)t.sourceNode.playbackRate.setTargetAtTime(1.0,AC.currentTime,0.1);
 };
+window.revertAllRatios=function(){tracks.forEach((_,i)=>{if(i>0)revertTrackRatio(i);});};
 
-window.revertAllRatios = function() {
-  tracks.forEach((t, i) => { if (i > 0) revertTrackRatio(i); });
-};
-
-window.applyRatios = function() {
-  const t0 = tracks[0];
-  const baseFreq = t0.oscMode ? t0.oscFreq : BASE_FREQ * t0.speed;
-  tracks.forEach((t, i) => {
-    const ratio = t.ratioNum / t.ratioDen;
-    if (t.oscMode) {
-      t.oscFreq = parseFloat((baseFreq * ratio).toFixed(2));
-      if (t.oscNode) t.oscNode.frequency.setTargetAtTime(t.oscFreq, AC.currentTime, 0.1);
-      const freqEl = document.getElementById(`osc-freq-${t.id}`);
-      if (freqEl) freqEl.value = t.oscFreq;
+window.applyRatios=function(){
+  const t0=tracks[0],base=t0.oscMode?t0.oscFreq:BASE_FREQ*t0.speed;
+  tracks.forEach(t=>{
+    const ratio=t.ratioNum/t.ratioDen;
+    if(t.oscMode){
+      t.oscFreq=parseFloat((base*ratio).toFixed(2));
+      if(t.oscNode)t.oscNode.frequency.setTargetAtTime(t.oscFreq,AC.currentTime,0.1);
+      const fe=document.getElementById('osc-freq-'+t.id);if(fe)fe.value=t.oscFreq;
     } else {
-      const newSpeed = parseFloat(Math.max(0.125, Math.min(4, (baseFreq * ratio) / BASE_FREQ)).toFixed(4));
-      t.speed = newSpeed;
-      if (t.sourceNode) t.sourceNode.playbackRate.setTargetAtTime(newSpeed, AC.currentTime, 0.1);
-      const slider = document.getElementById(`spd-slider-${t.id}`);
-      if (slider) slider.value = speedToSlider(newSpeed);
-      const exact = document.getElementById(`spd-exact-${t.id}`);
-      if (exact) exact.value = newSpeed.toFixed(3);
-      const lbl = document.getElementById(`spd-label-${t.id}`);
-      if (lbl) lbl.textContent = newSpeed.toFixed(2) + '×';
-      const pch = document.getElementById(`spd-pitch-${t.id}`);
-      if (pch) pch.textContent = speedToPitch(newSpeed);
+      const ns=parseFloat(Math.max(0.125,Math.min(4,(base*ratio)/BASE_FREQ)).toFixed(4));t.speed=ns;
+      if(t.sourceNode)t.sourceNode.playbackRate.setTargetAtTime(ns,AC.currentTime,0.1);
+      const sl=document.getElementById('spd-slider-'+t.id);if(sl)sl.value=speedToSlider(ns);
+      const ex=document.getElementById('spd-exact-'+t.id);if(ex)ex.value=ns.toFixed(3);
+      const lb=document.getElementById('spd-label-'+t.id);if(lb)lb.textContent=ns.toFixed(2)+'\xd7';
+      const pc=document.getElementById('spd-pitch-'+t.id);if(pc)pc.textContent=speedToPitch(ns);
     }
-    const freqEl = document.getElementById(`ratio-freq-${t.id}`);
-    if (freqEl) freqEl.textContent = (t.oscMode ? t.oscFreq : BASE_FREQ * t.speed).toFixed(1) + ' Hz';
+    const fe=document.getElementById('ratio-freq-'+t.id);
+    if(fe)fe.textContent=(t.oscMode?t.oscFreq:BASE_FREQ*t.speed).toFixed(1)+' Hz';
     updateRingFreqDisplay(t.id);
   });
-  showGlobalMsg('Ratios applied to all tracks.', 'success');
+  showToast('Ratios applied to all tracks.','success');
 };
 
-window.toggleRatioLock = function(locked) { ratioLocked = locked; };
+window.toggleRatioLock=function(locked){ratioLocked=locked;};
 
-function applyRatiosFromTrack0Speed(newSpeed) {
-  const baseFreq = BASE_FREQ * newSpeed;
-  tracks.forEach((t, i) => {
-    if (i === 0) return;
-    const ratio = t.ratioNum / t.ratioDen;
-    const spd = parseFloat(Math.max(0.125, Math.min(4, (baseFreq * ratio) / BASE_FREQ)).toFixed(4));
-    t.speed = spd;
-    if (t.sourceNode) t.sourceNode.playbackRate.setTargetAtTime(spd, AC.currentTime, 0.1);
-    const slider = document.getElementById(`spd-slider-${t.id}`);
-    if (slider) slider.value = speedToSlider(spd);
-    const exact = document.getElementById(`spd-exact-${t.id}`);
-    if (exact) exact.value = spd.toFixed(3);
-    const lbl = document.getElementById(`spd-label-${t.id}`);
-    if (lbl) lbl.textContent = spd.toFixed(2) + '×';
-    const pch = document.getElementById(`spd-pitch-${t.id}`);
-    if (pch) pch.textContent = speedToPitch(spd);
+function applyRatiosFromTrack0Speed(newSpeed){
+  const base=BASE_FREQ*newSpeed;
+  tracks.forEach((t,i)=>{
+    if(i===0)return;
+    const sp=parseFloat(Math.max(0.125,Math.min(4,(base*t.ratioNum/t.ratioDen)/BASE_FREQ)).toFixed(4));t.speed=sp;
+    if(t.sourceNode)t.sourceNode.playbackRate.setTargetAtTime(sp,AC.currentTime,0.1);
+    const sl=document.getElementById('spd-slider-'+t.id);if(sl)sl.value=speedToSlider(sp);
+    const ex=document.getElementById('spd-exact-'+t.id);if(ex)ex.value=sp.toFixed(3);
+    const lb=document.getElementById('spd-label-'+t.id);if(lb)lb.textContent=sp.toFixed(2)+'\xd7';
+    const pc=document.getElementById('spd-pitch-'+t.id);if(pc)pc.textContent=speedToPitch(sp);
   });
 }
 
-function updatePlayBtn() {
-  const hasAny = tracks.some(t => t.buffer || t.oscMode);
-  document.getElementById('playBtn').disabled = !hasAny;
-}
+function updatePlayBtn(){document.getElementById('playBtn').disabled=!tracks.some(t=>t.buffer||t.oscMode);}
 
-/* ═══════════════════════════════════════════════════════════
+/* =========================================================
    TRACK UI RENDER
-═══════════════════════════════════════════════════════════ */
-function renderTracks() {
-  const container = document.getElementById('tracksContainer');
-  container.innerHTML = '';
-  tracks.forEach(t => container.appendChild(buildTrackEl(t)));
-  tracks.forEach(t => { drawWaveform(t); updateRingFreqDisplay(t.id); });
+========================================================= */
+function renderTracks(){
+  const c=document.getElementById('tracksContainer');c.innerHTML='';
+  tracks.forEach(t=>c.appendChild(buildTrackEl(t)));
+  tracks.forEach(t=>{drawWaveform(t);updateRingFreqDisplay(t.id);});
   renderMuteSoloUI();
 }
 
-function buildTrackEl(t) {
-  const id = t.id;
-  const panLbl = t.pan === 0 ? 'C' : t.pan > 0 ? 'R'+Math.round(t.pan*100) : 'L'+Math.round(Math.abs(t.pan)*100);
-  const srcFreq = t.oscMode ? t.oscFreq : BASE_FREQ * t.speed;
-  const rSum = Math.round(srcFreq + t.ringCarrier);
-  const rDiff = Math.round(Math.abs(srcFreq - t.ringCarrier));
-  const spdSliderVal = speedToSlider(t.speed);
-
-  const div = document.createElement('div');
-  div.className = `track${t.buffer?' has-audio':''}${t.oscMode?' osc-mode':''}${t.muted?' is-muted':''}${t.soloed?' is-soloed':''}`;
-  div.id = `track-${id}`;
-
-  div.innerHTML = `
-    <div class="track-head">
-      <span class="track-num">T${id+1}</span>
-      <div class="track-ms-btns">
-        <button class="track-ms-btn mute-btn${t.muted?' active':''}" id="mute-${id}"
-          onclick="setMute(${id})" title="Mute (${id+1})">M</button>
-        <button class="track-ms-btn solo-btn${t.soloed?' active':''}" id="solo-${id}"
-          onclick="setSolo(${id})" title="Solo (Shift+${id+1})">S</button>
-      </div>
-      <span class="track-name">${t.name}</span>
-      <span class="track-file-info" id="tfile-${id}">
-        ${t.oscMode ? 'oscillator mode — '+t.oscType : (t.fileName || 'No file loaded')}
-      </span>
-      <div class="track-source-btns">
-        <button class="track-osc-btn ${t.oscMode?'active':''}" onclick="toggleOscMode(${id})">
-          ${t.oscMode?'◉ oscillator':'○ oscillator'}
-        </button>
-        ${!t.oscMode ? `<button class="track-select-btn ${t.buffer?'loaded':''}" onclick="openLoadForTrack(${id})">
-          ${t.buffer?'⟳ change':'+ load file'}
-        </button>` : ''}
-      </div>
-    </div>
-
-    <div class="track-wave"><canvas id="wave-${id}"></canvas></div>
-
-    <div class="track-controls">
-
-      <!-- Volume -->
-      <div class="ctrl-group">
-        <div class="ctrl-label">Volume
-          <span class="ctrl-val" id="vol-label-${id}">${Math.round(t.volume*100)}%</span>
-        </div>
-        <input type="range" min="0" max="1" step="0.01" value="${t.volume}"
-          oninput="setTrackParam(${id},'volume',+this.value);document.getElementById('vol-label-${id}').textContent=Math.round(this.value*100)+'%'">
-      </div>
-
-      <!-- Pan -->
-      <div class="ctrl-group">
-        <div class="ctrl-label">Pan <span class="ctrl-val" id="pan-label-${id}">${panLbl}</span></div>
-        <input type="range" min="-1" max="1" step="0.01" value="${t.pan}"
-          oninput="setTrackParam(${id},'pan',+this.value);updatePanLabel(${id},+this.value)">
-      </div>
-
-      ${t.oscMode ? `
-      <!-- Osc frequency -->
-      <div class="ctrl-group">
-        <div class="ctrl-label">Frequency
-          <span class="ctrl-val" id="osc-freq-label-${id}">${t.oscFreq.toFixed(1)} Hz</span>
-        </div>
-        <input type="range" min="20" max="2000" step="0.5" value="${t.oscFreq}" id="osc-freq-${id}"
-          oninput="setTrackParam(${id},'oscFreq',+this.value);document.getElementById('osc-freq-label-${id}').textContent=parseFloat(this.value).toFixed(1)+' Hz'">
-      </div>
-      <div class="ctrl-group">
-        <div class="ctrl-label">Waveform</div>
-        <div class="lfo-shapes" id="osc-type-btns-${id}">
-          ${['sine','triangle','square','sawtooth','noise'].map(tp =>
-            `<button class="lfo-shape-btn${t.oscType===tp?' active':''}" data-type="${tp}"
-              onclick="setOscType(${id},'${tp}')">${tp === 'sawtooth' ? 'Saw' : tp[0].toUpperCase()+tp.slice(1,3)}</button>`).join('')}
-        </div>
-      </div>
-      ` : `
-      <!-- Speed / pitch — logarithmic with snap and exact input -->
-      <div class="ctrl-group">
-        <div class="ctrl-label">Speed
-          <span class="ctrl-val" id="spd-label-${id}">${t.speed.toFixed(2)}×</span>
-        </div>
-        <input type="range" min="-3" max="2" step="0.001" value="${spdSliderVal}" id="spd-slider-${id}"
-          oninput="onSpeedSlider(${id},this.value)">
-        <div class="speed-row">
-          <input type="number" class="speed-exact" id="spd-exact-${id}"
-            min="0.125" max="4" step="0.001" value="${t.speed.toFixed(3)}"
-            onchange="onSpeedExact(${id},this.value)" title="Enter exact speed multiplier">
-          <span style="font-size:.6rem;color:var(--muted)">×</span>
-        </div>
-        <div class="pitch-label" id="spd-pitch-${id}">${speedToPitch(t.speed)}</div>
-      </div>
-      <!-- Loop + crossfade -->
-      <div class="ctrl-group" id="xf-group-${id}">
-        <div class="ctrl-label">Loop</div>
-        <div class="toggle-row">
-          <label class="toggle">
-            <input type="checkbox" ${t.loop?'checked':''} onchange="setTrackParam(${id},'loop',this.checked)">
-            <span class="toggle-slider"></span>
-          </label>
-          <span class="toggle-label">${t.loop?'On':'Off'}</span>
-        </div>
-        <div class="ctrl-label" style="margin-top:.4rem;">Crossfade
-          <span class="ctrl-val" id="xf-label-${id}">${t.crossfade}ms</span>
-        </div>
-        <input type="range" min="0" max="500" step="5" value="${t.crossfade}"
-          oninput="setTrackParam(${id},'crossfade',+this.value);document.getElementById('xf-label-${id}').textContent=this.value+'ms'">
-      </div>
-      `}
-
-      <!-- Ring modulator -->
-      <div class="ctrl-group">
-        <div class="ctrl-label">Ring mod
-          <label class="toggle ring-toggle" style="margin-left:.2rem">
-            <input type="checkbox" ${t.ringEnabled?'checked':''} onchange="setTrackEffect(${id},'ringEnabled',this.checked)">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <input type="range" class="ring-range" min="10" max="2000" step="1" value="${t.ringCarrier}"
-          id="ring-carrier-${id}" ${t.ringEnabled?'':'disabled'}
-          oninput="setTrackParam(${id},'ringCarrier',+this.value)">
-        <div class="ring-freqs" id="ring-freqs-${id}" style="opacity:${t.ringEnabled?1:.4}">
-          carrier: ${t.ringCarrier} Hz · sum: ${rSum} Hz · diff: ${rDiff} Hz
-        </div>
-      </div>
-
-      <!-- Reverb -->
-      <div class="ctrl-group">
-        <div class="ctrl-label">Reverb
-          <label class="toggle" style="margin-left:.2rem">
-            <input type="checkbox" ${t.reverbEnabled?'checked':''} onchange="setTrackEffect(${id},'reverbEnabled',this.checked)">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <input type="range" min="0" max="1" step="0.01" value="${t.reverbAmount}"
-          id="reverb-slider-${id}" ${t.reverbEnabled?'':'disabled'}
-          oninput="setTrackParam(${id},'reverbAmount',+this.value)">
-      </div>
-
-      <!-- LFO with routing -->
-      <div class="ctrl-group">
-        <div class="ctrl-label">LFO
-          <label class="toggle" style="margin-left:.2rem">
-            <input type="checkbox" ${t.lfoEnabled?'checked':''} onchange="setTrackEffect(${id},'lfoEnabled',this.checked)">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="ctrl-label" style="font-size:.58rem;margin-bottom:.2rem;">Route to</div>
-        <div class="lfo-shapes" id="lfo-target-${id}">
-          ${[['filter','F'],['volume','V'],['pan','P'],['ring','R']].map(([tgt,lbl]) =>
-            `<button class="lfo-shape-btn${t.lfoTarget===tgt?' active':''}" data-target="${tgt}"
-              ${t.lfoEnabled?'':'disabled'} onclick="setLfoTarget(${id},'${tgt}')" title="${tgt}">${lbl}</button>`).join('')}
-        </div>
-        <div style="margin-top:.3rem;"></div>
-        <input type="range" min="0.05" max="8" step="0.05" value="${t.lfoRate}"
-          id="lfo-rate-${id}" ${t.lfoEnabled?'':'disabled'}
-          oninput="setTrackParam(${id},'lfoRate',+this.value)">
-        <div class="lfo-shapes" id="lfo-shapes-${id}">
-          ${['sine','triangle','sawtooth','square'].map(s =>
-            `<button class="lfo-shape-btn${t.lfoShape===s?' active':''}" data-shape="${s}"
-              ${t.lfoEnabled?'':'disabled'} onclick="setLfoShape(${id},'${s}')">${s[0].toUpperCase()}</button>`).join('')}
-        </div>
-      </div>
-
-      <!-- Tape degradation (file mode only) -->
-      ${!t.oscMode ? `
-      <div class="ctrl-group">
-        <div class="ctrl-label">Tape
-          <label class="toggle" style="margin-left:.2rem">
-            <input type="checkbox" ${t.tapeEnabled?'checked':''} onchange="setTrackEffect(${id},'tapeEnabled',this.checked)">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div class="ctrl-label" style="font-size:.58rem;margin-bottom:.2rem;">Wear rate</div>
-        <input type="range" min="0.01" max="0.3" step="0.01" value="${t.tapeRate}"
-          id="tape-rate-${id}" ${t.tapeEnabled?'':'disabled'}
-          oninput="setTrackParam(${id},'tapeRate',+this.value)">
-        <div class="tape-meter"><div class="tape-meter-fill" id="tape-meter-${id}"
-          style="width:${t.tapeDegradation*100}%;background:${t.tapeDegradation>0.7?'#c0392b':t.tapeDegradation>0.4?'#e67e22':'var(--accent)'}"></div></div>
-        <div class="tape-loop-count" id="tape-loop-${id}"></div>
-        <div style="display:flex;gap:.3rem;margin-top:.35rem;flex-wrap:wrap;">
-          <button class="lib-action" style="font-size:.62rem;" onclick="resetTape(${id})">Reset tape</button>
-          ${t.buffer ? `<button class="lib-action" style="font-size:.62rem;" onclick="bakeTrack(${id})">Bake</button>` : ''}
-        </div>
-      </div>
-      ` : ''}
-
-    </div>
-  `;
+function buildTrackEl(t){
+  const id=t.id;
+  const panLbl=t.pan===0?'C':t.pan>0?'R'+Math.round(t.pan*100):'L'+Math.round(Math.abs(t.pan)*100);
+  const sf=t.oscMode?t.oscFreq:BASE_FREQ*t.speed;
+  const rSum=Math.round(sf+t.ringCarrier),rDiff=Math.round(Math.abs(sf-t.ringCarrier));
+  const spdSl=speedToSlider(t.speed);
+  const div=document.createElement('div');
+  div.className='track'+(t.buffer?' has-audio':'')+(t.oscMode?' osc-mode':'')+(t.muted?' is-muted':'')+(t.soloed?' is-soloed':'');
+  div.id='track-'+id;
+  div.innerHTML=
+    '<div class="track-head">'
+    +'<span class="track-num">T'+(id+1)+'</span>'
+    +'<div class="track-ms-btns">'
+    +'<button class="track-ms-btn mute-btn'+(t.muted?' active':'')+'" id="mute-'+id+'" onclick="setMute('+id+')" title="Mute ('+(id+1)+')">M</button>'
+    +'<button class="track-ms-btn solo-btn'+(t.soloed?' active':'')+'" id="solo-'+id+'" onclick="setSolo('+id+')" title="Solo (Shift+'+(id+1)+')">S</button>'
+    +'</div>'
+    +'<span class="track-name">'+t.name+'</span>'
+    +'<span class="track-file-info" id="tfile-'+id+'">'+(t.oscMode?'oscillator mode \u2014 '+t.oscType:(t.fileName||'No file loaded'))+'</span>'
+    +'<div class="track-source-btns">'
+    +'<button class="track-osc-btn '+(t.oscMode?'active':'')+'" onclick="toggleOscMode('+id+')">'+(t.oscMode?'\u25c9 oscillator':'\u25cb oscillator')+'</button>'
+    +(!t.oscMode?'<button class="track-select-btn '+(t.buffer?'loaded':'')+'" onclick="openLoadForTrack('+id+')">'+(t.buffer?'\u27f3 change':'+ load file')+'</button>':'')
+    +'</div></div>'
+    +'<div class="track-wave"><canvas id="wave-'+id+'"></canvas></div>'
+    +'<div class="track-controls">'
+    // Volume
+    +'<div class="ctrl-group"><div class="ctrl-label">Volume <span class="ctrl-val" id="vol-label-'+id+'">'+Math.round(t.volume*100)+'%</span></div>'
+    +'<input type="range" min="0" max="1" step="0.01" value="'+t.volume+'" oninput="setTrackParam('+id+',\'volume\',+this.value);document.getElementById(\'vol-label-'+id+'\').textContent=Math.round(this.value*100)+\'%\'"></div>'
+    // Pan
+    +'<div class="ctrl-group"><div class="ctrl-label">Pan <span class="ctrl-val" id="pan-label-'+id+'">'+panLbl+'</span></div>'
+    +'<input type="range" min="-1" max="1" step="0.01" value="'+t.pan+'" oninput="setTrackParam('+id+',\'pan\',+this.value);updatePanLabel('+id+',+this.value)"></div>'
+    // Osc mode controls
+    +(t.oscMode
+      ?'<div class="ctrl-group"><div class="ctrl-label">Frequency <span class="ctrl-val" id="osc-freq-label-'+id+'">'+t.oscFreq.toFixed(1)+' Hz</span></div>'
+       +'<input type="range" min="20" max="2000" step="0.5" value="'+t.oscFreq+'" id="osc-freq-'+id+'" oninput="setTrackParam('+id+',\'oscFreq\',+this.value);document.getElementById(\'osc-freq-label-'+id+'\').textContent=parseFloat(this.value).toFixed(1)+\' Hz\'"></div>'
+       +'<div class="ctrl-group"><div class="ctrl-label">Waveform</div><div class="lfo-shapes" id="osc-type-btns-'+id+'">'
+       +['sine','triangle','square','sawtooth','noise'].map(tp=>'<button class="lfo-shape-btn'+(t.oscType===tp?' active':'')+'" data-type="'+tp+'" onclick="setOscType('+id+',\''+tp+'\')">'+(tp==='sawtooth'?'Saw':tp[0].toUpperCase()+tp.slice(1,3))+'</button>').join('')
+       +'</div></div>'
+      // File mode controls
+      :'<div class="ctrl-group"><div class="ctrl-label">Speed <span class="ctrl-val" id="spd-label-'+id+'">'+t.speed.toFixed(2)+'\xd7</span></div>'
+       +'<input type="range" min="-3" max="2" step="0.001" value="'+spdSl+'" id="spd-slider-'+id+'" oninput="onSpeedSlider('+id+',this.value)">'
+       +'<div class="speed-row"><input type="number" class="speed-exact" id="spd-exact-'+id+'" min="0.125" max="4" step="0.001" value="'+t.speed.toFixed(3)+'" onchange="onSpeedExact('+id+',this.value)" title="Enter exact speed multiplier"><span style="font-size:.6rem;color:var(--muted)">\xd7</span></div>'
+       +'<div class="pitch-label" id="spd-pitch-'+id+'">'+speedToPitch(t.speed)+'</div></div>'
+       +'<div class="ctrl-group" id="xf-group-'+id+'"><div class="ctrl-label">Loop</div>'
+       +'<div class="toggle-row"><label class="toggle"><input type="checkbox" '+(t.loop?'checked':'')+' onchange="setTrackParam('+id+',\'loop\',this.checked)"><span class="toggle-slider"></span></label>'
+       +'<span class="toggle-label">'+(t.loop?'On':'Off')+'</span></div>'
+       +'<div class="ctrl-label" style="margin-top:.4rem;">Crossfade <span class="ctrl-val" id="xf-label-'+id+'">'+t.crossfade+'ms</span></div>'
+       +'<input type="range" min="0" max="500" step="5" value="'+t.crossfade+'" oninput="setTrackParam('+id+',\'crossfade\',+this.value);document.getElementById(\'xf-label-'+id+'\').textContent=this.value+\'ms\'"></div>'
+    )
+    // Ring mod
+    +'<div class="ctrl-group"><div class="ctrl-label">Ring mod '
+    +'<label class="toggle ring-toggle" style="margin-left:.2rem"><input type="checkbox" '+(t.ringEnabled?'checked':'')+' onchange="setTrackEffect('+id+',\'ringEnabled\',this.checked)"><span class="toggle-slider"></span></label></div>'
+    +'<input type="range" class="ring-range" min="10" max="2000" step="1" value="'+t.ringCarrier+'" id="ring-carrier-'+id+'" '+(t.ringEnabled?'':'disabled')+' oninput="setTrackParam('+id+',\'ringCarrier\',+this.value)">'
+    +'<div class="ring-freqs" id="ring-freqs-'+id+'" style="opacity:'+(t.ringEnabled?1:.4)+'">carrier: '+t.ringCarrier+' Hz \xb7 sum: '+rSum+' Hz \xb7 diff: '+rDiff+' Hz</div></div>'
+    // Reverb
+    +'<div class="ctrl-group"><div class="ctrl-label">Reverb '
+    +'<label class="toggle" style="margin-left:.2rem"><input type="checkbox" '+(t.reverbEnabled?'checked':'')+' onchange="setTrackEffect('+id+',\'reverbEnabled\',this.checked)"><span class="toggle-slider"></span></label></div>'
+    +'<input type="range" min="0" max="1" step="0.01" value="'+t.reverbAmount+'" id="reverb-slider-'+id+'" '+(t.reverbEnabled?'':'disabled')+' oninput="setTrackParam('+id+',\'reverbAmount\',+this.value)"></div>'
+    // LFO
+    +'<div class="ctrl-group"><div class="ctrl-label">LFO '
+    +'<label class="toggle" style="margin-left:.2rem"><input type="checkbox" '+(t.lfoEnabled?'checked':'')+' onchange="setTrackEffect('+id+',\'lfoEnabled\',this.checked)"><span class="toggle-slider"></span></label></div>'
+    +'<div class="ctrl-label" style="font-size:.58rem;margin-bottom:.2rem;">Route to</div>'
+    +'<div class="lfo-shapes" id="lfo-target-'+id+'">'
+    +[['filter','F'],['volume','V'],['pan','P'],['ring','R']].map(([tgt,lbl])=>'<button class="lfo-shape-btn'+(t.lfoTarget===tgt?' active':'')+'" data-target="'+tgt+'" '+(t.lfoEnabled?'':'disabled')+' onclick="setLfoTarget('+id+',\''+tgt+'\')" title="'+tgt+'">'+lbl+'</button>').join('')
+    +'</div><div style="margin-top:.3rem;"></div>'
+    +'<input type="range" min="0.05" max="8" step="0.05" value="'+t.lfoRate+'" id="lfo-rate-'+id+'" '+(t.lfoEnabled?'':'disabled')+' oninput="setTrackParam('+id+',\'lfoRate\',+this.value)">'
+    +'<div class="lfo-shapes" id="lfo-shapes-'+id+'">'
+    +['sine','triangle','sawtooth','square'].map(s=>'<button class="lfo-shape-btn'+(t.lfoShape===s?' active':'')+'" data-shape="'+s+'" '+(t.lfoEnabled?'':'disabled')+' onclick="setLfoShape('+id+',\''+s+'\')">'+s[0].toUpperCase()+'</button>').join('')
+    +'</div></div>'
+    // Tape (file mode only)
+    +(!t.oscMode
+      ?'<div class="ctrl-group"><div class="ctrl-label">Tape '
+       +'<label class="toggle" style="margin-left:.2rem"><input type="checkbox" '+(t.tapeEnabled?'checked':'')+' onchange="setTrackEffect('+id+',\'tapeEnabled\',this.checked)"><span class="toggle-slider"></span></label></div>'
+       +'<div class="ctrl-label" style="font-size:.58rem;margin-bottom:.2rem;">Wear rate</div>'
+       +'<input type="range" min="0.01" max="0.3" step="0.01" value="'+t.tapeRate+'" id="tape-rate-'+id+'" '+(t.tapeEnabled?'':'disabled')+' oninput="setTrackParam('+id+',\'tapeRate\',+this.value)">'
+       +'<div class="tape-meter"><div class="tape-meter-fill" id="tape-meter-'+id+'" style="width:'+(t.tapeDegradation*100)+'%;background:'+(t.tapeDegradation>0.7?'#c0392b':t.tapeDegradation>0.4?'#e67e22':'var(--accent)')+'"></div></div>'
+       +'<div class="tape-loop-count" id="tape-loop-'+id+'"></div>'
+       +'<div style="display:flex;gap:.3rem;margin-top:.35rem;flex-wrap:wrap;">'
+       +'<button class="lib-action" style="font-size:.62rem;" onclick="resetTape('+id+')">Reset tape</button>'
+       +(t.buffer?'<button class="lib-action" style="font-size:.62rem;" onclick="bakeTrack('+id+')">Bake</button>':'')
+       +'</div></div>'
+      :'')
+    +'</div>';
   return div;
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* =========================================================
    KEYBOARD SHORTCUTS
-═══════════════════════════════════════════════════════════ */
-document.addEventListener('keydown', e => {
-  // Don't fire shortcuts when typing in inputs
-  const tag = document.activeElement?.tagName;
-  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-
-  if (e.code === 'Space') {
-    e.preventDefault();
-    if (isPlaying) transportStop(); else transportPlay();
-  }
-  if (e.code === 'Escape') { e.preventDefault(); transportStop(); }
-  if (e.code === 'KeyR' && isPlaying) { e.preventDefault(); toggleMixRecord(); }
-
-  // 1–4: mute; Shift+1–4: solo
-  const numKeys = ['Digit1','Digit2','Digit3','Digit4'];
-  const idx = numKeys.indexOf(e.code);
-  if (idx >= 0) {
-    e.preventDefault();
-    if (e.shiftKey) setSolo(idx); else setMute(idx);
-  }
+========================================================= */
+document.addEventListener('keydown',e=>{
+  const tag=document.activeElement?.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT')return;
+  if(e.code==='Space'){e.preventDefault();if(isPlaying)transportStop();else transportPlay();}
+  if(e.code==='Escape'){e.preventDefault();transportStop();}
+  if(e.code==='KeyR'&&isPlaying){e.preventDefault();toggleMixRecord();}
+  const idx=['Digit1','Digit2','Digit3','Digit4'].indexOf(e.code);
+  if(idx>=0){e.preventDefault();if(e.shiftKey)setSolo(idx);else setMute(idx);}
 });
 
-/* ═══════════════════════════════════════════════════════════
+/* =========================================================
    LIBRARY
-═══════════════════════════════════════════════════════════ */
-let recordings = [], libRecStream = null, libRecMR = null, libRecChunks = [], libRecording = false;
+========================================================= */
+let recordings=[],libRecStream=null,libRecMR=null,libRecChunks=[],libRecording=false;
 
-async function loadLibrary() {
-  const sb = window._supabase; if (!sb) return;
-  const { data, error } = await sb.from('recordings').select('*').order('created_at', { ascending: false });
-  if (error) { console.error(error); return; }
-  recordings = data || [];
-  renderLibrary(); updateStorageBar();
+async function loadLibrary(){
+  const sb=window._supabase;if(!sb)return;
+  const{data,error}=await sb.from('recordings').select('*').order('created_at',{ascending:false});
+  if(error){console.error(error);return;}
+  recordings=data||[];renderLibrary();updateStorageBar();
 }
 
-function renderLibrary() {
-  const list = document.getElementById('libraryList');
-  if (!recordings.length) { list.innerHTML = '<div class="lib-empty">No recordings yet. Upload or record to get started.</div>'; return; }
-  list.innerHTML = recordings.map(r => `
-    <div class="lib-item" id="libitem-${r.id}">
-      <span class="lib-item-name" title="${r.title}">${r.title||'Untitled'}</span>
-      <span class="lib-item-meta">${formatBytes(r.file_size||0)} · ${formatDur(r.duration_s)}</span>
-      <div class="lib-item-actions">
-        <button class="lib-action add-to" onclick="openAddToTrack('${r.id}')">Add to track</button>
-        <button class="lib-action" onclick="openRename('${r.id}')">Rename</button>
-        <button class="lib-action danger" onclick="deleteRecording('${r.id}')">Delete</button>
-      </div>
-    </div>`).join('');
+function renderLibrary(){
+  const list=document.getElementById('libraryList');
+  if(!recordings.length){list.innerHTML='<div class="lib-empty">No recordings yet. Upload or record to get started.</div>';return;}
+  list.innerHTML=recordings.map(r=>
+    '<div class="lib-item" id="libitem-'+r.id+'">'
+    +'<span class="lib-item-name" title="'+(r.title||'')+'">'+( r.title||'Untitled')+'</span>'
+    +'<span class="lib-item-meta">'+formatBytes(r.file_size||0)+' \xb7 '+formatDur(r.duration_s)+'</span>'
+    +'<div class="lib-item-actions">'
+    +'<button class="lib-action add-to" onclick="openAddToTrack(\''+r.id+'\')">Add to track</button>'
+    +'<button class="lib-action" onclick="openRename(\''+r.id+'\')">Rename</button>'
+    +'<button class="lib-action danger" onclick="deleteRecording(\''+r.id+'\')">Delete</button>'
+    +'</div></div>'
+  ).join('');
 }
 
-function updateStorageBar() {
-  const used = recordings.reduce((s,r) => s+(r.file_size||0), 0);
-  const pct = Math.min(100, (used/QUOTA_BYTES)*100);
-  document.getElementById('storageFill').style.width = pct + '%';
-  document.getElementById('storageLabel').textContent = `${formatBytes(used)} / 25 MB`;
+function updateStorageBar(){
+  const used=recordings.reduce((s,r)=>s+(r.file_size||0),0),pct=Math.min(100,(used/QUOTA_BYTES)*100);
+  document.getElementById('storageFill').style.width=pct+'%';
+  document.getElementById('storageLabel').textContent=formatBytes(used)+' / 25 MB';
 }
 
-document.getElementById('fileUploadInput').addEventListener('change', async function() {
-  const files = Array.from(this.files); if (!files.length) return;
-  const status = document.getElementById('uploadStatus');
-  for (const file of files) {
-    const used = recordings.reduce((s,r) => s+(r.file_size||0), 0);
-    if (used+file.size > QUOTA_BYTES) { showGlobalMsg('Storage limit reached (25 MB). Delete some recordings first.','error'); break; }
-    status.textContent = `Uploading ${file.name}…`;
+document.getElementById('fileUploadInput').addEventListener('change',async function(){
+  const files=Array.from(this.files);if(!files.length)return;
+  const status=document.getElementById('uploadStatus');
+  for(const file of files){
+    const used=recordings.reduce((s,r)=>s+(r.file_size||0),0);
+    if(used+file.size>QUOTA_BYTES){showToast('Storage limit reached (25 MB). Delete some recordings first.','error');break;}
+    status.textContent='Uploading '+file.name+'\u2026';
     await uploadFile(file);
   }
-  status.textContent = ''; this.value = '';
-  await loadLibrary();
+  status.textContent='';this.value='';await loadLibrary();
 });
 
-async function uploadFile(file) {
-  const sb = window._supabase; const uid = window._currentUser.id;
-  const ext = file.name.split('.').pop();
-  const fpath = `${uid}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-  let duration_s = null;
-  try {
-    const ab = await file.arrayBuffer();
-    const tmp = new (window.AudioContext||window.webkitAudioContext)();
-    const buf = await tmp.decodeAudioData(ab); duration_s = parseFloat(buf.duration.toFixed(2)); tmp.close();
-  } catch(e) {}
-  const { error: upErr } = await sb.storage.from('recordings').upload(fpath, file, { contentType: file.type, upsert: false });
-  if (upErr) { showGlobalMsg('Upload failed: '+upErr.message,'error'); return; }
-  const { data: urlData } = await sb.storage.from('recordings').createSignedUrl(fpath, 3600*24*7);
-  const name = file.name.replace(/\.[^.]+$/,'');
-  await sb.from('recordings').insert({ user_id:uid, title:name, file_url:urlData?.signedUrl||'', storage_path:fpath, file_size:file.size, duration_s, mime_type:file.type });
+async function uploadFile(file){
+  const sb=window._supabase;if(!sb)return;
+  const uid=window._currentUser?.id;if(!uid)return;
+  const ext=file.name.split('.').pop();
+  const fpath=uid+'/'+Date.now()+'-'+Math.random().toString(36).slice(2)+'.'+ext;
+  // fix #4: close temp AudioContext in finally so it never leaks on decode error
+  let duration_s=null,tmp=null;
+  try{
+    tmp=new(window.AudioContext||window.webkitAudioContext)();
+    const buf=await tmp.decodeAudioData(await file.arrayBuffer());
+    duration_s=parseFloat(buf.duration.toFixed(2));
+  }catch(e){/* non-fatal */}finally{if(tmp)tmp.close().catch(()=>{});}
+  const{error:upErr}=await sb.storage.from('recordings').upload(fpath,file,{contentType:file.type,upsert:false});
+  if(upErr){showToast('Upload failed: '+upErr.message,'error');return;}
+  // fix #10: store storage_path only — no stale file_url in DB
+  await sb.from('recordings').insert({user_id:uid,title:file.name.replace(/\.[^.]+$/,''),storage_path:fpath,file_size:file.size,duration_s,mime_type:file.type});
 }
 
-window.toggleLibRecord = async function() {
-  if (!libRecording) {
-    try {
-      libRecStream = await navigator.mediaDevices.getUserMedia({ audio:true });
-      libRecChunks = []; libRecMR = new MediaRecorder(libRecStream);
-      libRecMR.ondataavailable = e => { if (e.data.size>0) libRecChunks.push(e.data); };
-      libRecMR.onstop = onLibRecStop; libRecMR.start(); libRecording = true;
+window.toggleLibRecord=async function(){
+  if(!libRecording){
+    try{
+      libRecStream=await navigator.mediaDevices.getUserMedia({audio:true});
+      libRecChunks=[];libRecMR=new MediaRecorder(libRecStream);
+      libRecMR.ondataavailable=e=>{if(e.data.size>0)libRecChunks.push(e.data);};
+      libRecMR.onstop=onLibRecStop;libRecMR.start();libRecording=true;
       document.getElementById('libRecBtn').classList.add('active');
-      document.getElementById('libRecBtn').innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg> Stop';
-      document.getElementById('uploadStatus').textContent = 'Recording…';
-    } catch(e) { showGlobalMsg('Microphone access denied.','error'); }
+      document.getElementById('libRecBtn').innerHTML='<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg> Stop';
+      document.getElementById('uploadStatus').textContent='Recording\u2026';
+    }catch(e){showToast('Microphone access denied.','error');}
   } else {
-    libRecMR.stop(); libRecStream.getTracks().forEach(t => t.stop()); libRecording = false;
+    // fix: guard against double-stop
+    if(libRecMR&&libRecMR.state!=='inactive')libRecMR.stop();
+    if(libRecStream)libRecStream.getTracks().forEach(t=>t.stop());
+    libRecording=false;libRecMR=null;
     document.getElementById('libRecBtn').classList.remove('active');
-    document.getElementById('libRecBtn').innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg> Record';
-    document.getElementById('uploadStatus').textContent = 'Processing…';
+    document.getElementById('libRecBtn').innerHTML='<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg> Record';
+    document.getElementById('uploadStatus').textContent='Processing\u2026';
   }
 };
 
-async function onLibRecStop() {
-  const blob = new Blob(libRecChunks, { type:'audio/webm' });
-  const name = 'Recording ' + new Date().toLocaleTimeString();
-  const file = new File([blob], name+'.webm', { type:'audio/webm' });
-  await uploadFile(file);
-  document.getElementById('uploadStatus').textContent = '';
-  await loadLibrary();
+async function onLibRecStop(){
+  const blob=new Blob(libRecChunks,{type:'audio/webm'}),name='Recording '+new Date().toLocaleTimeString();
+  await uploadFile(new File([blob],name+'.webm',{type:'audio/webm'}));
+  document.getElementById('uploadStatus').textContent='';await loadLibrary();
 }
 
-async function getSignedUrl(rec) {
-  const { data } = await window._supabase.storage.from('recordings').createSignedUrl(rec.storage_path, 3600);
-  return data?.signedUrl || rec.file_url;
-}
-async function loadRecordingBuffer(rec) {
-  if (!AC) initAudio();
-  const url = await getSignedUrl(rec);
-  const res = await fetch(url); const ab = await res.arrayBuffer();
-  return await AC.decodeAudioData(ab);
+// Always generate a fresh signed URL — never rely on the stored file_url (fix #10)
+async function getSignedUrl(rec){
+  const sb=window._supabase;if(!sb)return null;
+  const{data}=await sb.storage.from('recordings').createSignedUrl(rec.storage_path,3600);
+  return data?.signedUrl||null;
 }
 
-window.openLoadForTrack = function(trackId) {
-  window._targetTrackId = trackId;
-  const list = document.getElementById('trackSelectList');
-  document.getElementById('addToTrackTitle').textContent = `Load file into Track ${trackId+1}`;
-  list.innerHTML = recordings.length
-    ? recordings.map(r => `<button class="sbtn" style="width:100%;text-align:left;padding:.5rem .85rem;"
-        onclick="loadRecordingToTrackById('${r.id}',${trackId})">
-        ${r.title||'Untitled'} · ${formatDur(r.duration_s)}</button>`).join('')
-    : '<p style="font-size:.8rem;color:var(--muted)">No recordings yet.</p>';
+async function loadRecordingBuffer(rec){
+  if(!AC)initAudio();
+  const url=await getSignedUrl(rec);
+  if(!url)throw new Error('Could not generate download URL');
+  const res=await fetch(url);if(!res.ok)throw new Error('HTTP '+res.status);
+  return await AC.decodeAudioData(await res.arrayBuffer());
+}
+
+window.openLoadForTrack=function(trackId){
+  window._targetTrackId=trackId;
+  document.getElementById('addToTrackTitle').textContent='Load file into Track '+(trackId+1);
+  const list=document.getElementById('trackSelectList');
+  list.innerHTML=recordings.length
+    ?recordings.map(r=>'<button class="sbtn" style="width:100%;text-align:left;padding:.5rem .85rem;" onclick="loadRecordingToTrackById(\''+r.id+'\','+trackId+')">'+(r.title||'Untitled')+' \xb7 '+formatDur(r.duration_s)+'</button>').join('')
+    :'<p style="font-size:.8rem;color:var(--muted)">No recordings yet.</p>';
   openModal('addToTrackModal');
 };
 
-window.openAddToTrack = function(recId) {
-  window._pendingRecId = recId;
-  document.getElementById('addToTrackTitle').textContent = 'Add to track';
-  const list = document.getElementById('trackSelectList');
-  list.innerHTML = tracks.map(t => `<button class="sbtn" style="width:100%;text-align:left;padding:.5rem .85rem;"
-    onclick="loadRecordingToTrack(${t.id})">Track ${t.id+1} — ${t.fileName||'empty'}</button>`).join('');
+window.openAddToTrack=function(recId){
+  window._pendingRecId=recId;
+  document.getElementById('addToTrackTitle').textContent='Add to track';
+  document.getElementById('trackSelectList').innerHTML=tracks.map(t=>'<button class="sbtn" style="width:100%;text-align:left;padding:.5rem .85rem;" onclick="loadRecordingToTrack('+t.id+')">Track '+(t.id+1)+' \u2014 '+(t.fileName||'empty')+'</button>').join('');
   openModal('addToTrackModal');
 };
 
-window.loadRecordingToTrack = async function(trackId) {
+window.loadRecordingToTrack=async function(trackId){closeModal('addToTrackModal');await loadRecordingToTrackById(window._pendingRecId,trackId);};
+
+window.loadRecordingToTrackById=async function(recId,trackId){
   closeModal('addToTrackModal');
-  await loadRecordingToTrackById(window._pendingRecId, trackId);
+  const rec=recordings.find(r=>r.id===recId);if(!rec)return;
+  const t=tracks[trackId];showToast('Loading audio\u2026','success');
+  try{
+    const buf=await loadRecordingBuffer(rec);
+    t.buffer=buf;t.fullBuffer=buf;t.fileName=rec.title||'Untitled';
+    t.recordingId=rec.id;t.oscMode=false;t.selStart=0;t.selEnd=1;
+    renderTracks();updatePlayBtn();showToast('','');
+  }catch(e){showToast('Failed to load audio: '+e.message,'error');}
 };
 
-window.loadRecordingToTrackById = async function(recId, trackId) {
-  closeModal('addToTrackModal');
-  const rec = recordings.find(r => r.id === recId); if (!rec) return;
-  const t = tracks[trackId];
-  showGlobalMsg('Loading audio…','success');
-  try {
-    const buf = await loadRecordingBuffer(rec);
-    t.buffer = buf; t.fullBuffer = buf; t.fileName = rec.title||'Untitled';
-    t.recordingId = rec.id; t.oscMode = false; t.selStart = 0; t.selEnd = 1;
-    renderTracks(); updatePlayBtn(); showGlobalMsg('','');
-  } catch(e) { showGlobalMsg('Failed to load audio: '+e.message,'error'); }
+window.deleteRecording=async function(recId){
+  const sb=window._supabase;if(!sb)return;
+  const rec=recordings.find(r=>r.id===recId);if(!rec)return;
+  if(!confirm('Delete "'+(rec.title||'Untitled')+'"?'))return;
+  if(rec.storage_path)await sb.storage.from('recordings').remove([rec.storage_path]);
+  await sb.from('recordings').delete().eq('id',recId);
+  tracks.forEach(t=>{if(t.recordingId===recId){teardownTrackGraph(t);t.buffer=t.fullBuffer=t.fileName=t.recordingId=null;}});
+  await loadLibrary();renderTracks();updatePlayBtn();
 };
 
-window.deleteRecording = async function(recId) {
-  const rec = recordings.find(r => r.id === recId); if (!rec) return;
-  if (!confirm(`Delete "${rec.title||'Untitled'}"?`)) return;
-  const sb = window._supabase;
-  if (rec.storage_path) await sb.storage.from('recordings').remove([rec.storage_path]);
-  await sb.from('recordings').delete().eq('id', recId);
-  tracks.forEach(t => { if (t.recordingId === recId) { teardownTrackGraph(t); t.buffer=null; t.fullBuffer=null; t.fileName=null; t.recordingId=null; } });
-  await loadLibrary(); renderTracks(); updatePlayBtn();
-};
-
-let _renameId = null;
-window.openRename = function(recId) {
-  _renameId = recId;
-  const rec = recordings.find(r => r.id === recId);
-  document.getElementById('renameInput').value = rec?.title||'';
-  document.getElementById('renameMsg').className = 'msg';
+let _renameId=null;
+window.openRename=function(recId){
+  _renameId=recId;const rec=recordings.find(r=>r.id===recId);
+  document.getElementById('renameInput').value=rec?.title||'';
+  const msg=document.getElementById('renameMsg');msg.className='modal-msg';msg.textContent='';
   openModal('renameModal');
 };
-window.applyRename = async function() {
-  const name = document.getElementById('renameInput').value.trim();
-  if (!name) { document.getElementById('renameMsg').textContent='Please enter a name.'; document.getElementById('renameMsg').className='msg error show'; return; }
-  const { error } = await window._supabase.from('recordings').update({ title:name, updated_at:new Date().toISOString() }).eq('id',_renameId);
-  if (error) { document.getElementById('renameMsg').textContent=error.message; document.getElementById('renameMsg').className='msg error show'; return; }
-  closeModal('renameModal'); await loadLibrary();
-  tracks.forEach(t => { if (t.recordingId === _renameId) t.fileName = name; });
-  renderTracks();
+window.applyRename=async function(){
+  const sb=window._supabase;if(!sb)return;
+  const name=document.getElementById('renameInput').value.trim();
+  if(!name){const msg=document.getElementById('renameMsg');msg.textContent='Please enter a name.';msg.className='modal-msg error show';return;}
+  const{error}=await sb.from('recordings').update({title:name}).eq('id',_renameId);
+  if(error){const msg=document.getElementById('renameMsg');msg.textContent=error.message;msg.className='modal-msg error show';return;}
+  closeModal('renameModal');await loadLibrary();
+  tracks.forEach(t=>{if(t.recordingId===_renameId)t.fileName=name;});renderTracks();
 };
 
-/* ═══════════════════════════════════════════════════════════
+/* =========================================================
    SESSIONS
-═══════════════════════════════════════════════════════════ */
-let sessions = [];
-async function loadSessions() {
-  const sb = window._supabase;
-  const { data } = await sb.from('mixer_sessions').select('*').order('updated_at', { ascending: false });
-  sessions = data || []; renderSessionDropdown();
+========================================================= */
+let sessions=[];
+
+async function loadSessions(){
+  const sb=window._supabase;if(!sb)return;
+  const{data}=await sb.from('mixer_sessions').select('*').order('updated_at',{ascending:false});
+  sessions=data||[];renderSessionDropdown();
 }
-function renderSessionDropdown() {
-  const sel = document.getElementById('sessionSelect'); const cur = sel.value;
-  sel.innerHTML = '<option value="">— New session —</option>' + sessions.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-  if (cur && sessions.find(s => s.id === cur)) sel.value = cur;
+
+function renderSessionDropdown(){
+  const sel=document.getElementById('sessionSelect'),cur=sel.value;
+  sel.innerHTML='<option value="">\u2014 New session \u2014</option>'+sessions.map(s=>'<option value="'+s.id+'">'+s.name+'</option>').join('');
+  if(cur&&sessions.find(s=>s.id===cur))sel.value=cur;
 }
-function getTrackState() {
-  return tracks.map(t => ({
-    volume:t.volume, pan:t.pan, speed:t.speed, loop:t.loop,
-    muted:t.muted, soloed:t.soloed, crossfade:t.crossfade,
-    oscMode:t.oscMode, oscType:t.oscType, oscFreq:t.oscFreq,
-    reverbEnabled:t.reverbEnabled, reverbAmount:t.reverbAmount,
-    lfoEnabled:t.lfoEnabled, lfoRate:t.lfoRate, lfoDepth:t.lfoDepth, lfoShape:t.lfoShape, lfoTarget:t.lfoTarget,
-    tapeEnabled:t.tapeEnabled, tapeRate:t.tapeRate, tapeDegradation:t.tapeDegradation,
-    ringEnabled:t.ringEnabled, ringCarrier:t.ringCarrier,
-    ratioNum:t.ratioNum, ratioDen:t.ratioDen,
-    recordingId:t.recordingId, fileName:t.fileName,
+
+function getTrackState(){
+  return tracks.map(t=>({
+    volume:t.volume,pan:t.pan,speed:t.speed,loop:t.loop,
+    muted:t.muted,soloed:t.soloed,crossfade:t.crossfade,
+    oscMode:t.oscMode,oscType:t.oscType,oscFreq:t.oscFreq,
+    reverbEnabled:t.reverbEnabled,reverbAmount:t.reverbAmount,
+    lfoEnabled:t.lfoEnabled,lfoRate:t.lfoRate,lfoDepth:t.lfoDepth,lfoShape:t.lfoShape,lfoTarget:t.lfoTarget,
+    tapeEnabled:t.tapeEnabled,tapeRate:t.tapeRate,tapeDegradation:t.tapeDegradation,
+    ringEnabled:t.ringEnabled,ringCarrier:t.ringCarrier,
+    ratioNum:t.ratioNum,ratioDen:t.ratioDen,
+    recordingId:t.recordingId,fileName:t.fileName,
   }));
 }
-window.saveSession = async function() {
-  const sel = document.getElementById('sessionSelect'); const id = sel.value;
-  if (!id) { saveSessionAs(); return; }
-  const { error } = await window._supabase.from('mixer_sessions').update({ state:{tracks:getTrackState()}, updated_at:new Date().toISOString() }).eq('id',id);
-  if (error) { showGlobalMsg(error.message,'error'); return; }
-  showGlobalMsg('Session saved.','success'); await loadSessions();
+
+window.saveSession=async function(){
+  const sb=window._supabase;if(!sb)return;
+  const id=document.getElementById('sessionSelect').value;
+  if(!id){saveSessionAs();return;}
+  const{error}=await sb.from('mixer_sessions').update({state:{tracks:getTrackState()},updated_at:new Date().toISOString()}).eq('id',id);
+  if(error){showToast(error.message,'error');return;}
+  showToast('Session saved.','success');await loadSessions();
 };
-window.saveSessionAs = async function() {
-  const name = prompt('Session name:', `Session ${sessions.length+1}`); if (!name) return;
-  const uid = window._currentUser.id;
-  const { data, error } = await window._supabase.from('mixer_sessions').insert({ user_id:uid, name, state:{tracks:getTrackState()} }).select().single();
-  if (error) { showGlobalMsg(error.message,'error'); return; }
-  showGlobalMsg(`Session saved as "${name}".`,'success');
-  await loadSessions(); document.getElementById('sessionSelect').value = data.id;
+
+// fix #9: modal instead of prompt()
+window.saveSessionAs=function(){
+  const input=document.getElementById('saveAsInput');
+  input.value='Session '+(sessions.length+1);
+  const msg=document.getElementById('saveAsMsg');msg.className='modal-msg';msg.textContent='';
+  openModal('saveAsModal');
+  setTimeout(()=>input.select(),80);
 };
-window.deleteSession = async function() {
-  const id = document.getElementById('sessionSelect').value; if (!id) return;
-  const s = sessions.find(s => s.id === id);
-  if (!confirm(`Delete session "${s?.name}"?`)) return;
-  await window._supabase.from('mixer_sessions').delete().eq('id',id); await loadSessions();
+
+window.applySaveAs=async function(){
+  const sb=window._supabase;if(!sb)return;
+  const name=document.getElementById('saveAsInput').value.trim();
+  if(!name){const msg=document.getElementById('saveAsMsg');msg.textContent='Please enter a session name.';msg.className='modal-msg error show';return;}
+  const uid=window._currentUser?.id;if(!uid)return;
+  const{data,error}=await sb.from('mixer_sessions').insert({user_id:uid,name,state:{tracks:getTrackState()}}).select().single();
+  if(error){const msg=document.getElementById('saveAsMsg');msg.textContent=error.message;msg.className='modal-msg error show';return;}
+  closeModal('saveAsModal');showToast('Session saved as "'+name+'".','success');
+  await loadSessions();document.getElementById('sessionSelect').value=data.id;
 };
-document.getElementById('sessionSelect').addEventListener('change', async function() {
-  const id = this.value; if (!id) return;
-  const session = sessions.find(s => s.id === id); if (!session?.state?.tracks) return;
-  session.state.tracks.forEach((saved, i) => { Object.assign(tracks[i], saved); tracks[i].buffer = null; });
-  renderTracks(); renderRatioGrid();
-  for (const t of tracks) {
-    if (t.recordingId && !t.oscMode) {
-      const rec = recordings.find(r => r.id === t.recordingId);
-      if (rec) { try { t.buffer = await loadRecordingBuffer(rec); drawWaveform(t); } catch(e){} }
+
+window.deleteSession=async function(){
+  const sb=window._supabase;if(!sb)return;
+  const id=document.getElementById('sessionSelect').value;if(!id)return;
+  const s=sessions.find(s=>s.id===id);
+  if(!confirm('Delete session "'+(s?.name||'')+'"?'))return;
+  await sb.from('mixer_sessions').delete().eq('id',id);await loadSessions();
+};
+
+// fix #7: loading indicator; fix #1: per-track error on missing recordings
+document.getElementById('sessionSelect').addEventListener('change',async function(){
+  const id=this.value;if(!id)return;
+  const session=sessions.find(s=>s.id===id);if(!session?.state?.tracks)return;
+  showToast('Loading session\u2026','success');
+  session.state.tracks.forEach((saved,i)=>{Object.assign(tracks[i],saved);tracks[i].buffer=null;});
+  renderTracks();renderRatioGrid();
+  let errs=0;
+  for(const t of tracks){
+    if(t.recordingId&&!t.oscMode){
+      const rec=recordings.find(r=>r.id===t.recordingId);
+      if(rec){
+        try{t.buffer=await loadRecordingBuffer(rec);drawWaveform(t);}
+        catch(e){errs++;showToast('Track '+(t.id+1)+': could not reload \u201c'+(t.fileName||'recording')+'\u201d \u2014 it may have been deleted.','error');}
+      } else {
+        errs++;showToast('Track '+(t.id+1)+': recording no longer in library.','error');
+      }
     }
   }
   updatePlayBtn();
+  if(errs===0)showToast('Session loaded.','success');
 });
 
-/* ═══════════════════════════════════════════════════════════
-   MODAL HELPERS
-═══════════════════════════════════════════════════════════ */
-window.openModal  = id => document.getElementById(id).classList.add('open');
-window.closeModal = id => document.getElementById(id).classList.remove('open');
-document.querySelectorAll('.modal-overlay').forEach(m =>
-  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); })
-);
+/* =========================================================
+   MODALS
+========================================================= */
+window.openModal=id=>document.getElementById(id).classList.add('open');
+window.closeModal=id=>document.getElementById(id).classList.remove('open');
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+document.getElementById('renameInput').addEventListener('keydown',e=>{if(e.key==='Enter')applyRename();});
+document.getElementById('saveAsInput').addEventListener('keydown',e=>{if(e.key==='Enter')applySaveAs();});
 
-/* ═══════════════════════════════════════════════════════════
+/* =========================================================
+   TOAST (fix #6)
+   Fixed bottom-centre, auto-dismisses after 4s.
+   Passing empty text/type clears immediately.
+========================================================= */
+let _toastTimer=null;
+function showToast(text,type){
+  const el=document.getElementById('toast');
+  if(_toastTimer){clearTimeout(_toastTimer);_toastTimer=null;}
+  if(!text){el.classList.remove('show','error','success');return;}
+  el.textContent=text;el.className='toast '+type+' show';
+  // "Loading session\u2026" stays until replaced by success/error
+  if(!(type==='success'&&text.includes('Loading session'))){
+    _toastTimer=setTimeout(()=>el.classList.remove('show'),4000);
+  }
+}
+
+/* =========================================================
    UTILITIES
-═══════════════════════════════════════════════════════════ */
-function formatBytes(b) {
-  if (!b) return '0 KB';
-  return b < 1024*1024 ? (b/1024).toFixed(0)+' KB' : (b/(1024*1024)).toFixed(1)+' MB';
-}
-function formatDur(s) {
-  if (!s) return '—';
-  const m = Math.floor(s/60), sec = (s%60).toFixed(1);
-  return m > 0 ? `${m}:${sec.padStart(4,'0')}` : `${sec}s`;
-}
-function showGlobalMsg(text, type) {
-  const el = document.getElementById('globalMsg');
-  if (!text) { el.className = 'msg'; return; }
-  el.textContent = text; el.className = `msg ${type} show`;
-}
+========================================================= */
+function formatBytes(b){return!b?'0 KB':b<1048576?(b/1024).toFixed(0)+' KB':(b/1048576).toFixed(1)+' MB';}
+function formatDur(s){if(!s)return'\u2014';const m=Math.floor(s/60),sec=(s%60).toFixed(1);return m>0?m+':'+sec.padStart(4,'0'):sec+'s';}
 
-window.speedToPitch = speedToPitch;
-window.speedToSlider = speedToSlider;
+window.speedToPitch=speedToPitch;window.speedToSlider=speedToSlider;
 
-/* ═══════════════════════════════════════════════════════════
+/* =========================================================
    INIT
-═══════════════════════════════════════════════════════════ */
-function onAuthReady(cb) {
-  if (window._currentUser) { cb(); return; }
-  window.addEventListener('authReady', cb, { once:true });
-}
-onAuthReady(async () => {
-  renderTracks();
-  renderRatioGrid();
-  await loadLibrary();
-  await loadSessions();
-});
+========================================================= */
+function onAuthReady(cb){if(window._currentUser){cb();return;}window.addEventListener('authReady',cb,{once:true});}
+onAuthReady(async()=>{renderTracks();renderRatioGrid();await loadLibrary();await loadSessions();});
 </script>
 </body>
 </html>
