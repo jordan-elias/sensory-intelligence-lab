@@ -1,0 +1,271 @@
+# Sensory Intelligence Lab
+# https://lab.jordanelias.de/
+
+## Identity
+
+The Sensory Intelligence Lab is a neuroscience-informed, web-based sound wellness platform built by music therapist Jordan Elias (Berlin). It combines generative soundscapes, music therapy principles, nervous system regulation tools, journaling systems, breathing exercises, and creative sound exploration into a hybrid therapeutic environment.
+
+The platform is designed to extend therapeutic work beyond sessions into daily life through self-directed tools and optional one-to-one music therapy.
+
+---
+
+## Core Purpose
+
+The platform exists to solve a central problem in therapy:
+
+Therapeutic insight often emerges in sessions but is lost in the gap between them.
+
+The Lab provides continuous, structured, self-directed tools that support:
+- nervous system regulation
+- emotional awareness
+- attention and focus control
+- creative exploration
+- therapeutic continuity between sessions
+
+---
+
+## Core System: Regulation Engine
+
+The Regulation Engine is the central system of the platform.
+
+It generates personalised, adaptive soundscapes in real time based on the user's current state.
+
+It is grounded in the ISO PRINCIPLE of music therapy:
+
+:contentReference[oaicite:0]{index=0}
+
+### Function:
+- detects user state (mood, energy, sensory load)
+- generates adaptive soundscapes
+- transitions toward:
+  - calm
+  - focus
+  - activation
+  - sleep
+
+Unlike static playlists, sound is continuously generated and evolves dynamically.
+
+---
+
+## Platform Modules
+
+### Regulation Engine (Soundscapes)
+Generative sound environments for:
+- focus and deep work
+- anxiety reduction
+- sleep support
+- emotional regulation
+- activation and energy control
+
+---
+
+### Breath Regulation Tools
+Guided breathing exercises for:
+- stress reduction
+- anxiety relief
+- nervous system downregulation
+- attentional reset
+
+---
+
+### Journaling & Check-ins
+Structured reflective system for:
+- mood tracking
+- energy tracking
+- sensory load tracking
+- emotional pattern recognition
+- longitudinal self-awareness
+
+---
+
+### Ear Training & Spatial Awareness
+Auditory perception training for:
+- sound localisation
+- listening depth
+- sensory attention control
+- neurodivergent sensory regulation support
+
+---
+
+### Compositional Tools & Sound Art
+Creative modules for:
+- experimental sound exploration
+- generative composition
+- beginner-friendly music creation
+- structured creative practice without prior musical training
+
+---
+
+## Therapeutic Model
+
+The platform uses a hybrid model:
+
+### Self-directed layer
+- all digital tools
+- soundscapes
+- journaling
+- breathing exercises
+- creative tools
+
+### Human therapy layer
+- optional one-to-one video music therapy sessions
+- integration between session content and platform data
+- continuity between digital and live therapeutic work
+
+---
+
+## Core Philosophy
+
+Therapy is not a discrete event but a continuous relationship between:
+- attention
+- emotion
+- sensory experience
+- environment
+
+The Lab is designed to extend therapeutic work into daily life and reduce loss of insight between sessions.
+
+---
+
+## Target Users
+
+The platform is designed for:
+
+- people with anxiety or chronic stress
+- individuals with attention/focus difficulties (including ADHD)
+- autistic and neurodivergent users
+- people with sensory processing differences
+- people with sleep difficulties
+- creative individuals exploring sound
+- users seeking structured self-directed mental health tools
+
+No musical experience is required.
+
+---
+
+## Key Differentiation
+
+Compared to mainstream wellness apps:
+
+- Generative soundscapes instead of static audio tracks
+- Music therapy principles (iso principle-based design)
+- Adaptive real-time systems instead of fixed content
+- Therapeutic continuity across time
+- Optional access to a qualified music therapist
+- Integration of creative sound tools and training systems
+
+---
+
+## Clinical Foundations
+
+The platform is informed by:
+
+- music therapy practice (since 2017)
+- iso principle methodology
+- nervous system regulation theory
+- auditory attention and sensory processing research
+- neuroscience-informed models of stress and attention
+
+---
+
+## Continuity Model
+
+A core principle:
+
+Therapeutic progress is maintained through continuity between sessions.
+
+The platform preserves:
+- emotional tracking
+- journaling entries
+- sound experiments
+- regulation history
+
+This allows each therapy interaction to begin from lived context rather than memory reconstruction.
+
+---
+
+## System Structure
+
+The platform consists of:
+
+- landing page (information + onboarding)
+- authentication system (Supabase)
+- dashboard (post-login environment)
+- modular therapeutic tools
+- FAQ and about knowledge base
+
+---
+
+## Authentication
+
+- email/password signup
+- email verification required
+- password reset flow
+- privacy policy consent required
+- dashboard access after login
+
+---
+
+## Privacy
+
+Users must explicitly agree to privacy policy before account creation.
+Data handling is designed for therapeutic sensitivity and user control.
+
+---
+
+## FAQ Domain Coverage
+
+The platform explains:
+
+- iso principle in music therapy
+- generative sound vs static music apps
+- neurodivergent suitability
+- sleep/focus/anxiety use cases
+- hybrid therapy model
+- sound art and composition tools
+- free plan availability
+- international access
+
+---
+
+## Narrative Context
+
+The project emerged from:
+
+- clinical music therapy practice (2017–present)
+- remote therapy adaptation during COVID-19
+- exploration of continuity beyond sessions
+- critique of marketplace-based therapy systems
+- concern about loss of relational depth in digital health systems
+
+The platform is intentionally designed as a boutique therapeutic system rather than a mass-market wellness product.
+
+---
+
+## Collaboration Model
+
+The platform is evolving.
+
+Users are participants in shaping:
+- features
+- therapeutic workflows
+- sound systems
+- clinical integration approaches
+
+Feedback is part of system design and evolution.
+
+---
+
+## External Links
+
+https://jordanelias.de/
+https://jordanelias.de/music-therapy/
+https://jordanelias.de/blog/
+https://jordanelias.de/events/
+https://jordanelias.de/contact/
+https://lab.jordanelias.de/privacy
+
+---
+
+## Summary
+
+The Sensory Intelligence Lab is a hybrid music therapy and generative sound platform that extends clinical therapeutic principles into continuous, self-directed digital practice using adaptive sound, reflection, and optional human therapeutic support.
