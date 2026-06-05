@@ -2193,7 +2193,7 @@ window.addChapterSong = async function(chapterUuid, index) {
   div.innerHTML = `
     <div class="chapter-player-row">
       <div class="chapter-player-label" title="${escHtml(title)} — ${escHtml(artist)}">${escHtml(title)} — ${escHtml(artist)}</div>
-      <button class="chapter-player-play" onclick="playFromCard('${playerId}')">▶ Play</button>
+      <button class="chapter-player-play" onclick="playFromCard('${playerId}')">&#x25B6;&#xFE0E; Play</button>
       <button class="chapter-player-notes-toggle" onclick="toggleSongNotes('${playerId}')">Notes ▾</button>
       <button class="chapter-player-move" onclick="moveChapterSong('${playerId}', -1)" title="Move up">▲</button>
       <button class="chapter-player-move" onclick="moveChapterSong('${playerId}', 1)" title="Move down">▼</button>
@@ -2545,7 +2545,7 @@ window.loadEntryForEditing = async function(id) {
           div.innerHTML = `
             <div class="chapter-player-row">
               <div class="chapter-player-label" title="${escHtml(s.title)} — ${escHtml(s.artist)}">${escHtml(s.title)} — ${escHtml(s.artist)}</div>
-              <button class="chapter-player-play" onclick="playFromCard('${playerId}')">▶ Play</button>
+              <button class="chapter-player-play" onclick="playFromCard('${playerId}')">&#x25B6;&#xFE0E; Play</button>
               <button class="chapter-player-notes-toggle" onclick="toggleSongNotes('${playerId}')">${hasNote ? 'Notes ▴' : 'Notes ▾'}</button>
               <button class="chapter-player-move" onclick="moveChapterSong('${playerId}', -1)" title="Move up">▲</button>
               <button class="chapter-player-move" onclick="moveChapterSong('${playerId}', 1)" title="Move down">▼</button>
