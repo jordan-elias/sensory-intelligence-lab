@@ -277,6 +277,66 @@
   from = "/worksheets/"
   to   = "/worksheets/index.html"
   status = 200
+
+[[redirects]]
+  from = "/worksheets/goals-values"
+  to   = "/worksheets/goals-values/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/worksheets/goals-values/"
+  to   = "/worksheets/goals-values/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/worksheets/music-autobiography"
+  to   = "/worksheets/music-autobiography/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/worksheets/music-autobiography/"
+  to   = "/worksheets/music-autobiography/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/worksheets/session-reflection"
+  to   = "/worksheets/session-reflection/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/worksheets/session-reflection/"
+  to   = "/worksheets/session-reflection/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/worksheets/lyric-analysis"
+  to   = "/worksheets/lyric-analysis/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/worksheets/lyric-analysis/"
+  to   = "/worksheets/lyric-analysis/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/worksheets/coping"
+  to   = "/worksheets/coping/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/worksheets/coping/"
+  to   = "/worksheets/coping/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/worksheets/interpersonal"
+  to   = "/worksheets/interpersonal/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/worksheets/interpersonal/"
+  to   = "/worksheets/interpersonal/index.html"
+  status = 200
   
 # ── Subscribe ──
 
