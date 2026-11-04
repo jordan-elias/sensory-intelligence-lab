@@ -269,6 +269,16 @@
   status = 200
 
 [[redirects]]
+  from = "/vault"
+  to   = "/vault/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/vault/"
+  to   = "/vault/index.html"
+  status = 200
+
+[[redirects]]
   from = "/worksheets"
   to   = "/worksheets/index.html"
   status = 200

@@ -217,6 +217,9 @@ async function buildSession(mckKey, bundle, userId) {
   };
 }
 
+/** Rebuild a session from an already-unwrapped content key (used by the trusted-device path). */
+export const sessionFromContentKey = buildSession;
+
 async function unwrapRaw(bundle, credential, userId, opts) {
   if (credential.passphrase !== undefined) {
     const kek = await passphraseKek(credential.passphrase, bundle.kdf, opts);

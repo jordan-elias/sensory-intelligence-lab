@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Private vault · Sensory Intelligence Lab</title>
+  <meta name="robots" content="noindex, nofollow">
+
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <link rel="apple-touch-icon" href="/images/favicon.png">
+  <link rel="manifest" href="/site.webmanifest">
+
+  <script src="/dashboard/auth-guard.js" type="module"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/worksheets.css">
+  <link rel="stylesheet" href="/assets/css/vault.css">
+</head>
+<body>
+
+<div id="sil-header"></div>
+
+<main>
+  <h1 class="ws-title" style="font-family:var(--font-heading);font-size:1.6rem;margin-bottom:.4rem">Your private vault</h1>
+  <p class="vault-help" style="margin:0 0 2rem">Protects your worksheets, journal and check-ins.</p>
+  <div id="vaultApp"></div>
+</main>
+
+<div id="sil-footer"></div>
+
+<script type="module">
+  import { mountLayout } from '/assets/js/worksheets/core.js';
+  import * as vault from '/assets/js/vault/vault.js';
+  import { mountVaultPanel } from '/assets/js/vault/vault-ui.js';
+  mountLayout({ crumbs: [{ label: 'Private vault' }] });
+  mountVaultPanel(document.getElementById('vaultApp'), vault);
+</script>
+</body>
+</html>
