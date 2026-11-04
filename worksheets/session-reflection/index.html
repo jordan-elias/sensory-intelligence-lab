@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Session Reflection · Worksheets</title>
+
+  <meta name="robots" content="noindex, nofollow">
+
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <link rel="apple-touch-icon" href="/images/favicon.png">
+  <link rel="manifest" href="/site.webmanifest">
+
+  <script src="/dashboard/auth-guard.js" type="module"></script>
+
+  <script type="module">
+    import { applyGatingOnReady } from '/assets/js/gating.js';
+    applyGatingOnReady({
+      targetSelector: '#worksheetsApp',
+      moduleName: 'worksheets',
+    });
+  </script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/worksheets.css">
+</head>
+<body>
+
+<div id="sil-header"></div>
+
+<main id="worksheetsApp"></main>
+
+<div id="sil-footer"></div>
+
+<script type="module">
+  import { mount } from '/assets/js/worksheets/page.js';
+  import worksheet from '/assets/js/worksheets/pages/session-reflection.js';
+  mount(worksheet);
+</script>
+</body>
+</html>
