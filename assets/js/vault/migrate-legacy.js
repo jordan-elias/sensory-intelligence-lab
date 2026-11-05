@@ -88,3 +88,8 @@ export async function migrateLegacy({ sb, userId, session, legacyKey, onProgress
   }
   return collect ? { backup, failed } : { upgraded, failed };
 }
+
+/** After an upgrade: asks the server to erase the old key (it refuses to serve it again). Best effort. */
+export async function retireLegacyKey(sb) {
+  try { await fetchLegacyKey(sb); } catch { /* 410 = already retired; anything else is retried next time */ }
+}

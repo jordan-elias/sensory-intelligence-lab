@@ -12,7 +12,7 @@
  */
 import * as vault from './vault.js';
 import { mountVaultPanel } from './vault-ui.js';
-import { countLegacy, fetchLegacyKey, migrateLegacy } from './migrate-legacy.js';
+import { countLegacy, fetchLegacyKey, migrateLegacy, retireLegacyKey } from './migrate-legacy.js';
 
 const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -25,7 +25,7 @@ function ensureStyles() {
   document.head.appendChild(l);
 }
 
-function openDialog() {
+function openDialog({ dismissable = false } = {}) {
   ensureStyles();
   const previous = document.activeElement;
   const el = document.createElement('div');
@@ -35,7 +35,7 @@ function openDialog() {
       <h2 class="vault-gate__title" id="vaultGateTitle">Your private vault</h2>
       <div id="vaultGatePanel"></div>
       <div id="vaultGateStatus" hidden></div>
-      <p class="vault-gate__foot"><a class="vault-link" href="/dashboard/">Not now, back to the dashboard</a></p>
+      <p class="vault-gate__foot">${dismissable ? '<button type="button" class="vault-link" data-dismiss>Not now</button>' : '<a class="vault-link" href="/dashboard/">Not now, back to the dashboard</a>'}</p>
     </div>`;
   document.body.appendChild(el);
   document.body.classList.add('vault-gate-open');
@@ -77,9 +77,10 @@ async function upgradeOldEntries(dlg, session) {
   const uid = session.userId;
   const { data: prof } = await sb.from('profiles').select('encryption_key_enc').eq('id', uid).single();
   if (!prof?.encryption_key_enc) { await vault.markLegacyMigrated(); return; }   // never had an old key
+  const finish = async () => { await vault.markLegacyMigrated(); retireLegacyKey(sb); };
 
   const n = await countLegacy(sb, uid);
-  if (n === 0) { await vault.markLegacyMigrated(); return; }
+  if (n === 0) { await finish(); return; }
 
   for (;;) {
     dlg.title('Upgrading your saved entries');
@@ -107,7 +108,7 @@ async function upgradeOldEntries(dlg, session) {
         sb, userId: uid, session, legacyKey,
         onProgress: d => { const p = dlg.el.querySelector('#gateProgress'); if (p) p.textContent = `Upgraded ${d} of ${n}…`; },
       });
-      if (r.failed === 0) { await vault.markLegacyMigrated(); return; }
+      if (r.failed === 0) { await finish(); return; }
       showStatus(dlg, `<p class="vault-lead">${r.upgraded} upgraded. ${r.failed} could not be converted and have been left exactly as they were. We will try again next time you unlock.</p>
         <div class="vault-row"><button type="button" class="action-btn" data-gate="continue">Continue</button><button type="button" class="action-btn outline" data-gate="retry">Try again</button></div>`);
       if ((await choose(dlg, 'continue', 'retry')) === 'continue') return;
@@ -120,21 +121,25 @@ async function upgradeOldEntries(dlg, session) {
   }
 }
 
-async function run() {
+const DISMISSED = Symbol('dismissed');
+
+async function run({ dismissable = false } = {}) {
   let state = await vault.load();
   let dlg = null;
   try {
     if (state.state !== 'unlocked') {
-      dlg = openDialog();
+      dlg = openDialog({ dismissable });
       dlg.title(state.state === 'no-vault' ? 'Protect your private writing' : 'Unlock your private vault');
       mountVaultPanel(dlg.panel, vault);
-      await new Promise(resolve => {
+      const outcome = await new Promise(resolve => {
         const off = vault.onChange(s => { if (s.state === 'unlocked') { off(); resolve(); } });
+        dlg.el.addEventListener('click', e => { if (e.target.closest('[data-dismiss]')) { off(); resolve(DISMISSED); } });
         if (vault.getSession()) { off(); resolve(); }
       });
+      if (outcome === DISMISSED) return null;
     }
     if (!vault.legacyMigrated()) {
-      dlg ||= openDialog();
+      dlg ||= openDialog({ dismissable });
       try { await upgradeOldEntries(dlg, vault.requireSession()); }
       catch (e) { console.warn('[vault] upgrade skipped:', e.message); }
     }
@@ -157,6 +162,22 @@ export async function decryptSafe(payload) { if (!payload) return null; try { re
 export function isEncrypted(value) {
   if (!value || typeof value !== 'string') return false;
   try { const p = JSON.parse(value); return typeof p.iv === 'string' && typeof p.ciphertext === 'string'; } catch { return false; }
+}
+/**
+ * For the dashboard: people who still have entries under the old key are asked once,
+ * right after they sign in, to create their passphrase. They can dismiss it; it is asked
+ * again next time. People with nothing to upgrade are never interrupted here.
+ */
+export async function promptIfOldEntries() {
+  try {
+    const st = await vault.load();
+    if (st.state !== 'no-vault' && vault.legacyMigrated()) return;
+    const { data: prof } = await window._supabase.from('profiles').select('encryption_key_enc').eq('id', st.userId).single();
+    if (!prof?.encryption_key_enc) return;
+    if (running) return;
+    running = run({ dismissable: true }).finally(() => { running = null; });
+    await running;
+  } catch (e) { console.warn('[vault] prompt skipped:', e.message); }
 }
 export const lockVault = () => vault.lock();
 export const hasUserKey = () => !!vault.getSession();

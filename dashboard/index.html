@@ -939,6 +939,8 @@
 
   <script type="module">
 
+    import { promptIfOldEntries } from '/assets/js/vault/gate.js';
+
     // ── Greeting ──
     function onAuthReady(cb) {
       if (window._currentUser) { cb(); return; }
@@ -953,6 +955,8 @@ onAuthReady(async () => {
     .select('full_name')
     .eq('id', user.id)
     .single();
+
+  promptIfOldEntries();   // only people with entries under the old key are asked
 
   const fullName  = profile?.full_name?.trim() || '';
   const firstName = fullName.split(' ')[0];
