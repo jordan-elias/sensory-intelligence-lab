@@ -212,6 +212,8 @@ async function buildSession(mckKey, bundle, userId) {
     fingerprint: await fingerprintOf(pub),
     encrypt: text => encryptWithKey(mckKey, text),
     decrypt: payload => decryptWithKey(mckKey, payload),
+    encryptBytes: bytes => encryptBytesWithKey(mckKey, bytes),
+    decryptBytes: data => decryptBytesWithKey(mckKey, data),
     sign: data => signData(signPrivateKey, data),
     open: (sealed, opts) => open(sealed, { id: userId, encPrivateKey }, opts),
   };
@@ -339,6 +341,19 @@ export async function encryptWithKey(key, plaintext) {
 export async function decryptWithKey(key, payload) {
   const { iv, ciphertext } = JSON.parse(payload);
   return td.decode(await subtle.decrypt({ name: 'AES-GCM', iv: b64d(iv) }, key, b64d(ciphertext)));
+}
+/** Binary version for files: 12-byte IV followed by the ciphertext. */
+export async function encryptBytesWithKey(key, bytes) {
+  const iv = rand(12);
+  const ct = new Uint8Array(await subtle.encrypt({ name: 'AES-GCM', iv }, key, bytes));
+  const out = new Uint8Array(12 + ct.length);
+  out.set(iv, 0); out.set(ct, 12);
+  return out;
+}
+export async function decryptBytesWithKey(key, data) {
+  const u = data instanceof Uint8Array ? data : new Uint8Array(data);
+  if (u.length < 28) throw new VaultError('corrupt', 'This file is too short to be valid.');
+  return subtle.decrypt({ name: 'AES-GCM', iv: u.slice(0, 12) }, key, u.slice(12));
 }
 /** For migration: import the legacy server-provided base64 key to decrypt old rows. */
 export function importLegacyKey(base64Key) {

@@ -247,3 +247,21 @@ test('migration helper: legacy server key decrypts old rows, new key re-encrypts
   assert.equal(await session.decrypt(newRow), 'written before the migration');
   assert.equal(JSON.parse(newRow).v, 2);
 });
+
+test('files: bytes round-trip, differ each time, and any tampering is detected', async () => {
+  const { session } = await make();
+  const data = new Uint8Array(200000).map((_, i) => (i * 31 + 7) % 256);   // larger than getRandomValues allows in one call
+  const a = await session.encryptBytes(data), b = await session.encryptBytes(data);
+  assert.equal(a.length, data.length + 12 + 16);
+  assert.notDeepEqual(a, b, 'fresh IV each time');
+  assert.deepEqual(new Uint8Array(await session.decryptBytes(a)), data);
+  const bad = a.slice(); bad[5000] ^= 1;
+  await assert.rejects(session.decryptBytes(bad));
+  await assert.rejects(session.decryptBytes(new Uint8Array(10)));
+});
+test('files: another account cannot open them', async () => {
+  const { session } = await make();
+  const other = await V.createVault({ passphrase: PASS, userId: 'user-2', kdf: FAST, allowWeak: true });
+  const enc = await session.encryptBytes(new Uint8Array([1, 2, 3]));
+  await assert.rejects(other.session.decryptBytes(enc));
+});
