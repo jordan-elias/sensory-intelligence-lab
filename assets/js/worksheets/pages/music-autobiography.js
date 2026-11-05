@@ -19,7 +19,7 @@ import { attachContextMenu, openMenuAt } from '../contextmenu.js';
 import { searchSongs, findVideoId, playlistUrl } from '../songs.js';
 import { createPlayer } from '../player.js';
 
-const SORTABLE_URL = 'https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/modular/sortable.esm.js';
+const SORTABLE_URL = '/assets/js/vendor/sortable.esm.js'; // served from our own origin, never a CDN
 
 // ── Module state ───────────────────────────────────────
 let root = null;

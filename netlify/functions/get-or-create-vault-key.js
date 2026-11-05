@@ -1,10 +1,11 @@
 /**
- * netlify/functions/get-or-create-vault-key.js
+ * netlify/functions/get-or-create-vault-key.js   (LEGACY: migration only)
  *
- * Verifies the user's Supabase JWT, then either retrieves or
- * generates the user's AES-256 content key, wrapped with a
- * platform HKDF secret. Returns the plaintext key as base64
- * to the authenticated client over HTTPS.
+ * Verifies the user's Supabase JWT and returns the user's OLD server-held AES-256 key,
+ * wrapped with a platform HKDF secret, so the browser can convert old entries to the
+ * user's own passphrase key. It never creates keys any more, and once a user has been
+ * upgraded the stored old key is erased. Delete this function and VAULT_SECRET once no
+ * profiles.encryption_key_enc values remain.
  *
  * Required Netlify environment variables:
  *   SUPABASE_URL              — your project URL
@@ -151,8 +152,17 @@ export const handler = async (event) => {
     return { statusCode: 500, body: 'Database error' };
   }
 
-  // ── 6a. Existing key — unwrap and return ─────────────────
+  // ── 6a. Existing key — unwrap and return (only until the user has upgraded) ──
   if (profile?.encryption_key_enc) {
+    // Once a user's entries have been upgraded to their own passphrase key the old key is
+    // useless, so it is destroyed instead of being served again.
+    const { data: uk } = await adminClient
+      .from('user_keys').select('legacy_migrated_at').eq('user_id', userId).maybeSingle();
+    if (uk?.legacy_migrated_at) {
+      await adminClient.from('profiles').update({ encryption_key_enc: null }).eq('id', userId);
+      return { statusCode: 410, body: 'Legacy key retired' };
+    }
+
     let contentKey;
     try {
       contentKey = await unwrapKey(profile.encryption_key_enc, wrappingKey);
@@ -169,44 +179,8 @@ export const handler = async (event) => {
     };
   }
 
-  // ── 6b. First time — generate, wrap, store, return ───────
-  let contentKey;
-  try {
-    contentKey = await subtle.generateKey(
-      { name: 'AES-GCM', length: 256 },
-      true,
-      ['encrypt', 'decrypt']
-    );
-  } catch (err) {
-    console.error('Key generation error:', err);
-    return { statusCode: 500, body: 'Key generation failed' };
-  }
-
-  let encryptedKeyPayload;
-  try {
-    encryptedKeyPayload = await wrapKey(contentKey, wrappingKey);
-  } catch (err) {
-    console.error('Wrap error:', err);
-    return { statusCode: 500, body: 'Key wrapping failed' };
-  }
-
-  // Upsert so it works whether or not a profiles row exists yet
-  const { error: upsertError } = await adminClient
-    .from('profiles')
-    .upsert(
-      { id: userId, encryption_key_enc: encryptedKeyPayload },
-      { onConflict: 'id' }
-    );
-
-  if (upsertError) {
-    console.error('Upsert error:', upsertError.message);
-    return { statusCode: 500, body: 'Could not store vault key' };
-  }
-
-  const rawKey = await subtle.exportKey('raw', contentKey);
-  return {
-    statusCode: 200,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ key: bufferToBase64(rawKey) }),
-  };
+  // ── 6b. No old key: nothing to hand out ──────────────────
+  // This endpoint no longer creates keys. New content is locked with the user's own
+  // passphrase-derived key, which the server never sees.
+  return { statusCode: 404, body: 'No legacy key' };
 };

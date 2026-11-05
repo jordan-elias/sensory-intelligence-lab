@@ -462,14 +462,6 @@
   </ol>
 </nav>
 
-<!-- VAULT OVERLAY — shown while key is being fetched -->
-<div class="vault-overlay" id="vaultOverlay">
-  <div class="vault-overlay__icon">🔒︎</div>
-  <div class="vault-overlay__title">Setting up your secure vault</div>
-  <div class="vault-overlay__sub">Your entries will be encrypted on this device before saving. This only happens once.</div>
-  <div class="vault-spinner"></div>
-</div>
-
 <main>
 
   <div class="ph">
@@ -658,14 +650,12 @@
 'use strict';
 
 import {
-  loadUserKeyFromBase64,
-  hasUserKey,
+  ensureVaultReady,
   encrypt,
   decrypt,
-  decryptSafe,
   isEncrypted,
-  clearUserKey,
-} from '/assets/js/crypto-utils.js';
+  lockVault,
+} from '/assets/js/vault/gate.js';
 
 // ─────────────────────────────────────────────────────────
 // HEADER
@@ -698,7 +688,7 @@ async function getSupabase() {
 document.getElementById('silSignOut').addEventListener('click', async function () {
   this.disabled = true;
   this.textContent = 'Signing out…';
-  clearUserKey();
+  try { await lockVault(); } catch (e) { /* signing out anyway */ }
   try {
     const sb = await getSupabase();
     await sb.auth.signOut();
@@ -706,73 +696,6 @@ document.getElementById('silSignOut').addEventListener('click', async function (
     window.location.replace('/');
   }
 });
-
-// ─────────────────────────────────────────────────────────
-// VAULT — fetch or create the user's encryption key
-// Called once per session, lazily on page load after auth.
-// Shows the vault overlay on first-time setup.
-// ─────────────────────────────────────────────────────────
-let _vaultReady = false;
-let _vaultPromise = null;
-
-async function ensureVaultReady() {
-  if (_vaultReady) return;
-  // Coalesce concurrent calls — only one network request
-  if (_vaultPromise) return _vaultPromise;
-
-  _vaultPromise = (async () => {
-    const sb   = await getSupabase();
-    const { data: { session } } = await sb.auth.getSession();
-    if (!session) throw new Error('No active session');
-
-    // Check whether a vault key already exists for this user.
-    // If not, the overlay is shown while the function creates one.
-    const { data: profile } = await sb
-      .from('profiles')
-      .select('encryption_key_enc')
-      .eq('id', session.user.id)
-      .single();
-
-    const isFirstTime = !profile?.encryption_key_enc;
-
-    if (isFirstTime) {
-      document.getElementById('vaultOverlay').classList.add('visible');
-    }
-
-    // Call the Netlify function. It will:
-    //   - verify the JWT
-    //   - generate a key if none exists (first time)
-    //   - return the plaintext AES key as base64
-    const res = await fetch('/.netlify/functions/get-or-create-vault-key', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
-      },
-    });
-
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`Vault function error: ${err}`);
-    }
-
-    const { key } = await res.json();
-    await loadUserKeyFromBase64(key);
-    _vaultReady = true;
-
-    if (isFirstTime) {
-      // Brief moment to show "vault ready" before hiding overlay
-      document.querySelector('.vault-overlay__title').textContent = 'Your vault is ready';
-      document.querySelector('.vault-overlay__sub').textContent =
-        'Entries are encrypted on this device before saving and cannot be read by anyone else.';
-      document.querySelector('.vault-spinner').style.display = 'none';
-      await new Promise(r => setTimeout(r, 1800));
-      document.getElementById('vaultOverlay').classList.remove('visible');
-    }
-  })();
-
-  return _vaultPromise;
-}
 
 // ═══════════════════════════════════════════════════════
 // STATE

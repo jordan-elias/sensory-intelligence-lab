@@ -13,6 +13,14 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // Expose supabase client globally so other scripts on the page can use it
 window._supabase = supabase;
 
+// Signing out anywhere must also end any vault unlock kept in this browser.
+supabase.auth.onAuthStateChange((evt) => {
+  if (evt === "SIGNED_OUT") {
+    try { sessionStorage.removeItem("sil-vault-tab"); } catch (_) {}
+    import("/assets/js/vault/trusted-device.js").then(m => m.clear()).catch(() => {});
+  }
+});
+
 async function checkAuth() {
   // getUser() makes a network call to verify the token is still valid.
   // More reliable than getSession() on page load, which reads from
