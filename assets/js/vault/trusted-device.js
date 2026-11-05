@@ -9,6 +9,7 @@
 const DB = 'sil-vault';
 const STORE = 'trusted';
 const DAYS = 30;
+const TAB_MINUTES = 30;   // the short, automatic unlock that carries you between pages
 
 function open() {
   return new Promise((resolve, reject) => {
@@ -21,29 +22,47 @@ function open() {
 }
 const done = tx => new Promise((resolve, reject) => { tx.oncomplete = () => resolve(); tx.onerror = tx.onabort = () => reject(tx.error); });
 
-export async function save(userId, contentKey) {
+async function put(slot, userId, contentKey, ms) {
   try {
     const db = await open();
     const tx = db.transaction(STORE, 'readwrite');
-    tx.objectStore(STORE).put({ userId, key: contentKey, expiresAt: Date.now() + DAYS * 864e5 }, 'current');
+    tx.objectStore(STORE).put({ userId, key: contentKey, expiresAt: Date.now() + ms }, slot);
     await done(tx); db.close();
     return true;
   } catch { return false; }
 }
 
-export async function load(userId) {
+async function get(slot, userId) {
   try {
     const db = await open();
     const rec = await new Promise((resolve, reject) => {
-      const r = db.transaction(STORE).objectStore(STORE).get('current');
+      const r = db.transaction(STORE).objectStore(STORE).get(slot);
       r.onsuccess = () => resolve(r.result); r.onerror = () => reject(r.error);
     });
     db.close();
     if (!rec) return null;
-    if (rec.userId !== userId || rec.expiresAt < Date.now()) { await clear(); return null; }
+    if (rec.userId !== userId || rec.expiresAt < Date.now()) { await drop(slot); return null; }
     return rec.key;
   } catch { return null; }
 }
+
+async function drop(slot) {
+  try {
+    const db = await open();
+    const tx = db.transaction(STORE, 'readwrite');
+    tx.objectStore(STORE).delete(slot);
+    await done(tx); db.close();
+  } catch { /* nothing stored */ }
+}
+
+/** "Keep me unlocked on this device": opt-in, 30 days. */
+export const save = (userId, key) => put('current', userId, key, DAYS * 864e5);
+export const load = userId => get('current', userId);
+
+/** Automatic unlock for this browser tab: carries you between pages, ends after 30 quiet minutes. */
+export const saveTab = (userId, key) => put('tab', userId, key, TAB_MINUTES * 60e3);
+export const loadTab = userId => get('tab', userId);
+export const dropTab = () => drop('tab');
 
 export async function clear() {
   try {

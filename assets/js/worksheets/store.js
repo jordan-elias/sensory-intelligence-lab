@@ -8,7 +8,7 @@
  *   schema 2: used by the music autobiography (chapters array)
  */
 import { getSupabase, getUser, ensureVaultReady } from './core.js';
-import { encrypt, decrypt, isEncrypted } from '/assets/js/crypto-utils.js';
+import { isEncrypted } from '/assets/js/vault/gate.js';
 
 export class ConflictError extends Error {
   constructor() { super('This entry was changed on another device.'); this.name = 'ConflictError'; }
@@ -45,14 +45,14 @@ export async function list(type) {
 
 /** Fetch + decrypt one entry. Returns { id, title, type, created_at, updated_at, payload }. */
 export async function get(id) {
-  await ensureVaultReady();
+  const vs = await ensureVaultReady();
   const sb = await getSupabase();
   const uid = await userId();
   const { data: row, error } = await sb.from('worksheets')
     .select('*').eq('id', id).eq('user_id', uid).single();
   if (error || !row) throw new Error(error?.message || 'Entry not found');
   if ('updated_at' in row) _hasUpdatedAt = true;
-  const plaintext = isEncrypted(row.content) ? await decrypt(row.content) : row.content;
+  const plaintext = isEncrypted(row.content) ? await vs.decrypt(row.content) : row.content;
   const payload = JSON.parse(plaintext);
   return {
     id: row.id, title: row.title, type: row.type,
@@ -62,8 +62,8 @@ export async function get(id) {
 }
 
 async function seal(type, schema, data) {
-  await ensureVaultReady();
-  return encrypt(JSON.stringify({ type, schema, data }));
+  const vs = await ensureVaultReady();
+  return vs.encrypt(JSON.stringify({ type, schema, data }));
 }
 
 export async function create({ type, title, schema = 1, data }) {

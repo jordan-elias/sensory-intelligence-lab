@@ -4,10 +4,7 @@
  * Depends on /dashboard/auth-guard.js, which sets window._supabase and
  * window._currentUser and fires "authReady".
  */
-import {
-  loadUserKeyFromBase64,
-  clearUserKey,
-} from '/assets/js/crypto-utils.js';
+import { ensureVaultReady as openVault, lockVault } from '/assets/js/vault/gate.js';
 
 // ── Helpers ────────────────────────────────────────────
 export function esc(str) {
@@ -49,43 +46,11 @@ export function getUser() {
   return window._currentUser;
 }
 
-// ── Vault (encryption key) ─────────────────────────────
-let _vaultPromise = null;
+// ── Vault ──────────────────────────────────────────────
+// Resolves with the unlocked vault session; shows the unlock / create-vault dialog if needed.
+export const ensureVaultReady = openVault;
 
-export function ensureVaultReady() {
-  if (_vaultPromise) return _vaultPromise;
-  _vaultPromise = (async () => {
-    const sb = await getSupabase();
-    const { data: { session } } = await sb.auth.getSession();
-    if (!session) throw new Error('No active session');
-
-    const { data: profile } = await sb
-      .from('profiles').select('encryption_key_enc').eq('id', session.user.id).single();
-    const isFirstTime = !profile?.encryption_key_enc;
-    const overlay = document.getElementById('vaultOverlay');
-    if (isFirstTime && overlay) overlay.classList.add('visible');
-
-    const res = await fetch('/.netlify/functions/get-or-create-vault-key', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
-    });
-    if (!res.ok) throw new Error(await res.text());
-    const { key } = await res.json();
-    await loadUserKeyFromBase64(key);
-
-    if (isFirstTime && overlay) {
-      overlay.querySelector('.vault-overlay__title').textContent = 'Your vault is ready';
-      overlay.querySelector('.vault-overlay__sub').textContent =
-        'Worksheets are encrypted on this device before saving.';
-      overlay.querySelector('.vault-spinner').style.display = 'none';
-      await new Promise(r => setTimeout(r, 1800));
-      overlay.classList.remove('visible');
-    }
-  })().catch(err => { _vaultPromise = null; throw err; });
-  return _vaultPromise;
-}
-
-// ── Layout (header, breadcrumb, footer, vault overlay) ─
+// ── Layout (header, breadcrumb, footer) ─
 export function mountLayout({ crumbs = [] } = {}) {
   const header = document.getElementById('sil-header');
   if (header) {
@@ -122,15 +87,6 @@ export function mountLayout({ crumbs = [] } = {}) {
       </footer>`;
   }
 
-  if (!document.getElementById('vaultOverlay')) {
-    document.body.insertAdjacentHTML('beforeend', `
-      <div class="vault-overlay" id="vaultOverlay" role="status" aria-live="polite">
-        <div class="vault-overlay__title">Setting up your secure vault</div>
-        <div class="vault-overlay__sub">Your worksheets will be encrypted on this device before saving. This only happens once.</div>
-        <div class="vault-spinner"></div>
-      </div>`);
-  }
-
   const toggle = document.getElementById('silMenuToggle');
   const nav = document.getElementById('silNav');
   if (toggle && nav) {
@@ -146,7 +102,7 @@ export function mountLayout({ crumbs = [] } = {}) {
   if (signOut) {
     signOut.addEventListener('click', async () => {
       signOut.disabled = true; signOut.textContent = 'Signing out…';
-      clearUserKey();
+      try { await lockVault(); } catch { /* signing out anyway */ }
       try { const sb = await getSupabase(); await sb.auth.signOut(); }
       finally { window.location.replace('/'); }
     });

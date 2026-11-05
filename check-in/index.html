@@ -415,13 +415,6 @@
 </head>
 <body>
 
-<!-- VAULT OVERLAY -->
-<div class="vault-overlay" id="vaultOverlay">
-  <div class="vault-overlay__title">Setting up your secure vault</div>
-  <div class="vault-overlay__sub">Your notes will be encrypted on this device before saving.</div>
-  <div class="vault-spinner"></div>
-</div>
-
 <!-- HEADER -->
 <header class="sil-header">
   <a class="sil-header__wordmark" href="/dashboard/">Sensory Intelligence Lab</a>
@@ -677,12 +670,11 @@
 'use strict';
 
 import {
-  loadUserKeyFromBase64,
-  hasUserKey,
+  ensureVaultReady,
   encrypt,
   decrypt,
-  clearUserKey,
-} from '/assets/js/crypto-utils.js';
+  lockVault,
+} from '/assets/js/vault/gate.js';
 
 import {
   identifyChord,
@@ -720,57 +712,10 @@ async function getSupabase() {
 
 document.getElementById('silSignOut').addEventListener('click', async function () {
   this.disabled = true; this.textContent = 'Signing out…';
-  clearUserKey();
+  try { await lockVault(); } catch (e) { /* signing out anyway */ }
   try { const sb = await getSupabase(); await sb.auth.signOut(); }
   finally { window.location.replace('/'); }
 });
-
-// ─────────────────────────────────────────────────────────
-// VAULT
-// ─────────────────────────────────────────────────────────
-let _vaultReady   = false;
-let _vaultPromise = null;
-
-async function ensureVaultReady() {
-  if (_vaultReady) return;
-  if (_vaultPromise) return _vaultPromise;
-
-  _vaultPromise = (async () => {
-    const sb = await getSupabase();
-    const { data: { session } } = await sb.auth.getSession();
-    if (!session) throw new Error('No active session');
-
-    const { data: profile } = await sb
-      .from('profiles').select('encryption_key_enc').eq('id', session.user.id).single();
-
-    const isFirstTime = !profile?.encryption_key_enc;
-    if (isFirstTime) document.getElementById('vaultOverlay').classList.add('visible');
-
-    const res = await fetch('/.netlify/functions/get-or-create-vault-key', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
-      },
-    });
-    if (!res.ok) throw new Error(`Vault error: ${await res.text()}`);
-
-    const { key } = await res.json();
-    await loadUserKeyFromBase64(key);
-    _vaultReady = true;
-
-    if (isFirstTime) {
-      document.querySelector('.vault-overlay__title').textContent = 'Your vault is ready';
-      document.querySelector('.vault-overlay__sub').textContent =
-        'Notes are encrypted on this device. Only you can read them.';
-      document.querySelector('.vault-spinner').style.display = 'none';
-      await new Promise(r => setTimeout(r, 1600));
-      document.getElementById('vaultOverlay').classList.remove('visible');
-    }
-  })();
-
-  return _vaultPromise;
-}
 
 // ═══════════════════════════════════════════════════════
 // STATE

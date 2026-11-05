@@ -23,6 +23,10 @@ let trusted = false;
 let pending = null;         // { kind: 'setup' | 'rotate', bundle, session?, recoveryKey }
 let loaded = false;
 let signOutWatch = false;
+const TAB_FLAG = 'sil-vault-tab';
+const IDLE_MS = 30 * 60e3;       // an unlocked tab with no activity for this long locks itself
+let lastActivity = Date.now();
+let idleTimer = null;
 const listeners = new Set();
 
 function snapshot() {
@@ -56,14 +60,59 @@ export async function load({ force = false } = {}) {
       try { session = await C.sessionFromContentKey(key, record.bundle, userId); trusted = true; }
       catch { await device.clear(); }
     }
+    // Not a trusted device: carry an unlock between pages of the same tab, for a short time.
+    if (!session && tabFlag()) {
+      const tabKey = await device.loadTab(userId);
+      if (tabKey) {
+        try { session = await C.sessionFromContentKey(tabKey, record.bundle, userId); }
+        catch { await device.dropTab(); }
+      }
+    }
+    if (session) watchIdle();
   }
+  if (!session && !tabFlag()) await device.dropTab();
   loaded = true;
   watchSignOut();
   emit();
   return snapshot();
 }
 
+function tabFlag(set) {
+  try {
+    if (set === true) sessionStorage.setItem(TAB_FLAG, '1');
+    else if (set === false) sessionStorage.removeItem(TAB_FLAG);
+    else return sessionStorage.getItem(TAB_FLAG) === '1';
+  } catch { return false; }
+}
+
+/** Called after every successful unlock. */
+async function remember() {
+  lastActivity = Date.now();
+  if (!trusted && session && await device.saveTab(userId, session.contentKey)) tabFlag(true);
+  watchIdle();
+}
+
+let lastTouch = 0;
+function touch() {
+  lastActivity = Date.now();
+  if (!session || trusted || lastActivity - lastTouch < 30e3) return;
+  lastTouch = lastActivity;
+  device.saveTab(userId, session.contentKey);   // slides the 30 minutes forward
+}
+function watchIdle() {
+  if (idleTimer) return;
+  for (const evt of ['pointerdown', 'keydown']) window.addEventListener(evt, touch, { passive: true, capture: true });
+  idleTimer = setInterval(() => {
+    if (session && !trusted && Date.now() - lastActivity > IDLE_MS) lock();
+  }, 15e3);
+}
+
 export const getSession = () => session;
+export const legacyMigrated = () => !!record?.legacy_migrated_at;
+export async function markLegacyMigrated() {
+  if (!record) throw new C.VaultError('no-vault', 'No vault yet.');
+  record = await store.updateBundle(userId, record.bundle, record.updated_at, { legacy_migrated_at: new Date().toISOString() });
+}
 export function requireSession() {
   if (!session) throw new C.VaultError('locked', 'Your vault is locked.');
   return session;
@@ -90,6 +139,7 @@ export async function finishSetup({ keepUnlocked = false } = {}) {
   session = pending.session;
   pending = null;
   if (keepUnlocked) await setTrusted(true);
+  await remember();
   emit();
   return snapshot();
 }
@@ -101,6 +151,7 @@ export async function unlock(passphrase, { keepUnlocked = false } = {}) {
   if (!record) throw new C.VaultError('no-vault', 'No vault yet.');
   session = await C.unlockWithPassphrase(record.bundle, passphrase, userId);
   if (keepUnlocked) await setTrusted(true);
+  await remember();
   upgradeKdf(passphrase).catch(() => {});
   emit();
   return snapshot();
@@ -120,6 +171,7 @@ export async function recover(recoveryKey, newPassphrase, { keepUnlocked = false
   record = await store.updateBundle(userId, next, record.updated_at);
   session = await C.unlockWithRecoveryKey(record.bundle, recoveryKey, userId);
   if (keepUnlocked) await setTrusted(true);
+  await remember();
   emit();
   return snapshot();
 }
@@ -153,6 +205,7 @@ export async function setTrusted(on) {
   } else {
     await device.clear();
     trusted = false;
+    await remember();      // still unlocked, but only for this tab and 30 quiet minutes
   }
   emit();
   return trusted;
@@ -160,6 +213,7 @@ export async function setTrusted(on) {
 
 export async function lock() {
   session = null; trusted = false; pending = null;
+  tabFlag(false);
   await device.clear();
   emit();
 }
