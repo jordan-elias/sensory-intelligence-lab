@@ -250,7 +250,7 @@ test('migration helper: legacy server key decrypts old rows, new key re-encrypts
 
 test('files: bytes round-trip, differ each time, and any tampering is detected', async () => {
   const { session } = await make();
-  const data = crypto.getRandomValues(new Uint8Array(200000));
+  const data = new Uint8Array(200000).map((_, i) => (i * 31 + 7) % 256);   // larger than getRandomValues allows in one call
   const a = await session.encryptBytes(data), b = await session.encryptBytes(data);
   assert.equal(a.length, data.length + 12 + 16);
   assert.notDeepEqual(a, b, 'fresh IV each time');
