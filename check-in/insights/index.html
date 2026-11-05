@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Surroundings and mood · Check-in</title>
+  <meta name="robots" content="noindex, nofollow">
+
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <link rel="apple-touch-icon" href="/images/favicon.png">
+  <link rel="manifest" href="/site.webmanifest">
+
+  <script src="/dashboard/auth-guard.js" type="module"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/worksheets.css">
+  <link rel="stylesheet" href="/assets/css/vault.css">
+  <link rel="stylesheet" href="/assets/css/insights.css">
+</head>
+<body>
+
+<div id="sil-header"></div>
+
+<main>
+  <h1 class="in-title">Surroundings and mood</h1>
+  <p class="in-lede">Worked out on this device from your own check-ins. Nothing here is sent anywhere unencrypted.</p>
+  <div id="insightsApp"><p class="in-muted">Unlocking your vault…</p></div>
+</main>
+
+<div id="sil-footer"></div>
+
+<script type="module">
+  import { mountLayout } from '/assets/js/worksheets/core.js';
+  import { mountInsights } from '/assets/js/checkins/insights-page.js';
+  mountLayout({ crumbs: [{ label: 'Check-in', href: '/check-in/' }, { label: 'Surroundings' }] });
+  mountInsights(document.getElementById('insightsApp'));
+</script>
+</body>
+</html>

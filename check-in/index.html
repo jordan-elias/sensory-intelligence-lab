@@ -257,6 +257,26 @@
     .location-tag.selected { background: var(--accent-light); border-color: var(--accent); color: var(--accent); font-weight: 600; }
     .location-tag__icon { font-size: .85rem; }
 
+    /* ── SURROUNDINGS ── */
+    .env-section { margin-bottom: 2rem; }
+    .env-row { margin-bottom: 1.1rem; }
+    .env-row .env-label { display: flex; justify-content: space-between; align-items: baseline; font-size: .78rem; font-weight: 500; margin-bottom: .4rem; }
+    .env-row .env-label small { font-weight: 400; color: var(--muted); font-size: .7rem; }
+    .env-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .env-chip { font: 500 .8rem var(--font-body); padding: .38rem .9rem; min-width: 2.4rem; border: 1px solid var(--border); background: var(--bg); color: var(--muted); cursor: pointer; transition: all .12s; }
+    .env-chip:hover { border-color: var(--accent); color: var(--accent); }
+    .env-chip.selected { background: var(--accent-light); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+    .env-sun { font-size: .75rem; color: var(--muted); margin-top: .5rem; }
+    .place-picker { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .place-add { margin-top: .75rem; padding: 1rem; border: 1px solid var(--border); background: var(--surface); display: none; }
+    .place-add.open { display: block; }
+    .place-add label { display: block; font-size: .75rem; font-weight: 500; margin: .6rem 0 .25rem; }
+    .place-add input[type=text] { width: 100%; padding: .55rem .7rem; border: 1px solid var(--border); font: .85rem var(--font-body); background: var(--bg); }
+    .place-add .place-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: .8rem; }
+    .place-add .place-note { font-size: .7rem; color: var(--muted); margin-top: .5rem; line-height: 1.5; }
+    .env-link { background: none; border: none; font: .75rem var(--font-body); color: var(--muted); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: .3rem 0; }
+    .env-link:hover { color: var(--accent); }
+
     /* ── NOTES TEXTAREA ── */
     .notes-section { margin-bottom: 2rem; }
     textarea#checkinNotes { width: 100%; min-height: 90px; padding: .85rem 1rem; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: .875rem; line-height: 1.65; resize: vertical; outline: none; transition: border-color .15s; }
@@ -633,6 +653,40 @@
       </div>
     </div>
 
+    <div class="env-section" id="envSection">
+      <span class="sl">Your surroundings <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:.72rem;color:var(--muted);margin-left:.3rem">optional</span></span>
+
+      <div class="env-row">
+        <div class="env-label">Place <small>so you can compare places later</small></div>
+        <div class="place-picker" id="placePicker"></div>
+        <button type="button" class="env-link" id="placeAddToggle">Save this as a new place</button>
+        <div class="place-add" id="placeAdd">
+          <label for="placeName">Name</label>
+          <input type="text" id="placeName" maxlength="80" placeholder="e.g. Tiergarten bench, library 2nd floor">
+          <div class="place-actions">
+            <button type="button" class="btn-back" id="placeLocate">Use my current location</button>
+            <button type="button" class="btn-submit" id="placeSave" style="padding:.5rem 1.2rem">Save place</button>
+          </div>
+          <label style="display:flex;gap:.5rem;align-items:center;font-weight:400"><input type="checkbox" id="placeExact"> Store the exact spot (otherwise rounded to about 1 km)</label>
+          <p class="place-note" id="placeNote">Coordinates are optional. They let the app work out where the sun is at different times. They are encrypted like your notes and never leave your device unencrypted.</p>
+        </div>
+      </div>
+
+      <div class="env-row"><div class="env-label">Noise <small>1 silent · 5 very loud</small></div>
+        <div class="env-chips" data-env="noise">
+          <button type="button" class="env-chip" data-v="1">1</button><button type="button" class="env-chip" data-v="2">2</button><button type="button" class="env-chip" data-v="3">3</button><button type="button" class="env-chip" data-v="4">4</button><button type="button" class="env-chip" data-v="5">5</button>
+        </div></div>
+      <div class="env-row"><div class="env-label">Crowdedness <small>1 empty · 5 packed</small></div>
+        <div class="env-chips" data-env="crowd">
+          <button type="button" class="env-chip" data-v="1">1</button><button type="button" class="env-chip" data-v="2">2</button><button type="button" class="env-chip" data-v="3">3</button><button type="button" class="env-chip" data-v="4">4</button><button type="button" class="env-chip" data-v="5">5</button>
+        </div></div>
+      <div class="env-row"><div class="env-label">Light</div>
+        <div class="env-chips" data-env="light">
+          <button type="button" class="env-chip" data-v="direct">Direct sun</button><button type="button" class="env-chip" data-v="bright">Bright, no direct sun</button><button type="button" class="env-chip" data-v="dim">Dim</button><button type="button" class="env-chip" data-v="dark">Dark</button>
+        </div>
+        <p class="env-sun" id="envSun" aria-live="polite"></p></div>
+    </div>
+
     <div class="notes-section">
       <span class="sl">Notes <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:.72rem;color:var(--muted);margin-left:.3rem">optional</span></span>
       <textarea id="checkinNotes" placeholder="Anything worth noting about how you're feeling right now…" maxlength="500"></textarea>
@@ -646,6 +700,7 @@
   </div>
 
   <!-- DASHBOARD -->
+  <p style="margin:0 0 1rem;font-size:.82rem" id="insightsLink" hidden><a href="/check-in/insights/">See how your surroundings affect your mood, and where to go next</a></p>
   <div class="dashboard-section" id="dashboardSection">
     <div class="dashboard-header">
       <h3>Your patterns</h3>
@@ -669,12 +724,9 @@
 <script type="module">
 'use strict';
 
-import {
-  ensureVaultReady,
-  encrypt,
-  decrypt,
-  lockVault,
-} from '/assets/js/vault/gate.js';
+import { ensureVaultReady, lockVault } from '/assets/js/vault/gate.js';
+import * as checkinStore from '/assets/js/checkins/store.js';
+import { sunPosition, sunLabel, roundCoords } from '/assets/js/checkins/sun.js';
 
 import {
   identifyChord,
@@ -724,6 +776,8 @@ const S = {
   arousal: 5, valence: 5, sensory: 5,
   emotions: new Set(),
   location: null,
+  placeId: null, places: [],
+  env: { noise: null, crowd: null, light: null },
   currentStep: 1,
   submitting: false,
   dashPeriod: 7,
@@ -880,6 +934,80 @@ document.querySelectorAll('.location-tag').forEach(btn => {
 });
 
 // ═══════════════════════════════════════════════════════
+// SURROUNDINGS: place, noise, crowdedness, light
+// ═══════════════════════════════════════════════════════
+const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+function currentPlace() { return S.places.find(p => p.id === S.placeId) || null; }
+
+/** Where the sun is right now at the chosen place (needs coordinates); null otherwise. */
+function currentSun() {
+  const p = currentPlace();
+  if (!p || !Number.isFinite(p.lat) || !Number.isFinite(p.lng)) return null;
+  const pos = sunPosition(new Date(), p.lat, p.lng);
+  return { elevation: Math.round(pos.elevation * 10) / 10, label: sunLabel(pos.elevation) };
+}
+
+function refreshEnvUi() {
+  document.querySelectorAll('.env-chips').forEach(group => {
+    const key = group.dataset.env;
+    group.querySelectorAll('.env-chip').forEach(b => b.classList.toggle('selected', String(S.env[key]) === b.dataset.v));
+  });
+  const picker = document.getElementById('placePicker');
+  if (picker) {
+    picker.innerHTML = S.places.length
+      ? S.places.map(p => `<button type="button" class="env-chip${p.id === S.placeId ? ' selected' : ''}" data-place="${esc(p.id)}">${esc(p.name)}</button>`).join('')
+      : '<span style="font-size:.75rem;color:var(--muted)">No saved places yet.</span>';
+  }
+  const sun = currentSun();
+  const el = document.getElementById('envSun');
+  if (el) el.textContent = sun ? `Sun at this place right now: ${sun.label} (${sun.elevation}° above the horizon).` : '';
+}
+
+document.querySelectorAll('.env-chips').forEach(group => {
+  group.addEventListener('click', e => {
+    const b = e.target.closest('.env-chip'); if (!b) return;
+    const key = group.dataset.env, v = key === 'light' ? b.dataset.v : Number(b.dataset.v);
+    S.env[key] = S.env[key] === v ? null : v;
+    refreshEnvUi();
+  });
+});
+document.getElementById('placePicker').addEventListener('click', e => {
+  const b = e.target.closest('[data-place]'); if (!b) return;
+  S.placeId = S.placeId === b.dataset.place ? null : b.dataset.place;
+  refreshEnvUi();
+});
+document.getElementById('placeAddToggle').addEventListener('click', () => document.getElementById('placeAdd').classList.toggle('open'));
+
+let pendingCoords = null;
+document.getElementById('placeLocate').addEventListener('click', () => {
+  const note = document.getElementById('placeNote');
+  if (!navigator.geolocation) { note.textContent = 'Your browser cannot share a location.'; return; }
+  note.textContent = 'Asking your device for its location…';
+  navigator.geolocation.getCurrentPosition(
+    pos => { pendingCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude }; note.textContent = 'Location found. It will be saved only if you press Save place.'; },
+    () => { note.textContent = 'Could not get your location. You can still save the place without coordinates.'; },
+    { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 });
+});
+document.getElementById('placeSave').addEventListener('click', async () => {
+  const name = document.getElementById('placeName').value.trim();
+  const note = document.getElementById('placeNote');
+  if (!name) { note.textContent = 'Give the place a name first.'; return; }
+  const exact = document.getElementById('placeExact').checked;
+  const c = pendingCoords ? roundCoords(pendingCoords.lat, pendingCoords.lng, exact) : { lat: null, lng: null };
+  try {
+    const id = await checkinStore.savePlace({ name, kind: S.location || 'other', lat: c.lat, lng: c.lng, exact });
+    S.places = await checkinStore.listPlaces(); S.placeId = id; pendingCoords = null;
+    document.getElementById('placeName').value = ''; document.getElementById('placeAdd').classList.remove('open');
+    refreshEnvUi();
+  } catch (err) { note.textContent = 'Could not save the place: ' + err.message; }
+});
+async function loadPlaces() {
+  try { S.places = await checkinStore.listPlaces(); } catch (err) { console.warn('places:', err.message); }
+  refreshEnvUi();
+}
+
+// ═══════════════════════════════════════════════════════
 // STEP NAVIGATION
 // ═══════════════════════════════════════════════════════
 window.goToStep = function(n) {
@@ -920,34 +1048,24 @@ window.submitCheckin = async function() {
 
   const rawNotes = document.getElementById('checkinNotes').value.trim() || null;
 
-  // Encrypt notes if present
-  let encryptedNotes = null;
-  if (rawNotes) {
-    try {
-      await ensureVaultReady();
-      encryptedNotes = await encrypt(rawNotes);
-    } catch (err) {
-      showMsg('Could not encrypt notes: ' + err.message, 'error');
-      btn.disabled = false; btn.textContent = 'Save check-in'; S.submitting = false; return;
-    }
-  }
-
   const selectedPitchClasses = S.selectedNotes.size > 0
     ? [...new Set(Array.from(S.selectedNotes.values()).map(n => n.pitchClass))].sort((a,b)=>a-b)
     : null;
 
-  const { error } = await sb.from('checkins').insert({
-    user_id:        user.id,
-    arousal:        S.arousal,
-    valence:        S.valence,
-    sensory_load:   S.sensory,
-    emotion_words:  S.emotions.size > 0 ? Array.from(S.emotions) : [],
-    location_tag:   S.location,
-    notes:          encryptedNotes,     // ciphertext or null — never plaintext
-    notes_encrypted_at: encryptedNotes ? new Date().toISOString() : null,
-    selected_notes: selectedPitchClasses,
-    chord_name:     S.currentChordResult?.name || null,
-  });
+  // Everything private goes into one payload, encrypted in the browser before it is sent.
+  let error = null;
+  try {
+    await checkinStore.save({
+      arousal: S.arousal, valence: S.valence, sensory_load: S.sensory,
+      emotion_words: S.emotions.size > 0 ? Array.from(S.emotions) : [],
+      location_tag: S.location,
+      notes: rawNotes,
+      selected_notes: selectedPitchClasses,
+      chord_name: S.currentChordResult?.name || null,
+      place_id: S.placeId,
+      env: { ...S.env, sun_elevation: currentSun()?.elevation ?? null },
+    });
+  } catch (err) { error = err; }
 
   S.submitting = false; btn.disabled = false; btn.textContent = 'Save check-in';
 
@@ -989,6 +1107,7 @@ function showConfirmation() {
 window.resetToStep1 = function() {
   S.arousal = 5; S.valence = 5; S.sensory = 5;
   S.emotions.clear(); S.location = null; S.currentStep = 1;
+  S.placeId = null; S.env = { noise: null, crowd: null, light: null }; refreshEnvUi();
   S.selectedNotes.clear(); S.currentChordResult = null;
 
   SCALES.forEach(scale => {
@@ -1002,7 +1121,7 @@ window.resetToStep1 = function() {
     disp.textContent = '5'; disp.style.color = c;
   });
 
-  document.querySelectorAll('.emotion-word, .location-tag, .note-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.emotion-word, .location-tag, .note-btn, .env-chip').forEach(b => b.classList.remove('selected'));
   document.getElementById('checkinNotes').value = '';
   document.getElementById('noteSection').classList.remove('open');
   updateChordDisplay(); updateNoteControlStates();
@@ -1063,17 +1182,14 @@ function calcStreaks(allCheckins) {
 // LOAD + PERIOD
 // ═══════════════════════════════════════════════════════
 async function loadCheckins() {
-  const sb = window._supabase; const user = window._currentUser;
-  if (!sb || !user) return;
-  const since = new Date(); since.setDate(since.getDate() - 90);
-  const { data, error } = await sb
-    .from('checkins')
-    .select('id, created_at, arousal, valence, sensory_load, emotion_words, location_tag, selected_notes, chord_name, notes, notes_encrypted_at')
-    .eq('user_id', user.id)
-    .gte('created_at', since.toISOString())
-    .order('created_at', { ascending: true });
-  if (error) { console.error(error.message); return; }
-  S.allCheckins = data || [];
+  try {
+    S.allCheckins = await checkinStore.load({ sinceDays: 90 });
+  } catch (err) {
+    console.error(err.message);
+    document.getElementById('dashboardContent').innerHTML =
+      `<div class="dash-empty"><p>Could not load your check-ins (${esc(err.message)}).</p></div>`;
+    return;
+  }
   renderDashboard();
 }
 
@@ -1587,9 +1703,7 @@ function renderNotesHistory(checkins) {
       errEl.hidden = true;
       errEl.textContent = '';
       try {
-        await ensureVaultReady();
-        const text = await decrypt(c.notes);
-        bodyEl.textContent = text;
+        bodyEl.textContent = c.notes;
         if (lockEl) { lockEl.style.display = 'none'; lockEl.setAttribute('aria-hidden', 'true'); }
         revealBtn.textContent = 'Hide note';
         revealed = true;
@@ -1665,6 +1779,8 @@ function onAuthReady(cb) {
 onAuthReady(async () => {
   buildNoteGrid();
   await loadCheckins();
+  await loadPlaces();
+  if (S.allCheckins.length) document.getElementById('insightsLink')?.removeAttribute('hidden');
 });
 
 window.goToStep          = window.goToStep;
