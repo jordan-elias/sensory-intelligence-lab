@@ -137,6 +137,16 @@
   status = 200
 
 [[redirects]]
+  from = "/check-in/insights"
+  to   = "/check-in/insights/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/check-in/insights/"
+  to   = "/check-in/insights/index.html"
+  status = 200
+
+[[redirects]]
   from = "/library"
   to   = "/library/index.html"
   status = 200
