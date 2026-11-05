@@ -468,6 +468,7 @@
 </footer>
 
 <script type="module">
+import * as recStore from '/assets/js/recordings/store.js';
 /* =========================================================
    HEADER
 ========================================================= */
@@ -1323,13 +1324,25 @@ document.addEventListener('keydown',e=>{
 /* =========================================================
    LIBRARY
 ========================================================= */
+const escT=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 let recordings=[],libRecStream=null,libRecMR=null,libRecChunks=[],libRecording=false;
 
+let _securing=false;
 async function loadLibrary(){
-  const sb=window._supabase;if(!sb)return;
-  const{data,error}=await sb.from('recordings').select('*').order('created_at',{ascending:false});
-  if(error){console.error(error);return;}
-  recordings=data||[];renderLibrary();updateStorageBar();
+  try{recordings=await recStore.list();}
+  catch(e){console.error(e);showToast('Could not load your recordings: '+e.message,'error');return;}
+  renderLibrary();updateStorageBar();
+  // Recordings saved before encryption existed are encrypted in place, once.
+  if(!_securing&&recordings.some(r=>r.legacy)){
+    _securing=true;
+    showToast('Encrypting your earlier recordings\u2026','success');
+    try{
+      const r=await recStore.secureLegacy(recordings);
+      showToast(r.failed?r.done+' encrypted, '+r.failed+' could not be and were left as they were.':'Your recordings are now encrypted.',r.failed?'error':'success');
+    }catch(e){console.warn(e);}
+    _securing=false;
+    try{recordings=await recStore.list();renderLibrary();updateStorageBar();}catch(e){}
+  }
 }
 
 function renderLibrary(){
@@ -1337,7 +1350,7 @@ function renderLibrary(){
   if(!recordings.length){list.innerHTML='<div class="lib-empty">No recordings yet. Upload or record to get started.</div>';return;}
   list.innerHTML=recordings.map(r=>
     '<div class="lib-item" id="libitem-'+r.id+'">'
-    +'<span class="lib-item-name" title="'+(r.title||'')+'">'+( r.title||'Untitled')+'</span>'
+    +'<span class="lib-item-name" title="'+escT(r.title||'')+'">'+escT(r.title||'Untitled')+'</span>'
     +'<span class="lib-item-meta">'+formatBytes(r.file_size||0)+' \xb7 '+formatDur(r.duration_s)+'</span>'
     +'<div class="lib-item-actions">'
     +'<button class="lib-action add-to" onclick="openAddToTrack(\''+r.id+'\')">Add to track</button>'
@@ -1366,21 +1379,15 @@ document.getElementById('fileUploadInput').addEventListener('change',async funct
 });
 
 async function uploadFile(file){
-  const sb=window._supabase;if(!sb)return;
-  const uid=window._currentUser?.id;if(!uid)return;
-  const ext=file.name.split('.').pop();
-  const fpath=uid+'/'+Date.now()+'-'+Math.random().toString(36).slice(2)+'.'+ext;
-  // fix #4: close temp AudioContext in finally so it never leaks on decode error
+  // decode a throwaway copy just to learn the duration; closed in finally so it never leaks
   let duration_s=null,tmp=null;
   try{
     tmp=new(window.AudioContext||window.webkitAudioContext)();
     const buf=await tmp.decodeAudioData(await file.arrayBuffer());
     duration_s=parseFloat(buf.duration.toFixed(2));
   }catch(e){/* non-fatal */}finally{if(tmp)tmp.close().catch(()=>{});}
-  const{error:upErr}=await sb.storage.from('recordings').upload(fpath,file,{contentType:file.type,upsert:false});
-  if(upErr){showToast('Upload failed: '+upErr.message,'error');return;}
-  // fix #10: store storage_path only — no stale file_url in DB
-  await sb.from('recordings').insert({user_id:uid,title:file.name.replace(/\.[^.]+$/,''),storage_path:fpath,file_size:file.size,duration_s,mime_type:file.type});
+  try{await recStore.upload(file,{durationS:duration_s});}
+  catch(e){showToast('Upload failed: '+e.message,'error');}
 }
 
 window.toggleLibRecord=async function(){
@@ -1411,19 +1418,9 @@ async function onLibRecStop(){
   document.getElementById('uploadStatus').textContent='';await loadLibrary();
 }
 
-// Always generate a fresh signed URL — never rely on the stored file_url (fix #10)
-async function getSignedUrl(rec){
-  const sb=window._supabase;if(!sb)return null;
-  const{data}=await sb.storage.from('recordings').createSignedUrl(rec.storage_path,3600);
-  return data?.signedUrl||null;
-}
-
 async function loadRecordingBuffer(rec){
   if(!AC)initAudio();
-  const url=await getSignedUrl(rec);
-  if(!url)throw new Error('Could not generate download URL');
-  const res=await fetch(url);if(!res.ok)throw new Error('HTTP '+res.status);
-  return await AC.decodeAudioData(await res.arrayBuffer());
+  return await AC.decodeAudioData(await recStore.fetchAudio(rec));
 }
 
 window.openLoadForTrack=function(trackId){
@@ -1431,7 +1428,7 @@ window.openLoadForTrack=function(trackId){
   document.getElementById('addToTrackTitle').textContent='Load file into Track '+(trackId+1);
   const list=document.getElementById('trackSelectList');
   list.innerHTML=recordings.length
-    ?recordings.map(r=>'<button class="sbtn" style="width:100%;text-align:left;padding:.5rem .85rem;" onclick="loadRecordingToTrackById(\''+r.id+'\','+trackId+')">'+(r.title||'Untitled')+' \xb7 '+formatDur(r.duration_s)+'</button>').join('')
+    ?recordings.map(r=>'<button class="sbtn" style="width:100%;text-align:left;padding:.5rem .85rem;" onclick="loadRecordingToTrackById(\''+r.id+'\','+trackId+')">'+escT(r.title||'Untitled')+' \xb7 '+formatDur(r.duration_s)+'</button>').join('')
     :'<p style="font-size:.8rem;color:var(--muted)">No recordings yet.</p>';
   openModal('addToTrackModal');
 };
@@ -1461,8 +1458,7 @@ window.deleteRecording=async function(recId){
   const sb=window._supabase;if(!sb)return;
   const rec=recordings.find(r=>r.id===recId);if(!rec)return;
   if(!confirm('Delete "'+(rec.title||'Untitled')+'"?'))return;
-  if(rec.storage_path)await sb.storage.from('recordings').remove([rec.storage_path]);
-  await sb.from('recordings').delete().eq('id',recId);
+  try{await recStore.remove(rec);}catch(e){showToast('Could not delete: '+e.message,'error');return;}
   tracks.forEach(t=>{if(t.recordingId===recId){teardownTrackGraph(t);t.buffer=t.fullBuffer=t.fileName=t.recordingId=null;}});
   await loadLibrary();renderTracks();updatePlayBtn();
 };
@@ -1478,8 +1474,9 @@ window.applyRename=async function(){
   const sb=window._supabase;if(!sb)return;
   const name=document.getElementById('renameInput').value.trim();
   if(!name){const msg=document.getElementById('renameMsg');msg.textContent='Please enter a name.';msg.className='modal-msg error show';return;}
-  const{error}=await sb.from('recordings').update({title:name}).eq('id',_renameId);
-  if(error){const msg=document.getElementById('renameMsg');msg.textContent=error.message;msg.className='modal-msg error show';return;}
+  const cur=recordings.find(r=>r.id===_renameId);
+  try{await recStore.rename(cur,name);}
+  catch(error){const msg=document.getElementById('renameMsg');msg.textContent=error.message;msg.className='modal-msg error show';return;}
   closeModal('renameModal');await loadLibrary();
   tracks.forEach(t=>{if(t.recordingId===_renameId)t.fileName=name;});renderTracks();
 };
