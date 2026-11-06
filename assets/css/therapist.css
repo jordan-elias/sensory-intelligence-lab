@@ -1,0 +1,15 @@
+/* /assets/css/therapist.css — therapist profile page */
+.th-title { font: 600 1.6rem var(--font-heading); margin-bottom: .4rem; }
+.th-lede { color: var(--muted); font-size: .9rem; margin-bottom: 2rem; }
+.th-muted { color: var(--muted); font-size: .85rem; }
+.th-form { max-width: 560px; }
+.th-form .ws-field { margin-bottom: 1.4rem; }
+.th-count { font-size: .7rem; color: var(--muted); text-align: right; margin-top: .25rem; }
+.th-photo { display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap; }
+.th-photo img, .th-photo .th-initial { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); }
+.th-photo .th-initial { display: flex; align-items: center; justify-content: center; background: var(--accent-light); color: var(--accent); font: 600 2rem var(--font-heading); }
+.th-photo-actions { display: flex; flex-direction: column; gap: .5rem; align-items: flex-start; }
+.th-switch { display: flex; gap: .7rem; align-items: flex-start; font-size: .9rem; margin-bottom: 1rem; cursor: pointer; }
+.th-switch input { margin-top: .3rem; accent-color: var(--accent); }
+.th-switch small { display: block; color: var(--muted); font-size: .75rem; line-height: 1.5; }
+.th-hint { font-size: .75rem; color: var(--muted); margin-top: .3rem; line-height: 1.5; }

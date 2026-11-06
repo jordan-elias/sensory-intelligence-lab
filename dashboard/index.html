@@ -940,6 +940,7 @@
   <script type="module">
 
     import { promptIfOldEntries } from '/assets/js/vault/gate.js';
+    import { showDashboardNudge } from '/assets/js/therapist/my-therapist.js';
 
     // ── Greeting ──
     function onAuthReady(cb) {
@@ -952,10 +953,11 @@ onAuthReady(async () => {
 
   const { data: profile } = await window._supabase
     .from('profiles')
-    .select('full_name')
+    .select('full_name, subscription_tier, subscription_status')
     .eq('id', user.id)
     .single();
 
+  showDashboardNudge(window._supabase, profile, document.querySelector('main .page-header'));
   promptIfOldEntries();   // only people with entries under the old key are asked
 
   const fullName  = profile?.full_name?.trim() || '';
