@@ -279,6 +279,16 @@
   status = 200
 
 [[redirects]]
+  from = "/therapist/profile"
+  to   = "/therapist/profile/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/therapist/profile/"
+  to   = "/therapist/profile/index.html"
+  status = 200
+
+[[redirects]]
   from = "/vault"
   to   = "/vault/index.html"
   status = 200

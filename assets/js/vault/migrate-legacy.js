@@ -10,6 +10,7 @@
  * Rows that fail any step are left exactly as they were and counted.
  */
 import { importLegacyKey, decryptWithKey } from './vault-crypto.js';
+import { API_BASE } from '../api.js';
 
 export const TARGETS = [
   { table: 'worksheets',      column: 'content' },
@@ -50,7 +51,7 @@ async function* legacyRows(sb, userId, { table, column }) {
 export async function fetchLegacyKey(sb) {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) throw new Error('No active session');
-  const res = await fetch('/.netlify/functions/get-or-create-vault-key', {
+  const res = await fetch(`${API_BASE}/.netlify/functions/get-or-create-vault-key`, {
     method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
   });
   if (!res.ok) throw new Error('Could not fetch your old key: ' + await res.text());
