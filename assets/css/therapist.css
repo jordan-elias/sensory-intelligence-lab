@@ -19,8 +19,19 @@
 .th-client { border: 1px solid var(--border); padding: 1rem 1.1rem; margin-bottom: .8rem; display: flex; flex-wrap: wrap; gap: .8rem 1.2rem; align-items: center; justify-content: space-between; }
 .th-client-main { display: flex; flex-direction: column; gap: .15rem; font-size: .9rem; }
 .th-client-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+.th-client-thread { flex-basis: 100%; border-top: 1px solid var(--border); padding-top: .8rem; }
 .th-client-detail { flex-basis: 100%; border-top: 1px solid var(--border); padding-top: .8rem; font-size: .85rem; }
 .th-summary { margin-bottom: .6rem; line-height: 1.6; }
 .th-list { list-style: none; padding: 0; margin: 0; }
 .th-list li { padding: .5rem 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
 .th-note { color: var(--muted); font-style: italic; margin-top: .2rem; }
+
+/* messages */
+.msg-box { max-height: 420px; overflow-y: auto; border: 1px solid var(--border); padding: .8rem; margin-bottom: .6rem; display: flex; flex-direction: column; gap: .6rem; }
+.msg-row { display: flex; flex-direction: column; max-width: 85%; }
+.msg-row.mine { align-self: flex-end; align-items: flex-end; }
+.msg-row.theirs { align-self: flex-start; }
+.msg-bubble { padding: .55rem .8rem; background: var(--surface); border: 1px solid var(--border); font-size: .9rem; line-height: 1.5; overflow-wrap: anywhere; }
+.msg-row.mine .msg-bubble { background: var(--accent-light); }
+.msg-meta { font-size: .7rem; color: var(--muted); margin-top: .15rem; }
+.msg-form textarea { width: 100%; font: inherit; padding: .6rem .7rem; border: 1px solid var(--border); background: var(--bg, #fff); color: inherit; resize: vertical; }

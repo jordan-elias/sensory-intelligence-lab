@@ -7,6 +7,7 @@
  *  - everyone else: renders nothing
  */
 import { post } from '../api.js';
+import { unreadCount } from '../messages/store.js';
 import { mountSharing } from '../sharing/sharing-card.js';
 import { LINK_CONSENT_VERSION, LINK_CONSENT_TEXT } from './consent.js';
 
@@ -68,6 +69,7 @@ export async function mountMyTherapist(root, { supabase, profile }) {
         <div class="msg" id="thMsg" role="status"></div>
         <div class="btn-row" style="margin-top:0">
           ${state.active.booking_link ? `<a class="btn" href="${esc(state.active.booking_link)}" target="_blank" rel="noopener" style="text-decoration:none">Book a session</a>` : ''}
+          <a class="btn btn-outline" id="thMessages" href="/messages/" style="text-decoration:none">Messages</a>
           <button type="button" class="btn btn-outline" id="thEnd">End this connection</button>
         </div>
         <div id="thEndConfirm" hidden style="margin-top:1rem;padding:1rem;border:1px solid var(--border);background:var(--surface)">
@@ -78,6 +80,7 @@ export async function mountMyTherapist(root, { supabase, profile }) {
     const $ = id => root.querySelector('#' + id), msg = (t, k) => { const m = $('thMsg'); m.textContent = t; m.className = 'msg show ' + (k || ''); };
     supabase.auth.getSession().then(({ data }) => {
       const uid = data?.session?.user?.id;
+      if (uid) unreadCount(supabase, uid).then(n => { if (n) $('thMessages').textContent = `Messages (${n} new)`; }).catch(() => {});
       if (uid) mountSharing($('thSharing'), { sb: supabase, uid, link: state.active, therapistName: state.active.display_name });
     });
     $('thEnd').onclick = () => { $('thEndConfirm').hidden = false; };
