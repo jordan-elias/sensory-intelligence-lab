@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Messages · Sensory Intelligence Lab</title>
+  <meta name="robots" content="noindex, nofollow">
+
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <link rel="apple-touch-icon" href="/images/favicon.png">
+  <link rel="manifest" href="/site.webmanifest">
+
+  <script src="/dashboard/auth-guard.js" type="module"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/worksheets.css">
+  <link rel="stylesheet" href="/assets/css/therapist.css">
+</head>
+<body>
+
+<div id="sil-header"></div>
+
+<main>
+  <h1 class="th-title">Messages</h1>
+  <p class="th-lede">Private between you and your therapist.</p>
+  <div id="msgApp"><p class="th-muted">Loading…</p></div>
+</main>
+
+<div id="sil-footer"></div>
+
+<script type="module">
+  import { mountLayout } from '/assets/js/worksheets/core.js';
+  import { mountClientMessages } from '/assets/js/messages/client-page.js';
+  mountLayout({ crumbs: [{ label: 'Messages' }] });
+  mountClientMessages(document.getElementById('msgApp'));
+</script>
+</body>
+</html>

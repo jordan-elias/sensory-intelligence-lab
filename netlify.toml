@@ -279,6 +279,16 @@
   status = 200
 
 [[redirects]]
+  from = "/messages"
+  to   = "/messages/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/messages/"
+  to   = "/messages/index.html"
+  status = 200
+
+[[redirects]]
   from = "/therapist"
   to   = "/therapist/index.html"
   status = 200

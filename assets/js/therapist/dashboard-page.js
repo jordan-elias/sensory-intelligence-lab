@@ -6,6 +6,7 @@
  */
 import { ensureVaultReady } from '../vault/gate.js';
 import { pairSafetyCode } from '../vault/vault-crypto.js';
+import { mountThread } from '../messages/thread.js';
 import { tierLabel, intakeLabel, summarize, openCopies } from './clients.js';
 
 const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -18,14 +19,17 @@ export async function mountDashboard(root) {
   if (error) { root.innerHTML = `<div class="ws-callout"><strong>Could not load</strong>${esc(error.message)}</div>`; return; }
   if (!me) { root.innerHTML = `<div class="ws-callout"><strong>This page is for therapists</strong>If you should have access, please contact the practice owner.</div>`; return; }
 
-  const state = { clients: [], counts: {}, keys: {}, open: null };
+  const state = { clients: [], counts: {}, keys: {}, unread: {}, stops: {} };
 
   async function load() {
-    const [c, k, n] = await Promise.all([
+    const [c, k, n, u] = await Promise.all([
       sb.from('my_clients').select('*').order('started_at', { ascending: false }),
       sb.from('my_client_keys').select('*'),
       sb.from('shared_copies').select('link_id').eq('category', 'checkins'),
+      sb.from('messages').select('link_id').eq('recipient_id', me.user_id).is('read_at', null),
     ]);
+    state.unread = {};
+    for (const r of (u.data || [])) state.unread[r.link_id] = (state.unread[r.link_id] || 0) + 1;
     if (c.error) throw new Error(c.error.message);
     state.clients = c.data || [];
     state.keys = Object.fromEntries((k.data || []).map(r => [r.link_id, r]));
@@ -43,9 +47,11 @@ export async function mountDashboard(root) {
       </div>
       <div class="th-client-actions">
         ${state.counts[c.link_id] ? `<button type="button" class="action-btn outline sm" data-act="open">${archived ? 'View kept check-ins' : 'View check-ins'}</button>` : ''}
+        <button type="button" class="action-btn outline sm" data-act="messages">Messages${state.unread[c.link_id] ? ` (${state.unread[c.link_id]} new)` : ''}</button>
         ${archived ? '<button type="button" class="action-btn outline sm" data-act="delete">Delete my records</button>' : ''}
       </div>
       <div class="th-client-detail" hidden></div>
+      <div class="th-client-thread" hidden></div>
     </div>`;
 
   function draw() {
@@ -67,6 +73,7 @@ export async function mountDashboard(root) {
     root.querySelectorAll('.th-client').forEach(el => {
       const link = el.dataset.link, c = state.clients.find(x => x.link_id === link);
       el.querySelector('[data-act="open"]')?.addEventListener('click', () => toggle(el, c));
+      el.querySelector('[data-act="messages"]').addEventListener('click', () => toggleThread(el, c));
       el.querySelector('[data-act="delete"]')?.addEventListener('click', () => confirmDelete(el, c));
     });
   }
@@ -97,6 +104,19 @@ export async function mountDashboard(root) {
             ${i.env ? '· ' + envText(i.env) : ''}
             ${i.notes ? `<div class="th-note">“${esc(i.notes)}”</div>` : ''}</li>`).join('')}</ul>`;
     } catch (e) { box.innerHTML = `<p class="msg show error">${esc(e.message)}</p>`; }
+  }
+
+  async function toggleThread(el, c) {
+    const box = el.querySelector('.th-client-thread');
+    if (!box.hidden) { box.hidden = true; state.stops[c.link_id]?.(); return; }
+    box.hidden = false;
+    const key = state.keys[c.link_id], active = c.status === 'active';
+    if (active && !key?.public_enc) { box.innerHTML = `<p class="th-muted">${esc(c.full_name || 'This client')} has not finished setting up their secure vault yet, so messaging is not available.</p>`; return; }
+    state.stops[c.link_id] = await mountThread(box, {
+      sb, linkId: c.link_id, active,
+      other: { id: c.client_id, name: c.full_name || 'your client', public_enc: key?.public_enc || null, public_sign: key?.public_sign || null, fingerprint: key?.fingerprint || null },
+      onChange: () => load().catch(() => {}),
+    });
   }
 
   const envText = e => [e.noise ? `noise ${e.noise}/5` : null, e.crowd ? `crowd ${e.crowd}/5` : null, e.light ? `light ${esc(e.light)}` : null].filter(Boolean).join(', ');
