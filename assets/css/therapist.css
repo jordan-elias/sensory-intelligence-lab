@@ -13,3 +13,14 @@
 .th-switch input { margin-top: .3rem; accent-color: var(--accent); }
 .th-switch small { display: block; color: var(--muted); font-size: .75rem; line-height: 1.5; }
 .th-hint { font-size: .75rem; color: var(--muted); margin-top: .3rem; line-height: 1.5; }
+
+/* dashboard */
+.th-h2 { font: 600 1.05rem var(--font-heading); margin: 2rem 0 .8rem; }
+.th-client { border: 1px solid var(--border); padding: 1rem 1.1rem; margin-bottom: .8rem; display: flex; flex-wrap: wrap; gap: .8rem 1.2rem; align-items: center; justify-content: space-between; }
+.th-client-main { display: flex; flex-direction: column; gap: .15rem; font-size: .9rem; }
+.th-client-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+.th-client-detail { flex-basis: 100%; border-top: 1px solid var(--border); padding-top: .8rem; font-size: .85rem; }
+.th-summary { margin-bottom: .6rem; line-height: 1.6; }
+.th-list { list-style: none; padding: 0; margin: 0; }
+.th-list li { padding: .5rem 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+.th-note { color: var(--muted); font-style: italic; margin-top: .2rem; }
