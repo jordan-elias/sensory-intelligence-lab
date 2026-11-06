@@ -10,6 +10,7 @@
  *     selected_notes, chord_name, notes, place_id, env: { noise, crowd, light, sun_elevation } }
  */
 import { ensureVaultReady, isEncrypted } from '/assets/js/vault/gate.js';
+import * as sharing from '/assets/js/sharing/store.js';
 
 const PAYLOAD_VERSION = 1;
 const PLAIN_COLS = 'arousal, valence, sensory_load, emotion_words, location_tag, selected_notes, chord_name, notes';
@@ -62,7 +63,10 @@ export async function save(record) {
   const { data, error } = await sb.from('checkins')
     .insert({ user_id: uid, payload, key_version: 2, ...EMPTY_PLAIN }).select('id, created_at');
   if (error) throw new Error(error.message);
-  return Array.isArray(data) ? data[0] : data;
+  const saved = Array.isArray(data) ? data[0] : data;
+  // If the client turned sharing on, also seal a copy for their therapist (best effort, never blocks the save).
+  await sharing.shareNew({ sb, session, record: { ...record, id: saved.id, created_at: saved.created_at } });
+  return saved;
 }
 
 /** Loads and decrypts check-ins, oldest first. `sinceDays: null` loads everything. */
@@ -103,6 +107,7 @@ export async function remove(id) {
   const { sb, uid } = await ctx();
   const { error } = await sb.from('checkins').delete().eq('id', id).eq('user_id', uid);
   if (error) throw new Error(error.message);
+  await sharing.withdrawOne(sb, id);   // only works while the connection is active; afterwards the copy is the therapist's
 }
 
 // ── saved places ────────────────────────────────────────

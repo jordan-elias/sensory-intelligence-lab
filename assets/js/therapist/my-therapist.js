@@ -7,6 +7,7 @@
  *  - everyone else: renders nothing
  */
 import { post } from '../api.js';
+import { mountSharing } from '../sharing/sharing-card.js';
 import { LINK_CONSENT_VERSION, LINK_CONSENT_TEXT } from './consent.js';
 
 const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -63,17 +64,22 @@ export async function mountMyTherapist(root, { supabase, profile }) {
       <div class="card"><div class="card-head"><h3>Connected</h3></div><div class="card-body">
         ${who}
         <p style="font-size:.8rem;font-weight:500;margin-bottom:.4rem">What your therapist can see</p>${visible}
+        <div id="thSharing"></div>
         <div class="msg" id="thMsg" role="status"></div>
         <div class="btn-row" style="margin-top:0">
           ${state.active.booking_link ? `<a class="btn" href="${esc(state.active.booking_link)}" target="_blank" rel="noopener" style="text-decoration:none">Book a session</a>` : ''}
           <button type="button" class="btn btn-outline" id="thEnd">End this connection</button>
         </div>
         <div id="thEndConfirm" hidden style="margin-top:1rem;padding:1rem;border:1px solid var(--border);background:var(--surface)">
-          <p style="font-size:.8rem;line-height:1.6;margin-bottom:.8rem">End the connection with ${esc(state.active.display_name)}? They lose access straight away. It cannot undo anything they have already seen.</p>
+          <p style="font-size:.8rem;line-height:1.6;margin-bottom:.8rem">End the connection with ${esc(state.active.display_name)}? They lose access to new data straight away. Copies of check-ins you already shared stay with them, for them to keep or delete, and it cannot undo anything they have already seen.</p>
           <div class="btn-row" style="margin-top:0"><button type="button" class="btn btn-danger" id="thEndYes">Yes, end it</button><button type="button" class="btn btn-outline" id="thEndNo">Keep it</button></div>
         </div>
       </div></div>`;
     const $ = id => root.querySelector('#' + id), msg = (t, k) => { const m = $('thMsg'); m.textContent = t; m.className = 'msg show ' + (k || ''); };
+    supabase.auth.getSession().then(({ data }) => {
+      const uid = data?.session?.user?.id;
+      if (uid) mountSharing($('thSharing'), { sb: supabase, uid, link: state.active, therapistName: state.active.display_name });
+    });
     $('thEnd').onclick = () => { $('thEndConfirm').hidden = false; };
     $('thEndNo').onclick = () => { $('thEndConfirm').hidden = true; };
     $('thEndYes').onclick = async () => {
