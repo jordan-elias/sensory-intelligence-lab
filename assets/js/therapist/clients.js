@@ -36,7 +36,7 @@ export async function openCopies(session, copies) {
     try {
       const text = await session.open(c.sealed, { context: `share:${c.link_id}:${c.category}:${c.source_id}` });
       const p = JSON.parse(text);
-      items.push({ ...p, id: c.source_id, created_at: p.created_at || c.source_created_at });
+      items.push({ ...p, id: c.source_id, category: c.category, created_at: p.created_at || c.source_created_at });
     } catch { unreadable++; }
   }
   items.sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));

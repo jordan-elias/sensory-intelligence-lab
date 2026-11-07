@@ -11,7 +11,7 @@
 import { createClient } from "@supabase/supabase-js";
 
 // Must match LINK_CONSENT_VERSION in /assets/js/therapist/consent.js
-export const CONSENT_VERSION = "link-1.1";
+export const CONSENT_VERSION = "link-1.2";
 const SESSION_TIERS = ["call1", "call2"];
 const ACTIVE_STATUSES = ["active", "trialing"];
 

@@ -78,3 +78,10 @@ test('empty, oversized and keyless sends are refused', async () => {
   await assert.rejects(M.sendMessage({ sb, session: client.session, linkId: 'L', other: o, text: 'a'.repeat(M.MAX_CHARS + 1) }), /up to/);
   await assert.rejects(M.sendMessage({ sb, session: client.session, linkId: 'L', other: { id: 't1' }, text: 'hi' }), /secure vault/);
 });
+
+test('the pair safety code is a readable code, the same for both people', async () => {
+  const { pairSafetyCode } = await import('../../assets/js/vault/vault-crypto.js');
+  const a = await pairSafetyCode('FP-A', 'FP-B'), b = await pairSafetyCode('FP-B', 'FP-A');
+  assert.equal(typeof a, 'string'); assert.match(a, /\d/); assert.equal(a, b);
+  assert.notEqual(a, await pairSafetyCode('FP-A', 'FP-C'));
+});
