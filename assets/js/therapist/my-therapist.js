@@ -28,12 +28,13 @@ export async function photoUrl(sb, path) {
 export async function loadState(sb, profile) {
   const { data: links } = await sb.from('my_therapists').select('*').order('started_at', { ascending: false });
   const active = (links || []).find(l => l.status === 'active') || null;
-  let offered = null;
+  let offered = null, choices = [];
   if (!active && hasSessionPlan(profile)) {
-    const { data } = await sb.from('therapist_directory').select('*').eq('is_default', true).maybeSingle();
-    offered = data || null;
+    const { data } = await sb.from('therapist_directory').select('*');
+    choices = (data || []).slice().sort((a, b) => (b.is_default ? 1 : 0) - (a.is_default ? 1 : 0) || String(a.display_name).localeCompare(b.display_name));
+    offered = choices[0] || null;     // the practice's default therapist comes first
   }
-  return { active, offered, ended: (links || []).filter(l => l.status === 'ended'), needsLink: !active && hasSessionPlan(profile) };
+  return { active, offered, choices, ended: (links || []).filter(l => l.status === 'ended'), needsLink: !active && hasSessionPlan(profile) };
 }
 
 function avatar(url, name) {
@@ -49,6 +50,7 @@ export async function mountMyTherapist(root, { supabase, profile }) {
   if (!state.active && !state.needsLink) { root.hidden = true; root.innerHTML = ''; return; }
   root.hidden = false;
 
+  let chosenId = state.offered?.user_id;
   const t = state.active || state.offered;
   const url = t ? await photoUrl(supabase, t.photo_path).catch(() => null) : null;
   const who = t ? `
@@ -97,16 +99,26 @@ export async function mountMyTherapist(root, { supabase, profile }) {
   root.innerHTML = `
     <p class="sl" id="therapist">Your therapist</p>
     <div class="card"><div class="card-head"><h3>Connect with your therapist</h3></div><div class="card-body">
-      ${t ? who : ''}
+      ${state.choices.length > 1 ? `
+        <p style="font-size:.85rem;margin-bottom:.5rem">Choose your therapist:</p>
+        <div id="thPick" role="radiogroup" aria-label="Choose your therapist" style="margin-bottom:1rem">
+          ${state.choices.map((c, i) => `
+            <label style="display:block;border:1px solid var(--border);padding:.7rem .9rem;margin-bottom:.4rem;cursor:pointer">
+              <input type="radio" name="thChoice" value="${esc(c.user_id)}" ${i === 0 ? 'checked' : ''}>
+              <strong style="margin-left:.4rem">${esc(c.display_name)}</strong>
+              ${c.bio ? `<span style="display:block;font-size:.8rem;color:var(--muted);line-height:1.5;margin:.2rem 0 0 1.4rem">${esc(c.bio)}</span>` : ''}
+            </label>`).join('')}
+        </div>` : (t ? who : '')}
       <p style="font-size:.85rem;line-height:1.6;margin-bottom:.6rem">Your plan includes sessions. Before you are connected, please read what this means:</p>
       ${visible}
       <div class="msg" id="thMsg" role="status"></div>
       ${t ? `<div class="btn-row" style="margin-top:0"><button type="button" class="btn" id="thAgree">I understand, connect me</button></div>`
           : `<p style="font-size:.8rem;color:var(--muted)">No therapist is taking new clients right now. Please check back soon.</p>`}
     </div></div>`;
+  root.querySelectorAll('input[name="thChoice"]').forEach(r => r.addEventListener('change', () => { chosenId = r.value; }));
   root.querySelector('#thAgree')?.addEventListener('click', async e => {
     e.target.disabled = true;
-    try { await post('link-therapist', { consent_version: LINK_CONSENT_VERSION }); await mountMyTherapist(root, { supabase, profile }); }
+    try { await post('link-therapist', { consent_version: LINK_CONSENT_VERSION, ...(state.choices.length > 1 ? { therapist_id: chosenId } : {}) }); await mountMyTherapist(root, { supabase, profile }); }
     catch (err) { const m = root.querySelector('#thMsg'); m.textContent = err.message; m.className = 'msg show error'; e.target.disabled = false; }
   });
 }
