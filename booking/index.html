@@ -437,6 +437,7 @@
 <script type="module">
 
 import { getBookingEntitlement, getUpcomingBookings } from '/booking/entitlement-logic.js';
+import { planFor } from '/assets/js/booking/therapist-link.js';
 
 // ─────────────────────────────────────────────────────────
 // HEADER
@@ -610,7 +611,8 @@ function renderUpcoming(bookings) {
 // ─────────────────────────────────────────────────────────
 const _calInitialised = new Set();
 
-function loadAndMountCal(sections) {
+function loadAndMountCal(allSections) {
+  const sections = allSections.filter(sec => sec.calLink);   // link-only and paused sections have no calendar
   if (!sections.length) return;
 
   (function (C, A, L) {
@@ -676,7 +678,7 @@ function loadAndMountCal(sections) {
 // ─────────────────────────────────────────────────────────
 // RENDER BOOKING OPTIONS
 // ─────────────────────────────────────────────────────────
-function render(ent) {
+function render(ent, therapist) {
   const root = document.getElementById('bookingRoot');
   root.innerHTML = '';
 
@@ -861,11 +863,36 @@ function render(ent) {
     }
 
     // ── Subscriber session calendar ─────────────────────────────────────
-    sections.push({
-      id: 'cal-subscriber', label: 'Monthly Session',
-      meta: 'Included in your plan',
-      calLink: 'jordan-elias/subscriber-session', ns: 'subscriber-session',
-    });
+    // Session plans book with the client's own therapist. Without a connection, the practice
+    // calendar stays available so nothing breaks, with a prompt to connect.
+    const tp = planFor(therapist);
+    if (tp.kind === 'none') {
+      const nudge = document.createElement('div');
+      nudge.className = 'upgrade-nudge';
+      nudge.innerHTML = `
+        <p class="upgrade-nudge-head">Connect with your therapist</p>
+        <p>Your plan includes sessions with a therapist you choose. Connect from your account to book with them directly.</p>
+        <div class="nudge-actions"><a class="nudge-btn" href="/account/#therapist">Connect now</a></div>`;
+      root.appendChild(nudge);
+      sections.push({
+        id: 'cal-subscriber', label: 'Monthly Session',
+        meta: 'Included in your plan',
+        calLink: 'jordan-elias/subscriber-session', ns: 'subscriber-session',
+      });
+    } else {
+      const who = therapist.display_name || 'your therapist';
+      const label = `Monthly session with ${who}`;
+      if (tp.kind === 'cal') {
+        sections.push({ id: 'cal-subscriber', label, meta: 'Included in your plan', calLink: tp.calLink, ns: 'subscriber-session' });
+      } else if (tp.kind === 'external') {
+        sections.push({ id: 'cal-subscriber', label, meta: 'Included in your plan', ns: 'subscriber-session', href: tp.url, who });
+      } else {
+        sections.push({ id: 'cal-subscriber', label, meta: 'Included in your plan', ns: 'subscriber-session',
+          note: tp.reason === 'unavailable'
+            ? `${who} is not taking session bookings right now. You can message them from your account.`
+            : `${who} has not added a booking link yet. You can message them from your account.` });
+      }
+    }
 
   } else {
     // ── Free / Beta / Lab users ─────────────────────────────────────────
@@ -960,6 +987,21 @@ function buildCalSections(root, sections, ent) {
     `;
     wrap.appendChild(head);
 
+    if (sec.href || sec.note) {
+      const box = document.createElement('div');
+      box.className = 'intro-note';
+      if (sec.href) {
+        box.appendChild(document.createTextNode(`${sec.who} takes bookings on their own page. It opens in a new tab. `));
+        const a = document.createElement('a');
+        a.className = 'nudge-btn'; a.textContent = 'Book a session'; a.href = sec.href;
+        a.target = '_blank'; a.rel = 'noopener noreferrer';
+        box.appendChild(a);
+      } else { box.textContent = sec.note; }
+      wrap.appendChild(box);
+      root.appendChild(wrap);
+      return;
+    }
+
     const calWrap = document.createElement('div');
     calWrap.className = 'cal-embed-wrap';
     calWrap.id = sec.id;
@@ -1009,7 +1051,12 @@ onAuthReady(async () => {
     ]);
 
     renderUpcoming(upcoming);
-    render(ent);
+    let therapist = null;
+    if (ent.tier === 'call1' || ent.tier === 'call2') {
+      const { data } = await supabase.from('my_therapists').select('*').eq('status', 'active').limit(1);
+      therapist = (data && data[0]) || null;
+    }
+    render(ent, therapist);
 
   } catch (err) {
     console.error('Booking page error:', err);
