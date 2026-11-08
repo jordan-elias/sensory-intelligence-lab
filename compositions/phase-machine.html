@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <script src="/assets/js/audio/safe-output.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Phase Machine</title>
 
@@ -476,7 +477,7 @@ function posB(){
 function startPlay(pA,pB){
   stopNodes();
   var ctx=resumeCtx(),now=ctx.currentTime,l=state.buffer.duration;
-  masterGain=ctx.createGain();masterGain.gain.value=0.85;masterGain.connect(ctx.destination);
+  masterGain=ctx.createGain();masterGain.gain.setValueAtTime(0,now);masterGain.gain.linearRampToValueAtTime(0.85,now+0.04);masterGain.connect(ctx.destination);
   gainA=ctx.createGain();gainA.gain.value=state.volA;gainA.connect(masterGain);
   gainB=ctx.createGain();gainB.gain.value=state.volB;gainB.connect(masterGain);
   srcA=ctx.createBufferSource();srcA.buffer=state.buffer;srcA.loop=true;srcA.playbackRate.value=1.0;srcA.connect(gainA);
@@ -487,11 +488,17 @@ function startPlay(pA,pB){
 }
 
 function stopNodes(){
-  if(srcA){try{srcA.stop();}catch(e){}srcA=null;}
-  if(srcB){try{srcB.stop();}catch(e){}srcB=null;}
-  if(gainA){gainA.disconnect();gainA=null;}
-  if(gainB){gainB.disconnect();gainB=null;}
-  if(masterGain){masterGain.disconnect();masterGain=null;}
+  // Fade out briefly, then stop, so stopping never clicks.
+  var a=srcA,b=srcB,ga=gainA,gb=gainB,m=masterGain;
+  srcA=srcB=gainA=gainB=masterGain=null;
+  if(!m){return;}
+  var ctx=getCtx(),t=ctx.currentTime;
+  try{m.gain.cancelScheduledValues(t);m.gain.setValueAtTime(m.gain.value,t);m.gain.linearRampToValueAtTime(0,t+0.04);}catch(e){}
+  setTimeout(function(){
+    if(a){try{a.stop();}catch(e){}}
+    if(b){try{b.stop();}catch(e){}}
+    if(ga)ga.disconnect(); if(gb)gb.disconnect(); m.disconnect();
+  },70);
 }
 
 function togglePlay(){
@@ -844,14 +851,15 @@ function zoomFit(){
 /* ── Preview / use / reset ── */
 function previewSelection(){
   if(state.previewSrc){
-    try{state.previewSrc.stop();}catch(e){}
-    state.previewSrc=null;
+    var ps=state.previewSrc,pg=state.previewGain; state.previewSrc=null;
+    try{var t0=pg.context.currentTime;pg.gain.cancelScheduledValues(t0);pg.gain.setValueAtTime(pg.gain.value,t0);pg.gain.linearRampToValueAtTime(0,t0+0.04);}catch(e){}
+    setTimeout(function(){try{ps.stop();}catch(e){}},60);
     document.getElementById('wf-preview').innerHTML='<svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> Preview Selection';
     return;
   }
   var ctx=resumeCtx(),dur=state.fullBuffer.duration;
   var start=state.selStart*dur,end=state.selEnd*dur;
-  var g=ctx.createGain();g.gain.value=0.7;g.connect(ctx.destination);
+  var g=ctx.createGain();var pt=ctx.currentTime;g.gain.setValueAtTime(0,pt);g.gain.linearRampToValueAtTime(0.7,pt+0.03);g.gain.setValueAtTime(0.7,pt+Math.max(0.03,end-start-0.05));g.gain.linearRampToValueAtTime(0,pt+Math.max(0.04,end-start));g.connect(ctx.destination);state.previewGain=g;
   state.previewSrc=ctx.createBufferSource();
   state.previewSrc.buffer=state.fullBuffer;
   state.previewSrc.connect(g);
