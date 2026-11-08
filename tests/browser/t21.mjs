@@ -1,0 +1,20 @@
+import {launch,newPage} from './harness.mjs';
+const {browser,BASE,server}=await launch();
+let fail=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fail++; };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function nav(url,tables){ const P=await newPage(await browser.createBrowserContext(),BASE,{tables}); await P.page.goto(`${BASE}${url}`,{waitUntil:'domcontentloaded'}); await sleep(1800);
+  const links=await P.page.evaluate(()=>[...document.querySelectorAll('.sil-header__nav a')].map(a=>a.textContent.trim()+'|'+a.getAttribute('href')+'|'+a.className));
+  const order=await P.page.evaluate(()=>[...document.querySelectorAll('.sil-header__nav > *')].map(e=>e.textContent.trim()));
+  return {links,order,errors:P.errors.filter(e=>!/Failed to load resource/.test(e))}; }
+const unread=[{id:'m1',link_id:'L1',sender_id:'x',recipient_id:'u1',read_at:null},{id:'m2',link_id:'L1',sender_id:'x',recipient_id:'u1',read_at:null}];
+let r=await nav('/booking/',{therapist_profiles:[{user_id:'u1',display_name:'J'}],my_therapists:[],messages:unread});
+ok(r.links.some(l=>l.startsWith('Clients (2)|/therapist/')),'therapist sees "Clients" with unread count');
+ok(r.order.at(-1)==='Sign out','link sits before Sign out');
+r=await nav('/therapist/',{therapist_profiles:[{user_id:'u1',display_name:'J'}],my_therapists:[],messages:[]});
+ok(r.links.some(l=>/^Clients\|\/therapist\/\|.*sil-active/.test(l)),'on the dashboard the link is highlighted, no count when nothing unread');
+r=await nav('/account/',{therapist_profiles:[],my_therapists:[{link_id:'L1',status:'active',user_id:'t1',display_name:'D'}],messages:unread.slice(0,1)});
+ok(r.links.some(l=>l.startsWith('Messages (1)|/messages/'))&&!r.links.some(l=>l.startsWith('Clients')),'connected client sees "Messages", not "Clients"');
+r=await nav('/booking/',{therapist_profiles:[],my_therapists:[],messages:[]});
+ok(!r.links.some(l=>/^(Clients|Messages)/.test(l)),'everyone else sees neither');
+ok(r.errors.length===0,'no page errors '+r.errors.join('|'));
+await browser.close(); server.close(); process.exit(fail?1:0);
