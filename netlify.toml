@@ -443,25 +443,20 @@ Content-Security-Policy = """
     'unsafe-inline'
     'unsafe-eval'
     https://app.cal.com
-    https://fonts.googleapis.com
-    https://esm.sh
     https://cdnjs.cloudflare.com
     https://cdn.jsdelivr.net
     https://www.youtube.com;
   style-src
     'self'
     'unsafe-inline'
-    https://fonts.googleapis.com
     https://app.cal.com;
   font-src
-    'self'
-    https://fonts.gstatic.com;
+    'self';
   connect-src
     'self'
     https://app.cal.com
     https://cal.com
     https://lrjuufvrgkuvfxcmybtf.supabase.co
-    https://esm.sh
     https://lrclib.net
     https://www.youtube.com
     https://www.youtube-nocookie.com;

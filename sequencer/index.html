@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" href="/images/favicon.png">
   <link rel="manifest" href="/site.webmanifest">
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="/assets/css/fonts.css" rel="stylesheet">
 
 
   <style>
@@ -1761,7 +1761,7 @@ menuToggle.addEventListener('click', () => {
 silNav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => silNav.classList.remove('sil-open')));
 async function getSupabase() {
   if (window._supabase) return window._supabase;
-  const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+  const { createClient } = await import('/assets/js/vendor/supabase-js.js');
   return createClient('https://lrjuufvrgkuvfxcmybtf.supabase.co','sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1');
 }
 document.getElementById('silSignOut').addEventListener('click', async function () {

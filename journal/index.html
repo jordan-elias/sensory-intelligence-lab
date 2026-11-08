@@ -21,7 +21,7 @@
     });
   </script>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link href="/assets/css/fonts.css" rel="stylesheet">
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -678,7 +678,7 @@ silNav.querySelectorAll('a').forEach(a =>
 
 async function getSupabase() {
   if (window._supabase) return window._supabase;
-  const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+  const { createClient } = await import('/assets/js/vendor/supabase-js.js');
   return createClient(
     'https://lrjuufvrgkuvfxcmybtf.supabase.co',
     'sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1'

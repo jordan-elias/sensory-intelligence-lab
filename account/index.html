@@ -13,7 +13,7 @@
 
   <script src="/dashboard/auth-guard.js" type="module"></script>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+  <link href="/assets/css/fonts.css" rel="stylesheet">
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1162,14 +1162,7 @@ async function handleDeleteAccount() {
     const user     = window._currentUser;
     if (!supabase || !user) throw new Error('Not signed in.');
 
-    // Remove storage objects
-    const { data: storageFiles } = await supabase.storage
-      .from('recordings').list(user.id + '/');
-    if (storageFiles && storageFiles.length > 0) {
-      const paths = storageFiles.map(f => user.id + '/' + f.name);
-      await supabase.storage.from('recordings').remove(paths);
-    }
-
+    // Files, billing and all data are removed on the server in one step.
     // Server-side deletion
     const { data: { session } } = await supabase.auth.getSession();
     const res = await fetch('/.netlify/functions/delete-account', {
