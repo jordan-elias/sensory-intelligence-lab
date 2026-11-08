@@ -241,7 +241,7 @@
       <a href="#faq">FAQ</a>
       <a href="#contact">Contact</a>
     </nav>
-    <p class="sidebar__updated">Last updated<br>May 2026<br>Version 1.1</p>
+    <p class="sidebar__updated">Last updated<br>November 2026<br>Version 2.0</p>
   </aside>
 
   <main>
@@ -305,238 +305,127 @@
     </section>
 
     <!-- YOUR CONTENT & PRIVACY -->
-    <section class="section" id="your-content">
-      <h2 class="section__title">Your content and your privacy</h2>
-      <p class="prose">
-        The journal, check-in notes, and worksheets are personal tools. The platform is built
-        around a simple principle: <strong>nothing is recorded unless you actively choose to save it.</strong>
-        You are always in control of what happens to what you write.
-      </p>
+<section class="section" id="your-content">
+<h2 class="section__title">Your content and your privacy</h2>
+<p class="prose">
+The journal, check-ins, worksheets, saved places and recordings are personal tools. The platform is built
+around two rules: <strong>nothing is recorded unless you choose to save it</strong>, and
+<strong>nothing you save is shared with anyone unless you choose to share it</strong>. Sharing is never switched on by default.
+</p>
+<div class="callout callout--green">
+<span class="callout__label">The three options for anything you write</span>
+<strong>Save</strong> — your entry is encrypted in your browser before it is sent to the server. The server stores
+scrambled data only. Only you can unlock it, with your vault passphrase or recovery key.<br><br>
+<strong>Download as a file</strong> — your entry is written directly to a file on your own device. Nothing is
+sent to any server. The file belongs entirely to you and is <em>not</em> encrypted.<br><br>
+<strong>Delete / Destroy</strong> — the text is erased from the page and from memory. Nothing is sent anywhere.
+</div>
+<p class="prose">
+Writing, downloading and deleting are private in every case. No drafts are auto-saved to the server, and no
+keystroke or word-count data is sent while you write. The only moment saved content leaves your browser is when you
+press Save, and by then it is already encrypted.
+</p>
+<h3 class="section__sub">Working with a therapist on the platform</h3>
+<p class="prose">
+If you are on a session plan you can connect to a therapist. Until you do, no therapist can see you at all, and free
+and Lab-only accounts are never visible to therapists. When you connect, you are shown exactly what the therapist
+will see before you agree: your name, your email, your subscription and intake status, and the times of the sessions
+you book with them. <strong>Nothing else is visible until you share it.</strong>
+</p>
+<ul class="prose" style="margin-left:1.25rem;">
+<li><strong>Check-ins</strong> are shared only if you switch sharing on for that therapist, and you choose whether notes are included.</li>
+<li><strong>Worksheets</strong> are shared one document at a time. There is no switch that shares them all.</li>
+<li><strong>Messages</strong> between you and your therapist can be read only by the two of you.</li>
+<li>Journal entries, recordings and saved places are not shareable through the platform.</li>
+</ul>
+<p class="prose">
+Shared items are re-encrypted so that only you and that therapist can open them. You can stop sharing, and either of
+you can end the connection, at any time. When a connection ends, you and the therapist each choose whether to keep or delete
+your own copy. You can also still download any file and send it by email if you prefer.
+</p>
+</section>
 
-      <div class="callout callout--green">
-        <span class="callout__label">The three options — and what each means for your data</span>
-        <strong>Save encrypted</strong> — your entry is encrypted in your browser before being sent
-        to the server. The platform stores ciphertext only. Only you can decrypt and read it in a
-        future session.<br><br>
-        <strong>Download as a file</strong> — your entry is written directly to a file on your own
-        device. Nothing is sent to any server at any point. The platform has no record that you
-        wrote anything. The file belongs entirely to you.<br><br>
-        <strong>Delete / Destroy</strong> — the text is permanently erased from the page and from
-        memory. Nothing is sent anywhere. Nothing is logged. It is gone completely.
-      </div>
+<!-- ENCRYPTION -->
+<section class="section" id="encryption">
+<h2 class="section__title">How encryption works</h2>
+<p class="prose">
+Saved content is encrypted in your browser before it is sent to any server. What the database holds is scrambled
+data that cannot be read without your key. The encryption key is protected by a passphrase that <strong>only you
+know</strong>.
+</p>
+<h3 class="section__sub">Your vault</h3>
+<p class="prose">
+The first time you save something private you create a <strong>vault passphrase</strong>. Your browser turns it into
+a key using Argon2id (a deliberately slow function that makes guessing hard), and that key protects the random
+content key that encrypts your data. You also receive a <strong>recovery key</strong>, a second way to open the same
+vault if you forget the passphrase. The server stores only the protected bundle. It never receives your passphrase,
+your recovery key, or the unprotected content key.
+</p>
+<div class="tech-block">
+<span class="tech-block__label">Technical specification</span>
+<p><strong>Content encryption:</strong> AES-256-GCM with a fresh random 96-bit IV for every save, in your browser using the Web Crypto API</p>
+<p><strong>Passphrase protection:</strong> Argon2id (64 MiB, 3 passes) derives the key that wraps your content key</p>
+<p><strong>Recovery key:</strong> 160 random bits, a second wrapper for the same content key</p>
+<p><strong>Sharing keys:</strong> each account has an ECDH P-256 key pair for receiving shared items and an ECDSA P-256 key pair for signing messages. The private halves are encrypted with your content key. Shared items and messages are sealed separately to each person allowed to read them.</p>
+<p><strong>Binding:</strong> each encrypted item is bound to your account and its purpose, so it cannot be moved into another place unnoticed</p>
+</div>
+<h3 class="section__sub">What this means in practice</h3>
+<div class="callout callout--green">
+<span class="callout__label">What this protects against</span>
+Someone who obtains a copy of the database, the platform operator included, sees only scrambled data for everything
+marked encrypted below. There is no server-side copy of your key that the operator could use to read it.
+</div>
+<div class="callout callout--amber">
+<span class="callout__label">Honest limitations</span>
+<strong>If you lose both your passphrase and your recovery key, your encrypted content cannot be recovered by anyone,
+including us.</strong> Resetting your account password does not unlock it.<br><br>
+<strong>Not everything is encrypted.</strong> Your email, name, subscription, timestamps, booking times and the
+size of what you store are visible to the platform. Game scores and instrument or mixer settings are stored
+unencrypted. The table below lists each item.<br><br>
+<strong>This is a website.</strong> Your browser downloads the platform's code from our server each time. Encryption
+in the browser protects you against database access, but not against a malicious or compromised version of the site
+itself. We keep the number of outside code sources small and are working to remove the remaining ones.
+</div>
+</section>
 
-      <p class="prose">
-        Writing, downloading, and deleting are completely private in every case. No data is
-        collected during the writing process. No drafts are auto-saved to the server. No keystroke
-        or word count data is transmitted while you are writing. The only moment any content leaves
-        your browser is when you explicitly press Save — and at that point it is already encrypted.
-      </p>
+<!-- WHAT IS STORED -->
+<section class="section" id="data-stored">
+<h2 class="section__title">What is stored and how</h2>
+<p class="prose">
+The table covers every category of data the platform stores. Anything you download or delete is not stored.
+</p>
+<table class="data-table">
+<thead><tr><th>Data</th><th>Where</th><th>State</th><th>Who can read it</th></tr></thead>
+<tbody>
+<tr><td>Email address</td><td class="td-mono">Login records</td><td><span class="badge badge--plain">Plaintext</span></td><td>You. Platform operator. Supabase.</td></tr>
+<tr><td>Display name, subscription tier and status, intake status</td><td class="td-mono">Profile</td><td><span class="badge badge--plain">Plaintext</span></td><td>You. Platform operator. Your therapist, if you connect to one (see above).</td></tr>
+<tr><td>Journal entries (text and title)</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You only. Journal entries cannot be shared through the platform.</td></tr>
+<tr><td>Journal details: date, length, duration, soundscape, prompt</td><td class="td-mono">Database</td><td><span class="badge badge--plain">Plaintext</span></td><td>You. Platform operator.</td></tr>
+<tr><td>Check-ins: scores, emotion words, notes</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You. Your therapist, only if you turn sharing on.</td></tr>
+<tr><td>Saved places</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You only.</td></tr>
+<tr><td>Worksheets</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You. Your therapist, only for the individual worksheets you share.</td></tr>
+<tr><td>Audio recordings and compositions (audio, title, length)</td><td class="td-mono">Private file storage</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You only. Files are never at public links.</td></tr>
+<tr><td>Messages with your therapist</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You and your therapist only.</td></tr>
+<tr><td>Items you share with a therapist</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You and that therapist only.</td></tr>
+<tr><td>Your public sharing and signing keys</td><td class="td-mono">Database</td><td><span class="badge badge--plain">Plaintext</span></td><td>Visible to the platform. Used so others can encrypt to you and verify your messages. Not secret.</td></tr>
+<tr><td>Your protected vault bundle</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>Only your passphrase or recovery key can open it.</td></tr>
+<tr><td>Game scores, instrument and mixer settings</td><td class="td-mono">Database</td><td><span class="badge badge--plain">Plaintext</span></td><td>You. Platform operator.</td></tr>
+<tr><td>Who is connected to whom, when messages were sent, how large items are</td><td class="td-mono">Database</td><td><span class="badge badge--plain">Plaintext</span></td><td>Platform operator. The people involved. This information is not hidden.</td></tr>
+<tr><td>Booking times and the therapist booked with</td><td class="td-mono">Database</td><td><span class="badge badge--plain">Plaintext</span></td><td>You. Platform operator. The therapist you booked with.</td></tr>
+<tr><td>Booking details</td><td class="td-mono">Cal.com or the therapist’s own booking page</td><td><span class="badge badge--plain">Held by them</span></td><td>Governed by their privacy policy.</td></tr>
+<tr><td>Card details and invoices</td><td class="td-mono">Stripe</td><td><span class="badge badge--stripe">Stripe-managed, PCI-DSS</span></td><td>Stripe. We never see card numbers. We keep only a Stripe customer and subscription ID.</td></tr>
+<tr><td>Downloaded or deleted entries</td><td class="td-mono">—</td><td><span class="badge badge--zero">Not stored</span></td><td>No one. Nothing is recorded.</td></tr>
+</tbody>
+</table>
+<h3 class="section__sub">Identity separation</h3>
+<p class="prose">
+Your content is attached to a random account ID, not to your name or email, which are held in separate tables.
+Anyone looking only at content tables would see scrambled data under anonymous IDs. This is a precaution, not a
+guarantee: the platform operator can link IDs to people.
+</p>
+</section>
 
-      <h3 class="section__sub">Sharing with your therapist</h3>
-      <p class="prose">
-        If you work with Jordan Elias in a session tier and want to share something you have written
-        or worked on, the simplest and most private method is to <strong>download the file and send
-        it by email</strong> to <a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a>.
-        You choose exactly what to share, when, and how. The platform plays no role in that
-        exchange and has no record of it. Nothing is ever shared without your deliberate action.
-      </p>
-    </section>
-
-    <!-- ENCRYPTION -->
-    <section class="section" id="encryption">
-      <h2 class="section__title">How encryption works</h2>
-      <p class="prose">
-        When you choose to save content, it is encrypted in your browser before it is sent to any
-        server. What is stored in the database is ciphertext: scrambled data that cannot be read
-        without the correct key.
-      </p>
-
-      <h3 class="section__sub">The encryption standard</h3>
-      <p class="prose">
-        All content encryption uses <strong>AES-256-GCM</strong> (Advanced Encryption Standard,
-        256-bit key, Galois/Counter Mode). This is the same standard used by banks, governments,
-        and end-to-end encrypted messaging applications. GCM mode provides both confidentiality
-        (the content cannot be read) and integrity (any tampering with the ciphertext is detectable).
-      </p>
-
-      <div class="tech-block">
-        <span class="tech-block__label">Technical specification</span>
-        <p><strong>Algorithm:</strong> AES-256-GCM</p>
-        <p><strong>Key length:</strong> 256 bits (32 bytes)</p>
-        <p><strong>IV (Initialisation Vector):</strong> 96 bits (12 bytes), randomly generated per encryption operation — every save produces a unique ciphertext even for identical content</p>
-        <p><strong>Implementation:</strong> Web Crypto API (<code>window.crypto.subtle</code>) — browser-native, no external libraries</p>
-        <p><strong>Storage format:</strong> JSON object containing base64-encoded IV and ciphertext, stored as a text column in Supabase</p>
-        <p><strong>When encryption happens:</strong> In your browser, before any data is transmitted. Plaintext never travels over the network.</p>
-      </div>
-
-      <h3 class="section__sub">Your encryption key</h3>
-      <p class="prose">
-        Each account has a unique AES-256 encryption key, generated when you first visit a module
-        that uses encryption (journal, check-in notes, worksheets). This key is generated on our
-        server and returned to your browser over HTTPS, where it is held in memory for the duration
-        of your session only. It is never written to <code>localStorage</code>, cookies, or any
-        other persistent browser storage. When you sign out or close the tab, the key is gone from
-        your device.
-      </p>
-      <p class="prose">
-        The key is stored in the database in an encrypted form, wrapped using a key derived from a
-        <strong>platform secret</strong> — a random value stored only in our server environment
-        variables, never in the database. When you sign in, our server verifies your identity and
-        uses the platform secret to unwrap your key and return it to your browser.
-      </p>
-
-      <h3 class="section__sub">What this means honestly</h3>
-      <div class="callout callout--amber">
-        <span class="callout__label">Honest limitation</span>
-        This model protects saved data against database breaches — if someone obtained a copy of
-        the database, they would see only ciphertext that cannot be decrypted without also
-        compromising the server environment. However, as the platform operator, Jordan Elias has
-        access to the platform secret. This means that, in theory, someone with access to both
-        the database and the server environment could decrypt saved content.<br><br>
-        This is disclosed because honest privacy policy matters more than false reassurance.
-        If you want absolute certainty that no one can read what you write, use the download
-        or delete options — in both cases nothing is stored anywhere.
-      </div>
-
-      <div class="callout callout--green">
-        <span class="callout__label">What this protects against</span>
-        A database breach alone cannot expose your saved entries. They are ciphertext without the
-        server secret. Your data is never stored or logged in plaintext anywhere in the system.
-      </div>
-
-      <h3 class="section__sub">The future upgrade path</h3>
-      <p class="prose">
-        The architecture is designed to support an upgrade to <strong>true end-to-end encryption</strong>
-        in a future version, where your key would be derived from a passphrase only you know —
-        making decryption impossible even for the platform operator. This upgrade path is built
-        into the codebase but not yet activated. It will be announced clearly when available,
-        and upgrading will be opt-in with no loss of existing data.
-      </p>
-    </section>
-
-    <!-- WHAT IS STORED -->
-    <section class="section" id="data-stored">
-      <h2 class="section__title">What is stored and how</h2>
-      <p class="prose">
-        The table below covers every category of data stored by this platform. Anything you
-        download or delete does not appear here — it is never stored.
-      </p>
-
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Table</th>
-            <th>State</th>
-            <th>Who can read it</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Email address</td>
-            <td class="td-mono">auth.users</td>
-            <td><span class="badge badge--plain">Plaintext</span></td>
-            <td>You. Platform operator. Supabase service role.</td>
-          </tr>
-          <tr>
-            <td>Display name (chosen name)</td>
-            <td class="td-mono">profiles</td>
-            <td><span class="badge badge--plain">Plaintext</span></td>
-            <td>You. Platform operator via admin access.</td>
-          </tr>
-          <tr>
-            <td>Subscription tier and status</td>
-            <td class="td-mono">profiles</td>
-            <td><span class="badge badge--plain">Plaintext</span></td>
-            <td>You. Platform operator. Used for access gating.</td>
-          </tr>
-          <tr>
-            <td>Saved journal entry content and title</td>
-            <td class="td-mono">journal_entries</td>
-            <td><span class="badge badge--enc">AES-256-GCM encrypted</span></td>
-            <td>You only (decrypted in your browser). Platform operator has theoretical access via server secret.</td>
-          </tr>
-          <tr>
-            <td>Journal metadata (word count, duration, soundscape, prompt, date)</td>
-            <td class="td-mono">journal_entries</td>
-            <td><span class="badge badge--plain">Plaintext</span></td>
-            <td>You. Platform operator.</td>
-          </tr>
-          <tr>
-            <td>Downloaded or deleted journal entries</td>
-            <td class="td-mono">—</td>
-            <td><span class="badge badge--zero">Not stored</span></td>
-            <td>No one. Nothing is recorded.</td>
-          </tr>
-          <tr>
-            <td>Check-in numeric scores (arousal, valence, sensory load)</td>
-            <td class="td-mono">checkins</td>
-            <td><span class="badge badge--plain">Plaintext</span></td>
-            <td>You. Platform operator. Used for dashboard charting.</td>
-          </tr>
-          <tr>
-            <td>Check-in emotion words</td>
-            <td class="td-mono">checkins</td>
-            <td><span class="badge badge--plain">Plaintext</span></td>
-            <td>You. Platform operator.</td>
-          </tr>
-          <tr>
-            <td>Check-in written notes (if saved)</td>
-            <td class="td-mono">checkins</td>
-            <td><span class="badge badge--enc">AES-256-GCM encrypted</span></td>
-            <td>You only (decrypted in your browser). Platform operator has theoretical access via server secret.</td>
-          </tr>
-          <tr>
-            <td>Saved worksheet content</td>
-            <td class="td-mono">worksheets</td>
-            <td><span class="badge badge--enc">AES-256-GCM encrypted</span></td>
-            <td>You only (decrypted in your browser). Platform operator has theoretical access via server secret.</td>
-          </tr>
-          <tr>
-            <td>Downloaded or deleted worksheets</td>
-            <td class="td-mono">—</td>
-            <td><span class="badge badge--zero">Not stored</span></td>
-            <td>No one. Nothing is recorded.</td>
-          </tr>
-          <tr>
-            <td>Encryption key (wrapped)</td>
-            <td class="td-mono">profiles</td>
-            <td><span class="badge badge--enc">Encrypted with platform secret</span></td>
-            <td>No one in plaintext form. Server unwraps it only during your active session.</td>
-          </tr>
-          <tr>
-            <td>Audio recordings / compositions</td>
-            <td class="td-mono">Supabase Storage</td>
-            <td><span class="badge badge--plain">Plaintext audio file</span></td>
-            <td>You. Accessible only via authenticated signed URLs, never public links.</td>
-          </tr>
-          <tr>
-            <td>Payment information (card details)</td>
-            <td class="td-mono">Stripe (external)</td>
-            <td><span class="badge badge--stripe">Stripe-managed, PCI-DSS</span></td>
-            <td>Stripe only. We never see or store card numbers. We store only a Stripe customer ID.</td>
-          </tr>
-          <tr>
-            <td>Booking data</td>
-            <td class="td-mono">Cal.com (external)</td>
-            <td><span class="badge badge--plain">Plaintext</span></td>
-            <td>You and Jordan Elias via Cal.com. Governed by Cal.com's privacy policy.</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <h3 class="section__sub">Identity separation</h3>
-      <p class="prose">
-        Your identity — email address and name — is stored separately from your content.
-        Supabase maintains a dedicated <code>auth.users</code> table for authentication data,
-        separate from all content tables. All content tables reference you only by a
-        <strong>UUID</strong> — a random string like <code>a3f2c1d4-...</code> — not by your
-        name or email. Someone who obtained only the content tables would see encrypted ciphertext
-        attached to anonymous identifiers.
-      </p>
-    </section>
-
-    <!-- SUPABASE -->
+<!-- SUPABASE -->
     <section class="section" id="supabase">
       <h2 class="section__title">Supabase and the database</h2>
       <p class="prose">
@@ -555,14 +444,13 @@
       </p>
 
       <div class="tech-block">
-        <span class="tech-block__label">RLS policy structure</span>
-        <p><strong>journal_entries:</strong> Users can only read, create, and delete rows where <code>user_id = auth.uid()</code>. No other user can access another user's entries via the API.</p>
-        <p><strong>checkins:</strong> Same pattern — rows are visible only to the user who created them.</p>
-        <p><strong>worksheets:</strong> Same pattern — each worksheet row is locked to its creator's user ID.</p>
-        <p><strong>profiles:</strong> Users can read and update only their own profile row. Encryption key columns cannot be read by any application-layer query other than the dedicated vault server function.</p>
-      </div>
-
-      <h3 class="section__sub">The service role key</h3>
+<span class="tech-block__label">RLS policy structure</span>
+<p><strong>Your own data:</strong> check-ins, worksheets, journal entries, recordings, saved places and your profile can be read, changed and deleted only by the account that owns them.</p>
+<p><strong>Therapists:</strong> a therapist can see an account only through the connection you created, and only the few fields listed above. Free and Lab-only accounts do not appear to therapists at all.</p>
+<p><strong>Shared items and messages:</strong> readable only by the two people they were sealed to, and even then only as scrambled data that their own browser opens.</p>
+<p><strong>Key material:</strong> your protected vault bundle can be read only by you.</p>
+</div>
+<h3 class="section__sub">The service role key</h3>
       <p class="prose">
         Supabase provides two API keys: an <strong>anon key</strong> (used in the browser, subject
         to RLS) and a <strong>service role key</strong> (bypasses RLS, for server use only). The
@@ -581,123 +469,77 @@
     </section>
 
     <!-- DATA COLLECTED -->
-    <section class="section" id="data-collected">
-      <h2 class="section__title">Data we collect</h2>
-      <p class="prose">
-        We collect only what is needed for the platform to function. There is no advertising,
-        no third-party tracking, no analytics that profile your behaviour for commercial purposes.
-      </p>
-
-      <h3 class="section__sub">Account data</h3>
-      <p class="prose">
-        When you create an account: your email address (required for authentication), your chosen
-        display name, and your password (hashed by Supabase — we never see it in plaintext).
-      </p>
-
-      <h3 class="section__sub">Content you choose to save</h3>
-      <p class="prose">
-        Journal entries, check-in responses, and worksheets that you explicitly choose to save.
-        Downloaded or deleted content is never recorded. The platform has no knowledge of writing
-        that is not saved.
-      </p>
-
-      <h3 class="section__sub">Audio recordings</h3>
-      <p class="prose">
-        Audio files you create and choose to save, stored in Supabase Storage and accessible only
-        via authenticated signed URLs — never publicly accessible.
-      </p>
-
-      <h3 class="section__sub">Session and technical data</h3>
-      <p class="prose">
-        Supabase automatically logs authentication events (sign-ins, token refreshes) for security.
-        We do not run additional analytics or tracking scripts. There are no marketing trackers,
-        no pixels, no fingerprinting.
-      </p>
-
-      <h3 class="section__sub">Booking data</h3>
-      <p class="prose">
-        If you book a video session, booking data is processed by
-        <a href="https://cal.com" target="_blank" rel="noopener">Cal.com</a> and shared with
-        Jordan Elias for session preparation. Cal.com's own privacy policy governs their handling.
-      </p>
-
-      <h3 class="section__sub">Intake form data</h3>
-      <p class="prose">
-        If you book a video session you will be asked to complete an intake form covering
-        presenting concerns, health history, medications, and emergency contacts. This is stored
-        in a dedicated table, protected by RLS, and accessible only to you and Jordan Elias.
-        Unlike journal content, intake form data is not encrypted with your vault key — because
-        your therapist needs to be able to read it.
-      </p>
-
-      <div class="callout callout--green">
-  <span class="callout__label">Cookies</span>
-  This platform uses one category of cookie only: session cookies set by Supabase to keep you 
-  signed in. There are no advertising cookies, no tracking pixels, and no third-party analytics. 
-  You cannot opt out of session cookies without breaking authentication — they are technically 
-  necessary for the platform to function.
+<section class="section" id="data-collected">
+<h2 class="section__title">Data we collect</h2>
+<p class="prose">
+We collect only what is needed for the platform to work. There is no advertising, no third-party tracking and no
+analytics that profile your behaviour.
+</p>
+<h3 class="section__sub">Account data</h3>
+<p class="prose">Your email address, your chosen display name, and your password (hashed by Supabase; we never see it).</p>
+<h3 class="section__sub">Content you choose to save</h3>
+<p class="prose">
+Journal entries, check-ins, saved places, worksheets, recordings and messages, stored encrypted as described above.
+Downloaded or deleted content is never recorded.
+</p>
+<h3 class="section__sub">Session and technical data</h3>
+<p class="prose">
+Supabase logs sign-ins and token refreshes for security, and our hosting provider processes your IP address as part
+of delivering the site. We run no analytics or tracking scripts, no marketing trackers, no pixels and no fingerprinting.
+</p>
+<h3 class="section__sub">Booking data</h3>
+<p class="prose">
+When you book a session, the booking is made on <a href="https://cal.com" target="_blank" rel="noopener">Cal.com</a>
+or, if your therapist uses their own calendar, on their own booking page. That service receives your name, email and
+chosen time and has its own privacy policy. The platform records only when the session is and which therapist it is
+with, so that sessions can be counted and shown to you and to that therapist.
+</p>
+<h3 class="section__sub">Intake</h3>
+<p class="prose">
+The platform stores only an intake <em>status</em> (for example, not started or complete). It is visible to a
+therapist you connect with. The platform does not store the contents of any intake forms.
+</p>
+<div class="callout callout--green">
+<span class="callout__label">Cookies</span>
+The platform uses session storage set by Supabase to keep you signed in, plus settings stored in your browser (for
+example, which device you trust for your vault). There are no advertising cookies, tracking pixels or third-party analytics.
 </div>
-    </section>
+</section>
 
-    <!-- DATA SHARING -->
-    <section class="section" id="data-sharing">
-      <h2 class="section__title">Data sharing</h2>
-      <p class="prose">
-        Your data is not sold, rented, or shared with third parties for commercial purposes.
-        Full stop.
-      </p>
+<!-- DATA SHARING -->
+<section class="section" id="data-sharing">
+<h2 class="section__title">Data sharing</h2>
+<p class="prose">
+Your data is not sold, rented or shared with third parties for commercial purposes.
+</p>
+<h3 class="section__sub">Outside services used</h3>
+<table class="data-table">
+<thead><tr><th>Service</th><th>Purpose</th><th>Data involved</th></tr></thead>
+<tbody>
+<tr><td><strong>Supabase</strong> (EU, Frankfurt)</td><td>Database, login and file storage</td><td>All stored data, encrypted where marked above</td></tr>
+<tr><td><strong>Netlify</strong></td><td>Website hosting and server functions</td><td>Web requests (IP address and the pages you open)</td></tr>
+<tr><td><strong>Stripe</strong></td><td>Payments</td><td>Email, name, subscription. Card data goes to Stripe only.</td></tr>
+<tr><td><strong>Cal.com</strong></td><td>Session booking</td><td>Name, email, booking details</td></tr>
+<tr><td><strong>Code libraries from content delivery networks</strong> (esm.sh, jsDelivr, cdnjs, unpkg)</td><td>Loading open-source code libraries</td><td>Your IP address, when a page loads one</td></tr>
+<tr><td><strong>YouTube</strong></td><td>Playing songs you choose in some exercises</td><td>Standard embed data, only on pages where you use it</td></tr>
+<tr><td><strong>Genius and LRCLIB</strong></td><td>Song and lyric lookup in the worksheets</td><td>Your search text, passed through our server function for Genius</td></tr>
+</tbody>
+</table>
+<p class="prose">Fonts are served from this site and no longer from Google.</p>
+<h3 class="section__sub">Sharing with a therapist</h3>
+<p class="prose">
+This happens only through the connection described under “Your content and your privacy”, and only for what you choose
+to share. Nothing is shared by default. The platform operator cannot read what you share. When you or the therapist
+end the connection, access stops immediately.
+</p>
+<h3 class="section__sub">Legal disclosure</h3>
+<p class="prose">
+We may be required to disclose data in response to a valid legal request or court order. We can only hand over what
+we hold: encrypted content stays unreadable to us. If this happens we will notify you unless legally prohibited.
+</p>
+</section>
 
-      <h3 class="section__sub">Third-party services used</h3>
-
-      <table class="data-table">
-        <thead>
-          <tr><th>Service</th><th>Purpose</th><th>Data shared</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Supabase</strong></td>
-            <td>Database and authentication hosting</td>
-            <td>All data stored on the platform (encrypted where applicable)</td>
-          </tr>
-          <tr>
-            <td><strong>Stripe</strong></td>
-            <td>Payment processing</td>
-            <td>Email address, name, subscription tier. Card data never reaches us.</td>
-          </tr>
-          <tr>
-            <td><strong>Cal.com</strong></td>
-            <td>Session booking</td>
-            <td>Name, email, availability, booking details</td>
-          </tr>
-          <tr>
-            <td><strong>Netlify</strong></td>
-            <td>Website hosting and serverless functions</td>
-            <td>HTTP request data (processed in transit, not stored by us)</td>
-          </tr>
-          <tr>
-            <td><strong>Google Fonts</strong></td>
-            <td>Typography</td>
-            <td>IP address in font request (standard browser behaviour)</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <h3 class="section__sub">Sharing with your therapist</h3>
-      <p class="prose">
-        The platform does not have a built-in sharing mechanism. If you want to share something
-        with Jordan Elias, download the file and send it by email to
-        <a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a>. You decide what to share,
-        when, and in what form. The platform plays no role in that exchange and has no record of it.
-      </p>
-
-      <h3 class="section__sub">Legal disclosure</h3>
-      <p class="prose">
-        We may be required to disclose data in response to a valid legal request or court order.
-        If this happens, we will notify you unless legally prohibited from doing so.
-      </p>
-    </section>
-
-    <!-- PAYMENTS -->
+<!-- PAYMENTS -->
     <section class="section" id="payments">
       <h2 class="section__title">Payments and Stripe</h2>
       <p class="prose">
@@ -724,63 +566,55 @@
     </section>
 
     <!-- GDPR -->
-    <section class="section" id="gdpr">
-      <h2 class="section__title">Your rights under GDPR</h2>
-      <p class="prose">
-        As a resident of the EU, UK, Switzerland, or another jurisdiction with equivalent data
-        protection law, you have the following rights. To exercise any of them, write to
-        <a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a>. We will respond within 30 days.
-      </p>
+<section class="section" id="gdpr">
+<h2 class="section__title">Your rights under GDPR</h2>
+<p class="prose">
+As a resident of the EU, UK, Switzerland, or another jurisdiction with equivalent data
+protection law, you have the following rights. To exercise any of them, write to
+<a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a>. We will respond within 30 days.
+</p>
+<h3 class="section__sub">Right of access</h3>
+<p class="prose">Your saved content is visible to you inside the platform. For a copy of the other data we hold about you, contact us. Because your content is encrypted, only you can open it.</p>
+<h3 class="section__sub">Right to rectification</h3>
+<p class="prose">You can update your name and email from the Account page. For anything else, contact us.</p>
+<h3 class="section__sub">Right to erasure</h3>
+<p class="prose">You can delete individual items from within the platform, and delete your whole account yourself from the Account page. See below.</p>
+<h3 class="section__sub">Right to data portability</h3>
+<p class="prose">Journal entries and worksheets can be downloaded from within the platform. For a full export of everything stored, contact us.</p>
+<h3 class="section__sub">Right to object / restrict processing</h3>
+<p class="prose">Contact us to discuss any concerns about how your data is being processed.</p>
+<h3 class="section__sub">Lawful basis for processing</h3>
+<p class="prose">
+We process your data under GDPR Article 6 on the bases of
+<strong>performance of a contract</strong> (providing the service),
+<strong>legitimate interests</strong> (security logging, fraud prevention),
+and <strong>consent</strong> (for any processing not covered by the above, including everything you choose to share with a therapist).
+Health-related data under Article 9 is processed with your explicit consent.
+</p>
+</section>
 
-      <h3 class="section__sub">Right of access</h3>
-      <p class="prose">Most of your data is already visible within the platform. You can also request a full copy.</p>
+<!-- ACCOUNT DELETION -->
+<section class="section" id="account-deletion">
+<h2 class="section__title">Deleting your account</h2>
+<p class="prose">
+You can delete your account yourself from the <a href="/account/">Account page</a>. It takes effect straight away and
+removes your login, your profile, all of your saved content, your recordings and files, your keys, your messages and
+shared items (including the copies held by a therapist), your booking records and your therapist connections. It also
+cancels your subscription immediately.
+</p>
+<p class="prose">
+Some records are kept by others and are outside the platform: Stripe keeps the payment records it is legally required
+to keep, and Supabase's backups are cleared on their own schedule. Your encrypted content in any such backup cannot be read without your passphrase or recovery key.
+</p>
+<div class="callout callout--amber">
+<span class="callout__label">Important</span>
+Deletion is permanent and cannot be undone. Download anything you want to keep first. If you are connected to a
+therapist, that therapist's copies of what you shared are deleted too, and your message history with them is deleted for both of you.
+You can also request deletion by writing to <a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a>.
+</div>
+</section>
 
-      <h3 class="section__sub">Right to rectification</h3>
-      <p class="prose">You can update your name and email from the Account page. For anything else, contact us.</p>
-
-      <h3 class="section__sub">Right to erasure</h3>
-      <p class="prose">You can delete individual entries and worksheets from within the platform. For full account deletion, see below.</p>
-
-      <h3 class="section__sub">Right to data portability</h3>
-      <p class="prose">Journal entries and worksheets can be downloaded as files. For a full export of all stored data, contact us.</p>
-
-      <h3 class="section__sub">Right to object / restrict processing</h3>
-      <p class="prose">Contact us to discuss any concerns about how your data is being processed.</p>
-
-      <h3 class="section__sub">Lawful basis for processing</h3>
-      <p class="prose">
-        We process your data under GDPR Article 6 on the bases of
-        <strong>performance of a contract</strong> (providing the service),
-        <strong>legitimate interests</strong> (security logging, fraud prevention),
-        and <strong>consent</strong> (for any processing not covered by the above).
-        Health-related data under Article 9 is processed with your explicit consent.
-      </p>
-    </section>
-
-    <!-- ACCOUNT DELETION -->
-    <section class="section" id="account-deletion">
-      <h2 class="section__title">Deleting your account</h2>
-      <p class="prose">
-        To request full deletion, write to
-        <a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a> with the subject line
-        <strong>"Account deletion request"</strong>. We will delete your authentication record,
-        all content rows associated with your user ID, all stored audio files, and your Stripe
-        subscription and customer record. We will confirm within 14 days.
-      </p>
-      <p class="prose">
-        Because your saved content is encrypted with a key tied to your account, deletion also
-        renders any remaining ciphertext permanently undecryptable — even if database backups exist.
-      </p>
-
-      <div class="callout callout--amber">
-        <span class="callout__label">Important</span>
-        Deletion is permanent and cannot be undone. Download anything you want to keep before
-        making this request. If you have an active subscription, please cancel it from the
-        Account page first.
-      </div>
-    </section>
-
-    <!-- CRISIS -->
+<!-- CRISIS -->
     <section class="section" id="crisis">
       <h2 class="section__title">Crisis disclaimer</h2>
 
@@ -820,114 +654,121 @@
     </section>
 
     <!-- FAQ -->
-    <section class="section" id="faq">
-      <h2 class="section__title">Frequently asked questions</h2>
-      <div class="faq-list">
+<section class="section" id="faq">
+<h2 class="section__title">Frequently asked questions</h2>
+<div class="faq-list">
+<div class="faq-item">
+<button class="faq-q" aria-expanded="false">
+Can Jordan read my journal entries or worksheets?
+<svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
+</button>
+<div class="faq-a">
+<p>No. Saved content is encrypted in your browser with a key protected by your passphrase, and the server never has it. A therapist can see a check-in or worksheet only if you choose to share it, and then only that item, sealed to you and them.</p>
+</div>
+</div>
+<div class="faq-item">
+<button class="faq-q" aria-expanded="false">
+Does the platform record what I type while writing?
+<svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
+</button>
+<div class="faq-a">
+<p>No. Nothing is sent while you write. No drafts are saved on the server and no keystroke or word-count data is sent. Only when you press Save does the encrypted entry leave your browser.</p>
+</div>
+</div>
+<div class="faq-item">
+<button class="faq-q" aria-expanded="false">
+Does downloading an entry send it anywhere?
+<svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
+</button>
+<div class="faq-a">
+<p>No. Downloading writes the file directly to your device. The platform has no record of it. The downloaded file is not encrypted, so keep it somewhere you trust.</p>
+</div>
+</div>
+<div class="faq-item">
+<button class="faq-q" aria-expanded="false">
+What if I forget my passphrase?
+<svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
+</button>
+<div class="faq-a">
+<p>Use your recovery key. If you have lost both, your encrypted content cannot be recovered by anyone, including us, because we do not hold a copy of your key. Resetting your account password does not unlock it.</p>
+</div>
+</div>
+<div class="faq-item">
+<button class="faq-q" aria-expanded="false">
+Can my therapist see that I have an account if I am not connected?
+<svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
+</button>
+<div class="faq-a">
+<p>No. Free and Lab-only accounts are never visible to therapists. A therapist sees you only after you connect with them, and then only your name, email, subscription and intake status, the times of the sessions you book with them, and whatever you choose to share.</p>
+</div>
+</div>
+<div class="faq-item">
+<button class="faq-q" aria-expanded="false">
+Who can read my messages?
+<svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
+</button>
+<div class="faq-a">
+<p>Only you and your therapist. Messages are encrypted to the two of you and signed so they cannot be forged. Each of you can delete your own copy.</p>
+</div>
+</div>
+<div class="faq-item">
+<button class="faq-q" aria-expanded="false">
+What happens when I end the connection with a therapist?
+<svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
+</button>
+<div class="faq-a">
+<p>Their access stops immediately. You and the therapist each choose whether to keep or delete your own copy of what was shared and of the messages.</p>
+</div>
+</div>
+<div class="faq-item">
+<button class="faq-q" aria-expanded="false">
+What happens if I cancel my subscription?
+<svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
+</button>
+<div class="faq-a">
+<p>Cancelling removes access to paid features at the end of the billing period. It does not delete your data. To remove your data, delete your account from the Account page.</p>
+</div>
+</div>
+<div class="faq-item">
+<button class="faq-q" aria-expanded="false">
+Does the platform use cookies or trackers?
+<svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
+</button>
+<div class="faq-a">
+<p>No advertising cookies, no tracking pixels and no analytics. Your browser keeps your sign-in session and a few settings needed for the platform to work.</p>
+</div>
+</div>
+<div class="faq-item">
+<button class="faq-q" aria-expanded="false">
+Will my data be used to train AI models?
+<svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
+</button>
+<div class="faq-a">
+<p>No. Your data is not used to train AI models, sold to AI companies, or used for anything other than providing you with the platform.</p>
+</div>
+</div>
+<div class="faq-item">
+<button class="faq-q" aria-expanded="false">
+Where is my data stored?
+<svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
+</button>
+<div class="faq-a">
+<p>The database and file storage are hosted by Supabase in the EU (Frankfurt). Netlify hosts the website and server functions and does not keep your content. Stripe and Cal.com have their own storage under their own policies.</p>
+</div>
+</div>
+<div class="faq-item">
+<button class="faq-q" aria-expanded="false">
+What happens if the platform closes?
+<svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
+</button>
+<div class="faq-a">
+<p>You will be given at least 90 days notice and a way to export your data before closure. Data will not be transferred to a third party; it will be deleted.</p>
+</div>
+</div>
+</div>
+</section>
 
-        <div class="faq-item">
-          <button class="faq-q" aria-expanded="false">
-            Can Jordan read my journal entries or worksheets?
-            <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
-          </button>
-          <div class="faq-a">
-            <p>Not in any practical sense. For entries you download or delete, the answer is an unqualified no — those are never stored anywhere. For entries you choose to save, the content is encrypted in your browser before it reaches the server. As the platform operator, Jordan has access to the server secret used to wrap your key, meaning decryption is theoretically possible with access to both the database and the server environment. This is disclosed honestly above. If you want absolute certainty, use the download or delete options.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-q" aria-expanded="false">
-            Is anything recorded while I am writing?
-            <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
-          </button>
-          <div class="faq-a">
-            <p>No. Nothing is transmitted to any server during the writing process. No drafts are auto-saved. No keystroke data, word counts, or progress is recorded until you explicitly press Save. The writing space is entirely local to your browser until you make a deliberate choice about what to do with it.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-q" aria-expanded="false">
-            If I download a file, does the platform keep a copy?
-            <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
-          </button>
-          <div class="faq-a">
-            <p>No. Downloading writes the file directly to your device. Nothing is sent to the server. The platform has no record that the entry existed, no copy of the content, and no log of the download. The file belongs entirely to you.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-q" aria-expanded="false">
-            How do I share something with my therapist?
-            <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
-          </button>
-          <div class="faq-a">
-            <p>Download the file and email it to hello@jordanelias.de. That is the simplest and most private method — you control exactly what is shared and when, and the platform plays no role in the exchange and keeps no record of it. There is currently no in-platform sharing mechanism.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-q" aria-expanded="false">
-            What happens to my data if I cancel my subscription?
-            <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
-          </button>
-          <div class="faq-a">
-            <p>Cancelling removes access to paid features but does not delete your data. Your saved entries, check-in history, and worksheets remain intact. You can request full account deletion separately at any time.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-q" aria-expanded="false">
-            What if I forget my password?
-            <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
-          </button>
-          <div class="faq-a">
-            <p>Supabase handles password reset via a link sent to your email. Resetting your password does not affect your encrypted data — your vault key is wrapped with a platform secret, not your password, so a password change does not lock you out of your saved entries.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-q" aria-expanded="false">
-            Do you use cookies or tracking scripts?
-            <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
-          </button>
-          <div class="faq-a">
-            <p>Supabase uses session cookies to maintain your authenticated session — these are necessary for the platform to function. There are no advertising cookies, no third-party tracking pixels, no analytics that profile your behaviour. Google Fonts requests your browser's IP address to serve fonts, which is standard browser behaviour. That is the full extent of third-party data exposure on page load.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-q" aria-expanded="false">
-            Will my data be used to train AI models?
-            <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
-          </button>
-          <div class="faq-a">
-            <p>No. Your data will never be used to train AI models, sold to AI companies, or used for any purpose other than providing you with the platform service. This is a firm commitment.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-q" aria-expanded="false">
-            Where is my data stored geographically?
-            <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
-          </button>
-          <div class="faq-a">
-            <p>The Supabase database is hosted in the EU West (Frankfurt, Germany) AWS region. Netlify hosts the website and serverless functions; no persistent data is stored on Netlify. Stripe and Cal.com have their own infrastructure and data locations, described in their respective privacy policies.</p>
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-q" aria-expanded="false">
-            What happens to my data if the platform closes?
-            <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
-          </button>
-          <div class="faq-a">
-            <p>All users will be given at least 90 days notice and a mechanism to export their data before closure. Data will not be transferred to a third party — it will be deleted. This commitment is made in good faith and will be honoured.</p>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- CONTACT -->
+<!-- CONTACT -->
     <section class="section" id="contact">
       <h2 class="section__title">Contact</h2>
       <p class="prose">
