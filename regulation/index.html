@@ -74,11 +74,6 @@
     .player.vis{display:block}
 
     .pt{display:flex;align-items:center;gap:1rem;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);flex-wrap:wrap}
-    .ppb{font-family:var(--font-heading);font-size:.8rem;font-weight:600;padding:.6rem 1.4rem;border:none;background:var(--accent);color:white;cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:.5rem;flex-shrink:0}
-    .ppb:hover{background:var(--accent-hover)}
-    .tri{width:0;height:0;border-left:9px solid white;border-top:5px solid transparent;border-bottom:5px solid transparent;display:inline-block;flex-shrink:0}
-    .bars{display:inline-flex;gap:3px;align-items:center}
-    .bars span{display:block;width:3px;height:11px;background:white}
 
     .pi{flex:1;min-width:0}
     .ptitle{font-size:.875rem;font-weight:500;color:var(--text);margin-bottom:.1rem}
@@ -93,15 +88,14 @@
 
     .pf{padding:.85rem 1.5rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem}
     .rs{font-size:.75rem;color:var(--muted)}
-    .db{font-family:var(--font-body);font-size:.8rem;font-weight:500;padding:.45rem 1.1rem;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer;transition:all .12s}
-    .db:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
-    .db:disabled{opacity:.45;cursor:not-allowed}
 
     footer{border-top:1px solid var(--border);padding:1.5rem 2rem;text-align:center;font-size:.8rem;color:var(--muted);margin-top:auto}
     footer a{color:var(--muted);text-decoration:none;}
     footer a:hover{color:var(--accent);}
   </style>
   <link rel="stylesheet" href="/assets/css/header.css">
+  <link rel="stylesheet" href="/assets/css/ui.css">
+  <script src="/assets/js/ui/icons.js" defer></script>
 </head>
 <body>
 
@@ -154,8 +148,8 @@
 
   <div class="player" id="player">
     <div class="pt">
-      <button class="ppb" id="ppb" onclick="togglePlay()">
-        <span id="icon" class="tri"></span>
+      <button class="btn btn--primary" id="ppb" onclick="togglePlay()">
+        <span id="icon" data-icon="play"></span>
         <span id="plabel">Play</span>
       </button>
       <div class="pi">
@@ -174,7 +168,7 @@
     </div>
     <div class="pf">
       <span class="rs" id="rs">Rendering WAV…</span>
-      <button class="db" id="dlbtn" disabled onclick="dlWav()">Download WAV</button>
+      <button class="btn btn--secondary" id="dlbtn" disabled onclick="dlWav()"><span data-icon="download"></span>Download WAV</button>
     </div>
   </div>
 
@@ -811,8 +805,8 @@ function restartFull() {
 
 function setIcon(playing) {
   const ic=document.getElementById('icon'), lb=document.getElementById('plabel');
-  if (playing) { ic.className=''; ic.innerHTML='<span class="bars"><span></span><span></span></span>'; lb.textContent='Pause'; }
-  else         { ic.className='tri'; ic.innerHTML=''; lb.textContent = (S.pausedAt===null&&S.sessionStartWall===null)?'Play':'Resume'; }
+  if (playing) { ic.innerHTML=silIcons.html('pause'); lb.textContent='Pause'; }
+  else         { ic.innerHTML=silIcons.html('play'); lb.textContent = (S.pausedAt===null&&S.sessionStartWall===null)?'Play':'Resume'; }
 }
 
 // ─────────────────────────────────────────────────────────

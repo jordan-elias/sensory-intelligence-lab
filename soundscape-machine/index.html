@@ -59,16 +59,7 @@
     .sbtn.primary:hover{background:var(--accent-hover);}
     .sbtn:disabled{opacity:.45;cursor:not-allowed;}
     .transport{display:flex;align-items:center;gap:.75rem;padding:.85rem 1rem;border:1px solid var(--border);background:var(--surface);margin-bottom:1rem;flex-wrap:wrap;}
-    .t-btn{font-family:var(--font-heading);font-size:.78rem;font-weight:600;padding:.55rem 1.25rem;border:none;cursor:pointer;transition:all .12s;display:flex;align-items:center;gap:.45rem;letter-spacing:-.01em;}
-    .t-btn.play{background:var(--accent);color:white;}
-    .t-btn.play:hover{background:var(--accent-hover);}
-    .t-btn.stop{background:var(--bg);color:var(--text);border:1px solid var(--border);}
-    .t-btn.stop:hover{border-color:var(--accent);color:var(--accent);}
-    .t-btn.record{background:#c0392b;color:white;}
-    .t-btn.record:hover{background:#a93226;}
-    .t-btn.record.active{animation:recPulse 1s infinite;}
     @keyframes recPulse{0%,100%{opacity:1}50%{opacity:.6}}
-    .t-btn:disabled{opacity:.4;cursor:not-allowed;}
     .transport-time{font-family:var(--font-heading);font-size:.85rem;font-weight:600;color:var(--text);letter-spacing:.04em;font-variant-numeric:tabular-nums;margin-left:.25rem;}
     .transport-right{margin-left:auto;display:flex;align-items:center;gap:.65rem;}
     .master-ctrl{display:flex;align-items:center;gap:.5rem;}
@@ -226,6 +217,8 @@
     }
   </style>
   <link rel="stylesheet" href="/assets/css/header.css">
+  <link rel="stylesheet" href="/assets/css/ui.css">
+  <script src="/assets/js/ui/icons.js" defer></script>
 </head>
 <body>
 
@@ -256,15 +249,9 @@
   </div>
 
   <div class="transport">
-    <button class="t-btn play" id="playBtn" onclick="transportPlay()" disabled>
-      <svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> Play
-    </button>
-    <button class="t-btn stop" id="stopBtn" onclick="transportStop()" disabled>
-      <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg> Stop
-    </button>
-    <button class="t-btn record" id="mixRecordBtn" onclick="toggleMixRecord()" disabled>
-      <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg> Rec mix
-    </button>
+    <button class="btn btn--primary" id="playBtn" onclick="transportPlay()" disabled><span data-icon="play"></span>Play</button>
+    <button class="btn btn--secondary" id="stopBtn" onclick="transportStop()" disabled><span data-icon="square"></span>Stop</button>
+    <button class="btn btn--danger" id="mixRecordBtn" onclick="toggleMixRecord()" disabled><span data-icon="circle" class="icon--fill"></span>Rec mix</button>
     <span class="transport-time" id="transportTime">0:00.0</span>
     <div class="transport-right">
       <div class="master-ctrl">
@@ -1351,7 +1338,7 @@ window.toggleLibRecord=async function(){
       libRecMR.ondataavailable=e=>{if(e.data.size>0)libRecChunks.push(e.data);};
       libRecMR.onstop=onLibRecStop;libRecMR.start();libRecording=true;
       document.getElementById('libRecBtn').classList.add('active');
-      document.getElementById('libRecBtn').innerHTML='<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg> Stop';
+      document.getElementById('libRecBtn').innerHTML=silIcons.html('square')+' Stop';
       document.getElementById('uploadStatus').textContent='Recording\u2026';
     }catch(e){showToast('Microphone access denied.','error');}
   } else {
@@ -1360,7 +1347,7 @@ window.toggleLibRecord=async function(){
     if(libRecStream)libRecStream.getTracks().forEach(t=>t.stop());
     libRecording=false;libRecMR=null;
     document.getElementById('libRecBtn').classList.remove('active');
-    document.getElementById('libRecBtn').innerHTML='<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg> Record';
+    document.getElementById('libRecBtn').innerHTML=silIcons.html('circle')+' Record';
     document.getElementById('uploadStatus').textContent='Processing\u2026';
   }
 };

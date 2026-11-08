@@ -111,17 +111,14 @@
 
     /* ── Session controls ── */
     .session-controls{padding:.85rem 1.5rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:.75rem}
-    .ppb{font-family:var(--font-heading);font-size:.8rem;font-weight:600;padding:.6rem 1.4rem;border:none;background:var(--accent);color:white;cursor:pointer;transition:background .15s;display:flex;align-items:center;gap:.5rem;flex-shrink:0}
-    .ppb:hover{background:var(--accent-hover)}
-    .tri{width:0;height:0;border-left:9px solid white;border-top:5px solid transparent;border-bottom:5px solid transparent;display:inline-block;flex-shrink:0}
-    .bars{display:inline-flex;gap:3px;align-items:center}
-    .bars span{display:block;width:3px;height:11px;background:white}
 
     footer{border-top:1px solid var(--border);padding:1.5rem 2rem;text-align:center;font-size:.8rem;color:var(--muted);margin-top:auto}
     footer a{color:var(--muted);text-decoration:none;}
     footer a:hover{color:var(--accent);}
   </style>
   <link rel="stylesheet" href="/assets/css/header.css">
+  <link rel="stylesheet" href="/assets/css/ui.css">
+  <script src="/assets/js/ui/icons.js" defer></script>
 </head>
 <body>
 
@@ -206,8 +203,8 @@
     </div>
 
     <div class="session-controls">
-      <button class="ppb" id="ppb" onclick="togglePlay()">
-        <span id="icon" class="tri"></span>
+      <button class="btn btn--primary" id="ppb" onclick="togglePlay()">
+        <span id="icon" data-icon="play"></span>
         <span id="plabel">Play</span>
       </button>
     </div>
@@ -554,10 +551,10 @@ function togglePlay() {
 function setIcon(playing) {
   const ic = document.getElementById('icon'), lb = document.getElementById('plabel');
   if (playing) {
-    ic.className=''; ic.innerHTML='<span class="bars"><span></span><span></span></span>';
+    ic.innerHTML=silIcons.html('pause');
     lb.textContent='Pause';
   } else {
-    ic.className='tri'; ic.innerHTML='';
+    ic.innerHTML=silIcons.html('play');
     lb.textContent = S.done ? 'Begin again' : 'Resume';
   }
 }
