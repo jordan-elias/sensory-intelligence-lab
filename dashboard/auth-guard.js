@@ -3,7 +3,7 @@
 // Place this file at: /dashboard/auth-guard.js
 // Include on every protected page with: <script src="/dashboard/auth-guard.js" type="module"></script>
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "/assets/js/vendor/supabase-js.js";
 
 const SUPABASE_URL      = "https://lrjuufvrgkuvfxcmybtf.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1";

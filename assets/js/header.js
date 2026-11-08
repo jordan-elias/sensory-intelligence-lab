@@ -149,7 +149,7 @@
   // Sign out — uses window._supabase from auth-guard, or loads own client
   async function getClient() {
     if (window._supabase) return window._supabase;
-    const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+    const { createClient } = await import("/assets/js/vendor/supabase-js.js");
     return createClient(
       "https://lrjuufvrgkuvfxcmybtf.supabase.co",
       "sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1"

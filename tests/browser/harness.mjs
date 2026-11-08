@@ -88,7 +88,7 @@ export async function newPage(browser,BASE,{hasUpdatedAt=true,db=null,mobile=fal
   await page.setRequestInterception(true);
   page.on('request',r=>{ const u=r.url();
     if(u.startsWith(BASE)) return r.continue();
-    if(u.includes('sortablejs')) return r.respond({status:200,contentType:'text/javascript',headers:{'access-control-allow-origin':'*'},body:fs.readFileSync('node_modules/sortablejs/modular/sortable.esm.js','utf8')});
+    if(u.includes('sortablejs')) return r.respond({status:200,contentType:'text/javascript',headers:{'access-control-allow-origin':'*'},body:fs.readFileSync(SORTABLE,'utf8')});
     return r.abort(); });
   await page.evaluateOnNewDocument((hasU,dbRows,tbl,nl)=>{ window.__db=dbRows||[]; window.__hasUpdatedAt=hasU; window.__tbl=tbl||{}; window.__noLegacy=nl; },hasUpdatedAt,db,tables,noLegacy);
   if(mobile) await page.setViewport({width:390,height:800,hasTouch:true,isMobile:true});

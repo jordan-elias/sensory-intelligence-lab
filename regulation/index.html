@@ -305,7 +305,7 @@ silNav.querySelectorAll('a').forEach(a =>
 
 async function getSupabase() {
   if (window._supabase) return window._supabase;
-  const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+  const { createClient } = await import('/assets/js/vendor/supabase-js.js');
   return createClient(
     'https://lrjuufvrgkuvfxcmybtf.supabase.co',
     'sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1'

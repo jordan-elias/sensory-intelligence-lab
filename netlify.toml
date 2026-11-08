@@ -443,7 +443,6 @@ Content-Security-Policy = """
     'unsafe-inline'
     'unsafe-eval'
     https://app.cal.com
-    https://esm.sh
     https://cdnjs.cloudflare.com
     https://cdn.jsdelivr.net
     https://www.youtube.com;
@@ -458,7 +457,6 @@ Content-Security-Policy = """
     https://app.cal.com
     https://cal.com
     https://lrjuufvrgkuvfxcmybtf.supabase.co
-    https://esm.sh
     https://lrclib.net
     https://www.youtube.com
     https://www.youtube-nocookie.com;

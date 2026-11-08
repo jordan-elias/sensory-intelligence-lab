@@ -99,6 +99,7 @@ const ctxC=await browser.createBrowserContext();
 const C=await newPage(ctxC,BASE,{noLegacy:true});
 await C.page.goto(`${BASE}/journal/`,{waitUntil:'domcontentloaded'});
 await C.page.waitForSelector('.vault-gate #newPass',{timeout:20000});
+await sleep(1000);
 await C.page.type('#newPass',PASS); await C.page.type('#newConfirm',PASS);
 await C.page.click('.vault-gate button[type=submit]');
 await C.page.waitForSelector('#recoveryKey',{timeout:60000});

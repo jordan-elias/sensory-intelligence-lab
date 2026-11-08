@@ -22,6 +22,7 @@ await page.evaluateOnNewDocument(()=>{ window.Chart=class{constructor(){} destro
 await page.setGeolocation({latitude:52.520008,longitude:13.404954});
 await page.goto(`${BASE}/check-in/`,{waitUntil:'domcontentloaded'});
 await page.waitForSelector('.vault-gate #newPass',{timeout:20000});
+await new Promise(r=>setTimeout(r,1000));
 await page.type('#newPass',PASS); await page.type('#newConfirm',PASS);
 await page.click('.vault-gate button[type=submit]');
 await page.waitForSelector('#recoveryKey',{timeout:60000});
@@ -72,6 +73,6 @@ await page.select('#wNoise','quiet'); await page.select('#wCrowd','empty'); awai
 const first=await page.$eval('#results li strong',e=>e.textContent);
 ok(first==='Tiergarten bench','"Where to go" puts the quiet, empty place first: '+first);
 ok(await page.$$eval('.in-grid .in-cell',c=>c.length)===288,'sun-through-the-year grid drawn (12 x 24)');
-await page.screenshot({path:'shots/insights.png',fullPage:true});
+// screenshot removed
 ok(errors.length===0,'no page errors '+errors.join('|'));
 await browser.close(); server.close(); process.exit(fail?1:0);
