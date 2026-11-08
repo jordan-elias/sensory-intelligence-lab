@@ -12,12 +12,13 @@ import { mountThread } from '../messages/thread.js';
 import { tierLabel, intakeLabel, summarize, openCopies } from './clients.js';
 import { splitSessions, describe } from './sessions.js';
 import { toRows, renderRows, worksheetLabel } from './doc-render.js';
+import { makeNotesStore, mountNotes } from './notes.js';
 
 const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 const day = iso => iso ? new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '';
 const when = iso => iso ? new Date(iso).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
 const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
-const TABS = ['overview', 'messages', 'shared', 'sessions'];
+const TABS = ['overview', 'messages', 'shared', 'notes', 'sessions'];
 
 export async function mountClientPage(root) {
   const sb = await new Promise(res => { if (window._supabase && window._currentUser) res(window._supabase); else window.addEventListener('authReady', () => res(window._supabase), { once: true }); });
@@ -62,12 +63,14 @@ export async function mountClientPage(root) {
       <button role="tab" id="tab-overview" aria-controls="panel-overview" data-tab="overview">Overview</button>
       <button role="tab" id="tab-messages" aria-controls="panel-messages" data-tab="messages">Messages<span class="th-count" id="cntMessages"></span></button>
       <button role="tab" id="tab-shared" aria-controls="panel-shared" data-tab="shared">Shared<span class="th-count">${nCheckins + nDocs || ''}</span></button>
+      <button role="tab" id="tab-notes" aria-controls="panel-notes" data-tab="notes">Notes</button>
       <button role="tab" id="tab-sessions" aria-controls="panel-sessions" data-tab="sessions">Sessions<span class="th-count">${sessions.upcoming.length || ''}</span></button>
     </div>
     <section role="tabpanel" id="panel-overview" aria-labelledby="tab-overview" hidden></section>
     <section role="tabpanel" id="panel-messages" aria-labelledby="tab-messages" hidden></section>
     <section role="tabpanel" id="panel-shared" aria-labelledby="tab-shared" hidden></section>
-    <section role="tabpanel" id="panel-sessions" aria-labelledby="tab-sessions" hidden></section>`;
+    <section role="tabpanel" id="panel-sessions" aria-labelledby="tab-sessions" hidden></section>
+    <section role="tabpanel" id="panel-notes" aria-labelledby="tab-notes" hidden></section>`;
   const $ = id => root.querySelector('#' + id);
   const setUnread = n => { unread = n; $('cntMessages').textContent = n ? `${n} new` : ''; };
   setUnread(unread);
@@ -156,6 +159,18 @@ export async function mountClientPage(root) {
     } catch (e) { sharedMounted = false; box.innerHTML = `<p class="msg show error">${esc(e.message)}</p>`; }
   }
 
+  // ── Notes (opened on first view, because it asks for the vault) ──
+  let notesMounted = false;
+  async function showNotes() {
+    if (notesMounted) return; notesMounted = true;
+    const box = $('panel-notes');
+    box.innerHTML = '<p class="th-muted">Opening your notes…</p>';
+    try {
+      const session = await ensureVaultReady();
+      await mountNotes(box, { store: makeNotesStore(sb, session), clientId: client.client_id, clientName: name });
+    } catch (e) { notesMounted = false; box.innerHTML = `<p class="msg show error">${esc(e.message)}</p>`; }
+  }
+
   // ── Sessions ──
   const renderSessions = () => {
     const li = r => { const d = describe(r); return `<li><strong>${esc(d.when)}</strong> <span class="th-muted">${esc(d.kind)}${d.minutes ? ` · ${d.minutes} min` : ''}${d.cancelled ? ' · cancelled' : ''}</span></li>`; };
@@ -176,7 +191,7 @@ export async function mountClientPage(root) {
       $('panel-' + t).hidden = !on;
     }
     if (push) history.replaceState(null, '', `?link=${encodeURIComponent(linkId)}#${tab}`);
-    if (tab === 'messages') showMessages(); else if (tab === 'shared') showShared();
+    if (tab === 'messages') showMessages(); else if (tab === 'shared') showShared(); else if (tab === 'notes') showNotes();
   }
   root.querySelectorAll('[role=tab]').forEach(b => {
     b.addEventListener('click', () => show(b.dataset.tab));
