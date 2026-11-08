@@ -16,7 +16,7 @@ window._supabase = supabase;
 // Signing out anywhere must also end any vault unlock kept in this browser.
 supabase.auth.onAuthStateChange((evt) => {
   if (evt === "SIGNED_OUT") {
-    try { sessionStorage.removeItem("sil-vault-tab"); } catch (_) {}
+    try { sessionStorage.removeItem("sil-vault-tab"); sessionStorage.removeItem("sil-nav-roles"); } catch (_) {}
     import("/assets/js/vault/trusted-device.js").then(m => m.clear()).catch(() => {});
   }
 });
@@ -90,6 +90,9 @@ async function checkAuth() {
       isBeta,
     }
   }));
+
+  // Role-based header links (therapist: Clients; connected client: Messages). Never blocks the page.
+  import("/assets/js/nav-links.js").then(m => m.mountRoleLinks(supabase, user)).catch(() => {});
 
   console.log(
     "Authenticated:", user.email,
