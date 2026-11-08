@@ -3,7 +3,8 @@
  * Turns a therapist's saved booking link into what the booking page should show.
  *  - a Cal.com link is embedded as a calendar
  *  - any other https link opens in a new tab as a button
- *  - no link, or availability switched off, shows a plain message instead of a calendar
+ *  - no link yet shows a plain message instead of a calendar
+ *  (A therapist who cannot take bookings switches off "taking new clients"; existing clients still see the link.)
  */
 const CAL_HOSTS = new Set(['cal.com', 'www.cal.com', 'app.cal.com']);
 
@@ -22,10 +23,9 @@ export function parseBookingLink(raw) {
 
 /**
  * What to show for a client's active therapist.
- * @returns {{kind:'cal', calLink:string}|{kind:'external', url:string}|{kind:'paused', reason:'unavailable'|'no-link'}}
+ * @returns {{kind:'cal', calLink:string}|{kind:'external', url:string}|{kind:'paused', reason:'no-link'}}
  */
 export function planFor(therapist) {
   if (!therapist) return { kind: 'none' };
-  if (therapist.has_availability === false) return { kind: 'paused', reason: 'unavailable' };
   return parseBookingLink(therapist.booking_link) || { kind: 'paused', reason: 'no-link' };
 }

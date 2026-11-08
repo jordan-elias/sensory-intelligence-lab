@@ -46,10 +46,10 @@ await B.page.$eval('#thLink',e=>e.value=''); await B.page.type('#thLink','http:/
 await B.page.click('#thSave'); await sleep(300);
 ok(/https/.test(await B.page.$eval('#thMsg',e=>e.textContent))&&(await B.page.evaluate(()=>window.__tbl.therapist_profiles[0].booking_link))==='https://cal.com/jordan','a non-https booking link is refused');
 await B.page.$eval('#thLink',e=>e.value=''); await B.page.type('#thLink','https://cal.com/j-elias');
-await B.page.click('#thAvail'); await B.page.type('#thBio',' Also teaches.');
+await B.page.click('#thAccepting'); await B.page.type('#thBio',' Also teaches.');
 await B.page.click('#thSave'); await sleep(500);
 const row=await B.page.evaluate(()=>window.__tbl.therapist_profiles[0]);
-ok(row.display_name==='J. Elias'&&row.booking_link==='https://cal.com/j-elias'&&row.has_availability===false&&/Also teaches/.test(row.bio)&&row.is_default===true,'edits are saved; availability switched off');
+ok(row.display_name==='J. Elias'&&row.booking_link==='https://cal.com/j-elias'&&row.accepting_clients===false&&/Also teaches/.test(row.bio)&&row.is_default===true,'edits are saved; no longer taking new clients');
 // photo upload: big non-square image
 const big=await B.page.evaluate(async()=>{ const c=document.createElement('canvas'); c.width=1600;c.height=900; const g=c.getContext('2d'); g.fillStyle='#c33';g.fillRect(0,0,1600,900); const b=await new Promise(r=>c.toBlob(r,'image/png')); const dt=new DataTransfer(); dt.items.add(new File([b],'me.png',{type:'image/png'})); const i=document.getElementById('thFile'); i.files=dt.files; i.dispatchEvent(new Event('change')); return b.size; });
 await B.page.waitForFunction(()=>window.__tbl.therapist_profiles[0].photo_path,{timeout:10000});
