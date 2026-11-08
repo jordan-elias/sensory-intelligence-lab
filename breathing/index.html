@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <script>window.SIL_AUDIO_LATENCY = 'playback';</script>
   <script src="/assets/js/audio/safe-output.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Breathing</title>
@@ -548,7 +549,9 @@ function togglePlay() {
   }
 }
 
+const _ms = silAudio.mediaSession({ title: 'Breathing exercise', play: () => { if (!S.isPlaying) togglePlay(); }, pause: () => { if (S.isPlaying) togglePlay(); } });
 function setIcon(playing) {
+  _ms.state(playing ? 'playing' : 'paused');
   const ic = document.getElementById('icon'), lb = document.getElementById('plabel');
   if (playing) {
     ic.innerHTML=silIcons.html('pause');

@@ -78,8 +78,8 @@ const server = http.createServer((req,res)=>{
 });
 await new Promise(r=>server.listen(0,r)); const PORT=server.address().port; const BASE=`http://localhost:${PORT}`;
 
-export async function launch(){
-  const browser=await puppeteer.launch({executablePath:CHROME,headless:true,args:['--no-sandbox','--disable-gpu']});
+export async function launch({extraArgs=[]}={}){
+  const browser=await puppeteer.launch({executablePath:CHROME,headless:true,args:['--no-sandbox','--disable-gpu',...extraArgs]});
   return {browser,BASE,DB,server};
 }
 export async function newPage(browser,BASE,{hasUpdatedAt=true,db=null,mobile=false,tables=null,noLegacy=false}={}){
