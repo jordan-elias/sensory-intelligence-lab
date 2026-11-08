@@ -1,0 +1,22 @@
+/* Accessibility basics, linked on every page. */
+
+/* Keyboard focus is always visible. */
+.btn:focus-visible, a:focus-visible, button:focus-visible, [role="button"]:focus-visible,
+input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--accent, #2a5c45); outline-offset: 2px; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+/* People who ask their device for less motion get no decorative animation or smooth scrolling.
+   Exercises that are driven by script (for example the breathing circle) still move, because that
+   movement is the exercise itself. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+
+/* Skip link: first thing a keyboard user reaches. */
+.skip-link { position: absolute; left: 0.5rem; top: -4rem; z-index: 100001; background: var(--accent, #2a5c45);
+  color: #fff; padding: 0.6rem 1rem; text-decoration: none; font: 600 0.85rem var(--font-heading, inherit); }
+.skip-link:focus { top: 0.5rem; }

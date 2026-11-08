@@ -28,6 +28,19 @@
     '</nav>';
   if (me && me.parentNode) me.parentNode.insertBefore(header, me); else document.body.insertBefore(header, document.body.firstChild);
 
+  // Skip link for keyboard and screen-reader users (styled in a11y.css).
+  var skip = document.createElement('a');
+  skip.className = 'skip-link'; skip.href = '#main'; skip.textContent = 'Skip to content';
+  header.parentNode.insertBefore(skip, header);
+  function wireSkip() {
+    var main = document.querySelector('main');
+    if (!main) { skip.remove(); return; }
+    if (!main.id) main.id = 'main';
+    main.setAttribute('tabindex', '-1');
+    skip.setAttribute('href', '#' + main.id);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wireSkip); else wireSkip();
+
   var path = window.location.pathname.replace(/index\.html$/, '').replace(/\/$/, '') || '/';
   var nav = header.querySelector('#silNav');
   nav.querySelectorAll('a').forEach(function (a) {

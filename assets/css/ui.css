@@ -39,11 +39,3 @@
 /* Transport: Play / Pause / Stop (and Record) are always an icon plus a word. "Begin session" is
    reserved for exercises that run for a set time. */
 .transport-bar { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
-
-/* Keyboard focus is always visible. */
-.btn:focus-visible, a:focus-visible, button:focus-visible, [role="button"]:focus-visible,
-input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible {
-  outline: 2px solid var(--accent, #2a5c45); outline-offset: 2px; }
-
-.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
-  clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
