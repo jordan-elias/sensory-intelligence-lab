@@ -50,7 +50,7 @@ export async function mountSharing(root, { sb, uid, link, therapistName }) {
     $('shInfo').textContent = `${count} check-in${count === 1 ? '' : 's'} shared with ${therapistName}.`;
     try {
       const session = await ensureVaultReady();
-      $('shInfo').textContent += ` Safety code with ${therapistName}: ${pairSafetyCode(session.fingerprint, target.fingerprint)}. You can compare it with them to be sure nobody is in between.`;
+      $('shInfo').textContent += ` Safety code with ${therapistName}: ${await pairSafetyCode(session.fingerprint, target.fingerprint)}. You can compare it with them to be sure nobody is in between.`;
     } catch { /* locked: skip the code, the rest still works */ }
   }
 

@@ -14,9 +14,11 @@
  *   }
  * Opening an entry is `?id=<uuid>`; a blank sheet is the bare URL (or `?new`).
  */
-import { mountLayout, ensureVaultReady, whenAuthReady, esc, formatDate } from './core.js';
+import { mountLayout, ensureVaultReady, whenAuthReady, esc, formatDate, getSupabase } from './core.js';
 import * as store from './store.js';
 import { createAutosaver } from './autosave.js';
+import * as docSharing from '/assets/js/sharing/documents.js';
+import { therapistTarget } from '/assets/js/sharing/store.js';
 import { collectFields, restoreFields, initScales, initChoices, exportTextFromDom, downloadText, syncScales } from './ui.js';
 
 export async function mount(ws) {
@@ -54,6 +56,7 @@ export async function mount(ws) {
       <input type="text" id="wsTitle" class="ws-title-input" placeholder="Name this worksheet" value="${esc(defaultTitle)}" autocomplete="off">
       <span class="ws-status" id="wsStatus" role="status" aria-live="polite"></span>
       <button type="button" class="action-btn outline sm" id="wsRetry" hidden>Retry now</button>
+      <button type="button" class="action-btn outline sm" id="wsShare" hidden></button>
       <button type="button" class="action-btn outline sm" id="wsDownload">Download .txt</button>
       <button type="button" class="action-btn outline sm" id="wsPrint">Print / PDF</button>
     </div>
@@ -106,6 +109,7 @@ export async function mount(ws) {
         entryId = r.id; updatedAt = r.updated_at;
         history.replaceState(null, '', `?id=${entryId}`);
         await refreshList();
+        renderShare();
       } else {
         const r = await store.update(entryId, { type: ws.type, title, schema, data, expectedUpdatedAt: updatedAt });
         updatedAt = r.updated_at;
@@ -151,7 +155,7 @@ export async function mount(ws) {
         <div class="saved-item${e.id === entryId ? ' current' : ''}">
           <a class="saved-item__link" href="?id=${esc(e.id)}"${e.id === entryId ? ' aria-current="true"' : ''}>
             <span class="saved-item__name">${esc(e.title || 'Untitled')}</span>
-            <span class="saved-item__date">${formatDate(e.created_at)}</span>
+            <span class="saved-item__date">${formatDate(e.created_at)}${docSharing.isShared(e.id) ? ' · Shared with therapist' : ''}</span>
           </a>
           <button type="button" class="saved-item__delete" data-delete="${esc(e.id)}" aria-label="Delete ${esc(e.title || 'Untitled')}">Delete</button>
         </div>`).join('');
@@ -189,6 +193,36 @@ export async function mount(ws) {
     if (autosaver.hasUnsaved) { e.preventDefault(); await autosaver.flush(); location.href = '?new'; }
   });
 
+  // ── Sharing this worksheet with the therapist (off until the client presses Share) ──
+  let shareTarget = null, shareName = 'your therapist';
+  function renderShare() {
+    const b = $('wsShare');
+    if (!shareTarget || !entryId) { b.hidden = true; return; }
+    const on = docSharing.isShared(entryId);
+    b.hidden = false;
+    b.textContent = on ? `Shared with ${shareName} · Stop sharing` : `Share with ${shareName}`;
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    renderList();
+  }
+  $('wsShare').addEventListener('click', async () => {
+    const b = $('wsShare'); b.disabled = true; msg.className = 'msg'; msg.textContent = '';
+    try {
+      const sb = await getSupabase();
+      if (docSharing.isShared(entryId)) {
+        await docSharing.unshareDocument(sb, entryId); docSharing.markShared(entryId, false);
+      } else {
+        if (!confirm(`Share this worksheet with ${shareName}? They will be able to read it, including later changes you make, until you stop sharing. They keep anything they have already seen. Nothing else is shared.`)) { b.disabled = false; return; }
+        await autosaver.flush();
+        const session = await ensureVaultReady();
+        const { schema = 1, data } = ws.collect();
+        const row = entries.find(e => e.id === entryId);
+        await docSharing.shareDocument({ sb, session, target: shareTarget, entry: { id: entryId, type: ws.type, title: titleInput.value.trim() || defaultTitle, schema, data, created_at: row?.created_at } });
+        docSharing.markShared(entryId, true);
+      }
+    } catch (err) { showError('Sharing failed: ' + err.message); }
+    b.disabled = false; renderShare();
+  });
+
   // ── Boot ──
   if (!entryId) buildForm();
 
@@ -199,6 +233,16 @@ export async function mount(ws) {
     showError('Could not unlock your vault: ' + err.message);
     return;
   }
+
+  try {
+    const sb = await getSupabase();
+    const primed = await docSharing.prime(sb, therapistTarget);
+    shareTarget = primed?.target || null;
+    if (shareTarget) {
+      const { data: t } = await sb.from('my_therapists').select('display_name').eq('status', 'active').limit(1);
+      shareName = t?.[0]?.display_name || shareName;
+    }
+  } catch { /* sharing is optional; the worksheet works without it */ }
 
   try { await refreshList(); } catch (err) { $('savedList').innerHTML = `<div class="saved-empty">Could not load saved entries (${esc(err.message)}).</div>`; }
 
@@ -220,6 +264,7 @@ export async function mount(ws) {
 
   baseline = JSON.stringify(ws.collect().data);
   ready = true;
+  renderShare();
   statusEl.textContent = 'Autosave is on';
 
   ws.mountExtras && ws.mountExtras({

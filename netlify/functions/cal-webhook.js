@@ -81,6 +81,19 @@ async function findUserByEmail(email) {
   return data?.id || null;
 }
 
+// The therapist a booking is with, from the organizer's email. Null when it cannot be told
+// (older bookings are treated as the practice's default therapist by the database).
+async function findTherapistId(p) {
+  const email = p.organizer?.email;
+  if (!email) return null;
+  try {
+    const { data: prof } = await supabase.from('profiles').select('id').eq('email', email).maybeSingle();
+    if (!prof?.id) return null;
+    const { data: t } = await supabase.from('therapist_profiles').select('user_id').eq('user_id', prof.id).maybeSingle();
+    return t?.user_id || null;
+  } catch (e) { console.error('Error finding therapist for booking:', e); return null; }
+}
+
 // Only session types that warrant a post-session reflection reminder
 function shouldSendReminder(eventType) {
   return ['session', 'subscriber-session'].includes(eventType);
@@ -113,11 +126,14 @@ async function handleBookingCreated(p) {
     return { success: false, error: 'No event ID in payload' };
   }
 
+  const therapistId = await findTherapistId(p);
+
   // Upsert to handle duplicate webhook deliveries gracefully
   const { data: booking, error: bookingError } = await supabase
     .from('bookings')
     .upsert({
       user_id:       userId,
+      therapist_id:  therapistId,
       cal_event_id:  calEventId,
       event_type:    eventType,
       scheduled_at:  startTime,

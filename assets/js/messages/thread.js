@@ -24,7 +24,7 @@ export async function mountThread(root, { sb, linkId, other, active, onChange })
   catch (e) { root.innerHTML = `<p class="msg show error">${esc(e.message || 'Unlock your vault to read messages.')}</p>`; return () => {}; }
 
   let timer = null, stopped = false;
-  const code = other.fingerprint ? pairSafetyCode(session.fingerprint, other.fingerprint) : null;
+  const code = other.fingerprint ? await pairSafetyCode(session.fingerprint, other.fingerprint) : null;
 
   root.innerHTML = `
     <div class="msg-box" role="log" aria-live="polite" id="mxList"></div>

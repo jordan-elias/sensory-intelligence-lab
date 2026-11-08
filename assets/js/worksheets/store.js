@@ -9,6 +9,7 @@
  */
 import { getSupabase, getUser, ensureVaultReady } from './core.js';
 import { isEncrypted } from '/assets/js/vault/gate.js';
+import * as docSharing from '/assets/js/sharing/documents.js';
 
 export class ConflictError extends Error {
   constructor() { super('This entry was changed on another device.'); this.name = 'ConflictError'; }
@@ -100,6 +101,11 @@ export async function update(id, { type, title, schema = 1, data, expectedUpdate
     if (_hasUpdatedAt && expectedUpdatedAt) throw new ConflictError();
     throw new Error('Entry not found');
   }
+  // If this worksheet is shared with the therapist, keep their copy current (best effort).
+  if (docSharing.isShared(id)) {
+    const vs = await ensureVaultReady();
+    await docSharing.afterSave({ sb, session: vs, entry: { id, type, title, schema, data } });
+  }
   return { updated_at: rows[0].updated_at || null };
 }
 
@@ -116,4 +122,5 @@ export async function remove(id) {
   const sb = await getSupabase();
   const { error } = await sb.from('worksheets').delete().eq('id', id).eq('user_id', await userId());
   if (error) throw error;
+  await docSharing.afterDelete(sb, id);   // a shared copy is withdrawn too, while connected
 }
