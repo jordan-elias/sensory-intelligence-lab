@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <script src="/assets/js/audio/safe-output.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cocktail Party Problem</title>
   <meta name="robots" content="noindex, nofollow">
@@ -393,6 +394,7 @@ class AudioEngine {
     else resSrc.setPosition(0, 0, -1);
     const gainNode = this.audioCtx.createGain(); gainNode.gain.value = gain;
     src.connect(gainNode); gainNode.connect(resSrc.input);
+    src._gain = gainNode; src._level = gain;
     return src;
   }
   playTrial(targetBuffer, maskerBuffers, settings) {
@@ -403,13 +405,32 @@ class AudioEngine {
     maskerBuffers.forEach((buf, i) => {
       if (!buf) return;
       const src = this._makeSource(buf, settings.maskerGain, positions[i] || positions[0]);
-      src.start(now); src.stop(now + duration); this.sources.push(src);
+      this._envelope(src, now, now + duration); src.start(now); src.stop(now + duration); this.sources.push(src);
     });
     const tSrc = this._makeSource(targetBuffer, settings.targetGain, { x: 0, y: 0, z: -1 });
-    tSrc.start(wordStart); tSrc.stop(now + duration); this.sources.push(tSrc);
+    this._envelope(tSrc, wordStart, now + duration); tSrc.start(wordStart); tSrc.stop(now + duration); this.sources.push(tSrc);
     return { duration, wordStart: (wordStart - now) };
   }
-  stopAll() { this.sources.forEach(src => { try { src.stop(); } catch(e){} }); this.sources = []; }
+  // Short fades at both ends so sounds never start or stop with a click.
+  _envelope(src, t0, t1) {
+    const g = src._gain.gain, level = src._level;
+    g.cancelScheduledValues(0);
+    g.setValueAtTime(0, t0);
+    g.linearRampToValueAtTime(level, t0 + 0.04);
+    g.setValueAtTime(level, Math.max(t0 + 0.04, t1 - 0.08));
+    g.linearRampToValueAtTime(0, t1);
+  }
+  stopAll() {
+    const t = this.audioCtx ? this.audioCtx.currentTime : 0;
+    this.sources.forEach(src => {
+      try {
+        const g = src._gain.gain;
+        g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(0, t + 0.05);
+        src.stop(t + 0.06);
+      } catch(e) { try { src.stop(); } catch(e2){} }
+    });
+    this.sources = [];
+  }
 }
 
 // ═══ ASSET LOADER ════════════════════════════════════════

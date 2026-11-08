@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <script src="/assets/js/audio/safe-output.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rooms</title>
 
@@ -760,15 +761,16 @@ function wfSbTrackClick(e){
 
 function wfPreview(){
   if(wfState.previewSrc){
-    try{ wfState.previewSrc.stop(); } catch(e){}
-    wfState.previewSrc = null;
+    var ps = wfState.previewSrc, pg = wfState.previewGain; wfState.previewSrc = null;
+    try{ var t0 = pg.context.currentTime; pg.gain.cancelScheduledValues(t0); pg.gain.setValueAtTime(pg.gain.value, t0); pg.gain.linearRampToValueAtTime(0, t0 + 0.04); }catch(e){}
+    setTimeout(function(){ try{ ps.stop(); }catch(e){} }, 60);
     document.getElementById('wf-preview').textContent = '▶ Preview Selection';
     return;
   }
   var ctx = resumeCtx();
   var dur = wfState.fullBuffer.duration;
   var start = wfState.selStart * dur, end = wfState.selEnd * dur;
-  var g = ctx.createGain(); g.gain.value = 0.7; g.connect(ctx.destination);
+  var g = ctx.createGain(); var pt = ctx.currentTime; g.gain.setValueAtTime(0, pt); g.gain.linearRampToValueAtTime(0.7, pt + 0.03); g.gain.setValueAtTime(0.7, pt + Math.max(0.03, end - start - 0.05)); g.gain.linearRampToValueAtTime(0, pt + Math.max(0.04, end - start)); g.connect(ctx.destination); wfState.previewGain = g;
   wfState.previewSrc = ctx.createBufferSource();
   wfState.previewSrc.buffer = wfState.fullBuffer;
   wfState.previewSrc.connect(g);
@@ -832,7 +834,7 @@ function lPlay(){
   if(L.iters.length === 0) return;
   lStop();
   var ctx = resumeCtx();
-  lGain = ctx.createGain(); lGain.gain.value = L.vol; lGain.connect(ctx.destination);
+  lGain = ctx.createGain(); lGain.gain.setValueAtTime(0, ctx.currentTime); lGain.gain.linearRampToValueAtTime(L.vol, ctx.currentTime + 0.03); lGain.connect(ctx.destination);
   lSrc = ctx.createBufferSource(); lSrc.buffer = L.iters[L.cur]; lSrc.loop = L.looping;
   lSrc.connect(lGain);
   lSrc.onended = function(){ if(!L.looping){ L.playing = false; setLPlayBtn(false); } };
@@ -840,7 +842,12 @@ function lPlay(){
 }
 
 function lStop(){
-  if(lSrc){ try{ lSrc.stop(); } catch(e){} lSrc = null; }
+  if(lSrc){
+    // Fade out briefly before stopping so it never clicks.
+    var src = lSrc, g = lGain; lSrc = null;
+    try{ var t = g.context.currentTime; g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(g.gain.value, t); g.gain.linearRampToValueAtTime(0, t + 0.04); }catch(e){}
+    setTimeout(function(){ try{ src.stop(); }catch(e){} try{ g.disconnect(); }catch(e){} }, 60);
+  }
   L.playing = false; setLPlayBtn(false);
 }
 
