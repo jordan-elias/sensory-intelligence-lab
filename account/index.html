@@ -455,6 +455,22 @@
     </div>
   </div>
 
+  <!-- ── Download my data ── -->
+  <p class="sl">Your data</p>
+  <div class="card">
+    <div class="card-head"><h3>Download my data</h3></div>
+    <div class="card-body">
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:1rem;line-height:1.6;">
+        Saves everything stored for you to one file on this device: journal, check-ins, saved places, worksheets,
+        messages, bookings and scores. Your private entries are opened here in your browser with your vault
+        passphrase, so the file is not encrypted. Keep it somewhere you trust. Audio recordings are listed, not
+        included. Nothing is sent anywhere.
+      </p>
+      <div class="msg" id="exportMsg" role="status"></div>
+      <button class="btn" id="exportBtn" type="button">Download my data</button>
+    </div>
+  </div>
+
   <!-- ── Danger zone ── -->
   <p class="sl">Account actions</p>
   <div class="card danger-zone">
@@ -534,6 +550,7 @@
 
 import { getBookingEntitlement } from '/booking/entitlement-logic.js';
 import { mountMyTherapist } from '/assets/js/therapist/my-therapist.js';
+import { buildExport, exportFileName, downloadJson } from '/assets/js/export/export-data.js';
 
 function onAuthReady(cb) {
   if (window._currentUser) { cb(); return; }
@@ -919,6 +936,17 @@ onAuthReady(async () => {
   document.getElementById('passwordBtn').addEventListener('click', handlePasswordChange);
   document.getElementById('recoveryPwBtn').addEventListener('click', handleRecoveryPasswordSet);
   document.getElementById('signOutAllBtn').addEventListener('click', handleSignOutAll);
+  document.getElementById('exportBtn').addEventListener('click', async (ev) => {
+    const btn = ev.currentTarget, msg = document.getElementById('exportMsg');
+    btn.disabled = true; msg.textContent = 'Opening your data…'; msg.className = 'msg show';
+    try {
+      const data = await buildExport({ sb: window._supabase, uid: window._currentUser.id });
+      downloadJson(data, exportFileName());
+      msg.textContent = data.notes.length ? 'Downloaded, with some parts missing: ' + data.notes.join('; ') : 'Downloaded. Check your downloads folder.';
+      msg.className = 'msg show ' + (data.notes.length ? 'error' : 'success');
+    } catch (e) { msg.textContent = 'Could not build the file: ' + e.message; msg.className = 'msg show error'; }
+    btn.disabled = false;
+  });
   document.getElementById('deleteInitBtn').addEventListener('click', initiateDeleteFlow);
   document.getElementById('deleteCancelBtn').addEventListener('click', cancelDeleteFlow);
   document.getElementById('deleteConfirmBtn').addEventListener('click', handleDeleteAccount);
