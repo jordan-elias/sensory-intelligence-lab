@@ -73,7 +73,7 @@ const server = http.createServer((req,res)=>{
   if(p==='/__sortable.js'){ res.setHeader('content-type','text/javascript'); return res.end(fs.readFileSync(SORTABLE)); }
   if(p.endsWith('/')) p+='index.html';
   const f=path.join(REPO,p);
-  if(fs.existsSync(f)&&fs.statSync(f).isFile()){ const ext=path.extname(f); res.setHeader('content-type',{'.html':'text/html','.js':'text/javascript','.css':'text/css'}[ext]||'application/octet-stream'); return res.end(fs.readFileSync(f)); }
+  if(fs.existsSync(f)&&fs.statSync(f).isFile()){ const ext=path.extname(f); res.setHeader('content-type',{'.html':'text/html','.js':'text/javascript','.css':'text/css','.svg':'image/svg+xml','.woff2':'font/woff2'}[ext]||'application/octet-stream'); return res.end(fs.readFileSync(f)); }
   res.statusCode=404; res.end('nf');
 });
 await new Promise(r=>server.listen(0,r)); const PORT=server.address().port; const BASE=`http://localhost:${PORT}`;
