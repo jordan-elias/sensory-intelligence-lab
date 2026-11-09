@@ -498,3 +498,10 @@ Content-Security-Policy = """
   schedule = "0 17 * * *"
  
 
+
+# The service worker file must always be re-checked so a new deploy reaches people.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+    Service-Worker-Allowed = "/"
