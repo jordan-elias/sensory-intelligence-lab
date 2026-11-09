@@ -11,7 +11,7 @@ const FROM_ADDRESS = 'Jordan Elias <hello@jordanelias.de>';
 const QUIET_HOURS = 20;   // anyone with a check-in in the last 20 hours is skipped
 
 export function buildEmail() {
-  const url = `${SITE_URL}/checkin/`;
+  const url = `${SITE_URL}/check-in/`;
   const text = `A quiet moment to notice how you are.\n\nIf it feels useful, a check-in takes about a minute:\n${url}\n\n---\nYou chose to receive this reminder. Turn it off any time in your account settings: ${SITE_URL}/account/`;
   const html = `<p style="font:15px/1.7 Georgia,serif;color:#1a1a1a">A quiet moment to notice how you are.</p>
 <p style="font:15px/1.7 Georgia,serif;color:#1a1a1a">If it feels useful, a check-in takes about a minute.</p>
