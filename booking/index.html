@@ -663,7 +663,7 @@ function render(ent, therapist) {
     nudge.innerHTML = `
       <p class="upgrade-nudge-head">Resubscribe</p>
       <p>Your session subscription has ended. Resubscribe to get included video sessions each month — one session per month from <strong>€60</strong>, or two sessions per month for <strong>€110</strong>.</p>
-      <p class="muted" style="font-size:.78rem;color:var(--muted)">Single sessions remain available below at €75 each.</p>
+      <p class="muted" style="font-size:.78rem;color:var(--muted)">Single sessions remain available below at €80 each.</p>
       <div class="nudge-actions">
         <a class="nudge-btn" href="/subscribe/">View plans</a>
       </div>
@@ -674,7 +674,7 @@ function render(ent, therapist) {
     if (!ent.canBookIntro) {
       sections.push({
         id: 'cal-session', label: 'Individual Session',
-        meta: '€75 · Book anytime', calLink: 'jordan-elias/session', ns: 'session',
+        meta: '€80 · Book anytime', calLink: 'jordan-elias/session', ns: 'session',
       });
     } else {
       sections.push({
@@ -771,7 +771,7 @@ function render(ent, therapist) {
       nudge.innerHTML = `
         <p class="upgrade-nudge-head">Add a second session</p>
         <p><strong>Lab + 2 Calls</strong> includes two sessions per month for <strong>€110</strong> —
-          that's €55 per session, compared to €60 on your current plan or €75 for a single
+          that's €55 per session, compared to €60 on your current plan or €80 for a single
           session booked individually.</p>
         <div class="nudge-actions">
           <a class="nudge-btn" href="/subscribe/">View plans</a>
@@ -839,9 +839,9 @@ function render(ent, therapist) {
         nudge.className = 'upgrade-nudge';
         nudge.innerHTML = `
           <p class="upgrade-nudge-head">Include sessions in your plan</p>
-          <p>You're currently booking at <strong>€75 per session</strong>.
+          <p>You're currently booking at <strong>€80 per session</strong>.
             <strong>Lab + 1 Call</strong> includes one session per month for <strong>€60</strong>
-            — saving you €15 each time you book, with full Lab access already included in your plan.</p>
+            — saving you €20 each time you book, with full Lab access already included in your plan.</p>
           <p><strong>Lab + 2 Calls</strong> includes two sessions per month for <strong>€110</strong>
             — <span class="muted">€55 each</span>.</p>
           <div class="nudge-actions">
@@ -855,9 +855,9 @@ function render(ent, therapist) {
         nudge.className = 'upgrade-nudge';
         nudge.innerHTML = `
           <p class="upgrade-nudge-head">Subscribe and save</p>
-          <p>Single sessions are <strong>€75</strong> each.
+          <p>Single sessions are <strong>€80</strong> each.
             <strong>Lab + 1 Call</strong> includes one session per month for <strong>€60</strong>,
-            plus full access to all Lab tools — saving you €15 every time you book.</p>
+            plus full access to all Lab tools — saving you €20 every time you book.</p>
           <p><strong>Lab + 2 Calls</strong> includes two sessions per month for <strong>€110</strong>
             — <span class="muted">€55 each</span>.</p>
           <div class="nudge-actions">
@@ -870,7 +870,7 @@ function render(ent, therapist) {
 
       sections.push({
         id: 'cal-session', label: 'Individual Session',
-        meta: '€75 · Book anytime', calLink: 'jordan-elias/session', ns: 'session',
+        meta: '€80 · Book anytime', calLink: 'jordan-elias/session', ns: 'session',
       });
     }
   }
@@ -921,7 +921,7 @@ function buildCalSections(root, sections, ent) {
       const note = document.createElement('div');
       note.className = 'intro-note';
       note.textContent =
-        'The introductory session is complimentary. After that, individual sessions are €75, ' +
+        'The introductory session is complimentary. After that, individual sessions are €80, ' +
         'or included in a subscription from €60/month.';
       wrap.appendChild(note);
     }

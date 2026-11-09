@@ -9,7 +9,7 @@ const A=await newPage(await browser.createBrowserContext(),BASE,{tables:{therapi
 await A.page.evaluateOnNewDocument(()=>{ window.__tier='call1';
   const f=window.fetch.bind(window);
   window.fetch=async(u,o)=>{ const s=String(u);
-    if(s.includes('/.netlify/functions/link-therapist')){ const b=JSON.parse(o.body); if(b.consent_version!=='link-1.2') return new Response(JSON.stringify({error:'stale'}),{status:409}); window.__tbl.my_therapists.push({link_id:'L1',status:'active',started_at:new Date().toISOString(),...window.__tbl.therapist_directory[0]}); window.__linked=b; return new Response('{"ok":true}',{status:200}); }
+    if(s.includes('/.netlify/functions/link-therapist')){ const b=JSON.parse(o.body); if(b.consent_version!=='link-1.3') return new Response(JSON.stringify({error:'stale'}),{status:409}); window.__tbl.my_therapists.push({link_id:'L1',status:'active',started_at:new Date().toISOString(),...window.__tbl.therapist_directory[0]}); window.__linked=b; return new Response('{"ok":true}',{status:200}); }
     if(s.includes('/.netlify/functions/end-therapist-link')){ window.__tbl.my_therapists.forEach(r=>r.status='ended'); window.__ended=JSON.parse(o.body); return new Response('{"ok":true}',{status:200}); }
     return f(u,o); }; });
 await A.page.goto(`${BASE}/vault/`,{waitUntil:'domcontentloaded'}); await sleep(800);
@@ -22,7 +22,7 @@ ok(/name, email, subscription and intake status/.test(html)&&/Nothing else is vi
 ok(!(await A.page.evaluate(()=>window.__linked)),'nothing is created until the client agrees');
 await A.page.click('#thAgree'); await sleep(800);
 const linked=await A.page.evaluate(()=>({sent:window.__linked,text:document.getElementById('mt').innerText}));
-ok(linked.sent.consent_version==='link-1.2','agreeing sends the consent version');
+ok(linked.sent.consent_version==='link-1.3','agreeing sends the consent version');
 ok(/Connected/.test(linked.text)&&/Book a session/.test(linked.text),'then shows the connected therapist and a booking button');
 ok(await A.page.$eval('#mt a.btn',a=>a.href)==='https://cal.com/jordan','booking button uses the therapist\'s own link');
 await A.page.click('#thEnd'); ok(!(await A.page.$eval('#thEndConfirm',e=>e.hidden)),'ending asks for confirmation first');
