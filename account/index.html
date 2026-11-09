@@ -439,6 +439,24 @@
         </div>
       </div>
 
+      <div class="notif-row" id="appReminderRow" hidden>
+        <div class="notif-row-text">
+          <div class="notif-row-label">Check-in reminder on this phone</div>
+          <div class="notif-row-desc">A notification at the time you choose, every day. It is set on this phone only, and your time is not sent to us. It skips a day you have already checked in.</div>
+          <div style="margin-top:.5rem;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">
+            <label for="appReminderTime" style="font-size:.8rem">Time</label>
+            <input type="time" id="appReminderTime" value="20:00" style="padding:.4rem .5rem;border:1px solid var(--border);border-radius:4px;background:transparent;color:inherit">
+          </div>
+          <p id="appReminderMsg" role="status" style="font-size:.8rem;margin:.4rem 0 0;min-height:1.1em"></p>
+        </div>
+        <div class="toggle-wrap">
+          <label class="toggle" aria-label="Check-in reminder on this phone">
+            <input type="checkbox" id="appReminderToggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
       <div class="notif-row">
         <div class="notif-row-text">
           <div class="notif-row-label">Daily check-in reminder</div>
@@ -1155,6 +1173,25 @@ async function handleDeleteAccount() {
   }
 }
 
+</script>
+<script type="module">
+  import { remindersAvailable, getReminder, enableReminder, disableReminder } from '/assets/js/app/reminders.js';
+  if (remindersAvailable()) {
+    const row = document.getElementById('appReminderRow'), tog = document.getElementById('appReminderToggle'),
+          time = document.getElementById('appReminderTime'), msg = document.getElementById('appReminderMsg');
+    const pad = n => String(n).padStart(2, '0');
+    row.hidden = false;
+    const cur = getReminder(); tog.checked = cur.enabled; time.value = `${pad(cur.hour)}:${pad(cur.minute)}`;
+    const apply = async () => {
+      msg.textContent = '';
+      if (!tog.checked) { await disableReminder(); msg.textContent = 'Reminder off.'; return; }
+      const [h, m] = (time.value || '20:00').split(':').map(Number);
+      const r = await enableReminder(h, m);
+      if (!r.ok) { tog.checked = false; msg.textContent = r.reason === 'denied' ? 'Notifications are turned off for this app. Turn them on in your phone settings to get a reminder.' : 'Reminders are not available here.'; }
+      else msg.textContent = `Reminder set for ${pad(h)}:${pad(m)} each day.`;
+    };
+    tog.addEventListener('change', apply); time.addEventListener('change', () => { if (tog.checked) apply(); });
+  }
 </script>
 </body>
 </html>

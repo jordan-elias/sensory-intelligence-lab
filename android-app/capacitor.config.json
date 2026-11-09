@@ -1,0 +1,11 @@
+{
+  "appId": "de.jordanelias.sil",
+  "appName": "Sensory Intelligence Lab",
+  "webDir": "www",
+  "server": { "androidScheme": "https" },
+  "android": { "allowMixedContent": false },
+  "plugins": {
+    "SplashScreen": { "launchShowDuration": 0 },
+    "StatusBar": { "overlaysWebView": false }
+  }
+}

@@ -58,6 +58,7 @@ const key = await crypto.subtle.importKey('raw', new Uint8Array(32).fill(7), 'AE
 const s={userId:'u1',fingerprint:'AAAA-BBBB',open:async(sealed)=>sealed.plain,publicKeys:{enc:{},sign:null},sign:async()=>'sig',encrypt:t=>encryptWithKey(key,t),decrypt:p=>decryptWithKey(key,p)};
 export const ensureVaultReady=async()=>s;
 export const encrypt=t=>s.encrypt(t), decrypt=p=>s.decrypt(p);
+export const promptIfOldEntries=async()=>{};
 export const decryptSafe=async p=>{try{return await s.decrypt(p)}catch{return null}};
 export const isEncrypted=v=>{try{const p=JSON.parse(v);return typeof p.iv==='string'&&typeof p.ciphertext==='string'}catch{return false}};
 export const lockVault=async()=>{}; export const hasUserKey=()=>true;
