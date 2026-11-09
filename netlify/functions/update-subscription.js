@@ -1,3 +1,4 @@
+import { withCors } from './lib/cors.js';
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
@@ -39,7 +40,7 @@ function getTierFromPlan(plan) {
   return "free";
 }
 
-export async function handler(event) {
+async function rawHandler(event) {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: JSON.stringify({ error: "Method not allowed" }) };
   }
@@ -153,3 +154,5 @@ export async function handler(event) {
     };
   }
 }
+
+export const handler = withCors(rawHandler);
