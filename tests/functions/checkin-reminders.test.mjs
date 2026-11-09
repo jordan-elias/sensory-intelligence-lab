@@ -32,6 +32,6 @@ test('a database error is reported', async () => {
 
 test('the email is generic and links to the check-in', () => {
   const e = buildEmail();
-  assert.match(e.text, /\/checkin\//);
+  assert.match(e.text, /\/check-in\//);
   assert.doesNotMatch(e.text + e.html, /streak|you (felt|wrote)|mood|score/i);
 });
