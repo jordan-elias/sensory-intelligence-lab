@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import { activatePendingLink } from "./lib/therapist-link.js";
 import { createClient } from "@supabase/supabase-js";
 
 /* ─────────────────────────────
@@ -113,6 +114,7 @@ async function updateProfile({
     })
     .eq("id", userId);
   if (error) console.error("Profile update error:", error);
+  else await activatePendingLink(supabase, userId, tier, status);
 }
 
 /* ─────────────────────────────
@@ -254,6 +256,9 @@ export async function handler(event) {
             updated_at:           new Date(),
           })
           .eq("stripe_subscription_id", subscriptionId);
+
+        const { data: who } = await supabase.from("profiles").select("id").eq("stripe_subscription_id", subscriptionId).maybeSingle();
+        if (who) await activatePendingLink(supabase, who.id, tier, status);
 
         console.log(
           "Subscription updated:", subscriptionId,

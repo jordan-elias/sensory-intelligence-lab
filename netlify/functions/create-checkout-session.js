@@ -1,4 +1,5 @@
 import { withCors } from './lib/cors.js';
+import { therapistProblem } from './lib/therapist-link.js';
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
@@ -157,6 +158,9 @@ async function rawHandler(event) {
        writing the new subscription — acceptable at this scale. */
     const tier = getPlanTier(plan);
     if (tier === "call1" || tier === "call2") {
+      const noTherapist = await therapistProblem(supabase, user.id);
+      if (noTherapist) return noTherapist;
+
       const sessionsNeeded = SESSIONS_PER_TIER[tier];
       const sessionsUsed   = await getTotalSessionsCommitted();
 

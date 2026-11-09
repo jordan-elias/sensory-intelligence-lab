@@ -6,15 +6,15 @@ import { withCors } from './lib/cors.js';
  * therapist will be able to see. The browser cannot create these links itself: this function
  * checks the subscription tier on the server and records the consent text version.
  *
- * Today every session-tier client is linked to the default therapist. Later the body may carry
- * a `therapist_id` chosen from the directory.
+ * Anyone signed in can choose a therapist (the body carries `therapist_id`, else the default). Before the person
+ * has a paid session plan the connection is "pending": it shows them nothing of the person and gives no access.
+ * Paying for call1 or call2 activates it (see lib/therapist-link.js).
  */
 import { createClient } from "@supabase/supabase-js";
 
 // Must match LINK_CONSENT_VERSION in /assets/js/therapist/consent.js
-export const CONSENT_VERSION = "link-1.2";
-const SESSION_TIERS = ["call1", "call2"];
-const ACTIVE_STATUSES = ["active", "trialing"];
+export const CONSENT_VERSION = "link-1.3";
+import { SESSION_TIERS, ACTIVE_STATUSES } from "./lib/therapist-link.js";
 
 const json = (statusCode, body) => ({
   statusCode,
@@ -39,14 +39,15 @@ export function makeHandler(supabase) {
 
     const { data: profile } = await supabase
       .from("profiles").select("subscription_tier, subscription_status").eq("id", user.id).maybeSingle();
-    if (!profile || !SESSION_TIERS.includes(profile.subscription_tier) || !ACTIVE_STATUSES.includes(profile.subscription_status)) {
-      return json(403, { error: "Working with a therapist needs a plan that includes sessions." });
-    }
+    const paid = !!profile && SESSION_TIERS.includes(profile.subscription_tier) && ACTIVE_STATUSES.includes(profile.subscription_status);
 
     const { data: open } = await supabase
-      .from("client_therapists").select("id, status")
+      .from("client_therapists").select("id, status, therapist_id")
       .eq("client_id", user.id).in("status", ["pending", "active"]).limit(1);
-    if (open && open.length) return json(200, { ok: true, already: true, link_id: open[0].id });
+    const existing = open && open[0];
+    if (existing && (existing.status === "active" || !body.therapist_id || body.therapist_id === existing.therapist_id)) {
+      return json(200, { ok: true, already: true, link_id: existing.id });
+    }
 
     let q = supabase.from("therapist_profiles")
       .select("user_id, practice_id").eq("accepting_clients", true);
@@ -56,13 +57,18 @@ export function makeHandler(supabase) {
     if (!therapist) return json(503, { error: "No therapist is taking new clients right now. Please try again later." });
     if (therapist.user_id === user.id) return json(400, { error: "You cannot be your own client." });
 
+    // Changing a choice before paying: the earlier pending connection never gave access, so it is simply removed.
+    if (existing && existing.status === "pending") {
+      await supabase.from("client_therapists").delete().eq("id", existing.id).eq("client_id", user.id).eq("status", "pending");
+    }
+
     const { data: link, error } = await supabase.from("client_therapists").insert({
       client_id: user.id, therapist_id: therapist.user_id, practice_id: therapist.practice_id,
-      status: "active", requested_by: "client",
+      status: paid ? "active" : "pending", requested_by: "client",
       consented_at: new Date().toISOString(), consent_version: CONSENT_VERSION,
     }).select("id").single();
     if (error) return json(500, { error: "Could not create the link. Please try again." });
-    return json(200, { ok: true, link_id: link.id });
+    return json(200, { ok: true, link_id: link.id, pending: !paid });
   };
 }
 

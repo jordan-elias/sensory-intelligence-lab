@@ -40,7 +40,7 @@ export async function mountConnectedCard(root, sb, t) {
 }
 
 /** Choose a therapist. `onConnected` runs after the connection is made. */
-export async function mountChooser(root, sb, { onConnected } = {}) {
+export async function mountChooser(root, sb, { onConnected, intro } = {}) {
   const { data } = await sb.from('therapist_directory').select('*');
   const list = (data || []).slice().sort((a, b) => (b.is_default ? 1 : 0) - (a.is_default ? 1 : 0) || String(a.display_name).localeCompare(b.display_name));
   if (!list.length) {
@@ -51,7 +51,7 @@ export async function mountChooser(root, sb, { onConnected } = {}) {
   const urls = await Promise.all(list.map(t => photoUrl(sb, t.photo_path).catch(() => null)));
   root.innerHTML = `
     <p style="font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 .5rem">Choose your therapist</p>
-    <p style="font-size:.85rem;line-height:1.6;margin:0 0 1rem">Your plan includes sessions. Pick the therapist you would like to work with. You will see exactly what they can see before you are connected.</p>
+    <p style="font-size:.85rem;line-height:1.6;margin:0 0 1rem">${esc(intro || 'Your plan includes sessions. Pick the therapist you would like to work with.')} You will see exactly what they can see before you are connected.</p>
     <div id="tpList">${list.map((t, i) => `
       <div class="card" style="margin-bottom:.8rem"><div class="card-body" style="display:flex;gap:1rem;align-items:flex-start;flex-wrap:wrap">
         ${avatar(urls[i], t.display_name)}

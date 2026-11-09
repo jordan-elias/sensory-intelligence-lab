@@ -1,4 +1,5 @@
 import { withCors } from './lib/cors.js';
+import { therapistProblem } from './lib/therapist-link.js';
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
@@ -90,6 +91,12 @@ async function rawHandler(event) {
   const newTier   = getTierFromPlan(plan);
   const oldTier   = profile.subscription_tier || "free";
   const isUpgrade = TIER_ORDER[newTier] > TIER_ORDER[oldTier];
+
+  /* ── A therapist must be chosen first, and be taking new clients (any move onto a session plan) ── */
+  if (SESSIONS_PER_TIER[newTier] && newTier !== oldTier) {
+    const noTherapist = await therapistProblem(supabase, user.id);
+    if (noTherapist) return noTherapist;
+  }
 
   /* ── Capacity check for session tiers (upgrades only) ── */
   if (isUpgrade && SESSIONS_PER_TIER[newTier]) {

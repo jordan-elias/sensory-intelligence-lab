@@ -18,6 +18,7 @@ function fakeDb(seed, users) {
         const row = { id: `${table}-${db[table].length + 1}`, ...s.payload }; db[table].push(row);
         return { data: row, error: null };
       }
+      if (s.op === 'delete') { db[table] = db[table].filter(r => !rows.includes(r)); return { data: null, error: null }; }
       if (s.op === 'update') { rows.forEach(r => Object.assign(r, s.payload)); return { data: rows, error: null }; }
       if (s.lim) rows = rows.slice(0, s.lim);
       if (s.one) return { data: rows[0] ?? null, error: rows[0] || s.maybe ? null : { message: 'none' } };
@@ -26,7 +27,7 @@ function fakeDb(seed, users) {
     const b = {
       select() { return b; }, eq(k, v) { s.f.push([k, v]); return b; }, in(k, vs) { s.inn.push([k, vs]); return b; },
       limit(n) { s.lim = n; return b; }, maybeSingle() { s.one = true; s.maybe = true; return b; }, single() { s.one = true; return b; },
-      insert(p) { s.op = 'insert'; s.payload = p; return b; }, update(p) { s.op = 'update'; s.payload = p; return b; },
+      insert(p) { s.op = 'insert'; s.payload = p; return b; }, delete() { s.op = 'delete'; return b; }, update(p) { s.op = 'update'; s.payload = p; return b; },
       then(res, rej) { return Promise.resolve(run()).then(res, rej); },
     };
     return b;
@@ -41,16 +42,37 @@ const seed = () => ({
   client_therapists: [],
 });
 
-test('linking: needs a session tier, the current consent text, and a therapist', async () => {
+test('linking: needs sign-in, the current consent text, and a therapist who is accepting', async () => {
   const d = fakeDb(seed(), users), h = makeLink(d);
   assert.equal((await call(h, {}, null)).statusCode, 401);
   assert.equal((await call(h, {}, 'nope')).statusCode, 401);
   assert.equal((await call(h, { consent_version: CONSENT_VERSION }, 't-client', 'GET')).statusCode, 405);
   assert.equal((await call(h, { consent_version: 'old' })).statusCode, 409);
-  assert.equal((await call(h, { consent_version: CONSENT_VERSION }, 't-free')).statusCode, 403);
-  assert.equal((await call(h, { consent_version: CONSENT_VERSION }, 't-lab')).statusCode, 403);
-  assert.equal((await call(h, { consent_version: CONSENT_VERSION }, 't-lapsed')).statusCode, 403, 'a cancelled subscription does not count');
   assert.equal(d.db.client_therapists.length, 0, 'nothing created for refused requests');
+});
+test('choosing first: a free, lab or lapsed person gets a PENDING connection that gives no access', async () => {
+  for (const tok of ['t-free', 't-lab', 't-lapsed']) {
+    const d = fakeDb(seed(), users);
+    const r = await call(makeLink(d), { consent_version: CONSENT_VERSION }, tok);
+    assert.equal(r.statusCode, 200); assert.equal(JSON.parse(r.body).pending, true);
+    assert.equal(d.db.client_therapists[0].status, 'pending');
+  }
+});
+test('choosing first: changing the choice before paying replaces the pending connection', async () => {
+  const sd = seed(); sd.therapist_profiles.push({ user_id: 'th2', practice_id: 'p1', accepting_clients: true });
+  const d = fakeDb(sd, users), h = makeLink(d);
+  await call(h, { consent_version: CONSENT_VERSION, therapist_id: 'th1' }, 't-lab');
+  const again = await call(h, { consent_version: CONSENT_VERSION, therapist_id: 'th1' }, 't-lab');
+  assert.equal(JSON.parse(again.body).already, true);
+  await call(h, { consent_version: CONSENT_VERSION, therapist_id: 'th2' }, 't-lab');
+  assert.equal(d.db.client_therapists.length, 1); assert.equal(d.db.client_therapists[0].therapist_id, 'th2');
+});
+test('a pending choice can be withdrawn by the client and is deleted, leaving no record for the therapist', async () => {
+  const d = fakeDb(seed(), users); await call(makeLink(d), { consent_version: CONSENT_VERSION }, 't-lab');
+  const id = d.db.client_therapists[0].id, h = makeEnd(d);
+  assert.equal((await call(h, { link_id: id }, 't-th')).statusCode, 404, 'the therapist cannot see or end it');
+  assert.equal((await call(h, { link_id: id }, 't-lab')).statusCode, 200);
+  assert.equal(d.db.client_therapists.length, 0);
 });
 test('linking: a session-tier client who agrees is linked to the default therapist, with consent recorded', async () => {
   const d = fakeDb(seed(), users), h = makeLink(d);
