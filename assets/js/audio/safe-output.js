@@ -13,6 +13,15 @@
  * - The first time on a device, a short note asks people to start with the volume low.
  *
  * Offline renders (for exporting files) are never touched.
+ *
+ * It also looks after audio when the phone sleeps or the tab is hidden:
+ * - A context that the system suspended or interrupted (screen lock, a call) is resumed when the
+ *   person comes back, unless the page itself paused it on purpose.
+ * - Pages that do not need instant response run with the 'playback' latency hint (set
+ *   window.SIL_AUDIO_LATENCY = 'playback' before this script), which is kinder to the battery and
+ *   avoids glitches during long sessions.
+ * - silAudio.mediaSession() gives lock-screen and headset controls where the browser supports them.
+ *
  * Pages need no changes. For stopping gracefully they can call window.silAudio.fadeOut(ctx).
  */
 (function () {
@@ -122,6 +131,46 @@
     if (document.body) build(); else document.addEventListener('DOMContentLoaded', build);
   }
 
+  /* ── Lifecycle ─────────────────────────────────────────────────────────── */
+  var live = [];
+  var NativeAC = window.AudioContext || window.webkitAudioContext;
+
+  function track(ctx) {
+    live.push(ctx);
+    var nativeSuspend = ctx.suspend.bind(ctx), nativeResume = ctx.resume.bind(ctx);
+    ctx.suspend = function () { ctx.__silPausedByPage = true; return nativeSuspend(); };
+    ctx.resume = function () { ctx.__silPausedByPage = false; return nativeResume(); };
+    ctx.__silNativeResume = nativeResume;
+    ctx.addEventListener('statechange', function () { if (ctx.state === 'running') ctx.__silWasRunning = true; });
+  }
+
+  function recover() {
+    live.forEach(function (ctx) {
+      if (ctx.state === 'closed' || ctx.__silPausedByPage || !ctx.__silWasRunning) return;
+      if (ctx.state === 'suspended' || ctx.state === 'interrupted') {
+        var p = ctx.__silNativeResume(); if (p && p.catch) p.catch(function () { /* needs a tap first; the tap listener below retries */ });
+      }
+    });
+  }
+
+  if (NativeAC) {
+    var SilAudioContext = function (options) {
+      options = options || {};
+      if (options.latencyHint === undefined) options.latencyHint = window.SIL_AUDIO_LATENCY || 'interactive';
+      var ctx = new NativeAC(options);
+      track(ctx);
+      return ctx;
+    };
+    SilAudioContext.prototype = NativeAC.prototype;
+    window.AudioContext = SilAudioContext;
+    if (window.webkitAudioContext) window.webkitAudioContext = SilAudioContext;
+  }
+
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') recover(); });
+  window.addEventListener('pageshow', recover);
+  // Some phones only allow resuming after a touch, so the first touch back also tries.
+  document.addEventListener('pointerdown', recover, { passive: true });
+
   window.silAudio = {
     MASTER_LEVEL: MASTER_LEVEL,
     CEILING: CEILING,
@@ -131,6 +180,19 @@
       seconds = seconds == null ? 0.3 : seconds;
       ramp(ctx, 0, seconds);
       return new Promise(function (res) { setTimeout(res, seconds * 1000 + 30); });
+    },
+    /**
+     * Lock-screen and headset controls, where the browser supports them.
+     * opts: { title, artist, play(), pause(), stop() }. Returns { state('playing'|'paused'|'none') }.
+     */
+    mediaSession: function (opts) {
+      opts = opts || {};
+      if (!('mediaSession' in navigator) || typeof MediaMetadata === 'undefined') return { state: function () {} };
+      try {
+        navigator.mediaSession.metadata = new MediaMetadata({ title: opts.title || document.title, artist: opts.artist || 'Sensory Intelligence Lab' });
+        ['play', 'pause', 'stop'].forEach(function (a) { if (typeof opts[a] === 'function') navigator.mediaSession.setActionHandler(a, opts[a]); });
+      } catch (e) { /* unsupported action; ignore */ }
+      return { state: function (s) { try { navigator.mediaSession.playbackState = s; } catch (e) { /* ignore */ } } };
     },
     /** Bring the level back after a fadeOut. */
     fadeIn: function (ctx, seconds) { ramp(ctx, MASTER_LEVEL, seconds == null ? FADE_IN : seconds); }

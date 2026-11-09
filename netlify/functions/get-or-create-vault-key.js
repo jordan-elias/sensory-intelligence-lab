@@ -1,3 +1,4 @@
+import { withCors } from './lib/cors.js';
 /**
  * netlify/functions/get-or-create-vault-key.js   (LEGACY: migration only)
  *
@@ -91,7 +92,7 @@ async function unwrapKey(payload, wrappingKey) {
 
 // ─── Handler ────────────────────────────────────────────────
 
-export const handler = async (event) => {
+const rawHandler = async (event) => {
   // Only accept POST
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
@@ -184,3 +185,5 @@ export const handler = async (event) => {
   // passphrase-derived key, which the server never sees.
   return { statusCode: 404, body: 'No legacy key' };
 };
+
+export const handler = withCors(rawHandler);

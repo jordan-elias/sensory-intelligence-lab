@@ -387,6 +387,7 @@
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
   <link rel="stylesheet" href="/assets/css/header.css">
+  <link rel="stylesheet" href="/assets/css/a11y.css">
 </head>
 <body>
 
@@ -1530,7 +1531,7 @@ function renderChordHistory(checkins) {
       <span class="chord-history-name${!c.chord_name?' unnamed':''}">${chordName}</span>
       <span class="chord-history-notes">${noteNames}</span>
       <span class="chord-history-date">${date} ${time}</span>
-      <button class="chord-play-btn">▶</button>`;
+      <button class="chord-play-btn" type="button" aria-label="Play chord">▶</button>`;
     item.querySelector('.chord-play-btn').addEventListener('click', () => {
       playChord(c.selected_notes.map(pc => ({ pitchClass: pc, octave: 4 })), { duration: S.chordDuration });
     });

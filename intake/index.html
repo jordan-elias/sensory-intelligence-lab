@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Intake form · Sensory Intelligence Lab</title>
+  <meta name="robots" content="noindex, nofollow">
+
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <link rel="apple-touch-icon" href="/images/favicon.png">
+  <link rel="manifest" href="/site.webmanifest">
+
+  <script src="/dashboard/auth-guard.js" type="module"></script>
+
+  <link href="/assets/css/fonts.css" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/worksheets.css">
+  <link rel="stylesheet" href="/assets/css/therapist.css">
+  <link rel="stylesheet" href="/assets/css/a11y.css">
+</head>
+<body>
+
+<div id="sil-header"></div>
+
+<main>
+  <h1 class="th-title">Intake form</h1>
+  <div id="intakeApp"><p class="th-muted">Loading…</p></div>
+</main>
+
+<div id="sil-footer"></div>
+
+<script type="module">
+  import { mountLayout } from '/assets/js/worksheets/core.js';
+  import { mountIntake } from '/assets/js/intake/client-page.js';
+  mountLayout({ crumbs: [{ label: 'Intake form' }] });
+  mountIntake(document.getElementById('intakeApp'));
+</script>
+</body>
+</html>

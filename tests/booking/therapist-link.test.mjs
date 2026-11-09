@@ -22,9 +22,10 @@ test('a lookalike host is not treated as Cal.com', () => {
   assert.equal(parseBookingLink('https://evilcal.com/a').kind, 'external');
 });
 
-test('planFor respects availability and missing links', () => {
+test('planFor handles missing therapist and missing links', () => {
   assert.deepEqual(planFor(null), { kind: 'none' });
-  assert.deepEqual(planFor({ has_availability: false, booking_link: 'https://cal.com/a' }), { kind: 'paused', reason: 'unavailable' });
-  assert.deepEqual(planFor({ has_availability: true, booking_link: null }), { kind: 'paused', reason: 'no-link' });
-  assert.equal(planFor({ has_availability: true, booking_link: 'https://cal.com/a/b' }).kind, 'cal');
+  assert.deepEqual(planFor({ booking_link: null }), { kind: 'paused', reason: 'no-link' });
+  assert.equal(planFor({ booking_link: 'https://cal.com/a/b' }).kind, 'cal');
+  // not taking new clients does not stop an existing client from booking
+  assert.equal(planFor({ accepting_clients: false, booking_link: 'https://cal.com/a/b' }).kind, 'cal');
 });

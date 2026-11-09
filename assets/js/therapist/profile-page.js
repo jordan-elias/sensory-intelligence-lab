@@ -1,7 +1,7 @@
 /**
  * /assets/js/therapist/profile-page.js
- * Lets a therapist edit their own profile: name, short bio, booking link, availability
- * switches and a photo. The row itself is created by the practice owner in SQL; therapists
+ * Lets a therapist edit their own profile: name, short bio, booking link, whether they are
+ * taking new clients, and a photo. The row itself is created by the practice owner in SQL; therapists
  * can change only these fields (the database enforces it).
  */
 import { photoUrl } from './my-therapist.js';
@@ -63,9 +63,7 @@ export async function mountProfile(root) {
           <p class="th-hint">Where your clients book sessions with you. Must start with https://. Leave empty if you have none yet.</p></div>
 
         <label class="th-switch"><input type="checkbox" id="thAccepting" ${row.accepting_clients ? 'checked' : ''}>
-          <span>Taking new clients<small>When off, new clients cannot be connected with you. Your current clients are not affected.</small></span></label>
-        <label class="th-switch"><input type="checkbox" id="thAvail" ${row.has_availability ? 'checked' : ''}>
-          <span>I have session availability<small>Lets clients know that booking a session is possible right now.</small></span></label>
+          <span>Taking new clients<small>When off, you are not shown to new clients and they cannot connect with you. Your current clients can still book and message you.</small></span></label>
 
         <button type="submit" class="action-btn" id="thSave">Save profile</button>
       </form>`;
@@ -109,7 +107,7 @@ export async function mountProfile(root) {
       $('thSave').disabled = true;
       const { error: e } = await sb.from('therapist_profiles').update({
         display_name: name, bio: bio || null, booking_link: link || null,
-        accepting_clients: $('thAccepting').checked, has_availability: $('thAvail').checked,
+        accepting_clients: $('thAccepting').checked,
       }).eq('user_id', uid);
       $('thSave').disabled = false;
       if (e) return msg('Could not save: ' + e.message, 'error');

@@ -279,6 +279,16 @@
   status = 200
 
 [[redirects]]
+  from = "/intake"
+  to   = "/intake/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/intake/"
+  to   = "/intake/index.html"
+  status = 200
+
+[[redirects]]
   from = "/messages"
   to   = "/messages/index.html"
   status = 200
@@ -482,5 +492,16 @@ Content-Security-Policy = """
  
 [functions."send-session-reminders"]
   schedule = "0 * * * *"
+
+# Opt-in daily check-in reminder, once a day (17:00 UTC, evening in Berlin).
+[functions."send-checkin-reminders"]
+  schedule = "0 17 * * *"
  
 
+
+# The service worker file must always be re-checked so a new deploy reaches people.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+    Service-Worker-Allowed = "/"

@@ -1,0 +1,21 @@
+// Offline use: tools you have opened keep working without a connection; private pages are never kept.
+import {launch,newPage} from './harness.mjs';
+const {browser,BASE,server}=await launch();
+let fail=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fail++; };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const {page}=await newPage(await browser.createBrowserContext(),BASE,{});
+await page.goto(`${BASE}/breathing/`,{waitUntil:'domcontentloaded'});
+await page.evaluate(async()=>{ const m=await import('/assets/js/offline.js'); m.registerOffline(); await navigator.serviceWorker.ready; });
+await page.reload({waitUntil:'networkidle0'}); await sleep(800);
+ok(await page.evaluate(()=>!!navigator.serviceWorker.controller),'the service worker is in control after the first visit');
+await page.goto(`${BASE}/journal/`,{waitUntil:'networkidle0'}); await sleep(500);
+await page.goto(`${BASE}/breathing/`,{waitUntil:'networkidle0'}); await sleep(500);
+const keys=await page.evaluate(async()=>{ const c=await caches.open('sil-v1'); return (await c.keys()).map(r=>new URL(r.url).pathname); });
+ok(keys.includes('/breathing/')&&keys.includes('/offline.html'),'opened tool pages and the offline page are kept');
+ok(!keys.includes('/journal/')&&!keys.some(k=>k.startsWith('/.netlify')||k.includes('supabase')),'private pages and data calls are never kept');
+await page.setOfflineMode(true); server.closeAllConnections?.(); await new Promise(r=>server.close(r));
+await page.goto(`${BASE}/breathing/`,{waitUntil:'domcontentloaded'}).catch(()=>{});
+ok(/Breathing/i.test(await page.title()),'a tool opened before still opens offline');
+await page.goto(`${BASE}/journal/`,{waitUntil:'domcontentloaded'}).catch(()=>{});
+ok(/Offline/i.test(await page.title()),'a private page shows the offline notice');
+await browser.close(); process.exit(fail?1:0);

@@ -37,7 +37,7 @@ export async function loadState(sb, profile) {
   return { active, offered, choices, ended: (links || []).filter(l => l.status === 'ended'), needsLink: !active && hasSessionPlan(profile) };
 }
 
-function avatar(url, name) {
+export function avatar(url, name) {
   return url
     ? `<img src="${esc(url)}" alt="" width="64" height="64" style="width:64px;height:64px;object-fit:cover;border-radius:50%;border:1px solid var(--border);flex-shrink:0">`
     : `<div aria-hidden="true" style="width:64px;height:64px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font:600 1.3rem var(--font-heading);flex-shrink:0">${esc((name || '?').trim()[0]?.toUpperCase() || '?')}</div>`;

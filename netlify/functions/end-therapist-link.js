@@ -1,3 +1,4 @@
+import { withCors } from './lib/cors.js';
 /**
  * netlify/functions/end-therapist-link.js
  *
@@ -42,7 +43,9 @@ export function makeHandler(supabase) {
 }
 
 let cached;
-export const handler = (event) => {
+const rawHandler = (event) => {
   cached ||= makeHandler(createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY));
   return cached(event);
 };
+
+export const handler = withCors(rawHandler);

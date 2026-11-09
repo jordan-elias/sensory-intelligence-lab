@@ -214,6 +214,7 @@
       .data-table { display: block; overflow-x: auto; }
     }
   </style>
+  <link rel="stylesheet" href="/assets/css/a11y.css">
 </head>
 <body>
 
@@ -401,11 +402,14 @@ The table covers every category of data the platform stores. Anything you downlo
 <tr><td>Display name, subscription tier and status, intake status</td><td class="td-mono">Profile</td><td><span class="badge badge--plain">Plaintext</span></td><td>You. Platform operator. Your therapist, if you connect to one (see above).</td></tr>
 <tr><td>Journal entries (text and title)</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You only. Journal entries cannot be shared through the platform.</td></tr>
 <tr><td>Journal details: date, length, duration, soundscape, prompt</td><td class="td-mono">Database</td><td><span class="badge badge--plain">Plaintext</span></td><td>You. Platform operator.</td></tr>
+<tr><td>Offline copy of the tool pages you have opened</td><td class="td-mono">This device</td><td><span class="badge badge--enc">No personal content</span></td><td>You. It holds only the site's own pages, scripts and images, never your journal, check-ins, messages or account.</td></tr>
+<tr><td>Intake form: name, date of birth, pronouns, contact, medications, history</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You. Your therapist, only after they ask for it and you choose to send it. We store only that it exists.</td></tr>
 <tr><td>Check-ins: scores, emotion words, notes</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You. Your therapist, only if you turn sharing on.</td></tr>
 <tr><td>Saved places</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You only.</td></tr>
 <tr><td>Worksheets</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You. Your therapist, only for the individual worksheets you share.</td></tr>
 <tr><td>Audio recordings and compositions (audio, title, length)</td><td class="td-mono">Private file storage</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You only. Files are never at public links.</td></tr>
 <tr><td>Messages with your therapist</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You and your therapist only.</td></tr>
+<tr><td>A therapist’s private notes about a client</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>The therapist who wrote them only. They stay with the therapist if a connection ends, and are removed if the client deletes their account.</td></tr>
 <tr><td>Items you share with a therapist</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You and that therapist only.</td></tr>
 <tr><td>Your public sharing and signing keys</td><td class="td-mono">Database</td><td><span class="badge badge--plain">Plaintext</span></td><td>Visible to the platform. Used so others can encrypt to you and verify your messages. Not secret.</td></tr>
 <tr><td>Your protected vault bundle</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>Only your passphrase or recovery key can open it.</td></tr>
@@ -574,13 +578,13 @@ protection law, you have the following rights. To exercise any of them, write to
 <a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a>. We will respond within 30 days.
 </p>
 <h3 class="section__sub">Right of access</h3>
-<p class="prose">Your saved content is visible to you inside the platform. For a copy of the other data we hold about you, contact us. Because your content is encrypted, only you can open it.</p>
+<p class="prose">Your saved content is visible to you inside the platform, and “Download my data” on the Account page gives you a copy. For anything else we hold about you, contact us. Because your content is encrypted, only you can open it.</p>
 <h3 class="section__sub">Right to rectification</h3>
 <p class="prose">You can update your name and email from the Account page. For anything else, contact us.</p>
 <h3 class="section__sub">Right to erasure</h3>
 <p class="prose">You can delete individual items from within the platform, and delete your whole account yourself from the Account page. See below.</p>
 <h3 class="section__sub">Right to data portability</h3>
-<p class="prose">Journal entries and worksheets can be downloaded from within the platform. For a full export of everything stored, contact us.</p>
+<p class="prose">On the <a href="/account/">Account page</a>, “Download my data” saves everything stored for you (journal, check-ins, saved places, worksheets, messages, bookings and scores) to one file on your own device. Audio recordings are listed in it, and can be downloaded one by one.</p>
 <h3 class="section__sub">Right to object / restrict processing</h3>
 <p class="prose">Contact us to discuss any concerns about how your data is being processed.</p>
 <h3 class="section__sub">Lawful basis for processing</h3>

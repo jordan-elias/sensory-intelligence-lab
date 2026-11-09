@@ -250,6 +250,7 @@
     footer a:hover { color: var(--accent); text-decoration: underline; }
   </style>
   <link rel="stylesheet" href="/assets/css/header.css">
+  <link rel="stylesheet" href="/assets/css/a11y.css">
 </head>
 <body>
 
@@ -440,6 +441,19 @@
 
       <div class="notif-row">
         <div class="notif-row-text">
+          <div class="notif-row-label">Daily check-in reminder</div>
+          <div class="notif-row-desc">One short email in the evening, only on days you have not checked in. It never mentions what you have written. Off unless you turn it on.</div>
+        </div>
+        <div class="toggle-wrap">
+          <label class="toggle" aria-label="Daily check-in reminder">
+            <input type="checkbox" id="notifCheckinReminder">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="notif-row">
+        <div class="notif-row-text">
           <div class="notif-row-label">Updates &amp; announcements</div>
           <div class="notif-row-desc">Occasional emails about new modules, features, or changes to the Lab.</div>
         </div>
@@ -451,6 +465,22 @@
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ── Download my data ── -->
+  <p class="sl">Your data</p>
+  <div class="card">
+    <div class="card-head"><h3>Download my data</h3></div>
+    <div class="card-body">
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:1rem;line-height:1.6;">
+        Saves everything stored for you to one file on this device: journal, check-ins, saved places, worksheets,
+        messages, bookings and scores. Your private entries are opened here in your browser with your vault
+        passphrase, so the file is not encrypted. Keep it somewhere you trust. Audio recordings are listed, not
+        included. Nothing is sent anywhere.
+      </p>
+      <div class="msg" id="exportMsg" role="status"></div>
+      <button class="btn" id="exportBtn" type="button">Download my data</button>
     </div>
   </div>
 
@@ -533,6 +563,7 @@
 
 import { getBookingEntitlement } from '/booking/entitlement-logic.js';
 import { mountMyTherapist } from '/assets/js/therapist/my-therapist.js';
+import { buildExport, exportFileName, downloadJson } from '/assets/js/export/export-data.js';
 
 function onAuthReady(cb) {
   if (window._currentUser) { cb(); return; }
@@ -817,6 +848,7 @@ function getNotifPrefs() {
     booking_confirmation:  document.getElementById('notifBookingConfirm').checked,
     session_reminder_24h:  document.getElementById('notifSessionReminder').checked,
     product_updates:       document.getElementById('notifProductUpdates').checked,
+    checkin_reminder:      document.getElementById('notifCheckinReminder').checked,
   };
 }
 
@@ -826,6 +858,7 @@ function applyNotifPrefs(prefs) {
   document.getElementById('notifBookingConfirm').checked  = prefs.booking_confirmation  ?? true;
   document.getElementById('notifSessionReminder').checked = prefs.session_reminder_24h  ?? true;
   document.getElementById('notifProductUpdates').checked  = prefs.product_updates       ?? true;
+  document.getElementById('notifCheckinReminder').checked = prefs.checkin_reminder      ?? false;
 }
 
 function handleNotifChange() {
@@ -887,6 +920,7 @@ onAuthReady(async () => {
       booking_confirmation:  true,
       session_reminder_24h:  true,
       product_updates:       true,
+      checkin_reminder:      false,
     });
 
     // Use getBookingEntitlement for accurate session counts (anchor-day windows,
@@ -908,7 +942,7 @@ onAuthReady(async () => {
   }
 
   // Wire notification toggles
-  ['notifPostSession', 'notifBookingConfirm', 'notifSessionReminder', 'notifProductUpdates'].forEach(id => {
+  ['notifPostSession', 'notifBookingConfirm', 'notifSessionReminder', 'notifProductUpdates', 'notifCheckinReminder'].forEach(id => {
     document.getElementById(id)?.addEventListener('change', handleNotifChange);
   });
 
@@ -918,6 +952,17 @@ onAuthReady(async () => {
   document.getElementById('passwordBtn').addEventListener('click', handlePasswordChange);
   document.getElementById('recoveryPwBtn').addEventListener('click', handleRecoveryPasswordSet);
   document.getElementById('signOutAllBtn').addEventListener('click', handleSignOutAll);
+  document.getElementById('exportBtn').addEventListener('click', async (ev) => {
+    const btn = ev.currentTarget, msg = document.getElementById('exportMsg');
+    btn.disabled = true; msg.textContent = 'Opening your data…'; msg.className = 'msg show';
+    try {
+      const data = await buildExport({ sb: window._supabase, uid: window._currentUser.id });
+      downloadJson(data, exportFileName());
+      msg.textContent = data.notes.length ? 'Downloaded, with some parts missing: ' + data.notes.join('; ') : 'Downloaded. Check your downloads folder.';
+      msg.className = 'msg show ' + (data.notes.length ? 'error' : 'success');
+    } catch (e) { msg.textContent = 'Could not build the file: ' + e.message; msg.className = 'msg show error'; }
+    btn.disabled = false;
+  });
   document.getElementById('deleteInitBtn').addEventListener('click', initiateDeleteFlow);
   document.getElementById('deleteCancelBtn').addEventListener('click', cancelDeleteFlow);
   document.getElementById('deleteConfirmBtn').addEventListener('click', handleDeleteAccount);

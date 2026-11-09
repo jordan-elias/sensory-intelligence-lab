@@ -1,3 +1,4 @@
+import { withCors } from './lib/cors.js';
 /**
  * netlify/functions/delete-account.js
  *
@@ -130,8 +131,10 @@ export function makeHandler(supabase, stripe) {
   };
 }
 
-export const handler = (event, context) =>
+const rawHandler = (event, context) =>
   makeHandler(
     createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY),
     process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-06-20" }) : null
   )(event, context);
+
+export const handler = withCors(rawHandler);

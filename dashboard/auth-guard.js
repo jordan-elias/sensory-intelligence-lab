@@ -8,6 +8,10 @@ import { createClient } from "/assets/js/vendor/supabase-js.js";
 const SUPABASE_URL      = "https://lrjuufvrgkuvfxcmybtf.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1";
 
+// What the page needs to open without a connection: the last plan seen for this person, kept only on this device
+// and removed on sign-out. It never grants anything the server does not: data still comes from the database.
+const OFFLINE_KEY = "sil-offline-profile:";
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Expose supabase client globally so other scripts on the page can use it
@@ -17,15 +21,29 @@ window._supabase = supabase;
 supabase.auth.onAuthStateChange((evt) => {
   if (evt === "SIGNED_OUT") {
     try { sessionStorage.removeItem("sil-vault-tab"); sessionStorage.removeItem("sil-nav-roles"); } catch (_) {}
+    try { Object.keys(localStorage).filter(k => k.startsWith(OFFLINE_KEY)).forEach(k => localStorage.removeItem(k)); } catch (_) {}
     import("/assets/js/vault/trusted-device.js").then(m => m.clear()).catch(() => {});
   }
 });
 
 async function checkAuth() {
+  import("/assets/js/offline.js").then(m => m.registerOffline()).catch(() => {});
+
   // getUser() makes a network call to verify the token is still valid.
   // More reliable than getSession() on page load, which reads from
   // localStorage and can return stale data.
-  const { data: { user }, error } = await supabase.auth.getUser();
+  let { data: { user }, error } = await supabase.auth.getUser();
+
+  // No connection (as opposed to a rejected sign-in): keep the page open using the saved session on this device.
+  let offline = false, cachedProfile = null;
+  const unreachable = error && (error.name === "AuthRetryableFetchError" || navigator.onLine === false);
+  if (unreachable) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      try { cachedProfile = JSON.parse(localStorage.getItem(OFFLINE_KEY + session.user.id) || "null"); } catch (_) {}
+      if (cachedProfile) { user = session.user; error = null; offline = true; }
+    }
+  }
 
   if (error || !user) {
     // Not logged in — send to root sign-in page
@@ -34,11 +52,15 @@ async function checkAuth() {
   }
 
   // Fetch the user's profile using the clean schema columns
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("subscription_tier, subscription_status, is_beta, intro_call_used, full_name, email")
-    .eq("id", user.id)
-    .single();
+  const { data: fetched, error: fetchError } = offline
+    ? { data: cachedProfile, error: null }
+    : await supabase
+        .from("profiles")
+        .select("subscription_tier, subscription_status, is_beta, intro_call_used, full_name, email")
+        .eq("id", user.id)
+        .single();
+  const profile = fetched, profileError = fetchError;
+  if (profile && !offline) { try { localStorage.setItem(OFFLINE_KEY + user.id, JSON.stringify(profile)); } catch (_) {} }
 
   if (profileError) {
     console.warn("Could not load profile:", profileError.message);
@@ -69,6 +91,7 @@ async function checkAuth() {
   const isPaidUser = accessTier !== "free";
 
   // Expose everything globally for use by page scripts
+  window._offline        = offline;
   window._currentUser    = user;
   window._userProfile    = profile;
   window._accessTier     = accessTier;   // 'free' | 'lab' | 'call1' | 'call2' | 'beta'

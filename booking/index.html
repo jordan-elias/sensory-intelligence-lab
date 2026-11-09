@@ -319,6 +319,7 @@
     }
   </style>
   <link rel="stylesheet" href="/assets/css/header.css">
+  <link rel="stylesheet" href="/assets/css/a11y.css">
 </head>
 <body>
 
@@ -377,6 +378,7 @@
 
 import { getBookingEntitlement, getUpcomingBookings } from '/booking/entitlement-logic.js';
 import { planFor } from '/assets/js/booking/therapist-link.js';
+import { mountChooser, mountConnectedCard } from '/assets/js/booking/therapist-picker.js';
 
 // ─────────────────────────────────────────────────────────
 // HEADER
@@ -779,23 +781,16 @@ function render(ent, therapist) {
     }
 
     // ── Subscriber session calendar ─────────────────────────────────────
-    // Session plans book with the client's own therapist. Without a connection, the practice
-    // calendar stays available so nothing breaks, with a prompt to connect.
+    // Session plans book with the client's own therapist. With no connection yet, the client
+    // chooses one from those taking new clients; there is no shared calendar to fall back on.
     const tp = planFor(therapist);
+    const therapistBox = document.createElement('div');
+    root.appendChild(therapistBox);
     if (tp.kind === 'none') {
-      const nudge = document.createElement('div');
-      nudge.className = 'upgrade-nudge';
-      nudge.innerHTML = `
-        <p class="upgrade-nudge-head">Connect with your therapist</p>
-        <p>Your plan includes sessions with a therapist you choose. Connect from your account to book with them directly.</p>
-        <div class="nudge-actions"><a class="nudge-btn" href="/account/#therapist">Connect now</a></div>`;
-      root.appendChild(nudge);
-      sections.push({
-        id: 'cal-subscriber', label: 'Monthly Session',
-        meta: 'Included in your plan',
-        calLink: 'jordan-elias/subscriber-session', ns: 'subscriber-session',
-      });
+      mountChooser(therapistBox, window._supabase, { onConnected: () => window.location.reload() })
+        .catch(e => { console.warn('[booking] therapist list failed:', e.message); therapistBox.innerHTML = '<p class="muted">Could not load therapists. Please refresh the page.</p>'; });
     } else {
+      mountConnectedCard(therapistBox, window._supabase, therapist).catch(() => {});
       const who = therapist.display_name || 'your therapist';
       const label = `Monthly session with ${who}`;
       if (tp.kind === 'cal') {
@@ -804,9 +799,7 @@ function render(ent, therapist) {
         sections.push({ id: 'cal-subscriber', label, meta: 'Included in your plan', ns: 'subscriber-session', href: tp.url, who });
       } else {
         sections.push({ id: 'cal-subscriber', label, meta: 'Included in your plan', ns: 'subscriber-session',
-          note: tp.reason === 'unavailable'
-            ? `${who} is not taking session bookings right now. You can message them from your account.`
-            : `${who} has not added a booking link yet. You can message them from your account.` });
+          note: `${who} has not added a booking link yet. You can message them from your account.` });
       }
     }
 
