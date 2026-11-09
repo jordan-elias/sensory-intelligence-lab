@@ -1,3 +1,4 @@
+import { withCors } from './lib/cors.js';
 /**
  * netlify/functions/next-available.js
  *
@@ -88,5 +89,7 @@ export function makeHandler(supabase, fetchFn = fetch, nowFn = () => new Date())
   };
 }
 
-export const handler = (event, context) =>
+const rawHandler = (event, context) =>
   makeHandler(createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY))(event, context);
+
+export const handler = withCors(rawHandler);

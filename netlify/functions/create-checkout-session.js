@@ -1,3 +1,4 @@
+import { withCors } from './lib/cors.js';
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
@@ -78,7 +79,7 @@ async function getTotalSessionsCommitted() {
    NETLIFY HANDLER
    ───────────────────────────── */
 
-export async function handler(event) {
+async function rawHandler(event) {
 
   /* METHOD CHECK */
   if (event.httpMethod !== "POST") {
@@ -206,3 +207,5 @@ export async function handler(event) {
     };
   }
 }
+
+export const handler = withCors(rawHandler);

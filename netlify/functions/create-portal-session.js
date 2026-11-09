@@ -1,3 +1,4 @@
+import { withCors } from './lib/cors.js';
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
@@ -10,7 +11,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-export async function handler(event) {
+async function rawHandler(event) {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method not allowed" };
   }
@@ -64,3 +65,5 @@ export async function handler(event) {
     };
   }
 }
+
+export const handler = withCors(rawHandler);
