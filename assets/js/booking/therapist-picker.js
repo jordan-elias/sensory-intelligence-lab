@@ -35,6 +35,7 @@ export async function mountConnectedCard(root, sb, t) {
       <div><p style="font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 .2rem">Your therapist</p>
         <div style="font:600 1rem var(--font-heading)">${esc(t.display_name)}</div>
         ${t.bio ? `<p style="font-size:.8rem;color:var(--muted);line-height:1.55;margin:.2rem 0 0">${esc(t.bio)}</p>` : ''}</div>
+      ${t.intake_requested_at ? `<a class="action-btn sm" style="margin-left:auto" href="/intake/">Fill in intake form</a>` : ''}
     </div></div>`;
 }
 

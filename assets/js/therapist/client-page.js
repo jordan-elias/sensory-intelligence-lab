@@ -13,12 +13,13 @@ import { tierLabel, intakeLabel, summarize, openCopies } from './clients.js';
 import { splitSessions, describe } from './sessions.js';
 import { toRows, renderRows, worksheetLabel } from './doc-render.js';
 import { makeNotesStore, mountNotes } from './notes.js';
+import { openIntake, renderIntake } from '../intake/intake.js';
 
 const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 const day = iso => iso ? new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '';
 const when = iso => iso ? new Date(iso).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
 const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
-const TABS = ['overview', 'messages', 'shared', 'notes', 'sessions'];
+const TABS = ['overview', 'messages', 'shared', 'intake', 'notes', 'sessions'];
 
 export async function mountClientPage(root) {
   const sb = await new Promise(res => { if (window._supabase && window._currentUser) res(window._supabase); else window.addEventListener('authReady', () => res(window._supabase), { once: true }); });
@@ -63,6 +64,7 @@ export async function mountClientPage(root) {
       <button role="tab" id="tab-overview" aria-controls="panel-overview" data-tab="overview">Overview</button>
       <button role="tab" id="tab-messages" aria-controls="panel-messages" data-tab="messages">Messages<span class="th-count" id="cntMessages"></span></button>
       <button role="tab" id="tab-shared" aria-controls="panel-shared" data-tab="shared">Shared<span class="th-count">${nCheckins + nDocs || ''}</span></button>
+      <button role="tab" id="tab-intake" aria-controls="panel-intake" data-tab="intake">Intake</button>
       <button role="tab" id="tab-notes" aria-controls="panel-notes" data-tab="notes">Notes</button>
       <button role="tab" id="tab-sessions" aria-controls="panel-sessions" data-tab="sessions">Sessions<span class="th-count">${sessions.upcoming.length || ''}</span></button>
     </div>
@@ -70,6 +72,7 @@ export async function mountClientPage(root) {
     <section role="tabpanel" id="panel-messages" aria-labelledby="tab-messages" hidden></section>
     <section role="tabpanel" id="panel-shared" aria-labelledby="tab-shared" hidden></section>
     <section role="tabpanel" id="panel-sessions" aria-labelledby="tab-sessions" hidden></section>
+    <section role="tabpanel" id="panel-intake" aria-labelledby="tab-intake" hidden></section>
     <section role="tabpanel" id="panel-notes" aria-labelledby="tab-notes" hidden></section>`;
   const $ = id => root.querySelector('#' + id);
   const setUnread = n => { unread = n; $('cntMessages').textContent = n ? `${n} new` : ''; };
@@ -83,6 +86,7 @@ export async function mountClientPage(root) {
       ${card('Next session', next ? `${esc(describe(next).when)}<br><span class="th-muted">${esc(describe(next).kind)}${describe(next).minutes ? ` · ${describe(next).minutes} min` : ''}</span>` : '<span class="th-muted">None booked.</span>', `<button type="button" class="action-btn outline sm" data-go="sessions">All sessions</button>`)}
       ${card('Messages', unread ? `<strong>${plural(unread, 'new message')}</strong>` : '<span class="th-muted">Nothing new.</span>', `<button type="button" class="action-btn outline sm" data-go="messages">${active ? 'Open messages' : 'Read messages'}</button>`)}
       ${card('Shared with you', nCheckins || nDocs ? `${plural(nCheckins, 'check-in')}<br>${plural(nDocs, 'document')}` : '<span class="th-muted">Nothing shared yet. Everything else stays private to the client.</span>', nCheckins || nDocs ? `<button type="button" class="action-btn outline sm" data-go="shared">View shared</button>` : '')}
+      ${card('Intake form', client.intake_received ? '<strong>Received.</strong>' : client.intake_requested_at ? `<span class="th-muted">Asked ${esc(day(client.intake_requested_at))}. Not sent yet.</span>` : '<span class="th-muted">Not requested.</span>', `<button type="button" class="action-btn outline sm" data-go="intake">${client.intake_received ? 'View intake' : 'Intake form'}</button>`)}
       ${card('Safety code', key ? '<span class="th-muted">Compare this with the client to confirm your keys are genuine.</span><div id="safetyCode"></div>' : '<span class="th-muted">Available while connected, once the client has set up their vault.</span>', key ? `<button type="button" class="action-btn outline sm" id="showCode">Show safety code</button>` : '')}
     </div>
     <div class="th-card" style="margin-top:1rem"><p class="th-card-title">${active ? 'Connection' : 'Archive'}</p>
@@ -159,6 +163,41 @@ export async function mountClientPage(root) {
     } catch (e) { sharedMounted = false; box.innerHTML = `<p class="msg show error">${esc(e.message)}</p>`; }
   }
 
+  // ── Intake ──
+  let intakeMounted = false;
+  async function showIntake() {
+    if (intakeMounted) return; intakeMounted = true;
+    const box = $('panel-intake');
+    const ask = async () => {
+      const { error: e } = await sb.rpc('request_intake', { p_link: linkId });
+      if (e) throw new Error(e.message);
+      client.intake_requested_at = new Date().toISOString();
+    };
+    const draw = async () => {
+      const copy = copies.find(c => c.category === 'intake');
+      box.innerHTML = '';
+      if (copy) {
+        box.innerHTML = '<p class="th-muted">Opening…</p>';
+        try {
+          const session = await ensureVaultReady();
+          const intake = await openIntake(session, { ...copy, link_id: linkId });
+          box.innerHTML = `<p class="th-hint">Sent by ${esc(name)}${intake.submitted_at ? ' on ' + esc(day(intake.submitted_at)) : ''}. Only you and the client can read this.</p>`;
+          box.appendChild(renderIntake(document, intake));
+        } catch (e) { intakeMounted = false; box.innerHTML = `<p class="msg show error">${esc(e.message)}</p>`; }
+        return;
+      }
+      if (!active) { box.innerHTML = '<p class="th-muted">No intake form was received.</p>'; return; }
+      box.innerHTML = `<p class="th-muted">${client.intake_requested_at ? `You asked ${esc(name)} on ${esc(day(client.intake_requested_at))}. Nothing has arrived yet.` : `Ask ${esc(name)} to fill in a short intake form: name, date of birth, pronouns, contact information, medications and mental health history. They choose what to answer, and only you and they can read it.`}</p>
+        <button type="button" class="action-btn" id="askIntake">${client.intake_requested_at ? 'Send a reminder' : 'Request intake form'}</button> <p class="msg" id="askMsg" role="status"></p>`;
+      $('askIntake').onclick = async () => {
+        const m = $('askMsg'); $('askIntake').disabled = true;
+        try { await ask(); intakeMounted = false; renderOverview(); showIntake(); }
+        catch (e) { m.textContent = e.message; m.className = 'msg show error'; $('askIntake').disabled = false; }
+      };
+    };
+    draw();
+  }
+
   // ── Notes (opened on first view, because it asks for the vault) ──
   let notesMounted = false;
   async function showNotes() {
@@ -191,13 +230,14 @@ export async function mountClientPage(root) {
       $('panel-' + t).hidden = !on;
     }
     if (push) history.replaceState(null, '', `?link=${encodeURIComponent(linkId)}#${tab}`);
-    if (tab === 'messages') showMessages(); else if (tab === 'shared') showShared(); else if (tab === 'notes') showNotes();
+    if (tab === 'messages') showMessages(); else if (tab === 'shared') showShared(); else if (tab === 'notes') showNotes(); else if (tab === 'intake') showIntake();
   }
   root.querySelectorAll('[role=tab]').forEach(b => {
     b.addEventListener('click', () => show(b.dataset.tab));
     b.addEventListener('keydown', e => {
       const i = TABS.indexOf(b.dataset.tab);
-      const to = e.key === 'ArrowRight' ? TABS[(i + 1) % 4] : e.key === 'ArrowLeft' ? TABS[(i + 3) % 4] : null;
+      const n = TABS.length;
+      const to = e.key === 'ArrowRight' ? TABS[(i + 1) % n] : e.key === 'ArrowLeft' ? TABS[(i + n - 1) % n] : null;
       if (to) { e.preventDefault(); show(to); $('tab-' + to).focus(); }
     });
   });
