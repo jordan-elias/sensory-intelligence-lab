@@ -1012,7 +1012,7 @@ window.checkout = async function(tier) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${session.access_token}`,
       },
-      body: JSON.stringify({ plan }),
+      body: JSON.stringify({ plan, app: !!window.SIL_APP }),
     });
 
     if (!res.ok) {
@@ -1066,7 +1066,7 @@ window.changePlan = async function(tier) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${session.access_token}`,
       },
-      body: JSON.stringify({ plan }),
+      body: JSON.stringify({ plan, app: !!window.SIL_APP }),
     });
 
     const body = await res.json().catch(() => ({}));
@@ -1109,6 +1109,7 @@ window.openPortal = async function(btn) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${session.access_token}`,
       },
+      body: JSON.stringify({ app: !!window.SIL_APP }),
     });
     if (!res.ok) throw new Error('Could not open billing portal.');
     const { url } = await res.json();

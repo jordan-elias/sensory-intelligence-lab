@@ -845,6 +845,7 @@ async function openPortal(btn) {
         'Content-Type':  'application/json',
         'Authorization': `Bearer ${session.access_token}`,
       },
+      body: JSON.stringify({ app: !!window.SIL_APP }),
     });
     if (!res.ok) throw new Error('Could not open billing portal.');
     const { url } = await res.json();

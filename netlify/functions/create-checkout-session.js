@@ -1,4 +1,5 @@
 import { withCors } from './lib/cors.js';
+import { returnUrl } from './lib/return-url.js';
 import { therapistProblem } from './lib/therapist-link.js';
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
@@ -187,8 +188,8 @@ async function rawHandler(event) {
       mode: "subscription",
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url:    process.env.SITE_URL + "/subscribe/?success=true",
-      cancel_url:     process.env.SITE_URL + "/subscribe/?canceled=true",
+      success_url:    returnUrl(process.env.SITE_URL, "/subscribe/?success=true", body.app === true),
+      cancel_url:     returnUrl(process.env.SITE_URL, "/subscribe/?canceled=true", body.app === true),
       customer_email: user.email,
       metadata: {
         user_id: user.id,

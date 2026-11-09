@@ -28,6 +28,15 @@ if (cap?.isNativePlatform?.()) {
     }
   }, true);
 
+  // Coming back from the phone's browser (payment, billing portal): de.jordanelias.sil://open?path=/subscribe/?success=true
+  P.App?.addListener?.('appUrlOpen', ({ url }) => {
+    try {
+      const to = new URL(url).searchParams.get('path') || '/dashboard/';
+      if (!to.startsWith('/') || to.startsWith('//')) return;
+      location.href = to.replace(/^([^?#]*\/)(?=[?#]|$)/, '$1index.html');
+    } catch (_) {}
+  });
+
   P.StatusBar?.setStyle?.({ style: 'DEFAULT' });
   listenForTaps();
   refreshReminder();
