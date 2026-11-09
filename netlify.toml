@@ -492,5 +492,9 @@ Content-Security-Policy = """
  
 [functions."send-session-reminders"]
   schedule = "0 * * * *"
+
+# Opt-in daily check-in reminder, once a day (17:00 UTC, evening in Berlin).
+[functions."send-checkin-reminders"]
+  schedule = "0 17 * * *"
  
 

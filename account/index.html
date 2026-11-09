@@ -441,6 +441,19 @@
 
       <div class="notif-row">
         <div class="notif-row-text">
+          <div class="notif-row-label">Daily check-in reminder</div>
+          <div class="notif-row-desc">One short email in the evening, only on days you have not checked in. It never mentions what you have written. Off unless you turn it on.</div>
+        </div>
+        <div class="toggle-wrap">
+          <label class="toggle" aria-label="Daily check-in reminder">
+            <input type="checkbox" id="notifCheckinReminder">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="notif-row">
+        <div class="notif-row-text">
           <div class="notif-row-label">Updates &amp; announcements</div>
           <div class="notif-row-desc">Occasional emails about new modules, features, or changes to the Lab.</div>
         </div>
@@ -835,6 +848,7 @@ function getNotifPrefs() {
     booking_confirmation:  document.getElementById('notifBookingConfirm').checked,
     session_reminder_24h:  document.getElementById('notifSessionReminder').checked,
     product_updates:       document.getElementById('notifProductUpdates').checked,
+    checkin_reminder:      document.getElementById('notifCheckinReminder').checked,
   };
 }
 
@@ -844,6 +858,7 @@ function applyNotifPrefs(prefs) {
   document.getElementById('notifBookingConfirm').checked  = prefs.booking_confirmation  ?? true;
   document.getElementById('notifSessionReminder').checked = prefs.session_reminder_24h  ?? true;
   document.getElementById('notifProductUpdates').checked  = prefs.product_updates       ?? true;
+  document.getElementById('notifCheckinReminder').checked = prefs.checkin_reminder      ?? false;
 }
 
 function handleNotifChange() {
@@ -905,6 +920,7 @@ onAuthReady(async () => {
       booking_confirmation:  true,
       session_reminder_24h:  true,
       product_updates:       true,
+      checkin_reminder:      false,
     });
 
     // Use getBookingEntitlement for accurate session counts (anchor-day windows,
@@ -926,7 +942,7 @@ onAuthReady(async () => {
   }
 
   // Wire notification toggles
-  ['notifPostSession', 'notifBookingConfirm', 'notifSessionReminder', 'notifProductUpdates'].forEach(id => {
+  ['notifPostSession', 'notifBookingConfirm', 'notifSessionReminder', 'notifProductUpdates', 'notifCheckinReminder'].forEach(id => {
     document.getElementById(id)?.addEventListener('change', handleNotifChange);
   });
 
