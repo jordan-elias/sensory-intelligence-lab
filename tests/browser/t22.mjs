@@ -3,7 +3,7 @@ const {browser,BASE,server}=await launch();
 let fail=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fail++; };
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const now=new Date(); const iso=now.toISOString(); const soon=new Date(now.getTime()+3*864e5).toISOString(); const ago=new Date(now.getTime()-5*864e5).toISOString();
-const client={link_id:'L1',status:'active',started_at:iso,client_id:'c1',full_name:'Ana Client',email:'ana@example.com',subscription_tier:'call2',intake_status:'completed'};
+const client={link_id:'L1',status:'active',started_at:iso,client_id:'c1',full_name:'Ana Client',email:'ana@example.com',subscription_tier:'lab',intake_status:'completed'};
 const plain=o=>({plain:JSON.stringify(o)});
 const copies=[
  {link_id:'L1',category:'checkins',source_id:'s1',source_created_at:iso,sealed:plain({v:1,created_at:iso,arousal:4,valence:7,sensory_load:3,emotion_words:['calm'],notes:'<b>quiet</b> walk'})},
@@ -19,7 +19,7 @@ await P.page.evaluateOnNewDocument(()=>{ window.__rpc=(n,a)=>{ sessionStorage.se
 await P.page.goto(`${BASE}/therapist/client/?link=L1`,{waitUntil:'domcontentloaded'}); await P.page.waitForSelector('[role=tab]',{timeout:15000});
 const txt=sel=>P.page.$eval(sel,e=>e.innerText);
 let t=await P.page.evaluate(()=>document.getElementById('dashApp').innerText);
-ok(/Ana Client/.test(t)&&/ana@example.com/.test(t)&&/2 sessions/.test(t)&&/Intake complete/.test(t),'header shows who, plan and intake status');
+ok(/Ana Client/.test(t)&&/ana@example.com/.test(t)&&/Lab member/.test(t)&&/Intake complete/.test(t),'header shows who, plan and intake status');
 ok(/1 new/.test(await txt('#tab-messages')),'Messages tab shows the unread count');
 t=await txt('#panel-overview');
 ok(/Next session/i.test(t)&&/Monthly session/.test(t),'overview shows the next session');

@@ -1,4 +1,5 @@
 import { withCors } from './lib/cors.js';
+import { returnUrl } from './lib/return-url.js';
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
@@ -50,7 +51,7 @@ async function rawHandler(event) {
   try {
     const session = await stripe.billingPortal.sessions.create({
       customer: profile.stripe_customer_id,
-      return_url: process.env.SITE_URL + "/account/",
+      return_url: returnUrl(process.env.SITE_URL, "/account/", (() => { try { return JSON.parse(event.body || "{}").app === true; } catch { return false; } })()),
     });
 
     return {

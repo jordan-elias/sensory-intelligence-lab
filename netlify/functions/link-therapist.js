@@ -4,17 +4,13 @@ import { withCors } from './lib/cors.js';
  *
  * Connects a client with a therapist, only after the client has seen and agreed to what the
  * therapist will be able to see. The browser cannot create these links itself: this function
- * checks the subscription tier on the server and records the consent text version.
- *
- * Today every session-tier client is linked to the default therapist. Later the body may carry
- * a `therapist_id` chosen from the directory.
+ * records the consent text version. Anyone signed in can connect (the body carries `therapist_id`, else the
+ * default therapist); a person has one active therapist at a time and ends the connection to change.
  */
 import { createClient } from "@supabase/supabase-js";
 
 // Must match LINK_CONSENT_VERSION in /assets/js/therapist/consent.js
-export const CONSENT_VERSION = "link-1.2";
-const SESSION_TIERS = ["call1", "call2"];
-const ACTIVE_STATUSES = ["active", "trialing"];
+export const CONSENT_VERSION = "link-2.0";
 
 const json = (statusCode, body) => ({
   statusCode,
@@ -37,15 +33,9 @@ export function makeHandler(supabase) {
       return json(409, { error: "The wording you agreed to has changed. Please reload the page and read it again." });
     }
 
-    const { data: profile } = await supabase
-      .from("profiles").select("subscription_tier, subscription_status").eq("id", user.id).maybeSingle();
-    if (!profile || !SESSION_TIERS.includes(profile.subscription_tier) || !ACTIVE_STATUSES.includes(profile.subscription_status)) {
-      return json(403, { error: "Working with a therapist needs a plan that includes sessions." });
-    }
-
     const { data: open } = await supabase
-      .from("client_therapists").select("id, status")
-      .eq("client_id", user.id).in("status", ["pending", "active"]).limit(1);
+      .from("client_therapists").select("id")
+      .eq("client_id", user.id).eq("status", "active").limit(1);
     if (open && open.length) return json(200, { ok: true, already: true, link_id: open[0].id });
 
     let q = supabase.from("therapist_profiles")

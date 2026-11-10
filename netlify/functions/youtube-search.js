@@ -1,3 +1,4 @@
+import { withCors } from './lib/cors.js';
 /**
  * /.netlify/functions/youtube-search.js
  *
@@ -20,7 +21,7 @@ function normaliseQuery(q) {
   return q.toLowerCase().trim().replace(/\s+/g, ' ');
 }
 
-export async function handler(event) {
+async function rawHandler(event) {
   const raw = event.queryStringParameters?.q;
   const regionCode = event.queryStringParameters?.regionCode || null;
   if (!raw) {
@@ -113,3 +114,5 @@ export async function handler(event) {
     body: JSON.stringify({ videoId, title, source: 'api' }),
   };
 }
+
+export const handler = withCors(rawHandler);

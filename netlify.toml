@@ -60,6 +60,18 @@
   to   = "/privacy/index.html"
   status = 200
 
+# ── Therapy page ──
+
+[[redirects]]
+  from = "/therapy"
+  to   = "/therapy/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/therapy/"
+  to   = "/therapy/index.html"
+  status = 200
+
 # ── About page ──
 
 [[redirects]]
@@ -453,8 +465,6 @@ Content-Security-Policy = """
     'unsafe-inline'
     'unsafe-eval'
     https://app.cal.com
-    https://cdnjs.cloudflare.com
-    https://cdn.jsdelivr.net
     https://www.youtube.com;
   style-src
     'self'

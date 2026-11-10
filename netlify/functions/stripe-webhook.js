@@ -24,8 +24,6 @@ const RESEND_FROM    = process.env.RESEND_FROM_ADDRESS || "Jordan Elias <hello@j
 
 const TEMPLATE_BY_TIER = {
   lab:   "subscription-successful",
-  call1: "upgrade-successful-1",
-  call2: "upgrade-successful-2",
 };
 
 async function sendTierEmail({ to, tier, variables, idempotencyKey }) {
@@ -58,8 +56,6 @@ HELPERS
 function getTierFromPlan(plan) {
   switch (plan) {
     case "lab_monthly":   case "lab_yearly":   return "lab";
-    case "call1_monthly": case "call1_yearly": return "call1";
-    case "call2_monthly": case "call2_yearly": return "call2";
     default:                                   return "free";
   }
 }

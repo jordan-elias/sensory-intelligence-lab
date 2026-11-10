@@ -46,7 +46,7 @@ const storage={ from:b=>({
   upload:async(p,blob,o)=>{ if(window.__rejectMime && o&&o.contentType==='application/octet-stream') return {error:{message:'mime type application/octet-stream is not supported'}}; if(window.__storage.has(p)) return {error:{message:'exists'}}; window.__storage.set(p,{bytes:new Uint8Array(await blob.arrayBuffer()),type:o&&o.contentType}); return {data:{path:p},error:null}; },
   createSignedUrl:async(p)=> window.__storage.has(p)?{data:{signedUrl:location.origin+'/__storage/'+encodeURIComponent(p)},error:null}:{data:null,error:{message:'nf'}},
   remove:async(ps)=>{ ps.forEach(p=>window.__storage.delete(p)); return {data:null,error:null}; } }) };
-const sb={ storage, rpc:(n,a)=>Promise.resolve(window.__rpc?window.__rpc(n,a):{error:null}), from:t=> t==='profiles'? {select(){return {eq(){return {single(){return Promise.resolve({data:{encryption_key_enc: window.__noLegacy?null:'x', full_name:'Test', subscription_tier:window.__tier||'free', subscription_status:window.__tier&&window.__tier!=='free'?'active':'free'}})}}}}}} : builder(t),
+const sb={ storage, rpc:(n,a)=>Promise.resolve(window.__rpc?window.__rpc(n,a):{error:null}), from:t=> t==='profiles'? {select(){return {eq(){return {single(){return Promise.resolve({data:{encryption_key_enc: window.__noLegacy?null:'x', full_name:'Test', intro_call_used:!!window.__introUsed, subscription_tier:window.__tier||'free', subscription_status:window.__tier&&window.__tier!=='free'?'active':'free'}})}}}}}} : builder(t),
   auth:{ getSession:async()=>({data:{session:{access_token:'t',user:{id:'u1'}}}}), signOut:async()=>{} } };
 window._supabase=sb; window._currentUser={id:'u1'};
 window.dispatchEvent(new CustomEvent('authReady',{detail:{}}));
@@ -58,6 +58,7 @@ const key = await crypto.subtle.importKey('raw', new Uint8Array(32).fill(7), 'AE
 const s={userId:'u1',fingerprint:'AAAA-BBBB',open:async(sealed)=>sealed.plain,publicKeys:{enc:{},sign:null},sign:async()=>'sig',encrypt:t=>encryptWithKey(key,t),decrypt:p=>decryptWithKey(key,p)};
 export const ensureVaultReady=async()=>s;
 export const encrypt=t=>s.encrypt(t), decrypt=p=>s.decrypt(p);
+export const promptIfOldEntries=async()=>{};
 export const decryptSafe=async p=>{try{return await s.decrypt(p)}catch{return null}};
 export const isEncrypted=v=>{try{const p=JSON.parse(v);return typeof p.iv==='string'&&typeof p.ciphertext==='string'}catch{return false}};
 export const lockVault=async()=>{}; export const hasUserKey=()=>true;

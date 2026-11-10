@@ -12,11 +12,9 @@ import { mountSharing } from '../sharing/sharing-card.js';
 import { LINK_CONSENT_VERSION, LINK_CONSENT_TEXT } from './consent.js';
 
 const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-const SESSION_TIERS = ['call1', 'call2'];
-const ACTIVE = ['active', 'trialing'];
 
-export const hasSessionPlan = profile =>
-  !!profile && SESSION_TIERS.includes(profile.subscription_tier) && ACTIVE.includes(profile.subscription_status);
+// Choosing a therapist now happens when booking, so no plan is needed to be offered one here.
+export const hasSessionPlan = () => false;
 
 export async function photoUrl(sb, path) {
   if (!path) return null;
@@ -72,11 +70,11 @@ export async function mountMyTherapist(root, { supabase, profile }) {
         <div class="btn-row" style="margin-top:0">
           ${state.active.booking_link ? `<a class="btn" href="${esc(state.active.booking_link)}" target="_blank" rel="noopener" style="text-decoration:none">Book a session</a>` : ''}
           <a class="btn btn-outline" id="thMessages" href="/messages/" style="text-decoration:none">Messages</a>
-          <button type="button" class="btn btn-outline" id="thEnd">End this connection</button>
+          <button type="button" class="btn btn-outline" id="thEnd">Change therapist or end connection</button>
         </div>
         <div id="thEndConfirm" hidden style="margin-top:1rem;padding:1rem;border:1px solid var(--border);background:var(--surface)">
-          <p style="font-size:.8rem;line-height:1.6;margin-bottom:.8rem">End the connection with ${esc(state.active.display_name)}? They lose access to new data straight away. Copies of check-ins you already shared stay with them, for them to keep or delete, and it cannot undo anything they have already seen.</p>
-          <div class="btn-row" style="margin-top:0"><button type="button" class="btn btn-danger" id="thEndYes">Yes, end it</button><button type="button" class="btn btn-outline" id="thEndNo">Keep it</button></div>
+          <p style="font-size:.8rem;line-height:1.6;margin-bottom:.8rem">End the connection with ${esc(state.active.display_name)}? They lose access to new data straight away. Copies of check-ins you already shared stay with them, for them to keep or delete, and it cannot undo anything they have already seen. Your plan stays as it is, and you can then choose a different therapist straight away.</p>
+          <div class="btn-row" style="margin-top:0"><button type="button" class="btn btn-danger" id="thEndYes">Yes, continue</button><button type="button" class="btn btn-outline" id="thEndNo">Keep it</button></div>
         </div>
       </div></div>`;
     const $ = id => root.querySelector('#' + id), msg = (t, k) => { const m = $('thMsg'); m.textContent = t; m.className = 'msg show ' + (k || ''); };

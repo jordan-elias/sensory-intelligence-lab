@@ -172,6 +172,20 @@
     /* ══════════════════════════════════════
        MODULE CARD
     ══════════════════════════════════════ */
+    .checkin-hero { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; padding:1.25rem 1.5rem; margin:0 0 1.25rem; border:1px solid var(--accent); border-radius:6px; background:var(--accent-light); }
+    .checkin-hero-text { margin:.25rem 0 0; font-size:1rem; line-height:1.5; }
+    .checkin-hero-btn { background:var(--accent); color:#fff; text-decoration:none; padding:.75rem 1.5rem; border-radius:4px; font-weight:500; min-height:44px; display:inline-flex; align-items:center; }
+    #insightCard { margin:0 0 1.25rem; }
+    .insight-card { border:1px solid var(--border); border-radius:6px; padding:1.1rem 1.25rem; }
+    .insight-stats { display:flex; gap:2rem; flex-wrap:wrap; margin-bottom:.6rem; }
+    .insight-stats strong { display:block; font:600 1.5rem var(--font-heading); }
+    .insight-stats span { font-size:.78rem; color:var(--muted); }
+    .insight-note { border-top:1px solid var(--border); padding-top:.7rem; margin-top:.4rem; }
+    .insight-note p { margin:.25rem 0 0; font-size:.9rem; line-height:1.6; }
+    .insight-foot { font-size:.75rem; color:var(--muted); margin:.7rem 0 0; }
+    .insight-btn { background:var(--accent); color:#fff; border:0; padding:.65rem 1.2rem; border-radius:4px; min-height:44px; cursor:pointer; }
+    .checkin-hero.is-done { border-color:var(--border); background:transparent; }
+    .checkin-hero.is-done .checkin-hero-btn { background:transparent; color:var(--accent); border:1px solid var(--accent); }
     .module-card {
       background: var(--bg);
       padding: 1.5rem;
@@ -439,10 +453,34 @@
   
     </div>
 
+    <!-- Today's check-in: front and centre in the app -->
+    <div class="checkin-hero" id="checkinHero" hidden>
+      <div>
+        <span class="prompt-label">Today</span>
+        <p class="checkin-hero-text" id="checkinHeroText">How are you right now? A check-in takes about a minute.</p>
+      </div>
+      <a class="checkin-hero-btn" id="checkinHeroBtn" href="/check-in/">Check in</a>
+    </div>
+
+    <div id="insightCard" hidden></div>
+
     <!-- Daily listening prompt -->
     <div class="prompt-block">
       <span class="prompt-label">Today's prompt</span>
       <span class="prompt-text" id="dailyPrompt">Loading…</span>
+    </div>
+
+    <!-- ── Therapy ── -->
+    <div class="modules-section">
+      <p class="section-label">Therapy</p>
+      <div class="module-grid module-grid--2">
+        <a class="module-card" href="/therapy/">
+          <div class="module-top"><span class="module-icon">◎</span><span class="module-arrow">→</span></div>
+          <h3>Therapy with a music therapist</h3>
+          <p>How your work here connects to sessions: share check-ins and worksheets only if you choose, and arrive with context.</p>
+          <span class="module-tag">Sessions · Shared only by you</span>
+        </a>
+      </div>
     </div>
 
     <!-- ── Regulation ── -->
@@ -808,7 +846,7 @@
   <footer>
     <p>Jordan Elias Music Therapy · Berlin ·
       <a href="https://jordanelias.de/" target="_blank" rel="noopener">jordanelias.de</a> ·
-      <a href="/privacy/index.html/" target="_blank" rel="noopener">Privacy Policy</a>
+      <a href="/privacy/" target="_blank" rel="noopener">Privacy Policy</a>
     </p>
   </footer>
 
@@ -833,6 +871,18 @@ onAuthReady(async () => {
     .single();
 
   showDashboardNudge(window._supabase, profile, document.querySelector('main .page-header'));
+
+  if (window.SIL_APP) {
+    const hero = document.getElementById('checkinHero'); hero.hidden = false;
+    const start = new Date(); start.setHours(0, 0, 0, 0);
+    const { count } = await window._supabase.from('checkins').select('id', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', start.toISOString());
+    if (count > 0) {
+      hero.classList.add('is-done');
+      document.getElementById('checkinHeroText').textContent = 'You checked in today. Add another whenever it feels useful.';
+      document.getElementById('checkinHeroBtn').textContent = 'Check in again';
+    }
+  }
+  import('/assets/js/checkins/insight-card.js').then(m => m.mountInsightCard(document.getElementById('insightCard'))).catch(() => {});
   promptIfOldEntries();   // only people with entries under the old key are asked
 
   const fullName  = profile?.full_name?.trim() || '';

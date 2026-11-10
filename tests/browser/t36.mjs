@@ -1,0 +1,15 @@
+import {launch,newPage} from './harness.mjs';
+const {browser,BASE,server}=await launch();
+let fail=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fail++; };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const P=await newPage(await browser.createBrowserContext(),BASE,{tables:{}});
+await P.page.goto(`${BASE}/therapy/`,{waitUntil:'domcontentloaded'}); await sleep(800);
+const t=await P.page.evaluate(()=>({text:document.body.innerText,links:[...document.querySelectorAll('main a')].map(a=>a.getAttribute('href'))}));
+ok(/€80/.test(t.text)&&/€60/.test(t.text)&&/Introductory session/.test(t.text),'prices and the intro session are stated');
+ok(/Nothing else, unless you share it/.test(t.text)&&/name, your email, whether you have a Lab plan/.test(t.text),'what the therapist sees matches the consent text');
+ok(!/journal/i.test(t.text),'no claim that journal entries are shared');
+ok(t.links.includes('/booking/')&&t.links.includes('/subscribe/'),'links to booking and Lab');
+ok(P.errors.filter(e=>!/Failed to load resource/.test(e)).length===0,'no page errors '+P.errors.join('|'));
+await P.page.goto(`${BASE}/dashboard/`,{waitUntil:'domcontentloaded'}); await sleep(1200);
+ok(await P.page.$('a.module-card[href="/therapy/"]')!==null,'the dashboard links to the Therapy page');
+await browser.close(); server.close(); process.exit(fail?1:0);

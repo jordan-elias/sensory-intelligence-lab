@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { summarize, openCopies, tierLabel, intakeLabel } from '../../assets/js/therapist/clients.js';
 
 test('labels are plain and never undefined', () => {
-  assert.match(tierLabel('call2'), /2 sessions/); assert.match(tierLabel('call1'), /1 session/);
+  assert.equal(tierLabel('lab'), 'Lab member'); assert.equal(tierLabel('free'), 'No Lab plan');
   assert.equal(intakeLabel(null), 'Intake status not available'); assert.equal(intakeLabel('completed'), 'Intake complete');
 });
 

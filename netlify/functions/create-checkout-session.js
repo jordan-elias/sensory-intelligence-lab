@@ -1,4 +1,5 @@
 import { withCors } from './lib/cors.js';
+import { returnUrl } from './lib/return-url.js';
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
@@ -26,53 +27,14 @@ const supabase = createClient(
 const PRICE_MAP = {
   lab_monthly:   process.env.STRIPE_LAB_MONTHLY_PRICE_ID,
   lab_yearly:    process.env.STRIPE_LAB_YEARLY_PRICE_ID,
-  call1_monthly: process.env.STRIPE_CALL1_MONTHLY_PRICE_ID,
-  call1_yearly:  process.env.STRIPE_CALL1_YEARLY_PRICE_ID,
-  call2_monthly: process.env.STRIPE_CALL2_MONTHLY_PRICE_ID,
-  call2_yearly:  process.env.STRIPE_CALL2_YEARLY_PRICE_ID,
 };
-
-// Sessions committed per subscriber per month, by tier
-const SESSIONS_PER_TIER = { call1: 1, call2: 2 };
-
-// Maximum total sessions per month across all session-tier subscribers
-const SESSION_CAPACITY = 64;
 
 /* ─────────────────────────────
    HELPERS
    ───────────────────────────── */
 
 function getPlanTier(plan) {
-  if (plan.startsWith("lab"))   return "lab";
-  if (plan.startsWith("call1")) return "call1";
-  if (plan.startsWith("call2")) return "call2";
-  return "unknown";
-}
-
-/**
- * Count total monthly sessions currently committed across all active
- * call1 and call2 subscribers. Used to enforce the 64-session cap.
- *
- * We read from `profiles` (written by the Stripe webhook) rather than
- * a separate subscriptions table so the check is consistent with the
- * rest of the codebase.
- */
-async function getTotalSessionsCommitted() {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("subscription_tier")
-    .in("subscription_tier", ["call1", "call2"])
-    .in("subscription_status", ["active", "trialing"]);
-
-  if (error) {
-    console.error("Could not count active session subscribers:", error);
-    // Fail open — don't block checkout due to a counting failure
-    return 0;
-  }
-
-  return (data || []).reduce((total, row) => {
-    return total + (SESSIONS_PER_TIER[row.subscription_tier] ?? 0);
-  }, 0);
+  return plan.startsWith("lab") ? "lab" : "unknown";
 }
 
 /* ─────────────────────────────
@@ -150,41 +112,15 @@ async function rawHandler(event) {
       };
     }
 
-    /* SESSION CAPACITY CHECK (call1 and call2 only)
-       If adding this subscriber's monthly sessions would exceed the cap, block checkout.
-       We query live counts so concurrent signups are handled correctly.
-       Note: there is a small TOCTOU window between this check and the webhook
-       writing the new subscription — acceptable at this scale. */
     const tier = getPlanTier(plan);
-    if (tier === "call1" || tier === "call2") {
-      const sessionsNeeded = SESSIONS_PER_TIER[tier];
-      const sessionsUsed   = await getTotalSessionsCommitted();
-
-      if (sessionsUsed + sessionsNeeded > SESSION_CAPACITY) {
-        const remaining = Math.max(0, SESSION_CAPACITY - sessionsUsed);
-        console.log(
-          `Session capacity reached: ${sessionsUsed}/${SESSION_CAPACITY} used, ` +
-          `${sessionsNeeded} needed, ${remaining} slots left`
-        );
-        return {
-          statusCode: 409,
-          body: JSON.stringify({
-            error: "capacity_full",
-            message:
-              "All session slots for this month are currently filled. " +
-              "Please join the waitlist or check back next month.",
-          }),
-        };
-      }
-    }
 
     /* CREATE STRIPE CHECKOUT SESSION */
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url:    process.env.SITE_URL + "/subscribe/?success=true",
-      cancel_url:     process.env.SITE_URL + "/subscribe/?canceled=true",
+      success_url:    returnUrl(process.env.SITE_URL, "/subscribe/?success=true", body.app === true),
+      cancel_url:     returnUrl(process.env.SITE_URL, "/subscribe/?canceled=true", body.app === true),
       customer_email: user.email,
       metadata: {
         user_id: user.id,

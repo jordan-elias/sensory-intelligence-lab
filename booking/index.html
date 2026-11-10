@@ -214,8 +214,6 @@
     .plan-badge.free  { color: var(--muted); border-color: var(--border); }
     .plan-badge.beta  { color: #6b3a1a; border-color: #d4a87a; background: #fdf4ec; }
     .plan-badge.lab   { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
-    .plan-badge.call1 { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
-    .plan-badge.call2 { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
 
     /* ── Status banners ── */
     .status-banner {
@@ -461,12 +459,19 @@ function calBookingUrl(calEventId) {
 // ─────────────────────────────────────────────────────────
 // PLAN LABELS
 // ─────────────────────────────────────────────────────────
+// One place for the prices shown on this page. The real prices are set on the Cal.com events:
+// events named intro, session and member-session under each therapist's Cal.com username.
+const PRICES = { session: 80, member: 60, lab: 4 };
+
+function eventLinks(calLink) {
+  const owner = String(calLink).split('/')[0];
+  return { intro: `${owner}/intro`, session: `${owner}/session`, member: `${owner}/member-session` };
+}
+
 const PLAN_LABELS = {
   free:  'Free access',
   beta:  'Lab Access',   // beta displays as Lab Access
   lab:   'Lab Access',
-  call1: 'Lab + 1 session / month',
-  call2: 'Lab + 2 sessions / month',
 };
 
 // ─────────────────────────────────────────────────────────
@@ -599,279 +604,63 @@ function loadAndMountCal(allSections) {
 function render(ent, therapist) {
   const root = document.getElementById('bookingRoot');
   root.innerHTML = '';
-
   const sections = [];
 
-  // ── Derive a display badge class ──────────────────────────────────────
-  const badgeClass = ent.isBeta && ent.tier === 'lab' ? 'beta' : ent.tier;
+  const isMember = ent.isActive && !ent.isPastDue && (ent.isBeta || ['lab', 'call1', 'call2'].includes(ent.tier));
+  const planName = isMember ? PLAN_LABELS.lab : PLAN_LABELS.free;
+  const memberRate = PRICES.member ? `€${PRICES.member}` : null;
 
-  // ── Cancel-at-period-end banner ───────────────────────────────────────
+  const card = document.createElement('div');
+  card.className = 'plan-card';
+  card.innerHTML = `
+    <div class="plan-card-left"><span class="plan-card-label">Your plan</span><span class="plan-card-name">${planName}</span></div>
+    <span class="plan-badge ${isMember ? 'lab' : 'free'}">${isMember ? 'Lab member' : 'Free'}</span>`;
+  root.appendChild(card);
+
   if (ent.cancelAtPeriodEnd && ent.isActive) {
     const banner = document.createElement('div');
     banner.className = 'status-banner warning';
-    banner.innerHTML = `
-      <strong>Your plan is scheduled to cancel on ${fmtDate(ent.periodEnd)}.</strong>
-      Sessions booked after this date won't be included in your subscription —
-      you would need to pay for them separately. Book any remaining sessions before then,
-      or <a href="/account/">reactivate your plan in account settings</a>.
-    `;
+    banner.innerHTML = `<strong>Your Lab plan ends on ${fmtDate(ent.periodEnd)}.</strong> The member rate for sessions ends with it. <a href="/account/">Reactivate in account settings</a> to keep it.`;
     root.appendChild(banner);
   }
-
-  // ── Past-due ──────────────────────────────────────────────────────────
   if (ent.isPastDue) {
-    const planCard = document.createElement('div');
-    planCard.className = 'plan-card';
-    planCard.innerHTML = `
-      <div class="plan-card-left">
-        <span class="plan-card-label">Your plan</span>
-        <span class="plan-card-name">${PLAN_LABELS[ent.tier] || 'Free access'}</span>
-      </div>
-      <span class="plan-badge ${badgeClass}">${PLAN_LABELS[ent.tier] || 'Free'}</span>
-    `;
-    root.appendChild(planCard);
-
     const banner = document.createElement('div');
     banner.className = 'status-banner error';
-    banner.innerHTML = `
-      <strong>Your subscription payment failed.</strong>
-      Session booking is paused until your payment is resolved.
-      <a href="/account/">Update your payment method in account settings</a> to restore access.
-    `;
+    banner.innerHTML = `<strong>Your subscription payment failed.</strong> Sessions are booked at the standard rate until it is resolved. <a href="/account/">Update your payment method</a> to restore the member rate.`;
     root.appendChild(banner);
-
-    // Still show upcoming if they have any (booked before payment failed)
-    return;
   }
 
-  // ── Canceled (period ended) ───────────────────────────────────────────
-  if (ent.isCanceled) {
-    const planCard = document.createElement('div');
-    planCard.className = 'plan-card';
-    planCard.innerHTML = `
-      <div class="plan-card-left">
-        <span class="plan-card-label">Your plan</span>
-        <span class="plan-card-name">Free access</span>
-      </div>
-      <span class="plan-badge free">Free</span>
-    `;
-    root.appendChild(planCard);
-
-    // Resubscribe nudge — copy distinguishes returning vs new user
-    const nudge = document.createElement('div');
-    nudge.className = 'upgrade-nudge';
-    nudge.innerHTML = `
-      <p class="upgrade-nudge-head">Resubscribe</p>
-      <p>Your session subscription has ended. Resubscribe to get included video sessions each month — one session per month from <strong>€60</strong>, or two sessions per month for <strong>€110</strong>.</p>
-      <p class="muted" style="font-size:.78rem;color:var(--muted)">Single sessions remain available below at €75 each.</p>
-      <div class="nudge-actions">
-        <a class="nudge-btn" href="/subscribe/">View plans</a>
-      </div>
-    `;
-    root.appendChild(nudge);
-
-    // Show single session calendar so they can still book
-    if (!ent.canBookIntro) {
-      sections.push({
-        id: 'cal-session', label: 'Individual Session',
-        meta: '€75 · Book anytime', calLink: 'jordan-elias/session', ns: 'session',
-      });
-    } else {
-      sections.push({
-        id: 'cal-intro', label: 'Introductory Session',
-        meta: 'One-time · Complimentary', calLink: 'jordan-elias/intro', ns: 'intro',
-      });
-    }
-
-    buildCalSections(root, sections);
-    loadAndMountCal(sections);
+  // A session is always with a therapist the client has chosen. No choice yet: choose one first.
+  const therapistBox = document.createElement('div');
+  root.appendChild(therapistBox);
+  if (!therapist) {
+    mountChooser(therapistBox, window._supabase, { onConnected: () => window.location.reload(), intro: 'Choose the therapist you would like to book with.' })
+      .catch(e => { console.warn('[booking] therapist list failed:', e.message); therapistBox.innerHTML = '<p class="muted">Could not load therapists. Please refresh the page.</p>'; });
     return;
   }
+  mountConnectedCard(therapistBox, window._supabase, therapist).catch(() => {});
 
-  // ── Session-tier users (call1 / call2) ───────────────────────────────
-  if (ent.tier === 'call1' || ent.tier === 'call2') {
-
-    // Period range string
-    const periodStr = (ent.windowStart && ent.windowEnd)
-      ? `${fmtShort(ent.windowStart)} – ${fmtShort(ent.windowEnd)}`
-      : null;
-
-    // Build allowance description
-    let allowanceLine = '';
-    if (ent.carryOver > 0) {
-      allowanceLine = `<strong>${ent.sessionsAvailable}</strong> sessions available this period
-        <span style="color:var(--muted);">(${ent.baseSessionsPerMonth} included
-        + ${ent.carryOver} carried over from last month)</span>`;
+  const who = therapist.display_name || 'your therapist';
+  const tp = planFor(therapist);
+  if (tp.kind === 'external') {
+    sections.push({ id: 'cal-session', label: `Session with ${who}`, meta: 'Their own booking page', ns: 'session', href: tp.url, who });
+  } else if (tp.kind !== 'cal') {
+    sections.push({ id: 'cal-session', label: `Session with ${who}`, meta: '', ns: 'session', note: `${who} has not added a booking link yet. You can message them from your account.` });
+  } else {
+    const links = eventLinks(tp.calLink);
+    if (ent.canBookIntro) {
+      sections.push({ id: 'cal-intro', label: `Introductory session with ${who}`, meta: 'One-time · Complimentary', calLink: links.intro, ns: 'intro' });
+    } else if (isMember) {
+      sections.push({ id: 'cal-session', label: `Session with ${who}`, meta: memberRate ? `${memberRate} · Lab member rate` : 'Lab member rate', calLink: links.member, ns: 'member-session' });
     } else {
-      allowanceLine = `<strong>${ent.sessionsAvailable}</strong> session${ent.sessionsAvailable !== 1 ? 's' : ''} available this period`;
-    }
-
-    const usedLine = `${ent.sessionsUsed} used · <strong>${ent.sessionsRemaining}</strong> remaining`;
-
-    const statusCard = document.createElement('div');
-    statusCard.className = 'plan-card';
-    statusCard.innerHTML = `
-      <div class="plan-card-left">
-        <span class="plan-card-label">Your plan</span>
-        <span class="plan-card-name">${PLAN_LABELS[ent.tier]}</span>
-        <div class="session-allowance">
-          <div class="session-allowance-row">${allowanceLine}</div>
-          <div class="session-allowance-sub">${usedLine}</div>
-          ${periodStr ? `<div class="session-allowance-period">Current period: ${periodStr}${ent.periodEnd ? ` · renews ${fmtDate(ent.periodEnd)}` : ''}</div>` : ''}
-        </div>
-      </div>
-      <span class="plan-badge ${ent.tier}">${PLAN_LABELS[ent.tier]}</span>
-    `;
-    root.appendChild(statusCard);
-
-    // ── State-specific messaging ──────────────────────────────────────
-
-    if (ent.sessionsRemaining === 0) {
-      // All sessions used or booked for this period
-      const notice = document.createElement('div');
-      notice.className = 'all-used-notice';
-      const nextPeriodDate = ent.windowEnd
-        ? fmtDate(new Date(ent.windowEnd.getTime() + 1))
-        : 'your next period';
-      notice.innerHTML = `
-        <strong>You've used all your sessions for this period.</strong>
-        Your next session allowance starts on ${nextPeriodDate}.
-        You can still book sessions below for future periods — they won't count against your current allowance.
-      `;
-      root.appendChild(notice);
-    } else if (ent.tier === 'call2' && ent.sessionsUsed === 1) {
-      // call2 user has one session booked, one remaining — prompt to book the second
-      const prompt = document.createElement('div');
-      prompt.className = 'book-second-prompt';
-      prompt.innerHTML = `
-        <strong>You have one session remaining this period.</strong>
-        Book your second session below before ${periodStr ? ent.windowEnd ? fmtDate(ent.windowEnd) : 'your period ends' : 'your period ends'} — unused sessions carry over once, but expire if not used the following month.
-      `;
-      root.appendChild(prompt);
-    }
-
-    // ── Session info note ───────────────────────────────────────────────
-    const sessionsPerMonth = ent.baseSessionsPerMonth;
-    const infoNote = document.createElement('div');
-    infoNote.className = 'session-info-note';
-    infoNote.innerHTML = `
-      <p>Your plan includes <strong>${sessionsPerMonth} session${sessionsPerMonth > 1 ? 's' : ''} per month</strong>.
-        If you don't use a session in a given month, it carries over to the following month.
-        Unused carry-over sessions expire after one month — they don't accumulate further.</p>
-      <p>You can book sessions in advance — for example, if it's May and you'd like to lock in
-        the same slot for June and July, book both now. Sessions booked for future periods
-        won't count against your current month's allowance.</p>
-    `;
-    root.appendChild(infoNote);
-
-    // ── Upgrade nudge for call1 → call2 ────────────────────────────────
-    if (ent.showUpgradeToCall2) {
       const nudge = document.createElement('div');
       nudge.className = 'upgrade-nudge';
       nudge.innerHTML = `
-        <p class="upgrade-nudge-head">Add a second session</p>
-        <p><strong>Lab + 2 Calls</strong> includes two sessions per month for <strong>€110</strong> —
-          that's €55 per session, compared to €60 on your current plan or €75 for a single
-          session booked individually.</p>
-        <div class="nudge-actions">
-          <a class="nudge-btn" href="/subscribe/">View plans</a>
-        </div>
-      `;
+        <p class="upgrade-nudge-head">Lab members book sessions at a lower rate</p>
+        <p>A session is <strong>€${PRICES.session}</strong>. With Lab (€${PRICES.lab} a month) you also get every tool in the app, and sessions at the member rate${memberRate ? ` of <strong>${memberRate}</strong>` : ''}.</p>
+        <div class="nudge-actions"><a class="nudge-btn" href="/subscribe/">See Lab</a></div>`;
       root.appendChild(nudge);
-    }
-
-    // ── Subscriber session calendar ─────────────────────────────────────
-    // Session plans book with the client's own therapist. With no connection yet, the client
-    // chooses one from those taking new clients; there is no shared calendar to fall back on.
-    const tp = planFor(therapist);
-    const therapistBox = document.createElement('div');
-    root.appendChild(therapistBox);
-    if (tp.kind === 'none') {
-      mountChooser(therapistBox, window._supabase, { onConnected: () => window.location.reload() })
-        .catch(e => { console.warn('[booking] therapist list failed:', e.message); therapistBox.innerHTML = '<p class="muted">Could not load therapists. Please refresh the page.</p>'; });
-    } else {
-      mountConnectedCard(therapistBox, window._supabase, therapist).catch(() => {});
-      const who = therapist.display_name || 'your therapist';
-      const label = `Monthly session with ${who}`;
-      if (tp.kind === 'cal') {
-        sections.push({ id: 'cal-subscriber', label, meta: 'Included in your plan', calLink: tp.calLink, ns: 'subscriber-session' });
-      } else if (tp.kind === 'external') {
-        sections.push({ id: 'cal-subscriber', label, meta: 'Included in your plan', ns: 'subscriber-session', href: tp.url, who });
-      } else {
-        sections.push({ id: 'cal-subscriber', label, meta: 'Included in your plan', ns: 'subscriber-session',
-          note: `${who} has not added a booking link yet. You can message them from your account.` });
-      }
-    }
-
-  } else {
-    // ── Free / Beta / Lab users ─────────────────────────────────────────
-
-    const displayBadgeClass = ent.isBeta ? 'beta' : ent.tier;
-    const displayPlanLabel  = PLAN_LABELS[ent.isBeta ? 'beta' : ent.tier] || 'Free access';
-
-    const statusCard = document.createElement('div');
-    statusCard.className = 'plan-card';
-    statusCard.innerHTML = `
-      <div class="plan-card-left">
-        <span class="plan-card-label">Your plan</span>
-        <span class="plan-card-name">${displayPlanLabel}</span>
-      </div>
-      <span class="plan-badge ${displayBadgeClass}">${displayPlanLabel}</span>
-    `;
-    root.appendChild(statusCard);
-
-    if (ent.canBookIntro) {
-      // ── Intro not yet used ────────────────────────────────────────────
-      sections.push({
-        id: 'cal-intro', label: 'Introductory Session',
-        meta: 'One-time · Complimentary', calLink: 'jordan-elias/intro', ns: 'intro',
-      });
-
-      // Note beneath the calendar — sets expectation for what comes after
-      // (appended after cal section is built, handled in buildCalSections)
-
-    } else {
-      // ── Intro already used — show upgrade nudge + single session ──────
-
-      if (ent.tier === 'lab' || ent.isBeta) {
-        // Lab / beta user: nudge toward call1
-        const nudge = document.createElement('div');
-        nudge.className = 'upgrade-nudge';
-        nudge.innerHTML = `
-          <p class="upgrade-nudge-head">Include sessions in your plan</p>
-          <p>You're currently booking at <strong>€75 per session</strong>.
-            <strong>Lab + 1 Call</strong> includes one session per month for <strong>€60</strong>
-            — saving you €15 each time you book, with full Lab access already included in your plan.</p>
-          <p><strong>Lab + 2 Calls</strong> includes two sessions per month for <strong>€110</strong>
-            — <span class="muted">€55 each</span>.</p>
-          <div class="nudge-actions">
-            <a class="nudge-btn" href="/subscribe/">View session plans</a>
-          </div>
-        `;
-        root.appendChild(nudge);
-      } else {
-        // Free user: nudge toward call1, mention lab too
-        const nudge = document.createElement('div');
-        nudge.className = 'upgrade-nudge';
-        nudge.innerHTML = `
-          <p class="upgrade-nudge-head">Subscribe and save</p>
-          <p>Single sessions are <strong>€75</strong> each.
-            <strong>Lab + 1 Call</strong> includes one session per month for <strong>€60</strong>,
-            plus full access to all Lab tools — saving you €15 every time you book.</p>
-          <p><strong>Lab + 2 Calls</strong> includes two sessions per month for <strong>€110</strong>
-            — <span class="muted">€55 each</span>.</p>
-          <div class="nudge-actions">
-            <a class="nudge-btn" href="/subscribe/">View plans</a>
-            <a class="nudge-btn secondary" href="/subscribe/">Just Lab access — €4/month</a>
-          </div>
-        `;
-        root.appendChild(nudge);
-      }
-
-      sections.push({
-        id: 'cal-session', label: 'Individual Session',
-        meta: '€75 · Book anytime', calLink: 'jordan-elias/session', ns: 'session',
-      });
+      sections.push({ id: 'cal-session', label: `Session with ${who}`, meta: `€${PRICES.session}`, calLink: links.session, ns: 'session' });
     }
   }
 
@@ -921,8 +710,7 @@ function buildCalSections(root, sections, ent) {
       const note = document.createElement('div');
       note.className = 'intro-note';
       note.textContent =
-        'The introductory session is complimentary. After that, individual sessions are €75, ' +
-        'or included in a subscription from €60/month.';
+        `The introductory session is complimentary. After that, a session is €${PRICES.session}, and Lab members get a lower rate.`;
       wrap.appendChild(note);
     }
 
@@ -960,12 +748,8 @@ onAuthReady(async () => {
     ]);
 
     renderUpcoming(upcoming);
-    let therapist = null;
-    if (ent.tier === 'call1' || ent.tier === 'call2') {
-      const { data } = await supabase.from('my_therapists').select('*').eq('status', 'active').limit(1);
-      therapist = (data && data[0]) || null;
-    }
-    render(ent, therapist);
+    const { data: linked } = await supabase.from('my_therapists').select('*').eq('status', 'active').limit(1);
+    render(ent, (linked && linked[0]) || null);
 
   } catch (err) {
     console.error('Booking page error:', err);

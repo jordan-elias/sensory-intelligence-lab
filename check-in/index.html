@@ -22,7 +22,7 @@
   </script>
 
   <link href="/assets/css/fonts.css" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="/assets/js/vendor/chart.umd.js"></script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -987,6 +987,7 @@ window.submitCheckin = async function() {
   S.submitting = false; btn.disabled = false; btn.textContent = 'Save check-in';
 
   if (error) { showMsg('Could not save: ' + error.message, 'error'); return; }
+  if (window.SIL_APP) import('/assets/js/app/reminders.js').then(m => m.refreshReminder({ checkedInToday: true })).catch(() => {});
 
   showConfirmation();
   await loadCheckins();

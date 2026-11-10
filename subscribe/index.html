@@ -193,7 +193,7 @@
     /* ── Plan grid ── */
     .plan-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 1px;
       background: var(--border);
       border: 1px solid var(--border);
@@ -216,8 +216,6 @@
     }
     .plan-badge.free-badge    { color: var(--muted);  border-color: var(--border); }
     .plan-badge.lab-badge     { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
-    .plan-badge.call1-badge   { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
-    .plan-badge.call2-badge   { color: var(--accent); border-color: var(--accent); background: var(--accent-light); }
     .plan-badge.current-badge { background: var(--accent); color: white; border-color: var(--accent); }
     .plan-badge.full-badge    { color: var(--muted);  border-color: var(--border); background: var(--surface); }
 
@@ -347,7 +345,7 @@
 
   <div class="ph">
     <h2>Choose a plan</h2>
-    <p>All plans include the core Lab tools. Session tiers add scheduled one-to-one video calls with Jordan each month. Cancel or change anytime.</p>
+    <p>Lab gives you every tool in the app. Therapy sessions are booked separately, €80 each, or €60 for Lab members. Cancel anytime.</p>
   </div>
 
   <div class="msg" id="pageMsg"></div>
@@ -404,7 +402,7 @@
         <li class="muted-feature">Check-In &amp; journaling</li>
         <li class="muted-feature">Spatial Awareness game</li>
         <li class="muted-feature">Soundscape Machine</li>
-        <li class="muted-feature">Video sessions</li>
+        <li>Sessions with a therapist at the standard rate</li>
       </ul>
       <div class="downgrade-notice" id="downgrade-notice-free">
         Downgrade takes effect at the end of your billing period. You keep full access until then.
@@ -431,65 +429,12 @@
         <li>Timed journal</li>
         <li>Composition modules</li>
         <li>Session history</li>
-        <li class="muted-feature">Video sessions</li>
+        <li>Sessions with a therapist at the member rate (€60 instead of €80)</li>
       </ul>
       <div class="downgrade-notice" id="downgrade-notice-lab">
         Downgrade takes effect at the end of your billing period. You keep full access until then.
       </div>
       <button class="plan-cta primary" id="cta-lab">Get started</button>
-    </div>
-
-    <!-- Call 1 -->
-    <div class="plan-card" id="card-call1">
-      <span class="plan-badge call1-badge" id="badge-call1">Lab + 1 session</span>
-      <div class="plan-name">Lab + 1 Call</div>
-      <div class="plan-tagline">Full Lab access plus one 50-minute video session with Jordan each month.</div>
-      <div class="plan-price">
-        <span class="amount" data-monthly="€60" data-yearly="€600">€60</span>
-        <span class="period" data-monthly="/ month" data-yearly="/ year">/ month</span>
-        <div class="yearly-equiv" data-monthly="" data-yearly="€50 / month">—</div>
-        <div class="saving" style="display:none" id="saving-call1">Save €120 / year</div>
-      </div>
-      <ul class="plan-features">
-        <li>Everything in Lab</li>
-        <li>1 × 50-min video session / month</li>
-        <li>Session scheduling via calendar</li>
-        <li>Carry-over if unused <span style="font-size:.7rem;color:var(--muted)">(1 month)</span></li>
-      </ul>
-      <div class="capacity-notice" id="notice-call1" style="display:none">
-        All session slots are currently full. Join the waitlist and we'll contact you when a space opens.
-      </div>
-      <div class="downgrade-notice" id="downgrade-notice-call1">
-        Downgrade takes effect at the end of your billing period. You keep full access until then.
-      </div>
-      <button class="plan-cta primary" id="cta-call1">Get started</button>
-    </div>
-
-    <!-- Call 2 -->
-    <div class="plan-card" id="card-call2">
-      <span class="plan-badge call2-badge" id="badge-call2">Lab + 2 sessions</span>
-      <div class="plan-name">Lab + 2 Calls</div>
-      <div class="plan-tagline">Full Lab access plus two 50-minute video sessions with Jordan each month.</div>
-      <div class="plan-price">
-        <span class="amount" data-monthly="€110" data-yearly="€1100">€110</span>
-        <span class="period" data-monthly="/ month" data-yearly="/ year">/ month</span>
-        <div class="yearly-equiv" data-monthly="" data-yearly="€91.67 / month">—</div>
-        <div class="saving" style="display:none" id="saving-call2">Save €220 / year</div>
-      </div>
-      <ul class="plan-features">
-        <li>Everything in Lab</li>
-        <li>2 × 50-min video sessions / month</li>
-        <li>Session scheduling via calendar</li>
-        <li>Priority scheduling</li>
-        <li>Carry-over if unused <span style="font-size:.7rem;color:var(--muted)">(1 month)</span></li>
-      </ul>
-      <div class="capacity-notice" id="notice-call2" style="display:none">
-        All session slots are currently full. Join the waitlist and we'll contact you when a space opens.
-      </div>
-      <div class="downgrade-notice" id="downgrade-notice-call2">
-        Downgrade takes effect at the end of your billing period. You keep full access until then.
-      </div>
-      <button class="plan-cta primary" id="cta-call2">Get started</button>
     </div>
 
   </div>
@@ -503,53 +448,55 @@
           <th style="width:40%">Feature</th>
           <th class="plan-col">Free</th>
           <th class="plan-col">Lab</th>
-          <th class="plan-col">+ 1 Call</th>
-          <th class="plan-col">+ 2 Calls</th>
         </tr>
       </thead>
       <tbody>
-        <tr class="row-group"><td colspan="5">Core tools</td></tr>
+        <tr class="row-group"><td colspan="3">Core tools</td></tr>
         <tr>
           <td><div class="feature-name">Regulation Engine</div><div class="feature-sub">Generative ISO soundscapes</div></td>
-          <td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td>
+          <td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td>
         </tr>
         <tr>
           <td><div class="feature-name">Breath Regulation</div><div class="feature-sub">4 evidence-based patterns with audio</div></td>
-          <td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td>
+          <td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td>
         </tr>
         <tr>
           <td><div class="feature-name">Ear Training</div><div class="feature-sub">Intervals and chords</div></td>
-          <td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td>
+          <td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td>
         </tr>
         <tr>
           <td><div class="feature-name">Resource Library</div><div class="feature-sub">Curated books, tools, archives</div></td>
-          <td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td>
+          <td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td>
         </tr>
-        <tr class="row-group"><td colspan="5">Lab tools</td></tr>
+        <tr class="row-group"><td colspan="3">Lab tools</td></tr>
         <tr>
           <td><div class="feature-name">Check-In</div><div class="feature-sub">State and sensory load logging</div></td>
-          <td class="check-col"><span class="cross">—</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td>
+          <td class="check-col"><span class="cross">—</span></td><td class="check-col"><span class="check">✓</span></td>
         </tr>
         <tr>
           <td><div class="feature-name">Spatial Awareness</div><div class="feature-sub">Sound localisation training</div></td>
-          <td class="check-col"><span class="cross">—</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td>
+          <td class="check-col"><span class="cross">—</span></td><td class="check-col"><span class="check">✓</span></td>
         </tr>
         <tr>
           <td><div class="feature-name">Soundscape Machine</div><div class="feature-sub">Four-track tape composition</div></td>
-          <td class="check-col"><span class="cross">—</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td>
+          <td class="check-col"><span class="cross">—</span></td><td class="check-col"><span class="check">✓</span></td>
         </tr>
         <tr>
           <td><div class="feature-name">Timed Journal</div><div class="feature-sub">Timed writing with soundscapes</div></td>
-          <td class="check-col"><span class="cross">—</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td>
+          <td class="check-col"><span class="cross">—</span></td><td class="check-col"><span class="check">✓</span></td>
         </tr>
-        <tr class="row-group"><td colspan="5">Video sessions</td></tr>
+        <tr class="row-group"><td colspan="3">Sessions with a therapist</td></tr>
         <tr>
-          <td><div class="feature-name">Monthly video sessions</div><div class="feature-sub">50 minutes, scheduled via calendar</div></td>
-          <td class="check-col"><span class="cross">—</span></td><td class="check-col"><span class="cross">—</span></td><td class="check-col"><span class="partial">1 / month</span></td><td class="check-col"><span class="partial">2 / month</span></td>
+          <td><div class="feature-name">Introductory session</div><div class="feature-sub">Complimentary, once, before your first session</div></td>
+          <td class="check-col"><span class="check">✓</span></td><td class="check-col"><span class="check">✓</span></td>
         </tr>
         <tr>
-          <td><div class="feature-name">Priority scheduling</div></td>
-          <td class="check-col"><span class="cross">—</span></td><td class="check-col"><span class="cross">—</span></td><td class="check-col"><span class="cross">—</span></td><td class="check-col"><span class="check">✓</span></td>
+          <td><div class="feature-name">Video sessions</div><div class="feature-sub">50 minutes, booked with the therapist you choose</div></td>
+          <td class="check-col"><span class="partial">€80</span></td><td class="check-col"><span class="partial">€60</span></td>
+        </tr>
+        <tr>
+          <td><div class="feature-name">Share your work with your therapist</div><div class="feature-sub">Check-ins, worksheets and journal, only what you choose</div></td>
+          <td class="check-col"><span class="cross">—</span></td><td class="check-col"><span class="check">✓</span></td>
         </tr>
       </tbody>
     </table>
@@ -564,7 +511,7 @@
         <div class="about-body">
           <p>Most of what happens in therapy happens between sessions — in the moments when you're trying to regulate, trying to listen differently, trying to remember what worked. I built the Sensory Intelligence Lab as a place for that work to live.</p>
           <p>This isn't a subscription to content. It's a structured environment for self-directed practice: tools I use in sessions, made available for daily use, built around how your nervous system actually works.</p>
-          <p>The session tiers exist for people who want more direct access — continuity across the week rather than one appointment a month, a space to bring what's come up in the Lab, and a relationship with the work that builds over time.</p>
+          <p>Sessions are booked with a therapist you choose, and Lab members get a lower session rate. What you do in the Lab can go with you into the room if you choose to share it.</p>
         </div>
       </div>
       <div class="about-pillars">
@@ -586,7 +533,7 @@
           <div class="pillar-icon">◇</div>
           <div class="pillar-text">
             <div class="pillar-title">More direct access</div>
-            <div class="pillar-desc">Session tiers mean you can bring what you've been working on straight to a call — less catch-up, more depth. I keep session numbers small on purpose.</div>
+            <div class="pillar-desc">Share your check-ins and worksheets with your therapist if you choose, and bring what you've been working on straight to a session — less catch-up, more depth.</div>
           </div>
         </div>
         <div class="pillar">
@@ -641,10 +588,10 @@
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">
-          <span class="faq-q-text">What are the video sessions for?</span>
+          <span class="faq-q-text">What are therapy sessions for?</span>
           <span class="faq-icon">+</span>
         </div>
-        <div class="faq-a"><div class="faq-a-inner">The sessions are one-to-one video calls with Jordan, the music therapist behind these tools. They can be used for guided listening work, discussion of what you've been exploring in the Lab, or support around goals.</div></div>
+        <div class="faq-a"><div class="faq-a-inner">Sessions are one-to-one video calls with a music therapist. You pay per session when you book, and a session is €80, or €60 for Lab members. They can be used for guided listening work, discussion of what you've been exploring in the Lab, or support around goals.</div></div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">
@@ -674,6 +621,7 @@
 
 <script type="module">
 
+
 // ─────────────────────────────────────────────────────────
 // HEADER
 // ─────────────────────────────────────────────────────────
@@ -701,15 +649,11 @@ let cancelAtPeriodEnd = false;
 /** @type {Date|null} profiles.current_period_end */
 let currentPeriodEnd = null;
 
-const SESSION_CAPACITY  = 64;
-const SESSIONS_PER_TIER = { call1: 1, call2: 2 };
-const TIER_ORDER        = { free: 0, lab: 1, call1: 2, call2: 3 };
+const TIER_ORDER        = { free: 0, lab: 1 };
 
 const PLAN_LABELS = {
   free:  'Free',
   lab:   'Lab Access',
-  call1: 'Lab + 1 session / month',
-  call2: 'Lab + 2 sessions / month',
   // beta users display as Lab Access
 };
 
@@ -726,16 +670,10 @@ onAuthReady(async () => {
   const user = window._currentUser;
   if (!sb || !user) return;
 
-  const [profileResult, capacityResult] = await Promise.all([
-    sb.from('profiles')
-      .select('subscription_tier, subscription_status, is_beta, current_period_end, stripe_subscription_id, cancel_at_period_end')
-      .eq('id', user.id)
-      .single(),
-    sb.from('profiles')
-      .select('subscription_tier', { count: 'exact', head: false })
-      .in('subscription_tier', ['call1', 'call2'])
-      .in('subscription_status', ['active', 'trialing']),
-  ]);
+  const profileResult = await sb.from('profiles')
+    .select('subscription_tier, subscription_status, is_beta, current_period_end, stripe_subscription_id, cancel_at_period_end')
+    .eq('id', user.id)
+    .single();
 
   const profile = profileResult.data;
   if (profile) {
@@ -756,18 +694,13 @@ onAuthReady(async () => {
     // is_beta only applies when the user has no active paid subscription.
     // A beta user who has since subscribed should see their actual tier.
     const isActivePaidTier =
-      ['lab', 'call1', 'call2'].includes(userTier) &&
+      ['lab'].includes(userTier) &&
       ['active', 'trialing'].includes(userSubscriptionStatus);
 
     userPlan = (isBeta && !isActivePaidTier) ? 'beta' : userTier;
   }
 
-  const activeRows   = capacityResult.data || [];
-  const sessionsUsed = activeRows.reduce((t, r) => t + (SESSIONS_PER_TIER[r.subscription_tier] ?? 0), 0);
-  const call1Full    = (sessionsUsed + SESSIONS_PER_TIER.call1) > SESSION_CAPACITY;
-  const call2Full    = (sessionsUsed + SESSIONS_PER_TIER.call2) > SESSION_CAPACITY;
-
-  renderPlanState({ call1Full, call2Full });
+  renderPlanState();
 
   // Handle redirect params from Stripe
   const params = new URLSearchParams(window.location.search);
@@ -786,14 +719,14 @@ onAuthReady(async () => {
 // ─────────────────────────────────────────────────────────
 
 // beta maps to the lab card for all display purposes
-const TIER_MAP = { free: 'free', lab: 'lab', call1: 'call1', call2: 'call2', beta: 'lab' };
+const TIER_MAP = { free: 'free', lab: 'lab', beta: 'lab' };
 
 function formatDate(date) {
   if (!date) return 'the end of your billing period';
   return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
-function renderPlanState({ call1Full = false, call2Full = false } = {}) {
+function renderPlanState() {
 
   // ── Past due ────────────────────────────────────────────
   if (userSubscriptionStatus === 'past_due') {
@@ -801,7 +734,7 @@ function renderPlanState({ call1Full = false, call2Full = false } = {}) {
 
     // Show current plan banner (no portal btn — past-due banner has its own)
     const currentCardKey = TIER_MAP[userPlan] || 'free';
-    if (['lab', 'call1', 'call2', 'beta'].includes(userPlan)) {
+    if (['lab', 'beta'].includes(userPlan)) {
       const banner = document.getElementById('currentPlanBanner');
       banner.style.display = 'flex';
       document.getElementById('currentPlanLabel').textContent =
@@ -813,7 +746,7 @@ function renderPlanState({ call1Full = false, call2Full = false } = {}) {
     const currentCard = document.getElementById('card-' + currentCardKey);
     if (currentCard) currentCard.classList.add('is-current');
 
-    ['free', 'lab', 'call1', 'call2'].forEach(t => {
+    ['free', 'lab'].forEach(t => {
       const cta  = document.getElementById('cta-' + t);
       const badge = document.getElementById('badge-' + t);
       if (!cta) return;
@@ -849,7 +782,7 @@ function renderPlanState({ call1Full = false, call2Full = false } = {}) {
   }
 
   // ── Current plan banner for any paid/beta plan ───────────
-  if (['lab', 'call1', 'call2', 'beta'].includes(effectivePlan)) {
+  if (['lab', 'beta'].includes(effectivePlan)) {
     const banner = document.getElementById('currentPlanBanner');
     banner.style.display = 'flex';
     // beta users display as "Lab Access"
@@ -868,12 +801,8 @@ function renderPlanState({ call1Full = false, call2Full = false } = {}) {
   const currentCard = document.getElementById('card-' + currentCardKey);
   if (currentCard) currentCard.classList.add('is-current');
 
-  // Apply capacity states first (may be overridden below for current tier)
-  applyCapacityState('call1', call1Full, currentCardKey === 'call1');
-  applyCapacityState('call2', call2Full, currentCardKey === 'call2');
-
   // Set CTA labels based on relationship to current tier
-  ['free', 'lab', 'call1', 'call2'].forEach(t => {
+  ['free', 'lab'].forEach(t => {
     const cta    = document.getElementById('cta-' + t);
     const badge  = document.getElementById('badge-' + t);
     const notice = document.getElementById('downgrade-notice-' + t);
@@ -925,24 +854,6 @@ function renderPlanState({ call1Full = false, call2Full = false } = {}) {
   });
 }
 
-function applyCapacityState(tier, isFull, isCurrent) {
-  const card   = document.getElementById('card-' + tier);
-  const cta    = document.getElementById('cta-' + tier);
-  const notice = document.getElementById('notice-' + tier);
-  const badge  = document.getElementById('badge-' + tier);
-  if (!card || !cta || isCurrent) return;
-
-  if (isFull) {
-    card.classList.add('is-full');
-    cta.textContent = 'Currently full';
-    cta.className   = 'plan-cta waitlist-cta';
-    cta.disabled    = true;
-    cta.onclick     = null;
-    if (notice) notice.style.display = 'block';
-    if (badge)  badge.className = 'plan-badge full-badge';
-  }
-}
-
 // ─────────────────────────────────────────────────────────
 // BILLING TOGGLE
 // ─────────────────────────────────────────────────────────
@@ -957,7 +868,7 @@ window.setBilling = function(period) {
     el.classList.toggle('visible', period === 'yearly' && el.classList.contains('yearly-equiv'));
   });
 
-  ['lab', 'call1', 'call2'].forEach(t => {
+  ['lab'].forEach(t => {
     const s = document.getElementById('saving-' + t);
     if (s) s.style.display = period === 'yearly' ? 'inline-block' : 'none';
   });
@@ -996,16 +907,11 @@ window.checkout = async function(tier) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${session.access_token}`,
       },
-      body: JSON.stringify({ plan }),
+      body: JSON.stringify({ plan, app: !!window.SIL_APP }),
     });
 
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      if (body.error === 'capacity_full') {
-        applyCapacityState(tier, true, false);
-        showMsg('Session places have just filled — all slots are now taken. Please check back next month.', 'error');
-        return;
-      }
       throw new Error(body.error || 'Checkout failed.');
     }
 
@@ -1049,17 +955,12 @@ window.changePlan = async function(tier) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${session.access_token}`,
       },
-      body: JSON.stringify({ plan }),
+      body: JSON.stringify({ plan, app: !!window.SIL_APP }),
     });
 
     const body = await res.json().catch(() => ({}));
 
     if (!res.ok) {
-      if (body.error === 'capacity_full') {
-        applyCapacityState(tier, true, false);
-        showMsg('Session places have just filled — all slots are now taken.', 'error');
-        return;
-      }
       throw new Error(body.error || 'Could not update subscription.');
     }
 
@@ -1091,6 +992,7 @@ window.openPortal = async function(btn) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${session.access_token}`,
       },
+      body: JSON.stringify({ app: !!window.SIL_APP }),
     });
     if (!res.ok) throw new Error('Could not open billing portal.');
     const { url } = await res.json();

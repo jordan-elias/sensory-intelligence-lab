@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Back to the app · Sensory Intelligence Lab</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <link rel="stylesheet" href="/assets/css/a11y.css">
+  <style>
+    body { font: 16px/1.6 system-ui, sans-serif; color: #1a1a1a; background: #f9f9f7; margin: 0; display: grid; place-items: center; min-height: 100vh; padding: 1.5rem; }
+    main { max-width: 30rem; text-align: center; } a.btn { display: inline-block; background: #2a5c45; color: #fff; padding: .8rem 1.6rem; border-radius: 4px; text-decoration: none; margin: .5rem 0; }
+    @media (prefers-color-scheme: dark) { body { color: #eee; background: #161a18; } }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Returning to the app</h1>
+  <p>If the app does not open by itself, tap the button.</p>
+  <p><a class="btn" id="open" href="#">Open the app</a></p>
+  <p><a id="web" href="/dashboard/">Continue on the website instead</a></p>
+</main>
+<script>
+  // Only plain paths on this site are passed on, never another address.
+  var to = new URLSearchParams(location.search).get('to') || '/dashboard/';
+  if (to.charAt(0) !== '/' || to.indexOf('//') === 0 || to.indexOf('\\') !== -1) to = '/dashboard/';
+  var link = 'de.jordanelias.sil://open?path=' + encodeURIComponent(to);
+  document.getElementById('open').href = link;
+  document.getElementById('web').href = to;
+  setTimeout(function () { location.href = link; }, 300);
+</script>
+</body>
+</html>

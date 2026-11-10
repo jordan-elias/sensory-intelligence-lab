@@ -1,4 +1,5 @@
-exports.handler = async function (event) {
+import { withCors } from './lib/cors.js';
+async function rawHandler(event) {
   // Only allow GET requests
   if (event.httpMethod !== 'GET') {
     return { statusCode: 405, body: 'Method Not Allowed' };
@@ -52,3 +53,5 @@ exports.handler = async function (event) {
     };
   }
 };
+
+export const handler = withCors(rawHandler);
