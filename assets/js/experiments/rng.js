@@ -85,8 +85,37 @@ export function generate(spec, rng) {
       return { kind: 'pattern', items: seq.map((p, i) => ({ label: `${i + 1}`, text: NOTE_NAMES[p] })), pitchClasses: seq,
         summary: `Note set ${set.map(p => NOTE_NAMES[p]).join(' ')} · ${seq.map(p => NOTE_NAMES[p]).join(' ')}` };
     }
+    case 'chords': {
+      const table = chordTable(spec.root ?? 0, spec.scale === 'natural minor' ? 'natural minor' : 'major'), n = spec.count ?? 4;
+      const picks = []; while (picks.length < n) { const c = table[int(rng, 0, 6)]; if (!picks.length || picks[picks.length - 1] !== c) picks.push(c); }
+      return { kind: 'chords', items: picks.map((c, i) => ({ label: `${i + 1}`, text: `${c.name} (${c.numeral})` })), chords: picks.map(c => c.pcs), summary: picks.map(c => c.name).join(' – ') };
+    }
+    case 'euclid': {
+      const n = spec.steps ?? 16, k = spec.hits ? spec.hits : int(rng, spec.minHits ?? 3, spec.maxHits ?? 7), r = int(rng, 0, n - 1), pat = euclid(k, n, r);
+      return { kind: 'euclid', items: [{ label: `${k} hits in ${n} steps, shifted by ${r}`, text: patternText(pat) }], pattern: pat, summary: `${k}/${n} +${r}` };
+    }
     default: throw new Error('Unknown generator kind: ' + spec.kind);
   }
+}
+
+/** Euclidean rhythm: k hits spread as evenly as possible over n steps, rotated by r. Returns an array of 0/1. */
+export function euclid(k, n, r = 0) {
+  const base = Array.from({ length: n }, (_, i) => ((i * k) % n) < k ? 1 : 0);
+  const rot = ((r % n) + n) % n;
+  return base.slice(rot).concat(base.slice(0, rot));
+}
+export const patternText = p => p.map(x => (x ? 'x' : '·')).join(' ');
+
+const TRIADS = {
+  'major': [['I', 0, 'maj'], ['ii', 2, 'min'], ['iii', 4, 'min'], ['IV', 5, 'maj'], ['V', 7, 'maj'], ['vi', 9, 'min'], ['vii°', 11, 'dim']],
+  'natural minor': [['i', 0, 'min'], ['ii°', 2, 'dim'], ['III', 3, 'maj'], ['iv', 5, 'min'], ['v', 7, 'min'], ['VI', 8, 'maj'], ['VII', 10, 'maj']],
+};
+const QUALITY_STEPS = { maj: [0, 4, 7], min: [0, 3, 7], dim: [0, 3, 6] };
+export function chordTable(root, scale) {
+  return (TRIADS[scale] || TRIADS.major).map(([num, off, q]) => {
+    const r = (root + off) % 12;
+    return { numeral: num, name: NOTE_NAMES[r] + (q === 'min' ? 'm' : q === 'dim' ? '°' : ''), pcs: QUALITY_STEPS[q].map(x => (r + x) % 12) };
+  });
 }
 
 /** Every item moves to a different place: nobody keeps the original position. */

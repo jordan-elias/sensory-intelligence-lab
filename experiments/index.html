@@ -42,7 +42,14 @@
     .xp-box{border-left:3px solid var(--accent);background:var(--accent-light);padding:.8rem 1rem;margin:1rem 0;font-size:.92rem;border-radius:0 4px 4px 0}
     .xp-box b{display:block;font:600 .68rem var(--font-heading);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:.2rem}
     h3.xp-h{font:600 .68rem var(--font-heading);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:1.8rem 0 .6rem}
-    .xp-steps{margin:0 0 0 1.2rem;font-size:.95rem} .xp-steps li{margin-bottom:.5rem}
+    .xp-proc{margin:0 0 .6rem 1.2rem;font-size:.95rem} .xp-proc li{margin-bottom:.5rem}
+    .xp-stop{font-size:.9rem;margin:.4rem 0 1rem}
+    .xp-vars{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem} @media(max-width:700px){.xp-vars{grid-template-columns:1fr}}
+    .xp-vars h4{font:600 .78rem var(--font-heading);margin-bottom:.3rem} .xp-vlist{list-style:none;font-size:.88rem;border-left:2px solid var(--border);padding-left:.7rem} .xp-vlist li{margin-bottom:.3rem}
+    .xp-params,.xp-trials{width:100%;border-collapse:collapse;font-size:.88rem} .xp-params th,.xp-params td,.xp-trials th,.xp-trials td{border-bottom:1px solid var(--border);padding:.45rem .4rem;text-align:left;vertical-align:top}
+    .xp-params th{width:34%;font-weight:600;color:var(--muted)} .xp-trials thead th{font-size:.72rem;color:var(--muted);letter-spacing:.04em} .xp-trials input{width:100%;font:inherit;padding:.4rem .5rem;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text);min-height:40px}
+    .xp-steps-grid{display:grid;gap:3px;margin:.6rem 0} .xp-step{aspect-ratio:1;min-height:26px;border:1px solid var(--border);background:var(--bg);border-radius:3px;cursor:pointer;padding:0}
+    .xp-step[aria-pressed="true"]{background:var(--accent-light);border-color:var(--accent)} .xp-step.on{outline:2px solid var(--accent)} .xp-step[aria-pressed="true"].on{background:var(--accent)}
     .xp-meta-line{font-size:.8rem;color:var(--muted);margin-bottom:.8rem}
     .xp-tool{border:1px solid var(--border);border-radius:6px;padding:1rem 1.1rem;margin-bottom:.9rem;background:var(--surface)}
     .xp-k{font:600 .68rem var(--font-heading);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem}
@@ -113,23 +120,55 @@ function list() {
 
 function detail(e) {
   const done = new Set(read(KEY_DONE, []));
-  const note = el('textarea', { rows: 4, 'aria-label': 'Your notes on this experiment', placeholder: 'What surprised you? Kept on this device only.' });
-  note.value = read(NOTE(e.id), ''); note.oninput = () => write(NOTE(e.id), note.value);
+  const store = (key, fallback) => ({ get: () => read(key, fallback), set: v => write(key, v) });
+  const pred = store(`sil.exp.pred.${e.id}`, ''), trialsStore = store(`sil.exp.trials.${e.id}`, {}), concl = store(`sil.exp.concl.${e.id}`, { verdict: '', text: '' });
+  const predEl = el('textarea', { rows: 3, 'aria-label': 'Your prediction', placeholder: 'Before you start: what do you expect will happen? Kept on this device only.' });
+  predEl.value = pred.get(); predEl.oninput = () => pred.set(predEl.value);
+
+  const saved = trialsStore.get();
+  const trialRows = e.trials.map((t, i) => {
+    const sc = el('select', { 'aria-label': `${t}: how surprising (1 to 5)` }, el('option', { value: '' }, '–'), [1, 2, 3, 4, 5].map(n => el('option', { value: n }, n)));
+    const tx = el('input', { type: 'text', 'aria-label': `${t}: one line`, placeholder: 'One line', maxlength: 200 });
+    sc.value = saved[i]?.score ?? ''; tx.value = saved[i]?.text ?? '';
+    const save = () => { const s = trialsStore.get(); s[i] = { score: sc.value, text: tx.value }; trialsStore.set(s); };
+    sc.onchange = save; tx.oninput = save;
+    return el('tr', {}, el('th', { scope: 'row' }, t), el('td', {}, sc), el('td', {}, tx));
+  });
+
+  const c0 = concl.get();
+  const verdict = el('select', { 'aria-label': 'Was the hypothesis supported?' }, el('option', { value: '' }, 'Choose…'),
+    el('option', { value: 'yes' }, 'Supported'), el('option', { value: 'partly' }, 'Partly supported'), el('option', { value: 'no' }, 'Not supported'), el('option', { value: 'unclear' }, 'Could not tell'));
+  verdict.value = c0.verdict; const ctext = el('textarea', { rows: 4, 'aria-label': 'Conclusion', placeholder: e.reflect });
+  ctext.value = c0.text;
+  const saveC = () => concl.set({ verdict: verdict.value, text: ctext.value }); verdict.onchange = saveC; ctext.oninput = saveC;
+
   const mark = el('button', { type: 'button', class: 'xp-btn xp-btn--alt', onclick: () => {
     const d = new Set(read(KEY_DONE, [])); d.has(e.id) ? d.delete(e.id) : d.add(e.id); write(KEY_DONE, [...d]); mark.textContent = d.has(e.id) ? 'Done ✓ (tap to undo)' : 'Mark as done';
   } }, done.has(e.id) ? 'Done ✓ (tap to undo)' : 'Mark as done');
-  const idx = EXPERIMENTS.indexOf(e);
+  const idx = EXPERIMENTS.indexOf(e), list2 = items => el('ul', { class: 'xp-vlist' }, items.map(i => el('li', {}, i)));
+
   root.replaceChildren(
     el('a', { class: 'xp-back', href: '#/' }, '← All experiments'),
     el('div', { class: 'ph' }, el('h2', {}, e.title), el('p', {}, e.summary)),
     el('p', { class: 'xp-meta-line' }, `${CATEGORIES[e.category]} · ${NEEDS[e.needs]} · about ${e.minutes} minutes`),
-    el('div', { class: 'xp-box' }, el('b', {}, 'The limit'), e.limit),
-    el('h3', { class: 'xp-h' }, 'Steps'), el('ol', { class: 'xp-steps' }, e.steps.map(s => el('li', {}, s))),
-    el('div', { class: 'xp-box' }, el('b', {}, 'Let it surprise you'), e.surprise),
+    el('div', { class: 'xp-box', id: 'xpQuestion' }, el('b', {}, 'Question'), e.question),
+    el('div', { class: 'xp-box', id: 'xpHypothesis' }, el('b', {}, 'Hypothesis'), e.hypothesis),
+    el('h3', { class: 'xp-h' }, 'Your prediction'), predEl,
+    el('h3', { class: 'xp-h' }, 'Variables'),
+    el('div', { class: 'xp-vars' },
+      el('div', {}, el('h4', {}, 'Held fixed'), list2(e.variables.fixed)),
+      el('div', {}, el('h4', {}, 'Changed'), list2(e.variables.changed)),
+      el('div', {}, el('h4', {}, 'Measured'), list2(e.variables.measured))),
+    el('h3', { class: 'xp-h' }, 'Parameters'),
+    el('table', { class: 'xp-params' }, el('tbody', {}, e.parameters.map(([k, v]) => el('tr', {}, el('th', { scope: 'row' }, k), el('td', {}, v))))),
+    el('h3', { class: 'xp-h' }, 'Procedure'), el('ol', { class: 'xp-proc' }, e.procedure.map(s => el('li', {}, s))),
+    el('p', { class: 'xp-stop' }, el('strong', {}, 'Stop rule: '), e.stop),
     el('h3', { class: 'xp-h' }, 'Tools'), ...e.tools.map(buildTool),
     ...(e.links || []).map(l => el('p', {}, el('a', { href: l.href }, l.label))),
     el('details', { class: 'xp-solo' }, el('summary', {}, 'Doing this without the app'), el('p', {}, e.solo)),
-    el('h3', { class: 'xp-h' }, 'Afterwards'), el('p', {}, e.reflect), note,
+    el('h3', { class: 'xp-h' }, 'Record'),
+    el('table', { class: 'xp-trials' }, el('thead', {}, el('tr', {}, el('th', {}, 'Trial'), el('th', {}, 'Surprise 1–5'), el('th', {}, 'Observation'))), el('tbody', {}, trialRows)),
+    el('h3', { class: 'xp-h' }, 'Conclusion'), el('p', { class: 'xp-hint' }, 'Was the hypothesis supported? ' + e.reflect), verdict, ctext,
     el('div', { class: 'xp-done' }, mark),
     el('p', { class: 'xp-hint', style: 'margin-top:1.5rem' }, el('a', { href: '#/' + EXPERIMENTS[(idx + 1) % EXPERIMENTS.length].id }, 'Next in the list →'), ' · ', el('a', { href: '#/' }, 'Choose another')));
   window.scrollTo(0, 0);

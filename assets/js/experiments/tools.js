@@ -4,7 +4,7 @@
  * Audio you load or record here is held in memory only: it is not uploaded, and it is gone
  * when you leave the page unless you download it yourself.
  */
-import { mulberry32, newSeed, generate, SCALES, NOTE_NAMES, rotateAssign } from './rng.js';
+import { mulberry32, newSeed, generate, SCALES, NOTE_NAMES, rotateAssign, euclid, int } from './rng.js';
 import { mixToMono, resample, reverse, chopShuffle, stutter, pitchedGrains, contrastLayer, normalise, encodeWav } from './audio-ops.js';
 
 export function el(tag, attrs = {}, ...kids) {
@@ -36,6 +36,18 @@ export function playTones(pcs, { step = 0.5, octave = 0 } = {}) {
   return () => nodes.forEach(o => { try { o.stop(); } catch { /* already stopped */ } });
 }
 
+/** Plays chords (arrays of pitch classes) one after another, each stacked. Returns a stop function. */
+export function playChords(chords, { step = 1.1 } = {}) {
+  const ctx = audioCtx(), t0 = ctx.currentTime + 0.05, nodes = [];
+  chords.forEach((pcs, i) => pcs.forEach(pc => {
+    const o = ctx.createOscillator(), g = ctx.createGain(), t = t0 + i * step;
+    o.type = 'triangle'; o.frequency.value = freqOf(pc) * 0.5;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.18, t + 0.03); g.gain.exponentialRampToValueAtTime(0.001, t + step * 0.97);
+    o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + step); nodes.push(o);
+  }));
+  return () => nodes.forEach(o => { try { o.stop(); } catch { /* already stopped */ } });
+}
+
 // ── tool: number / note generator ───────────────────────────────────
 function genTool(cfg) {
   const root = el('div', { class: 'xp-tool' });
@@ -45,12 +57,13 @@ function genTool(cfg) {
   const seedEl = el('span', { class: 'xp-seed' });
   let stop = () => {};
   const rollBtn = el('button', { type: 'button', class: 'xp-btn' }, cfg.label || 'Roll');
-  const hear = el('button', { type: 'button', class: 'xp-btn xp-btn--alt', hidden: true }, 'Hear the notes');
+  const hear = el('button', { type: 'button', class: 'xp-btn xp-btn--alt', hidden: true }, 'Hear it');
   const bar = el('div', { class: 'xp-row' });
 
   if (cfg.keyPicker) {
     const key = el('select', { 'aria-label': 'Key', onchange: e => { state.root = +e.target.value; } }, NOTE_NAMES.map((n, i) => el('option', { value: i }, n)));
-    const sc = el('select', { 'aria-label': 'Scale', onchange: e => { state.scale = e.target.value; } }, Object.keys(SCALES).map(s => el('option', { value: s }, s)));
+    const scales = cfg.kind === 'chords' ? ['major', 'natural minor'] : Object.keys(SCALES);
+    const sc = el('select', { 'aria-label': 'Scale', onchange: e => { state.scale = e.target.value; } }, scales.map(s => el('option', { value: s }, s)));
     bar.append(el('label', {}, 'Key ', key), el('label', {}, 'Scale ', sc));
   }
   let last = null;
@@ -60,9 +73,9 @@ function genTool(cfg) {
     out.replaceChildren(el('ul', { class: 'xp-chips' }, last.items.map(i => el('li', {}, i.label ? el('span', { class: 'xp-chip-k' }, i.label) : null, ' ', i.text))));
     seedEl.textContent = `Seed ${seed}`;
     hist.prepend(el('li', {}, last.summary)); while (hist.children.length > 5) hist.lastChild.remove();
-    hear.hidden = !last.pitchClasses;
+    hear.hidden = !(last.pitchClasses || last.chords);
   };
-  hear.onclick = () => { stop(); if (last?.pitchClasses) stop = playTones(last.pitchClasses, { step: cfg.kind === 'notes' ? 0.6 : 0.4 }); };
+  hear.onclick = () => { stop(); if (last?.chords) stop = playChords(last.chords); else if (last?.pitchClasses) stop = playTones(last.pitchClasses, { step: cfg.kind === 'notes' ? 0.6 : 0.4 }); };
   root.append(el('div', { class: 'xp-row' }, rollBtn, hear), bar, out, el('div', { class: 'xp-meta' }, seedEl, el('p', { class: 'xp-hint' }, 'The seed makes a roll repeatable.')),
     cfg.noHistory ? null : el('details', { class: 'xp-details' }, el('summary', {}, 'Earlier rolls'), hist));
   return root;
@@ -176,6 +189,31 @@ function loopsTool(cfg) {
     el('p', { class: 'xp-hint' }, 'The loud click is beat 1 of each loop. Change a length, then stop and start again.'), btn, lights);
 }
 
+// ── tool: a repeating rhythm to play over ───────────────────────────
+function grooveTool(cfg) {
+  const n = cfg.steps || 16; let bpm = cfg.bpm || 90, timer = null, step = 0, next = 0;
+  let pat = cfg.hits === n || !cfg.hits ? Array(n).fill(cfg.hits ? 1 : 0) : euclid(cfg.hits, n, 0);
+  if (n === 4 && cfg.hits === 4) pat = [1, 1, 1, 1];
+  const cells = Array.from({ length: n }, (_, i) => el('button', { type: 'button', class: 'xp-step', 'aria-pressed': String(!!pat[i]), 'aria-label': `Step ${i + 1}`,
+    onclick: () => { pat[i] = pat[i] ? 0 : 1; draw(); } }));
+  const label = el('p', { class: 'xp-hint', 'aria-live': 'polite' });
+  const draw = (on = -1) => { cells.forEach((c, i) => { c.setAttribute('aria-pressed', String(!!pat[i])); c.classList.toggle('on', i === on); }); label.textContent = `${pat.reduce((a, b) => a + b, 0)} hits in ${n} steps · ${bpm} BPM`; };
+  const btn = el('button', { type: 'button', class: 'xp-btn' }, 'Start');
+  const tempo = el('input', { type: 'range', min: 40, max: 180, value: bpm, 'aria-label': 'Tempo', oninput: e => { bpm = +e.target.value; draw(); } });
+  const hit = (t, accent) => { const c = audioCtx(), o = c.createOscillator(), g = c.createGain(); o.type = 'square'; o.frequency.value = accent ? 330 : 220;
+    g.gain.setValueAtTime(accent ? 0.14 : 0.09, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.09); o.connect(g).connect(c.destination); o.start(t); o.stop(t + 0.12); };
+  const stepDur = () => (60 / bpm) * (4 / n);      // 4 steps = beats, 8 = eighth notes, 16 = sixteenths
+  const tick = () => { const c = audioCtx(); while (next < c.currentTime + 0.15) { const i = step % n; if (pat[i]) hit(next, i === 0); const when = next, k = i;
+    setTimeout(() => draw(k), Math.max(0, (when - c.currentTime) * 1000)); step++; next += stepDur(); } };
+  btn.onclick = () => { if (timer) { clearInterval(timer); timer = null; btn.textContent = 'Start'; draw(); return; } step = 0; next = audioCtx().currentTime + 0.1; timer = setInterval(tick, 50); btn.textContent = 'Stop'; };
+  const rollBtn = cfg.roll ? el('button', { type: 'button', class: 'xp-btn xp-btn--alt', onclick: () => {
+    const [lo, hi] = cfg.rollRange || [cfg.hits || 5, cfg.hits || 5], k = int(mulberry32(newSeed()), lo, hi); pat = euclid(k, n, int(mulberry32(newSeed()), 0, n - 1)); draw(); } }, 'Roll a rhythm') : null;
+  draw();
+  return el('div', { class: 'xp-tool' }, el('p', { class: 'xp-k' }, cfg.roll ? 'Rhythm to play over' : 'Metronome / rhythm'), el('div', { class: 'xp-row' }, btn, rollBtn, el('label', {}, 'Tempo ', tempo)),
+    el('div', { class: 'xp-steps-grid', style: `grid-template-columns:repeat(${Math.min(n, 16)},1fr)` }, cells), label,
+    el('p', { class: 'xp-hint' }, 'Tap a step to switch it on or off. Once you have started an experiment that fixes the rhythm, stop editing it.'));
+}
+
 // ── tool: reassign ──────────────────────────────────────────────────
 function assignTool() {
   const area = el('textarea', { rows: 4, 'aria-label': 'Your tracks, one per line', placeholder: 'One track or instrument per line, for example:\nBass\nPiano\nVoice\nDrums' });
@@ -195,8 +233,9 @@ export function buildTool(cfg) {
     case 'timer': return timerTool(cfg);
     case 'clip': return clipTool(cfg);
     case 'loops': return loopsTool(cfg);
+    case 'groove': return grooveTool(cfg);
     case 'assign': return assignTool(cfg);
     default: return el('p', {}, '');
   }
 }
-export const TOOL_TYPES = ['gen', 'timer', 'clip', 'loops', 'assign'];
+export const TOOL_TYPES = ['gen', 'timer', 'clip', 'loops', 'groove', 'assign'];

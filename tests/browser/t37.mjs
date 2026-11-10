@@ -8,7 +8,7 @@ const P=await newPage(await browser.createBrowserContext(),BASE,{tables:{}});
 const page=P.page;
 await page.goto(`${BASE}/experiments/`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('.xp-card',{timeout:15000});
 const n=await page.$$eval('.xp-card',c=>c.length);
-ok(n>=18,'the list shows every experiment ('+n+')');
+ok(n>=20,'the list shows every experiment ('+n+')');
 await page.evaluate(()=>[...document.querySelectorAll('.chip')].find(b=>b.textContent==='Field recordings').click()); await sleep(100);
 const f=await page.$$eval('.xp-card',c=>c.map(x=>x.querySelector('h3').textContent));
 ok(f.length===6&&f.includes('Chop and reorder'),'filtering by category works');
@@ -16,7 +16,7 @@ await page.evaluate(()=>[...document.querySelectorAll('.chip')].find(b=>b.textCo
 await page.evaluate(()=>[...document.querySelectorAll('.chip')].find(b=>b.textContent==='DAW or sequencer').click()); await sleep(100);
 ok((await page.$$eval('.xp-card',c=>c.length))>=3,'filtering by what you need works');
 await page.click('#xpSurprise'); await sleep(300);
-ok(/#\/./.test(await page.evaluate(()=>location.hash))&&await page.$('.xp-steps')!==null,'Surprise me opens one experiment');
+ok(/#\/./.test(await page.evaluate(()=>location.hash))&&await page.$('.xp-proc')!==null&&await page.$('#xpHypothesis')!==null,'Surprise me opens one experiment as a protocol');
 
 // dice melody: roll
 await page.goto(`${BASE}/experiments/#/dice-melody`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('.xp-tool .xp-btn',{timeout:8000});
@@ -25,9 +25,23 @@ ok((await page.$$eval('.xp-chips li',l=>l.length))===7,'rolling gives seven note
 ok(/Seed \d+/.test(await page.$eval('.xp-seed',e=>e.textContent)),'the seed is shown');
 ok(await page.$('details.xp-solo')!==null,'instructions for doing it without the app are there');
 // notes + done persist
-await page.type('textarea','a note'); await page.evaluate(()=>[...document.querySelectorAll('.xp-btn')].find(b=>/Mark as done/.test(b.textContent)).click());
+await page.type('textarea[aria-label="Your prediction"]','I expect a surprise'); await page.select('select[aria-label="Version A: how surprising (1 to 5)"]','4'); await page.select('select[aria-label="Was the hypothesis supported?"]','partly'); await page.evaluate(()=>[...document.querySelectorAll('.xp-btn')].find(b=>/Mark as done/.test(b.textContent)).click());
 await page.goto(`${BASE}/experiments/`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('.xp-card');
 ok(/1 of \d+ done/.test(await page.$eval('.xp-count',e=>e.textContent)),'done is remembered on this device');
+await page.goto(`${BASE}/experiments/#/dice-melody`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('textarea');
+ok(await page.$eval('textarea[aria-label="Your prediction"]',e=>e.value)==='I expect a surprise'&&await page.$eval('select[aria-label="Version A: how surprising (1 to 5)"]',e=>e.value)==='4'&&await page.$eval('select[aria-label="Was the hypothesis supported?"]',e=>e.value)==='partly','prediction, trial scores and conclusion are remembered on this device');
+// protocol sections
+await page.goto(`${BASE}/experiments/#/fixed-groove-chords`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('.xp-vars');
+ok((await page.$$eval('.xp-vars h4',h=>h.map(x=>x.textContent))).join()==='Held fixed,Changed,Measured','variables are laid out as fixed, changed and measured');
+ok((await page.$$eval('.xp-params tr',r=>r.length))>=4,'parameters are listed with exact values');
+await page.evaluate(()=>[...document.querySelectorAll('.xp-btn')].find(b=>b.textContent==='Roll four chords').click());
+ok((await page.$$eval('.xp-chips li',l=>l.length))===4,'rolling gives four chords');
+ok((await page.$$eval('.xp-step',c=>c.length))===16,'the rhythm grid has 16 steps');
+await page.evaluate(()=>[...document.querySelectorAll('.xp-btn')].find(b=>b.textContent==='Roll a rhythm').click());
+ok((await page.$$eval('.xp-step[aria-pressed=true]',c=>c.length))>=1,'a rolled rhythm switches steps on');
+await page.evaluate(()=>[...document.querySelectorAll('.xp-btn')].find(b=>b.textContent==='Start'&&b.closest('.xp-tool').querySelector('.xp-step')).click()); await sleep(900);
+ok(await page.$('.xp-step.on')!==null,'the rhythm plays and shows its position');
+await page.evaluate(()=>[...document.querySelectorAll('.xp-btn')].find(b=>b.textContent==='Stop')?.click());
 // timer
 await page.goto(`${BASE}/experiments/#/subtract`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('.xp-time');
 ok(/20:00/.test(await page.$eval('.xp-time',e=>e.textContent)),'the timer shows its length');

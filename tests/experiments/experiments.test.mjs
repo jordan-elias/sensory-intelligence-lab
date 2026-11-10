@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mulberry32, generate, shuffle, sample, rotateAssign, degreeNotes, NOTE_NAMES } from '../../assets/js/experiments/rng.js';
+import { mulberry32, generate, shuffle, sample, rotateAssign, degreeNotes, NOTE_NAMES, euclid, chordTable } from '../../assets/js/experiments/rng.js';
 import { resample, reverse, chopShuffle, stutter, pitchedGrains, contrastLayer, normalise, encodeWav, mixToMono } from '../../assets/js/experiments/audio-ops.js';
 import { EXPERIMENTS, CATEGORIES, NEEDS } from '../../assets/js/experiments/catalog.js';
 
@@ -57,19 +57,39 @@ test('encodeWav writes a valid 16-bit mono header', () => {
 });
 test('mixToMono averages channels', () => { assert.deepEqual([...mixToMono([Float32Array.of(1, 0), Float32Array.of(0, 1)])], [0.5, 0.5]); });
 
-test('every experiment is complete, and uses real categories, needs and generator kinds', () => {
-  const ids = new Set(), kinds = ['degrees', 'notes', 'tuning', 'range', 'choice', 'shuffle', 'pattern'], tools = ['gen', 'timer', 'clip', 'loops', 'assign'], ops = ['slow', 'fast', 'contrast', 'reverse', 'chop', 'stutter', 'grain'];
+test('euclid spreads hits evenly and rotates', () => {
+  assert.deepEqual(euclid(3, 8), [1, 0, 0, 1, 0, 0, 1, 0]);
+  for (let k = 1; k <= 16; k++) assert.equal(euclid(k, 16, 5).reduce((a, b) => a + b, 0), k);
+  assert.deepEqual(euclid(3, 8, 3), [1, 0, 0, 1, 0, 1, 0, 0]);
+});
+test('chords: triads in the key, no immediate repeats', () => {
+  const t = chordTable(0, 'major'); assert.deepEqual(t.map(c => c.name), ['C', 'Dm', 'Em', 'F', 'G', 'Am', 'B°']); assert.deepEqual(t[0].pcs, [0, 4, 7]);
+  for (let s = 0; s < 100; s++) { const r = generate({ kind: 'chords', count: 4, root: 7, scale: 'natural minor' }, mulberry32(s)); assert.equal(r.chords.length, 4); for (let i = 1; i < 4; i++) assert.notEqual(r.items[i].text, r.items[i - 1].text); }
+});
+test('euclid generator gives a pattern of the requested length', () => {
+  const r = generate({ kind: 'euclid', steps: 16, minHits: 3, maxHits: 7 }, mulberry32(4)); assert.equal(r.pattern.length, 16);
+  const hits = r.pattern.reduce((a, b) => a + b, 0); assert.ok(hits >= 3 && hits <= 7);
+});
+
+test('every experiment is a complete protocol with real parameters, tools and generators', () => {
+  const ids = new Set(), kinds = ['degrees', 'notes', 'tuning', 'range', 'choice', 'shuffle', 'pattern', 'chords', 'euclid'], tools = ['gen', 'timer', 'clip', 'loops', 'groove', 'assign'], ops = ['slow', 'fast', 'contrast', 'reverse', 'chop', 'stutter', 'grain'];
   for (const e of EXPERIMENTS) {
     assert.ok(!ids.has(e.id), 'duplicate id ' + e.id); ids.add(e.id);
     assert.ok(CATEGORIES[e.category], e.id); assert.ok(NEEDS[e.needs], e.id);
-    for (const f of ['title', 'summary', 'limit', 'surprise', 'reflect', 'solo']) assert.ok(e[f] && e[f].length > (f === 'title' ? 3 : 10), `${e.id}.${f}`);
-    assert.ok(e.steps.length >= 3 && e.minutes > 0, e.id);
+    for (const f of ['title', 'summary', 'question', 'hypothesis', 'stop', 'reflect', 'solo']) assert.ok(e[f] && e[f].length > (f === 'title' ? 3 : 10), `${e.id}.${f}`);
+    assert.ok(/\b(will|would)\b/.test(e.hypothesis), e.id + ': a hypothesis makes a prediction');
+    for (const g of ['fixed', 'changed', 'measured']) assert.ok(e.variables?.[g]?.length >= 1, `${e.id} variables.${g}`);
+    assert.ok(e.parameters.length >= 3 && e.parameters.every(p => p.length === 2 && p[0] && p[1]), e.id + ' parameters');
+    assert.ok(e.parameters.some(p => /\d/.test(p[1])), e.id + ': at least one exact number');
+    assert.ok(e.procedure.length >= 4 && e.minutes > 0, e.id);
+    assert.ok(e.trials.length >= 1, e.id + ' trials');
     for (const t of e.tools) {
       assert.ok(tools.includes(t.type), e.id);
       if (t.type === 'gen') { assert.ok(kinds.includes(t.kind), e.id); generate({ ...t, root: 0, scale: 'major' }, mulberry32(1)); }
       if (t.type === 'clip') for (const o of t.ops) assert.ok(ops.includes(o), e.id + ' ' + o);
     }
   }
-  assert.ok(EXPERIMENTS.length >= 18);
+  assert.ok(EXPERIMENTS.length >= 20);
   for (const c of Object.keys(CATEGORIES)) assert.ok(EXPERIMENTS.some(e => e.category === c), 'empty category ' + c);
+  assert.ok(EXPERIMENTS.some(e => e.id === 'fixed-groove-chords') && EXPERIMENTS.some(e => e.id === 'fixed-notes-rhythm'), 'the fixed-rhythm and fixed-notes experiments exist');
 });
