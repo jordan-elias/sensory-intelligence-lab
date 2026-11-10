@@ -579,7 +579,6 @@
 
 <script type="module">
 
-import { getBookingEntitlement } from '/booking/entitlement-logic.js';
 import { mountMyTherapist } from '/assets/js/therapist/my-therapist.js';
 import { buildExport, exportFileName, downloadJson } from '/assets/js/export/export-data.js';
 
@@ -680,17 +679,7 @@ const PLAN_CONFIG = {
   lab: {
     label: 'Lab', badgeClass: 'badge-paid', icon: '◎',
     statusText: 'Active subscription', statusClass: 'status-active',
-    includes: ['Full access to all modules', 'Check-In & journaling', 'Spatial Awareness', 'Soundscape Machine', 'Timed journal'],
-  },
-  call1: {
-    label: 'Lab + 1 session', badgeClass: 'badge-paid', icon: '◎',
-    statusText: 'Active subscription', statusClass: 'status-active',
-    includes: ['Full access to all modules', '1 × 50-min video session / month', 'Session scheduling'],
-  },
-  call2: {
-    label: 'Lab + 2 sessions', badgeClass: 'badge-paid', icon: '◎',
-    statusText: 'Active subscription', statusClass: 'status-active',
-    includes: ['Full access to all modules', '2 × 50-min video sessions / month', 'Priority scheduling'],
+    includes: ['Full access to all modules', 'Check-In & journaling', 'Spatial Awareness', 'Soundscape Machine', 'Timed journal', 'Lower rate on therapy sessions'],
   },
   past_due: {
     label: 'Payment failed', badgeClass: 'badge-error', icon: '◯',
@@ -724,7 +713,7 @@ function renderSubscription(profile, ent) {
   let configKey;
   if (isPastDue)      configKey = 'past_due';
   else if (isBeta)    configKey = 'beta';
-  else if (isActive)  configKey = tier;
+  else if (isActive)  configKey = 'lab';   // any active paid plan is Lab
   else                configKey = 'free';
 
   const cfg = PLAN_CONFIG[configKey] || PLAN_CONFIG.free;
@@ -733,35 +722,6 @@ function renderSubscription(profile, ent) {
   const badge = document.getElementById('planBadge');
   badge.textContent = cfg.label;
   badge.className   = `plan-badge ${cfg.badgeClass}`;
-
-  // ── Session pips (call1/call2, using entitlement for accuracy) ──
-  let sessionPipsHtml = '';
-  if ((tier === 'call1' || tier === 'call2') && isActive && ent) {
-    const total = ent.sessionsAvailable;
-    const used  = ent.sessionsUsed;
-    const avail = ent.sessionsRemaining;
-    let pips = '';
-    for (let i = 0; i < used; i++)
-      pips += `<div class="session-pip used" title="Used">✓</div>`;
-    for (let i = 0; i < avail; i++)
-      pips += `<div class="session-pip available" title="Available">→</div>`;
-    // If carry-over expanded the total beyond base, show extra used pips
-    if (total > (tier === 'call2' ? 2 : 1)) {
-      // already accounted for in used/avail above
-    }
-    const label = avail > 0
-      ? `${avail} session${avail > 1 ? 's' : ''} remaining this period`
-      : 'All sessions used this period';
-    const periodStr = (ent.windowStart && ent.windowEnd)
-      ? ` · ${new Date(ent.windowStart).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}–${new Date(ent.windowEnd).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`
-      : '';
-    sessionPipsHtml = `
-      <div class="session-usage">
-        <div class="session-usage-label">Sessions this period${periodStr}</div>
-        <div class="session-pips">${pips}<span class="session-pip-label">${label}</span></div>
-        ${ent.carryOver > 0 ? `<div style="font-size:.7rem;color:var(--muted);margin-top:.4rem;">Includes ${ent.carryOver} carried over from last month</div>` : ''}
-      </div>`;
-  }
 
   // ── What's included ──
   const includesHtml = cfg.includes.length
@@ -817,7 +777,6 @@ function renderSubscription(profile, ent) {
         </div>
       </div>
     </div>
-    ${sessionPipsHtml}
     ${includesHtml}
     ${billingActionsHtml}
     ${periodHtml}
@@ -942,20 +901,7 @@ onAuthReady(async () => {
       checkin_reminder:      false,
     });
 
-    // Use getBookingEntitlement for accurate session counts (anchor-day windows,
-    // carry-over) — same calculation as the booking page.
-    let ent = null;
-    const tier     = profile.subscription_tier   ?? 'free';
-    const status   = profile.subscription_status ?? 'free';
-    const isActive = status === 'active' || status === 'trialing';
-    if (isActive && (tier === 'call1' || tier === 'call2')) {
-      try {
-        ent = await getBookingEntitlement(supabase, user.id);
-      } catch (e) {
-        console.warn('Could not load entitlement for account page:', e.message);
-      }
-    }
-
+    const ent = null;
     renderSubscription(profile, ent);
     mountMyTherapist(document.getElementById('myTherapist'), { supabase, profile });
   }

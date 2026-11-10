@@ -3,10 +3,10 @@
  * What a therapist sees of a client: plain labels, opening the check-ins the client shared,
  * and a short summary. Pure functions plus one loader that takes the vault session.
  */
-export const TIER_LABEL = { call1: 'Lab + 1 session a month', call2: 'Lab + 2 sessions a month' };
+export const TIER_LABEL = { lab: 'Lab member', beta: 'Lab member', call1: 'Lab member', call2: 'Lab member', free: 'No Lab plan' };
 export const INTAKE_LABEL = { not_started: 'Intake not started', in_progress: 'Intake in progress', completed: 'Intake complete', complete: 'Intake complete' };
 
-export const tierLabel = t => TIER_LABEL[t] || 'Session plan';
+export const tierLabel = t => TIER_LABEL[t] || 'No Lab plan';
 export const intakeLabel = s => INTAKE_LABEL[s] || (s ? String(s).replace(/_/g, ' ') : 'Intake status not available');
 
 const avg = xs => xs.length ? Math.round(xs.reduce((a, b) => a + b, 0) / xs.length * 10) / 10 : null;

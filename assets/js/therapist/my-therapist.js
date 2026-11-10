@@ -12,11 +12,9 @@ import { mountSharing } from '../sharing/sharing-card.js';
 import { LINK_CONSENT_VERSION, LINK_CONSENT_TEXT } from './consent.js';
 
 const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-const SESSION_TIERS = ['call1', 'call2'];
-const ACTIVE = ['active', 'trialing'];
 
-export const hasSessionPlan = profile =>
-  !!profile && SESSION_TIERS.includes(profile.subscription_tier) && ACTIVE.includes(profile.subscription_status);
+// Choosing a therapist now happens when booking, so no plan is needed to be offered one here.
+export const hasSessionPlan = () => false;
 
 export async function photoUrl(sb, path) {
   if (!path) return null;

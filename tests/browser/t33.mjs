@@ -1,24 +1,14 @@
-// Subscribe page: a therapist must be chosen (and available) before the session plans can be started.
+// Subscribe page: one Lab plan next to Free, no session plans, no script errors.
 import {launch,newPage} from './harness.mjs';
 const {browser,BASE,server}=await launch();
 let fail=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fail++; };
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const {page}=await newPage(await browser.createBrowserContext(),BASE,{});
-await page.goto(`${BASE}/subscribe/`,{waitUntil:'domcontentloaded'}); await sleep(1500);
-async function state(links,dir){
-  return page.evaluate(async(links,dir)=>{
-    const t=r=>({select(){return t2(r)}}); const t2=r=>{ const b={in(){return b},limit(){return b},then(res){res({data:r,error:null})}}; return b; };
-    window._supabase={...window._supabase,from:n=>n==='my_therapists'?t(links):n==='therapist_directory'?t(dir):window._supabase.__orig(n)};
-    ['call1','call2'].forEach(x=>{const c=document.getElementById('cta-'+x); c.className='plan-cta primary'; c.disabled=false; c.textContent='Get started';});
-    await window.__silLoadGate();
-    return {gate:document.getElementById('therapistGate').innerText, c1:document.getElementById('cta-call1').textContent, c1d:document.getElementById('cta-call1').disabled, lab:document.getElementById('cta-lab').textContent};
-  },links,dir);
-}
-const a=await state([],[]);
-ok(/No therapist is taking new clients/.test(a.gate)&&a.c1==='No therapist available'&&a.c1d,'nobody accepting: session plans cannot be started');
-const b=await state([],[{user_id:'t1'}]);
-ok(/Choose your therapist first/.test(b.gate)&&b.c1==='Choose a therapist first'&&!b.c1d,'someone accepting but none chosen: asks to choose first');
-ok(b.lab===a.lab,'Lab plan is not affected');
-const c=await state([{link_id:'l1',status:'pending',display_name:'Dr Sam'}],[{user_id:'t1'}]);
-ok(/Dr Sam/.test(c.gate)&&/Choose someone else/.test(c.gate)&&c.c1==='Get started','chosen (pending): plans open and the choice is shown');
+const {page,errors}=await newPage(await browser.createBrowserContext(),BASE,{});
+await page.goto(`${BASE}/subscribe/`,{waitUntil:'domcontentloaded'}); await sleep(1800);
+const r=await page.evaluate(()=>({cards:[...document.querySelectorAll('.plan-card')].map(c=>c.id), text:document.body.innerText, labCta:document.getElementById('cta-lab')?.textContent}));
+ok(r.cards.join()==='card-free,card-lab','only the Free and Lab plans are shown');
+ok(!/1 session|2 sessions|\+ 1 Call|\+ 2 Calls/i.test(r.text),'no session plans are mentioned');
+ok(/member rate/i.test(r.text),'the member session rate is explained');
+console.log('lab cta:',JSON.stringify(r.labCta)); ok(/Get started|Current plan|Upgrade/.test(r.labCta),'the Lab button is wired');
+ok(errors.length===0,'no script errors '+JSON.stringify(errors.slice(0,2)));
 await browser.close(); server.close(); process.exit(fail?1:0);

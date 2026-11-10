@@ -9,20 +9,24 @@ const A=await newPage(await browser.createBrowserContext(),BASE,{tables:{therapi
 await A.page.evaluateOnNewDocument(()=>{ window.__tier='call1';
   const f=window.fetch.bind(window);
   window.fetch=async(u,o)=>{ const s=String(u);
-    if(s.includes('/.netlify/functions/link-therapist')){ const b=JSON.parse(o.body); if(b.consent_version!=='link-1.3') return new Response(JSON.stringify({error:'stale'}),{status:409}); window.__tbl.my_therapists.push({link_id:'L1',status:'active',started_at:new Date().toISOString(),...window.__tbl.therapist_directory[0]}); window.__linked=b; return new Response('{"ok":true}',{status:200}); }
+    if(s.includes('/.netlify/functions/link-therapist')){ const b=JSON.parse(o.body); if(b.consent_version!=='link-2.0') return new Response(JSON.stringify({error:'stale'}),{status:409}); window.__tbl.my_therapists.push({link_id:'L1',status:'active',started_at:new Date().toISOString(),...window.__tbl.therapist_directory[0]}); window.__linked=b; return new Response('{"ok":true}',{status:200}); }
+    if(s.includes('/.netlify/functions/next-available')) return new Response('{"results":{}}',{status:200});
     if(s.includes('/.netlify/functions/end-therapist-link')){ window.__tbl.my_therapists.forEach(r=>r.status='ended'); window.__ended=JSON.parse(o.body); return new Response('{"ok":true}',{status:200}); }
     return f(u,o); }; });
 await A.page.goto(`${BASE}/vault/`,{waitUntil:'domcontentloaded'}); await sleep(800);
 const html=await A.page.evaluate(async()=>{ const d=document.createElement('div'); d.id='mt'; document.body.append(d);
-  const m=await import('/assets/js/therapist/my-therapist.js'); const sb=window._supabase;
-  window.__mount=()=>m.mountMyTherapist(d,{supabase:sb,profile:{subscription_tier:'call1',subscription_status:'active'}});
-  await window.__mount(); return d.innerText; });
-ok(/Connect with your therapist/.test(html)&&/Jordan Elias/.test(html),'session-plan client sees the offer and the therapist');
-ok(/name, email, subscription and intake status/.test(html)&&/Nothing else is visible/.test(html)&&/nothing can undo/.test(html),'the visibility wording is shown before agreeing');
+  const m=await import('/assets/js/booking/therapist-picker.js'); const sb=window._supabase; const mt=await import('/assets/js/therapist/my-therapist.js');
+  window.__mount=()=>mt.mountMyTherapist(d,{supabase:sb,profile:{subscription_tier:'free',subscription_status:'active'}});
+  window.__after=()=>window.__mount();
+  await m.mountChooser(d,sb,{onConnected:()=>window.__after()}); return d.innerText; });
+ok(/choose your therapist/i.test(html)&&/Jordan Elias/.test(html),'any client sees the chooser and the therapist');
 ok(!(await A.page.evaluate(()=>window.__linked)),'nothing is created until the client agrees');
-await A.page.click('#thAgree'); await sleep(800);
+await A.page.click('[data-choose]'); await sleep(200);
+const vis=await A.page.$eval('#tpConsent',e=>e.innerText);
+ok(/name, email, whether you have a Lab plan/.test(vis)&&/Nothing else is visible/.test(vis)&&/nothing can undo/.test(vis),'the visibility wording is shown before agreeing');
+await A.page.click('#tpAgree'); await sleep(800);
 const linked=await A.page.evaluate(()=>({sent:window.__linked,text:document.getElementById('mt').innerText}));
-ok(linked.sent.consent_version==='link-1.3','agreeing sends the consent version');
+ok(linked.sent.consent_version==='link-2.0','agreeing sends the consent version');
 ok(/Connected/.test(linked.text)&&/Book a session/.test(linked.text),'then shows the connected therapist and a booking button');
 ok(await A.page.$eval('#mt a.btn',a=>a.href)==='https://cal.com/jordan','booking button uses the therapist\'s own link');
 await A.page.click('#thEnd'); ok(!(await A.page.$eval('#thEndConfirm',e=>e.hidden)),'ending asks for confirmation first');

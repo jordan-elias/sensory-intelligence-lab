@@ -1,5 +1,4 @@
 import { withCors } from './lib/cors.js';
-import { therapistProblem } from './lib/therapist-link.js';
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
@@ -22,22 +21,12 @@ instead of a hardcoded map — see the comment in the handler below.
 const PRICE_IDS = {
   lab_monthly:   process.env.STRIPE_LAB_MONTHLY_PRICE_ID,
   lab_yearly:    process.env.STRIPE_LAB_YEARLY_PRICE_ID,
-  call1_monthly: process.env.STRIPE_CALL1_MONTHLY_PRICE_ID,
-  call1_yearly:  process.env.STRIPE_CALL1_YEARLY_PRICE_ID,
-  call2_monthly: process.env.STRIPE_CALL2_MONTHLY_PRICE_ID,
-  call2_yearly:  process.env.STRIPE_CALL2_YEARLY_PRICE_ID,
 };
 
-const TIER_ORDER = { free: 0, lab: 1, call1: 2, call2: 3 };
-
-// Session capacity — must match SESSION_CAPACITY in create-checkout-session.js
-const SESSION_CAPACITY  = 64;
-const SESSIONS_PER_TIER = { call1: 1, call2: 2 };
+const TIER_ORDER = { free: 0, lab: 1 };
 
 function getTierFromPlan(plan) {
   if (plan.startsWith("lab"))   return "lab";
-  if (plan.startsWith("call1")) return "call1";
-  if (plan.startsWith("call2")) return "call2";
   return "free";
 }
 
@@ -92,38 +81,6 @@ async function rawHandler(event) {
   const oldTier   = profile.subscription_tier || "free";
   const isUpgrade = TIER_ORDER[newTier] > TIER_ORDER[oldTier];
 
-  /* ── A therapist must be chosen first, and be taking new clients (any move onto a session plan) ── */
-  if (SESSIONS_PER_TIER[newTier] && newTier !== oldTier) {
-    const noTherapist = await therapistProblem(supabase, user.id);
-    if (noTherapist) return noTherapist;
-  }
-
-  /* ── Capacity check for session tiers (upgrades only) ── */
-  if (isUpgrade && SESSIONS_PER_TIER[newTier]) {
-    const { data: activeRows } = await supabase
-      .from("profiles")
-      .select("subscription_tier")
-      .in("subscription_tier", ["call1", "call2"])
-      .in("subscription_status", ["active", "trialing"]);
-
-    // Total sessions across all active session subscribers
-    const sessionsUsed = (activeRows || []).reduce(
-      (t, r) => t + (SESSIONS_PER_TIER[r.subscription_tier] ?? 0), 0
-    );
-
-    // Subtract the upgrading user's current sessions — they are already counted
-    // in sessionsUsed but will be replaced by the new tier, not added on top.
-    const currentUserSessions = SESSIONS_PER_TIER[oldTier] ?? 0;
-    const sessionsAfterChange = sessionsUsed - currentUserSessions + SESSIONS_PER_TIER[newTier];
-
-    if (sessionsAfterChange > SESSION_CAPACITY) {
-      return {
-        statusCode: 409,
-        body: JSON.stringify({ error: "capacity_full", message: "Session slots are currently full." }),
-      };
-    }
-  }
-
   /* ── Update Stripe subscription ── */
   try {
     const subscription = await stripe.subscriptions.retrieve(profile.stripe_subscription_id);
@@ -131,6 +88,7 @@ async function rawHandler(event) {
 
     // Option A: use hardcoded PRICE_IDS map (default)
     const newPriceId = PRICE_IDS[plan];
+    if (!newPriceId) return { statusCode: 400, body: JSON.stringify({ error: "Invalid plan" }) };
 
     // Option B (alternative): resolve by lookup_key if you've set them in Stripe
     // const prices    = await stripe.prices.list({ lookup_keys: [plan], limit: 1 });

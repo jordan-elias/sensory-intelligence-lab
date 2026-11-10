@@ -50,29 +50,24 @@ test('linking: needs sign-in, the current consent text, and a therapist who is a
   assert.equal((await call(h, { consent_version: 'old' })).statusCode, 409);
   assert.equal(d.db.client_therapists.length, 0, 'nothing created for refused requests');
 });
-test('choosing first: a free, lab or lapsed person gets a PENDING connection that gives no access', async () => {
+test('anyone signed in can connect, with an immediately active link', async () => {
   for (const tok of ['t-free', 't-lab', 't-lapsed']) {
     const d = fakeDb(seed(), users);
     const r = await call(makeLink(d), { consent_version: CONSENT_VERSION }, tok);
-    assert.equal(r.statusCode, 200); assert.equal(JSON.parse(r.body).pending, true);
-    assert.equal(d.db.client_therapists[0].status, 'pending');
+    assert.equal(r.statusCode, 200);
+    assert.equal(d.db.client_therapists[0].status, 'active');
   }
 });
-test('choosing first: changing the choice before paying replaces the pending connection', async () => {
+test('a second request while connected changes nothing; changing means ending first', async () => {
   const sd = seed(); sd.therapist_profiles.push({ user_id: 'th2', practice_id: 'p1', accepting_clients: true });
   const d = fakeDb(sd, users), h = makeLink(d);
   await call(h, { consent_version: CONSENT_VERSION, therapist_id: 'th1' }, 't-lab');
-  const again = await call(h, { consent_version: CONSENT_VERSION, therapist_id: 'th1' }, 't-lab');
+  const again = await call(h, { consent_version: CONSENT_VERSION, therapist_id: 'th2' }, 't-lab');
   assert.equal(JSON.parse(again.body).already, true);
+  assert.equal(d.db.client_therapists.length, 1); assert.equal(d.db.client_therapists[0].therapist_id, 'th1');
+  await call(makeEnd(d), { link_id: d.db.client_therapists[0].id }, 't-lab');
   await call(h, { consent_version: CONSENT_VERSION, therapist_id: 'th2' }, 't-lab');
-  assert.equal(d.db.client_therapists.length, 1); assert.equal(d.db.client_therapists[0].therapist_id, 'th2');
-});
-test('a pending choice can be withdrawn by the client and is deleted, leaving no record for the therapist', async () => {
-  const d = fakeDb(seed(), users); await call(makeLink(d), { consent_version: CONSENT_VERSION }, 't-lab');
-  const id = d.db.client_therapists[0].id, h = makeEnd(d);
-  assert.equal((await call(h, { link_id: id }, 't-th')).statusCode, 404, 'the therapist cannot see or end it');
-  assert.equal((await call(h, { link_id: id }, 't-lab')).statusCode, 200);
-  assert.equal(d.db.client_therapists.length, 0);
+  assert.equal(d.db.client_therapists.filter(l => l.status === 'active')[0].therapist_id, 'th2');
 });
 test('linking: a session-tier client who agrees is linked to the default therapist, with consent recorded', async () => {
   const d = fakeDb(seed(), users), h = makeLink(d);

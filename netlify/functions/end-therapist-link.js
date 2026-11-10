@@ -34,14 +34,6 @@ export function makeHandler(supabase) {
     }
     if (link.status === "ended") return json(200, { ok: true, already: true });
 
-    // A connection that was never active gave the therapist nothing and they never saw the person: just remove it.
-    if (link.status === "pending") {
-      if (link.client_id !== user.id) return json(404, { error: "Link not found" });
-      const { error: delError } = await supabase.from("client_therapists").delete().eq("id", link.id).eq("status", "pending");
-      if (delError) return json(500, { error: "Could not remove the choice. Please try again." });
-      return json(200, { ok: true, removed: true });
-    }
-
     const { error } = await supabase.from("client_therapists")
       .update({ status: "ended", ended_at: new Date().toISOString(), ended_by: user.id })
       .eq("id", link.id);
