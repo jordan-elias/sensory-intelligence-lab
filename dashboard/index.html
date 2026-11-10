@@ -470,8 +470,8 @@
       <span class="prompt-text" id="dailyPrompt">Loading…</span>
     </div>
 
-    <!-- ── Therapy ── -->
-    <div class="modules-section">
+    <!-- ── Therapy (app only; the website has the Book a session module) ── -->
+    <div class="modules-section" id="appTherapy" hidden>
       <p class="section-label">Therapy</p>
       <div class="module-grid module-grid--2">
         <a class="module-card" href="/therapy/">
@@ -874,6 +874,8 @@ onAuthReady(async () => {
 
   if (window.SIL_APP) {
     const hero = document.getElementById('checkinHero'); hero.hidden = false;
+    document.getElementById('appTherapy').hidden = false;
+    import('/assets/js/checkins/insight-card.js').then(m => m.mountInsightCard(document.getElementById('insightCard'))).catch(() => {});
     const start = new Date(); start.setHours(0, 0, 0, 0);
     const { count } = await window._supabase.from('checkins').select('id', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', start.toISOString());
     if (count > 0) {
@@ -882,7 +884,6 @@ onAuthReady(async () => {
       document.getElementById('checkinHeroBtn').textContent = 'Check in again';
     }
   }
-  import('/assets/js/checkins/insight-card.js').then(m => m.mountInsightCard(document.getElementById('insightCard'))).catch(() => {});
   promptIfOldEntries();   // only people with entries under the old key are asked
 
   const fullName  = profile?.full_name?.trim() || '';
