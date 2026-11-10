@@ -1,0 +1,23 @@
+import {launch,newPage} from './harness.mjs';
+const {browser,BASE,server}=await launch();
+let fail=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fail++; };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const A=await newPage(await browser.createBrowserContext(),BASE,{tables:{}});
+await A.page.goto(`${BASE}/dashboard/`,{waitUntil:'domcontentloaded'}); await sleep(1500);
+const out=await A.page.evaluate(async()=>{
+  localStorage.removeItem('sil.insights.v1');
+  const m=await import('/assets/js/checkins/insight-card.js');
+  const now=new Date(); const mk=(d,v)=>{const x=new Date(now); x.setDate(x.getDate()-d); x.setHours(9,0,0,0); return {created_at:x.toISOString(),valence:v,arousal:5,sensory_load:5};};
+  const data=[0,1,2,3].map(d=>mk(d,8)).concat([8,9,10,11].map(d=>mk(d,4)));
+  const root=document.getElementById('insightCard'); m.render(root,data,now);
+  const first=root.innerText; const hidden1=root.hidden;
+  m.render(root,data,now); const second=root.innerText;
+  const empty=document.createElement('div'); m.render(empty,[],now);
+  return {first,hidden1,second,emptyHidden:empty.hidden};
+});
+ok(!out.hidden1&&/4\s*days in a row/i.test(out.first)&&/mood this week/i.test(out.first),'shows streak and weekly mood');
+ok(/Your mood has been lifting/.test(out.first)&&/Worked out on this device/.test(out.first),'shows one insight, says it is local');
+ok(!/Your mood has been lifting/.test(out.second),'the same insight is not shown again straight away');
+ok(out.emptyHidden,'nothing is shown with no check-ins');
+ok(A.errors.filter(e=>!/Failed to load resource/.test(e)).length===0,'no page errors '+A.errors.join('|'));
+await browser.close(); server.close?.(); process.exit(fail?1:0);
