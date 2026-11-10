@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Therapy | Sensory Intelligence Lab</title>
+  <meta name="description" content="Music-based therapy sessions that connect to the work you do in the app, shared only if you choose.">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <link href="/assets/css/fonts.css" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/a11y.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --bg:#fff; --surface:#f9f9f7; --border:#e5e5e0; --text:#1a1a1a; --muted:#6b6b6b; --accent:#2a5c45; --accent-light:#edf4f0;
+      --font-body:'Inter',sans-serif; --font-heading:'Space Grotesk',sans-serif; }
+    @media (prefers-color-scheme: dark) { :root { --bg:#151716; --surface:#1d201e; --border:#2f3431; --text:#ececea; --muted:#9a9f9b; --accent:#7fc29f; --accent-light:#1c2a22; } }
+    body { font-family:var(--font-body); color:var(--text); background:var(--bg); line-height:1.65; }
+    main { max-width:720px; margin:0 auto; padding:2rem 1.25rem 4rem; }
+    h1 { font:600 2rem var(--font-heading); letter-spacing:-.02em; margin-bottom:.6rem; }
+    h2 { font:600 1.15rem var(--font-heading); margin:2.2rem 0 .6rem; }
+    p, li { font-size:.95rem; } p { margin-bottom:.8rem; } .lede { font-size:1.05rem; color:var(--muted); }
+    ul { margin:0 0 .8rem 1.2rem; } li { margin-bottom:.35rem; }
+    .steps { display:grid; gap:.8rem; margin:1rem 0; }
+    .step { border:1px solid var(--border); border-radius:6px; padding:1rem 1.1rem; background:var(--surface); }
+    .step b { display:block; margin-bottom:.2rem; }
+    .price { display:flex; gap:1rem; flex-wrap:wrap; margin:1rem 0; }
+    .price div { flex:1; min-width:150px; border:1px solid var(--border); border-radius:6px; padding:.9rem 1.1rem; }
+    .price strong { display:block; font:600 1.6rem var(--font-heading); }
+    .price span { font-size:.8rem; color:var(--muted); }
+    .cta { display:inline-flex; align-items:center; min-height:44px; padding:.7rem 1.4rem; background:var(--accent); color:#fff; border-radius:4px; text-decoration:none; font-weight:500; margin:.4rem .5rem .4rem 0; }
+    .cta.alt { background:transparent; color:var(--accent); border:1px solid var(--accent); }
+    .note { border-left:3px solid var(--accent); background:var(--accent-light); padding:.8rem 1rem; font-size:.9rem; margin:1rem 0; }
+  </style>
+  <script src="/assets/js/site-header.js"></script>
+</head>
+<body>
+<main>
+  <h1>Therapy</h1>
+  <p class="lede">One-to-one video sessions with a music therapist, connected to the work you do in the app, so the hour goes further.</p>
+
+  <h2>How the app and therapy fit together</h2>
+  <div class="steps">
+    <div class="step"><b>1. Work on your own, any day</b>Check in, listen, practise regulation, try the tools. All of it is private to you. Nobody sees any of it by default.</div>
+    <div class="step"><b>2. Choose what to bring</b>If you want your therapist to see your work, you share it. Check-ins can be shared with a switch you control. Worksheets are shared one at a time. You can stop sharing whenever you like.</div>
+    <div class="step"><b>3. Meet, with context</b>Your therapist starts from what you have been noticing, rather than from scratch. Less catching up, more depth.</div>
+    <div class="step"><b>4. Carry it back into your days</b>Keep checking in between sessions. Your own patterns stay on your device, and you decide what is worth raising.</div>
+  </div>
+
+  <h2>What your therapist can see</h2>
+  <p>When you connect, your therapist sees your name, your email, whether you have a Lab plan, your intake status, and the times of the sessions you book with them. <strong>Nothing else, unless you share it.</strong> Messages between the two of you can be read only by you and them.</p>
+  <p>You can end the connection at any time and choose what happens to what was shared. <a href="/privacy/#data-sharing">Read the full details</a>.</p>
+
+  <h2>Getting started</h2>
+  <ul>
+    <li><strong>Introductory session:</strong> complimentary, once, before your first regular session. It is a chance to meet and see if it feels right.</li>
+    <li><strong>You can change therapist</strong> whenever you need to.</li>
+    <li>You pay when you book, in the booking step. There is no therapy subscription.</li>
+  </ul>
+
+  <div class="price">
+    <div><strong>€80</strong><span>per session</span></div>
+    <div><strong>€60</strong><span>per session with Lab (€4 a month)</span></div>
+  </div>
+
+  <p><a class="cta" href="/booking/">Choose a therapist and book</a> <a class="cta alt" href="/subscribe/">See Lab</a></p>
+
+  <div class="note">Therapy is not an emergency service. If you are in crisis or in danger, contact your local emergency number or a crisis line right away.</div>
+</main>
+</body>
+</html>

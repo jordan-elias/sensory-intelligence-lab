@@ -60,6 +60,18 @@
   to   = "/privacy/index.html"
   status = 200
 
+# ── Therapy page ──
+
+[[redirects]]
+  from = "/therapy"
+  to   = "/therapy/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/therapy/"
+  to   = "/therapy/index.html"
+  status = 200
+
 # ── About page ──
 
 [[redirects]]

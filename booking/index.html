@@ -461,7 +461,7 @@ function calBookingUrl(calEventId) {
 // ─────────────────────────────────────────────────────────
 // One place for the prices shown on this page. The real prices are set on the Cal.com events:
 // events named intro, session and member-session under each therapist's Cal.com username.
-const PRICES = { session: 80, member: null, lab: 4 };   // member: set when the member rate is decided
+const PRICES = { session: 80, member: 60, lab: 4 };
 
 function eventLinks(calLink) {
   const owner = String(calLink).split('/')[0];
