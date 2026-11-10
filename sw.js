@@ -3,7 +3,7 @@
  * Only the site's own pages, scripts, styles, fonts and images are kept. Nothing from the database, the account,
  * payments or any function is ever stored here, so no personal content ends up in this cache. */
 const VERSION = 'sil-v1';
-const PAGES = ['/', '/breathing/', '/regulation/', '/soundscape-machine/', '/ear-training/', '/sequencer/', '/spatial-game/', '/cocktail-party-problem/', '/creature/', '/offline.html'];
+const PAGES = ['/', '/breathing/', '/regulation/', '/soundscape-machine/', '/ear-training/', '/sequencer/', '/spatial-game/', '/cocktail-party-problem/', '/creature/', '/experiments/', '/offline.html'];
 const STATIC = /^\/(assets|images|audio|dashboard)\//;
 
 self.addEventListener('install', e => { e.waitUntil(caches.open(VERSION).then(c => c.add('/offline.html')).then(() => self.skipWaiting())); });

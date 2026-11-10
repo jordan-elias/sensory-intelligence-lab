@@ -60,6 +60,18 @@
   to   = "/privacy/index.html"
   status = 200
 
+# ── Experiments ──
+
+[[redirects]]
+  from = "/experiments"
+  to   = "/experiments/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/experiments/"
+  to   = "/experiments/index.html"
+  status = 200
+
 # ── Therapy page ──
 
 [[redirects]]
