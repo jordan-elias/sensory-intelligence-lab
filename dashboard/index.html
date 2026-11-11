@@ -470,19 +470,6 @@
       <span class="prompt-text" id="dailyPrompt">Loading…</span>
     </div>
 
-    <!-- ── Therapy (app only; the website has the Book a session module) ── -->
-    <div class="modules-section" id="appTherapy" hidden>
-      <p class="section-label">Therapy</p>
-      <div class="module-grid module-grid--2">
-        <a class="module-card" href="/therapy/">
-          <div class="module-top"><span class="module-icon">◎</span><span class="module-arrow">→</span></div>
-          <h3>Therapy with a music therapist</h3>
-          <p>How your work here connects to sessions: share check-ins and worksheets only if you choose, and arrive with context.</p>
-          <span class="module-tag">Sessions · Shared only by you</span>
-        </a>
-      </div>
-    </div>
-
     <!-- ── Regulation ── -->
     <div class="modules-section">
       <p class="section-label">Regulation</p>
@@ -643,14 +630,14 @@
           <span class="module-tag">Resources · Learning</span>
         </a>
 
-        <a class="module-card" href="/booking/">
+        <a class="module-card" id="bookCard" href="/booking/">
           <div class="module-top">
             <span class="module-icon">▲</span>
             <span class="module-arrow">→</span>
           </div>
-          <h3>Book a Session</h3>
-          <p>Schedule a one-to-one video session with Jordan. Included sessions are drawn from your current billing period.</p>
-          <span class="module-tag">Telehealth · Music therapy</span>
+          <h3 id="bookCardTitle">Book a Session</h3>
+          <p id="bookCardText">Schedule a one-to-one video session with a music therapist. Lab members get a lower rate.</p>
+          <span class="module-tag" id="bookCardTag">Telehealth · Music therapy</span>
         </a>
 
       </div>
@@ -885,7 +872,14 @@ onAuthReady(async () => {
 
   if (window.SIL_APP) {
     const hero = document.getElementById('checkinHero'); hero.hidden = false;
-    document.getElementById('appTherapy').hidden = false;
+    // In the app, until a therapist is chosen this card explains therapy; afterwards it is the booking card.
+    const { data: links } = await window._supabase.from('my_therapists').select('link_id').eq('status', 'active').limit(1);
+    if (!(links && links.length)) {
+      document.getElementById('bookCard').setAttribute('href', '/therapy/');
+      document.getElementById('bookCardTitle').textContent = 'Therapy with a music therapist';
+      document.getElementById('bookCardText').textContent = 'See how your work here connects to sessions. Share check-ins and worksheets only if you choose, and arrive with context.';
+      document.getElementById('bookCardTag').textContent = 'Sessions · Shared only by you';
+    }
     import('/assets/js/checkins/insight-card.js').then(m => m.mountInsightCard(document.getElementById('insightCard'))).catch(() => {});
     const start = new Date(); start.setHours(0, 0, 0, 0);
     const { count } = await window._supabase.from('checkins').select('id', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', start.toISOString());
