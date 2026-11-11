@@ -402,7 +402,8 @@ The table covers every category of data the platform stores. Anything you downlo
 <tr><td>Journal entries (text and title)</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You only. Journal entries cannot be shared through the platform.</td></tr>
 <tr><td>Journal details: date, length, duration, soundscape, prompt</td><td class="td-mono">Database</td><td><span class="badge badge--plain">Plaintext</span></td><td>You. Platform operator.</td></tr>
 <tr><td>Offline copy of the tool pages you have opened</td><td class="td-mono">This device</td><td><span class="badge badge--enc">No personal content</span></td><td>You. It holds only the site's own pages, scripts and images, never your journal, check-ins, messages or account.</td></tr>
-<tr><td>Intake form: name, date of birth, pronouns, contact, medications, history</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You. Your therapist, only after they ask for it and you choose to send it. We store only that it exists.</td></tr>
+<tr><td>Intake form: name, pronouns, date of birth, contact, emergency contact, reason for therapy, medications, health, history, sound</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You. Your therapist, only after they ask for it and you choose to send it. We store only that it exists.</td></tr>
+<tr><td>Family history: people, relationships, history (optional)</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You. Your therapist, only if you press send, and only a snapshot. You can take the copy back at any time.</td></tr>
 <tr><td>Check-ins: scores, emotion words, notes</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You. Your therapist, only if you turn sharing on.</td></tr>
 <tr><td>Saved places</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You only.</td></tr>
 <tr><td>Experiment ticks and notes</td><td class="td-mono">Your device only</td><td><span class="badge badge--plain">Not encrypted</span></td><td>You only. They are never sent to the server. Audio you load or record in an experiment stays in the page and is not saved.</td></tr>
@@ -500,8 +501,17 @@ with, so that sessions can be counted and shown to you and to that therapist.
 </p>
 <h3 class="section__sub">Intake</h3>
 <p class="prose">
-The platform stores only an intake <em>status</em> (for example, not started or complete). It is visible to a
-therapist you connect with. The platform does not store the contents of any intake forms.
+The platform stores an intake <em>status</em> (for example, not started or complete), which is visible to a
+therapist you connect with. The form itself is encrypted in your browser for you and that therapist only, and
+is stored only in that encrypted form, so the platform cannot read it. You do not need to give your legal name,
+birth name or any former name.
+</p>
+<h3 class="section__sub">Family history</h3>
+<p class="prose">
+The optional family history is encrypted in your browser with your own key before it is saved, so only you can
+read it. It is never shared unless you choose to send a snapshot to a therapist you are connected with. That
+copy is encrypted for you and that therapist only, you can take it back at any time, and later changes stay
+private until you send again.
 </p>
 <div class="callout callout--green">
 <span class="callout__label">Cookies</span>

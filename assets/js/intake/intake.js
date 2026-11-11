@@ -8,12 +8,17 @@ import { seal } from '../vault/vault-crypto.js';
 
 export const INTAKE_CATEGORY = 'intake';
 export const INTAKE_FIELDS = [
-  { key: 'name', label: 'Name you would like to be called', hint: 'Any name you use. It does not need to be your legal or birth name.', type: 'text', max: 120 },
-  { key: 'dob', label: 'Date of birth', type: 'date' },
+  { key: 'name', label: 'The name you would like to be called', short: 'Name', hint: 'Use only the name you want your therapist to use. Your legal name, birth name or any former name is not required.', type: 'text', max: 120 },
   { key: 'pronouns', label: 'Pronouns', hint: 'For example she/her, he/him, they/them, or your own.', type: 'text', max: 60 },
-  { key: 'contact', label: 'Contact information', hint: 'Phone number, and anything else you want your therapist to have.', type: 'textarea', max: 500 },
-  { key: 'medications', label: 'Any medications', hint: 'What you take now, if anything.', type: 'textarea', max: 1500 },
-  { key: 'history', label: 'Mental health history', hint: 'Anything you want your therapist to know. Share as much or as little as you like.', type: 'textarea', max: 5000 },
+  { key: 'dob', label: 'Date of birth', type: 'date' },
+  { key: 'contact', label: 'Contact information', hint: 'A phone number, and anything else you want your therapist to have.', type: 'textarea', max: 500 },
+  { key: 'emergency', label: 'Emergency contact', short: 'Emergency contact', hint: 'Optional. Someone to contact if you were in danger: their name, relationship and phone number.', type: 'textarea', max: 500 },
+  { key: 'reason', label: 'What brings you to therapy', short: 'Reason for therapy', hint: 'In your own words, as much or as little as you like.', type: 'textarea', max: 3000 },
+  { key: 'medications', label: 'Medications', short: 'Medications', hint: 'What you take now, if anything.', type: 'textarea', max: 1500 },
+  { key: 'medical', label: 'Physical health', short: 'Physical health', hint: 'Anything about your body or health your therapist should know.', type: 'textarea', max: 2000 },
+  { key: 'history', label: 'Mental health history', short: 'Mental health history', hint: 'Anything you want your therapist to know. Share as much or as little as you like.', type: 'textarea', max: 5000 },
+  { key: 'therapy_before', label: 'Therapy you have had before', short: 'Previous therapy', hint: 'What helped, and what did not.', type: 'textarea', max: 3000 },
+  { key: 'sound', label: 'Music and sound', short: 'Music and sound', hint: 'Music or sounds that calm you, and anything that overwhelms you.', type: 'textarea', max: 2000 },
 ];
 export const INTAKE_ctx = (linkId) => `share:${linkId}:${INTAKE_CATEGORY}:${linkId}`;
 
@@ -64,7 +69,7 @@ export function renderIntake(doc, intake) {
   const dl = doc.createElement('dl'); dl.className = 'th-intake';
   for (const f of INTAKE_FIELDS) {
     const v = intake.fields[f.key]; if (!v) continue;
-    const dt = doc.createElement('dt'); dt.textContent = f.key === 'name' ? 'Name' : f.label.replace(/^Any /, '');
+    const dt = doc.createElement('dt'); dt.textContent = f.short || f.label;
     const dd = doc.createElement('dd'); dd.textContent = v; dd.style.whiteSpace = 'pre-wrap';
     dl.append(dt, dd);
   }

@@ -14,6 +14,7 @@ import { splitSessions, describe } from './sessions.js';
 import { toRows, renderRows, worksheetLabel } from './doc-render.js';
 import { makeNotesStore, mountNotes } from './notes.js';
 import { openIntake, renderIntake } from '../intake/intake.js';
+import { openFamily, renderFamily } from '../family/family.js';
 
 const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 const day = iso => iso ? new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '';
@@ -173,6 +174,15 @@ export async function mountClientPage(root) {
       if (e) throw new Error(e.message);
       client.intake_requested_at = new Date().toISOString();
     };
+    const appendFamily = async () => {
+      const fcopy = copies.find(c => c.category === 'family'); if (!fcopy) return;
+      try {
+        const session = await ensureVaultReady(), fam = await openFamily(session, { ...fcopy, link_id: linkId });
+        const sec = document.createElement('section'); sec.style.marginTop = '2rem'; sec.id = 'familySection';
+        sec.innerHTML = `<h2 class="th-h2">Family history</h2><p class="th-hint">Sent by ${esc(name)}${fam.sent_at ? ' on ' + esc(day(fam.sent_at)) : ''}. Optional, and only you and the client can read it.</p>`;
+        sec.appendChild(renderFamily(document, fam)); box.appendChild(sec);
+      } catch (e) { const p = document.createElement('p'); p.className = 'msg show error'; p.textContent = e.message; box.appendChild(p); }
+    };
     const draw = async () => {
       const copy = copies.find(c => c.category === 'intake');
       box.innerHTML = '';
@@ -183,10 +193,11 @@ export async function mountClientPage(root) {
           const intake = await openIntake(session, { ...copy, link_id: linkId });
           box.innerHTML = `<p class="th-hint">Sent by ${esc(name)}${intake.submitted_at ? ' on ' + esc(day(intake.submitted_at)) : ''}. Only you and the client can read this.</p>`;
           box.appendChild(renderIntake(document, intake));
+          await appendFamily();
         } catch (e) { intakeMounted = false; box.innerHTML = `<p class="msg show error">${esc(e.message)}</p>`; }
         return;
       }
-      if (!active) { box.innerHTML = '<p class="th-muted">No intake form was received.</p>'; return; }
+      if (!active) { box.innerHTML = '<p class="th-muted">No intake form was received.</p>'; await appendFamily(); return; }
       box.innerHTML = `<p class="th-muted">${client.intake_requested_at ? `You asked ${esc(name)} on ${esc(day(client.intake_requested_at))}. Nothing has arrived yet.` : `Ask ${esc(name)} to fill in a short intake form: name, date of birth, pronouns, contact information, medications and mental health history. They choose what to answer, and only you and they can read it.`}</p>
         <button type="button" class="action-btn" id="askIntake">${client.intake_requested_at ? 'Send a reminder' : 'Request intake form'}</button> <p class="msg" id="askMsg" role="status"></p>`;
       $('askIntake').onclick = async () => {
@@ -194,6 +205,7 @@ export async function mountClientPage(root) {
         try { await ask(); intakeMounted = false; renderOverview(); showIntake(); }
         catch (e) { m.textContent = e.message; m.className = 'msg show error'; $('askIntake').disabled = false; }
       };
+      await appendFamily();
     };
     draw();
   }

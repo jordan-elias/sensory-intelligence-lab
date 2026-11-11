@@ -1,0 +1,45 @@
+// Family history page: private by default, saves encrypted, send / take back with a connected therapist.
+import {launch,newPage} from './harness.mjs';
+const {browser,BASE,server}=await launch();
+let fail=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fail++; };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const PASS='orange bicycle hums nine rivers';
+const {page,errors}=await newPage(await browser.createBrowserContext(),BASE,{tables:{shared_copies:[],family_history:[],my_therapists:[]}});
+await page.goto(`${BASE}/vault/`,{waitUntil:'domcontentloaded'});
+await page.waitForSelector('#newPass',{timeout:20000}); await sleep(1200);
+await page.type('#newPass',PASS); await page.type('#newConfirm',PASS); await page.click('button[type=submit]');
+await page.waitForSelector('#recoveryKey',{timeout:60000});
+const RK=await page.$eval('#recoveryKey',e=>e.textContent.trim());
+await page.type('#keyCheck',RK.slice(0,4)); await page.click('.vault-check input'); await sleep(200); await page.click('#recoveryContinue');
+await page.waitForSelector('.vault-status',{timeout:30000});
+
+await page.evaluate(()=>{ window.__mount=async()=>{ document.getElementById('familyApp')?.remove(); const d=document.createElement('div'); d.id='familyApp'; document.body.append(d); window.confirm=()=>true;
+  const m=await import('/assets/js/family/page.js'); await m.mountFamily(d); }; });
+await page.evaluate(()=>window.__mount()); await page.waitForSelector('#fhAdd',{timeout:20000});
+ok(/Private to you/.test(await page.$eval('#familyApp',e=>e.innerText))&&/Keeping this private/.test(await page.$eval('#fhShare',e=>e.innerText)),'private by default, with no therapist connected');
+await page.type('#fhOverview','Two houses, one dog.');
+await page.click('#fhAdd'); await sleep(200);
+await page.type('.fh-card input[type=text]','Rosa');
+await page.select('.fh-card select','Grandparent');
+await page.click('#fhSave'); await sleep(800);
+const raw=await page.evaluate(()=>JSON.stringify(window.__tbl.family_history));
+ok(raw.length>20&&!/Rosa|Two houses/.test(raw),'what is saved is encrypted, with no readable text');
+await page.evaluate(()=>window.__mount()); await page.waitForSelector('#fhAdd',{timeout:20000});
+ok(await page.$eval('#fhOverview',e=>e.value)==='Two houses, one dog.'&&/Rosa/.test(await page.$eval('.fh-card summary',e=>e.textContent)),'it opens again with the same content');
+ok(await page.$('#fhSend')===null,'nothing can be sent without a connected therapist');
+
+// connect a therapist: the send step appears, and sending is deliberate
+const uid=await page.evaluate(()=>window._currentUser.id);
+const my=await page.evaluate(async()=>{ const gate=await import('/assets/js/vault/gate.js'); const s=await gate.ensureVaultReady(); const k=s.publicKeys.enc; return {kty:k.kty,crv:k.crv,x:k.x,y:k.y}; });
+await page.evaluate((enc)=>{ window.__tbl.my_therapists.push({link_id:'L1',status:'active',user_id:'t1',display_name:'Dr Rivera'}); window.__tbl.my_therapist_keys=[{link_id:'L1',therapist_id:'t1',public_enc:enc,fingerprint:'abcd'}]; localStorage.setItem('__state',JSON.stringify({db:window.__db,tbl:window.__tbl})); },my);
+await page.evaluate(()=>window.__mount()); await page.waitForSelector('#fhShare',{timeout:20000}); await sleep(500);
+ok(/Not sent to Dr Rivera/.test(await page.$eval('#fhShare',e=>e.innerText)),'it says it has not been sent');
+ok((await page.evaluate(()=>window.__tbl.shared_copies.length))===0,'nothing was sent just by connecting');
+await page.click('#fhSend'); await sleep(1500);
+const sc=await page.evaluate(()=>window.__tbl.shared_copies);
+ok(sc.length===1&&sc[0].category==='family'&&sc[0].link_id==='L1'&&!/Rosa|Two houses/.test(JSON.stringify(sc)),'sending creates one sealed copy with no readable text');
+ok(/Dr Rivera has a copy/.test(await page.$eval('#fhShare',e=>e.innerText)),'it then says the therapist has a copy');
+await page.click('#fhWithdraw'); await sleep(1000);
+ok((await page.evaluate(()=>window.__tbl.shared_copies.length))===0&&/Not sent to Dr Rivera/.test(await page.$eval('#fhShare',e=>e.innerText)),'taking it back removes the therapist\'s copy');
+ok(errors.filter(e=>!/Failed to load resource/.test(e)).length===0,'no page errors '+errors.join('|'));
+await browser.close(); server.close(); process.exit(fail?1:0);

@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 const dir = path.dirname(fileURLToPath(import.meta.url));
 const files = readdirSync(dir).filter((f) => /^t\d+\.mjs$/.test(f)).sort((a, b) => parseInt(a.slice(1)) - parseInt(b.slice(1)));
 // These tests exercise the real vault, so they run against the real gate instead of the stand-in.
-const REAL_GATE = new Set(['t5.mjs', 't9.mjs', 't10.mjs', 't29.mjs', 't30.mjs', 't31.mjs']);
+const REAL_GATE = new Set(['t5.mjs', 't9.mjs', 't10.mjs', 't29.mjs', 't30.mjs', 't31.mjs', 't38.mjs']);
 let failed = [];
 for (const f of files) {
   const r = spawnSync(process.execPath, [path.join(dir, f)], { encoding: 'utf8', timeout: 180000, env: { ...process.env, ...(REAL_GATE.has(f) ? { REAL_GATE: '1' } : {}) } });

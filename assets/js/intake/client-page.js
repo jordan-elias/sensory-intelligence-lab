@@ -34,7 +34,7 @@ export async function mountIntake(root) {
       <form id="intakeForm" novalidate>${INTAKE_FIELDS.map(f => `
         <div class="field"><label for="f_${f.key}">${esc(f.label)}</label>
         ${f.hint ? `<p class="th-muted" style="margin:.1rem 0 .3rem">${esc(f.hint)}</p>` : ''}
-        ${f.type === 'textarea' ? `<textarea id="f_${f.key}" maxlength="${f.max}" rows="${f.key === 'history' ? 6 : 3}"></textarea>` : `<input id="f_${f.key}" type="${f.type}" ${f.max ? `maxlength="${f.max}"` : ''}>`}
+        ${f.type === 'textarea' ? `<textarea id="f_${f.key}" maxlength="${f.max}" rows="${f.key === 'history' || f.key === 'reason' ? 6 : 3}"></textarea>` : `<input id="f_${f.key}" type="${f.type}" ${f.max ? `maxlength="${f.max}"` : ''}>`}
         </div>`).join('')}
       <button type="submit" class="action-btn" id="sendIntake">${current ? 'Send again' : 'Send to ' + esc(name)}</button>
       <p class="msg" id="intakeMsg" role="status"></p></form>`;
