@@ -60,6 +60,30 @@
   to   = "/privacy/index.html"
   status = 200
 
+# ── Family history ──
+
+[[redirects]]
+  from = "/family"
+  to   = "/family/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/family/"
+  to   = "/family/index.html"
+  status = 200
+
+# ── Experiments ──
+
+[[redirects]]
+  from = "/experiments"
+  to   = "/experiments/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/experiments/"
+  to   = "/experiments/index.html"
+  status = 200
+
 # ── Therapy page ──
 
 [[redirects]]

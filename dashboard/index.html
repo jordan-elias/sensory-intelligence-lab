@@ -175,6 +175,8 @@
     .checkin-hero { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; padding:1.25rem 1.5rem; margin:0 0 1.25rem; border:1px solid var(--accent); border-radius:6px; background:var(--accent-light); }
     .checkin-hero-text { margin:.25rem 0 0; font-size:1rem; line-height:1.5; }
     .checkin-hero-btn { background:var(--accent); color:#fff; text-decoration:none; padding:.75rem 1.5rem; border-radius:4px; font-weight:500; min-height:44px; display:inline-flex; align-items:center; }
+    .intake-banner { border:1px solid var(--accent); background:var(--accent-light); border-radius:6px; padding:.85rem 1.1rem; margin:0 0 1.25rem; font-size:.92rem; }
+    .intake-banner a { font-weight:600; margin-left:.4rem; }
     #insightCard { margin:0 0 1.25rem; }
     .insight-card { border:1px solid var(--border); border-radius:6px; padding:1.1rem 1.25rem; }
     .insight-stats { display:flex; gap:2rem; flex-wrap:wrap; margin-bottom:.6rem; }
@@ -454,6 +456,10 @@
     </div>
 
     <!-- Today's check-in: front and centre in the app -->
+    <div class="intake-banner" id="intakeBanner" role="status" hidden>
+      <span class="intake-banner-text"></span> <a href="/intake/">Fill it in</a>
+    </div>
+
     <div class="checkin-hero" id="checkinHero" hidden>
       <div>
         <span class="prompt-label">Today</span>
@@ -468,19 +474,6 @@
     <div class="prompt-block">
       <span class="prompt-label">Today's prompt</span>
       <span class="prompt-text" id="dailyPrompt">Loading…</span>
-    </div>
-
-    <!-- ── Therapy (app only; the website has the Book a session module) ── -->
-    <div class="modules-section" id="appTherapy" hidden>
-      <p class="section-label">Therapy</p>
-      <div class="module-grid module-grid--2">
-        <a class="module-card" href="/therapy/">
-          <div class="module-top"><span class="module-icon">◎</span><span class="module-arrow">→</span></div>
-          <h3>Therapy with a music therapist</h3>
-          <p>How your work here connects to sessions: share check-ins and worksheets only if you choose, and arrive with context.</p>
-          <span class="module-tag">Sessions · Shared only by you</span>
-        </a>
-      </div>
     </div>
 
     <!-- ── Regulation ── -->
@@ -574,6 +567,17 @@
       <p class="section-label">Creative tools</p>
       <div class="module-grid module-grid--2">
 
+        <a class="module-card" href="/experiments/">
+          <div class="module-top">
+            <span class="module-icon">✦</span>
+            <span class="module-arrow">→</span>
+          </div>
+          <h3>Experiments</h3>
+          <p>Structured experiments for creative blocks. A clear limit, a process, and an outcome you let surprise you.</p>
+          <span class="module-tag">Mini course · Composition · Field recording</span>
+        </a>
+
+
         <a class="module-card" href="/soundscape-machine/" data-gated="true">
           <div class="module-top">
             <span class="module-icon">▧</span>
@@ -632,14 +636,24 @@
           <span class="module-tag">Resources · Learning</span>
         </a>
 
-        <a class="module-card" href="/booking/">
+        <a class="module-card" id="bookCard" href="/booking/">
           <div class="module-top">
             <span class="module-icon">▲</span>
             <span class="module-arrow">→</span>
           </div>
-          <h3>Book a Session</h3>
-          <p>Schedule a one-to-one video session with Jordan. Included sessions are drawn from your current billing period.</p>
-          <span class="module-tag">Telehealth · Music therapy</span>
+          <h3 id="bookCardTitle">Book a Session</h3>
+          <p id="bookCardText">Schedule a one-to-one video session with a music therapist. Lab members get a lower rate.</p>
+          <span class="module-tag" id="bookCardTag">Telehealth · Music therapy</span>
+        </a>
+
+        <a class="module-card" href="/family/">
+          <div class="module-top">
+            <span class="module-icon">❖</span>
+            <span class="module-arrow">→</span>
+          </div>
+          <h3>Family History</h3>
+          <p>An optional, private quick reference for the people in your story: names, relationships and what matters. Sent to a therapist only if you choose.</p>
+          <span class="module-tag">Optional · Private to you</span>
         </a>
 
       </div>
@@ -872,9 +886,30 @@ onAuthReady(async () => {
 
   showDashboardNudge(window._supabase, profile, document.querySelector('main .page-header'));
 
+  // A therapist's request for an intake form shows here until it has been sent.
+  try {
+    const { data: tl } = await window._supabase.from('my_therapists').select('link_id, display_name, intake_requested_at').eq('status', 'active').limit(1);
+    const l = tl && tl[0];
+    if (l && l.intake_requested_at) {
+      const { data: sent } = await window._supabase.from('shared_copies').select('id').eq('category', 'intake').eq('link_id', l.link_id).limit(1);
+      if (!(sent && sent.length)) {
+        const b = document.getElementById('intakeBanner');
+        b.querySelector('.intake-banner-text').textContent = `${l.display_name || 'Your therapist'} asked you to fill in a short intake form.`;
+        b.hidden = false;
+      }
+    }
+  } catch { /* the banner is a convenience */ }
+
   if (window.SIL_APP) {
     const hero = document.getElementById('checkinHero'); hero.hidden = false;
-    document.getElementById('appTherapy').hidden = false;
+    // In the app, until a therapist is chosen this card explains therapy; afterwards it is the booking card.
+    const { data: links } = await window._supabase.from('my_therapists').select('link_id').eq('status', 'active').limit(1);
+    if (!(links && links.length)) {
+      document.getElementById('bookCard').setAttribute('href', '/therapy/');
+      document.getElementById('bookCardTitle').textContent = 'Therapy with a music therapist';
+      document.getElementById('bookCardText').textContent = 'See how your work here connects to sessions. Share check-ins and worksheets only if you choose, and arrive with context.';
+      document.getElementById('bookCardTag').textContent = 'Sessions · Shared only by you';
+    }
     import('/assets/js/checkins/insight-card.js').then(m => m.mountInsightCard(document.getElementById('insightCard'))).catch(() => {});
     const start = new Date(); start.setHours(0, 0, 0, 0);
     const { count } = await window._supabase.from('checkins').select('id', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', start.toISOString());

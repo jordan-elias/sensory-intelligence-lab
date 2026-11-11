@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script>window.SIL_AUDIO_LATENCY = 'playback';</script>
+  <script src="/assets/js/audio/safe-output.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Experiments — Sensory Intelligence Lab</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <link rel="apple-touch-icon" href="/images/favicon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <script src="/dashboard/auth-guard.js" type="module"></script>
+  <link href="/assets/css/fonts.css" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--font-body:'Inter',sans-serif;--font-heading:'Space Grotesk',sans-serif;--bg:#fff;--surface:#f9f9f7;--border:#e5e5e0;--text:#1a1a1a;--muted:#6b6b6b;--accent:#2a5c45;--accent-light:#edf4f0;--accent-hover:#1e4433}
+    html{font-size:16px}
+    body{font-family:var(--font-body);color:var(--text);background:var(--bg);line-height:1.6;min-height:100vh;display:flex;flex-direction:column}
+    a{color:var(--text);text-decoration:underline;text-underline-offset:3px} a:hover{color:var(--accent)}
+    .bc{padding:.75rem 1.5rem 0;max-width:900px;margin:0 auto;width:100%}
+    .bc ol{list-style:none;display:flex;gap:.3rem;font-size:.75rem;color:var(--muted);flex-wrap:wrap}
+    .bc li+li::before{content:'/';margin-right:.3rem;color:var(--border)} .bc a{color:var(--muted);text-decoration:none}
+    main{max-width:900px;margin:0 auto;padding:2rem 1.25rem 4rem;flex:1;width:100%}
+    .ph{margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
+    .ph h2{font:600 2rem var(--font-heading);letter-spacing:-.02em;line-height:1.2;margin-bottom:.4rem}
+    .ph p{font-size:.92rem;color:var(--muted);max-width:60ch}
+    .xp-filters{display:flex;gap:.5rem;flex-wrap:wrap;margin:0 0 1.25rem}
+    .chip{font:500 .8rem var(--font-body);padding:.5rem .9rem;border:1px solid var(--border);background:var(--bg);border-radius:99px;cursor:pointer;min-height:40px;color:var(--text)}
+    .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+    .xp-top{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;margin-bottom:1.25rem}
+    .xp-count{font-size:.8rem;color:var(--muted)}
+    .xp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem}
+    @media(max-width:600px){.xp-grid{grid-template-columns:1fr}}
+    .xp-card{display:block;border:1px solid var(--border);border-radius:6px;padding:1rem 1.1rem;text-decoration:none;color:var(--text);background:var(--bg)}
+    .xp-card:hover,.xp-card:focus-visible{border-color:var(--accent);background:var(--accent-light)}
+    .xp-card h3{font:600 1.02rem var(--font-heading);margin-bottom:.25rem}
+    .xp-card p{font-size:.85rem;color:var(--muted);line-height:1.5}
+    .xp-card small{display:block;margin-top:.5rem;font-size:.72rem;color:var(--muted);letter-spacing:.03em}
+    .xp-card.done h3::after{content:' ✓';color:var(--accent)}
+    .xp-back{display:inline-block;margin-bottom:1rem;font-size:.85rem}
+    .xp-box{border-left:3px solid var(--accent);background:var(--accent-light);padding:.8rem 1rem;margin:1rem 0;font-size:.92rem;border-radius:0 4px 4px 0}
+    .xp-box b{display:block;font:600 .68rem var(--font-heading);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:.2rem}
+    h3.xp-h{font:600 .68rem var(--font-heading);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:1.8rem 0 .6rem}
+    .xp-proc{margin:0 0 .6rem 1.2rem;font-size:.95rem} .xp-proc li{margin-bottom:.5rem}
+    .xp-stop{font-size:.9rem;margin:.4rem 0 1rem}
+    .xp-vars{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem} @media(max-width:700px){.xp-vars{grid-template-columns:1fr}}
+    .xp-vars h4{font:600 .78rem var(--font-heading);margin-bottom:.3rem} .xp-vlist{list-style:none;font-size:.88rem;border-left:2px solid var(--border);padding-left:.7rem} .xp-vlist li{margin-bottom:.3rem}
+    .xp-params,.xp-trials{width:100%;border-collapse:collapse;font-size:.88rem} .xp-params th,.xp-params td,.xp-trials th,.xp-trials td{border-bottom:1px solid var(--border);padding:.45rem .4rem;text-align:left;vertical-align:top}
+    .xp-params th{width:34%;font-weight:600;color:var(--muted)} .xp-trials thead th{font-size:.72rem;color:var(--muted);letter-spacing:.04em} .xp-trials input{width:100%;font:inherit;padding:.4rem .5rem;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text);min-height:40px}
+    .xp-steps-grid{display:grid;gap:3px;margin:.6rem 0} .xp-step{aspect-ratio:1;min-height:26px;border:1px solid var(--border);background:var(--bg);border-radius:3px;cursor:pointer;padding:0}
+    .xp-step[aria-pressed="true"]{background:var(--accent-light);border-color:var(--accent)} .xp-step.on{outline:2px solid var(--accent)} .xp-step[aria-pressed="true"].on{background:var(--accent)}
+    .xp-meta-line{font-size:.8rem;color:var(--muted);margin-bottom:.8rem}
+    .xp-tool{border:1px solid var(--border);border-radius:6px;padding:1rem 1.1rem;margin-bottom:.9rem;background:var(--surface)}
+    .xp-k{font:600 .68rem var(--font-heading);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem}
+    .xp-row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin:.4rem 0}
+    .xp-row label,.xp-grain label{font-size:.8rem;color:var(--muted);display:flex;gap:.35rem;align-items:center}
+    .xp-btn{font:500 .88rem var(--font-body);background:var(--accent);color:#fff;border:1px solid var(--accent);padding:.65rem 1.2rem;border-radius:4px;min-height:44px;cursor:pointer}
+    .xp-btn:hover{background:var(--accent-hover)} .xp-btn[disabled]{opacity:.6;cursor:default}
+    .xp-btn--alt{background:transparent;color:var(--accent)} .xp-btn--alt:hover{background:var(--accent-light)}
+    select,input[type=number]{font:inherit;padding:.4rem .5rem;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text);min-height:40px}
+    input[type=number]{width:4.2rem}
+    textarea{width:100%;font:inherit;padding:.6rem .7rem;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text)}
+    .xp-chips{list-style:none;display:flex;gap:.4rem;flex-wrap:wrap;margin:.5rem 0}
+    .xp-chips li{border:1px solid var(--accent);color:var(--accent);background:var(--bg);padding:.35rem .7rem;border-radius:4px;font-size:.92rem;font-weight:500}
+    .xp-chip-k{font-size:.7rem;color:var(--muted);margin-right:.15rem}
+    .xp-hint{font-size:.78rem;color:var(--muted)} .xp-meta{display:flex;gap:.8rem;align-items:baseline;flex-wrap:wrap}
+    .xp-seed{font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums}
+    .xp-time{font:600 2rem var(--font-heading);font-variant-numeric:tabular-nums;margin:.2rem 0}
+    .xp-details{margin-top:.4rem;font-size:.82rem} .xp-hist{margin:.4rem 0 0 1.2rem;color:var(--muted)}
+    .xp-lanes{margin-top:.8rem} .xp-lane{display:flex;gap:.3rem;align-items:center;margin:.3rem 0;font-size:.8rem;color:var(--muted)}
+    .xp-lane i{width:20px;height:20px;border:1px solid var(--border);border-radius:50%;display:inline-block;background:var(--bg)} .xp-lane i.on{background:var(--accent);border-color:var(--accent)}
+    .xp-file{font-size:.8rem;max-width:14rem} .xp-grain{display:flex;gap:1rem;flex-wrap:wrap;margin:.5rem 0}
+    .xp-done{margin-top:1rem}
+    .xp-solo{border:1px solid var(--border);border-radius:6px;padding:.7rem 1rem;margin-top:1.2rem} .xp-solo summary{cursor:pointer;font-weight:500;font-size:.9rem}
+    .xp-solo p{margin-top:.6rem;font-size:.9rem}
+    footer{border-top:1px solid var(--border);padding:1.2rem 1.5rem;font-size:.78rem;color:var(--muted);text-align:center}
+  </style>
+  <link rel="stylesheet" href="/assets/css/header.css">
+  <link rel="stylesheet" href="/assets/css/ui.css">
+  <link rel="stylesheet" href="/assets/css/a11y.css">
+</head>
+<body>
+<script src="/assets/js/site-header.js"></script>
+
+<nav aria-label="Breadcrumb" class="bc"><ol><li><a href="/dashboard/">Dashboard</a></li><li>Experiments</li></ol></nav>
+
+<main id="xpRoot" aria-live="polite"></main>
+
+<footer>Anything you load or record here stays in your browser. Your notes and ticks are kept on this device only.</footer>
+
+<script type="module">
+import { CATEGORIES, NEEDS, EXPERIMENTS, byId } from '/assets/js/experiments/catalog.js';
+import { buildTool, el } from '/assets/js/experiments/tools.js';
+
+const root = document.getElementById('xpRoot');
+const KEY_DONE = 'sil.exp.done', NOTE = id => `sil.exp.note.${id}`;
+const read = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
+const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* private window */ } };
+let filter = { cat: 'all', needs: 'all' };
+
+function list() {
+  const done = new Set(read(KEY_DONE, []));
+  const shown = EXPERIMENTS.filter(e => (filter.cat === 'all' || e.category === filter.cat) && (filter.needs === 'all' || e.needs === filter.needs));
+  const chip = (group, key, label) => el('button', { type: 'button', class: 'chip', 'aria-pressed': String(filter[group] === key), onclick: () => { filter[group] = key; list(); } }, label);
+  const surprise = el('button', { type: 'button', class: 'xp-btn', id: 'xpSurprise', onclick: () => {
+    const pool = (shown.length ? shown : EXPERIMENTS); const fresh = pool.filter(e => !done.has(e.id)); const pick = (fresh.length ? fresh : pool)[Math.floor(Math.random() * (fresh.length || pool.length))];
+    location.hash = '#/' + pick.id;
+  } }, 'Surprise me');
+  root.replaceChildren(
+    el('div', { class: 'ph' }, el('h2', {}, 'Experiments'),
+      el('p', {}, 'Structured, specific experiments for creative blocks. Each has a clear limit and asks you to set up a process, then let the outcome surprise you. Do them in any order, here with the built-in tools, or on your own with dice and paper.')),
+    el('div', { class: 'xp-top' }, surprise, el('span', { class: 'xp-count' }, `${done.size} of ${EXPERIMENTS.length} done`)),
+    el('div', { class: 'xp-filters', role: 'group', 'aria-label': 'Category' }, chip('cat', 'all', 'All'), ...Object.entries(CATEGORIES).map(([k, v]) => chip('cat', k, v))),
+    el('div', { class: 'xp-filters', role: 'group', 'aria-label': 'What you need' }, chip('needs', 'all', 'Anything'), ...Object.entries(NEEDS).map(([k, v]) => chip('needs', k, v))),
+    el('div', { class: 'xp-grid' }, shown.map(e => el('a', { class: 'xp-card' + (done.has(e.id) ? ' done' : ''), href: '#/' + e.id },
+      el('h3', {}, e.title), el('p', {}, e.summary), el('small', {}, `${CATEGORIES[e.category]} · ${NEEDS[e.needs]} · ${e.minutes} min`)))),
+    shown.length ? null : el('p', { class: 'xp-hint' }, 'Nothing matches those two filters. Try "Anything".'));
+}
+
+function detail(e) {
+  const done = new Set(read(KEY_DONE, []));
+  const store = (key, fallback) => ({ get: () => read(key, fallback), set: v => write(key, v) });
+  const pred = store(`sil.exp.pred.${e.id}`, ''), trialsStore = store(`sil.exp.trials.${e.id}`, {}), concl = store(`sil.exp.concl.${e.id}`, { verdict: '', text: '' });
+  const predEl = el('textarea', { rows: 3, 'aria-label': 'Your prediction', placeholder: 'Before you start: what do you expect will happen? Kept on this device only.' });
+  predEl.value = pred.get(); predEl.oninput = () => pred.set(predEl.value);
+
+  const saved = trialsStore.get();
+  const trialRows = e.trials.map((t, i) => {
+    const sc = el('select', { 'aria-label': `${t}: how surprising (1 to 5)` }, el('option', { value: '' }, '–'), [1, 2, 3, 4, 5].map(n => el('option', { value: n }, n)));
+    const tx = el('input', { type: 'text', 'aria-label': `${t}: one line`, placeholder: 'One line', maxlength: 200 });
+    sc.value = saved[i]?.score ?? ''; tx.value = saved[i]?.text ?? '';
+    const save = () => { const s = trialsStore.get(); s[i] = { score: sc.value, text: tx.value }; trialsStore.set(s); };
+    sc.onchange = save; tx.oninput = save;
+    return el('tr', {}, el('th', { scope: 'row' }, t), el('td', {}, sc), el('td', {}, tx));
+  });
+
+  const c0 = concl.get();
+  const verdict = el('select', { 'aria-label': 'Was the hypothesis supported?' }, el('option', { value: '' }, 'Choose…'),
+    el('option', { value: 'yes' }, 'Supported'), el('option', { value: 'partly' }, 'Partly supported'), el('option', { value: 'no' }, 'Not supported'), el('option', { value: 'unclear' }, 'Could not tell'));
+  verdict.value = c0.verdict; const ctext = el('textarea', { rows: 4, 'aria-label': 'Conclusion', placeholder: e.reflect });
+  ctext.value = c0.text;
+  const saveC = () => concl.set({ verdict: verdict.value, text: ctext.value }); verdict.onchange = saveC; ctext.oninput = saveC;
+
+  const mark = el('button', { type: 'button', class: 'xp-btn xp-btn--alt', onclick: () => {
+    const d = new Set(read(KEY_DONE, [])); d.has(e.id) ? d.delete(e.id) : d.add(e.id); write(KEY_DONE, [...d]); mark.textContent = d.has(e.id) ? 'Done ✓ (tap to undo)' : 'Mark as done';
+  } }, done.has(e.id) ? 'Done ✓ (tap to undo)' : 'Mark as done');
+  const idx = EXPERIMENTS.indexOf(e), list2 = items => el('ul', { class: 'xp-vlist' }, items.map(i => el('li', {}, i)));
+
+  root.replaceChildren(
+    el('a', { class: 'xp-back', href: '#/' }, '← All experiments'),
+    el('div', { class: 'ph' }, el('h2', {}, e.title), el('p', {}, e.summary)),
+    el('p', { class: 'xp-meta-line' }, `${CATEGORIES[e.category]} · ${NEEDS[e.needs]} · about ${e.minutes} minutes`),
+    el('div', { class: 'xp-box', id: 'xpQuestion' }, el('b', {}, 'Question'), e.question),
+    el('div', { class: 'xp-box', id: 'xpHypothesis' }, el('b', {}, 'Hypothesis'), e.hypothesis),
+    el('h3', { class: 'xp-h' }, 'Your prediction'), predEl,
+    el('h3', { class: 'xp-h' }, 'Variables'),
+    el('div', { class: 'xp-vars' },
+      el('div', {}, el('h4', {}, 'Held fixed'), list2(e.variables.fixed)),
+      el('div', {}, el('h4', {}, 'Changed'), list2(e.variables.changed)),
+      el('div', {}, el('h4', {}, 'Measured'), list2(e.variables.measured))),
+    el('h3', { class: 'xp-h' }, 'Parameters'),
+    el('table', { class: 'xp-params' }, el('tbody', {}, e.parameters.map(([k, v]) => el('tr', {}, el('th', { scope: 'row' }, k), el('td', {}, v))))),
+    el('h3', { class: 'xp-h' }, 'Procedure'), el('ol', { class: 'xp-proc' }, e.procedure.map(s => el('li', {}, s))),
+    el('p', { class: 'xp-stop' }, el('strong', {}, 'Stop rule: '), e.stop),
+    el('h3', { class: 'xp-h' }, 'Tools'), ...e.tools.map(buildTool),
+    ...(e.links || []).map(l => el('p', {}, el('a', { href: l.href }, l.label))),
+    el('details', { class: 'xp-solo' }, el('summary', {}, 'Doing this without the app'), el('p', {}, e.solo)),
+    el('h3', { class: 'xp-h' }, 'Record'),
+    el('table', { class: 'xp-trials' }, el('thead', {}, el('tr', {}, el('th', {}, 'Trial'), el('th', {}, 'Surprise 1–5'), el('th', {}, 'Observation'))), el('tbody', {}, trialRows)),
+    el('h3', { class: 'xp-h' }, 'Conclusion'), el('p', { class: 'xp-hint' }, 'Was the hypothesis supported? ' + e.reflect), verdict, ctext,
+    el('div', { class: 'xp-done' }, mark),
+    el('p', { class: 'xp-hint', style: 'margin-top:1.5rem' }, el('a', { href: '#/' + EXPERIMENTS[(idx + 1) % EXPERIMENTS.length].id }, 'Next in the list →'), ' · ', el('a', { href: '#/' }, 'Choose another')));
+  window.scrollTo(0, 0);
+}
+
+function route() {
+  const id = location.hash.replace(/^#\/?/, '');
+  const e = id && byId(id);
+  document.title = (e ? e.title + ' — ' : '') + 'Experiments — Sensory Intelligence Lab';
+  e ? detail(e) : list();
+}
+window.addEventListener('hashchange', route);
+route();
+</script>
+</body>
+</html>

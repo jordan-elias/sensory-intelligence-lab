@@ -30,10 +30,11 @@ function builder(table){
       return q.single?{data:out[0]||null,error:(out[0]||q.maybe)?null:{message:'not found'}}:{data:out,error:null}; }
     if(q.op==='insert'){ if(isKeys && rows.some(x=>x.user_id===q.payload.user_id)) return {data:null,error:{code:'23505',message:'dup'}}; const r={id:crypto.randomUUID(),created_at:new Date().toISOString(),...(isKeys?{updated_at:new Date().toISOString()}:{}),...q.payload}; rows.push(r); persist(); const o=q.cols.split(',').reduce((a,c)=>{c=c.trim(); if(c in r)a[c]=r[c]; return a},{}); return {data:q.single?o:[o],error:null}; }
     if(q.op==='update'){ res.forEach(r=>Object.assign(r,q.payload,isKeys?{updated_at:new Date(Date.now()+Math.random()*1000).toISOString()}:{})); persist(); const o=res.map(r=>q.cols.split(',').reduce((a,c)=>{c=c.trim(); if(c in r)a[c]=r[c]; return a},{})); return {data:o,error:null}; }
+    if(q.op==='upsert'){ const hit=rows.find(x=>x.user_id===q.payload.user_id); if(hit) Object.assign(hit,q.payload); else rows.push({...q.payload}); persist(); return {data:null,error:null}; }
     if(q.op==='delete'){ res.forEach(r=>rows.splice(rows.indexOf(r),1)); persist(); return {data:null,error:null}; }
   };
   const b={ select(c='*',o){ if(q.op==='select'||q.op) {q.cols=c; q.after=true;} if(o&&o.head) q.head=true; return b; }, like(k,v){q.like=[k,v];return b}, gte(k,v){q.filters2=(q.filters2||[]);q.filters2.push([k,v]);return b}, is(k,v){q.isNull=[k,v];return b}, gt(k,v){q.gt=[k,v];return b}, limit(n){q.limit=n;return b},
-    insert(p){q.op='insert';q.payload=p;return b}, update(p){q.op='update';q.payload=p;return b}, delete(){q.op='delete';return b},
+    insert(p){q.op='insert';q.payload=p;return b}, upsert(p){q.op='upsert';q.payload=p;return b}, update(p){q.op='update';q.payload=p;return b}, delete(){q.op='delete';return b},
     eq(k,v){q.filters.push([k,v]);return b}, in(k,vs){q.ins=(q.ins||[]);q.ins.push([k,vs]);return b}, order(col,o){q.order={col,asc:!(o&&o.ascending===false)};return b}, single(){q.single=true;return b}, maybeSingle(){q.single=true;q.maybe=true;return b},
     then(res,rej){ try{ res(run()) }catch(e){ rej&&rej(e) } } };
   return b;

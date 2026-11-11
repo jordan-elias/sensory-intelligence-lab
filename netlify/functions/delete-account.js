@@ -31,6 +31,7 @@ export const TABLES = [
   ["client_therapists", "client_id"],
   ["client_therapists", "therapist_id"],
   ["therapist_profiles", "user_id"],
+  ["family_history", "user_id"],
   ["worksheets", "user_id"],
   ["locations", "user_id"],
   ["checkins", "user_id"],
