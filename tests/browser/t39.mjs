@@ -1,0 +1,26 @@
+// Header bell: counts messages and pending form requests; a sent form drops off; nothing for a client with no therapist.
+import {launch,newPage} from './harness.mjs';
+const {browser,BASE,server}=await launch();
+let fail=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fail++; };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const {page,errors}=await newPage(await browser.createBrowserContext(),BASE,{tables:{shared_copies:[],my_therapists:[],messages:[]}});
+await page.goto(`${BASE}/dashboard/`,{waitUntil:'domcontentloaded'});
+await page.waitForSelector('.sil-header',{timeout:20000}); await sleep(1500);
+await page.evaluate(()=>{ window.__draw=async(rows)=>{ const m=await import('/assets/js/notifications.js'); await m.mountBell(window._supabase,window._currentUser,{unread:rows.unread||0}); }; });
+await page.evaluate(()=>window.__draw({}));
+ok((await page.$eval('#silBell',e=>e.getAttribute('aria-label')))==='Notifications, none new'&&await page.$('.sil-bell__count')===null,'no therapist and no messages: no badge');
+await page.evaluate(()=>{ window.__tbl.my_therapists.push({link_id:'L1',status:'active',user_id:'t1',display_name:'Dr Rivera',intake_requested_at:new Date().toISOString(),family_requested_at:new Date().toISOString()}); });
+await page.evaluate(()=>window.__draw({unread:2}));
+ok((await page.$eval('.sil-bell__count',e=>e.textContent))==='3','two messages and two forms are counted as three items (messages group)');
+await page.click('#silBell');
+const texts=await page.$$eval('.sil-bell__panel a',a=>a.map(x=>x.getAttribute('href')));
+ok(JSON.stringify(texts)==='["/messages/","/intake/","/family/"]','panel links to messages, intake and family');
+ok(await page.$eval('#silBell',e=>e.getAttribute('aria-expanded'))==='true','opens');
+await page.keyboard.press('Escape');
+ok(await page.$eval('#silBell',e=>e.getAttribute('aria-expanded'))==='false','Escape closes it');
+await page.evaluate(()=>{ window.__tbl.shared_copies.push({link_id:'L1',category:'intake'}); });
+await page.evaluate(()=>window.__draw({unread:0}));
+const left=await page.$$eval('.sil-bell__panel a',a=>a.map(x=>x.getAttribute('href')));
+ok(JSON.stringify(left)==='["/family/"]','a form that has been sent drops off the bell');
+ok(errors.filter(e=>!/Failed to load resource/.test(e)).length===0,'no page errors '+errors.join('|'));
+await browser.close(); server.close(); process.exit(fail?1:0);

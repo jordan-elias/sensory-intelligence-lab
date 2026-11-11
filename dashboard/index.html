@@ -175,8 +175,6 @@
     .checkin-hero { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; padding:1.25rem 1.5rem; margin:0 0 1.25rem; border:1px solid var(--accent); border-radius:6px; background:var(--accent-light); }
     .checkin-hero-text { margin:.25rem 0 0; font-size:1rem; line-height:1.5; }
     .checkin-hero-btn { background:var(--accent); color:#fff; text-decoration:none; padding:.75rem 1.5rem; border-radius:4px; font-weight:500; min-height:44px; display:inline-flex; align-items:center; }
-    .intake-banner { border:1px solid var(--accent); background:var(--accent-light); border-radius:6px; padding:.85rem 1.1rem; margin:0 0 1.25rem; font-size:.92rem; }
-    .intake-banner a { font-weight:600; margin-left:.4rem; }
     #insightCard { margin:0 0 1.25rem; }
     .insight-card { border:1px solid var(--border); border-radius:6px; padding:1.1rem 1.25rem; }
     .insight-stats { display:flex; gap:2rem; flex-wrap:wrap; margin-bottom:.6rem; }
@@ -455,11 +453,6 @@
   
     </div>
 
-    <!-- Today's check-in: front and centre in the app -->
-    <div class="intake-banner" id="intakeBanner" role="status" hidden>
-      <span class="intake-banner-text"></span> <a href="/intake/">Fill it in</a>
-    </div>
-
     <div class="checkin-hero" id="checkinHero" hidden>
       <div>
         <span class="prompt-label">Today</span>
@@ -645,17 +638,6 @@
           <p id="bookCardText">Schedule a one-to-one video session with a music therapist. Lab members get a lower rate.</p>
           <span class="module-tag" id="bookCardTag">Telehealth · Music therapy</span>
         </a>
-
-        <a class="module-card" href="/family/">
-          <div class="module-top">
-            <span class="module-icon">❖</span>
-            <span class="module-arrow">→</span>
-          </div>
-          <h3>Family History</h3>
-          <p>An optional, private quick reference for the people in your story: names, relationships and what matters. Sent to a therapist only if you choose.</p>
-          <span class="module-tag">Optional · Private to you</span>
-        </a>
-
       </div>
     </div>
 
@@ -885,20 +867,6 @@ onAuthReady(async () => {
     .single();
 
   showDashboardNudge(window._supabase, profile, document.querySelector('main .page-header'));
-
-  // A therapist's request for an intake form shows here until it has been sent.
-  try {
-    const { data: tl } = await window._supabase.from('my_therapists').select('link_id, display_name, intake_requested_at').eq('status', 'active').limit(1);
-    const l = tl && tl[0];
-    if (l && l.intake_requested_at) {
-      const { data: sent } = await window._supabase.from('shared_copies').select('id').eq('category', 'intake').eq('link_id', l.link_id).limit(1);
-      if (!(sent && sent.length)) {
-        const b = document.getElementById('intakeBanner');
-        b.querySelector('.intake-banner-text').textContent = `${l.display_name || 'Your therapist'} asked you to fill in a short intake form.`;
-        b.hidden = false;
-      }
-    }
-  } catch { /* the banner is a convenience */ }
 
   if (window.SIL_APP) {
     const hero = document.getElementById('checkinHero'); hero.hidden = false;

@@ -18,14 +18,20 @@ export async function mountFamily(root) {
   const sb = await new Promise(res => { if (window._supabase && window._currentUser) res(window._supabase); else window.addEventListener('authReady', () => res(window._supabase), { once: true }); });
   const uid = window._currentUser?.id;
   root.replaceChildren(h('p', { class: 'th-muted' }, 'Opening…'));
+  // The family history is a form a therapist can ask for. Without a request there is nothing to fill in.
+  const { data: links } = await sb.from('my_therapists').select('*').eq('status', 'active').limit(1);
+  const link = links && links[0];
+  if (!link || !link.family_requested_at) {
+    root.replaceChildren(h('h2', { class: 'th-h2' }, 'Nothing to fill in'),
+      h('p', { class: 'th-muted' }, 'A therapist can ask you for a family history, and when they do you will be notified here and in the bell at the top of the page. Nothing is shared unless you choose to send it.'));
+    return;
+  }
   let session, doc, updatedAt;
   try {
     session = await ensureVaultReady();
     ({ doc, updated_at: updatedAt } = await loadFamily({ sb, session, uid }));
   } catch (e) { root.replaceChildren(h('p', { class: 'msg show error' }, e.message)); return; }
 
-  const { data: links } = await sb.from('my_therapists').select('*').eq('status', 'active').limit(1);
-  const link = links && links[0];
   const status = h('p', { class: 'msg', role: 'status', 'aria-live': 'polite' });
   let timer = null, dirty = false;
 
