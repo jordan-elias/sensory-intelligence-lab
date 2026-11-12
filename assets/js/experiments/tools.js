@@ -5,6 +5,8 @@
  * when you leave the page unless you download it yourself.
  */
 import { mulberry32, newSeed, generate, SCALES, NOTE_NAMES, rotateAssign, euclid, int } from './rng.js';
+import { wordPoemTool, burnTool, cardsTool, blackoutTool } from './tools-writing.js';
+import { rollTool, samplerTool, treatTool } from './tools-music.js';
 import { mixToMono, resample, reverse, chopShuffle, stutter, pitchedGrains, contrastLayer, normalise, encodeWav } from './audio-ops.js';
 
 export function el(tag, attrs = {}, ...kids) {
@@ -235,7 +237,14 @@ export function buildTool(cfg) {
     case 'loops': return loopsTool(cfg);
     case 'groove': return grooveTool(cfg);
     case 'assign': return assignTool(cfg);
+    case 'wordpoem': return wordPoemTool(cfg);
+    case 'burn': return burnTool(cfg);
+    case 'cards': return cardsTool(cfg);
+    case 'blackout': return blackoutTool(cfg);
+    case 'roll': return rollTool(cfg);
+    case 'sampler': return samplerTool(cfg);
+    case 'treat': return treatTool(cfg);
     default: return el('p', {}, '');
   }
 }
-export const TOOL_TYPES = ['gen', 'timer', 'clip', 'loops', 'groove', 'assign'];
+export const TOOL_TYPES = ['gen', 'timer', 'clip', 'loops', 'groove', 'assign', 'wordpoem', 'burn', 'cards', 'blackout', 'roll', 'sampler', 'treat'];
