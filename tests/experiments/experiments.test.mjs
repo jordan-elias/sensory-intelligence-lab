@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mulberry32, generate, shuffle, sample, rotateAssign, degreeNotes, NOTE_NAMES, euclid, chordTable } from '../../assets/js/experiments/rng.js';
 import { resample, reverse, chopShuffle, stutter, pitchedGrains, contrastLayer, normalise, encodeWav, mixToMono } from '../../assets/js/experiments/audio-ops.js';
-import { EXPERIMENTS, CATEGORIES, NEEDS } from '../../assets/js/experiments/catalog.js';
+import { EXPERIMENTS, CATEGORIES, NEEDS, UNITS, PATH, COURSE } from '../../assets/js/experiments/catalog.js';
 
 test('the same seed gives the same roll; different seeds differ', () => {
   const spec = { kind: 'degrees', count: 7, root: 0, scale: 'major' };
@@ -72,7 +72,7 @@ test('euclid generator gives a pattern of the requested length', () => {
 });
 
 test('every experiment is a complete protocol with real parameters, tools and generators', () => {
-  const ids = new Set(), kinds = ['degrees', 'notes', 'tuning', 'range', 'choice', 'shuffle', 'pattern', 'chords', 'euclid'], tools = ['gen', 'timer', 'clip', 'loops', 'groove', 'assign'], ops = ['slow', 'fast', 'contrast', 'reverse', 'chop', 'stutter', 'grain'];
+  const ids = new Set(), kinds = ['degrees', 'notes', 'tuning', 'range', 'choice', 'shuffle', 'pattern', 'chords', 'euclid'], tools = ['gen', 'timer', 'clip', 'loops', 'groove', 'assign', 'wordpoem', 'burn', 'cards', 'blackout', 'roll', 'sampler', 'treat'], ops = ['slow', 'fast', 'contrast', 'reverse', 'chop', 'stutter', 'grain'];
   for (const e of EXPERIMENTS) {
     assert.ok(!ids.has(e.id), 'duplicate id ' + e.id); ids.add(e.id);
     assert.ok(CATEGORIES[e.category], e.id); assert.ok(NEEDS[e.needs], e.id);
@@ -92,4 +92,59 @@ test('every experiment is a complete protocol with real parameters, tools and ge
   assert.ok(EXPERIMENTS.length >= 20);
   for (const c of Object.keys(CATEGORIES)) assert.ok(EXPERIMENTS.some(e => e.category === c), 'empty category ' + c);
   assert.ok(EXPERIMENTS.some(e => e.id === 'fixed-groove-chords') && EXPERIMENTS.some(e => e.id === 'fixed-notes-rhythm'), 'the fixed-rhythm and fixed-notes experiments exist');
+});
+
+import { wordsOf, syllables, findHaiku, burnPlan, burnedAfter, endWordFrame, pageWords, blackoutPoem } from '../../assets/js/experiments/text-ops.js';
+import { DECK, draw } from '../../assets/js/experiments/cards.js';
+import { scaleNotes, setStep, encodeMidi, makeLanes, treatments, EFFECTS } from '../../assets/js/experiments/music-ops.js';
+
+const PAGE = 'The morning light came slowly over the quiet river and the old bridge held the water still while a small bird sang about nothing at all and everything else besides';
+test('wordsOf strips edge punctuation and keeps inner apostrophes', () => assert.deepEqual(wordsOf('"Don\'t stop," she said.'), ["Don't", 'stop', 'she', 'said']));
+test('syllables is a sensible guide', () => { for (const [w, n] of [['the', 1], ['water', 2], ['quiet', 2], ['came', 1], ['everything', 4]]) assert.equal(syllables(w), n, w); });
+test('findHaiku returns words in order that count 5-7-5', () => {
+  for (let s = 0; s < 30; s++) {
+    const words = wordsOf(PAGE), h = findHaiku(words, mulberry32(s)); assert.ok(h);
+    assert.deepEqual(h.map(l => l.reduce((a, i) => a + syllables(words[i]), 0)), [5, 7, 5]);
+    const flat = h.flat(); assert.deepEqual(flat, [...flat].sort((a, b) => a - b));
+  }
+  assert.equal(findHaiku(wordsOf('too short'), mulberry32(1)), null);
+});
+test('burnPlan burns everything except the haiku, and the haiku survives', () => {
+  const p = burnPlan(PAGE, mulberry32(4)); assert.ok(p.haiku);
+  assert.equal(p.order.length + p.keep.size, p.words.length);
+  assert.ok(p.order.every(i => !p.keep.has(i)));
+  assert.equal(burnedAfter(p, p.order.length).size, p.order.length); assert.equal(burnedAfter(p, 0).size, 0);
+  assert.equal(burnPlan('only a few words here', mulberry32(1)).haiku, null);
+});
+test('endWordFrame keeps order unless shuffled, and always keeps every word', () => {
+  assert.deepEqual(endWordFrame('a b c d', mulberry32(1)).map(f => f.word), ['a', 'b', 'c', 'd']);
+  assert.deepEqual(endWordFrame('a b c d', mulberry32(1), { shuffled: true }).map(f => f.word).sort(), ['a', 'b', 'c', 'd']);
+});
+test('blackout keeps the chosen words in page order', () => { const w = pageWords('one two three four five'); assert.equal(blackoutPoem(w, new Set([3, 1])), 'two four'); assert.equal(pageWords('a '.repeat(1000)).length, 360); });
+test('the deck is complete and a draw never repeats until it is used up', () => {
+  assert.ok(DECK.length >= 36); assert.ok(DECK.every(c => c.text.length > 15 && /\d/.test(c.limit + c.text)));
+  const seen = new Set(), got = []; for (let i = 0; i < DECK.length / 3 - 1; i++) got.push(...draw(mulberry32(i), 3, seen).map(c => c.id));
+  assert.equal(new Set(got).size, got.length);
+});
+test('scaleNotes stays in the scale; setStep toggles', () => {
+  assert.deepEqual(scaleNotes(0, 'major', 1), [60, 62, 64, 65, 67, 69, 71, 72]);
+  assert.deepEqual(setStep([null, null], 1, 62), [null, 62]); assert.deepEqual(setStep([null, 62], 1, 62), [null, null]);
+});
+test('encodeMidi writes a valid file with matching note on and off events', () => {
+  const m = encodeMidi({ melody: [60, null, 62], chords: [[48, 52, 55]], stepsPerChord: 4, bpm: 120 }), dv = new DataView(m.buffer);
+  assert.equal(String.fromCharCode(...m.slice(0, 4)), 'MThd'); assert.equal(dv.getUint16(12, true) >= 0, true); assert.equal(String.fromCharCode(...m.slice(14, 18)), 'MTrk');
+  assert.equal(dv.getUint32(18), m.length - 22); assert.deepEqual([...m.slice(-3)], [0xff, 0x2f, 0]);
+  const on = [...m].filter((b, i) => (b === 0x90 || b === 0x91) && m[i + 2] > 0).length, off = [...m].filter(b => b === 0x80 || b === 0x81).length; assert.ok(on >= 5 && off >= 5);
+});
+test('makeLanes gives four lanes whose slices fit inside the sample', () => {
+  for (let s = 0; s < 50; s++) { const l = makeLanes(mulberry32(s), 1.5); assert.equal(l.length, 4); for (const x of l) assert.ok(x.start >= 0 && x.start + x.length <= 1.5 + 1e-9 && x.rate > 0); }
+});
+test('treatments gives every track an effect, all different while there are enough', () => {
+  for (let s = 0; s < 30; s++) { const t = treatments(mulberry32(s), ['a', 'b', 'c', 'd']); assert.equal(new Set(t.map(x => x.effect)).size, 4); assert.ok(t.every(x => /\d/.test(x.setting))); }
+  assert.ok(EFFECTS.length >= 8);
+});
+test('the course has a name, six units, and every experiment is in the path once', () => {
+  assert.equal(COURSE.name, 'Within Limits'); assert.equal(UNITS.length, 6);
+  assert.equal(PATH.length, EXPERIMENTS.length); assert.equal(new Set(PATH.map(e => e.id)).size, EXPERIMENTS.length);
+  assert.ok(EXPERIMENTS.length >= 30);
 });

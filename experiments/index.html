@@ -5,7 +5,7 @@
   <script>window.SIL_AUDIO_LATENCY = 'playback';</script>
   <script src="/assets/js/audio/safe-output.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Experiments — Sensory Intelligence Lab</title>
+  <title>Within Limits — Sensory Intelligence Lab</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" type="image/png" href="/images/favicon.png">
   <link rel="apple-touch-icon" href="/images/favicon.png">
@@ -74,6 +74,26 @@
     .xp-done{margin-top:1rem}
     .xp-solo{border:1px solid var(--border);border-radius:6px;padding:.7rem 1rem;margin-top:1.2rem} .xp-solo summary{cursor:pointer;font-weight:500;font-size:.9rem}
     .xp-solo p{margin-top:.6rem;font-size:.9rem}
+    .xp-prog{display:flex;align-items:center;gap:.8rem;margin:0 0 1rem}
+    .xp-prog-bar{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden} .xp-prog-bar span{display:block;height:100%;background:var(--accent)}
+    .xp-method{margin-bottom:1.25rem;border-color:var(--accent)}
+    .xp-unit{margin:1.8rem 0} .xp-unit-h{font:600 1.15rem var(--font-heading);margin-bottom:.2rem} .xp-unit .xp-hint{margin-bottom:.7rem}
+    .xp-method-steps{margin:0 0 1.2rem 1.3rem} .xp-method-steps li{margin-bottom:1rem} .xp-method-steps p{color:var(--muted);font-size:.95rem}
+    .xp-photo{margin:.5rem 0} .xp-frame{margin:.6rem 0 0 1.4rem} .xp-frame li{margin:.5rem 0;font-size:1rem} .xp-blank{color:var(--border)}
+    .xp-page{min-height:2rem;margin-top:.8rem;font:1.05rem/1.7 var(--font-body)} .xp-w{transition:opacity 1s,color 1s} .xp-w.gone{opacity:0;color:#b4532a}
+    .xp-haiku{font:500 1.35rem/1.6 var(--font-heading);padding:1rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)} .xp-haiku p{margin:0}
+    .xp-card-face{border:1px solid var(--accent);border-radius:6px;padding:1rem 1.1rem;margin:.6rem 0;background:var(--bg)} .xp-card-text{font:500 1.05rem/1.5 var(--font-heading)} .xp-card-limit{margin-top:.5rem;font-size:.82rem;color:var(--muted)}
+    .xp-blackout{display:flex;flex-wrap:wrap;gap:.2rem;margin:.7rem 0;max-height:22rem;overflow:auto;padding:.5rem;border:1px solid var(--border);border-radius:4px;background:var(--bg)}
+    .xp-bw{font:inherit;font-size:.92rem;border:0;background:transparent;padding:.2rem .3rem;border-radius:3px;cursor:pointer;color:var(--text);min-height:32px}
+    .xp-bw.keep{background:var(--accent);color:#fff} .xp-bw.cover{background:#111;color:#111} .xp-poem{font:500 1.1rem/1.6 var(--font-heading);min-height:1.6rem}
+    .xp-roll-wrap{overflow-x:auto;margin:.6rem 0} .xp-roll{display:grid;gap:2px;min-width:34rem} .xp-roll-k{font-size:.7rem;color:var(--muted);align-self:center}
+    .xp-rc{min-height:24px;border:1px solid var(--border);background:var(--bg);border-radius:2px;padding:0;cursor:pointer} .xp-rc.bar{border-left:2px solid var(--muted)}
+    .xp-rc.on{background:var(--accent);border-color:var(--accent)} .xp-rc.now{outline:2px solid var(--text)} .xp-chords{font:600 1.05rem var(--font-heading);margin:.5rem 0}
+    .xp-lane2{margin:.5rem 0} .xp-lane-k{font-size:.78rem;color:var(--muted);display:block;margin-bottom:.2rem} .xp-lane-steps{display:grid;grid-template-columns:repeat(16,1fr);gap:2px}
+    .xp-ls{min-height:28px;border:1px solid var(--border);background:var(--bg);border-radius:2px;padding:0;cursor:pointer} .xp-ls.bar{border-left:2px solid var(--muted)} .xp-ls.on{background:var(--accent);border-color:var(--accent)} .xp-ls.now{outline:2px solid var(--text)}
+    .xp-treat{list-style:none;margin:.5rem 0} .xp-treat li{padding:.4rem 0;border-bottom:1px solid var(--border);font-size:.92rem}
+    .xp-bk{margin:1.2rem 0;break-inside:avoid} .xp-bk h4{font:600 1.1rem var(--font-heading)} .xp-bk p,.xp-bk li{font-size:.92rem;margin:.3rem 0} .xp-bk ol{margin-left:1.2rem}
+    @media print{header,.sil-header,.skip-link,.bc,footer,.xp-noprint{display:none!important} .xp-breakb{break-before:page} main{padding:0;max-width:none}}
     footer{border-top:1px solid var(--border);padding:1.2rem 1.5rem;font-size:.78rem;color:var(--muted);text-align:center}
   </style>
   <link rel="stylesheet" href="/assets/css/header.css">
@@ -83,39 +103,75 @@
 <body>
 <script src="/assets/js/site-header.js"></script>
 
-<nav aria-label="Breadcrumb" class="bc"><ol><li><a href="/dashboard/">Dashboard</a></li><li>Experiments</li></ol></nav>
+<nav aria-label="Breadcrumb" class="bc"><ol><li><a href="/dashboard/">Dashboard</a></li><li>Within Limits</li></ol></nav>
 
 <main id="xpRoot" aria-live="polite"></main>
 
 <footer>Anything you load or record here stays in your browser. Your notes and ticks are kept on this device only.</footer>
 
 <script type="module">
-import { CATEGORIES, NEEDS, EXPERIMENTS, byId } from '/assets/js/experiments/catalog.js';
+import { CATEGORIES, NEEDS, EXPERIMENTS, byId, COURSE, METHOD, UNITS, PATH } from '/assets/js/experiments/catalog.js';
 import { buildTool, el } from '/assets/js/experiments/tools.js';
 
 const root = document.getElementById('xpRoot');
 const KEY_DONE = 'sil.exp.done', NOTE = id => `sil.exp.note.${id}`;
 const read = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
 const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* private window */ } };
-let filter = { cat: 'all', needs: 'all' };
+let filter = { needs: 'all' };
 
 function list() {
   const done = new Set(read(KEY_DONE, []));
-  const shown = EXPERIMENTS.filter(e => (filter.cat === 'all' || e.category === filter.cat) && (filter.needs === 'all' || e.needs === filter.needs));
-  const chip = (group, key, label) => el('button', { type: 'button', class: 'chip', 'aria-pressed': String(filter[group] === key), onclick: () => { filter[group] = key; list(); } }, label);
-  const surprise = el('button', { type: 'button', class: 'xp-btn', id: 'xpSurprise', onclick: () => {
-    const pool = (shown.length ? shown : EXPERIMENTS); const fresh = pool.filter(e => !done.has(e.id)); const pick = (fresh.length ? fresh : pool)[Math.floor(Math.random() * (fresh.length || pool.length))];
-    location.hash = '#/' + pick.id;
-  } }, 'Surprise me');
+  const next = PATH.find(e => !done.has(e.id));
+  const chip = (key, label) => el('button', { type: 'button', class: 'chip', 'aria-pressed': String(filter.needs === key), onclick: () => { filter.needs = key; list(); } }, label);
+  const pick = () => { const pool = PATH.filter(e => (filter.needs === 'all' || e.needs === filter.needs)); const fresh = pool.filter(e => !done.has(e.id)); const from = fresh.length ? fresh : pool; return from[Math.floor(Math.random() * from.length)]; };
+  const pct = Math.round(100 * done.size / PATH.length);
   root.replaceChildren(
-    el('div', { class: 'ph' }, el('h2', {}, 'Experiments'),
-      el('p', {}, 'Structured, specific experiments for creative blocks. Each has a clear limit and asks you to set up a process, then let the outcome surprise you. Do them in any order, here with the built-in tools, or on your own with dice and paper.')),
-    el('div', { class: 'xp-top' }, surprise, el('span', { class: 'xp-count' }, `${done.size} of ${EXPERIMENTS.length} done`)),
-    el('div', { class: 'xp-filters', role: 'group', 'aria-label': 'Category' }, chip('cat', 'all', 'All'), ...Object.entries(CATEGORIES).map(([k, v]) => chip('cat', k, v))),
-    el('div', { class: 'xp-filters', role: 'group', 'aria-label': 'What you need' }, chip('needs', 'all', 'Anything'), ...Object.entries(NEEDS).map(([k, v]) => chip('needs', k, v))),
-    el('div', { class: 'xp-grid' }, shown.map(e => el('a', { class: 'xp-card' + (done.has(e.id) ? ' done' : ''), href: '#/' + e.id },
-      el('h3', {}, e.title), el('p', {}, e.summary), el('small', {}, `${CATEGORIES[e.category]} · ${NEEDS[e.needs]} · ${e.minutes} min`)))),
-    shown.length ? null : el('p', { class: 'xp-hint' }, 'Nothing matches those two filters. Try "Anything".'));
+    el('div', { class: 'ph' }, el('h2', {}, COURSE.name), el('p', {}, COURSE.tagline), el('p', { style: 'margin-top:.5rem' }, COURSE.intro)),
+    el('div', { class: 'xp-prog', role: 'img', 'aria-label': `${done.size} of ${PATH.length} experiments done` }, el('div', { class: 'xp-prog-bar' }, el('span', { style: `width:${pct}%` })), el('span', { class: 'xp-count' }, `${done.size} of ${PATH.length} done`)),
+    el('div', { class: 'xp-top' },
+      next ? el('a', { class: 'xp-btn', id: 'xpContinue', href: '#/' + next.id, style: 'text-decoration:none;display:inline-flex;align-items:center' }, done.size ? 'Continue: ' + next.title : 'Begin: ' + next.title) : el('span', { class: 'xp-hint' }, 'You have done them all. Do any again.'),
+      el('button', { type: 'button', class: 'xp-btn xp-btn--alt', id: 'xpSurprise', onclick: () => { const e = pick(); if (e) location.hash = '#/' + e.id; } }, 'Surprise me'),
+      el('a', { class: 'xp-btn xp-btn--alt', href: '#/book', style: 'text-decoration:none;display:inline-flex;align-items:center' }, 'Do it on paper')),
+    el('a', { class: 'xp-card xp-method', href: '#/method' }, el('h3', {}, 'Start here: ' + METHOD.title), el('p', {}, 'Five short steps. Read once, then use them every time.'), el('small', {}, '2 minutes')),
+    el('div', { class: 'xp-filters', role: 'group', 'aria-label': 'What you need' }, chip('all', 'Anything'), ...Object.entries(NEEDS).map(([k, v]) => chip(k, v))),
+    ...UNITS.map(u => {
+      const shown = u.experiments.filter(e => filter.needs === 'all' || e.needs === filter.needs);
+      if (!shown.length) return null;
+      const n = u.experiments.filter(e => done.has(e.id)).length;
+      return el('section', { class: 'xp-unit', 'aria-labelledby': 'u-' + u.id },
+        el('h3', { class: 'xp-unit-h', id: 'u-' + u.id }, `Unit ${u.number}: ${u.title}`, el('span', { class: 'xp-count' }, ` ${n} of ${u.experiments.length}`)),
+        el('p', { class: 'xp-hint' }, u.intro),
+        el('div', { class: 'xp-grid' }, shown.map(e => el('a', { class: 'xp-card' + (done.has(e.id) ? ' done' : ''), href: '#/' + e.id },
+          el('h3', {}, e.title), el('p', {}, e.summary), el('small', {}, `${NEEDS[e.needs]} · ${e.minutes} min`)))));
+    }));
+}
+
+function method() {
+  root.replaceChildren(
+    el('a', { class: 'xp-back', href: '#/' }, '← ' + COURSE.name),
+    el('div', { class: 'ph' }, el('h2', {}, METHOD.title), el('p', {}, 'The same five steps apply to every experiment in this course.')),
+    el('ol', { class: 'xp-method-steps' }, METHOD.steps.map(([h, t]) => el('li', {}, el('strong', {}, h), el('p', {}, t)))),
+    el('p', { class: 'xp-hint' }, 'Your predictions, records and conclusions are kept on this device only. They are not sent anywhere.'),
+    el('p', {}, el('a', { class: 'xp-btn', href: '#/' + PATH[0].id, style: 'text-decoration:none;display:inline-block' }, 'Begin with ' + PATH[0].title)));
+  window.scrollTo(0, 0);
+}
+
+// A plain, printable version of the whole course: the same protocols with no tools, for working on paper.
+function book() {
+  const list2 = items => el('ul', {}, items.map(i => el('li', {}, i)));
+  root.replaceChildren(
+    el('a', { class: 'xp-back xp-noprint', href: '#/' }, '← ' + COURSE.name),
+    el('div', { class: 'ph' }, el('h2', {}, COURSE.name), el('p', {}, COURSE.tagline), el('p', { class: 'xp-noprint' }, el('button', { type: 'button', class: 'xp-btn', id: 'xpPrint', onclick: () => window.print() }, 'Print or save as PDF'))),
+    el('h3', { class: 'xp-h' }, METHOD.title), el('ol', {}, METHOD.steps.map(([h, t]) => el('li', {}, el('strong', {}, h + '. '), t))),
+    ...UNITS.flatMap(u => [el('h3', { class: 'xp-h xp-breakb' }, `Unit ${u.number}: ${u.title}`), ...u.experiments.map(e => el('article', { class: 'xp-bk' },
+      el('h4', {}, e.title), el('p', {}, el('em', {}, e.summary)),
+      el('p', {}, el('strong', {}, 'Question. '), e.question), el('p', {}, el('strong', {}, 'Hypothesis. '), e.hypothesis),
+      el('p', {}, el('strong', {}, 'Held fixed: '), e.variables.fixed.join('; '), '. ', el('strong', {}, 'Changed: '), e.variables.changed.join('; '), '. ', el('strong', {}, 'Measured: '), e.variables.measured.join('; '), '.'),
+      el('p', {}, el('strong', {}, 'Parameters: '), e.parameters.map(([k, v]) => `${k}: ${v}`).join(' · ')),
+      el('ol', {}, e.procedure.map(x => el('li', {}, x))),
+      el('p', {}, el('strong', {}, 'Stop: '), e.stop), el('p', {}, el('strong', {}, 'On paper: '), e.solo),
+      el('p', {}, el('strong', {}, 'Record: '), e.trials.join(' · ')), el('p', {}, el('strong', {}, 'Conclusion: '), e.reflect)))]));
+  window.scrollTo(0, 0);
 }
 
 function detail(e) {
@@ -145,10 +201,10 @@ function detail(e) {
   const mark = el('button', { type: 'button', class: 'xp-btn xp-btn--alt', onclick: () => {
     const d = new Set(read(KEY_DONE, [])); d.has(e.id) ? d.delete(e.id) : d.add(e.id); write(KEY_DONE, [...d]); mark.textContent = d.has(e.id) ? 'Done ✓ (tap to undo)' : 'Mark as done';
   } }, done.has(e.id) ? 'Done ✓ (tap to undo)' : 'Mark as done');
-  const idx = EXPERIMENTS.indexOf(e), list2 = items => el('ul', { class: 'xp-vlist' }, items.map(i => el('li', {}, i)));
+  const idx = PATH.indexOf(e), list2 = items => el('ul', { class: 'xp-vlist' }, items.map(i => el('li', {}, i)));
 
   root.replaceChildren(
-    el('a', { class: 'xp-back', href: '#/' }, '← All experiments'),
+    el('a', { class: 'xp-back', href: '#/' }, '← ' + COURSE.name),
     el('div', { class: 'ph' }, el('h2', {}, e.title), el('p', {}, e.summary)),
     el('p', { class: 'xp-meta-line' }, `${CATEGORIES[e.category]} · ${NEEDS[e.needs]} · about ${e.minutes} minutes`),
     el('div', { class: 'xp-box', id: 'xpQuestion' }, el('b', {}, 'Question'), e.question),
@@ -170,15 +226,15 @@ function detail(e) {
     el('table', { class: 'xp-trials' }, el('thead', {}, el('tr', {}, el('th', {}, 'Trial'), el('th', {}, 'Surprise 1–5'), el('th', {}, 'Observation'))), el('tbody', {}, trialRows)),
     el('h3', { class: 'xp-h' }, 'Conclusion'), el('p', { class: 'xp-hint' }, 'Was the hypothesis supported? ' + e.reflect), verdict, ctext,
     el('div', { class: 'xp-done' }, mark),
-    el('p', { class: 'xp-hint', style: 'margin-top:1.5rem' }, el('a', { href: '#/' + EXPERIMENTS[(idx + 1) % EXPERIMENTS.length].id }, 'Next in the list →'), ' · ', el('a', { href: '#/' }, 'Choose another')));
+    el('p', { class: 'xp-hint', style: 'margin-top:1.5rem' }, el('a', { href: '#/' + PATH[(idx + 1) % PATH.length].id }, 'Next in the course →'), ' · ', el('a', { href: '#/' }, 'Choose another')));
   window.scrollTo(0, 0);
 }
 
 function route() {
   const id = location.hash.replace(/^#\/?/, '');
   const e = id && byId(id);
-  document.title = (e ? e.title + ' — ' : '') + 'Experiments — Sensory Intelligence Lab';
-  e ? detail(e) : list();
+  document.title = (e ? e.title + ' — ' : '') + COURSE.name + ' — Sensory Intelligence Lab';
+  if (id === 'method') method(); else if (id === 'book') book(); else e ? detail(e) : list();
 }
 window.addEventListener('hashchange', route);
 route();

@@ -11,6 +11,7 @@ content must not load executable code from third-party CDNs.
 | resonance-audio.min.js | resonance-audio | 1.0.0 | Apache-2.0 (resonance-audio-LICENSE.txt) | https://www.npmjs.com/package/resonance-audio |
 | compromise.js | compromise | 14.14.0 | MIT (compromise-LICENSE.txt) | https://www.npmjs.com/package/compromise |
 | chart.umd.js | chart.js | 4.4.1 | MIT (chart-LICENSE.txt) | https://www.npmjs.com/package/chart.js |
+| pdf.min.js, pdf.worker.min.js | pdfjs-dist (loaded only by the blackout-poetry experiment; the PDF is read in the browser and never uploaded) | 4.10.38 | Apache-2.0 (pdfjs-LICENSE.txt) | https://www.npmjs.com/package/pdfjs-dist |
 
 To update: install the new version with npm in a scratch folder, copy the file named above,
 update the version above, and re-run `npm test`.
