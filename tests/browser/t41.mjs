@@ -1,0 +1,27 @@
+// The app frame: a bottom tab bar, a slim top bar with back, and the website header reduced to the bell.
+import {launch,newPage} from './harness.mjs';
+const {browser,BASE,server}=await launch();
+let fail=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fail++; };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const A=await newPage(await browser.createBrowserContext(),BASE,{tables:{my_therapists:[],messages:[]}}); const page=A.page;
+await page.evaluateOnNewDocument(()=>{ window.SIL_APP=true; });
+A.errors.length=0;
+const mount=async()=>{ await page.waitForSelector('.sil-header',{timeout:20000}); await page.evaluate(async()=>{ const m=await import('/assets/js/app/shell.js'); m.mountShell(); }); await sleep(300); };
+await page.goto(`${BASE}/dashboard/`,{waitUntil:'domcontentloaded'}); await mount();
+ok((await page.$$eval('.app-tabs a',a=>a.length))===5,'five tabs');
+ok(await page.$eval('.app-tabs a[aria-current=page]',a=>a.dataset.tab)==='home','Home is the current tab on the dashboard');
+ok(await page.$eval('.sil-header__wordmark',e=>getComputedStyle(e).display)==='none'&&await page.$eval('.sil-header__nav',e=>getComputedStyle(e).display)==='none','the website header links are hidden');
+ok(await page.$eval('.app-back',e=>e.hidden),'no back button on a tab root');
+ok(/dashboard/i.test(await page.$eval('.app-title',e=>e.textContent))||(await page.$eval('.app-title',e=>e.textContent)).length>0,'the top bar shows a title');
+ok(await page.$eval('.app-tabs',e=>getComputedStyle(e).position)==='fixed','the tab bar is fixed at the bottom');
+await page.focus('input,textarea,select').catch(()=>{});
+await page.goto(`${BASE}/experiments/`,{waitUntil:'domcontentloaded'}); await mount();
+ok(await page.$eval('.app-tabs a[aria-current=page]',a=>a.dataset.tab)==='course','Course is current on the minicourse');
+await page.evaluate(()=>{ location.hash='#/method'; }); await sleep(400);
+ok(!(await page.$eval('.app-back',e=>e.hidden)),'a back button appears inside a course page');
+await page.goto(`${BASE}/messages/`,{waitUntil:'domcontentloaded'}); await mount();
+ok(await page.$eval('.app-tabs a[aria-current=page]',a=>a.dataset.tab)==='sessions'&&!(await page.$eval('.app-back',e=>e.hidden)),'messages sits under Sessions and has a back button');
+await page.goto(`${BASE}/account/`,{waitUntil:'domcontentloaded'}); await mount();
+ok(await page.$('.app-signout')!==null,'the account page has a sign out button');
+ok(A.errors.filter(e=>!/Failed to load resource|onAuthStateChange/.test(e)).length===0,'no page errors '+A.errors.join('|'));
+await browser.close(); server.close(); process.exit(fail?1:0);
