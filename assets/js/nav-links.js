@@ -6,6 +6,7 @@
  * The number of unread messages is shown beside the link. Nothing is shown to anyone else.
  * The role is remembered for the tab so later pages do not flicker; it is refreshed every time.
  */
+import { mountBell } from './notifications.js';
 const CACHE_KEY = 'sil-nav-roles';
 
 const read = () => { try { return JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null'); } catch { return null; } };
@@ -57,5 +58,6 @@ export async function mountRoleLinks(sb, user) {
     }
     write(roles);
     render(roles);
+    await mountBell(sb, user, roles);
   } catch (e) { console.warn('[nav] role links skipped:', e.message); }
 }

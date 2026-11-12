@@ -175,7 +175,21 @@ export async function mountClientPage(root) {
       client.intake_requested_at = new Date().toISOString();
     };
     const appendFamily = async () => {
-      const fcopy = copies.find(c => c.category === 'family'); if (!fcopy) return;
+      const fcopy = copies.find(c => c.category === 'family');
+      if (!fcopy) {
+        if (!active) return;
+        const sec = document.createElement('section'); sec.style.marginTop = '2rem'; sec.id = 'familyAsk';
+        sec.innerHTML = `<h2 class="th-h2">Family history</h2><p class="th-muted">${client.family_requested_at ? `You asked ${esc(name)} on ${esc(day(client.family_requested_at))}. Nothing has arrived yet.` : `Optionally ask ${esc(name)} for a family history: the significant people in their life, how they relate and what matters. It is separate from the intake form. They choose what to write and whether to send it, and only you and they can read it.`}</p>
+          <button type="button" class="action-btn" id="askFamily">${client.family_requested_at ? 'Send a reminder' : 'Request family history form'}</button> <p class="msg" id="askFamMsg" role="status"></p>`;
+        box.appendChild(sec);
+        sec.querySelector('#askFamily').onclick = async () => {
+          const b = sec.querySelector('#askFamily'), m = sec.querySelector('#askFamMsg'); b.disabled = true;
+          const { error: e } = await sb.rpc('request_family', { p_link: linkId });
+          if (e) { m.textContent = e.message; m.className = 'msg show error'; b.disabled = false; return; }
+          client.family_requested_at = new Date().toISOString(); intakeMounted = false; showIntake();
+        };
+        return;
+      }
       try {
         const session = await ensureVaultReady(), fam = await openFamily(session, { ...fcopy, link_id: linkId });
         const sec = document.createElement('section'); sec.style.marginTop = '2rem'; sec.id = 'familySection';

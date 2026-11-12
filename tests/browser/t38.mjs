@@ -15,8 +15,15 @@ await page.waitForSelector('.vault-status',{timeout:30000});
 
 await page.evaluate(()=>{ window.__mount=async()=>{ document.getElementById('familyApp')?.remove(); const d=document.createElement('div'); d.id='familyApp'; document.body.append(d); window.confirm=()=>true;
   const m=await import('/assets/js/family/page.js'); await m.mountFamily(d); }; });
+await page.evaluate(()=>window.__mount()); await sleep(800);
+ok(/Nothing to fill in/.test(await page.$eval('#familyApp',e=>e.innerText))&&await page.$('#fhAdd')===null,'with no therapist, there is no family form');
+await page.evaluate(()=>{ window.__tbl.my_therapists.push({link_id:'L1',status:'active',user_id:'t1',display_name:'Dr Rivera'}); });
+await page.evaluate(()=>window.__mount()); await sleep(800);
+ok(/Nothing to fill in/.test(await page.$eval('#familyApp',e=>e.innerText))&&await page.$('#fhAdd')===null,'a connected therapist who has not asked: still no form');
+await page.evaluate(()=>{ window.__tbl.my_therapists[0].family_requested_at=new Date().toISOString(); });
 await page.evaluate(()=>window.__mount()); await page.waitForSelector('#fhAdd',{timeout:20000});
-ok(/Private to you/.test(await page.$eval('#familyApp',e=>e.innerText))&&/Keeping this private/.test(await page.$eval('#fhShare',e=>e.innerText)),'private by default, with no therapist connected');
+ok(/Dr Rivera/.test(await page.$eval('#fhShare',e=>e.innerText)),'once asked, the form opens and names the therapist');
+ok(/Private to you/.test(await page.$eval('#familyApp',e=>e.innerText)),'it says it is private to the client');
 await page.type('#fhOverview','Two houses, one dog.');
 await page.click('#fhAdd'); await sleep(200);
 await page.type('.fh-card input[type=text]','Rosa');
@@ -26,12 +33,11 @@ const raw=await page.evaluate(()=>JSON.stringify(window.__tbl.family_history));
 ok(raw.length>20&&!/Rosa|Two houses/.test(raw),'what is saved is encrypted, with no readable text');
 await page.evaluate(()=>window.__mount()); await page.waitForSelector('#fhAdd',{timeout:20000});
 ok(await page.$eval('#fhOverview',e=>e.value)==='Two houses, one dog.'&&/Rosa/.test(await page.$eval('.fh-card summary',e=>e.textContent)),'it opens again with the same content');
-ok(await page.$('#fhSend')===null,'nothing can be sent without a connected therapist');
 
 // connect a therapist: the send step appears, and sending is deliberate
 const uid=await page.evaluate(()=>window._currentUser.id);
 const my=await page.evaluate(async()=>{ const gate=await import('/assets/js/vault/gate.js'); const s=await gate.ensureVaultReady(); const k=s.publicKeys.enc; return {kty:k.kty,crv:k.crv,x:k.x,y:k.y}; });
-await page.evaluate((enc)=>{ window.__tbl.my_therapists.push({link_id:'L1',status:'active',user_id:'t1',display_name:'Dr Rivera'}); window.__tbl.my_therapist_keys=[{link_id:'L1',therapist_id:'t1',public_enc:enc,fingerprint:'abcd'}]; localStorage.setItem('__state',JSON.stringify({db:window.__db,tbl:window.__tbl})); },my);
+await page.evaluate((enc)=>{ window.__tbl.my_therapist_keys=[{link_id:'L1',therapist_id:'t1',public_enc:enc,fingerprint:'abcd'}]; localStorage.setItem('__state',JSON.stringify({db:window.__db,tbl:window.__tbl})); },my);
 await page.evaluate(()=>window.__mount()); await page.waitForSelector('#fhShare',{timeout:20000}); await sleep(500);
 ok(/Not sent to Dr Rivera/.test(await page.$eval('#fhShare',e=>e.innerText)),'it says it has not been sent');
 ok((await page.evaluate(()=>window.__tbl.shared_copies.length))===0,'nothing was sent just by connecting');
