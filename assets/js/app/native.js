@@ -4,6 +4,10 @@
  * the back button, the status bar, links that leave the app, and reminder taps.
  */
 import { refreshReminder, listenForTaps } from './reminders.js';
+import { mountShell } from './shell.js';
+
+// The app frame (tab bar, top bar) is for the installed app only; SIL_APP is set by the app build.
+if (window.SIL_APP) { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => mountShell()); else mountShell(); }
 
 const cap = window.Capacitor;
 if (cap?.isNativePlatform?.()) {
