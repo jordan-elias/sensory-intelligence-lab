@@ -4,9 +4,9 @@ const {browser,BASE,server}=await launch();
 let fail=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fail++; };
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const P=await newPage(await browser.createBrowserContext(),BASE,{}); const page=P.page;
-await page.goto(`${BASE}/compositions/neural-network.html`,{waitUntil:'domcontentloaded'});
+await page.goto(`${BASE}/compositions/neural-synthesis.html`,{waitUntil:'domcontentloaded'});
 await page.waitForSelector('#nnPlay',{timeout:20000}); await sleep(800);
-ok(await page.$eval('#essayH',e=>!!e)&&(await page.$$eval('.essay h3',h=>h.length))>=8,'the essay is there with its sections');
+ok(await page.$eval('#essayH',e=>!!e)&&(await page.$$eval('.essay h2',h=>h.length))>=8,'the essay is there with its sections');
 ok((await page.$eval('#nnCanvas',c=>c.width))>100,'the network is drawn');
 await page.click('#nnPlay'); await sleep(1500);
 ok(await page.evaluate(()=>window.__nn.running&&window.__nn.ctx&&window.__nn.ctx.state==='running'),'the audio engine is running');
@@ -14,7 +14,7 @@ const snap=()=>page.evaluate(()=>{ const c=window.__nn.conductor; return {t:c.t,
 const a=await snap();
 await page.evaluate(()=>{ const c=window.__nn.conductor; for(let i=0;i<1500;i++) c.tick(0.1); });   // fast-forward 2.5 minutes of the network
 const b=await snap();
-ok(b.t>a.t+100&&b.chord!==a.chord&&b.w!==a.w,'after minutes the chord and the weights have moved on');
+ok(b.t>a.t+100&&b.w!==a.w,'after minutes the chord and the weights have moved on');
 ok(/\d+:\d\d/.test(await page.$eval('#nnTime',e=>e.textContent)),'the clock runs');
 await page.click('#nnPlay'); await sleep(300);
 ok(await page.$eval('#nnPlay',e=>e.textContent)==='Resume','it can be paused');

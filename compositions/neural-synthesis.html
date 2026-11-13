@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <script src="/assets/js/audio/safe-output.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Network Learns to Sing — a neural network you can hear, inspect and change</title>
+  <title>Neural Synthesis — a neural network you can hear, inspect and change</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" type="image/png" href="/images/favicon.png">
   <link rel="apple-touch-icon" href="/images/favicon.png">
@@ -12,7 +12,7 @@
   <script src="/dashboard/auth-guard.js" type="module"></script>
   <script type="module">
   import { applyGatingOnReady } from '/assets/js/gating.js';
-  applyGatingOnReady({ targetSelector: '.nn-app', moduleName: 'neural-network' });
+  applyGatingOnReady({ targetSelector: '.nn-app', moduleName: 'neural-synthesis' });
   </script>
   <link href="/assets/css/fonts.css" rel="stylesheet">
   <style>
@@ -103,10 +103,10 @@
 </head>
 <body>
 <script src="/assets/js/site-header.js"></script>
-<nav aria-label="Breadcrumb" class="bc"><ol><li><a href="/dashboard/">Dashboard</a></li><li><a href="/compositions/">Compositions</a></li><li>The Network Learns to Sing</li></ol></nav>
+<nav aria-label="Breadcrumb" class="bc"><ol><li><a href="/dashboard/">Dashboard</a></li><li><a href="/compositions/">Compositions</a></li><li>Neural Synthesis</li></ol></nav>
 <main>
   <div class="ph">
-    <h2>The Network Learns to Sing</h2>
+    <h2>Neural Synthesis</h2>
     <p>A small neural network that never finishes learning, and whose computation is the music. Select any neuron or connection to see exactly how it weighs its inputs, change it, and hear what happens. Underneath the sound is a real network, trained by the same method as the large ones. A long essay below explains how they work.</p>
   </div>
 
@@ -392,7 +392,8 @@ const NOTE = ['C','C♯','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
 const $ = id => document.getElementById(id), cv = $('nnCanvas');
 let seed = Math.floor(Math.random() * 1e6), t0 = 0, last = null, frame = 0;
 const state = { sel: null };
-const engine = new NeuralEngine({ seed, volume: 0.6, onFrame: s => { last = s; paint(); frame++; if (frame % 3 === 0) ui.refresh(); } });
+let ui = null;
+const engine = new NeuralEngine({ seed, volume: 0.6, onFrame: s => { last = s; paint(); frame++; if (frame % 3 === 0 && ui) ui.refresh(); } });
 const status = a => { $('nnLog').textContent = a; };
 const params = net => net.W.reduce((n, L, l) => n + L.reduce((m, row, j) => m + row.reduce((k, w, i) => k + net.M[l][j][i], 0) + 1, 0), 0);
 function paint() {
@@ -400,9 +401,9 @@ function paint() {
   draw(cv, c.net, s.acts, c.lossNow, state.sel);
   $('nnLoss').textContent = c.lossNow.toFixed(3); $('nnKey').textContent = `${NOTE[c.root]} ${c.mode}`; $('nnEpisode').textContent = c.episode; $('nnParams').textContent = params(c.net);
   if (engine.running) { const sec = Math.floor((performance.now() - t0) / 1000); $('nnTime').textContent = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`; }
-  ui.syncKey();
+  if (ui) ui.syncKey();
 }
-const ui = mountUI({ engine, canvas: cv, state, onSelect: () => paint() });
+ui = mountUI({ engine, canvas: cv, state, onSelect: () => paint() });
 mountReference($('nnRef'));
 const play = $('nnPlay');
 play.onclick = async () => {
@@ -414,7 +415,7 @@ $('nnNew').onclick = () => { seed = Math.floor(Math.random() * 1e6); engine.rese
 addEventListener('resize', paint); paint();
 // while paused the picture still follows selections and edits
 setInterval(() => { if (!engine.running) { paint(); ui.refresh(); } }, 500);
-if (window.silAudio?.mediaSession) window.silAudio.mediaSession({ title: 'The Network Learns to Sing', play: () => engine.running || play.click(), pause: () => engine.running && play.click() });
+if (window.silAudio?.mediaSession) window.silAudio.mediaSession({ title: 'Neural Synthesis', play: () => engine.running || play.click(), pause: () => engine.running && play.click() });
 window.__nn = engine; window.__nnui = ui;
 </script>
 </body>

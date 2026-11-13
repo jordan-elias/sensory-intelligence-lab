@@ -46,7 +46,7 @@ ok(await P2.page.evaluate(()=>!!document.getElementById('silHeadphoneNotice')),'
 await P2.page.evaluate(()=>{ const c=new AudioContext(); silAudio.busFor(c); });
 ok(await P2.page.evaluate(()=>document.querySelectorAll('#silHeadphoneNotice').length===1),'only one note at a time');
 
-const pages=['breathing/index.html','cocktail-party-problem/index.html','compositions/chance.html','compositions/neural-network.html','compositions/oramics.html','compositions/phase-machine.html','compositions/rooms.html','compositions/semantic-synth.html','compositions/waves.html','ear-training/index.html','journal/index.html','regulation/index.html','sequencer/index.html','soundscape-machine/index.html','spatial-game/index.html','creature/index.html'];
+const pages=['breathing/index.html','cocktail-party-problem/index.html','compositions/chance.html','compositions/neural-synthesis.html','compositions/oramics.html','compositions/phase-machine.html','compositions/rooms.html','compositions/semantic-synth.html','compositions/waves.html','ear-training/index.html','journal/index.html','regulation/index.html','sequencer/index.html','soundscape-machine/index.html','spatial-game/index.html','creature/index.html'];
 for(const p of pages){
   const Q=await newPage(await browser.createBrowserContext(),BASE,{});
   await Q.page.goto(`${BASE}/${p}`,{waitUntil:'domcontentloaded'}).catch(()=>{});

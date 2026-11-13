@@ -35,12 +35,12 @@ export class NeuralEngine {
   _build() {
     const ctx = this.ctx = new (window.AudioContext || window.webkitAudioContext)(), c = this.conductor;
     this.master = ctx.createGain(); this.master.gain.value = this.volume; this.master.connect(ctx.destination);
+    for (const v of VOICES) { const b = ctx.createGain(); b.gain.value = this.levels[v]; b.connect(this.master); this.buses[v] = b; }
     // a feedback delay and a dark pad of echoes for the melody
     this.delay = ctx.createDelay(2); this.delay.delayTime.value = 0.43; const fb = ctx.createGain(); fb.gain.value = 0.42; const wet = ctx.createGain(); wet.gain.value = 0.35;
     const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1800;
     this.delay.connect(lp).connect(fb).connect(this.delay); lp.connect(wet).connect(this.buses.melody);
     this.send = ctx.createGain(); this.send.gain.value = 0.6; this.send.connect(this.delay); this.send.connect(this.buses.melody);
-    for (const v of VOICES) { const b = ctx.createGain(); b.gain.value = this.levels[v]; b.connect(this.master); this.buses[v] = b; }
     const mk = (type, freq, pan = 0, bus = this.master) => { const o = ctx.createOscillator(), g = ctx.createGain(), p = ctx.createStereoPanner ? ctx.createStereoPanner() : null; o.type = type; o.frequency.value = freq; g.gain.value = 0; p ? (p.pan.value = pan, o.connect(g).connect(p).connect(bus)) : o.connect(g).connect(bus); o.start(); return { o, g, p }; };
     const rootHz = 55 * Math.pow(2, c.root / 12);
     this.drone = HARM.slice(0, MAX_HIDDEN[0]).map((h, i) => mk('sine', rootHz * h, (i % 2 ? 1 : -1) * 0.25, this.buses.drone));
