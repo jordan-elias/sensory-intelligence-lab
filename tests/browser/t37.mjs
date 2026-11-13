@@ -10,7 +10,7 @@ await page.goto(`${BASE}/experiments/`,{waitUntil:'domcontentloaded'}); await pa
 const n=await page.$$eval('.xp-unit .xp-card',c=>c.length);
 ok(n>=20,'the list shows every experiment ('+n+')');
 ok(/Within Limits/.test(await page.$eval('.ph h2',e=>e.textContent)),'the course has its name');
-ok((await page.$$eval('.xp-unit',u=>u.length))===6,'the course is laid out in six units');
+ok((await page.$$eval('.xp-unit',u=>u.length))===7,'the course is laid out in seven units');
 const f=await page.$$eval('.xp-unit:nth-of-type(4) .xp-card h3',c=>c.map(x=>x.textContent));
 ok(await page.$$eval('.xp-unit .xp-card h3',c=>c.some(x=>x.textContent==='Chop and reorder')),'units list their experiments');
 ok(/Begin:/.test(await page.$eval('#xpContinue',e=>e.textContent)),'the course offers a place to begin');
@@ -74,6 +74,9 @@ await page.goto(`${BASE}/experiments/#/method`,{waitUntil:'domcontentloaded'}); 
 ok((await page.$$eval('.xp-method-steps li',l=>l.length))===5,'the method lesson has five steps');
 await page.goto(`${BASE}/experiments/#/book`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('.xp-bk');
 ok((await page.$$eval('.xp-bk',l=>l.length))>=30&&await page.$('#xpPrint')!==null,'the printable book lists every protocol');
+// notebook
+await page.goto(`${BASE}/experiments/#/notebook`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('#xpNotebookText');
+ok(/Within Limits: my notebook/.test(await page.$eval('#xpNotebookText',e=>e.textContent)),'the notebook page shows the notebook');
 // writing tools
 await page.goto(`${BASE}/experiments/#/borrowed-end-words`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('#xpWords');
 await page.type('#xpWords','The only way out is through the door'); await page.click('#xpFrame');
