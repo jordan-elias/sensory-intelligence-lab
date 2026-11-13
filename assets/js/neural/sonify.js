@@ -13,12 +13,12 @@ export function degreeFreq(root, mode, degree, octave = 0, base = 110) {
 }
 
 /** Drone partial amplitudes from the first hidden layer: the louder the neuron, the louder its harmonic. */
-export const droneAmps = (acts, { floor = 0.015, scale = 0.11 } = {}) => acts.map(a => floor + scale * Math.abs(a));
+export const droneAmps = (acts, { floor = 0.015, scale = 0.11 } = {}) => acts.map(a => floor + scale * Math.min(1, Math.abs(a)));
 
 /** The shimmer layer: second hidden layer neurons become inharmonic upper partials, stretched when tension is high. */
 export function shimmerPartials(acts, root, tension) {
   const stretch = 1 + 0.05 * Math.min(1, Math.max(0, tension));
-  return acts.map((a, i) => ({ freq: 220 * Math.pow(2, root / 12) * (2 + i * 1.5) * Math.pow(stretch, i + 1), amp: 0.004 + 0.02 * Math.abs(a), pan: Math.max(-1, Math.min(1, a)) }));
+  return acts.map((a, i) => ({ freq: 220 * Math.pow(2, root / 12) * (2 + i * 1.5) * Math.pow(stretch, i + 1), amp: 0.004 + 0.02 * Math.min(1, Math.abs(a)), pan: Math.max(-1, Math.min(1, a)) }));
 }
 
 /** Chooses a scale degree by sampling the output layer's probabilities. Higher heat means more adventurous choices. */

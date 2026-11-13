@@ -275,28 +275,28 @@
 
 [[redirects]]
   from = "/neural-synthesis"
-  to   = "/compositions/neural-network.html"
-  status = 301
+  to   = "/compositions/neural-synthesis.html"
+  status = 200
 
 [[redirects]]
   from = "/neural-synthesis/"
-  to   = "/compositions/neural-network.html"
-  status = 301
-
-[[redirects]]
-  from = "/compositions/neural-synthesis.html"
-  to   = "/compositions/neural-network.html"
-  status = 301
+  to   = "/compositions/neural-synthesis.html"
+  status = 200
 
 [[redirects]]
   from = "/neural-network"
-  to   = "/compositions/neural-network.html"
-  status = 200
+  to   = "/neural-synthesis"
+  status = 301
 
 [[redirects]]
   from = "/neural-network/"
-  to   = "/compositions/neural-network.html"
-  status = 200
+  to   = "/neural-synthesis"
+  status = 301
+
+[[redirects]]
+  from = "/compositions/neural-network.html"
+  to   = "/compositions/neural-synthesis.html"
+  status = 301
 
 [[redirects]]
   from = "/semantic-synth"

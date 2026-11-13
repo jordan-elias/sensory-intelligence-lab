@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="/assets/js/audio/safe-output.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Network Learns to Sing — a neural network you can hear, inspect and change</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <link rel="apple-touch-icon" href="/images/favicon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <script src="/dashboard/auth-guard.js" type="module"></script>
+  <script type="module">
+  import { applyGatingOnReady } from '/assets/js/gating.js';
+  applyGatingOnReady({ targetSelector: '.nn-app', moduleName: 'neural-network' });
+  </script>
+  <link href="/assets/css/fonts.css" rel="stylesheet">
+  <style>
+
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --font-body:'Inter',sans-serif;
+      --font-heading:'Space Grotesk',sans-serif;
+      --bg:#fff;--surface:#f9f9f7;--border:#e5e5e0;
+      --text:#1a1a1a;--muted:#6b6b6b;
+      --accent:#2a5c45;--accent-light:#edf4f0;--accent-hover:#1e4433;
+    }
+    html{font-size:16px}
+    body{font-family:var(--font-body);color:var(--text);background:var(--bg);
+      min-height:100vh;display:flex;flex-direction:column;}
+
+    /* Breadcrumb */
+    .bc{padding:.75rem 1.5rem 0;max-width:1100px;margin:0 auto;width:100%}
+    .bc ol{list-style:none;display:flex;gap:.3rem;align-items:center;font-size:.75rem;color:var(--muted);}
+    .bc li+li::before{content:'/';margin-right:.3rem;color:var(--border)}
+    .bc a{color:var(--muted);text-decoration:none;}
+    .bc a:hover{color:var(--accent);text-decoration:underline;}
+
+    /* Main */
+    main{max-width:1100px;margin:0 auto;padding:2.5rem 1.5rem 4rem;flex:1;width:100%;}
+    @media(max-width:600px){main{padding:1.5rem 1rem 3rem}}
+
+    /* Page header */
+    .ph{margin-bottom:2.5rem;padding-bottom:2rem;border-bottom:1px solid var(--border);}
+    .ph h2{font-family:var(--font-heading);font-size:1.5rem;font-weight:600;
+      letter-spacing:-.02em;line-height:1.2;margin-bottom:.4rem;}
+    .ph p{font-size:.9rem;color:var(--muted);}
+
+    
+    .card{border:1px solid var(--border);padding:1.5rem;margin-bottom:1.5rem;background:var(--bg)}
+    .card-title{font-family:var(--font-heading);font-size:.67rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 1rem}
+    .nn-stage{position:relative;background:var(--surface);border:1px solid var(--border)}
+    #nnCanvas{display:block;width:100%;height:340px}
+    .nn-stats{display:flex;flex-wrap:wrap;gap:1.5rem;margin:1rem 0;font-size:.85rem;color:var(--muted)}
+    .nn-stats strong{display:block;font:600 1.15rem var(--font-heading);color:var(--text)}
+    .nn-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem 1.5rem;margin-top:1rem}
+    .nn-controls label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:.25rem}
+    .nn-controls input[type=range]{width:100%}
+    .nn-btn{font:600 .9rem var(--font-body);padding:.7rem 1.4rem;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;min-height:44px}
+    .nn-btn--alt{background:none;color:var(--accent)} .nn-btn:focus-visible{outline:3px solid var(--text);outline-offset:2px}
+    .nn-row{display:flex;gap:.75rem;flex-wrap:wrap;align-items:center}
+    .nn-log{font-size:.82rem;color:var(--muted);min-height:1.3rem;margin-top:.6rem}
+    .essay{max-width:44rem} .essay h3{font:600 1.15rem var(--font-heading);margin:2rem 0 .5rem} .essay p,.essay li{font-size:.95rem;line-height:1.7;margin:.6rem 0}
+    .essay ul,.essay ol{margin:.5rem 0 .5rem 1.3rem} .essay table{border-collapse:collapse;width:100%;font-size:.85rem;margin:.8rem 0}
+    .essay th,.essay td{border:1px solid var(--border);padding:.5rem .6rem;text-align:left;vertical-align:top} .essay th{background:var(--surface)}
+    .essay .eq{font-family:ui-monospace,Menlo,monospace;background:var(--surface);border:1px solid var(--border);padding:.7rem .9rem;font-size:.85rem;overflow-x:auto;white-space:pre}
+    .essay dt{font-weight:600;margin-top:.7rem} .essay dd{margin-left:0;color:var(--muted);font-size:.92rem}
+    footer{border-top:1px solid var(--border);padding:1.25rem 1.5rem;text-align:center;font-size:.78rem;color:var(--muted);margin-top:auto}
+    footer a{color:var(--muted);text-decoration:none} footer a:hover{color:var(--accent)}
+    #nnCanvas{height:400px;cursor:pointer}
+    .nn-tabs{display:flex;gap:.25rem;border-bottom:1px solid var(--border);margin:1.2rem 0 0;flex-wrap:wrap}
+    .nn-tabs [role=tab]{font:600 .85rem var(--font-body);padding:.7rem 1rem;border:1px solid transparent;border-bottom:0;background:none;color:var(--muted);cursor:pointer;min-height:44px}
+    .nn-tabs [role=tab][aria-selected=true]{color:var(--text);border-color:var(--border);background:var(--bg);margin-bottom:-1px}
+    .nn-pane{padding:1.2rem 0 0}
+    .nn-pick{display:flex;gap:.8rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem;font-size:.85rem;color:var(--muted)}
+    .nn-pick select,.nn-pane select{font:inherit;padding:.4rem .5rem;border:1px solid var(--border);background:var(--bg);color:var(--text);min-height:36px}
+    .nn-h4{font:600 1.05rem var(--font-heading);margin:.2rem 0 .5rem;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+    .nn-badge{font:600 .66rem var(--font-body);letter-spacing:.06em;text-transform:uppercase;color:var(--accent);background:var(--accent-light);padding:.2rem .5rem;border-radius:3px}
+    .nn-nums{display:flex;gap:1.5rem;flex-wrap:wrap;margin:.8rem 0;font-size:.78rem;color:var(--muted)} .nn-nums strong{display:block;font:600 1.1rem var(--font-heading);color:var(--text)}
+    .nn-formula{font-family:ui-monospace,Menlo,monospace;font-size:.8rem;background:var(--surface);border:1px solid var(--border);padding:.6rem .8rem;overflow-x:auto;white-space:nowrap;margin:.5rem 0}
+    .nn-plot{display:block;width:100%;max-width:340px;height:120px;border:1px solid var(--border);background:var(--surface);margin:.6rem 0}
+    .nn-tab{border-collapse:collapse;width:100%;font-size:.8rem;margin:.8rem 0} .nn-tab th,.nn-tab td{border:1px solid var(--border);padding:.3rem .5rem;text-align:left;font-variant-numeric:tabular-nums} .nn-tab th{background:var(--surface);font-weight:600}
+    .nn-click{cursor:pointer} .nn-click:hover,.nn-click:focus{outline:2px solid var(--accent);outline-offset:-2px}
+    .nn-ctl{margin:.8rem 0;font-size:.85rem} .nn-ctl input[type=range]{width:min(320px,100%);vertical-align:middle}
+    .nn-hint{font-size:.82rem;color:var(--muted);line-height:1.55;margin:.4rem 0}
+    .nn-btn--sm{padding:.45rem .8rem;font-size:.8rem;min-height:36px}
+    .nn-weights{border-collapse:collapse;font-size:.7rem;font-variant-numeric:tabular-nums;margin:.6rem 0} .nn-weights th{font-weight:600;color:var(--muted);padding:.2rem .35rem;text-align:center}
+    .nn-weights td{border:1px solid var(--border);min-width:2.6rem;text-align:center;padding:.3rem .2rem;cursor:pointer} .nn-weights td:focus,.nn-weights td:hover{outline:2px solid var(--text);outline-offset:-2px}
+    .nn-wrap{overflow-x:auto}
+    .nn-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem 1.6rem}
+    .nn-grid label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:.2rem} .nn-grid input[type=range]{width:100%} .nn-grid output{color:var(--text);font-weight:600}
+    .nn-ref{border:1px solid var(--border);margin:.5rem 0;padding:.2rem .9rem} .nn-ref summary{cursor:pointer;padding:.6rem 0;display:flex;gap:.7rem;align-items:center;flex-wrap:wrap} .nn-ref p{margin:.4rem 0 .8rem}
+    .nn-acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem;margin:1rem 0} .nn-acts figure{border:1px solid var(--border);padding:.8rem} .nn-acts figcaption{display:block;font-size:.82rem;line-height:1.5} .nn-acts figcaption>*{display:block;margin:.2rem 0}
+    .nn-acts code{font-family:ui-monospace,Menlo,monospace;font-size:.78rem;color:var(--muted)}
+    .toc{border:1px solid var(--border);background:var(--surface);padding:1rem 1.3rem;margin:1rem 0 2rem;columns:2;column-gap:2rem;font-size:.88rem} .toc a{color:var(--accent);text-decoration:none;display:block;padding:.15rem 0} .toc a:hover{text-decoration:underline}
+    @media(max-width:600px){.toc{columns:1} #nnCanvas{height:340px}}
+    .essay h2{font:600 1.35rem var(--font-heading);margin:2.6rem 0 .3rem;padding-top:1rem;border-top:1px solid var(--border)} .essay .eq{white-space:pre-wrap}
+    .essay blockquote{border-left:3px solid var(--accent);padding:.1rem 1rem;margin:1rem 0;color:var(--muted)}
+    .essay-ref a{color:var(--accent)}
+  </style>
+  <link rel="stylesheet" href="/assets/css/header.css">
+  <link rel="stylesheet" href="/assets/css/a11y.css">
+</head>
+<body>
+<script src="/assets/js/site-header.js"></script>
+<nav aria-label="Breadcrumb" class="bc"><ol><li><a href="/dashboard/">Dashboard</a></li><li><a href="/compositions/">Compositions</a></li><li>The Network Learns to Sing</li></ol></nav>
+<main>
+  <div class="ph">
+    <h2>The Network Learns to Sing</h2>
+    <p>A small neural network that never finishes learning, and whose computation is the music. Select any neuron or connection to see exactly how it weighs its inputs, change it, and hear what happens. Underneath the sound is a real network, trained by the same method as the large ones. A long essay below explains how they work.</p>
+  </div>
+
+  <div class="card nn-app">
+    <p class="card-title">the network, live</p>
+    <div class="nn-stage"><canvas id="nnCanvas" role="img" aria-label="The network: 6 inputs, two hidden layers and 8 outputs. Brighter circles are more active. Lines are the connections between neurons. Select a neuron or a line to inspect it; the same choices are available in the lists below."></canvas></div>
+    <div class="nn-stats" aria-live="off">
+      <div><strong id="nnLoss">–</strong>Error (loss)</div>
+      <div><strong id="nnKey">–</strong>Key</div>
+      <div><strong id="nnEpisode">0</strong>Episodes so far</div>
+      <div><strong id="nnParams">–</strong>Trainable numbers</div>
+      <div><strong id="nnTime">0:00</strong>Running</div>
+    </div>
+    <div class="nn-row"><button type="button" class="nn-btn" id="nnPlay">Start listening</button><button type="button" class="nn-btn nn-btn--alt" id="nnNew">New network</button></div>
+    <p class="nn-log" id="nnLog" role="status" aria-live="polite">It starts out knowing nothing. Press start, then leave it for a few minutes: it changes slowly, and it does not repeat. Circles are neurons (brighter is more active); lines are weights (green positive, orange negative, thicker is stronger). Select one.</p>
+
+    <div class="nn-tabs" role="tablist" aria-label="Explore and change the network">
+      <button role="tab" id="tabNeuron" aria-selected="true" aria-controls="paneNeuron" type="button">Neuron</button>
+      <button role="tab" id="tabWeights" aria-selected="false" aria-controls="paneWeights" tabindex="-1" type="button">Weights</button>
+      <button role="tab" id="tabNetwork" aria-selected="false" aria-controls="paneNetwork" tabindex="-1" type="button">Network</button>
+      <button role="tab" id="tabSound" aria-selected="false" aria-controls="paneSound" tabindex="-1" type="button">Sound</button>
+    </div>
+
+    <div class="nn-pane" id="paneNeuron" role="tabpanel" aria-labelledby="tabNeuron">
+      <div class="nn-pick">
+        <label>Layer <select id="nnPickLayer"><option value="0">Input</option><option value="1">Hidden 1</option><option value="2">Hidden 2</option><option value="3">Output</option></select></label>
+        <label>Neuron <select id="nnPickNeuron"></select></label>
+      </div>
+      <div id="nnInspector" aria-live="off"></div>
+    </div>
+
+    <div class="nn-pane" id="paneWeights" role="tabpanel" aria-labelledby="tabWeights" hidden>
+      <p class="nn-hint">Every number the network has learned is a weight. Each table is one layer's weights, updating as it learns.</p>
+      <div class="nn-pick"><label>Layer of connections <select id="nnWLayer"><option value="0">Input → Hidden 1</option><option value="1">Hidden 1 → Hidden 2</option><option value="2">Hidden 2 → Output</option></select></label></div>
+      <div class="nn-wrap"><table class="nn-weights" id="nnWeights" aria-describedby="nnWCaption"></table></div>
+      <p class="nn-hint" id="nnWCaption"></p>
+    </div>
+
+    <div class="nn-pane" id="paneNetwork" role="tabpanel" aria-labelledby="tabNetwork" hidden>
+      <div class="nn-grid">
+        <div><label for="nnLearn">Learning rate <output id="nnLearnV"></output></label><input type="range" id="nnLearn" min="0.005" max="0.15" step="0.005" value="0.05"></div>
+        <div><label for="nnHeat">Heat: how hard it is shaken at each new episode <output id="nnHeatV"></output></label><input type="range" id="nnHeat" min="0" max="1" step="0.05" value="0.5"></div>
+        <div><label for="nnPace">Pace: how often the goal changes <output id="nnPaceV"></output></label><input type="range" id="nnPace" min="0.25" max="3" step="0.05" value="1"></div>
+        <div><label for="nnAdv">Adventure: how freely it picks notes <output id="nnAdvV"></output></label><input type="range" id="nnAdv" min="0" max="1" step="0.05" value="0.5"></div>
+        <div><label for="nnRate">Note rate <output id="nnRateV"></output></label><input type="range" id="nnRate" min="0.25" max="2.5" step="0.05" value="1"></div>
+        <div><label for="nnVol">Volume <output id="nnVolV"></output></label><input type="range" id="nnVol" min="0" max="1" step="0.05" value="0.6"></div>
+        <div><label for="nnH1">Neurons in hidden layer 1 <output id="nnH1V">10</output></label><input type="range" id="nnH1" min="2" max="16" step="1" value="10"></div>
+        <div><label for="nnH2">Neurons in hidden layer 2 <output id="nnH2V">8</output></label><input type="range" id="nnH2" min="2" max="12" step="1" value="8"></div>
+        <div><label for="nnAct1">Activation function, hidden 1</label><select id="nnAct1"></select></div>
+        <div><label for="nnAct2">Activation function, hidden 2</label><select id="nnAct2"></select></div>
+      </div>
+      <p class="nn-hint">Changing the number of neurons makes a new network of that shape (it forgets what it has learned). Changing an activation function keeps the weights, so the network has to relearn around the change.</p>
+      <div class="nn-row" style="margin-top:.8rem">
+        <label><input type="checkbox" id="nnHold"> Hold the goal still (no new chords or episodes)</label>
+        <label><input type="checkbox" id="nnLockKey"> Lock the key to</label>
+        <select id="nnKeyRoot" aria-label="Key"></select><select id="nnKeyMode" aria-label="Mode"></select>
+      </div>
+    </div>
+
+    <div class="nn-pane" id="paneSound" role="tabpanel" aria-labelledby="tabSound" hidden>
+      <p class="nn-hint">Each part of the network has its own voice. Turn one down to hear what the others are doing, or to hear only one part of the computation.</p>
+      <div class="nn-grid">
+        <div><label for="nnMix-drone">Drone: hidden layer 1 <output id="nnMixV-drone">1.00</output></label><input type="range" id="nnMix-drone" min="0" max="1.5" step="0.05" value="1"></div>
+        <div><label for="nnMix-shimmer">Shimmer: hidden layer 2 <output id="nnMixV-shimmer">1.00</output></label><input type="range" id="nnMix-shimmer" min="0" max="1.5" step="0.05" value="1"></div>
+        <div><label for="nnMix-melody">Melody: the output layer <output id="nnMixV-melody">1.00</output></label><input type="range" id="nnMix-melody" min="0" max="1.5" step="0.05" value="1"></div>
+        <div><label for="nnMix-weighing">Weighing: the strongest products <output id="nnMixV-weighing">1.00</output></label><input type="range" id="nnMix-weighing" min="0" max="1.5" step="0.05" value="1"></div>
+        <div><label for="nnMix-texture">Texture: the loss <output id="nnMixV-texture">1.00</output></label><input type="range" id="nnMix-texture" min="0" max="1.5" step="0.05" value="1"></div>
+      </div>
+      <table class="nn-tab" style="margin-top:1.2rem"><thead><tr><th>What the network computes</th><th>What you hear</th></tr></thead><tbody>
+        <tr><td>Hidden layer 1 activations</td><td>Loudness of harmonics of the key's root: a drone whose colour is the pattern of those neurons.</td></tr>
+        <tr><td>Hidden layer 2 activations</td><td>Inharmonic upper partials spread across the stereo field, stretched out of tune when the loss is high.</td></tr>
+        <tr><td>Output probabilities</td><td>Which note of the scale is played next, drawn from the seven note outputs. The Adventure setting flattens or sharpens the draw.</td></tr>
+        <tr><td>Gate neuron</td><td>Whether a note sounds at all, scaled by a slow density cycle.</td></tr>
+        <tr><td>Largest weight × activation products</td><td>Soft blips: which connections are doing the most work right now.</td></tr>
+        <tr><td>The loss</td><td>Brightness, noise texture, and how long the notes ring.</td></tr></tbody></table>
+    </div>
+  </div>
+
+  <div class="card essay" id="nnRef" aria-labelledby="refH"><p class="card-title" id="refH">reference: the parts of the network</p></div>
+  <article class="card essay" aria-labelledby="essayH">
+    <p class="card-title" id="essayH">a deep dive: how neural networks work</p>
+    <p>This is a long essay, written for people who are curious about what neural networks actually are and are willing to follow some arithmetic. It does not assume you know any mathematics beyond multiplication and addition, but it does not avoid the mathematics either, because the mathematics is the explanation. Everything described here is happening, live, in the network above.</p>
+
+    <nav class="toc" aria-label="Contents of the essay">
+      <a href="#e-what">1. What a neural network is</a>
+      <a href="#e-history">2. Where the idea comes from</a>
+      <a href="#e-neuron">3. The neuron: a weighted vote</a>
+      <a href="#e-layers">4. Layers, and the matrix view</a>
+      <a href="#e-nonlinear">5. Why the activation function matters</a>
+      <a href="#e-learning">6. How a network learns</a>
+      <a href="#e-backprop">7. Backpropagation, step by step</a>
+      <a href="#e-practice">8. Making learning work in practice</a>
+      <a href="#e-wrong">9. What goes wrong</a>
+      <a href="#e-inside">10. What the hidden layers become</a>
+      <a href="#e-arch">11. Architectures: networks of many shapes</a>
+      <a href="#e-language">12. How large language models fit in</a>
+      <a href="#e-uses">13. What they are used for</a>
+      <a href="#e-limits">14. Limits, risks and open questions</a>
+      <a href="#e-here">15. What this page is and is not</a>
+      <a href="#e-try">16. Experiments to try here</a>
+      <a href="#e-gloss">17. Glossary</a>
+      <a href="#e-read">18. Where to go next</a>
+    </nav>
+
+    <h2 id="e-what">1. What a neural network is</h2>
+    <p>A neural network is a function: something that takes in a list of numbers and produces another list of numbers. What makes it special is how the function is built and how it is found. It is built from many very simple units, each doing a tiny calculation, wired together in layers. And it is not written by anyone: its behaviour is set by thousands to billions of adjustable numbers, called <em>parameters</em>, and those numbers are found by showing the network examples and nudging them, a little at a time, in whatever direction makes its mistakes smaller. This process is called <em>training</em>.</p>
+    <p>That is the whole idea. An image classifier is a function from the brightness of every pixel to a list of probabilities for "cat", "dog", "car". A speech recogniser is a function from sound to text. A language model is a function from the words so far to a probability for each possible next word. The network above is a function from six wandering numbers to eight outputs, and it is being trained to make those outputs spell out a chord. Same machinery, much smaller.</p>
+    <p>The network here has 6 inputs, then two hidden layers (10 and 8 neurons by default), then 8 outputs. With the default shape it has 230 adjustable numbers: 60 + 80 + 64 = 204 weights, plus 10 + 8 + 8 = 26 biases (both terms are explained below). The live count is shown under the picture, and it changes when you change the size of the layers.</p>
+
+    <h2 id="e-history">2. Where the idea comes from</h2>
+    <p>In 1943 Warren McCulloch and Walter Pitts proposed a simplified mathematical model of a neuron: a unit that adds up its inputs and "fires" if the total passes a threshold. In 1958 Frank Rosenblatt built the <em>perceptron</em>, a machine that used a unit like this and could learn to classify simple patterns by adjusting its weights. It attracted enormous attention, and enormous promises.</p>
+    <p>In 1969 Marvin Minsky and Seymour Papert published <em>Perceptrons</em>, which showed, rigorously, that a single layer of such units cannot compute some simple functions, the best known being <em>exclusive or</em> (XOR: output 1 if exactly one of two inputs is 1). Networks with a hidden layer can, but at the time there was no good way to train them, and interest and funding in the field fell away for years.</p>
+    <p>The method that solved this was <em>backpropagation</em>: an efficient way of working out how every weight in a many-layered network contributed to an error. Its mathematical ingredients had been discovered more than once by different people (reverse-mode automatic differentiation in the 1960s and 1970s, and Paul Werbos's 1974 thesis applying it to networks), and the 1986 paper by David Rumelhart, Geoffrey Hinton and Ronald Williams showed convincingly that it made networks learn useful internal representations. In 1989 Yann LeCun and colleagues used a convolutional network trained by backpropagation to read handwritten postcode digits. In 1997 Sepp Hochreiter and Jürgen Schmidhuber introduced the LSTM, a unit for learning from sequences.</p>
+    <p>For about two decades after that, other machine-learning methods were often better in practice. The turn came in 2012, when a deep convolutional network, AlexNet (Alex Krizhevsky, Ilya Sutskever and Geoffrey Hinton), won an image-recognition competition by a wide margin. Three things had come together: much more labelled data, graphics processors that could do the arithmetic fast, and a set of practical improvements to training that made deep networks work. Since then the field has moved quickly: generative adversarial networks (2014), networks that beat human champions at Go (2016), and the <em>transformer</em> architecture (Vaswani and colleagues, 2017), which underlies most current large language models.</p>
+
+    <h2 id="e-neuron">3. The neuron: a weighted vote</h2>
+    <p>A neuron receives some numbers. Each incoming connection has a <em>weight</em>, which says how much that input counts. The neuron multiplies each input by its weight and adds up the results. It then adds a <em>bias</em>, a number of its own that shifts the total up or down whatever the inputs are. The result is called the <em>pre-activation</em> and is usually written z. Finally z is passed through an <em>activation function</em> f, which produces the neuron's output a.</p>
+    <div class="eq">z = w₁x₁ + w₂x₂ + … + wₙxₙ + b
+a = f(z)</div>
+    <p>It is a vote in which some voters count more than others (their weights), some count against (negative weights), and the neuron has a built-in leaning (its bias). If you select any neuron in the picture above, the Neuron tab shows precisely this: every input, the weight applied to it, the product, the total and the output.</p>
+    <p>A worked example. A neuron has inputs 0.5 and -1, weights 0.8 and 0.3, and bias 0.1. Then z = 0.5×0.8 + (-1)×0.3 + 0.1 = 0.4 − 0.3 + 0.1 = 0.2. With tanh as the activation function, a = tanh(0.2) ≈ 0.197.</p>
+    <p><strong>A word on biology.</strong> The name "neural network" and the diagrams of connected circles come from an analogy with the brain, and the analogy was a real source of the idea. But the analogy is loose. A real neuron is an elaborate cell with many kinds of chemistry and timing, and brains learn by mechanisms that are not backpropagation. Artificial neurons are best thought of as a convenient mathematical building block, inspired by biology but not a model of it.</p>
+
+    <h2 id="e-layers">4. Layers, and the matrix view</h2>
+    <p>Neurons are arranged in layers, and every neuron in a layer takes input from every neuron in the layer before. If you collect all the weights going into a layer into a table (a <em>matrix</em> W, with one row for each neuron in the layer and one column for each neuron in the layer before it) and all the biases into a list b, then the whole layer's calculation is one line:</p>
+    <div class="eq">a_next = f( W · a_previous + b )</div>
+    <p>The Weights tab above shows exactly these tables, one for each pair of layers. A network is this line repeated: the output of one layer becomes the input of the next, until the last layer produces the answer. This pass from input to output is the <em>forward pass</em>. It is the reason graphics processors are so good at neural networks: matrix multiplication is what they were built for.</p>
+    <p>The first layer is the <em>input layer</em>, which just holds the data. The last is the <em>output layer</em>, whose values are the answer. Everything in between is <em>hidden</em>, a word that only means "neither input nor output". "Deep" learning means many hidden layers.</p>
+    <p>Parameter counts: a layer going from m neurons to n neurons has m × n weights and n biases. Doubling the width of a layer therefore roughly quadruples its weights. Large systems have billions of parameters; this one has a few hundred.</p>
+
+    <h2 id="e-nonlinear">5. Why the activation function matters</h2>
+    <p>Suppose there were no activation function, so each neuron simply output its weighted sum. Then two layers in a row would compute W₂(W₁x + b₁) + b₂, which can be rewritten as (W₂W₁)x + (W₂b₁ + b₂): that is, a single layer with different weights. A hundred layers would collapse into one. Without a <em>nonlinearity</em> in between, depth adds no power, and a linear function can only ever draw straight boundaries through the data. XOR cannot be separated by a straight line, which is exactly the limitation Minsky and Papert pointed out.</p>
+    <p>The activation function bends the line. Once every layer applies a nonlinear function, stacking layers lets the network compose simple bends into complicated shapes. There is a famous mathematical result, the <em>universal approximation theorem</em> (George Cybenko, 1989; Kurt Hornik, 1991), which says that a network with just one hidden layer and enough neurons can approximate any continuous function on a bounded region as closely as you like. It is a reassuring fact, and it is easy to misread: it says such a network <em>exists</em>, not that training will find it, nor how many neurons would be needed. In practice, depth tends to be far more efficient than width.</p>
+    <p>Different functions have different characters. This page offers four, which you can choose for each hidden layer and compare in the reference section above. <strong>tanh</strong> and <strong>softsign</strong> squash every input into -1 to +1, and flatten out for large inputs (<em>saturation</em>). <strong>Leaky ReLU</strong> passes positive values unchanged and nearly blocks negative ones; the plain version, the rectified linear unit, became the default choice in large networks because it does not saturate on the positive side and is cheap to compute. <strong>Sine</strong> is periodic and unusual, and makes a neuron respond in bands. The output layer here always uses tanh because the targets are between -1 and +1.</p>
+
+    <h2 id="e-learning">6. How a network learns</h2>
+    <p>Learning needs a way of saying how wrong the network is. That is the <em>loss function</em>: a single number, computed from the network's outputs and the correct answers, which is large when the network is wrong and zero when it is perfect. This network uses the <em>mean squared error</em>: for each output, take the difference between what the network said and what it should have said, square it, and average. The number labelled "Error (loss)" under the picture is that.</p>
+    <div class="eq">loss = average of (output − target)²</div>
+    <p>Other problems use other losses. For classification, <em>cross-entropy</em> is standard: it penalises a network heavily for being confidently wrong. The choice of loss is a choice about what counts as a mistake, and it matters.</p>
+    <p>Now imagine all the parameters of the network as coordinates, so that the network at any moment is a point in a space with hundreds, or billions, of dimensions. The loss is a height at each point: a landscape. Training is a walk downhill on this landscape. At the current point you work out which way is steepest, and take a small step that way. The steepness and direction at a point are given by the <em>gradient</em> (a list containing the slope of the loss with respect to each parameter), and the method is <em>gradient descent</em>. The size of each step is the <em>learning rate</em>, which you can set in the Network tab.</p>
+    <div class="eq">w ← w − η × (slope of the loss with respect to w)</div>
+    <p>The hard part was never the stepping; it was finding the slope for every one of millions of parameters efficiently. That is what backpropagation does.</p>
+
+    <h2 id="e-backprop">7. Backpropagation, step by step</h2>
+    <p>The slope of the loss with respect to a weight can be found with the <em>chain rule</em> from calculus: if A affects B and B affects the loss, then the effect of A on the loss is the effect of A on B times the effect of B on the loss. The network is a chain of such steps, so the effect of any weight on the loss is a product of local effects along the path from that weight to the output.</p>
+    <p>Backpropagation arranges the arithmetic so that it is done once, working from the output backward. For each neuron, define δ (delta) as the slope of the loss with respect to that neuron's pre-activation z. For an output neuron with target t:</p>
+    <div class="eq">δ = (2 / n) × (output − target) × f′(z)</div>
+    <p>Here n is the number of outputs and f′ is the slope of the activation function at z: how sensitive the neuron is, right now, to a change in its input sum. For a hidden neuron, the error is whatever it contributed to the deltas of the neurons it feeds, weighted by the connections:</p>
+    <div class="eq">δ(hidden) = f′(z) × Σ ( weight to next neuron × δ(next neuron) )</div>
+    <p>That is the "back-propagation" of error: each layer's deltas are computed from the next layer's. Once a neuron has its δ, the update for every weight going into it is the same simple rule:</p>
+    <div class="eq">Δw = −η × δ × (the input that came along that weight)
+Δb = −η × δ</div>
+    <p>Pick any neuron and look at its table in the Neuron tab: the "Its output" column is the input to each weight, and those are exactly the numbers that multiply δ in the update.</p>
+    <p><strong>Worked example, continued.</strong> Take the neuron from earlier (inputs 0.5 and -1, weights 0.8 and 0.3, bias 0.1, output 0.197) and suppose it should have output 0.9. With one output, δ = 2 × (0.197 − 0.9) × (1 − 0.197²) ≈ -1.35, where the last bracket is the slope of tanh at that point. With η = 0.05:</p>
+    <ul>
+      <li>weight 1: 0.8 − 0.05 × (-1.35) × 0.5 ≈ 0.834</li>
+      <li>weight 2: 0.3 − 0.05 × (-1.35) × (-1) ≈ 0.232 (it goes down, because its input was negative)</li>
+      <li>bias: 0.1 − 0.05 × (-1.35) ≈ 0.168</li>
+    </ul>
+    <p>Running the neuron again gives tanh(0.5×0.834 − 0.232 + 0.168) = tanh(0.352) ≈ 0.338: closer to 0.9. This is repeated many times, and the page does it about twenty times a second across all its parameters at once. The numbers in this example are checked by an automatic test against the code that runs this page.</p>
+    <p>In 1986 this was a breakthrough; today it is automated. Machine-learning software records the calculations of the forward pass and computes all the gradients for you (<em>automatic differentiation</em>), so nobody writes backpropagation by hand for each new architecture.</p>
+
+    <h2 id="e-practice">8. Making learning work in practice</h2>
+    <p><strong>Learning rate.</strong> Too small and learning is painfully slow; too large and each step overshoots the valley and the loss bounces or blows up. You can see both here: set the learning rate to its lowest, and the network trails the changing chords; set it high and it follows quickly but with overshoot and roughness.</p>
+    <p><strong>Stochastic and mini-batch gradient descent.</strong> Real training data has millions of examples. Computing the exact gradient over all of them for every step is wasteful, so training uses small random batches. The gradient from a batch is a noisy estimate of the true one, but it is far cheaper, and the noise is even helpful. This page takes the extreme form, one example at a time, because its "dataset" is a single moving input.</p>
+    <p><strong>Better optimisers.</strong> Plain gradient descent has many refinements. <em>Momentum</em> keeps some of the previous step's direction, which smooths the path; <em>Adam</em> (Diederik Kingma and Jimmy Ba, 2014) adapts the step size of each parameter individually, and is among the most widely used methods.</p>
+    <p><strong>Initialisation.</strong> You cannot start with all weights equal to zero. If two neurons in a layer start identical they receive identical updates for ever and stay identical, so the layer is wasted. Weights are started at small random values, and their scale is chosen so that signals neither shrink nor grow as they pass through layers. This page uses <em>Xavier (Glorot) initialisation</em>, from a 2010 paper by Xavier Glorot and Yoshua Bengio, which draws weights with a spread of √(2 / (inputs + outputs)). For ReLU units a related scheme (He initialisation) is used.</p>
+    <p><strong>Normalisation, regularisation and data.</strong> Large networks add many further techniques, such as normalising the numbers in each layer, and using <em>weight decay</em> (a small pull that keeps weights from growing), <em>dropout</em> (randomly silencing neurons during training; Nitish Srivastava and colleagues, 2014) and <em>data augmentation</em> (training on altered copies of the data). The common purpose is to help the network generalise, which is the next topic.</p>
+
+    <h2 id="e-wrong">9. What goes wrong</h2>
+    <p><strong>Overfitting.</strong> A network with enough parameters can memorise its training examples, including their noise, and then perform badly on new ones. What you want is <em>generalisation</em>: doing well on examples it has never seen. This is why data is split into a training set (used to learn), a validation set (used to tune choices) and a test set (touched only at the end to measure real performance). A falling training loss alone tells you very little.</p>
+    <p><strong>Vanishing and exploding gradients.</strong> In a deep network the gradient for early layers is a long product of numbers from later layers. If those numbers are mostly smaller than one the product shrinks toward zero and early layers barely learn; if mostly larger than one it explodes. Saturating activation functions make the first problem worse: where a tanh neuron is saturated, its slope f′(z) is close to zero, and almost no learning signal passes through it. Much of the progress of the last decade is a catalogue of fixes for this: ReLU-style activations, careful initialisation, normalisation layers and residual connections (see below).</p>
+    <p><strong>Dead neurons.</strong> A plain ReLU neuron whose input is always negative outputs zero and has zero slope, so it can never recover. The "leaky" version used here keeps a small slope on the negative side for that reason.</p>
+    <p><strong>Local minima, plateaus and saddle points.</strong> The loss landscape is not a simple bowl. In very high dimensions, however, pure local minima turn out to be rarer than saddle points (flat regions that slope down in some directions), and the practical difficulty is more often slow progress along plateaus than being trapped.</p>
+    <p><strong>Optimising the wrong thing.</strong> A network minimises the loss you give it, not what you meant. If the loss rewards the wrong thing, or the data is unrepresentative, the network will faithfully learn that. The most important problems with deployed networks are usually problems of data and objectives, not of arithmetic.</p>
+
+    <h2 id="e-inside">10. What the hidden layers become</h2>
+    <p>Nobody tells a hidden neuron what to detect. Training pushes its weights toward whatever combination of its inputs helps reduce the loss, so its meaning emerges. In image networks, researchers who visualised what neurons respond to found a rough hierarchy: neurons in early layers respond to edges and colour contrasts, middle layers to textures and parts, later layers to whole objects. The network builds up its own description of the data, layer by layer. These descriptions are called <em>representations</em>, and the ability to learn good ones, rather than having a human design them by hand, is the real strength of the approach.</p>
+    <p>A particularly useful kind of representation is an <em>embedding</em>: a list of numbers that places each word, image or song at a point in a space where similar things are close together. Word embeddings learned from large amounts of text famously capture some relationships as directions in the space (the vector from "man" to "woman" is roughly similar to that from "king" to "queen"), though such examples are approximate and are easier to pick out than to rely on.</p>
+    <p>Interpreting what a trained network is doing is a hard and active research field. For a large network it is generally not possible to say, in a sentence, why it produced a particular output. On this page, you can do a small version of the investigation yourself: select a neuron in the second hidden layer, silence it, and listen to what changes. That is a miniature of an <em>ablation</em> experiment, a standard technique in interpretability research.</p>
+
+    <h2 id="e-arch">11. Architectures: networks of many shapes</h2>
+    <p>The network on this page is a <em>multilayer perceptron</em> (MLP), or fully connected network. It is the plainest design. Most of the progress in practical systems has come from architectures that build in assumptions about the data:</p>
+    <ul>
+      <li><strong>Convolutional networks</strong> are designed for images and other grid-like data. A small filter of shared weights slides across the image, so the same pattern is detected wherever it appears. Reusing weights makes them far more efficient than connecting every pixel to every neuron.</li>
+      <li><strong>Recurrent networks</strong> process sequences one step at a time, feeding some of their output back as input to the next step, which gives them a form of memory. LSTM and GRU units add learned gates that control what to remember and forget.</li>
+      <li><strong>Transformers</strong> (2017) replace recurrence with <em>attention</em>: for each position in a sequence, the network computes how relevant every other position is, and takes a weighted average of what it finds. This can be computed in parallel across the whole sequence, which suits modern hardware and scales well. Transformers are the basis of most current language models and are also used for images, audio and more.</li>
+      <li><strong>Autoencoders</strong> are trained to squeeze data through a narrow middle layer and reconstruct it, so the middle layer becomes a compact representation.</li>
+      <li><strong>Generative adversarial networks</strong> (Ian Goodfellow and colleagues, 2014) pit a generator, which makes fake examples, against a discriminator, which tries to tell fakes from real ones, so that each improves the other. <strong>Diffusion models</strong> learn to reverse a process of gradually adding noise, and generate images and audio by starting from noise and removing it step by step.</li>
+      <li><strong>Reinforcement learning</strong> uses a network to choose actions, and trains it from rewards rather than correct answers. It was central to the systems that mastered Go and many video games.</li>
+    </ul>
+    <p>Residual connections, which add a layer's input directly to its output, deserve a note: they let information and gradients bypass layers, and are what made networks of hundreds of layers trainable. The reference section above lists these and other units.</p>
+
+    <h2 id="e-language">12. How large language models fit in</h2>
+    <p>A large language model is a transformer network with billions of parameters trained on a very large amount of text. The basic training task is <em>next-token prediction</em>: given a stretch of text, predict what comes next. A token is a piece of a word. The loss is the cross-entropy between the network's predicted probabilities and the word that actually followed. To predict well across enormous quantities of varied text, the network has to build internal representations of grammar, facts, styles and a great deal more, which is why such a simple objective yields general abilities.</p>
+    <p>The raw trained model is then usually refined, often with <em>fine-tuning</em> on examples of the desired behaviour and with feedback from human raters, to make it follow instructions and avoid harmful output. When a model generates text, it does something very like the note choice on this page: it computes a probability for each possible next token, and one is drawn, with a setting (the <em>temperature</em>) controlling how adventurous the draw is. The Adventure slider is the same idea.</p>
+    <p>The key differences from this page are scale, the architecture, and above all the data. Understanding the mechanism does not make the behaviour of a large model predictable, and it is important to remember that such a model produces plausible text, which is not the same as true text.</p>
+
+    <h2 id="e-uses">13. What they are used for</h2>
+    <ul>
+      <li><strong>Images and video:</strong> recognising objects and faces, reading handwriting and documents, medical imaging (for example, helping flag suspicious regions in scans for a clinician to review), generating and editing pictures.</li>
+      <li><strong>Speech and language:</strong> speech recognition and synthesis, translation, summarisation, search, and conversational systems.</li>
+      <li><strong>Science:</strong> predicting the three-dimensional structure of proteins from their sequence (AlphaFold), modelling materials and weather, and finding patterns in large experimental data sets.</li>
+      <li><strong>Recommendation and ranking:</strong> which video, product or song to show next; this is one of the largest commercial uses.</li>
+      <li><strong>Control and games:</strong> robotics, game-playing, and optimising complex systems.</li>
+      <li><strong>Audio and music:</strong> separating a mix into instruments, transcribing music, noise reduction in phones and hearing aids, compressing audio, and generating sound and music. For a field built on sound, they are now everywhere.</li>
+    </ul>
+    <p>In health and mental-health settings the potential is real and so are the risks. Networks can pick up subtle patterns in speech, text or physiological signals, but a pattern is not a diagnosis, models can perform much worse on groups that were poorly represented in their training data, and training such models typically requires gathering large amounts of very sensitive personal information. Those are among the reasons this Lab keeps your data encrypted on your device and calculates its insights there.</p>
+
+    <h2 id="e-limits">14. Limits, risks and open questions</h2>
+    <ul>
+      <li><strong>Opacity.</strong> A trained network is a large pile of numbers. It is difficult to explain individual decisions, which matters where decisions affect people.</li>
+      <li><strong>Bias.</strong> A network learns the patterns in its data, including unfair ones. It can reproduce and amplify them while looking objective.</li>
+      <li><strong>Brittleness.</strong> Networks can fail on inputs unlike those they were trained on, and can be fooled by <em>adversarial examples</em>: tiny, carefully chosen changes to an input that humans cannot perceive but that change the output completely.</li>
+      <li><strong>Confident error.</strong> Generative systems can produce fluent output that is false. Fluency is not evidence.</li>
+      <li><strong>Privacy.</strong> Models can sometimes reveal parts of their training data, and building them concentrates personal data. Approaches such as training or running models on the user's own device exist partly for this reason.</li>
+      <li><strong>Cost and power.</strong> Training the largest models takes a great deal of computation and energy.</li>
+      <li><strong>Open questions.</strong> Why large networks generalise as well as they do despite having so many parameters, how to interpret them reliably, and how to align their behaviour with human intentions are all active areas of research, without settled answers.</li>
+    </ul>
+
+    <h2 id="e-here">15. What this page is and is not</h2>
+    <p>Real: the network, its loss, its learning, and every number going through it. The neuron tables, the weight tables and the formulas you see are read directly from the running network, and the example calculations in this essay are checked against its code.</p>
+    <p>Chosen: every mapping from numbers to sound. Making the first hidden layer a drone, the second a shimmer and the output a melody is a composer's decision, and other mappings would make the same network sound entirely different. This is <em>sonification</em>: a way of making the shape of a computation audible. It is not the voice of a mind. The network has no understanding of music, or of anything: it adjusts a few hundred numbers to match a pattern of eight values.</p>
+    <p>Also simplified: the network learns online, from one constantly changing example, rather than from a large data set in batches; it has no validation data and so cannot overfit in the usual sense; and its goal keeps moving by design, so it never converges. These choices are what make it musical.</p>
+
+    <h2 id="e-try">16. Experiments to try here</h2>
+    <ol>
+      <li><strong>Ablation.</strong> In the Neuron tab, silence a neuron in hidden layer 2 and listen. Then silence a different one. Do some matter more than others? Does the network adapt over the next minute by relying on the others?</li>
+      <li><strong>Capacity.</strong> In the Network tab set both hidden layers to 2 neurons. Can it still track the chord? Now set them to the maximum. What does extra capacity buy, and what does it cost in the time taken to learn?</li>
+      <li><strong>Nonlinearity.</strong> Change hidden layer 1 to leaky ReLU, then sine. Which changes the sound of the drone most? Which settles to a lower loss?</li>
+      <li><strong>Teaching.</strong> Select the output neuron for the 1st scale degree and set "Teach it" to always on. Then to always off. Listen to the melody follow.</li>
+      <li><strong>Freezing.</strong> Freeze every neuron in hidden layer 2 (one by one), and watch the loss when the next chord change arrives. What can a network do if only part of it is allowed to learn?</li>
+      <li><strong>Cutting connections.</strong> In the Weights tab select the largest weights in a layer and cut them. How quickly does the network repair itself?</li>
+      <li><strong>Learning rate.</strong> Set it to the minimum, then the maximum. Describe how each sounds, and how the loss trace in the picture looks.</li>
+      <li><strong>Heat and pace.</strong> Turn both up and wait for an episode. Then hold the goal still and watch the loss trace flatten.</li>
+    </ol>
+
+    <h2 id="e-gloss">17. Glossary</h2>
+    <dl>
+      <dt>Activation (of a neuron)</dt><dd>The neuron's output for the current input.</dd>
+      <dt>Activation function</dt><dd>The nonlinear function applied to a neuron's weighted sum.</dd>
+      <dt>Backpropagation</dt><dd>An efficient way to compute the gradient of the loss with respect to every weight, by working backward from the output.</dd>
+      <dt>Batch / mini-batch</dt><dd>A group of training examples used together for one update.</dd>
+      <dt>Bias</dt><dd>A neuron's own constant added to its weighted sum.</dd>
+      <dt>Cross-entropy</dt><dd>A loss for probabilities that penalises confident wrong answers heavily.</dd>
+      <dt>Embedding</dt><dd>A learned list of numbers representing an item, placed so that similar items are near each other.</dd>
+      <dt>Epoch</dt><dd>One full pass through the training data. (This page uses "episode" for a change of goal.)</dd>
+      <dt>Forward pass</dt><dd>Computing the output from the input, layer by layer.</dd>
+      <dt>Generalisation</dt><dd>Performing well on examples not seen in training.</dd>
+      <dt>Gradient</dt><dd>The list of slopes of the loss with respect to each parameter.</dd>
+      <dt>Gradient descent</dt><dd>Repeatedly stepping parameters against the gradient to reduce the loss.</dd>
+      <dt>Hidden layer</dt><dd>A layer that is neither input nor output.</dd>
+      <dt>Hyperparameter</dt><dd>A setting chosen by the designer, such as the learning rate or layer sizes, rather than learned.</dd>
+      <dt>Learning rate</dt><dd>The size of each parameter update.</dd>
+      <dt>Loss</dt><dd>A number measuring how wrong the network currently is.</dd>
+      <dt>Overfitting</dt><dd>Fitting the training data, noise included, at the cost of performance on new data.</dd>
+      <dt>Parameter</dt><dd>Any number the network learns: the weights and biases.</dd>
+      <dt>Regularisation</dt><dd>Any technique that discourages overfitting.</dd>
+      <dt>Representation</dt><dd>The internal description of the data that a layer builds.</dd>
+      <dt>Saturation</dt><dd>A neuron's output sitting on the flat part of its activation function, where its slope, and so its learning, is near zero.</dd>
+      <dt>Softmax</dt><dd>A function turning a list of numbers into probabilities that sum to one.</dd>
+      <dt>Sonification</dt><dd>Turning data into sound.</dd>
+      <dt>Weight</dt><dd>A learned number scaling one connection.</dd>
+    </dl>
+
+    <h2 id="e-read">18. Where to go next</h2>
+    <ul class="essay-ref">
+      <li>Michael Nielsen, <em>Neural Networks and Deep Learning</em>: a free online book that builds up exactly the material in sections 3 to 8, with code.</li>
+      <li>3Blue1Brown, the video series on neural networks: the clearest visual introduction to the forward pass, gradient descent and backpropagation.</li>
+      <li>Andrej Karpathy, <em>Neural Networks: Zero to Hero</em>: a video course that builds a small network and a language model from scratch in code.</li>
+      <li>Ian Goodfellow, Yoshua Bengio and Aaron Courville, <em>Deep Learning</em> (MIT Press, 2016): the standard textbook, free to read online. It is mathematical.</li>
+      <li>The journal <em>Distill</em> (archived online): beautifully illustrated explanations of how networks represent and process data.</li>
+    </ul>
+  </article>
+</main>
+<footer><p><a href="/compositions/">Compositions</a> · <a href="/privacy/">Privacy</a></p></footer>
+
+<script type="module">
+import { NeuralEngine } from '/assets/js/neural/engine.js';
+import { draw } from '/assets/js/neural/draw.js';
+import { mountUI, mountReference } from '/assets/js/neural/ui.js';
+const NOTE = ['C','C♯','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
+const $ = id => document.getElementById(id), cv = $('nnCanvas');
+let seed = Math.floor(Math.random() * 1e6), t0 = 0, last = null, frame = 0;
+const state = { sel: null };
+const engine = new NeuralEngine({ seed, volume: 0.6, onFrame: s => { last = s; paint(); frame++; if (frame % 3 === 0) ui.refresh(); } });
+const status = a => { $('nnLog').textContent = a; };
+const params = net => net.W.reduce((n, L, l) => n + L.reduce((m, row, j) => m + row.reduce((k, w, i) => k + net.M[l][j][i], 0) + 1, 0), 0);
+function paint() {
+  const c = engine.conductor, s = last || { acts: c.lastActs };
+  draw(cv, c.net, s.acts, c.lossNow, state.sel);
+  $('nnLoss').textContent = c.lossNow.toFixed(3); $('nnKey').textContent = `${NOTE[c.root]} ${c.mode}`; $('nnEpisode').textContent = c.episode; $('nnParams').textContent = params(c.net);
+  if (engine.running) { const sec = Math.floor((performance.now() - t0) / 1000); $('nnTime').textContent = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`; }
+  ui.syncKey();
+}
+const ui = mountUI({ engine, canvas: cv, state, onSelect: () => paint() });
+mountReference($('nnRef'));
+const play = $('nnPlay');
+play.onclick = async () => {
+  if (engine.running) { engine.pause(); play.textContent = 'Resume'; status('Paused. The network is still there, just not running. You can still look around and change things.'); return; }
+  t0 = performance.now(); play.textContent = 'Pause'; status('Listening. At first it is rough while it works out its first chord. Give it a minute, and try selecting a neuron.');
+  await (engine.ctx ? engine.resume() : engine.start());
+};
+$('nnNew').onclick = () => { seed = Math.floor(Math.random() * 1e6); engine.reseed(seed); ui.redraw(); ui.choose(null); play.textContent = 'Pause'; t0 = performance.now(); status('A new network with different random weights. It knows nothing yet.'); };
+addEventListener('resize', paint); paint();
+// while paused the picture still follows selections and edits
+setInterval(() => { if (!engine.running) { paint(); ui.refresh(); } }, 500);
+if (window.silAudio?.mediaSession) window.silAudio.mediaSession({ title: 'The Network Learns to Sing', play: () => engine.running || play.click(), pause: () => engine.running && play.click() });
+window.__nn = engine; window.__nnui = ui;
+</script>
+</body>
+</html>
