@@ -797,8 +797,8 @@ export const EXPERIMENTS = [
 
 /** The course: a name, a method lesson, and units in a suggested order. People may take them in any order. */
 export const COURSE = {
-  name: 'Within Limits',
-  tagline: 'A minicourse in creative experiments for when you are stuck.',
+  name: 'Experiments in Creativity',
+  tagline: 'Creative prompts and guided activities for getting curious about how you make things, and for getting unstuck.',
   intro: 'Every experiment here sets a limit, asks you to run a process, and lets the result surprise you. They work like small science experiments: a question, a prediction, one thing changed, and a record. Take them in the suggested order or choose your own.',
 };
 export const METHOD = {
