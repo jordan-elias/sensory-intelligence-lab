@@ -67,6 +67,8 @@ Honest limits: lexicons miss irony, slang, negation across clauses and context, 
 
 0c. Done (branch app-20): retention reminder (default 10 years for Germany, the therapist's own setting, 0 = off; in-app only on the therapist's device; counts from the latest of end of connection, last session, last note; never deletes anything; "remind me again in a year"). Caseload page (`/therapist/caseload/`): sessions with no note yet, clients not written up lately, themes across clients; people are never matched across clients. Markdown import dropped (notes are written in the Lab). To check with a lawyer: retention duty and client erasure rights by country.
 
+0d. Done (branch app-21): Regulation sound. The current-to-target arc and the drone/rhythm layers are unchanged. New: a melodic voice (`assets/js/regulation/character.js`, tested) whose scale, register, speed, note length, tone colour and echo move from the current state's character to the target's; a transparent safety limiter; page copy rewritten to make no claims about the nervous system. Plain Web Audio kept (live and WAV render share one graph); Tone.js not needed. Still to do: listen by ear and tune the per-state values in `character.js`. The home page meta description still says "nervous system regulation".
+
 ### Other open items
 - Background audio with the screen off (Android).
 - Daily path.

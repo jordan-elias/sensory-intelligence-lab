@@ -181,19 +181,13 @@
   <br>
 
   <p>
-    Each soundscape is generated in real time rather than played from a recording. The system continuously shapes elements like rhythm, harmony, texture, and movement to support a gradual shift in attention and nervous system state. Because the sounds are created generatively, no two sessions are ever exactly the same — even when you select the same option.
+    Each soundscape is generated in real time rather than played from a recording. A slow drone, a melodic voice and a soft rhythm are shaped by the two states you choose: each state has its own scale, register, speed, tone and amount of echo, and the sound moves gradually from the character of your current state to the character of your target. Because the sounds are generated, no two sessions are exactly the same, even when you select the same options.
   </p>
 
   <br>
 
   <p>
-    The soundscapes follow a principle used in music therapy called the iso principle. Instead of forcing the listener into a new state immediately, the music begins by matching your current energy, then slowly guides you toward the desired state. This gradual transition helps the nervous system adapt comfortably and naturally.
-  </p>
-
-  <br>
-
-  <p>
-    The structure and musical elements of each soundscape are guided by music cognition research and the neuroscience of sound perception, which explore how people respond to sound and how specific musical features can support attention, emotional regulation, and a sense of stability.
+    The journey follows the iso principle from music therapy. Instead of switching to a new sound at once, the music begins by matching where you are and then moves step by step toward where you want to be. The structure draws on ideas from music cognition and deep listening. It is a listening experience, not a treatment, and it makes no claims about what it does to your body.
   </p>
 </main>
 
@@ -201,6 +195,7 @@
 
 <script type="module">
 'use strict';
+import { melodyEvents, blendColor, echoAt } from '/assets/js/regulation/character.js';
 
 // ─────────────────────────────────────────────────────────
 // HEADER BEHAVIOUR
@@ -403,7 +398,10 @@ function buildGraph(ctx, curState, tgtState, rng) {
   const STEPS = 200;
 
   const master = ctx.createGain();
-  master.connect(ctx.destination);
+  // A transparent safety limiter: it only acts if the sum of all layers gets close to full scale.
+  const limiter = ctx.createDynamicsCompressor();
+  limiter.threshold.value = -4; limiter.knee.value = 0; limiter.ratio.value = 20; limiter.attack.value = 0.003; limiter.release.value = 0.25;
+  master.connect(limiter); limiter.connect(ctx.destination);
   master.gain.setValueAtTime(0, now);
   master.gain.linearRampToValueAtTime(1.0, now + FI);
   master.gain.setValueAtTime(1.0, now + DUR - FO);
@@ -598,8 +596,35 @@ function buildGraph(ctx, curState, tgtState, rng) {
   }
 
   buildRhythm(ctx, arc, rng, master, now, DUR, norm, curState, tgtState);
+  buildVoice(ctx, master, mkRng((rng() * 4294967296) >>> 0), now, norm, curState, tgtState);
 
   return master;
+}
+
+// A melodic voice above the drone. Its scale, register, speed, note length, tone colour and echo move from the character of the
+// current state to that of the target (see character.js), so each state sounds like itself and the journey is audible.
+function buildVoice(ctx, master, rng, now, norm, curState, tgtState) {
+  const ev = melodyEvents(rng, curState, tgtState, DUR, { fadeIn: FI, fadeOut: FO });
+  if (!ev.length) return;
+  const dry = ctx.createGain(); dry.connect(master);
+  const send = ctx.createGain(), wet = ctx.createGain(), d1 = ctx.createDelay(1), d2 = ctx.createDelay(1), fb = ctx.createGain(), tone = ctx.createBiquadFilter();
+  const pL = ctx.createStereoPanner(), pR = ctx.createStereoPanner();
+  d1.delayTime.value = 0.31; d2.delayTime.value = 0.47; fb.gain.value = 0.52; tone.type = 'lowpass'; tone.frequency.value = 2600; pL.pan.value = -0.6; pR.pan.value = 0.6;
+  send.connect(d1); d1.connect(tone); tone.connect(fb); fb.connect(d1);
+  tone.connect(pL); pL.connect(wet); tone.connect(d2); d2.connect(pR); pR.connect(wet); wet.connect(master);
+  for (let i = 0; i <= 40; i++) { const t = now + (i / 40) * DUR, g = echoAt(curState, tgtState, i / 40) * 1.1; if (i === 0) wet.gain.setValueAtTime(g, t); else wet.gain.linearRampToValueAtTime(g, t); }
+  const waves = new Map();
+  const waveAt = p => {
+    const k = Math.round(p * 8); if (!waves.has(k)) { const h = blendColor(curState, tgtState, k / 8); waves.set(k, ctx.createPeriodicWave(new Float32Array(h.length), Float32Array.from(h))); } return waves.get(k);
+  };
+  for (const e of ev) {
+    const t0 = now + e.t, osc = ctx.createOscillator(), g = ctx.createGain(), pan = ctx.createStereoPanner();
+    osc.setPeriodicWave(waveAt(c01(e.t / DUR))); osc.frequency.value = e.freq; pan.pan.value = e.pan;
+    osc.connect(g); g.connect(pan); pan.connect(dry); pan.connect(send);
+    const a = e.amp * norm;
+    g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(a, t0 + Math.max(0.003, e.att)); g.gain.linearRampToValueAtTime(0, t0 + e.dur);
+    osc.start(t0); osc.stop(t0 + e.dur + 0.05);
+  }
 }
 
 function buildRhythm(ctx, arc, rng, master, startAt, dur, norm, curState, tgtState) {
@@ -909,6 +934,7 @@ window.pick       = pick;
 window.generate   = generate;
 window.togglePlay = togglePlay;
 window.dlWav      = dlWav;
+window.__regS     = S;
 
 </script>
 </body>
