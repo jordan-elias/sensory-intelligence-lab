@@ -7,6 +7,7 @@
  */
 import { tierLabel, intakeLabel } from './clients.js';
 import { nextSession, describe } from './sessions.js';
+import * as ret from './retention.js';
 
 const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 const day = iso => iso ? new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '';
@@ -18,7 +19,7 @@ export async function mountDashboard(root) {
   if (error) { root.innerHTML = `<div class="ws-callout"><strong>Could not load</strong>${esc(error.message)}</div>`; return; }
   if (!me) { root.innerHTML = `<div class="ws-callout"><strong>This page is for therapists</strong>If you should have access, please contact the practice owner.</div>`; return; }
 
-  const state = { clients: [], shared: {}, unread: {}, sessions: {}, kept: 0 };
+  const state = { clients: [], shared: {}, unread: {}, sessions: {}, kept: 0, keptDue: 0, noteLast: {} };
 
   async function load() {
     const [c, n, u, s] = await Promise.all([
@@ -32,7 +33,7 @@ export async function mountDashboard(root) {
     const tally = rows => { const m = {}; for (const r of rows || []) m[r.link_id] = (m[r.link_id] || 0) + 1; return m; };
     state.shared = tally(n.data); state.unread = tally(u.data);
     // People you hold records about who are no longer connected (for example a client who deleted their account). Ids only: nothing is opened here.
-    try { const { data: k } = await sb.from('therapist_notes').select('client_id'); const have = new Set(state.clients.map(x => x.client_id)); state.kept = new Set((k || []).map(r => r.client_id).filter(id => !have.has(id))).size; } catch { state.kept = 0; }
+    try { const { data: k } = await sb.from('therapist_notes').select('client_id, created_at'); const have = new Set(state.clients.map(x => x.client_id)); state.noteLast = {}; for (const r of k || []) if (!state.noteLast[r.client_id] || r.created_at > state.noteLast[r.client_id]) state.noteLast[r.client_id] = r.created_at; const gone = Object.keys(state.noteLast).filter(id => !have.has(id)); state.kept = gone.length; const cfg = ret.settings(me.user_id); state.keptDue = gone.filter(id => ret.retentionStatus(ret.lastActivity({ noteDates: [state.noteLast[id]] }), cfg.years, new Date(), cfg.snooze[id]).state === 'due').length; } catch { state.kept = 0; state.keptDue = 0; }
     state.sessions = {};
     for (const r of (s.data || [])) (state.sessions[r.link_id] = state.sessions[r.link_id] || []).push(r);
   }
@@ -43,6 +44,7 @@ export async function mountDashboard(root) {
     if (next) out.push(`<span class="th-chip">Next: ${esc(describe(next).when)}</span>`);
     else if (!archived) out.push('<span class="th-chip quiet">No session booked</span>');
     if (state.unread[c.link_id]) out.push(`<span class="th-chip alert">${esc(plural(state.unread[c.link_id], 'new message'))}</span>`);
+    if (archived) { const cfg = ret.settings(me.user_id), st = ret.retentionStatus(ret.lastActivity({ endedAt: c.ended_at, sessionDates: (state.sessions[c.link_id] || []).map(r => r.scheduled_at), noteDates: [state.noteLast[c.client_id]] }), cfg.years, new Date(), cfg.snooze[c.client_id]); if (st.state === 'due') out.push('<span class="th-chip alert">Retention period over</span>'); else if (st.state === 'soon') out.push(`<span class="th-chip">Period ends in ${st.daysLeft} days</span>`); }
     out.push(`<span class="th-chip quiet">${state.shared[c.link_id] ? esc(plural(state.shared[c.link_id], 'shared item')) : 'Nothing shared'}</span>`);
     return out.join('');
   };
@@ -67,7 +69,7 @@ export async function mountDashboard(root) {
       <h2 class="th-h2">Archive</h2>
       <p class="th-hint">Clients who ended the connection. What they shared before then is yours to keep or delete; open a client to delete it.</p>
       ${ended.length ? ended.map(c => card(c, true)).join('') : '<p class="th-muted">Nothing in the archive.</p>'}
-      ${state.kept ? `<h2 class="th-h2">Kept records</h2><a class="th-client th-client-link" href="/therapist/archive/"><div class="th-client-main"><strong>${esc(plural(state.kept, 'person'))} no longer connected</strong><span class="th-muted">Your own notes and saved copies, including anyone who deleted their account. Only you can open them.</span></div><span class="th-open" aria-hidden="true">Open &rarr;</span></a>` : ''}`;
+      ${state.kept ? `<h2 class="th-h2">Kept records</h2><a class="th-client th-client-link" href="/therapist/archive/"><div class="th-client-main"><strong>${esc(plural(state.kept, 'person'))} no longer connected</strong><span class="th-muted">Your own notes and saved copies, including anyone who deleted their account. Only you can open them.${state.keptDue ? ` ${esc(plural(state.keptDue, 'record'))} past the retention period.` : ''}</span></div><span class="th-open" aria-hidden="true">Open &rarr;</span></a>` : ''}`;
   }
 
   try { await load(); draw(); } catch (e) { root.innerHTML = `<div class="ws-callout"><strong>Could not load your clients</strong>${esc(e.message)}</div>`; }
