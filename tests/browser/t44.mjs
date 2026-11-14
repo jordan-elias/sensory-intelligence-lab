@@ -45,6 +45,9 @@ ok(/went to the park/.test(await txt())&&await page.evaluate(()=>window.__tbl.th
 // map
 await tab('Map');
 ok(await page.$('svg.th-map')!==null&&(await page.$$eval('svg.th-map g',g=>g.length))>=5,'the map shows people, events and themes');
+await page.evaluate(()=>[...window.__box.querySelectorAll('button')].find(b=>b.textContent==='Zoom in').click());
+ok((await page.$eval('svg.th-map',e=>e.getAttribute('viewBox'))).split(' ')[2]<640,'the map can be zoomed');
+await page.evaluate(()=>[...window.__box.querySelectorAll('button')].find(b=>b.textContent==='Reset').click());
 ok(/Anna and perfectionism|perfectionism and Anna/.test(await txt())&&/in the same sentence/.test(await txt()),'the connections are also listed as text');
 // themes table
 await tab('Themes');
@@ -76,6 +79,13 @@ ok(/Born/.test(await txt())&&/1996/.test(await txt())&&/Teenage years/.test(awai
 // after the client is gone: open the record from the therapist's own copies only
 await page.evaluate(()=>{ window.__box.innerHTML=''; }); await page.evaluate(()=>window.__mount(false)); await sleep(900);
 ok(/From the intake form/.test(await txt())&&/From the family history/.test(await txt())&&/First session/.test(await txt()),'with no live copies the kept intake, family history and notes are all still there');
+// a short description for a person, saved encrypted, and used in the export
+await page.evaluate(()=>[...window.__box.querySelectorAll('.th-link--entity')].find(b=>b.textContent==='Anna').click()); await sleep(200);
+await page.evaluate(()=>{ const t=window.__box.querySelector('#recAbout textarea'); t.value='Mother. Critical but present; the key relationship.'; [...window.__box.querySelectorAll('#recAbout button')].find(b=>b.textContent==='Save description').click(); }); await sleep(800);
+ok(await page.evaluate(()=>window.__tbl.therapist_notes.length)===11&&!/key relationship/.test(await page.evaluate(()=>JSON.stringify(window.__tbl.therapist_notes))),'a description of a person is saved, encrypted');
+await page.evaluate(()=>window.__mount()); await sleep(900);
+await page.evaluate(()=>[...window.__box.querySelectorAll('.th-link--entity')].find(b=>b.textContent==='Anna').click()); await sleep(200);
+ok(/key relationship/.test(await page.evaluate(()=>window.__box.querySelector('#recAbout textarea').value))&&/Words around it|Comes up with/.test(await page.$eval('#recAbout',e=>e.innerText)),'the description comes back, with what the person comes up with');
 // export
 await tab('Export and delete');
 const md=await page.evaluate(async()=>{ const {toMarkdown,ordered}=await import('/assets/js/notes/graph.js'); const n=(await window.__store.list('c1')); return toMarkdown('Sam Lee',n.map(x=>({...x}))); });
@@ -84,7 +94,7 @@ ok(/nothing is deleted automatically/.test(await txt()),'an ended connection say
 // delete all, with confirmation
 await page.evaluate(()=>[...window.__box.querySelectorAll('button')].find(b=>/Delete this whole record/.test(b.textContent)).click());
 await page.evaluate(()=>{ [...window.__box.querySelectorAll('button')].find(b=>b.textContent==='Delete the notes').click(); }); await sleep(300);
-ok(await page.evaluate(()=>window.__tbl.therapist_notes.length)===10,'deleting does nothing without the confirmation word');
+ok(await page.evaluate(()=>window.__tbl.therapist_notes.length)===11,'deleting does nothing without the confirmation word');
 await page.type('#recConfirm','DELETE'); await page.evaluate(()=>[...window.__box.querySelectorAll('button')].find(b=>b.textContent==='Delete the notes').click()); await sleep(700);
 ok(await page.evaluate(()=>window.__tbl.therapist_notes.length)===0&&await page.evaluate(()=>window.__deleted)===1,'all notes are deleted when the therapist confirms');
 ok(errors.filter(e=>!/Failed to load resource/.test(e)).length===0,'no page errors '+errors.join('|'));

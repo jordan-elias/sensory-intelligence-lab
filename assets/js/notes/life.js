@@ -9,6 +9,8 @@ import { rawSentences, parseNote, plain } from './parse.js';
 
 const THIS_YEAR = () => new Date().getFullYear();
 const STAGES = [
+  [/\bals\s+(?:kleines\s+)?kind\b|\bkindheit\b|\baufgewachsen\b/i, 'Childhood', 6, 11],
+  [/\bals\s+(?:teenager|jugendliche[rn]?)\b|\bjugend\b/i, 'Teenage years', 12, 17],
   [/\b(?:as|when)\s+(?:a|an)\s+(?:baby|infant|toddler)\b|\binfancy\b|\bearly childhood\b/i, 'Early childhood', 0, 5],
   [/\b(?:as|when)\s+(?:a|an)\s+(?:small |young )?(?:child|kid)\b|\bchildhood\b|\bgrowing up\b|\bgrew up\b|\bprimary school\b/i, 'Childhood', 6, 11],
   [/\b(?:as|when)\s+(?:a|an)\s+(?:teenager|teen|adolescent)\b|\bteens?\b(?!\w)|\bteenage years\b|\bsecondary school\b|\bhigh school\b/i, 'Teenage years', 12, 17],
@@ -18,6 +20,8 @@ const STAGES = [
   [/\bin\s+(?:his|her|their|my)\s+(?:early |late |mid )?(?:fifties|sixties|seventies)\b/i, 'Later life', 50, 79],
 ];
 const AGE = [
+  /\b(?:im\s+alter\s+von|mit)\s+(\d{1,2})\s*(?:jahren?)?\b/gi,
+  /\b(?:als|wenn)\s+(?:er|sie|ich|wir)\s+(\d{1,2})\s+(?:war|waren|wurde)\b/gi,
   /\b(?:at|by|since|around|from|until|till|before|after)\s+(?:the\s+)?age\s+(?:of\s+)?(\d{1,2})\b/gi,
   /\baged?\s+(\d{1,2})\b/gi,
   /\b(?:when|while|since)\s+(?:he|she|they|i|we|\w+)\s+(?:was|were|am|turned)\s+(\d{1,2})\b/gi,

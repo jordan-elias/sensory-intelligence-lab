@@ -88,3 +88,6 @@
 .th-trend { margin: .5rem 0; } .th-life { list-style: none; padding: 0; margin: 0; border-left: 2px solid var(--border); }
 .th-life-row { padding: .6rem 0 .6rem 1rem; position: relative; } .th-life-row::before { content: ""; position: absolute; left: -6px; top: 1rem; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
 .th-life-when { font: 600 .85rem var(--font-heading); }
+
+.th-print { display: none; } .th-print-body { white-space: pre-wrap; font: 11pt/1.5 Georgia, serif; }
+@media print { body.th-printing > *:not(#recPrint) { display: none !important; } body.th-printing #recPrint { display: block; padding: 1.5cm; } }

@@ -110,3 +110,11 @@ test('without a birth year, ages stay in their own lane and nothing is invented'
   const l = lifeLanes(ev); assert.equal(l.dated.length, 1); assert.equal(l.byAge.length, 1); assert.equal(l.byAge[0].age, 7); assert.equal(ev.length, 2);
   assert.equal(birthYearOf('1994-05-02'), 1994); assert.equal(birthYearOf('soon'), null);
 });
+
+test('German notes are read too: sentiment, negation, themes and ages', () => {
+  assert.ok(sentiment('Sie ist sehr glücklich und ruhig').score > 0.9); assert.ok(sentiment('nicht glücklich, traurig und einsam').score < 0);
+  assert.ok(emotions('traurig und einsam, voller Angst').sadness > 0 && emotions('traurig und einsam, voller Angst').fear > 0);
+  assert.equal(suggestThemes('Sie kann nicht schlafen, Schlaflosigkeit und Albträume')[0].theme, 'sleep');
+  const ev = lifeEvents([{ id: 'n', date: '2026-01-01', text: 'Im Alter von 9 Jahren zog die Familie um. Als Kind war sie oft allein.' }]);
+  assert.ok(ev.some(e => e.age === 9) && ev.some(e => e.stage === 'Childhood'));
+});

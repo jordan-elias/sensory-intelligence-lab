@@ -48,6 +48,14 @@ export function makeNotesStore(sb, session) {
       else { const { error } = await sb.from('therapist_notes').insert({ client_id: clientId, payload }); if (error) throw new Error(error.message); }
       return true;
     },
+    /** A short description the therapist writes for a person, event or theme (like a note of its own). Empty text removes it. */
+    async setItem(clientId, key, name, text) {
+      const rows = (await this.list(clientId)).filter(r => r.kind === 'item' && r.data && r.data.key === key), t = String(text || '').trim();
+      if (!t) { for (const r of rows) await this.remove(r.id); return; }
+      const payload = await session.encrypt(JSON.stringify({ v: 3, kind: 'item', data: { key, name, text: t.slice(0, 4000) } }));
+      if (rows[0]) { const { error } = await sb.from('therapist_notes').update({ payload }).eq('id', rows[0].id); if (error) throw new Error(error.message); }
+      else { const { error } = await sb.from('therapist_notes').insert({ client_id: clientId, payload }); if (error) throw new Error(error.message); }
+    },
     /** Everyone this therapist holds records about (ids only, nothing decrypted). */
     async people() {
       const { data, error } = await sb.from('therapist_notes').select('client_id, created_at');

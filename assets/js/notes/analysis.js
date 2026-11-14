@@ -5,7 +5,7 @@
  *
  * These are descriptive tools. They count words; they do not understand people. Lexicon sentiment misses irony and
  * context, and the results are meant to point the therapist back to their own notes, never to diagnose or score a client.
- * The word lists are English; the stop words also cover German.
+ * The word lists cover English and German.
  */
 import { plain } from './parse.js';
 
@@ -39,6 +39,9 @@ const POS = 'happy glad joy joyful love loved loving calm relaxed relief relieve
 const NEG = 'sad sadness depressed depression anxious anxiety worry worried worrying afraid scared fear fearful angry anger furious resent resentment hate hated guilty guilt ashamed shame lonely alone empty numb hopeless worthless tired exhausted stuck trapped overwhelmed panic panicked cry cried crying hurt hurting pain painful bad worse worst terrible awful upset irritable ignored rejected abandoned failure failed stress stressed tense dread dreading nightmare lost grief grieving'.split(' ');
 const NEGATORS = new Set(['not', "n't", 'no', 'never', 'without', "don't", "doesn't", "didn't", "isn't", "wasn't", "can't", "won't", "couldn't", "wouldn't", "haven't", "hasn't", "hadn't", "aren't", "weren't", 'neither', 'nor', 'hardly']);
 const BOOST = new Set(['very', 'really', 'so', 'extremely', 'completely', 'totally', 'deeply', 'incredibly']);
+const POS_DE = 'glücklich froh freude freut zufrieden ruhig entspannt erleichtert erleichterung hoffnung hoffnungsvoll stolz sicher geborgen unterstützt besser gut gut gelassen dankbar liebe geliebt stärker stark vertrauen vertraut lachen gelacht verbunden warm fortschritt'.split(' ');
+const NEG_DE = 'traurig traurigkeit depressiv angst ängstlich sorge sorgen besorgt furcht wütend wut ärger verärgert schuld schuldig schuldgefühle scham beschämt einsam allein leer taub hoffnungslos wertlos müde erschöpft gefangen überfordert panik weinen geweint verletzt schmerz schmerzen schlecht schlechter schlimm schrecklich gestresst stress angespannt albtraum trauer verlust verloren abgelehnt verlassen versagt'.split(' ');
+POS.push(...POS_DE); NEG.push(...NEG_DE); ['nicht', 'kein', 'keine', 'keinen', 'nie', 'niemals', 'ohne', 'kaum'].forEach(w => NEGATORS.add(w)); ['sehr', 'ganz', 'total', 'extrem', 'wirklich'].forEach(w => BOOST.add(w));
 const POSS = new Set(POS), NEGS = new Set(NEG);
 
 /** Valence of a text from -1 to 1, with simple negation ("not happy") and intensifiers. `scored` is how many words counted; low means low confidence. */
@@ -53,12 +56,12 @@ export function sentiment(text) {
 }
 
 export const EMOTIONS = {
-  sadness: 'sad* cry* grie* lonely empty numb hopeless miss* loss lost tearful',
-  anger: 'angr* furious resent* irritat* rage mad frustrat* annoy*',
-  fear: 'afraid scared fear* anxious anxiety worr* panic* dread* nervous terrif*',
-  shame: 'asham* shame guilt* embarrass* worthless humiliat* blame*',
-  joy: 'happy joy* glad delight* excited laugh* enjoy* grateful proud',
-  calm: 'calm relax* peace* safe steady settled ease content',
+  sadness: 'sad* cry* grie* lonely empty numb hopeless miss* loss lost tearful traurig* trauer* weinen geweint einsam leer hoffnungslos vermiss*',
+  anger: 'angr* furious resent* irritat* rage mad frustrat* annoy* wütend wut ärger* verärgert gereizt',
+  fear: 'afraid scared fear* anxious anxiety worr* panic* dread* nervous terrif* angst ängst* sorge* sorgen besorgt panik furcht nervös',
+  shame: 'asham* shame guilt* embarrass* worthless humiliat* blame* scham* schuld* beschämt wertlos peinlich',
+  joy: 'happy joy* glad delight* excited laugh* enjoy* grateful proud glücklich freude froh lachen stolz dankbar',
+  calm: 'calm relax* peace* safe steady settled ease content ruhig gelassen entspannt frieden sicher geborgen',
 };
 const rx = list => new RegExp('^(?:' + list.split(' ').map(s => s.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*$/, '[\\p{L}]*')).join('|') + ')$', 'u');
 const EMO = Object.fromEntries(Object.entries(EMOTIONS).map(([k, v]) => [k, rx(v)]));
@@ -79,18 +82,18 @@ export function style(text) {
 
 // ── themes: seed word lists the therapist can accept, rename or ignore ──
 export const THEME_SEEDS = {
-  sleep: 'sleep* insomnia tired exhaust* nightmare* dream* bed rest*',
-  anxiety: 'anxi* worr* panic* nervous dread* afraid fear* tense',
+  sleep: 'schlaf* schlaflos* alptraum* albtraum* sleep* insomnia tired exhaust* nightmare* dream* bed rest*',
+  anxiety: 'angst* ängst* sorge* panik anxi* worr* panic* nervous dread* afraid fear* tense',
   'low-mood': 'depress* sad* hopeless empty numb flat low',
-  grief: 'grie* loss lost died death funeral miss* mourn*',
+  grief: 'trauer* verlust gestorben tod beerdigung vermiss* grie* loss lost died death funeral miss* mourn*',
   anger: 'angr* furious resent* rage irritat* frustrat*',
-  'self-criticism': 'failure stupid worthless useless hate* blame* should perfect* inadequate',
+  'self-criticism': 'versager* wertlos dumm nutzlos failure stupid worthless useless hate* blame* should perfect* inadequate',
   avoidance: 'avoid* postpone* procrastinat* cancel* hide hiding escape putting',
-  relationships: 'partner husband wife boyfriend girlfriend friend* family argument* divorce break*up lonely',
-  work: 'work* job boss colleague* deadline* career burnout manager office',
+  relationships: 'partner* freund* familie streit* scheidung trennung partner husband wife boyfriend girlfriend friend* family argument* divorce break*up lonely',
+  work: 'arbeit* beruf chef* kollegen stress* work* job boss colleague* deadline* career burnout manager office',
   body: 'body pain headache stomach chest breath* heart tension appetite',
   'self-worth': 'worth* proud confident confidence esteem deserve*',
-  trauma: 'trauma* abuse* assault flashback* trigger* unsafe violence',
+  trauma: 'trauma* missbrauch* gewalt übergriff* flashback* abuse* assault flashback* trigger* unsafe violence',
 };
 const themeRx = Object.fromEntries(Object.entries(THEME_SEEDS).map(([k, v]) => [k, rx(v)]));
 /** Which seed themes a note touches, with how many words matched. The therapist decides whether any of it is a real theme. */

@@ -44,11 +44,18 @@ function download(name, text, type = 'text/markdown') {
   const a = h('a', { href: URL.createObjectURL(new Blob([text], { type: type + ';charset=utf-8' })), download: name }); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
 
+/** Prints the record as plain pages: only this text is shown while printing, so "Save as PDF" in the print dialog gives a clean file. Made on this device. */
+function printRecord(text, title) {
+  const doc = h('div', { id: 'recPrint', class: 'th-print' }, h('h1', {}, title), h('div', { class: 'th-print-body' }, text));
+  const done = () => { document.body.classList.remove('th-printing'); doc.remove(); removeEventListener('afterprint', done); };
+  document.body.append(doc); document.body.classList.add('th-printing'); addEventListener('afterprint', done); window.print();
+}
 export async function mountRecord(box, { store, clientId, clientName, intake = null, fam = null, profile = null, sharedDates = [], active = true, onDeleted = () => {} }) {
-  let notes = [], view = 'notes', panel = null, filter = '', intakeD = null, famD = null, extras = [], people = [], kept = false;
+  let notes = [], view = 'notes', panel = null, filter = '', intakeD = null, famD = null, extras = [], people = [], kept = false, descs = new Map();
   const load = async () => {
     const rows = await store.list(clientId), arch = k => rows.find(r => r.kind === k)?.data || null;
     notes = rows.filter(n => n.kind === 'note').map(n => ({ ...n, source: 'note' }));
+    descs = new Map(rows.filter(r => r.kind === 'item' && r.data).map(r => [r.data.key, r.data]));
     intakeD = intake || arch('intake'); famD = fam || arch('family');
     extras = [intakeEntry(intakeD, INTAKE_FIELDS), familyEntry(famD)].filter(Boolean); people = familyPeople(famD);
   };
@@ -69,6 +76,8 @@ export async function mountRecord(box, { store, clientId, clientName, intake = n
     const rel = related(entries(), name);
     if (rel.together.length) wrap.insertBefore(h('p', { class: 'th-hint' }, 'Comes up with: ', rel.together.slice(0, 8).map((t, i) => [i ? ', ' : '', h('button', { type: 'button', class: 'th-link', onclick: () => openAbout(t.name) }, t.name), ` (${t.sessions}${t.close ? `, ${t.close} in the same sentence` : ''})`])), wrap.querySelector('ul,p.th-muted'));
     if (rel.around.length) wrap.insertBefore(h('p', { class: 'th-hint' }, 'Words around it: ' + rel.around.map(w => w.word).join(', ')), wrap.querySelector('ul,p.th-muted'));
+    const dk = keyOf(name), d = descs.get(dk), ta = h('textarea', { class: 'ws-input', rows: '3', maxlength: '4000', 'aria-label': 'Your description of ' + name, placeholder: 'A few lines you want to remember: who this is, why it matters, what it connects to.' }); ta.value = d ? d.text : '';
+    wrap.insertBefore(h('div', {}, ta, h('div', { style: 'margin:.4rem 0' }, btn('Save description', async e => { e.target.disabled = true; try { await store.setItem(clientId, dk, name, ta.value); await load(); e.target.textContent = 'Saved'; setTimeout(() => { e.target.textContent = 'Save description'; e.target.disabled = false; }, 1200); } catch (err) { say(err.message, 'error'); e.target.disabled = false; } }))), wrap.querySelector('ul,p.th-muted'));
     panel.prepend(wrap); wrap.focus();
   }
 
@@ -124,6 +133,13 @@ export async function mountRecord(box, { store, clientId, clientName, intake = n
       grp.addEventListener('click', () => openAbout(n.name)); grp.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); openAbout(n.name); } });
       svg.append(grp);
     }
+    // zoom and pan: change the visible part of the picture; nothing is recomputed
+    let vb = { x: 0, y: 0, w: W, h: H }; const setVb = () => svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+    const zoom = f => { const nw = Math.max(W / 6, Math.min(W, vb.w / f)), nh = nw * H / W; vb = { x: Math.max(0, Math.min(W - nw, vb.x + (vb.w - nw) / 2)), y: Math.max(0, Math.min(H - nh, vb.y + (vb.h - nh) / 2)), w: nw, h: nh }; setVb(); };
+    let drag = null; svg.addEventListener('pointerdown', e => { if (e.target.closest('g')) return; drag = { x: e.clientX, y: e.clientY, vx: vb.x, vy: vb.y }; svg.setPointerCapture(e.pointerId); });
+    svg.addEventListener('pointermove', e => { if (!drag) return; const k = vb.w / svg.clientWidth; vb.x = Math.max(0, Math.min(W - vb.w, drag.vx - (e.clientX - drag.x) * k)); vb.y = Math.max(0, Math.min(H - vb.h, drag.vy - (e.clientY - drag.y) * k)); setVb(); });
+    svg.addEventListener('pointerup', () => { drag = null; });
+    panel.append(h('div', { class: 'th-chips' }, btn('Zoom in', () => zoom(1.5), 'th-chip'), btn('Zoom out', () => zoom(1 / 1.5), 'th-chip'), btn('Reset', () => { vb = { x: 0, y: 0, w: W, h: H }; setVb(); }, 'th-chip')));
     panel.append(h('p', { class: 'th-hint' }, 'Filled circles are themes (inner ring). Outlined circles are people, events and places (outer ring). A line means two things came up in the same note; a dark line means in the same sentence. Select any circle to read every mention.'), svg);
     const name = id => g.nodes.find(n => n.id === id)?.name;
     panel.append(h('h2', { class: 'th-h2' }, 'Connections'), g.edges.length ? h('ul', { class: 'th-list' }, g.edges.slice(0, 40).map(e => h('li', {}, `${name(e.source)} and ${name(e.target)}: together in ${e.sessions} note${e.sessions === 1 ? '' : 's'}${e.close ? `, in the same sentence in ${e.close}` : ''}.`))) : noData('No connections yet: nothing has come up together so far.'));
@@ -193,11 +209,11 @@ export async function mountRecord(box, { store, clientId, clientName, intake = n
 
   // ── Export and delete ──
   function viewRecords() {
-    const all = entries(), nNotes = notes.filter(n => n.text != null).length, full = () => toMarkdown(clientName, all) + (intakeFull(intakeD, INTAKE_FIELDS) ? `\n## Intake form, in full\n\n${intakeFull(intakeD, INTAKE_FIELDS)}\n` : ''), safe = clientName.replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '') || 'client';
+    const all = entries(), nNotes = notes.filter(n => n.text != null).length, aboutMd = () => descs.size ? `\n## About the people, events and themes\n\n${[...descs.values()].map(d => `### ${d.name}\n\n${d.text}`).join('\n\n')}\n` : '', full = () => toMarkdown(clientName, all) + aboutMd() + (intakeFull(intakeD, INTAKE_FIELDS) ? `\n## Intake form, in full\n\n${intakeFull(intakeD, INTAKE_FIELDS)}\n` : ''), safe = clientName.replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '') || 'client';
     panel.append(h('h2', { class: 'th-h2', style: 'margin-top:0' }, 'Export'),
       h('p', {}, `${nNotes} session note${nNotes === 1 ? '' : 's'}${extras.filter(Boolean).length ? ' plus the intake form and family history' : ''}.`),
       h('p', { class: 'th-hint' }, kept ? 'A copy of the intake form and family history is kept in your own encrypted record, so it stays if the client leaves or deletes their account. ' : '', `A Markdown file keeps your [[links]] and #themes and opens in any notes app, Obsidian included. It is made on this device. If ${clientName} asks for their records, send them this file yourself; the platform never holds a readable copy.`),
-      btn('Download as Markdown', () => download(`${safe}-record.md`, full()), 'action-btn'), ' ', btn('Download as plain text', () => download(`${safe}-record.txt`, full(), 'text/plain'), 'action-btn outline'),
+      btn('Download as Markdown', () => download(`${safe}-record.md`, full()), 'action-btn'), ' ', btn('Print or save as PDF', () => printRecord(full(), clientName), 'action-btn outline'), ' ', btn('Download as plain text', () => download(`${safe}-record.txt`, full(), 'text/plain'), 'action-btn outline'),
       h('h2', { class: 'th-h2' }, 'Keep or delete'),
       h('p', {}, active ? 'Your notes stay until you delete them.' : `This connection has ended. Your notes about ${clientName} are yours: nothing is deleted automatically, so keep them or delete them when you choose.`),
       h('p', { class: 'th-hint' }, `Ending a connection does not remove your notes. They stay until you delete them here, even if ${clientName} deletes their own account.`));

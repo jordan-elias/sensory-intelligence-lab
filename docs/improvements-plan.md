@@ -50,7 +50,7 @@ Built (`assets/js/notes/`, tested): all of this is plain code over the therapist
 - Theme suggestions from seed word lists (sleep, anxiety, low mood, grief, anger, self-criticism, avoidance, relationships, work, body, self-worth, trauma). Suggestions only: the therapist accepts, renames or ignores.
 - Markdown export with [[links]] kept, so notes open in Obsidian or any notes app.
 
-Possible later, still on-device: a small embedding model run in the browser (tens of MB, downloaded once from our own hosting, never sent anywhere) for "find sessions like this one" and grouping similar passages; German word lists; a therapist-editable theme dictionary; simple trend lines per theme.
+Possible later, still on-device: a small embedding model run in the browser (tens of MB, downloaded once from our own hosting, never sent anywhere) for "find sessions like this one" and grouping similar passages; (done) German word lists; a therapist-editable theme dictionary; simple trend lines per theme.
 
 Honest limits: lexicons miss irony, slang, negation across clauses and context, and they only know the words in their lists. Counts describe the notes; they do not describe the client. They are there to point the therapist back to what they wrote, never to score, label or diagnose a client, and the interface should say so.
 
@@ -60,10 +60,10 @@ Honest limits: lexicons miss irony, slang, negation across clauses and context, 
 0b. Done (branch app-18): the Record tab on the therapist's client page: notes with session dates, [[links]] and #themes, intake and family history in the same record, backlinks, search, map, themes by session, timeline with tone and theme suggestions, before-a-session brief, Markdown and text export, keep-or-delete with typed confirmation. Uses the existing vault (passphrase and recovery key), so no new key design was needed.
 1. Session notes per client, encrypted on the therapist's device, with date and free text. Intake and family history shown as the first entries.
 2. (done) `[[links]]` and `#themes`, backlinks.
-3. Still to do: a short description per person, event and theme (a small page for each, like an Obsidian note).
+3. (done) A short description per person, event and theme, saved encrypted and included in the export.
 4. (done) Timeline and themes × sessions table.
-5. (done) Graph view and pre-session brief. Still to do: drag-to-arrange and zoom for large maps.
-6. (done) Markdown and text export, keep-or-delete. Still to do: PDF export, import of Markdown, an optional reminder when a retention period the therapist sets has passed.
+5. (done) Graph view and pre-session brief. Zoom and pan are done; arranging nodes by hand is not.
+6. (done) Markdown and text export, keep-or-delete. PDF is done through the print dialog (Save as PDF). Still to do: import of Markdown, an optional reminder when a retention period the therapist sets has passed.
 
 ### Other open items
 - Background audio with the screen off (Android).
