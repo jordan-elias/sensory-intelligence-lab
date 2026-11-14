@@ -8,7 +8,7 @@ const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').re
 const MAX = 20000;
 
 export function makeNotesStore(sb, session) {
-  const seal = text => session.encrypt(JSON.stringify({ v: 1, text }));
+  const seal = (text, date) => session.encrypt(JSON.stringify(date ? { v: 2, text, date } : { v: 1, text }));
   return {
     async list(clientId) {
       const { data, error } = await sb.from('therapist_notes').select('id, payload, created_at, updated_at')
@@ -16,24 +16,29 @@ export function makeNotesStore(sb, session) {
       if (error) throw new Error(error.message);
       const out = [];
       for (const r of data || []) {
-        let text = null;
-        try { text = JSON.parse(await session.decrypt(r.payload)).text; } catch { text = null; }
-        out.push({ id: r.id, created_at: r.created_at, updated_at: r.updated_at, text });
+        let text = null, date = null;
+        try { const p = JSON.parse(await session.decrypt(r.payload)); text = p.text; date = /^\d{4}-\d{2}-\d{2}$/.test(p.date || '') ? p.date : null; } catch { text = null; }
+        out.push({ id: r.id, created_at: r.created_at, updated_at: r.updated_at, text, date: date || String(r.created_at).slice(0, 10) });
       }
       return out;
     },
-    async add(clientId, text) {
+    async add(clientId, text, date = null) {
       text = String(text || '').trim();
       if (!text) throw new Error('Write something first.');
       if (text.length > MAX) throw new Error('That note is too long.');
-      const { error } = await sb.from('therapist_notes').insert({ client_id: clientId, payload: await seal(text) });
+      const { error } = await sb.from('therapist_notes').insert({ client_id: clientId, payload: await seal(text, date) });
       if (error) throw new Error(error.message);
     },
-    async update(id, text) {
+    async update(id, text, date = null) {
       text = String(text || '').trim();
       if (!text) throw new Error('A note cannot be empty. Delete it instead.');
       if (text.length > MAX) throw new Error('That note is too long.');
-      const { error } = await sb.from('therapist_notes').update({ payload: await seal(text) }).eq('id', id);
+      const { error } = await sb.from('therapist_notes').update({ payload: await seal(text, date) }).eq('id', id);
+      if (error) throw new Error(error.message);
+    },
+    /** Deletes every note this therapist holds about one client. Used only when the therapist chooses to. */
+    async removeAll(clientId) {
+      const { error } = await sb.from('therapist_notes').delete().eq('client_id', clientId);
       if (error) throw new Error(error.message);
     },
     async remove(id) {

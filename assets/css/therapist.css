@@ -65,3 +65,22 @@
 .th-doc dt { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-top: .8rem; }
 .th-doc dd { margin: .2rem 0 0; font-size: .88rem; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
 .th-doc dd .th-doc { padding-left: .8rem; border-left: 2px solid var(--border); }
+
+/* record: notes, map, themes, timeline */
+.th-tabs--sub { margin-bottom: 1rem; flex-wrap: wrap; }
+.th-tabs--sub button.on { border-bottom-color: var(--accent); color: var(--accent); }
+.th-link { background: none; border: 0; padding: 0; font: inherit; color: var(--accent); cursor: pointer; text-decoration: underline dotted; }
+.th-link--theme { font-weight: 600; }
+.th-chips { display: flex; flex-wrap: wrap; gap: .4rem; margin: .5rem 0; }
+.th-chip { border: 1px solid var(--border); background: var(--surface); border-radius: 99px; padding: .15rem .65rem; font: .75rem var(--font-body); cursor: pointer; color: var(--text); }
+.th-about { border: 1px solid var(--accent); padding: .8rem 1rem; margin-bottom: 1rem; background: var(--surface); }
+.th-h3 { font: 600 .95rem var(--font-heading); margin-bottom: .4rem; }
+.th-map { width: 100%; max-width: 680px; height: auto; border: 1px solid var(--border); background: var(--surface); }
+.th-map g { cursor: pointer; } .th-map g:focus-visible circle { stroke-width: 4; outline: none; }
+.th-scroll { overflow-x: auto; }
+.th-matrix { border-collapse: collapse; font-size: .75rem; } .th-matrix th, .th-matrix td { border: 1px solid var(--border); padding: .25rem .5rem; text-align: center; min-width: 2.4rem; }
+.th-matrix td.on { background: var(--accent); color: #fff; } .th-rowname { text-align: left !important; white-space: nowrap; }
+.th-timeline { list-style: none; padding: 0; margin: 0; } .th-timeline li { padding: .7rem 0; border-bottom: 1px solid var(--border); }
+.th-tone { position: relative; height: 6px; background: linear-gradient(90deg, #b4532a33, #ddd, #2a5c4533); border-radius: 3px; margin: .4rem 0; max-width: 220px; }
+.th-tone-bar { position: absolute; top: -3px; width: 4px; height: 12px; background: #222; border-radius: 2px; transform: translateX(-2px); }
+.th-danger { margin: 1rem 0; padding: 1rem; border: 1px solid var(--border); }

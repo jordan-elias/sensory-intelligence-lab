@@ -37,7 +37,8 @@ Open work, roughly in the order it was raised. Constraints that apply to everyth
 1. How long records should be kept by default, and what the platform says about professional retention duties (these differ by country and profession; the therapist decides, we do not advise).
 2. Shared Cal.com account and freelancer-by-invoice model: notes are scoped per therapist, never per account.
 3. Anything the client sees (for example homework) stays a separate, explicit, per-item action.
-4. Key recovery: if the therapist loses their device key, the notes are gone. Offer a recovery key they store themselves, and say so plainly.
+4. Key recovery: already handled by the vault's recovery key. The page should say plainly that without the passphrase and recovery key the notes cannot be opened by anyone.
+5. **Decision needed:** `therapist_notes.client_id` is `on delete cascade`, so if a client deletes their own account the therapist's notes about them are deleted too. Your wish is that the therapist chooses. Options: keep the cascade (client erasure wins), or change it so notes survive and are labelled from inside the encrypted payload. Professional record-keeping duties and the client's erasure rights pull in different directions and vary by country, so this is worth a short legal check before choosing.
 
 **On-device analysis: what is possible without an LLM**
 Built (`assets/js/notes/`, tested): all of this is plain code over the therapist's own words.
@@ -54,13 +55,14 @@ Possible later, still on-device: a small embedding model run in the browser (ten
 Honest limits: lexicons miss irony, slang, negation across clauses and context, and they only know the words in their lists. Counts describe the notes; they do not describe the client. They are there to point the therapist back to what they wrote, never to score, label or diagnose a client, and the interface should say so.
 
 **Possible build order**
-0. Done: parsing, analysis, graph and export modules with tests (no interface yet).
+0. Done: parsing, analysis, graph and export modules with tests.
+0b. Done (branch app-18): the Record tab on the therapist's client page: notes with session dates, [[links]] and #themes, intake and family history in the same record, backlinks, search, map, themes by session, timeline with tone and theme suggestions, before-a-session brief, Markdown and text export, keep-or-delete with typed confirmation. Uses the existing vault (passphrase and recovery key), so no new key design was needed.
 1. Session notes per client, encrypted on the therapist's device, with date and free text. Intake and family history shown as the first entries.
-2. `[[links]]` and `#themes` parsed on save; backlinks panel.
-3. Entities with short descriptions (people, events); themes list with counts.
-4. Timeline and themes × sessions table.
-5. Graph view and pre-session brief.
-6. Markdown export (and import) for portability, record export for the client on request, keep-or-delete when a client leaves.
+2. (done) `[[links]]` and `#themes`, backlinks.
+3. Still to do: a short description per person, event and theme (a small page for each, like an Obsidian note).
+4. (done) Timeline and themes × sessions table.
+5. (done) Graph view and pre-session brief. Still to do: drag-to-arrange and zoom for large maps.
+6. (done) Markdown and text export, keep-or-delete. Still to do: PDF export, import of Markdown, an optional reminder when a retention period the therapist sets has passed.
 
 ### Other open items
 - Background audio with the screen off (Android).

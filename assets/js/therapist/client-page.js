@@ -12,8 +12,10 @@ import { mountThread } from '../messages/thread.js';
 import { tierLabel, intakeLabel, summarize, openCopies } from './clients.js';
 import { splitSessions, describe } from './sessions.js';
 import { toRows, renderRows, worksheetLabel } from './doc-render.js';
-import { makeNotesStore, mountNotes } from './notes.js';
-import { openIntake, renderIntake } from '../intake/intake.js';
+import { makeNotesStore } from './notes.js';
+import { mountRecord } from './record.js';
+import { intakeEntry, familyEntry, familyPeople } from '../notes/entries.js';
+import { openIntake, renderIntake, INTAKE_FIELDS } from '../intake/intake.js';
 import { openFamily, renderFamily } from '../family/family.js';
 
 const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -66,7 +68,7 @@ export async function mountClientPage(root) {
       <button role="tab" id="tab-messages" aria-controls="panel-messages" data-tab="messages">Messages<span class="th-count" id="cntMessages"></span></button>
       <button role="tab" id="tab-shared" aria-controls="panel-shared" data-tab="shared">Shared<span class="th-count">${nCheckins + nDocs || ''}</span></button>
       <button role="tab" id="tab-intake" aria-controls="panel-intake" data-tab="intake">Intake</button>
-      <button role="tab" id="tab-notes" aria-controls="panel-notes" data-tab="notes">Notes</button>
+      <button role="tab" id="tab-notes" aria-controls="panel-notes" data-tab="notes">Record</button>
       <button role="tab" id="tab-sessions" aria-controls="panel-sessions" data-tab="sessions">Sessions<span class="th-count">${sessions.upcoming.length || ''}</span></button>
     </div>
     <section role="tabpanel" id="panel-overview" aria-labelledby="tab-overview" hidden></section>
@@ -232,7 +234,12 @@ export async function mountClientPage(root) {
     box.innerHTML = '<p class="th-muted">Opening your notes…</p>';
     try {
       const session = await ensureVaultReady();
-      await mountNotes(box, { store: makeNotesStore(sb, session), clientId: client.client_id, clientName: name });
+      // The intake form and family history join the record, so everything about this client is in one place. Opened here, read here.
+      const open = async (cat, fn) => { const c = copies.find(x => x.category === cat); if (!c) return null; try { return await fn(session, { ...c, link_id: linkId }); } catch { return null; } };
+      const [intake, fam] = await Promise.all([open('intake', openIntake), open('family', openFamily)]);
+      await mountRecord(box, { store: makeNotesStore(sb, session), clientId: client.client_id, clientName: name, active,
+        extras: [intakeEntry(intake, INTAKE_FIELDS), familyEntry(fam)].filter(Boolean), people: familyPeople(fam),
+        sharedDates: copies.filter(c => c.category === 'checkins').map(c => c.source_created_at).filter(Boolean) });
     } catch (e) { notesMounted = false; box.innerHTML = `<p class="msg show error">${esc(e.message)}</p>`; }
   }
 

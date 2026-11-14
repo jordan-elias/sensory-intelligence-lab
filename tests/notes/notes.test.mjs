@@ -58,3 +58,14 @@ test('the timeline carries tone and suggested themes', () => {
 test('markdown export keeps the links and the order', () => {
   const md = toMarkdown('Client A', [NOTES[1], NOTES[0]]); assert.match(md, /^# Client A/); assert.ok(md.indexOf('2026-01-10') < md.indexOf('2026-01-24')); assert.match(md, /\[\[Mother\]\]/);
 });
+
+import { intakeEntry, familyEntry, familyPeople } from '../../assets/js/notes/entries.js';
+test('intake and family history become entries; contact details stay out; people become links', () => {
+  const defs = [{ key: 'name', label: 'Name' }, { key: 'contact', label: 'Contact' }, { key: 'reason', label: 'Why', short: 'Reason for therapy' }];
+  const e = intakeEntry({ fields: { name: 'Sam', contact: '0151 555', reason: 'Cannot sleep, worried about work' }, submitted_at: '2026-01-02T10:00:00Z' }, defs);
+  assert.equal(e.date, '2026-01-02'); assert.match(e.text, /Reason for therapy: Cannot sleep/); assert.ok(!/0151|Sam/.test(e.text));
+  assert.equal(intakeEntry({ fields: { name: 'Sam' } }, defs), null);
+  const fam = { doc: { overview: 'Close but busy.', members: [{ name: 'Anna', relationship: 'Mother', status: 'Living', description: 'Critical.', history: '', impact: 'Shapes work.' }] }, sent_at: '2026-01-05T00:00:00Z' };
+  const f = familyEntry(fam); assert.match(f.text, /\[\[Anna\]\], \(Mother\), living\./); assert.deepEqual(parseNote(f.text).links.map(l => l.name), ['Anna']);
+  assert.deepEqual(familyPeople(fam), [{ name: 'Anna', relationship: 'Mother' }]); assert.equal(familyEntry({ doc: { overview: '', members: [] } }), null);
+});
