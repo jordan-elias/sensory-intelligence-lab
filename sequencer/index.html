@@ -174,6 +174,13 @@
     }
     .ms-btn { margin-left: .25rem; width: 1.3rem; height: 1.3rem; border: 1px solid var(--border); background: transparent; font: 600 .6rem var(--font-mono); cursor: pointer; color: var(--muted); padding: 0; }
     .ms-btn.on[data-ms=m] { background: #b4532a; border-color: #b4532a; color: #fff; } .ms-btn.on[data-ms=s] { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .pad-vel { position: absolute; left: 3px; bottom: 3px; width: 4px; height: 60%; background: rgba(255,255,255,.25); border-radius: 2px; overflow: hidden; pointer-events: none; }
+    .pad-vel i { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,.95); display: block; }
+    .pad-prob { position: absolute; right: 4px; top: 4px; font: .55rem var(--font-mono); color: rgba(255,255,255,.95); pointer-events: none; }
+    .pad.beyond { opacity: .35; }
+    .pat-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; padding: .6rem 1rem; border-top: 1px solid var(--border); }
+    .pat-bar .pat-name { width: 9rem; }
+    .pat-bar .pat-note, .pat-bar .pat-msg { font: .7rem var(--font-mono); color: var(--muted); }
     .t-num { width: 3rem; border: 1px solid var(--border); background: var(--surface); font: .75rem var(--font-mono); padding: .2rem; }
     .track-item {
       display: flex;
@@ -593,6 +600,19 @@
       </div>
       <div class="t-sep"></div>
 
+      <div class="tempo-group" role="group" aria-label="What tapping a step changes" title="Notes: turn steps on or off. Velocity and chance: tap an active step to step through 100, 75, 50 and 25 percent.">
+        <span class="tempo-label">tap sets</span>
+        <button class="tbtn active" data-editmode="notes" aria-pressed="true" onclick="SEQ.setEditMode('notes')">notes</button>
+        <button class="tbtn" data-editmode="vel" aria-pressed="false" onclick="SEQ.setEditMode('vel')">velocity</button>
+        <button class="tbtn" data-editmode="prob" aria-pressed="false" onclick="SEQ.setEditMode('prob')">chance</button>
+      </div>
+      <div class="t-sep"></div>
+      <div class="tempo-group" title="How many steps the active track plays before it starts again. A length that is not 16 makes it drift against the other tracks.">
+        <span class="tempo-label">length</span>
+        <input type="number" class="t-num" id="len-input" min="1" max="16" value="16" aria-label="Track length in steps" onchange="SEQ.setLen(this.value)">
+      </div>
+      <div class="t-sep"></div>
+
       <button class="tbtn" onclick="SEQ.randomize()" title="Randomize active track">✦ randomize</button>
       <button class="tbtn" onclick="SEQ.clearTrack()" title="Clear active track">clear</button>
       <button class="tbtn" onclick="SEQ.loadDefault()" title="Load example beat">example</button>
@@ -628,6 +648,17 @@
     <div class="info-bar" id="infoBar">
       <strong id="info-track">Kick</strong>
       <span id="info-hint">Tap a square to toggle a step on or off.</span>
+    </div>
+
+    <div class="pat-bar" id="patBar">
+      <span class="tempo-label">patterns</span>
+      <input class="t-num pat-name" id="pat-name" maxlength="40" placeholder="name" aria-label="Pattern name">
+      <button class="tbtn" onclick="SEQ.savePattern()">save</button>
+      <select class="t-select" id="pat-select" aria-label="Saved patterns"></select>
+      <button class="tbtn" onclick="SEQ.loadPattern()">load</button>
+      <button class="tbtn" onclick="SEQ.deletePattern()">delete</button>
+      <span class="pat-msg" id="pat-msg" role="status"></span>
+      <span class="pat-note">Saved on this device only.</span>
     </div>
 
     <!-- LOOP SECTION -->
@@ -694,6 +725,7 @@
     <p><strong>Swing</strong> delays every second sixteenth note a little, which turns a rigid grid into a rolling, human feel. At 0% the steps are exactly even; the further you push it, the more the off-beat notes lean late. Hip-hop, house and jazz all use it in different amounts, and a small amount on the hi-hats alone changes the whole character of a loop.</p>
     <p>The <strong>M</strong> and <strong>S</strong> buttons beside each track mute or solo it. Muting takes a track out of the mix so you can hear what the others are doing; soloing plays only the tracks you have soloed. Both also apply when you export to WAV, so what you hear is what you get.</p>
     <p>A <strong>Euclidean rhythm</strong> spreads a number of hits as evenly as possible over the sixteen steps. Five hits give a pattern that turns up in music from many parts of the world, and rotating it moves where the pattern starts without changing its shape. Put it on a track, then add or remove a few steps by hand.</p>
+    <p>Every active step also has a <strong>velocity</strong> and a <strong>chance</strong>. Switch "tap sets" to velocity and tap a step to move it through 100, 75, 50 and 25 percent: the white bar in the pad shows how hard it is played, and accents and ghost notes are most of what makes a pattern feel played rather than programmed. Chance does the same for how likely the step is to sound at all. A hi-hat at 50 percent plays about every other time, so the loop is never quite the same twice. Each track can also have its own <strong>length</strong>. A hi-hat of twelve steps against a kick of sixteen drifts out of phase and only lines up again after forty-eight steps. Composers call this polymeter, and it is an easy way to get a pattern that keeps changing. Finally, <strong>save</strong> keeps the whole pattern, tempo, swing and key under a name, on this device only.</p>
 
     <h2>Tempo</h2>
     <p>The BPM slider controls playback speed. 120 BPM is a common tempo for house and pop music — four beats per second. 90 BPM gives a more relaxed hip-hop feel; 140 feels urgent and energetic. Changes take effect immediately, so you can adjust tempo while the sequencer is playing to find the right feel before committing to a number.</p>
@@ -712,7 +744,7 @@
 <!-- ═══════════════════════════════════════════════════════
      SEQUENCER ENGINE
 ═══════════════════════════════════════════════════════ -->
-<script type="module">import * as G from '/assets/js/seq/groove.js'; window.SEQGROOVE = G;</script>
+<script type="module">import * as G from '/assets/js/seq/groove.js'; import * as P from '/assets/js/seq/patterns.js'; window.SEQGROOVE = G; window.SEQPAT = P;</script>
 <script>
 (function () {
 'use strict';
@@ -847,7 +879,7 @@ let activeTrack = 0; // index into TRACKS
 let swing = 0;       // 0..1: how late the off-beat sixteenths are played
 const muted  = Array(8).fill(false), soloed = Array(8).fill(false);
 // The rhythm rules live in /assets/js/seq/groove.js (tested). Until it has loaded, play straight and let everything sound.
-const GROOVE = () => window.SEQGROOVE || { audible: () => true, swingOffset: () => 0, euclid: (p, n) => Array(n).fill(false) };
+const GROOVE = () => window.SEQGROOVE || { audible: () => true, swingOffset: () => 0, euclid: (p, n) => Array(n).fill(false), nextLevel: v => v, velocityVol: (b) => b, plays: () => true, trackStep: (t) => t % 16, clampLen: n => n };
 
 // 4 loop slots × 8 tracks × 16 steps
 // Each step for drum: true/false
@@ -856,6 +888,13 @@ function makeEmptyLoop() {
   return TRACKS.map(() => Array(NUM_STEPS).fill(null));
 }
 const loops = [makeEmptyLoop(), makeEmptyLoop(), makeEmptyLoop(), makeEmptyLoop()];
+// Per step: how hard it is played (velocity) and how likely it is to sound (chance), both 1 = full. Per track: its own length (1-16 steps).
+const makeLevels = () => TRACKS.map(() => Array(NUM_STEPS).fill(1));
+const vel  = [makeLevels(), makeLevels(), makeLevels(), makeLevels()];
+const prob = [makeLevels(), makeLevels(), makeLevels(), makeLevels()];
+const lens = [0, 1, 2, 3].map(() => TRACKS.map(() => NUM_STEPS));
+let editMode = 'notes'; // 'notes' | 'vel' | 'prob'
+let tickCount = 0;      // running step count since play started; tracks of different lengths cycle against it
 let editingLoop = 0; // which loop the user is editing (0-based)
 
 /* Chain: array of { loopIdx (0-based), reps } */
@@ -1141,15 +1180,17 @@ function advanceChain() {
   renderChainUI();
 }
 
-function scheduleStep(step, time) {
+function scheduleStep(step, time, tick) {
   const loopIdx = getPlayingLoop();
-  const loopData = loops[loopIdx];
+  const loopData = loops[loopIdx], G = GROOVE();
 
   TRACKS.forEach((track, ti) => {
-    const cell = loopData[ti][step];
+    const ts = G.trackStep(tick, lens[loopIdx][ti]);
+    const cell = loopData[ti][ts];
     if (cell === null || cell === false) return;
-    if (!GROOVE().audible(ti, muted, soloed)) return;
-    const vol = 0.85;
+    if (!G.audible(ti, muted, soloed)) return;
+    if (!G.plays(prob[loopIdx][ti][ts], Math.random())) return;
+    const vol = G.velocityVol(0.85, vel[loopIdx][ti][ts]);
 
     if (track.type === 'drum') {
       if (track.id === 'kick')   playKick(time, vol);
@@ -1169,14 +1210,14 @@ function scheduleStep(step, time) {
 function scheduler() {
   if (!playing || !AC) return;
   while (nextStepTime < AC.currentTime + LOOKAHEAD) {
-    scheduleStep(currentStep, nextStepTime + GROOVE().swingOffset(currentStep, swing, stepDuration()));
-    // Schedule UI update ~at playback time (approximate — RAF will handle actual display)
-    const stepSnap = currentStep;
+    scheduleStep(currentStep, nextStepTime + GROOVE().swingOffset(currentStep, swing, stepDuration()), tickCount);
+    // Schedule UI update ~at playback time (approximate — RAF will handle actual display). The playhead follows the track being edited, which may have its own length.
+    const stepSnap = GROOVE().trackStep(tickCount, lens[editingLoop][activeTrack]);
     const delay = Math.max(0, (nextStepTime - AC.currentTime) * 1000);
     setTimeout(() => { if (playing) renderPlayhead(stepSnap); }, delay);
     // Advance
     if (currentStep === 15) advanceChain();
-    currentStep = (currentStep + 1) % NUM_STEPS;
+    currentStep = (currentStep + 1) % NUM_STEPS; tickCount++;
     nextStepTime += stepDuration();
   }
   scheduleTimer = setTimeout(scheduler, SCHEDULE_INTERVAL);
@@ -1225,9 +1266,20 @@ function renderPads() {
       }
     }
 
+    // Velocity bar, chance label, and steps beyond this track's length
+    const v = vel[editingLoop][activeTrack][i], c = prob[editingLoop][activeTrack][i];
+    const vb = pad.querySelector('.pad-vel'), pb = pad.querySelector('.pad-prob');
+    if (vb) { vb.style.display = isOn ? '' : 'none'; vb.firstElementChild.style.height = Math.round(v * 100) + '%'; vb.title = 'Velocity ' + Math.round(v * 100) + '%'; }
+    if (pb) { const shown = isOn && (c < 1 || editMode === 'prob'); pb.style.display = shown ? '' : 'none'; pb.textContent = Math.round(c * 100) + '%'; }
+    pad.classList.toggle('beyond', i >= lens[editingLoop][activeTrack]);
+    pad.setAttribute('aria-label', 'Step ' + (i + 1) + (isOn ? ', on, velocity ' + Math.round(v * 100) + '%, chance ' + Math.round(c * 100) + '%' : ', off'));
+
     // Playhead
     pad.classList.toggle('playing', i === lastPlayhead);
   });
+  const li = document.getElementById('len-input'); if (li && document.activeElement !== li) li.value = lens[editingLoop][activeTrack];
+  document.querySelectorAll('[data-editmode]').forEach(b => { const on = b.dataset.editmode === editMode; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
+  document.getElementById('padGrid').dataset.mode = editMode;
 }
 
 function buildPadGrid() {
@@ -1247,6 +1299,10 @@ function buildPadGrid() {
     noteEl.className = 'pad-note';
     noteEl.style.display = 'none';
     pad.appendChild(noteEl);
+
+    const velEl = document.createElement('span'); velEl.className = 'pad-vel'; velEl.style.display = 'none'; velEl.appendChild(document.createElement('i')); pad.appendChild(velEl);
+    const probEl = document.createElement('span'); probEl.className = 'pad-prob'; probEl.style.display = 'none'; pad.appendChild(probEl);
+    pad.setAttribute('role', 'button');
 
     pad.addEventListener('click', () => onPadClick(i));
     grid.appendChild(pad);
@@ -1441,8 +1497,18 @@ function onPadClick(stepIdx) {
     closePicker();
   }
 
+  // Velocity and Chance modes only adjust steps that are already on: each tap goes to the next level (100, 75, 50, 25 %).
+  if (editMode !== 'notes') {
+    if (!isOn) { document.getElementById('info-hint').textContent = 'Turn this step on in Notes mode first.'; return; }
+    const table = editMode === 'vel' ? vel : prob;
+    table[editingLoop][activeTrack][stepIdx] = GROOVE().nextLevel(table[editingLoop][activeTrack][stepIdx]);
+    if (editMode === 'vel' && AC && track.type === 'drum') { const t = AC.currentTime + 0.01, v = GROOVE().velocityVol(0.7, vel[editingLoop][activeTrack][stepIdx]); if (track.id === 'kick') playKick(t, v); if (track.id === 'snare') playSnare(t, v); if (track.id === 'hihat') playHiHat(t, v, false); if (track.id === 'cymbal') playCymbal(t, v); }
+    renderPads(); return;
+  }
+
   if (track.type === 'drum') {
     trackData[stepIdx] = isOn ? null : true;
+    if (isOn) { vel[editingLoop][activeTrack][stepIdx] = 1; prob[editingLoop][activeTrack][stepIdx] = 1; }
     // Preview sound
     if (!isOn && AC) {
       const t = AC.currentTime + 0.01;
@@ -1489,7 +1555,7 @@ document.addEventListener('click', e => {
 ══════════════════════════════════════════════ */
 function loadDefaultBeat() {
   // Clear loop 1
-  loops[0] = makeEmptyLoop();
+  loops[0] = makeEmptyLoop(); vel[0] = makeLevels(); prob[0] = makeLevels(); lens[0] = TRACKS.map(() => NUM_STEPS);
 
   // Kick: steps 1, 5, 9, 13 → indices 0,4,8,12
   [0, 4, 8, 12].forEach(i => { loops[0][0][i] = true; });
@@ -1527,7 +1593,7 @@ const SEQ = window.SEQ = {
     const btn = document.getElementById('btn-play');
 
     if (playing) {
-      currentStep  = 0;
+      currentStep  = 0; tickCount = 0;
       chainPos     = 0;
       chainReps    = 0;
       nextStepTime = AC.currentTime + 0.05;
@@ -1596,6 +1662,41 @@ const SEQ = window.SEQ = {
     document.getElementById('swing-val').textContent = Math.round(v) + '%';
   },
 
+  setEditMode(m) { editMode = (m === 'vel' || m === 'prob') ? m : 'notes'; closePicker(); document.getElementById('info-hint').textContent = editMode === 'notes' ? TRACKS[activeTrack].hint : 'Tap an active step to step through 100, 75, 50 and 25 percent.'; renderPads(); },
+  setLen(n) { lens[editingLoop][activeTrack] = GROOVE().clampLen(n); renderPads(); },
+
+  /* Saved patterns live on this device only. */
+  _state() { return { bpm, swing, root: rootKey, scale: scaleName, loops, vel, prob, len: lens, chain }; },
+  _patMsg(t, bad) { const m = document.getElementById('pat-msg'); m.textContent = t; m.style.color = bad ? '#b00020' : ''; },
+  refreshPatterns(selectName) {
+    const sel = document.getElementById('pat-select'); if (!sel || !window.SEQPAT) return;
+    const items = window.SEQPAT.list(); sel.innerHTML = '';
+    for (const p of items) { const o = document.createElement('option'); o.value = p.name; o.textContent = p.name; sel.appendChild(o); }
+    if (!items.length) { const o = document.createElement('option'); o.textContent = 'no saved patterns'; o.value = ''; sel.appendChild(o); }
+    if (selectName) sel.value = selectName;
+  },
+  savePattern() {
+    if (!window.SEQPAT) return SEQ._patMsg('Still loading, try again in a moment.', true);
+    const name = document.getElementById('pat-name').value, r = window.SEQPAT.save(name, SEQ._state());
+    if (!r.ok) return SEQ._patMsg(r.error, true);
+    SEQ._patMsg('Saved.'); SEQ.refreshPatterns(window.SEQPAT.cleanName(name));
+  },
+  loadPattern() {
+    const name = document.getElementById('pat-select').value; if (!name || !window.SEQPAT) return SEQ._patMsg('Nothing to load.', true);
+    const u = window.SEQPAT.load(name, { tracks: TRACKS.length, loops: NUM_LOOPS, steps: NUM_STEPS, maxNote: 7 }); if (!u) return SEQ._patMsg('That pattern could not be opened.', true);
+    for (let l = 0; l < NUM_LOOPS; l++) { loops[l] = u.loops[l]; vel[l] = u.vel[l]; prob[l] = u.prob[l]; lens[l] = u.len[l]; }
+    chain = u.chain; chainPos = 0; chainReps = 0;
+    SEQ.setTempo(u.bpm); document.getElementById('tempo-slider').value = u.bpm;
+    swing = u.swing; document.getElementById('swing-slider').value = Math.round(u.swing * 100); document.getElementById('swing-val').textContent = Math.round(u.swing * 100) + '%';
+    document.getElementById('key-select').value = u.root; document.getElementById('scale-select').value = u.scale;
+    SEQ.setKey(u.root); SEQ.setScale(u.scale);
+    closePicker(); renderPads(); updateLoopSlotDots(); renderChainUI(); SEQ._patMsg('Loaded ' + name + '.');
+  },
+  deletePattern() {
+    const name = document.getElementById('pat-select').value; if (!name || !window.SEQPAT) return;
+    window.SEQPAT.remove(name); SEQ.refreshPatterns(); SEQ._patMsg('Deleted.');
+  },
+
   toggleMute(i) { muted[i] = !muted[i]; buildTrackList(); },
   toggleSolo(i) { soloed[i] = !soloed[i]; buildTrackList(); },
 
@@ -1604,11 +1705,13 @@ const SEQ = window.SEQ = {
     const hits = parseInt(document.getElementById('euclid-hits').value, 10) || 0, rot = parseInt(document.getElementById('euclid-rot').value, 10) || 0;
     const pattern = GROOVE().euclid(hits, NUM_STEPS, rot), track = TRACKS[activeTrack];
     loops[editingLoop][activeTrack] = pattern.map(on => (on ? (track.type === 'drum' ? true : 0) : null));
+    vel[editingLoop][activeTrack].fill(1); prob[editingLoop][activeTrack].fill(1);
     closePicker(); renderPads(); updateLoopSlotDots();
   },
 
   clearTrack() {
     loops[editingLoop][activeTrack] = Array(NUM_STEPS).fill(null);
+    vel[editingLoop][activeTrack].fill(1); prob[editingLoop][activeTrack].fill(1);
     closePicker();
     renderPads();
     updateLoopSlotDots();
@@ -1624,6 +1727,7 @@ const SEQ = window.SEQ = {
       }
       return null;
     });
+    vel[editingLoop][activeTrack].fill(1); prob[editingLoop][activeTrack].fill(1);
     renderPads();
     updateLoopSlotDots();
   },
@@ -1637,6 +1741,7 @@ const SEQ = window.SEQ = {
     let target = (editingLoop + 1) % NUM_LOOPS;
     // Deep copy
     loops[target] = loops[editingLoop].map(track => [...track]);
+    vel[target] = vel[editingLoop].map(r => [...r]); prob[target] = prob[editingLoop].map(r => [...r]); lens[target] = [...lens[editingLoop]];
     SEQ.setEditingLoop(target);
   },
 
@@ -1670,16 +1775,18 @@ const SEQ = window.SEQ = {
     const offCtx = new OfflineAudioContext(2, Math.ceil((totalDur + 1.0) * sr), sr);
 
     // Render each loop pass
-    let t = 0;
+    let t = 0, tick = 0;
     for (const loopIdx of renderPlan) {
       const loopData = loops[loopIdx];
-      for (let step = 0; step < NUM_STEPS; step++) {
+      for (let step = 0; step < NUM_STEPS; step++, tick++) {
         const time = t + step * stepDuration() + GROOVE().swingOffset(step, swing, stepDuration());
         TRACKS.forEach((track, ti) => {
-          const cell = loopData[ti][step];
+          const ts = GROOVE().trackStep(tick, lens[loopIdx][ti]);
+          const cell = loopData[ti][ts];
           if (cell === null || cell === false) return;
           if (!GROOVE().audible(ti, muted, soloed)) return;
-          const vol = 0.8;
+          if (!GROOVE().plays(prob[loopIdx][ti][ts], Math.random())) return;
+          const vol = GROOVE().velocityVol(0.8, vel[loopIdx][ti][ts]);
           // Inline synthesis for offline context
           if (track.type === 'drum') {
             renderDrumOffline(offCtx, track.id, time, vol);
@@ -1730,6 +1837,8 @@ function init() {
   updateInfoBar();
   loadDefaultBeat();
   renderPads();
+  // The pattern store is a module and may arrive a moment after this script.
+  let tries = 0; const wait = setInterval(() => { if (window.SEQPAT || ++tries > 50) { clearInterval(wait); SEQ.refreshPatterns(); } }, 100);
 }
 
 /* ── HEADER / AUTH ── */

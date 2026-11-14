@@ -69,6 +69,8 @@ Honest limits: lexicons miss irony, slang, negation across clauses and context, 
 
 0d. Done (branch app-21): Regulation sound. The current-to-target arc and the drone/rhythm layers are unchanged. New: a melodic voice (`assets/js/regulation/character.js`, tested) whose scale, register, speed, note length, tone colour and echo move from the current state's character to the target's; a transparent safety limiter; page copy rewritten to make no claims about the nervous system. Plain Web Audio kept (live and WAV render share one graph); Tone.js not needed. Still to do: listen by ear and tune the per-state values in `character.js`. The home page meta description still says "nervous system regulation".
 
+0e. Done (branch app-22): Sequencer step velocity (100/75/50/25 %), step chance, per-track length (polymeter), and savable patterns on the device only (`assets/js/seq/patterns.js`, validated on load, up to 30). Tested in `tests/seq/steps.test.mjs` and `t50`. Chance makes WAV export vary from run to run when a step is below 100 %.
+
 ### Other open items
 - Background audio with the screen off (Android).
 - Daily path.
@@ -76,6 +78,6 @@ Honest limits: lexicons miss irony, slang, negation across clauses and context, 
 - Play Store listing and Play Billing decisions.
 - Journal sharing with a therapist (needs go-ahead and a privacy policy change).
 - Regulation "worlds of sound"; Tone.js, Pure Data and SuperCollider spikes.
-- Sequencer: done (branch app-19): swing, mute/solo per track, Euclidean fill, WAV export matches. Still to do: per-step velocity, probability, per-track length. Soundscape Machine reviewed, already deep; waiting for the user to say what is missing.
+- Sequencer: done (branch app-19): swing, mute/solo per track, Euclidean fill, WAV export matches. Soundscape Machine reviewed, already deep; waiting for the user to say what is missing.
 - Photo-words experiment: automatic OCR (currently typed by hand).
 - Listening test of the piano roll and sampler by ear.
