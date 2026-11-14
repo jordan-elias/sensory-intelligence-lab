@@ -65,6 +65,8 @@ Honest limits: lexicons miss irony, slang, negation across clauses and context, 
 5. (done) Graph view and pre-session brief. Zoom and pan are done; arranging nodes by hand is not.
 6. (done) Markdown and text export, keep-or-delete. PDF is done through the print dialog (Save as PDF). Still to do: import of Markdown, an optional reminder when a retention period the therapist sets has passed.
 
+0c. Done (branch app-20): retention reminder (default 10 years for Germany, the therapist's own setting, 0 = off; in-app only on the therapist's device; counts from the latest of end of connection, last session, last note; never deletes anything; "remind me again in a year"). Caseload page (`/therapist/caseload/`): sessions with no note yet, clients not written up lately, themes across clients; people are never matched across clients. Markdown import dropped (notes are written in the Lab). To check with a lawyer: retention duty and client erasure rights by country.
+
 ### Other open items
 - Background audio with the screen off (Android).
 - Daily path.
