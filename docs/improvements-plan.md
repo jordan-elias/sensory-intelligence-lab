@@ -72,6 +72,6 @@ Honest limits: lexicons miss irony, slang, negation across clauses and context, 
 - Play Store listing and Play Billing decisions.
 - Journal sharing with a therapist (needs go-ahead and a privacy policy change).
 - Regulation "worlds of sound"; Tone.js, Pure Data and SuperCollider spikes.
-- Deepen Soundscape Machine and Sequencer (priority order not yet chosen).
+- Sequencer: done (branch app-19): swing, mute/solo per track, Euclidean fill, WAV export matches. Still to do: per-step velocity, probability, per-track length. Soundscape Machine reviewed, already deep; waiting for the user to say what is missing.
 - Photo-words experiment: automatic OCR (currently typed by hand).
 - Listening test of the piano roll and sampler by ear.
