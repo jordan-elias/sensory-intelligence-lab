@@ -76,13 +76,13 @@ test('every experiment is a complete protocol with real parameters, tools and ge
   for (const e of EXPERIMENTS) {
     assert.ok(!ids.has(e.id), 'duplicate id ' + e.id); ids.add(e.id);
     assert.ok(CATEGORIES[e.category], e.id); assert.ok(NEEDS[e.needs], e.id);
-    for (const f of ['title', 'summary', 'question', 'hypothesis', 'stop', 'reflect', 'solo']) assert.ok(e[f] && e[f].length > (f === 'title' ? 3 : 10), `${e.id}.${f}`);
-    assert.ok(/\b(will|would)\b/.test(e.hypothesis), e.id + ': a hypothesis makes a prediction');
-    for (const g of ['fixed', 'changed', 'measured']) assert.ok(e.variables?.[g]?.length >= 1, `${e.id} variables.${g}`);
+    for (const f of ['title', 'summary', 'question', 'stop', 'reflect', 'solo']) assert.ok(e[f] && e[f].length > (f === 'title' ? 3 : 10), `${e.id}.${f}`);
+    assert.ok(!('hypothesis' in e) && !('variables' in e) && !('trials' in e), e.id + ': no hypothesis, variables or trials');
+    assert.ok(!/hypothes|predict|score|1 to 5|surprise score/i.test([e.reflect, ...e.procedure].join(' ')), e.id + ': no leftover science-fair wording');
     assert.ok(e.parameters.length >= 3 && e.parameters.every(p => p.length === 2 && p[0] && p[1]), e.id + ' parameters');
     assert.ok(e.parameters.some(p => /\d/.test(p[1])), e.id + ': at least one exact number');
     assert.ok(e.procedure.length >= 4 && e.minutes > 0, e.id);
-    assert.ok(e.trials.length >= 1, e.id + ' trials');
+    assert.ok(e.procedure.every(x => x.length > 12), e.id + ': every step is a real instruction');
     for (const t of e.tools) {
       assert.ok(tools.includes(t.type), e.id);
       if (t.type === 'gen') { assert.ok(kinds.includes(t.kind), e.id); generate({ ...t, root: 0, scale: 'major' }, mulberry32(1)); }
@@ -150,12 +150,12 @@ test('the course has a name, seven units, and every experiment is in the path on
 });
 
 import { buildNotebook } from '../../assets/js/experiments/notebook.js';
-test('the notebook lists only what was recorded, in course order', () => {
+test('the notebook lists only what was written, in course order', () => {
   const first = UNITS[0].experiments[0], second = UNITS[1].experiments[0];
-  const saved = id => id === second.id ? { pred: 'I expect a surprise', trials: { 0: { text: 'a thing', score: '4' } }, concl: { verdict: 'partly', text: 'It held up.' } } : {};
+  const saved = id => (id === second.id ? 'It kept pulling me back to the rhythm.' : '');
   const t = buildNotebook({ course: 'Experiments in Creativity', units: UNITS, done: new Set([first.id]), saved });
   assert.match(t, /^# Experiments in Creativity: my notebook/); assert.ok(t.indexOf(first.title) < t.indexOf(second.title));
-  assert.match(t, /Prediction: I expect a surprise/); assert.match(t, /surprise 4\/5/); assert.match(t, /Conclusion: Partly supported\. It held up\./);
+  assert.match(t, /It kept pulling me back to the rhythm\./); assert.match(t, /\(no note\)/);
   assert.ok(!t.includes(UNITS[2].experiments[0].title));
 });
-test('an empty notebook says so', () => assert.match(buildNotebook({ course: 'X', units: UNITS, done: new Set(), saved: () => ({}) }), /Nothing recorded yet/));
+test('an empty notebook says so', () => assert.match(buildNotebook({ course: 'X', units: UNITS, done: new Set(), saved: () => '' }), /Nothing here yet/));

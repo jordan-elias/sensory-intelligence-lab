@@ -92,6 +92,10 @@
     .xp-lane2{margin:.5rem 0} .xp-lane-k{font-size:.78rem;color:var(--muted);display:block;margin-bottom:.2rem} .xp-lane-steps{display:grid;grid-template-columns:repeat(16,1fr);gap:2px}
     .xp-ls{min-height:28px;border:1px solid var(--border);background:var(--bg);border-radius:2px;padding:0;cursor:pointer} .xp-ls.bar{border-left:2px solid var(--muted)} .xp-ls.on{background:var(--accent);border-color:var(--accent)} .xp-ls.now{outline:2px solid var(--text)}
     .xp-treat{list-style:none;margin:.5rem 0} .xp-treat li{padding:.4rem 0;border-bottom:1px solid var(--border);font-size:.92rem}
+    .xp-intro-list{list-style:none;margin:1rem 0} .xp-intro-list li{padding:.55rem 0;border-bottom:1px solid var(--border);font-size:.95rem} .xp-intro-list b{display:inline-block;min-width:7rem;font:600 .68rem var(--font-heading);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+    .xp-stepcard{margin:1rem 0 1.2rem} .xp-stepno{font:600 .72rem var(--font-heading);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:.5rem} .xp-steptext{font:500 1.4rem/1.45 var(--font-heading);letter-spacing:-.01em}
+    .xp-nav{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center;margin:1.4rem 0 .4rem} .xp-nav .grow{flex:1}
+    .xp-dots{display:flex;gap:6px;margin:0 0 1.2rem} .xp-dot{width:100%;height:5px;background:var(--border);border-radius:3px;flex:1} .xp-dot.on{background:var(--accent)}
     .xp-notebook{white-space:pre-wrap;font:.88rem/1.6 ui-monospace,Menlo,monospace;background:var(--surface);border:1px solid var(--border);padding:1rem;margin:0 0 1rem;max-height:30rem;overflow:auto}
     .xp-bk{margin:1.2rem 0;break-inside:avoid} .xp-bk h4{font:600 1.1rem var(--font-heading)} .xp-bk p,.xp-bk li{font-size:.92rem;margin:.3rem 0} .xp-bk ol{margin-left:1.2rem}
     @media print{header,.sil-header,.skip-link,.bc,footer,.xp-noprint{display:none!important} .xp-breakb{break-before:page} main{padding:0;max-width:none}}
@@ -135,7 +139,7 @@ function list() {
       el('button', { type: 'button', class: 'xp-btn xp-btn--alt', id: 'xpSurprise', onclick: () => { const e = pick(); if (e) location.hash = '#/' + e.id; } }, 'Surprise me'),
       el('a', { class: 'xp-btn xp-btn--alt', href: '#/book', style: 'text-decoration:none;display:inline-flex;align-items:center' }, 'Do it on paper'),
       el('a', { class: 'xp-btn xp-btn--alt', href: '#/notebook', id: 'xpNotebookLink', style: 'text-decoration:none;display:inline-flex;align-items:center' }, 'My notebook')),
-    el('a', { class: 'xp-card xp-method', href: '#/method' }, el('h3', {}, 'Start here: ' + METHOD.title), el('p', {}, 'Five short steps. Read once, then use them every time.'), el('small', {}, '2 minutes')),
+    el('a', { class: 'xp-card xp-method', href: '#/method' }, el('h3', {}, 'Start here: ' + METHOD.title), el('p', {}, 'Five short ideas. Read once, then use them every time.'), el('small', {}, '1 minute')),
     el('div', { class: 'xp-filters', role: 'group', 'aria-label': 'What you need' }, chip('all', 'Anything'), ...Object.entries(NEEDS).map(([k, v]) => chip(k, v))),
     ...UNITS.map(u => {
       const shown = u.experiments.filter(e => filter.needs === 'all' || e.needs === filter.needs);
@@ -152,9 +156,9 @@ function list() {
 function method() {
   root.replaceChildren(
     el('a', { class: 'xp-back', href: '#/' }, '← ' + COURSE.name),
-    el('div', { class: 'ph' }, el('h2', {}, METHOD.title), el('p', {}, 'The same five steps apply to every experiment in this course.')),
+    el('div', { class: 'ph' }, el('h2', {}, METHOD.title), el('p', {}, 'The same five ideas apply to every experiment in this course.')),
     el('ol', { class: 'xp-method-steps' }, METHOD.steps.map(([h, t]) => el('li', {}, el('strong', {}, h), el('p', {}, t)))),
-    el('p', { class: 'xp-hint' }, 'Your predictions, records and conclusions are kept on this device only. They are not sent anywhere.'),
+    el('p', { class: 'xp-hint' }, 'Your notes are kept on this device only. They are not sent anywhere.'),
     el('p', {}, el('a', { class: 'xp-btn', href: '#/' + PATH[0].id, style: 'text-decoration:none;display:inline-block' }, 'Begin with ' + PATH[0].title)));
   window.scrollTo(0, 0);
 }
@@ -162,11 +166,11 @@ function method() {
 // Everything recorded in the course, as plain text to keep. It is read from this device and goes nowhere.
 function notebook() {
   const done = new Set(read(KEY_DONE, []));
-  const text = buildNotebook({ course: COURSE.name, units: UNITS, done, saved: id => ({ pred: read(`sil.exp.pred.${id}`, ''), trials: read(`sil.exp.trials.${id}`, {}), concl: read(`sil.exp.concl.${id}`, {}) }) });
+  const text = buildNotebook({ course: COURSE.name, units: UNITS, done, saved: id => read(NOTE(id), '') });
   const msg = el('p', { class: 'xp-hint', role: 'status', 'aria-live': 'polite' });
   root.replaceChildren(
     el('a', { class: 'xp-back', href: '#/' }, '← ' + COURSE.name),
-    el('div', { class: 'ph' }, el('h2', {}, 'My notebook'), el('p', {}, 'Your predictions, records and conclusions in one place. They are kept on this device only.')),
+    el('div', { class: 'ph' }, el('h2', {}, 'My notebook'), el('p', {}, 'Everything you wrote at the end of an experiment, in one place. Kept on this device only.')),
     el('pre', { class: 'xp-notebook', id: 'xpNotebookText' }, text),
     el('div', { class: 'xp-row' },
       el('button', { type: 'button', class: 'xp-btn', id: 'xpNbCopy', onclick: async () => { try { await navigator.clipboard.writeText(text); msg.textContent = 'Copied.'; } catch { msg.textContent = 'Select the text and copy it.'; } } }, 'Copy'),
@@ -184,69 +188,60 @@ function book() {
     el('h3', { class: 'xp-h' }, METHOD.title), el('ol', {}, METHOD.steps.map(([h, t]) => el('li', {}, el('strong', {}, h + '. '), t))),
     ...UNITS.flatMap(u => [el('h3', { class: 'xp-h xp-breakb' }, `Unit ${u.number}: ${u.title}`), ...u.experiments.map(e => el('article', { class: 'xp-bk' },
       el('h4', {}, e.title), el('p', {}, el('em', {}, e.summary)),
-      el('p', {}, el('strong', {}, 'Question. '), e.question), el('p', {}, el('strong', {}, 'Hypothesis. '), e.hypothesis),
-      el('p', {}, el('strong', {}, 'Held fixed: '), e.variables.fixed.join('; '), '. ', el('strong', {}, 'Changed: '), e.variables.changed.join('; '), '. ', el('strong', {}, 'Measured: '), e.variables.measured.join('; '), '.'),
-      el('p', {}, el('strong', {}, 'Parameters: '), e.parameters.map(([k, v]) => `${k}: ${v}`).join(' · ')),
+      el('p', {}, el('strong', {}, 'Finding out. '), e.question),
+      el('p', {}, el('strong', {}, 'Limits: '), e.parameters.map(([k, v]) => `${k}: ${v}`).join(' · ')),
       el('ol', {}, e.procedure.map(x => el('li', {}, x))),
       el('p', {}, el('strong', {}, 'Stop: '), e.stop), el('p', {}, el('strong', {}, 'On paper: '), e.solo),
-      el('p', {}, el('strong', {}, 'Record: '), e.trials.join(' · ')), el('p', {}, el('strong', {}, 'Conclusion: '), e.reflect)))]));
+      el('p', {}, el('strong', {}, 'Your note: '), e.reflect, ' ______________________________________________')))]));
   window.scrollTo(0, 0);
 }
 
 function detail(e) {
   const done = new Set(read(KEY_DONE, []));
-  const store = (key, fallback) => ({ get: () => read(key, fallback), set: v => write(key, v) });
-  const pred = store(`sil.exp.pred.${e.id}`, ''), trialsStore = store(`sil.exp.trials.${e.id}`, {}), concl = store(`sil.exp.concl.${e.id}`, { verdict: '', text: '' });
-  const predEl = el('textarea', { rows: 3, 'aria-label': 'Your prediction', placeholder: 'Before you start: what do you expect will happen? Kept on this device only.' });
-  predEl.value = pred.get(); predEl.oninput = () => pred.set(predEl.value);
+  const note = el('textarea', { rows: 8, id: 'xpNote', 'aria-label': 'Your note', placeholder: 'Record your process, or share your thoughts. Anything at all, in any shape. Kept on this device only.' });
+  note.value = read(NOTE(e.id), ''); note.oninput = () => write(NOTE(e.id), note.value);
+  const toolBox = el('div', { class: 'xp-tools', id: 'xpTools' }, el('h3', { class: 'xp-h' }, 'Your tools'), ...e.tools.map(buildTool), ...(e.links || []).map(l => el('p', {}, el('a', { href: l.href }, l.label))));
+  const total = e.procedure.length, last = total + 1;                    // 0 = start, 1..total = steps, last = finish
+  let at = 0;
+  const idx = PATH.indexOf(e), next = PATH[(idx + 1) % PATH.length];
 
-  const saved = trialsStore.get();
-  const trialRows = e.trials.map((t, i) => {
-    const sc = el('select', { 'aria-label': `${t}: how surprising (1 to 5)` }, el('option', { value: '' }, '–'), [1, 2, 3, 4, 5].map(n => el('option', { value: n }, n)));
-    const tx = el('input', { type: 'text', 'aria-label': `${t}: one line`, placeholder: 'One line', maxlength: 200 });
-    sc.value = saved[i]?.score ?? ''; tx.value = saved[i]?.text ?? '';
-    const save = () => { const s = trialsStore.get(); s[i] = { score: sc.value, text: tx.value }; trialsStore.set(s); };
-    sc.onchange = save; tx.oninput = save;
-    return el('tr', {}, el('th', { scope: 'row' }, t), el('td', {}, sc), el('td', {}, tx));
-  });
+  const dots = () => el('div', { class: 'xp-dots', role: 'img', 'aria-label': at === 0 ? 'Not started' : at > total ? 'All steps done' : `Step ${at} of ${total}` }, Array.from({ length: total + 2 }, (_, k) => el('span', { class: 'xp-dot' + (k <= at ? ' on' : '') })));
+  const nav = (...kids) => el('div', { class: 'xp-nav' }, ...kids);
+  const btn = (label, fn, alt, id) => el('button', { type: 'button', class: 'xp-btn' + (alt ? ' xp-btn--alt' : ''), id, onclick: fn }, label);
+  const go = n => { at = n; draw(); window.scrollTo(0, 0); };
+  const finish = () => { const d = new Set(read(KEY_DONE, [])); d.add(e.id); write(KEY_DONE, [...d]); location.hash = '#/'; };
 
-  const c0 = concl.get();
-  const verdict = el('select', { 'aria-label': 'Was the hypothesis supported?' }, el('option', { value: '' }, 'Choose…'),
-    el('option', { value: 'yes' }, 'Supported'), el('option', { value: 'partly' }, 'Partly supported'), el('option', { value: 'no' }, 'Not supported'), el('option', { value: 'unclear' }, 'Could not tell'));
-  verdict.value = c0.verdict; const ctext = el('textarea', { rows: 4, 'aria-label': 'Conclusion', placeholder: e.reflect });
-  ctext.value = c0.text;
-  const saveC = () => concl.set({ verdict: verdict.value, text: ctext.value }); verdict.onchange = saveC; ctext.oninput = saveC;
-
-  const mark = el('button', { type: 'button', class: 'xp-btn xp-btn--alt', onclick: () => {
-    const d = new Set(read(KEY_DONE, [])); d.has(e.id) ? d.delete(e.id) : d.add(e.id); write(KEY_DONE, [...d]); mark.textContent = d.has(e.id) ? 'Done ✓ (tap to undo)' : 'Mark as done';
-  } }, done.has(e.id) ? 'Done ✓ (tap to undo)' : 'Mark as done');
-  const idx = PATH.indexOf(e), list2 = items => el('ul', { class: 'xp-vlist' }, items.map(i => el('li', {}, i)));
-
-  root.replaceChildren(
-    el('a', { class: 'xp-back', href: '#/' }, '← ' + COURSE.name),
-    el('div', { class: 'ph' }, el('h2', {}, e.title), el('p', {}, e.summary)),
-    el('p', { class: 'xp-meta-line' }, `${CATEGORIES[e.category]} · ${NEEDS[e.needs]} · about ${e.minutes} minutes`),
-    el('div', { class: 'xp-box', id: 'xpQuestion' }, el('b', {}, 'Question'), e.question),
-    el('div', { class: 'xp-box', id: 'xpHypothesis' }, el('b', {}, 'Hypothesis'), e.hypothesis),
-    el('h3', { class: 'xp-h' }, 'Your prediction'), predEl,
-    el('h3', { class: 'xp-h' }, 'Variables'),
-    el('div', { class: 'xp-vars' },
-      el('div', {}, el('h4', {}, 'Held fixed'), list2(e.variables.fixed)),
-      el('div', {}, el('h4', {}, 'Changed'), list2(e.variables.changed)),
-      el('div', {}, el('h4', {}, 'Measured'), list2(e.variables.measured))),
-    el('h3', { class: 'xp-h' }, 'Parameters'),
-    el('table', { class: 'xp-params' }, el('tbody', {}, e.parameters.map(([k, v]) => el('tr', {}, el('th', { scope: 'row' }, k), el('td', {}, v))))),
-    el('h3', { class: 'xp-h' }, 'Procedure'), el('ol', { class: 'xp-proc' }, e.procedure.map(s => el('li', {}, s))),
-    el('p', { class: 'xp-stop' }, el('strong', {}, 'Stop rule: '), e.stop),
-    el('h3', { class: 'xp-h' }, 'Tools'), ...e.tools.map(buildTool),
-    ...(e.links || []).map(l => el('p', {}, el('a', { href: l.href }, l.label))),
-    el('details', { class: 'xp-solo' }, el('summary', {}, 'Doing this without the app'), el('p', {}, e.solo)),
-    el('h3', { class: 'xp-h' }, 'Record'),
-    el('table', { class: 'xp-trials' }, el('thead', {}, el('tr', {}, el('th', {}, 'Trial'), el('th', {}, 'Surprise 1–5'), el('th', {}, 'Observation'))), el('tbody', {}, trialRows)),
-    el('h3', { class: 'xp-h' }, 'Conclusion'), el('p', { class: 'xp-hint' }, 'Was the hypothesis supported? ' + e.reflect), verdict, ctext,
-    el('div', { class: 'xp-done' }, mark),
-    el('p', { class: 'xp-hint', style: 'margin-top:1.5rem' }, el('a', { href: '#/' + PATH[(idx + 1) % PATH.length].id }, 'Next in the course →'), ' · ', el('a', { href: '#/' }, 'Choose another')));
-  window.scrollTo(0, 0);
+  function draw() {
+    const head = el('a', { class: 'xp-back', href: '#/' }, '← ' + COURSE.name);
+    toolBox.hidden = at === 0 || at === last;
+    if (at === 0) {
+      root.replaceChildren(head,
+        el('div', { class: 'ph' }, el('h2', {}, e.title), el('p', {}, e.summary)),
+        el('div', { class: 'xp-box', id: 'xpQuestion' }, el('b', {}, 'What you are finding out'), e.question),
+        el('ul', { class: 'xp-intro-list' },
+          el('li', {}, el('b', {}, 'Time'), `about ${e.minutes} minutes`),
+          el('li', {}, el('b', {}, 'You need'), NEEDS[e.needs]),
+          el('li', {}, el('b', {}, 'Steps'), `${total}, one at a time`),
+          el('li', {}, el('b', {}, 'The limits'), e.parameters.map(([k, v]) => `${k}: ${v}`).join(' · '))),
+        el('p', { class: 'xp-hint' }, 'Your first step: ' + e.procedure[0]),
+        nav(btn('Begin', () => go(1), false, 'xpBegin'), el('a', { href: '#/method', class: 'xp-hint' }, 'How it works')),
+        el('details', { class: 'xp-solo' }, el('summary', {}, 'Doing this without the app'), el('p', {}, e.solo)));
+    } else if (at <= total) {
+      root.replaceChildren(head, dots(),
+        el('div', { class: 'xp-stepcard', 'aria-live': 'polite' }, el('div', { class: 'xp-stepno' }, `Step ${at} of ${total}`), el('p', { class: 'xp-steptext', id: 'xpStep' }, e.procedure[at - 1])),
+        nav(btn(at === total ? 'Finish' : 'Next', () => go(at + 1), false, 'xpNext'), btn('Back', () => go(at - 1), true, 'xpBack')),
+        toolBox);
+    } else {
+      root.replaceChildren(head, dots(),
+        el('div', { class: 'ph' }, el('h2', {}, 'All done'), el('p', {}, 'Stop here: ' + e.stop)),
+        el('h3', { class: 'xp-h' }, 'Your note (optional)'),
+        el('p', { class: 'xp-hint' }, 'Record your process or share your thoughts. If it helps to start: ' + e.reflect),
+        note,
+        nav(btn(done.has(e.id) ? 'Save and finish' : 'Mark as done', finish, false, 'xpFinish'), btn('Back to the steps', () => go(total), true, 'xpBackSteps')),
+        el('p', { class: 'xp-hint', style: 'margin-top:1rem' }, el('a', { href: '#/' + next.id }, 'Next in the course: ' + next.title + ' →'), ' · ', el('a', { href: '#/' }, 'Choose another')));
+    }
+  }
+  draw(); window.scrollTo(0, 0);
 }
 
 function route() {
