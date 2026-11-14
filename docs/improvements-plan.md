@@ -27,21 +27,40 @@ Open work, roughly in the order it was raised. Constraints that apply to everyth
 
 **Obsidian ideas worth borrowing:** wiki-style links, backlinks, graph view, tags, daily-note feel, everything searchable as plain text, export as Markdown so the therapist is never locked in.
 
-**Privacy and professional questions to settle first**
-1. Notes are the therapist's, private to that therapist, encrypted so we cannot read them. Our privacy policy and Supabase RLS must say and enforce this.
-2. Clients have legal rights to access their records in many places (GDPR access requests in the EU). Decide how that works with encrypted therapist notes: an export the therapist can generate, rather than us holding readable copies.
-3. What happens when a client leaves or a therapist stops using the platform: export and deletion.
-4. Whether anything is ever sent to an AI. Default: no. Any optional local-only suggestions (for example "this theme has not been revisited in 6 sessions") should run without sending note text anywhere.
-5. Shared Cal.com account and freelancer-by-invoice model: notes must be scoped per therapist, not per account.
-6. Client-visible parts (for example homework the therapist chooses to share) stay a separate, explicit, per-item action.
+**Decisions (from Jordan, 14 Nov)**
+- Total encryption: notes are encrypted on the therapist's device before they leave it. We cannot read them. Privacy comes first, ahead of any convenience feature.
+- Clients can have their records sent to them on request. The therapist generates the export (Markdown plus a PDF) from their own device and sends it; we hold nothing readable.
+- If a client leaves, the therapist chooses whether to keep or delete that client's records. Nothing is deleted or kept automatically. Provide both a one-click export-then-delete and a keep-as-archive option, each with a clear confirmation.
+- No LLM and no network: any analysis runs on the therapist's device.
+
+**Still to settle**
+1. How long records should be kept by default, and what the platform says about professional retention duties (these differ by country and profession; the therapist decides, we do not advise).
+2. Shared Cal.com account and freelancer-by-invoice model: notes are scoped per therapist, never per account.
+3. Anything the client sees (for example homework) stays a separate, explicit, per-item action.
+4. Key recovery: if the therapist loses their device key, the notes are gone. Offer a recovery key they store themselves, and say so plainly.
+
+**On-device analysis: what is possible without an LLM**
+Built (`assets/js/notes/`, tested): all of this is plain code over the therapist's own words.
+- Word counts, recurring words across the record, and distinctive words per session (TF-IDF).
+- Backlinks for any person, event or theme; a themes-by-sessions table; a graph where two things are joined when they come up in the same session or the same sentence.
+- "Not revisited lately": a theme that used to come up and has been quiet for N sessions.
+- A tone reading per session from a small sentiment word list (handles "not happy", "really sad"), plus six emotion families per 100 words, shown with how many words were counted so thin evidence is visible.
+- Style markers researchers use descriptively: first-person share, absolutes ("always", "never"), questions, past versus future focus.
+- Theme suggestions from seed word lists (sleep, anxiety, low mood, grief, anger, self-criticism, avoidance, relationships, work, body, self-worth, trauma). Suggestions only: the therapist accepts, renames or ignores.
+- Markdown export with [[links]] kept, so notes open in Obsidian or any notes app.
+
+Possible later, still on-device: a small embedding model run in the browser (tens of MB, downloaded once from our own hosting, never sent anywhere) for "find sessions like this one" and grouping similar passages; German word lists; a therapist-editable theme dictionary; simple trend lines per theme.
+
+Honest limits: lexicons miss irony, slang, negation across clauses and context, and they only know the words in their lists. Counts describe the notes; they do not describe the client. They are there to point the therapist back to what they wrote, never to score, label or diagnose a client, and the interface should say so.
 
 **Possible build order**
+0. Done: parsing, analysis, graph and export modules with tests (no interface yet).
 1. Session notes per client, encrypted on the therapist's device, with date and free text. Intake and family history shown as the first entries.
 2. `[[links]]` and `#themes` parsed on save; backlinks panel.
 3. Entities with short descriptions (people, events); themes list with counts.
 4. Timeline and themes × sessions table.
 5. Graph view and pre-session brief.
-6. Markdown export (and import) for portability.
+6. Markdown export (and import) for portability, record export for the client on request, keep-or-delete when a client leaves.
 
 ### Other open items
 - Background audio with the screen off (Android).
