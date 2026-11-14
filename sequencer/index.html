@@ -172,6 +172,9 @@
       padding: .5rem .75rem .35rem;
       border-bottom: 1px solid var(--border);
     }
+    .ms-btn { margin-left: .25rem; width: 1.3rem; height: 1.3rem; border: 1px solid var(--border); background: transparent; font: 600 .6rem var(--font-mono); cursor: pointer; color: var(--muted); padding: 0; }
+    .ms-btn.on[data-ms=m] { background: #b4532a; border-color: #b4532a; color: #fff; } .ms-btn.on[data-ms=s] { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .t-num { width: 3rem; border: 1px solid var(--border); background: var(--surface); font: .75rem var(--font-mono); padding: .2rem; }
     .track-item {
       display: flex;
       align-items: center;
@@ -575,6 +578,21 @@
       </select>
       <div class="t-sep"></div>
 
+      <div class="tempo-group">
+        <span class="tempo-label">swing</span>
+        <input type="range" class="t-slider" id="swing-slider" min="0" max="100" step="1" value="0" oninput="SEQ.setSwing(+this.value)" aria-label="Swing">
+        <span class="tempo-val" id="swing-val">0%</span>
+      </div>
+      <div class="t-sep"></div>
+      <div class="tempo-group" title="Euclidean rhythm: spread this many hits evenly over the 16 steps of the active track">
+        <span class="tempo-label">euclid</span>
+        <input type="number" class="t-num" id="euclid-hits" min="0" max="16" value="5" aria-label="Number of hits">
+        <span class="tempo-label">rot</span>
+        <input type="number" class="t-num" id="euclid-rot" min="0" max="15" value="0" aria-label="Rotation">
+        <button class="tbtn" onclick="SEQ.euclid()" title="Fill the active track with a Euclidean rhythm">fill</button>
+      </div>
+      <div class="t-sep"></div>
+
       <button class="tbtn" onclick="SEQ.randomize()" title="Randomize active track">✦ randomize</button>
       <button class="tbtn" onclick="SEQ.clearTrack()" title="Clear active track">clear</button>
       <button class="tbtn" onclick="SEQ.loadDefault()" title="Load example beat">example</button>
@@ -672,6 +690,11 @@
     <p>The sequencer has four loop slots. Each stores a completely independent set of patterns across all eight tracks. By default, Loop 1 plays on repeat. Click Loop 2, 3, or 4 to switch to a different slot and program a new pattern — the copy button duplicates the current loop to the next slot so you can vary an existing pattern rather than starting from scratch.</p>
     <p>The chain section lets you combine loops into an arrangement. Use the selectors to choose a loop and how many times it should repeat, then click Add. You can build a sequence like "Loop 1 twice, then Loop 2 four times, then Loop 3 once" and it will cycle through that pattern continuously. To remove a step from the chain, click the × on it. Export WAV renders the entire chain — or the current loop if no chain is set — as a stereo audio file you can take into any other software.</p>
 
+    <h2>Swing, mute and solo, and Euclidean rhythms</h2>
+    <p><strong>Swing</strong> delays every second sixteenth note a little, which turns a rigid grid into a rolling, human feel. At 0% the steps are exactly even; the further you push it, the more the off-beat notes lean late. Hip-hop, house and jazz all use it in different amounts, and a small amount on the hi-hats alone changes the whole character of a loop.</p>
+    <p>The <strong>M</strong> and <strong>S</strong> buttons beside each track mute or solo it. Muting takes a track out of the mix so you can hear what the others are doing; soloing plays only the tracks you have soloed. Both also apply when you export to WAV, so what you hear is what you get.</p>
+    <p>A <strong>Euclidean rhythm</strong> spreads a number of hits as evenly as possible over the sixteen steps. Five hits give a pattern that turns up in music from many parts of the world, and rotating it moves where the pattern starts without changing its shape. Put it on a track, then add or remove a few steps by hand.</p>
+
     <h2>Tempo</h2>
     <p>The BPM slider controls playback speed. 120 BPM is a common tempo for house and pop music — four beats per second. 90 BPM gives a more relaxed hip-hop feel; 140 feels urgent and energetic. Changes take effect immediately, so you can adjust tempo while the sequencer is playing to find the right feel before committing to a number.</p>
 
@@ -689,6 +712,7 @@
 <!-- ═══════════════════════════════════════════════════════
      SEQUENCER ENGINE
 ═══════════════════════════════════════════════════════ -->
+<script type="module">import * as G from '/assets/js/seq/groove.js'; window.SEQGROOVE = G;</script>
 <script>
 (function () {
 'use strict';
@@ -820,6 +844,10 @@ let rootKey  = 'C';
 let scaleName = 'major';
 
 let activeTrack = 0; // index into TRACKS
+let swing = 0;       // 0..1: how late the off-beat sixteenths are played
+const muted  = Array(8).fill(false), soloed = Array(8).fill(false);
+// The rhythm rules live in /assets/js/seq/groove.js (tested). Until it has loaded, play straight and let everything sound.
+const GROOVE = () => window.SEQGROOVE || { audible: () => true, swingOffset: () => 0, euclid: (p, n) => Array(n).fill(false) };
 
 // 4 loop slots × 8 tracks × 16 steps
 // Each step for drum: true/false
@@ -1120,6 +1148,7 @@ function scheduleStep(step, time) {
   TRACKS.forEach((track, ti) => {
     const cell = loopData[ti][step];
     if (cell === null || cell === false) return;
+    if (!GROOVE().audible(ti, muted, soloed)) return;
     const vol = 0.85;
 
     if (track.type === 'drum') {
@@ -1140,7 +1169,7 @@ function scheduleStep(step, time) {
 function scheduler() {
   if (!playing || !AC) return;
   while (nextStepTime < AC.currentTime + LOOKAHEAD) {
-    scheduleStep(currentStep, nextStepTime);
+    scheduleStep(currentStep, nextStepTime + GROOVE().swingOffset(currentStep, swing, stepDuration()));
     // Schedule UI update ~at playback time (approximate — RAF will handle actual display)
     const stepSnap = currentStep;
     const delay = Math.max(0, (nextStepTime - AC.currentTime) * 1000);
@@ -1244,7 +1273,10 @@ function buildTrackList() {
       <span class="track-dot" style="background:${track.col}"></span>
       <span class="track-name">${track.name}</span>
       <span class="track-type-badge">${track.type === 'drum' ? 'rhy' : 'mel'}</span>
+      <button type="button" class="ms-btn${muted[i] ? ' on' : ''}" data-ms="m" aria-pressed="${muted[i]}" aria-label="Mute ${track.name}" title="Mute">M</button>
+      <button type="button" class="ms-btn${soloed[i] ? ' on' : ''}" data-ms="s" aria-pressed="${soloed[i]}" aria-label="Solo ${track.name}" title="Solo">S</button>
     `;
+    item.querySelectorAll('.ms-btn').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); (b.dataset.ms === 'm' ? SEQ.toggleMute : SEQ.toggleSolo)(i); }));
     item.addEventListener('click', () => SEQ.setTrack(i));
     inner.appendChild(item);
   });
@@ -1559,6 +1591,22 @@ const SEQ = window.SEQ = {
     renderPads();
   },
 
+  setSwing(v) {
+    swing = Math.max(0, Math.min(1, v / 100));
+    document.getElementById('swing-val').textContent = Math.round(v) + '%';
+  },
+
+  toggleMute(i) { muted[i] = !muted[i]; buildTrackList(); },
+  toggleSolo(i) { soloed[i] = !soloed[i]; buildTrackList(); },
+
+  /** Spreads N hits as evenly as possible over the 16 steps of the active track (a Euclidean rhythm), rotated by the chosen amount. */
+  euclid() {
+    const hits = parseInt(document.getElementById('euclid-hits').value, 10) || 0, rot = parseInt(document.getElementById('euclid-rot').value, 10) || 0;
+    const pattern = GROOVE().euclid(hits, NUM_STEPS, rot), track = TRACKS[activeTrack];
+    loops[editingLoop][activeTrack] = pattern.map(on => (on ? (track.type === 'drum' ? true : 0) : null));
+    closePicker(); renderPads(); updateLoopSlotDots();
+  },
+
   clearTrack() {
     loops[editingLoop][activeTrack] = Array(NUM_STEPS).fill(null);
     closePicker();
@@ -1626,10 +1674,11 @@ const SEQ = window.SEQ = {
     for (const loopIdx of renderPlan) {
       const loopData = loops[loopIdx];
       for (let step = 0; step < NUM_STEPS; step++) {
-        const time = t + step * stepDuration();
+        const time = t + step * stepDuration() + GROOVE().swingOffset(step, swing, stepDuration());
         TRACKS.forEach((track, ti) => {
           const cell = loopData[ti][step];
           if (cell === null || cell === false) return;
+          if (!GROOVE().audible(ti, muted, soloed)) return;
           const vol = 0.8;
           // Inline synthesis for offline context
           if (track.type === 'drum') {
