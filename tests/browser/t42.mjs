@@ -8,6 +8,7 @@ await page.goto(`${BASE}/compositions/neural-synthesis.html`,{waitUntil:'domcont
 await page.waitForSelector('#nnPlay',{timeout:20000}); await sleep(800);
 ok(await page.$eval('#essayH',e=>!!e)&&(await page.$$eval('.essay h2',h=>h.length))>=8,'the essay is there with its sections');
 ok((await page.$eval('#nnCanvas',c=>c.width))>100,'the network is drawn');
+await page.click('#modePlay'); await sleep(300);
 await page.click('#nnPlay'); await sleep(1500);
 ok(await page.evaluate(()=>window.__nn.running&&window.__nn.ctx&&window.__nn.ctx.state==='running'),'the audio engine is running');
 const snap=()=>page.evaluate(()=>{ const c=window.__nn.conductor; return {t:c.t,loss:c.lossNow,chord:c.chord.join(),w:c.net.W[1][0][0]}; });

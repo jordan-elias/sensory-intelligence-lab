@@ -6,6 +6,7 @@
 import { ACTIVATIONS, ACTIVATION_NAMES, MAX_HIDDEN, MODES, setWeight, setBias, toggleConnection, toggleMute, toggleFrozen, scaleIncoming, resetNeuron, setActivation } from './net.js';
 import { describeNeuron, describeConnection, explainWeight, LAYER_NAMES } from './inspect.js';
 import { hitTest } from './draw.js';
+import { neuronCycle } from './synth.js';
 import { mulberry32 } from '../experiments/rng.js';
 import { NODE_TYPES, ACTIVATION_INFO, LARGER_UNITS } from './node-types.js';
 
@@ -16,8 +17,22 @@ export function h(tag, attrs = {}, ...kids) {
   for (const k of kids.flat()) if (k != null && k !== false) e.append(k.nodeType ? k : document.createTextNode(k));
   return e;
 }
+const fill = (el, ...k) => el.replaceChildren(...k.flat().filter(x => x != null && x !== false));
 const f2 = v => (Math.abs(v) < 0.005 ? '0.00' : v.toFixed(2));
 const colour = v => { const a = Math.min(1, Math.abs(v) / 1.5); return v >= 0 ? `rgba(42,92,69,${0.08 + 0.7 * a})` : `rgba(190,90,40,${0.08 + 0.7 * a})`; };
+
+/** One cycle of a wave as a line, with the current phase marked and an optional target wave dashed behind it. */
+export function plotCycle(canvas, wave, phase = null, target = null) {
+  const dpr = window.devicePixelRatio || 1, w = canvas.clientWidth || 300, hgt = canvas.clientHeight || 110;
+  canvas.width = Math.round(w * dpr); canvas.height = Math.round(hgt * dpr);
+  const g = canvas.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, hgt);
+  let hi = 1.05; for (const v of wave) hi = Math.max(hi, Math.abs(v) * 1.05);
+  const Y = v => hgt / 2 - (v / hi) * (hgt / 2 - 4), X = k => (k / (wave.length - 1)) * w;
+  g.strokeStyle = '#d5d5cf'; g.lineWidth = 1; g.beginPath(); g.moveTo(0, Y(0)); g.lineTo(w, Y(0)); g.stroke();
+  if (target) { g.strokeStyle = '#b4532a'; g.setLineDash([4, 3]); g.beginPath(); for (let k = 0; k < target.length; k++) { const x = (k / (target.length - 1)) * w; k ? g.lineTo(x, Y(target[k])) : g.moveTo(x, Y(target[k])); } g.stroke(); g.setLineDash([]); }
+  g.strokeStyle = '#2a5c45'; g.lineWidth = 2; g.beginPath(); for (let k = 0; k < wave.length; k++) k ? g.lineTo(X(k), Y(wave[k])) : g.moveTo(X(k), Y(wave[k])); g.stroke();
+  if (phase != null) { const k = phase * (wave.length - 1); g.strokeStyle = '#111'; g.lineWidth = 1; g.beginPath(); g.moveTo(X(k), 0); g.lineTo(X(k), hgt); g.stroke(); g.fillStyle = '#111'; g.beginPath(); g.arc(X(k), Y(wave[Math.round(k)]), 3.5, 0, 6.283); g.fill(); }
+}
 
 /** A small plot of an activation function with the neuron's current input and output marked. */
 export function plotFunction(canvas, name, z = null) {
@@ -63,14 +78,16 @@ export function mountUI({ engine, canvas, state, onSelect }) {
     let pin = null;
     if (isOut) { pin = h('label', {}, 'Teach it: ', h('select', { id: 'nnPin', onchange: e => { const v = e.target.value; if (v === 'auto') delete c().pins[i]; else c().pins[i] = +v; } },
       h('option', { value: 'auto' }, 'follow the chord'), h('option', { value: '0.9' }, 'always on (+0.9)'), h('option', { value: '-0.9' }, 'always off (-0.9)'))); pin.querySelector('select').value = c().pins[i] == null ? 'auto' : String(c().pins[i]); }
-    panel.replaceChildren(
+    const cyc = engine.mode === 'inst' && layer > 0 ? h('canvas', { class: 'nn-plot nn-cycle', id: 'nnICycle', role: 'img', 'aria-label': 'This neuron over one cycle of the wave, with the current position marked' }) : null;
+    fill(panel,
       h('h4', { class: 'nn-h4' }, `${LAYER_NAMES[layer]}, neuron ${i + 1}`, h('span', { class: 'nn-badge' }, d.type)),
       h('p', {}, d.sound),
       h('div', { class: 'nn-nums' }, h('div', {}, act, 'Activation'), d.fn ? h('div', {}, sum, 'Weighted sum + bias (z)') : null, d.fn ? h('div', {}, h('strong', {}, d.fn.label), 'Activation function') : null, isOut ? h('div', {}, h('strong', { id: 'nnITarget' }), 'Target') : null),
-      d.fn ? formula : null, plot, d.fn ? h('p', { class: 'nn-hint' }, d.fn.about) : null, body, controls, flags, pin,
+      d.fn ? formula : null, plot, cyc ? h('p', { class: 'nn-hint' }, 'This neuron over one cycle of the wave (the dot is where the cycle is now). The next layer builds the sound out of shapes like this.') : null, cyc, d.fn ? h('p', { class: 'nn-hint' }, d.fn.about) : null, body, controls, flags, pin,
       d.outgoing && d.outgoing.length ? h('p', { class: 'nn-hint', id: 'nnIOut' }) : null);
     live = () => {
       const dd = describeNeuron(net(), c().lastActs, layer, i, c().target);
+      if (cyc) plotCycle(cyc, neuronCycle(net(), layer, i, engine.a || 0, engine.b || 0), engine.phase || 0);
       act.textContent = f2(dd.activation); if (dd.fn) { sum.textContent = f2(dd.fn.z); formula.textContent = `${dd.fn.label}( ${dd.incoming.filter(r => r.alive).map(r => f2(r.product)).join(' + ') || '0'} + bias ${f2(dd.bias)} ) = ${dd.fn.label}( ${f2(dd.fn.z)} ) = ${f2(dd.activation)}`; if (plot) plotFunction(plot, dd.fn.name, dd.fn.z); }
       const rows = document.getElementById('nnIRows');
       if (rows) { const maxP = Math.max(0.05, ...dd.incoming.map(r => Math.abs(r.product)));
@@ -85,7 +102,7 @@ export function mountUI({ engine, canvas, state, onSelect }) {
   // ── a single connection ──
   function showEdge(layer, j, i) {
     const d = describeConnection(net(), c().lastActs, layer, j, i), num = h('strong', { id: 'nnEW' }), prod = h('strong', { id: 'nnEP' });
-    panel.replaceChildren(
+    fill(panel,
       h('h4', { class: 'nn-h4' }, `${d.fromLayer} ${i + 1} → ${d.toLayer} ${j + 1}`, h('span', { class: 'nn-badge' }, 'Connection (weight)')),
       h('p', { id: 'nnEExplain' }), h('div', { class: 'nn-nums' }, h('div', {}, num, 'Weight'), h('div', {}, h('strong', { id: 'nnEX' }), 'Sender\'s output'), h('div', {}, prod, 'Contribution (weight × output)')),
       h('label', { class: 'nn-ctl' }, 'Weight ', h('input', { type: 'range', min: -3, max: 3, step: 0.05, id: 'nnEWSlider', value: d.weight, 'aria-label': 'Weight', oninput: e => { if (!net().M[layer][j][i]) toggleConnection(net(), layer, j, i); setWeight(net(), layer, j, i, +e.target.value); } })),
@@ -137,7 +154,7 @@ export function mountUI({ engine, canvas, state, onSelect }) {
   tabs.forEach(t => { t.onclick = () => { tabs.forEach(o => { const on = o === t; o.setAttribute('aria-selected', String(on)); o.tabIndex = on ? 0 : -1; document.getElementById(o.getAttribute('aria-controls')).hidden = !on; }); if (t.id === 'tabWeights') drawWeights(); }; t.onkeydown = e => { const k = tabs.indexOf(t); if (e.key === 'ArrowRight') { tabs[(k + 1) % tabs.length].focus(); tabs[(k + 1) % tabs.length].click(); } if (e.key === 'ArrowLeft') { tabs[(k + tabs.length - 1) % tabs.length].focus(); tabs[(k + tabs.length - 1) % tabs.length].click(); } }; });
 
   fillNeurons(); choose(null);
-  return { refresh() { live && live(); if (!document.getElementById('paneWeights').hidden) drawWeights(); }, choose, keyRoot, keyMode, syncKey() { if (!document.getElementById('nnLockKey').checked) { keyRoot.value = c().root; keyMode.value = c().mode; } }, redraw() { wBuilt = ''; } };
+  return { refresh() { live && live(); if (!document.getElementById('paneWeights').hidden) drawWeights(); }, choose, keyRoot, keyMode, syncKey() { if (!document.getElementById('nnLockKey').checked) { keyRoot.value = c().root; keyMode.value = c().mode; } }, redraw() { wBuilt = ''; fillNeurons(); } };
 }
 
 /** The reference section: node types, activation functions (with plots), and the units of larger networks. */

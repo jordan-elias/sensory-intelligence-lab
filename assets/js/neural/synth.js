@@ -84,3 +84,10 @@ export function packedForward(p, x, ACT) {
   }
   return a;
 }
+
+/** One neuron's activation across a whole cycle: shows what that neuron contributes to the wave. */
+export function neuronCycle(net, layer, i, a = 0, b = 0, n = 128) {
+  const w = new Float32Array(n);
+  for (let k = 0; k < n; k++) w[k] = forward(net, inputsAt(k / n, a, b))[layer][i];
+  return w;
+}

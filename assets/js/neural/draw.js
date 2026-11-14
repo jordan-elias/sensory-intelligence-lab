@@ -4,7 +4,7 @@
  * (thicker when stronger; one colour for positive weights, another for negative), and the loss as a small trace.
  */
 const hist = [];
-export function layout(sizes, w, h, pad = 28) {
+export function layout(sizes, w, h, pad = 44) {
   const cols = sizes.length, pos = [];
   for (let l = 0; l < cols; l++) {
     const x = pad + (w - 2 * pad) * (l / (cols - 1)), n = sizes[l];
@@ -26,7 +26,7 @@ export function hitTest(canvas, net, x, y) {
   }));
   return best;
 }
-export function draw(canvas, net, acts, loss, sel = null) {
+export function draw(canvas, net, acts, loss, sel = null, opts = {}) {
   const dpr = window.devicePixelRatio || 1, w = canvas.clientWidth, h = canvas.clientHeight;
   if (!w || !h) return;
   if (canvas.width !== Math.round(w * dpr)) { canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); }
@@ -49,7 +49,10 @@ export function draw(canvas, net, acts, loss, sel = null) {
     if (net.frozen[l][i]) { g.fillStyle = '#2a5c45'; g.fillRect(p.x - 2, p.y - r - 5, 4, 3); }
   }));
   g.fillStyle = '#6b6b6b'; g.font = '10px sans-serif'; g.textAlign = 'center';
-  pos.forEach((col, l) => g.fillText(LABELS[l] || '', col[0].x, 12)); g.textAlign = 'left';
+  const names = opts.layers || LABELS; pos.forEach((col, l) => g.fillText(names[l] || '', col[0].x, 12)); g.textAlign = 'left';
+  if (opts.inputs) { g.textAlign = 'right'; g.fillStyle = '#444'; pos[0].forEach((p, i) => g.fillText(opts.inputs[i] || '', p.x - 11, p.y + 3)); }
+  if (opts.outputs) { g.textAlign = 'left'; g.fillStyle = '#444'; pos[pos.length - 1].forEach((p, i) => g.fillText(opts.outputs[i] || '', p.x + 11, p.y + 3)); }
+  g.textAlign = 'left';
   hist.push(loss); if (hist.length > 240) hist.shift();
   const gx = 28, gy = h - 18, gw = w - 56, max = Math.max(0.3, ...hist);
   g.strokeStyle = '#b8b8b0'; g.lineWidth = 1; g.beginPath(); g.moveTo(gx, gy); g.lineTo(gx + gw, gy); g.stroke();

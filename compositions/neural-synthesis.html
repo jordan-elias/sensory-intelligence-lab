@@ -58,7 +58,7 @@
     .nn-controls input[type=range]{width:100%}
     .nn-btn{font:600 .9rem var(--font-body);padding:.7rem 1.4rem;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;min-height:44px}
     .nn-btn--alt{background:none;color:var(--accent)} .nn-btn:focus-visible{outline:3px solid var(--text);outline-offset:2px}
-    .nn-row{display:flex;gap:.75rem;flex-wrap:wrap;align-items:center}
+    .nn-scopes{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin:.6rem 0}.nn-scopes canvas{width:100%;height:130px;background:var(--surface);border:1px solid var(--border);display:block}.nn-scopes figcaption{font-size:.75rem;color:var(--muted)}@media(max-width:600px){.nn-scopes{grid-template-columns:1fr}}.nn-keys{display:flex;gap:2px;margin:.8rem 0;flex-wrap:wrap}.nn-keys button{flex:1 1 0;min-width:34px;min-height:64px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font:.7rem var(--font-body);padding:0}.nn-keys button.black{background:#222;color:#fff}.nn-keys button.on{background:var(--accent);color:#fff}.nn-modes{margin-bottom:.8rem}.nn-btn[aria-pressed=false]{background:transparent;color:var(--accent)}[hidden]{display:none!important}.nn-row{display:flex;gap:.75rem;flex-wrap:wrap;align-items:center}
     .nn-log{font-size:.82rem;color:var(--muted);min-height:1.3rem;margin-top:.6rem}
     .essay{max-width:44rem} .essay h3{font:600 1.15rem var(--font-heading);margin:2rem 0 .5rem} .essay p,.essay li{font-size:.95rem;line-height:1.7;margin:.6rem 0}
     .essay ul,.essay ol{margin:.5rem 0 .5rem 1.3rem} .essay table{border-collapse:collapse;width:100%;font-size:.85rem;margin:.8rem 0}
@@ -107,11 +107,12 @@
 <main>
   <div class="ph">
     <h2>Neural Synthesis</h2>
-    <p>A small neural network that never finishes learning, and whose computation is the music. Select any neuron or connection to see exactly how it weighs its inputs, change it, and hear what happens. Underneath the sound is a real network, trained by the same method as the large ones. A long essay below explains how they work.</p>
+    <p>A real neural network that is the instrument. In <strong>Instrument</strong> mode the network is the oscillator: tens of thousands of times a second it is asked "what is the wave doing at this point in its cycle?", and its answer is the sound. Select any neuron or connection, change a weight or an activation function, and hear what that does. In <strong>Self-playing</strong> mode the network learns and composes on its own.</p>
   </div>
 
   <div class="card nn-app">
     <p class="card-title">the network, live</p>
+    <div class="nn-row nn-modes" role="group" aria-label="Mode"><button type="button" class="nn-btn" id="modeInst" aria-pressed="true">Instrument</button><button type="button" class="nn-btn nn-btn--alt" id="modePlay" aria-pressed="false">Self-playing</button></div>
     <div class="nn-stage"><canvas id="nnCanvas" role="img" aria-label="The network: 6 inputs, two hidden layers and 8 outputs. Brighter circles are more active. Lines are the connections between neurons. Select a neuron or a line to inspect it; the same choices are available in the lists below."></canvas></div>
     <div class="nn-stats" aria-live="off">
       <div><strong id="nnLoss">–</strong>Error (loss)</div>
@@ -120,14 +121,34 @@
       <div><strong id="nnParams">–</strong>Trainable numbers</div>
       <div><strong id="nnTime">0:00</strong>Running</div>
     </div>
-    <div class="nn-row"><button type="button" class="nn-btn" id="nnPlay">Start listening</button><button type="button" class="nn-btn nn-btn--alt" id="nnNew">New network</button></div>
+    <div class="nn-row"><button type="button" class="nn-btn" id="nnPlay">Start sound</button><button type="button" class="nn-btn nn-btn--alt" id="nnNew">New network</button></div>
     <p class="nn-log" id="nnLog" role="status" aria-live="polite">It starts out knowing nothing. Press start, then leave it for a few minutes: it changes slowly, and it does not repeat. Circles are neurons (brighter is more active); lines are weights (green positive, orange negative, thicker is stronger). Select one.</p>
+
+
+    <div id="instPanel" class="nn-inst">
+      <p class="nn-hint">Every sample, the network is given where we are in the wave (φ, from 0 to 1, as a sine and cosine pair) plus your two knobs. Its first two outputs are the left and right speaker. Press Start, play a note, then pick a neuron in the picture and change it.</p>
+      <div class="nn-scopes"><figure><canvas id="nnScope" role="img" aria-label="One cycle of the wave the network is producing"></canvas><figcaption>One cycle of the output (the wave). Dashed: the wave it is being taught.</figcaption></figure>
+        <figure><canvas id="nnSpec" role="img" aria-label="The loudness of the first 24 harmonics"></canvas><figcaption>Harmonics 1 to 24: the recipe of sine waves this wave is made of.</figcaption></figure></div>
+      <div class="nn-grid">
+        <div><label for="nnPitch">Pitch <output id="nnPitchV">220 Hz</output></label><input type="range" id="nnPitch" min="0" max="1" step="0.001" value="0.5"></div>
+        <div><label for="nnKnobA">Knob A (input 5) <output id="nnKnobAV">0.00</output></label><input type="range" id="nnKnobA" min="-1" max="1" step="0.01" value="0"></div>
+        <div><label for="nnKnobB">Knob B (input 6) <output id="nnKnobBV">0.00</output></label><input type="range" id="nnKnobB" min="-1" max="1" step="0.01" value="0"></div>
+        <div><label for="nnWob">Wobble: sweeps knob A <output id="nnWobV">0.00</output></label><input type="range" id="nnWob" min="0" max="1" step="0.01" value="0"></div>
+        <div><label for="nnWobRate">Wobble speed <output id="nnWobRateV">3.0 Hz</output></label><input type="range" id="nnWobRate" min="0.1" max="12" step="0.1" value="3"></div>
+        <div><label for="nnPhase">Look at the network at φ = <output id="nnPhaseV">0.00</output></label><input type="range" id="nnPhase" min="0" max="1" step="0.01" value="0"><label><input type="checkbox" id="nnSweep" checked> Sweep through the cycle</label></div>
+      </div>
+      <div class="nn-keys" id="nnKeys" role="group" aria-label="Keyboard: hold a key to play. Computer keys A to K also play."></div>
+      <div class="nn-row"><label><input type="checkbox" id="nnHoldNote"> Hold the note</label>
+        <button type="button" class="nn-btn nn-btn--sm nn-btn--alt" id="nnGainUp">All weights ×1.25</button><button type="button" class="nn-btn nn-btn--sm nn-btn--alt" id="nnGainDown">All weights ×0.8</button>
+        <label>Teach it <select id="nnTeachWave"></select></label><button type="button" class="nn-btn nn-btn--sm" id="nnTeach">Teach</button><span class="nn-hint" id="nnTeachStatus" role="status"></span></div>
+      <p class="nn-hint">Bigger weights drive the neurons harder, which bends the wave and adds harmonics. Teaching shows the network a target shape at every point of the cycle and nudges all its weights toward it: it is ordinary training, except that what it learns is a sound.</p>
+    </div>
 
     <div class="nn-tabs" role="tablist" aria-label="Explore and change the network">
       <button role="tab" id="tabNeuron" aria-selected="true" aria-controls="paneNeuron" type="button">Neuron</button>
       <button role="tab" id="tabWeights" aria-selected="false" aria-controls="paneWeights" tabindex="-1" type="button">Weights</button>
       <button role="tab" id="tabNetwork" aria-selected="false" aria-controls="paneNetwork" tabindex="-1" type="button">Network</button>
-      <button role="tab" id="tabSound" aria-selected="false" aria-controls="paneSound" tabindex="-1" type="button">Sound</button>
+      <button role="tab" class="play-only" id="tabSound" aria-selected="false" aria-controls="paneSound" tabindex="-1" type="button">Sound</button>
     </div>
 
     <div class="nn-pane" id="paneNeuron" role="tabpanel" aria-labelledby="tabNeuron">
@@ -147,11 +168,11 @@
 
     <div class="nn-pane" id="paneNetwork" role="tabpanel" aria-labelledby="tabNetwork" hidden>
       <div class="nn-grid">
-        <div><label for="nnLearn">Learning rate <output id="nnLearnV"></output></label><input type="range" id="nnLearn" min="0.005" max="0.15" step="0.005" value="0.05"></div>
-        <div><label for="nnHeat">Heat: how hard it is shaken at each new episode <output id="nnHeatV"></output></label><input type="range" id="nnHeat" min="0" max="1" step="0.05" value="0.5"></div>
-        <div><label for="nnPace">Pace: how often the goal changes <output id="nnPaceV"></output></label><input type="range" id="nnPace" min="0.25" max="3" step="0.05" value="1"></div>
-        <div><label for="nnAdv">Adventure: how freely it picks notes <output id="nnAdvV"></output></label><input type="range" id="nnAdv" min="0" max="1" step="0.05" value="0.5"></div>
-        <div><label for="nnRate">Note rate <output id="nnRateV"></output></label><input type="range" id="nnRate" min="0.25" max="2.5" step="0.05" value="1"></div>
+        <div class="play-only"><label for="nnLearn">Learning rate <output id="nnLearnV"></output></label><input type="range" id="nnLearn" min="0.005" max="0.15" step="0.005" value="0.05"></div>
+        <div class="play-only"><label for="nnHeat">Heat: how hard it is shaken at each new episode <output id="nnHeatV"></output></label><input type="range" id="nnHeat" min="0" max="1" step="0.05" value="0.5"></div>
+        <div class="play-only"><label for="nnPace">Pace: how often the goal changes <output id="nnPaceV"></output></label><input type="range" id="nnPace" min="0.25" max="3" step="0.05" value="1"></div>
+        <div class="play-only"><label for="nnAdv">Adventure: how freely it picks notes <output id="nnAdvV"></output></label><input type="range" id="nnAdv" min="0" max="1" step="0.05" value="0.5"></div>
+        <div class="play-only"><label for="nnRate">Note rate <output id="nnRateV"></output></label><input type="range" id="nnRate" min="0.25" max="2.5" step="0.05" value="1"></div>
         <div><label for="nnVol">Volume <output id="nnVolV"></output></label><input type="range" id="nnVol" min="0" max="1" step="0.05" value="0.6"></div>
         <div><label for="nnH1">Neurons in hidden layer 1 <output id="nnH1V">10</output></label><input type="range" id="nnH1" min="2" max="16" step="1" value="10"></div>
         <div><label for="nnH2">Neurons in hidden layer 2 <output id="nnH2V">8</output></label><input type="range" id="nnH2" min="2" max="12" step="1" value="8"></div>
@@ -159,7 +180,7 @@
         <div><label for="nnAct2">Activation function, hidden 2</label><select id="nnAct2"></select></div>
       </div>
       <p class="nn-hint">Changing the number of neurons makes a new network of that shape (it forgets what it has learned). Changing an activation function keeps the weights, so the network has to relearn around the change.</p>
-      <div class="nn-row" style="margin-top:.8rem">
+      <div class="nn-row play-only" style="margin-top:.8rem">
         <label><input type="checkbox" id="nnHold"> Hold the goal still (no new chords or episodes)</label>
         <label><input type="checkbox" id="nnLockKey"> Lock the key to</label>
         <select id="nnKeyRoot" aria-label="Key"></select><select id="nnKeyMode" aria-label="Mode"></select>
@@ -205,10 +226,11 @@
       <a href="#e-language">12. How large language models fit in</a>
       <a href="#e-uses">13. What they are used for</a>
       <a href="#e-limits">14. Limits, risks and open questions</a>
-      <a href="#e-here">15. What this page is and is not</a>
-      <a href="#e-try">16. Experiments to try here</a>
-      <a href="#e-gloss">17. Glossary</a>
-      <a href="#e-read">18. Where to go next</a>
+      <a href="#e-sound">15. Sound as a function: Instrument mode</a>
+      <a href="#e-here">16. What this page is and is not</a>
+      <a href="#e-try">17. Experiments to try here</a>
+      <a href="#e-gloss">18. Glossary</a>
+      <a href="#e-read">19. Where to go next</a>
     </nav>
 
     <h2 id="e-what">1. What a neural network is</h2>
@@ -327,12 +349,40 @@ a = f(z)</div>
       <li><strong>Open questions.</strong> Why large networks generalise as well as they do despite having so many parameters, how to interpret them reliably, and how to align their behaviour with human intentions are all active areas of research, without settled answers.</li>
     </ul>
 
-    <h2 id="e-here">15. What this page is and is not</h2>
-    <p>Real: the network, its loss, its learning, and every number going through it. The neuron tables, the weight tables and the formulas you see are read directly from the running network, and the example calculations in this essay are checked against its code.</p>
-    <p>Chosen: every mapping from numbers to sound. Making the first hidden layer a drone, the second a shimmer and the output a melody is a composer's decision, and other mappings would make the same network sound entirely different. This is <em>sonification</em>: a way of making the shape of a computation audible. It is not the voice of a mind. The network has no understanding of music, or of anything: it adjusts a few hundred numbers to match a pattern of eight values.</p>
+    <h2 id="e-sound">15. Sound as a function: Instrument mode</h2>
+    <p>A sound wave is also a function. Pick any point in one cycle of a repeating wave, written as a number φ (phi) from 0 to 1, and the wave has one height there. A sine wave is the function that maps φ to sin(2πφ). A sawtooth maps it to a straight ramp. A recording of a violin is a much more complicated function of the same kind. Since a neural network is a function from numbers to numbers, it can be the wave: give it φ and let the answer be the height.</p>
+    <p>That is exactly what Instrument mode does. The six inputs are sin φ, cos φ, sin 2φ and cos 2φ (so the network can tell every point of the cycle apart, and the end of the cycle joins the start) plus two knobs you control. The first two outputs are the left and right speaker. To make a note at 220 Hz, φ runs from 0 to 1 two hundred and twenty times a second, and at each of the 48,000 samples a second the whole network is calculated once. The program that does this contains no oscillator, no filter and no wavetable. Everything you hear is the arithmetic you see in the Neuron tab.</p>
+    <h3>What the parts do to the sound</h3>
+    <ul>
+      <li><strong>Weights.</strong> A weight scales one signal on its way to the next neuron. Making many weights larger drives the neurons harder, and a neuron driven hard enough saturates: its output flattens at the top and bottom. A flattened sine is no longer a sine, and the difference is new harmonics. That is why the "All weights ×1.25" button makes the sound brighter. A symmetric squashing like tanh adds only odd harmonics (3, 5, 7…), which is why a square wave, the limit of flattening, has only those.</li>
+      <li><strong>Bias.</strong> A bias moves a neuron's working point away from zero. For a squashing function, a shifted wave is squashed lopsidedly, and lopsided squashing creates <em>even</em> harmonics (2, 4, 6…). Try changing one hidden neuron's bias while you watch the spectrum.</li>
+      <li><strong>Activation functions.</strong> The function is the character of the oscillator. With tanh the output is smooth and rounded. With leaky ReLU, whose graph has a corner, the wave gets sharp corners and a rich, buzzy spectrum. With sine the network folds the wave back on itself, which is the wave-folding of modular synthesizers and gives bright, metallic tones as weights grow.</li>
+      <li><strong>The knobs.</strong> Because knob A and knob B are just inputs, turning them changes what every neuron receives, so they bend the wave as a whole, with different effects depending on the weights each neuron has for them. A fixed network turned by two knobs is a small synthesizer whose controls were not designed but found.</li>
+      <li><strong>Muting and cutting.</strong> Silencing a hidden neuron removes one of the shapes the output is built from. Cutting a connection removes one term from one weighted sum. Both are small surgeries you can hear and see in the wave.</li>
+    </ul>
+    <h3>The harmonic view</h3>
+    <p>The bar chart shows how loud each harmonic of the note is. Any repeating wave can be written as a sum of sine waves at whole-number multiples of its pitch, and this chart is that recipe, found with a discrete Fourier transform of the single cycle the network just produced. A change in the network is a change in the wave, and a change in the wave is a change in the recipe, so you can see in the chart what you are hearing.</p>
+    <h3>Teaching it a wave</h3>
+    <p>Training is the same procedure as everywhere else in this essay. Choose a target (say a triangle wave), pick a random φ, ask the network for its output, compare it with the target's height at that φ, and use backpropagation to nudge every weight a little to make the error smaller. After a few thousand of these examples the whole function is close to the target. Watching the solid line crawl toward the dashed one is what "learning a function" means, and it makes the point that the network has no special knowledge of sound: it is simply fitting a curve.</p>
+    <p>You can also see why this is hard. A neuron is smooth, so a perfect square wave with its instant jumps is something the network can only approximate, and the sharper the target, the larger the weights have to be, which is the same effect as turning the gain up. Teaching a wave and then changing a single neuron shows how the knowledge is spread across all the weights rather than stored in one place.</p>
+    <p>This is also the idea behind a family of research systems: networks used as oscillators and sound generators, taught from recordings, or whose weights are explored by ear. Here the network is small enough to understand completely, which is the point.</p>
+
+    <h2 id="e-here">16. What this page is and is not</h2>
+    <p>Real: the network, its loss, its learning, and every number going through it. In Instrument mode the sound is the network's own output, sample by sample. The neuron tables, the weight tables and the formulas you see are read directly from the running network, and the example calculations in this essay are checked against its code.</p>
+    <p>Chosen, in Self-playing mode: every mapping from numbers to sound. Making the first hidden layer a drone, the second a shimmer and the output a melody is a composer's decision, and other mappings would make the same network sound entirely different. This is <em>sonification</em>: a way of making the shape of a computation audible. It is not the voice of a mind. The network has no understanding of music, or of anything: it adjusts a few hundred numbers to match a pattern of eight values.</p>
     <p>Also simplified: the network learns online, from one constantly changing example, rather than from a large data set in batches; it has no validation data and so cannot overfit in the usual sense; and its goal keeps moving by design, so it never converges. These choices are what make it musical.</p>
 
-    <h2 id="e-try">16. Experiments to try here</h2>
+    <h2 id="e-try">17. Experiments to try here</h2>
+    <h3>In Instrument mode</h3>
+    <ol>
+      <li><strong>Gain and harmonics.</strong> Hold a note. Press "All weights ×0.8" five times, then "×1.25" ten times. Watch the harmonics chart as you go. Where does the sound change character? What happens to the loudness, given that every neuron's output is limited?</li>
+      <li><strong>Swap the function.</strong> In the Network tab set hidden layer 1 to sine, then leaky ReLU, then back to tanh. Listen and look: which one has the most harmonics? Which has the sharpest corners in the wave?</li>
+      <li><strong>Odd and even.</strong> Select a neuron in hidden layer 1 and move its bias slowly from −3 to +3. Watch the even harmonics (2, 4, 6) appear and disappear.</li>
+      <li><strong>Teach and damage.</strong> Teach a triangle wave. Then silence one hidden neuron at a time. Does any single neuron hold the shape, or is it shared?</li>
+      <li><strong>Knobs are inputs.</strong> Turn Wobble up and look at which wave shapes appear as knob A sweeps. Then select a neuron and cut the connection from "knob A" to it. What changes?</li>
+      <li><strong>Teach with a knob.</strong> Set knob A to −1 and teach a sine, then set knob A to +1 and teach a saw. Sweep the knob. You have taught the network a morph between two sounds.</li>
+    </ol>
+    <h3>In Self-playing mode</h3>
     <ol>
       <li><strong>Ablation.</strong> In the Neuron tab, silence a neuron in hidden layer 2 and listen. Then silence a different one. Do some matter more than others? Does the network adapt over the next minute by relying on the others?</li>
       <li><strong>Capacity.</strong> In the Network tab set both hidden layers to 2 neurons. Can it still track the chord? Now set them to the maximum. What does extra capacity buy, and what does it cost in the time taken to learn?</li>
@@ -344,7 +394,7 @@ a = f(z)</div>
       <li><strong>Heat and pace.</strong> Turn both up and wait for an episode. Then hold the goal still and watch the loss trace flatten.</li>
     </ol>
 
-    <h2 id="e-gloss">17. Glossary</h2>
+    <h2 id="e-gloss">18. Glossary</h2>
     <dl>
       <dt>Activation (of a neuron)</dt><dd>The neuron's output for the current input.</dd>
       <dt>Activation function</dt><dd>The nonlinear function applied to a neuron's weighted sum.</dd>
@@ -372,7 +422,7 @@ a = f(z)</div>
       <dt>Weight</dt><dd>A learned number scaling one connection.</dd>
     </dl>
 
-    <h2 id="e-read">18. Where to go next</h2>
+    <h2 id="e-read">19. Where to go next</h2>
     <ul class="essay-ref">
       <li>Michael Nielsen, <em>Neural Networks and Deep Learning</em>: a free online book that builds up exactly the material in sections 3 to 8, with code.</li>
       <li>3Blue1Brown, the video series on neural networks: the clearest visual introduction to the forward pass, gradient descent and backpropagation.</li>
@@ -386,37 +436,98 @@ a = f(z)</div>
 
 <script type="module">
 import { NeuralEngine } from '/assets/js/neural/engine.js';
+import { InstrumentEngine } from '/assets/js/neural/synth-engine.js';
+import { WAVES, WAVE_NAMES, INPUT_LABELS } from '/assets/js/neural/synth.js';
+import { setInspectMode } from '/assets/js/neural/inspect.js';
 import { draw } from '/assets/js/neural/draw.js';
-import { mountUI, mountReference } from '/assets/js/neural/ui.js';
+import { mountUI, mountReference, plotCycle } from '/assets/js/neural/ui.js';
 const NOTE = ['C','C♯','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
 const $ = id => document.getElementById(id), cv = $('nnCanvas');
-let seed = Math.floor(Math.random() * 1e6), t0 = 0, last = null, frame = 0;
+let seed = Math.floor(Math.random() * 1e6), t0 = 0, last = null, frame = 0, mode = 'inst';
 const state = { sel: null };
 let ui = null;
-const engine = new NeuralEngine({ seed, volume: 0.6, onFrame: s => { last = s; paint(); frame++; if (frame % 3 === 0 && ui) ui.refresh(); } });
+const onFrame = s => { last = s; paint(); frame++; if (frame % 3 === 0 && ui) ui.refresh(); };
+const playEng = new NeuralEngine({ seed, volume: 0.6, onFrame: s => { if (mode === 'play') onFrame(s); } });
+const instEng = new InstrumentEngine({ seed, volume: 0.6, onFrame: s => { if (mode === 'inst') onFrame(s); } });
+let engine = instEng;
+const host = { get conductor() { return engine.conductor; }, get mode() { return mode; }, get a() { return instEng.a; }, get b() { return instEng.b; }, get phase() { return instEng.phase; },
+  set: o => engine.set(o), setLevel: (v, x) => engine.setLevel(v, x) };
 const status = a => { $('nnLog').textContent = a; };
 const params = net => net.W.reduce((n, L, l) => n + L.reduce((m, row, j) => m + row.reduce((k, w, i) => k + net.M[l][j][i], 0) + 1, 0), 0);
+const hz = v => 55 * Math.pow(16, v), noteName = f => { const n = Math.round(12 * Math.log2(f / 440)) + 69; return NOTE[((n % 12) + 12) % 12] + (Math.floor(n / 12) - 1); };
+function paintInstrument() {
+  const e = instEng; if (!e.cycle) return;
+  const sc = $('nnScope'), tgt = e.teaching ? Float32Array.from({ length: 128 }, (_, k) => WAVES[e.teaching.wave](k / 127)) : null;
+  plotCycle(sc, e.cycle, e.phase, tgt);
+  const sp = $('nnSpec'), dpr = window.devicePixelRatio || 1, w = sp.clientWidth || 300, h = sp.clientHeight || 130; sp.width = Math.round(w * dpr); sp.height = Math.round(h * dpr);
+  const g = sp.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
+  const hs = e.harm || [], mx = Math.max(0.3, ...hs), bw = w / 24;
+  hs.forEach((v, k) => { const bh = (v / mx) * (h - 18); g.fillStyle = '#2a5c45'; g.fillRect(k * bw + 1, h - 14 - bh, bw - 2, bh); if (k % 3 === 0) { g.fillStyle = '#6b6b6b'; g.font = '9px sans-serif'; g.fillText(k + 1, k * bw + 2, h - 3); } });
+  const t = e.teaching; $('nnTeachStatus').textContent = t ? `Teaching ${t.wave}… error ${t.loss == null ? '–' : t.loss.toFixed(3)}` : $('nnTeachStatus').textContent;
+}
 function paint() {
   const c = engine.conductor, s = last || { acts: c.lastActs };
-  draw(cv, c.net, s.acts, c.lossNow, state.sel);
-  $('nnLoss').textContent = c.lossNow.toFixed(3); $('nnKey').textContent = `${NOTE[c.root]} ${c.mode}`; $('nnEpisode').textContent = c.episode; $('nnParams').textContent = params(c.net);
+  draw(cv, c.net, s.acts || c.lastActs, c.lossNow, state.sel, mode === 'inst' ? { layers: ['input: where in the cycle', 'hidden 1', 'hidden 2', 'output: the sound'], inputs: INPUT_LABELS, outputs: ['left', 'right', '', '', '', '', '', ''] } : {});
+  $('nnLoss').textContent = c.lossNow.toFixed(3); $('nnParams').textContent = params(c.net);
+  if (mode === 'play') { $('nnKey').textContent = `${NOTE[c.root]} ${c.mode}`; $('nnEpisode').textContent = c.episode; if (ui) ui.syncKey(); } else paintInstrument();
   if (engine.running) { const sec = Math.floor((performance.now() - t0) / 1000); $('nnTime').textContent = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`; }
-  if (ui) ui.syncKey();
 }
-ui = mountUI({ engine, canvas: cv, state, onSelect: () => paint() });
+ui = mountUI({ engine: host, canvas: cv, state, onSelect: () => paint() });
 mountReference($('nnRef'));
 const play = $('nnPlay');
+const startLabel = () => (mode === 'inst' ? 'Start sound' : 'Start listening');
 play.onclick = async () => {
-  if (engine.running) { engine.pause(); play.textContent = 'Resume'; status('Paused. The network is still there, just not running. You can still look around and change things.'); return; }
-  t0 = performance.now(); play.textContent = 'Pause'; status('Listening. At first it is rough while it works out its first chord. Give it a minute, and try selecting a neuron.');
-  await (engine.ctx ? engine.resume() : engine.start());
+  if (engine.running) { await engine.pause(); play.textContent = 'Resume'; status('Paused. The network is still there, just not running. You can still look around and change things.'); return; }
+  t0 = performance.now(); play.textContent = 'Pause';
+  status(mode === 'inst' ? 'The sound is on, but the instrument is silent until you play a note: press a key below, or hold the note. Then select a neuron and change something.' : 'Listening. At first it is rough while it works out its first chord. Give it a minute, and try selecting a neuron.');
+  try { await (engine.ctx ? engine.resume() : engine.start()); } catch (e) { status('The browser would not start audio here: ' + (e && e.message || e)); play.textContent = startLabel(); }
 };
-$('nnNew').onclick = () => { seed = Math.floor(Math.random() * 1e6); engine.reseed(seed); ui.redraw(); ui.choose(null); play.textContent = 'Pause'; t0 = performance.now(); status('A new network with different random weights. It knows nothing yet.'); };
+$('nnNew').onclick = async () => {
+  seed = Math.floor(Math.random() * 1e6); engine.reseed(seed); ui.redraw(); ui.choose(null); last = null; paint();
+  status(mode === 'inst' ? 'A new network with new random weights. Every network of this shape makes a different wave.' : 'A new network with different random weights. It knows nothing yet.');
+  if (!engine.running) { play.textContent = 'Pause'; t0 = performance.now(); await (engine.ctx ? engine.resume() : engine.start()); }
+};
+function setMode(m) {
+  if (m === mode) return;
+  if (engine.running) engine.pause(); mode = m; engine = m === 'inst' ? instEng : playEng; setInspectMode(m); last = null;
+  $('modeInst').setAttribute('aria-pressed', String(m === 'inst')); $('modePlay').setAttribute('aria-pressed', String(m === 'play'));
+  $('instPanel').hidden = m !== 'inst'; document.querySelectorAll('.play-only').forEach(e => { e.hidden = m === 'inst'; });
+  $('nnKey').parentElement.hidden = $('nnEpisode').parentElement.hidden = m === 'inst';
+  if (m === 'inst' && $('tabSound').getAttribute('aria-selected') === 'true') $('tabNeuron').click();
+  play.textContent = startLabel(); ui.redraw(); ui.choose(null); paint();
+  status(m === 'inst' ? 'Instrument mode: the network is the oscillator. Press Start sound, then play a note.' : 'Self-playing mode: the network keeps learning and composes as it goes.');
+}
+$('modeInst').onclick = () => setMode('inst'); $('modePlay').onclick = () => setMode('play');
+
+// ── the instrument ──
+const keys = $('nnKeys'), KEYMAP = 'awsedftgyhujk', pressed = new Set();
+const keyHz = k => 130.81 * Math.pow(2, k / 12);                 // C3 upward
+for (let k = 0; k < 13; k++) { const b = document.createElement('button'); b.type = 'button'; b.className = [1, 3, 6, 8, 10].includes(k % 12) ? 'black' : ''; b.textContent = KEYMAP[k].toUpperCase(); b.setAttribute('aria-label', 'Play ' + noteName(keyHz(k))); b.dataset.k = k; keys.append(b); }
+async function ensureOn() { if (!instEng.running) await play.onclick(); }
+async function down(k) { await ensureOn(); pressed.add(k); instEng.noteOn(keyHz(k)); $('nnPitch').value = Math.log(keyHz(k) / 55) / Math.log(16); $('nnPitchV').textContent = `${Math.round(keyHz(k))} Hz · ${noteName(keyHz(k))}`; keys.children[k].classList.add('on'); }
+function up(k) { pressed.delete(k); keys.children[k].classList.remove('on'); if (!pressed.size) instEng.noteOff(); }
+keys.addEventListener('pointerdown', e => { const b = e.target.closest('button'); if (b) { e.preventDefault(); down(+b.dataset.k); } });
+addEventListener('pointerup', () => [...pressed].forEach(up));
+addEventListener('keydown', e => { if (mode !== 'inst' || e.repeat || e.ctrlKey || e.metaKey || e.altKey || /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return; const k = KEYMAP.indexOf(e.key.toLowerCase()); if (k >= 0) { e.preventDefault(); down(k); } });
+addEventListener('keyup', e => { const k = KEYMAP.indexOf(e.key.toLowerCase()); if (k >= 0 && pressed.has(k)) up(k); });
+const slide = (id, fn, fmt) => { const el = $(id), out = $(id + 'V'); const run = () => { const v = +el.value; fn(v); if (out) out.textContent = fmt(v); }; el.oninput = run; run(); };
+slide('nnPitch', v => instEng.setPitch(hz(v)), v => `${Math.round(hz(v))} Hz · ${noteName(hz(v))}`);
+slide('nnKnobA', v => instEng.setKnobs({ a: v }), v => v.toFixed(2)); slide('nnKnobB', v => instEng.setKnobs({ b: v }), v => v.toFixed(2));
+slide('nnWob', v => instEng.setKnobs({ wob: v }), v => v.toFixed(2)); slide('nnWobRate', v => instEng.setKnobs({ wobRate: v }), v => `${v.toFixed(1)} Hz`);
+$('nnSweep').onchange = e => { instEng.sweep = e.target.checked; };
+$('nnPhase').oninput = e => { $('nnSweep').checked = instEng.sweep = false; instEng.phase = +e.target.value; $('nnPhaseV').textContent = (+e.target.value).toFixed(2); instEng.tickNow(); paint(); ui.refresh(); };
+$('nnHoldNote').onchange = async e => { if (e.target.checked) await ensureOn(); instEng.setHold(e.target.checked); };
+$('nnGainUp').onclick = () => { instEng.scale(1.25); status('Every weight made 25% larger: neurons are driven harder, so the wave bends more and gains harmonics.'); };
+$('nnGainDown').onclick = () => { instEng.scale(0.8); status('Every weight made 20% smaller: the wave relaxes toward something simpler and quieter.'); };
+$('nnTeachWave').replaceChildren(...WAVE_NAMES.map(n => Object.assign(document.createElement('option'), { value: n, textContent: n })));
+$('nnTeach').onclick = async () => { await ensureOn(); instEng.teach($('nnTeachWave').value); status(`Showing the network a ${$('nnTeachWave').value} wave, over and over, and nudging every weight toward it. Watch the solid wave move toward the dashed one.`); };
+
 addEventListener('resize', paint); paint();
-// while paused the picture still follows selections and edits
-setInterval(() => { if (!engine.running) { paint(); ui.refresh(); } }, 500);
+setInterval(() => { if (!engine.running) { if (mode === 'inst') instEng.tickNow(); last = null; paint(); ui.refresh(); } }, 500);
 if (window.silAudio?.mediaSession) window.silAudio.mediaSession({ title: 'Neural Synthesis', play: () => engine.running || play.click(), pause: () => engine.running && play.click() });
-window.__nn = engine; window.__nnui = ui;
+document.querySelectorAll('.play-only').forEach(e => { e.hidden = true; }); $('nnKey').parentElement.hidden = $('nnEpisode').parentElement.hidden = true; $('instPanel').hidden = false; setInspectMode('inst'); ui.redraw(); ui.choose(null); paint();
+window.__nn = playEng; window.__inst = instEng; window.__nnui = ui; window.__nnmode = () => mode; window.__setMode = setMode;
 </script>
+
 </body>
 </html>

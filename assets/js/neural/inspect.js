@@ -8,7 +8,16 @@ export const LAYER_NAMES = ['Input', 'Hidden 1', 'Hidden 2', 'Output'];
 const DEG = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th'];
 
 /** Which kind of neuron this is, and what its number does in the sound. */
+let MODE = 'play';
+export const setInspectMode = m => { MODE = m; };
+const IN_LAB = ['sin φ', 'cos φ', 'sin 2φ', 'cos 2φ', 'knob A', 'knob B'];
+function instrumentRole(net, layer, i) {
+  if (layer === 0) return { type: 'Input neuron', short: `input ${i + 1}: ${IN_LAB[i]}`, sound: i < 4 ? `Where we are in one cycle of the wave. φ (phi) runs from 0 to 1 and then starts again, many times a second (the pitch). This input is ${IN_LAB[i]}: a smooth wave of φ, so the network can tell every point in the cycle apart and the output joins up at the seam.` : `A knob you control (${i === 4 ? 'A' : 'B'}). Turn it and every neuron that listens to it changes, so the whole waveform bends. This is how an instrument gets a knob: not by filtering a fixed sound, but by giving the function another input.` };
+  if (layer === net.sizes.length - 1) return i < 2 ? { type: 'Output neuron (sound)', short: `output ${i + 1}: ${i ? 'right' : 'left'} speaker`, sound: `The sound itself. At every instant, 48,000 times a second, the network computes this neuron's value from the current φ, and that number is the position of the speaker cone. Nothing else is added to it.` } : { type: 'Output neuron (unused)', short: `output ${i + 1}: not used here`, sound: 'In Instrument mode only the first two outputs (left and right speaker) make sound. This one is computed but ignored.' };
+  return { type: 'Hidden neuron', short: `hidden ${layer}, neuron ${i + 1}`, sound: `One building block of the wave. Its activation changes as φ sweeps round the cycle, and the neurons after it combine many such shapes. The graph "over one cycle" below shows what this neuron contributes. Change its function, its weights or its bias and watch how the output wave and its harmonics change.` };
+}
 export function roleOf(net, layer, i) {
+  if (MODE === 'instrument') return instrumentRole(net, layer, i);
   const last = net.sizes.length - 1;
   if (layer === 0) return { type: 'Input neuron', short: `input ${i + 1}`, sound: 'An input does not make sound itself. It is one coordinate of a point that wanders slowly through space and never repeats. Every other neuron is ultimately listening to these six numbers.' };
   if (layer === 1) return { type: 'Hidden neuron', short: `hidden 1, neuron ${i + 1}`, sound: `Its activation sets the loudness of harmonic number ${[1, 2, 3, 4, 5, 6, 8, 9, 10, 12, 15, 16, 18, 20, 24, 27][i]} of the drone. Louder means the network is more strongly responding to its inputs in this way.` };
