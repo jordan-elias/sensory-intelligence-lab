@@ -84,3 +84,7 @@
 .th-tone { position: relative; height: 6px; background: linear-gradient(90deg, #b4532a33, #ddd, #2a5c4533); border-radius: 3px; margin: .4rem 0; max-width: 220px; }
 .th-tone-bar { position: absolute; top: -3px; width: 4px; height: 12px; background: #222; border-radius: 2px; transform: translateX(-2px); }
 .th-danger { margin: 1rem 0; padding: 1rem; border: 1px solid var(--border); }
+.th-spark { width: 170px; height: 30px; display: block; } .th-emos { display: flex; flex-wrap: wrap; gap: 1rem 1.6rem; margin: .4rem 0 1rem; }
+.th-trend { margin: .5rem 0; } .th-life { list-style: none; padding: 0; margin: 0; border-left: 2px solid var(--border); }
+.th-life-row { padding: .6rem 0 .6rem 1rem; position: relative; } .th-life-row::before { content: ""; position: absolute; left: -6px; top: 1rem; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+.th-life-when { font: 600 .85rem var(--font-heading); }

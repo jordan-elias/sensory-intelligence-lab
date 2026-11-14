@@ -69,3 +69,44 @@ test('intake and family history become entries; contact details stay out; people
   const f = familyEntry(fam); assert.match(f.text, /\[\[Anna\]\], \(Mother\), living\./); assert.deepEqual(parseNote(f.text).links.map(l => l.name), ['Anna']);
   assert.deepEqual(familyPeople(fam), [{ name: 'Anna', relationship: 'Mother' }]); assert.equal(familyEntry({ doc: { overview: '', members: [] } }), null);
 });
+
+import { bigrams, termSeries, shifts, emotionSeries, wordsAround } from '../../assets/js/notes/analysis.js';
+import { related } from '../../assets/js/notes/graph.js';
+import { lifeEvents, lifeLanes, birthYearOf } from '../../assets/js/notes/life.js';
+test('phrases: adjacent content words, not across stop words', () => {
+  const b = bigrams(['panic attacks before work', 'more panic attacks at night', 'the work of panic'], 5);
+  assert.equal(b[0].phrase, 'panic attacks'); assert.equal(b[0].count, 2); assert.ok(!b.find(x => x.phrase === 'panic work'));
+});
+test('a word or phrase can be followed through the record', () => {
+  const t = ['panic attacks started', 'no panic this week', 'panic attacks again, panic attacks worse'];
+  assert.deepEqual(termSeries(t, 'panic'), [1, 1, 2]); assert.deepEqual(termSeries(t, 'panic attacks'), [1, 0, 2]); assert.deepEqual(termSeries(t, 'xyz'), [0, 0, 0]);
+});
+test('rising and fading words compare the recent entries with the earlier ones', () => {
+  const t = ['sleep sleep worry', 'sleep worry', 'worry sleep', 'walking garden friends', 'walking friends calm', 'garden walking'];
+  const s = shifts(t, { minTotal: 3 }); assert.ok(s.rising.some(r => r.term === 'walking')); assert.ok(s.fading.some(r => r.term === 'sleep')); assert.deepEqual(shifts(['a b', 'c d'], {}), { rising: [], fading: [] });
+});
+test('emotion wording by entry, as a series', () => {
+  const e = emotionSeries(['sad and lonely', 'calm and happy']); assert.ok(e.sadness[0] > 0 && e.sadness[1] === 0 && e.joy[1] > 0 && e.calm[1] > 0);
+});
+test('words around a topic are the ones that go with it', () => {
+  const texts = ['mother critical perfect homework', 'mother critical dinner', 'garden walking sunshine', 'garden sunshine friends'];
+  const w = wordsAround(texts, [true, true, false, false], 3).map(x => x.word); assert.ok(w.includes('critical') && !w.includes('garden'));
+});
+test('what an item travels with: other items and the words around it', () => {
+  const r = related(NOTES, 'Mother'); assert.equal(r.mentions, 2); assert.ok(r.together.some(x => x.name === 'perfectionism')); assert.ok(r.together[0].sessions >= 1);
+});
+test('the life timeline fills itself in from years, ages and stages', () => {
+  const en = [{ id: 'n1', date: '2026-02-01', source: 'note', text: 'Her parents divorced in 2005 when she was 9. Moved to Berlin in 2019 with [[Dad]]. As a teenager she stopped playing music. Cried at age 14, in the move too.' }];
+  const ev = lifeEvents(en, { birthYear: 1996, family: [{ name: 'Anna', relationship: 'Mother', born: '1966' }] });
+  const find = t => ev.find(e => e.text.includes(t));
+  assert.equal(find('divorced').age, 9); assert.equal(ev.filter(e => e.text.includes('divorced')).map(e => e.year).sort().join(), '2005,2005');
+  assert.equal(find('Moved to Berlin').year, 2019); assert.equal(find('Moved to Berlin').age, 23);
+  assert.equal(ev.find(e => e.kind === 'stage' && e.text.includes('teenager')).stage, 'Teenage years');
+  assert.deepEqual(find('Moved to Berlin').people, ['Dad']); assert.ok(ev.find(e => e.text === 'Born' && e.year === 1996)); assert.ok(ev.find(e => /Anna.*born/.test(e.text) && e.year === 1966));
+  assert.ok(ev.map(e => e.year).every((y, i, a) => i === 0 || y >= a[i - 1]), 'in time order');
+});
+test('without a birth year, ages stay in their own lane and nothing is invented', () => {
+  const ev = lifeEvents([{ id: 'n', date: '2026-01-01', text: 'At age 7 the family moved. In 2019 things changed. Weather was nice.' }]);
+  const l = lifeLanes(ev); assert.equal(l.dated.length, 1); assert.equal(l.byAge.length, 1); assert.equal(l.byAge[0].age, 7); assert.equal(ev.length, 2);
+  assert.equal(birthYearOf('1994-05-02'), 1994); assert.equal(birthYearOf('soon'), null);
+});

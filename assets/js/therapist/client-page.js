@@ -14,8 +14,7 @@ import { splitSessions, describe } from './sessions.js';
 import { toRows, renderRows, worksheetLabel } from './doc-render.js';
 import { makeNotesStore } from './notes.js';
 import { mountRecord } from './record.js';
-import { intakeEntry, familyEntry, familyPeople } from '../notes/entries.js';
-import { openIntake, renderIntake, INTAKE_FIELDS } from '../intake/intake.js';
+import { openIntake, renderIntake } from '../intake/intake.js';
 import { openFamily, renderFamily } from '../family/family.js';
 
 const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
@@ -166,6 +165,9 @@ export async function mountClientPage(root) {
     } catch (e) { sharedMounted = false; box.innerHTML = `<p class="msg show error">${esc(e.message)}</p>`; }
   }
 
+  // Whatever the therapist opens from the client is also copied into their own encrypted record, so it survives if the client leaves or deletes their account.
+  const keepCopy = (session, kind, data) => makeNotesStore(sb, session).keep(client.client_id, kind, data).catch(() => {});
+
   // ── Intake ──
   let intakeMounted = false;
   async function showIntake() {
@@ -193,7 +195,7 @@ export async function mountClientPage(root) {
         return;
       }
       try {
-        const session = await ensureVaultReady(), fam = await openFamily(session, { ...fcopy, link_id: linkId });
+        const session = await ensureVaultReady(), fam = await openFamily(session, { ...fcopy, link_id: linkId }); keepCopy(session, 'family', fam);
         const sec = document.createElement('section'); sec.style.marginTop = '2rem'; sec.id = 'familySection';
         sec.innerHTML = `<h2 class="th-h2">Family history</h2><p class="th-hint">Sent by ${esc(name)}${fam.sent_at ? ' on ' + esc(day(fam.sent_at)) : ''}. Optional, and only you and the client can read it.</p>`;
         sec.appendChild(renderFamily(document, fam)); box.appendChild(sec);
@@ -206,7 +208,7 @@ export async function mountClientPage(root) {
         box.innerHTML = '<p class="th-muted">Opening…</p>';
         try {
           const session = await ensureVaultReady();
-          const intake = await openIntake(session, { ...copy, link_id: linkId });
+          const intake = await openIntake(session, { ...copy, link_id: linkId }); keepCopy(session, 'intake', intake); keepCopy(session, 'profile', { name });
           box.innerHTML = `<p class="th-hint">Sent by ${esc(name)}${intake.submitted_at ? ' on ' + esc(day(intake.submitted_at)) : ''}. Only you and the client can read this.</p>`;
           box.appendChild(renderIntake(document, intake));
           await appendFamily();
@@ -237,8 +239,7 @@ export async function mountClientPage(root) {
       // The intake form and family history join the record, so everything about this client is in one place. Opened here, read here.
       const open = async (cat, fn) => { const c = copies.find(x => x.category === cat); if (!c) return null; try { return await fn(session, { ...c, link_id: linkId }); } catch { return null; } };
       const [intake, fam] = await Promise.all([open('intake', openIntake), open('family', openFamily)]);
-      await mountRecord(box, { store: makeNotesStore(sb, session), clientId: client.client_id, clientName: name, active,
-        extras: [intakeEntry(intake, INTAKE_FIELDS), familyEntry(fam)].filter(Boolean), people: familyPeople(fam),
+      await mountRecord(box, { store: makeNotesStore(sb, session), clientId: client.client_id, clientName: name, active, intake, fam, profile: { name },
         sharedDates: copies.filter(c => c.category === 'checkins').map(c => c.source_created_at).filter(Boolean) });
     } catch (e) { notesMounted = false; box.innerHTML = `<p class="msg show error">${esc(e.message)}</p>`; }
   }

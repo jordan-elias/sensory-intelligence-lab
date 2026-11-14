@@ -103,9 +103,9 @@ export async function mountFamily(root) {
     } }, info ? `Send the current version to ${name}` : `Send to ${name}`);
     share.append(h('strong', {}, info ? `${name} has a copy` : `Not sent to ${name}`),
       info ? `You sent it on ${day(info.sent_at)}. Later changes stay private until you send again. ` : 'Nothing is sent unless you press the button. ',
-      `If you send it, only you and ${name} can read it. It is encrypted on your device first, so we cannot read it either.`, h('div', { class: 'fh-actions' }, send,
+      `If you send it, only you and ${name} can read it. It is encrypted on your device first, so we cannot read it either.${' Your therapist keeps their own encrypted record of what you send, as a clinic would with a paper form. That record is private to them and stays with them if you end the connection or delete your account.'}`, h('div', { class: 'fh-actions' }, send,
         info ? h('button', { type: 'button', class: 'action-btn action-btn--quiet', id: 'fhWithdraw', onclick: async () => {
-          if (!confirm(`Remove ${name}'s copy? They will no longer be able to read it. Your own copy stays.`)) return;
+          if (!confirm(`Remove ${name}'s copy? They will no longer see it here. If they already saved it in their own private record, that record stays with them. Your own copy stays.`)) return;
           try { await withdrawFamily(sb, link.link_id); await drawShare(); } catch (e) { msg.textContent = e.message; msg.className = 'msg show error'; }
         } }, 'Take it back') : null), msg);
   }

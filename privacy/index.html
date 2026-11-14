@@ -410,7 +410,7 @@ The table covers every category of data the platform stores. Anything you downlo
 <tr><td>Worksheets</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You. Your therapist, only for the individual worksheets you share.</td></tr>
 <tr><td>Audio recordings and compositions (audio, title, length)</td><td class="td-mono">Private file storage</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You only. Files are never at public links.</td></tr>
 <tr><td>Messages with your therapist</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You and your therapist only.</td></tr>
-<tr><td>A therapist’s private notes about a client</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>The therapist who wrote them only. They stay with the therapist if a connection ends, and are removed if the client deletes their account.</td></tr>
+<tr><td>A therapist’s private notes about a client</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>The therapist who wrote them only. They stay with the therapist if a connection ends or if the client deletes their account, and the therapist chooses when to delete them.</td></tr>
 <tr><td>Items you share with a therapist</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You and that therapist only.</td></tr>
 <tr><td>Your public sharing and signing keys</td><td class="td-mono">Database</td><td><span class="badge badge--plain">Plaintext</span></td><td>Visible to the platform. Used so others can encrypt to you and verify your messages. Not secret.</td></tr>
 <tr><td>Your protected vault bundle</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>Only your passphrase or recovery key can open it.</td></tr>
@@ -612,7 +612,7 @@ Health-related data under Article 9 is processed with your explicit consent.
 <p class="prose">
 You can delete your account yourself from the <a href="/account/">Account page</a>. It takes effect straight away and
 removes your login, your profile, all of your saved content, your recordings and files, your keys, your messages and
-shared items (including the copies held by a therapist), your booking records and your therapist connections. It also
+shared items (the copies held for a therapist on the platform), your booking records and your therapist connections. It also
 cancels your subscription immediately.
 </p>
 <p class="prose">
@@ -622,7 +622,7 @@ to keep, and Supabase's backups are cleared on their own schedule. Your encrypte
 <div class="callout callout--amber">
 <span class="callout__label">Important</span>
 Deletion is permanent and cannot be undone. Download anything you want to keep first. If you are connected to a
-therapist, that therapist's copies of what you shared are deleted too, and your message history with them is deleted for both of you.
+therapist, your message history with them is deleted for both of you, and what you shared is removed from the platform. A therapist's own private notes, and the record they keep of your intake form and family history (as a clinic keeps a paper file), belong to the therapist: they are encrypted so we cannot read them, they are not deleted with your account, and the therapist decides how long to keep them. To ask a therapist for a copy of your records, or to ask them to delete them, contact the therapist directly.
 You can also request deletion by writing to <a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a>.
 </div>
 </section>

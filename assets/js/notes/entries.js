@@ -30,3 +30,10 @@ export function familyEntry(fam) {
 export function familyPeople(fam) {
   return (fam?.doc?.members || []).map(m => ({ name: clean(m.name) || clean(m.relationship), relationship: clean(m.relationship) })).filter(p => p.name);
 }
+
+/** The whole intake form as text, every answer the client gave (including contact details), for the therapist's own export. */
+export function intakeFull(intake, defs) {
+  const f = intake?.fields || {}, lines = [];
+  for (const d of defs || []) if (f[d.key]) lines.push(`**${d.short || d.label}:** ${String(f[d.key]).trim()}`);
+  return lines.length ? lines.join('\n\n') : '';
+}

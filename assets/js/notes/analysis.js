@@ -99,3 +99,40 @@ export function suggestThemes(text, minHits = 2) {
   for (const [k, r] of Object.entries(themeRx)) { const hits = w.filter(t => r.test(t)); if (hits.length >= minHits) out.push({ theme: k, hits: hits.length, words: [...new Set(hits)].slice(0, 6) }); }
   return out.sort((a, b) => b.hits - a.hits);
 }
+
+// ── phrases, change over time, and what travels together ──
+/** Two-word phrases that sit next to each other in the text (not across a stop word), most frequent first. `notes` are strings. */
+export function bigrams(notes, n = 15, { minCount = 2 } = {}) {
+  const m = new Map();
+  for (const t of notes) { const w = tokenize(t), seen = new Set(); for (let i = 0; i + 1 < w.length; i++) { const a = w[i], b = w[i + 1]; if (a.length < 3 || b.length < 3 || STOP.has(a) || STOP.has(b) || /^\d+$/.test(a + b)) continue; const k = a + ' ' + b; m.set(k, (m.get(k) || 0) + 1); seen.add(k); } }
+  return [...m].filter(([, c]) => c >= minCount).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, n).map(([phrase, count]) => ({ phrase, count }));
+}
+
+/** How often a word or phrase appears in each text, in order: a series to draw as a line. */
+export function termSeries(notes, term) {
+  const t = term.toLocaleLowerCase();
+  return notes.map(x => { const w = tokenize(x); if (!t.includes(' ')) return w.filter(a => a === t || (t.length > 4 && a.startsWith(t))).length; return w.slice(0, -1).filter((a, i) => a + ' ' + w[i + 1] === t).length; });
+}
+
+/** Words and phrases that are rising or fading: the last third of the entries against the first two thirds, per entry. Needs at least 4 entries. */
+export function shifts(notes, { n = 6, minTotal = 3 } = {}) {
+  if (notes.length < 4) return { rising: [], fading: [] };
+  const cut = Math.max(1, Math.round(notes.length * 2 / 3)), early = notes.slice(0, cut), late = notes.slice(cut);
+  const tally = list => { const m = new Map(); for (const t of list) { for (const [w, c] of counts(t)) m.set(w, (m.get(w) || 0) + c); for (const { phrase, count } of bigrams([t], 99, { minCount: 1 })) m.set(phrase, (m.get(phrase) || 0) + count); } return m; };
+  const a = tally(early), b = tally(late), all = new Set([...a.keys(), ...b.keys()]), rows = [];
+  for (const k of all) { const ca = a.get(k) || 0, cb = b.get(k) || 0; if (ca + cb < minTotal) continue; const ra = ca / early.length, rb = cb / late.length; rows.push({ term: k, early: ca, late: cb, change: rb - ra }); }
+  const up = rows.filter(r => r.change > 0).sort((x, y) => y.change - x.change || x.term.localeCompare(y.term)).slice(0, n), down = rows.filter(r => r.change < 0).sort((x, y) => x.change - y.change || x.term.localeCompare(y.term)).slice(0, n);
+  return { rising: up, fading: down };
+}
+
+/** Emotion words per 100 words in each text, as a series for each family: how the wording changes across the record. */
+export function emotionSeries(notes) { const rows = notes.map(emotions); return Object.fromEntries(Object.keys(EMOTIONS).map(k => [k, rows.map(r => r[k])])); }
+
+/** Words that are more common in the entries that mention something than in those that do not (smoothed ratio), for "the words around this". */
+export function wordsAround(texts, mentions, n = 8) {
+  const withT = [], without = []; texts.forEach((t, i) => (mentions[i] ? withT : without).push(t));
+  if (!withT.length) return [];
+  const a = new Map(), b = new Map(); for (const t of withT) for (const [w, c] of counts(t)) a.set(w, (a.get(w) || 0) + c); for (const t of without) for (const [w, c] of counts(t)) b.set(w, (b.get(w) || 0) + c);
+  const na = [...a.values()].reduce((x, y) => x + y, 0) || 1, nb = [...b.values()].reduce((x, y) => x + y, 0) || 1;
+  return [...a].filter(([, c]) => c >= 2 || !without.length).map(([w, c]) => ({ word: w, count: c, lift: (c / na) / (((b.get(w) || 0) + 0.5) / (nb + 0.5 * a.size)) })).sort((x, y) => y.lift - x.lift || y.count - x.count || x.word.localeCompare(y.word)).slice(0, n);
+}

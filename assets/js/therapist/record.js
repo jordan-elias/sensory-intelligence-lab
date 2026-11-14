@@ -6,10 +6,13 @@
  * this browser; nothing is sent to a server or to any model.
  */
 import { parseNote, keyOf } from '../notes/parse.js';
-import { recurring, suggestThemes, THEME_SEEDS } from '../notes/analysis.js';
-import { items, backlinks, matrix, graph, notRevisited, timeline, toMarkdown, ordered } from '../notes/graph.js';
+import { recurring, suggestThemes, bigrams, shifts, emotionSeries, termSeries } from '../notes/analysis.js';
+import { items, backlinks, matrix, graph, notRevisited, timeline, toMarkdown, ordered, related } from '../notes/graph.js';
+import { lifeEvents, lifeLanes, birthYearOf } from '../notes/life.js';
+import { intakeEntry, familyEntry, familyPeople, intakeFull } from '../notes/entries.js';
+import { INTAKE_FIELDS } from '../intake/intake.js';
 
-const VIEWS = [['notes', 'Notes'], ['map', 'Map'], ['themes', 'Themes'], ['timeline', 'Timeline'], ['brief', 'Before a session'], ['records', 'Export and delete']];
+const VIEWS = [['notes', 'Notes'], ['map', 'Map'], ['themes', 'Themes'], ['timeline', 'Timeline'], ['life', 'Life story'], ['brief', 'Before a session'], ['records', 'Export and delete']];
 const today = () => new Date().toISOString().slice(0, 10);
 const longDate = d => { const t = new Date(d + 'T12:00:00'); return isNaN(t) ? String(d) : t.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }); };
 const SOURCE = { intake: 'From the intake form', family: 'From the family history' };
@@ -41,9 +44,18 @@ function download(name, text, type = 'text/markdown') {
   const a = h('a', { href: URL.createObjectURL(new Blob([text], { type: type + ';charset=utf-8' })), download: name }); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
 
-export async function mountRecord(box, { store, clientId, clientName, extras = [], people = [], sharedDates = [], active = true, onDeleted = () => {} }) {
-  let notes = [], view = 'notes', panel = null, filter = '';
-  const load = async () => { notes = (await store.list(clientId)).map(n => ({ ...n, source: 'note' })); };
+export async function mountRecord(box, { store, clientId, clientName, intake = null, fam = null, profile = null, sharedDates = [], active = true, onDeleted = () => {} }) {
+  let notes = [], view = 'notes', panel = null, filter = '', intakeD = null, famD = null, extras = [], people = [], kept = false;
+  const load = async () => {
+    const rows = await store.list(clientId), arch = k => rows.find(r => r.kind === k)?.data || null;
+    notes = rows.filter(n => n.kind === 'note').map(n => ({ ...n, source: 'note' }));
+    intakeD = intake || arch('intake'); famD = fam || arch('family');
+    extras = [intakeEntry(intakeD, INTAKE_FIELDS), familyEntry(famD)].filter(Boolean); people = familyPeople(famD);
+  };
+  // What the client sent, and who they are, is copied into the therapist's own encrypted record, so it stays if the client leaves or deletes their account.
+  const keepCopies = async () => {
+    try { let any = false; if (intake) any = (await store.keep(clientId, 'intake', intake)) || any; if (fam) any = (await store.keep(clientId, 'family', fam)) || any; if (profile?.name) any = (await store.keep(clientId, 'profile', { name: profile.name })) || any; kept = intake || fam || profile ? true : false; return any; } catch { return false; }
+  };
   const entries = () => [...notes.filter(n => n.text != null), ...extras.filter(Boolean)].map(n => ({ ...n, date: n.date || today() }));
   const say = (t, kind) => { const m = box.querySelector('#recMsg'); if (m) { m.textContent = t; m.className = 'msg show ' + (kind || ''); } };
   const noData = txt => h('p', { class: 'th-muted' }, txt);
@@ -54,6 +66,9 @@ export async function mountRecord(box, { store, clientId, clientName, extras = [
     const wrap = h('aside', { class: 'th-about', id: 'recAbout', tabindex: '-1', 'aria-label': 'Everything about ' + name }, h('h3', { class: 'th-h3' }, name),
       back.length ? h('ul', { class: 'th-list' }, back.map(b => h('li', {}, h('span', { class: 'th-muted' }, longDate(b.date) + ' · '), b.context))) : noData('Not mentioned yet.'),
       btn('Close', () => wrap.remove(), 'action-btn sm outline'));
+    const rel = related(entries(), name);
+    if (rel.together.length) wrap.insertBefore(h('p', { class: 'th-hint' }, 'Comes up with: ', rel.together.slice(0, 8).map((t, i) => [i ? ', ' : '', h('button', { type: 'button', class: 'th-link', onclick: () => openAbout(t.name) }, t.name), ` (${t.sessions}${t.close ? `, ${t.close} in the same sentence` : ''})`])), wrap.querySelector('ul,p.th-muted'));
+    if (rel.around.length) wrap.insertBefore(h('p', { class: 'th-hint' }, 'Words around it: ' + rel.around.map(w => w.word).join(', ')), wrap.querySelector('ul,p.th-muted'));
     panel.prepend(wrap); wrap.focus();
   }
 
@@ -124,6 +139,16 @@ export async function mountRecord(box, { store, clientId, clientName, extras = [
     const quiet = notRevisited(all);
     panel.append(h('h2', { class: 'th-h2' }, 'Not brought up lately'), quiet.length ? h('ul', { class: 'th-list' }, quiet.map(q => h('li', {}, h('button', { type: 'button', class: 'th-link', onclick: () => openAbout(q.name) }, q.name), ` came up ${q.mentions} times, last on ${longDate(q.last)}, ${q.sessionsSince} entr${q.sessionsSince === 1 ? 'y' : 'ies'} ago.`))) : noData('Nothing that used to come up has gone quiet.'));
     const tagged = new Set(items(all).filter(i => i.kind === 'theme').map(i => i.key)), text = all.map(n => n.text).join('\n'), sug = suggestThemes(text, 3).filter(t => !tagged.has(keyOf(t.theme)));
+    const texts = ordered(all).map(n => n.text), sh = shifts(texts), bg = bigrams(texts, 12), em = emotionSeries(texts), cols = ordered(all);
+    const spark = (vals, w = 170, ht = 30) => { const mx = Math.max(1, ...vals), pts = vals.map((v, i) => `${vals.length > 1 ? (i / (vals.length - 1)) * w : w / 2},${ht - 3 - (v / mx) * (ht - 6)}`).join(' '); const NS = 'http://www.w3.org/2000/svg', sv = document.createElementNS(NS, 'svg'); sv.setAttribute('viewBox', `0 0 ${w} ${ht}`); sv.setAttribute('class', 'th-spark'); sv.setAttribute('role', 'img'); sv.setAttribute('aria-label', `Across ${vals.length} entries: ${vals.join(', ')}`); const pl = document.createElementNS(NS, 'polyline'); pl.setAttribute('points', pts); pl.setAttribute('fill', 'none'); pl.setAttribute('stroke', '#2a5c45'); pl.setAttribute('stroke-width', '2'); sv.append(pl); return sv; };
+    const termOut = h('div', { class: 'th-trend', 'aria-live': 'polite' }), termIn = h('input', { type: 'search', class: 'ws-input', id: 'recTerm', placeholder: 'A word or phrase, e.g. sleep or panic attacks', 'aria-label': 'Follow a word or phrase through the record' });
+    termIn.oninput = () => { const q = termIn.value.trim(); termOut.replaceChildren(); if (!q) return; const v = termSeries(texts, q); termOut.append(v.some(Boolean) ? h('div', {}, spark(v), h('div', { class: 'th-hint' }, `${v.reduce((a, b) => a + b, 0)} mention${v.reduce((a, b) => a + b, 0) === 1 ? '' : 's'} across ${v.length} entries, from ${longDate(cols[0].date)} to ${longDate(cols[cols.length - 1].date)}.`)) : h('p', { class: 'th-muted' }, 'Not found in the record.')); };
+    const list2 = (rows, label) => rows.length ? h('ul', { class: 'th-list' }, rows.map(r => h('li', {}, h('strong', {}, r.term), ` ${label}: ${r.early} in the earlier entries, ${r.late} in the recent ones.`))) : noData('Nothing stands out yet. This needs at least four entries.');
+    panel.append(h('h2', { class: 'th-h2' }, 'Change over time'), h('p', { class: 'th-hint' }, 'The most recent third of the record against the earlier entries.'),
+      h('h3', { class: 'th-h3' }, 'Coming up more'), list2(sh.rising, 'now'), h('h3', { class: 'th-h3' }, 'Coming up less'), list2(sh.fading, 'before'),
+      h('h3', { class: 'th-h3' }, 'Follow a word or phrase'), termIn, termOut,
+      h('h3', { class: 'th-h3' }, 'Emotion words by entry'), h('div', { class: 'th-emos' }, Object.entries(em).filter(([, v]) => v.some(Boolean)).map(([k, v]) => h('div', {}, h('div', { class: 'th-muted' }, k), spark(v)))),
+      h('h2', { class: 'th-h2' }, 'Phrases that recur'), bg.length ? h('p', {}, bg.map(b => `${b.phrase} (${b.count})`).join(' · ')) : noData('No repeated phrases yet.'));
     panel.append(h('h2', { class: 'th-h2' }, 'Possible themes'), h('p', { class: 'th-hint' }, 'Words in your notes that match common themes. Only a suggestion: add a #tag to any note if it fits, and ignore the rest.'),
       sug.length ? h('ul', { class: 'th-list' }, sug.map(t => h('li', {}, h('strong', {}, t.theme), ` · ${t.hits} matching words: ${t.words.join(', ')}`))) : noData('No suggestions.'),
       h('h2', { class: 'th-h2' }, 'Words that recur'), h('p', {}, recurring(all.map(n => n.text), 18).map(w => `${w.word} (${w.count})`).join(' · ') || 'Not enough text yet.'));
@@ -142,6 +167,18 @@ export async function mountRecord(box, { store, clientId, clientName, extras = [
     })));
   }
 
+  // ── Life story: filled in automatically from the years, ages and stages written in the record ──
+  function viewLife() {
+    const by = birthYearOf(intakeD?.fields?.dob), ev = lifeEvents(entries(), { birthYear: by }), lanes = lifeLanes(ev); panel.append(caveat());
+    panel.append(h('p', { class: 'th-hint' }, 'Filled in automatically from the years ("in 2019"), ages ("at age 7", "when she was 12") and life stages ("as a child", "in her twenties") you have written in your notes, the intake form and the family history. Nothing is added that is not in the text, and each line shows where it came from.' + (by ? '' : ' No date of birth is on file, so events known only by age are listed separately.')));
+    if (!ev.length) { panel.append(noData('Nothing to place yet. Write dates or ages in your notes, such as "moved to Berlin in 2019" or "when she was 9", and they appear here.')); return; }
+    const row = e => h('li', { class: 'th-life-row' }, h('div', { class: 'th-life-when' }, e.kind === 'stage' ? e.stage : e.label, e.age != null && e.kind !== 'age' && e.kind !== 'stage' ? h('span', { class: 'th-muted' }, ` · age ${e.age}`) : e.year != null && e.kind !== 'year' ? h('span', { class: 'th-muted' }, ` · ${e.year}`) : null),
+      h('div', {}, e.text.length > 220 ? e.text.slice(0, 217) + '…' : e.text, ' ', ...e.people.map(p => h('button', { type: 'button', class: 'th-link th-link--entity', onclick: () => openAbout(p) }, p))),
+      h('div', { class: 'th-hint' }, e.source === 'note' ? `From the note of ${longDate(e.entryDate)}` : SOURCE[e.source]));
+    panel.append(h('ol', { class: 'th-life' }, lanes.dated.map(row)));
+    if (lanes.byAge.length) panel.append(h('h2', { class: 'th-h2' }, 'Known by age or stage'), h('ol', { class: 'th-life' }, lanes.byAge.map(row)));
+  }
+
   // ── Before a session ──
   function viewBrief() {
     const all = ordered(entries().filter(n => n.source === 'note')), last = all.slice(-2).reverse(), every = entries(); panel.append(caveat());
@@ -156,18 +193,18 @@ export async function mountRecord(box, { store, clientId, clientName, extras = [
 
   // ── Export and delete ──
   function viewRecords() {
-    const all = entries(), nNotes = notes.filter(n => n.text != null).length, safe = clientName.replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '') || 'client';
+    const all = entries(), nNotes = notes.filter(n => n.text != null).length, full = () => toMarkdown(clientName, all) + (intakeFull(intakeD, INTAKE_FIELDS) ? `\n## Intake form, in full\n\n${intakeFull(intakeD, INTAKE_FIELDS)}\n` : ''), safe = clientName.replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '') || 'client';
     panel.append(h('h2', { class: 'th-h2', style: 'margin-top:0' }, 'Export'),
       h('p', {}, `${nNotes} session note${nNotes === 1 ? '' : 's'}${extras.filter(Boolean).length ? ' plus the intake form and family history' : ''}.`),
-      h('p', { class: 'th-hint' }, `A Markdown file keeps your [[links]] and #themes and opens in any notes app, Obsidian included. It is made on this device. If ${clientName} asks for their records, send them this file yourself; the platform never holds a readable copy.`),
-      btn('Download as Markdown', () => download(`${safe}-record.md`, toMarkdown(clientName, all)), 'action-btn'), ' ', btn('Download as plain text', () => download(`${safe}-record.txt`, toMarkdown(clientName, all), 'text/plain'), 'action-btn outline'),
+      h('p', { class: 'th-hint' }, kept ? 'A copy of the intake form and family history is kept in your own encrypted record, so it stays if the client leaves or deletes their account. ' : '', `A Markdown file keeps your [[links]] and #themes and opens in any notes app, Obsidian included. It is made on this device. If ${clientName} asks for their records, send them this file yourself; the platform never holds a readable copy.`),
+      btn('Download as Markdown', () => download(`${safe}-record.md`, full()), 'action-btn'), ' ', btn('Download as plain text', () => download(`${safe}-record.txt`, full(), 'text/plain'), 'action-btn outline'),
       h('h2', { class: 'th-h2' }, 'Keep or delete'),
       h('p', {}, active ? 'Your notes stay until you delete them.' : `This connection has ended. Your notes about ${clientName} are yours: nothing is deleted automatically, so keep them or delete them when you choose.`),
-      h('p', { class: 'th-hint' }, `Ending a connection does not remove your notes. They are removed only if you delete them here, or if ${clientName} deletes their own account.`));
+      h('p', { class: 'th-hint' }, `Ending a connection does not remove your notes. They stay until you delete them here, even if ${clientName} deletes their own account.`));
     const zone = h('div', { class: 'th-danger' });
-    const ask = () => zone.replaceChildren(btn('Delete all my notes about this client…', () => {
+    const ask = () => zone.replaceChildren(btn('Delete this whole record…', () => {
       const input = h('input', { class: 'ws-input', id: 'recConfirm', 'aria-label': 'Type DELETE to confirm', placeholder: 'Type DELETE', autocomplete: 'off' });
-      zone.replaceChildren(h('p', { style: 'font-size:.85rem' }, `This permanently deletes all ${nNotes} of your notes about ${clientName}. It cannot be undone. Download an export first if you want a copy.`), input, h('div', { style: 'margin-top:.6rem' },
+      zone.replaceChildren(h('p', { style: 'font-size:.85rem' }, `This permanently deletes all ${nNotes} of your notes about ${clientName}, and the copies you kept of their intake form and family history. It cannot be undone. Download an export first if you want a copy.`), input, h('div', { style: 'margin-top:.6rem' },
         btn('Delete the notes', async e => { if (input.value.trim() !== 'DELETE') { say('Type DELETE to confirm.', 'error'); return; } e.target.disabled = true; try { await store.removeAll(clientId); notes = []; onDeleted(); draw(); } catch (err) { say(err.message, 'error'); e.target.disabled = false; } }), ' ', btn('Cancel', ask, 'action-btn sm outline')));
     }, 'action-btn outline sm'));
     ask(); panel.append(zone, h('div', { class: 'msg', id: 'recMsg', role: 'status' }));
@@ -176,7 +213,8 @@ export async function mountRecord(box, { store, clientId, clientName, extras = [
   function draw() {
     box.replaceChildren(h('div', { class: 'th-tabs th-tabs--sub', role: 'tablist', 'aria-label': 'Record views' }, VIEWS.map(([k, label]) => h('button', { type: 'button', role: 'tab', 'aria-selected': String(k === view), class: k === view ? 'on' : '', onclick: () => { view = k; draw(); } }, label))),
       panel = h('div', { class: 'th-recpanel', role: 'tabpanel' }));
-    ({ notes: viewNotes, map: viewMap, themes: viewThemes, timeline: viewTimeline, brief: viewBrief, records: viewRecords })[view]();
+    ({ notes: viewNotes, map: viewMap, themes: viewThemes, timeline: viewTimeline, life: viewLife, brief: viewBrief, records: viewRecords })[view]();
   }
   await load(); draw();
+  if (await keepCopies()) { await load(); if (view === 'notes' || view === 'records') draw(); }
 }

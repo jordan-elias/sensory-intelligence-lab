@@ -38,7 +38,7 @@ Open work, roughly in the order it was raised. Constraints that apply to everyth
 2. Shared Cal.com account and freelancer-by-invoice model: notes are scoped per therapist, never per account.
 3. Anything the client sees (for example homework) stays a separate, explicit, per-item action.
 4. Key recovery: already handled by the vault's recovery key. The page should say plainly that without the passphrase and recovery key the notes cannot be opened by anyone.
-5. **Decision needed:** `therapist_notes.client_id` is `on delete cascade`, so if a client deletes their own account the therapist's notes about them are deleted too. Your wish is that the therapist chooses. Options: keep the cascade (client erasure wins), or change it so notes survive and are labelled from inside the encrypted payload. Professional record-keeping duties and the client's erasure rights pull in different directions and vary by country, so this is worth a short legal check before choosing.
+5. **Decided (14 Nov): therapists keep their records if the client deletes their account.** `phase12_001_keep_therapist_records.sql` removes the foreign key so notes survive, and the app copies the intake form, family history and client name into the therapist's own encrypted record when they open them. The privacy policy and the client-facing send screens say so plainly. Kept records open from the Archive page (`/therapist/archive/`). Still worth a short legal check by country on how long records should be kept and how a client's erasure request interacts with professional record-keeping duties.
 
 **On-device analysis: what is possible without an LLM**
 Built (`assets/js/notes/`, tested): all of this is plain code over the therapist's own words.
@@ -56,6 +56,7 @@ Honest limits: lexicons miss irony, slang, negation across clauses and context, 
 
 **Possible build order**
 0. Done: parsing, analysis, graph and export modules with tests.
+0c. Done: life story timeline filled in automatically from years, ages and life stages in the text; phrases (bigrams), rising and fading words, emotion trends, follow-a-word charts, and "comes up with / words around it" for every person or theme.
 0b. Done (branch app-18): the Record tab on the therapist's client page: notes with session dates, [[links]] and #themes, intake and family history in the same record, backlinks, search, map, themes by session, timeline with tone and theme suggestions, before-a-session brief, Markdown and text export, keep-or-delete with typed confirmation. Uses the existing vault (passphrase and recovery key), so no new key design was needed.
 1. Session notes per client, encrypted on the therapist's device, with date and free text. Intake and family history shown as the first entries.
 2. (done) `[[links]]` and `#themes`, backlinks.

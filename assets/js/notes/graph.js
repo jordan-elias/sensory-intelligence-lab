@@ -5,7 +5,7 @@
  * Pure functions over plain note objects { id, date, text }. Runs on the device.
  */
 import { parseNote, sentences, rawSentences, keyOf, normName } from './parse.js';
-import { suggestThemes, sentiment } from './analysis.js';
+import { suggestThemes, sentiment, wordsAround } from './analysis.js';
 
 const byDate = (a, b) => String(a.date).localeCompare(String(b.date)) || String(a.id).localeCompare(String(b.id));
 export const ordered = notes => [...notes].sort(byDate);
@@ -77,4 +77,14 @@ export function toMarkdown(client, notes) {
   const out = [`# ${normName(client)}`, ''];
   for (const n of ordered(notes)) out.push(`## ${n.date}`, '', String(n.text).trim(), '');
   return out.join('\n').trimEnd() + '\n';
+}
+
+/** What an item travels with: other items that share notes or sentences with it (most often first), and the words around it. */
+export function related(notes, name, { words = 8 } = {}) {
+  const k = keyOf(name), list = ordered(notes), withIt = list.map(n => { const p = parseNote(n.text); return p.links.some(l => l.key === k) || p.tags.some(t => t.key === k); });
+  const g = graph(notes);
+  const id = g.nodes.find(n => keyOf(n.name) === k)?.id, byId = new Map(g.nodes.map(n => [n.id, n]));
+  const together = id ? g.edges.filter(e => e.source === id || e.target === id).map(e => ({ name: byId.get(e.source === id ? e.target : e.source).name, kind: byId.get(e.source === id ? e.target : e.source).kind, sessions: e.sessions, close: e.close })).sort((a, b) => b.close - a.close || b.sessions - a.sessions || a.name.localeCompare(b.name)) : [];
+  const own = new Set([k]), around = wordsAround(list.map(n => n.text), withIt, words + 4).filter(w => !own.has(w.word)).slice(0, words);
+  return { together, around, mentions: withIt.filter(Boolean).length };
 }

@@ -18,7 +18,7 @@ export async function mountDashboard(root) {
   if (error) { root.innerHTML = `<div class="ws-callout"><strong>Could not load</strong>${esc(error.message)}</div>`; return; }
   if (!me) { root.innerHTML = `<div class="ws-callout"><strong>This page is for therapists</strong>If you should have access, please contact the practice owner.</div>`; return; }
 
-  const state = { clients: [], shared: {}, unread: {}, sessions: {} };
+  const state = { clients: [], shared: {}, unread: {}, sessions: {}, kept: 0 };
 
   async function load() {
     const [c, n, u, s] = await Promise.all([
@@ -31,6 +31,8 @@ export async function mountDashboard(root) {
     state.clients = c.data || [];
     const tally = rows => { const m = {}; for (const r of rows || []) m[r.link_id] = (m[r.link_id] || 0) + 1; return m; };
     state.shared = tally(n.data); state.unread = tally(u.data);
+    // People you hold records about who are no longer connected (for example a client who deleted their account). Ids only: nothing is opened here.
+    try { const { data: k } = await sb.from('therapist_notes').select('client_id'); const have = new Set(state.clients.map(x => x.client_id)); state.kept = new Set((k || []).map(r => r.client_id).filter(id => !have.has(id))).size; } catch { state.kept = 0; }
     state.sessions = {};
     for (const r of (s.data || [])) (state.sessions[r.link_id] = state.sessions[r.link_id] || []).push(r);
   }
@@ -64,7 +66,8 @@ export async function mountDashboard(root) {
       ${active.length ? active.map(c => card(c, false)).join('') : '<p class="th-muted">No active clients yet. Clients on a session plan appear here after they choose to connect with you. Free and Lab members are never shown to you.</p>'}
       <h2 class="th-h2">Archive</h2>
       <p class="th-hint">Clients who ended the connection. What they shared before then is yours to keep or delete; open a client to delete it.</p>
-      ${ended.length ? ended.map(c => card(c, true)).join('') : '<p class="th-muted">Nothing in the archive.</p>'}`;
+      ${ended.length ? ended.map(c => card(c, true)).join('') : '<p class="th-muted">Nothing in the archive.</p>'}
+      ${state.kept ? `<h2 class="th-h2">Kept records</h2><a class="th-client th-client-link" href="/therapist/archive/"><div class="th-client-main"><strong>${esc(plural(state.kept, 'person'))} no longer connected</strong><span class="th-muted">Your own notes and saved copies, including anyone who deleted their account. Only you can open them.</span></div><span class="th-open" aria-hidden="true">Open &rarr;</span></a>` : ''}`;
   }
 
   try { await load(); draw(); } catch (e) { root.innerHTML = `<div class="ws-callout"><strong>Could not load your clients</strong>${esc(e.message)}</div>`; }
