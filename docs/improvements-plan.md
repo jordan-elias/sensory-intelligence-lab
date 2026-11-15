@@ -77,7 +77,7 @@ Honest limits: lexicons miss irony, slang, negation across clauses and context, 
 - Background audio with the screen off (Android).
 - Daily path.
 - Deep links for sign-in emails.
-- Play Store listing and Play Billing decisions.
+- Play Store listing. Payments decided: Stripe on the website only; the Android app is consumption-only (no purchase links or billing buttons, `assets/js/app/consumption.js`). Look at the EEA external offers programme only if an in-app link to the website is wanted later.
 - Journal sharing with a therapist (needs go-ahead and a privacy policy change).
 - Regulation "worlds of sound"; Tone.js, Pure Data and SuperCollider spikes.
 - Sequencer: done (branch app-19): swing, mute/solo per track, Euclidean fill, WAV export matches. Soundscape Machine reviewed, already deep; waiting for the user to say what is missing.

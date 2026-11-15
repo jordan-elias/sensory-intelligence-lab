@@ -1,3 +1,5 @@
+> **Not used. Decided 15 Nov 2026:** the app is consumption-only and Stripe on the website is the only payment system. This outline is kept only in case that changes.
+
 # Selling the Lab plan in the Android app (Google Play Billing next to Stripe)
 
 Status: outline for decision. Nothing here is built. Stripe is not changed by any of it.

@@ -10,7 +10,7 @@ Draft for the Console forms. Every answer below must stay true to /privacy/ and 
 
 ## Target audience and content
 * Target age: 18 and over only. Not designed for children. Do not tick any child age band.
-* Content rating questionnaire (IARF): category "Utility, productivity, communication or other" is not right for a health tool; choose the closest wellness or reference option. Answer No to violence, sexual content, profanity, gambling and drugs. User-generated content: users can write private notes and send messages only to their own therapist; nothing is public. Users can interact: yes (messages with a therapist the person chose). Shares location: no. Digital purchases: yes if Play Billing is added (see below), otherwise no.
+* Content rating questionnaire (IARF): category "Utility, productivity, communication or other" is not right for a health tool; choose the closest wellness or reference option. Answer No to violence, sexual content, profanity, gambling and drugs. User-generated content: users can write private notes and send messages only to their own therapist; nothing is public. Users can interact: yes (messages with a therapist the person chose). Shares location: no. Digital purchases: no (the app sells nothing; see the consumption-only note below).
 
 ## Data safety (what to declare)
 Collected, and sent off the device:
@@ -19,7 +19,7 @@ Collected, and sent off the device:
 * Messages: messages with a therapist. Encrypted end to end. App functionality.
 * Photos, audio: audio recordings the person saves (encrypted, stored in private storage). Photos used in an experiment are read on the device and not uploaded.
 * App activity: game scores and instrument or mixer settings (stored unencrypted, disclosed in the privacy page); booking times. App functionality.
-* Financial info: none collected by the app. Payment is handled by Stripe (website) or Google Play (app, if added). If Play Billing is added, declare "Purchase history" as collected for app functionality.
+* Financial info: none collected by the app. Payment is handled by Stripe on the website only; the app has no purchase flow.
 * Device or other IDs, location, contacts, calendar, web browsing, SMS, files and docs, installed apps: not collected.
 * Crash logs and diagnostics: not collected (no analytics or crash SDK). CHECK that none is added later.
 Shared with third parties: No data is shared for advertising or analytics. Service providers acting for us (Supabase for storage in Frankfurt, Netlify for hosting, Stripe for payments, Cal.com for booking) are processors and are not "sharing" in the form's terms; say so under the description if the form asks.
@@ -42,8 +42,8 @@ Deletion: in the app under Account, Delete account. Web link for deletion reques
 * Financial features: none (no loans, banking, crypto, trading). Not a news app. Not a government app. No COVID-19 features.
 
 ## In-app products and subscriptions
-* ASK: depends on the decision in docs/play-billing-outline.md. If Play Billing is added: create the subscription `lab_monthly` (and `lab_yearly` if wanted), tell the form that the app offers subscriptions, and add the price and the cancel path to the listing.
-* If it is not added: answer that the app has no in-app purchases, and see the warning in the outline about not leading people to the website to pay.
+* Decided 15 Nov: none. The app is consumption-only. It gives access to a plan bought on the website and never sells it, prices it, or links to buying it (the plans page and every purchase link or billing button are hidden in the app, see `assets/js/app/consumption.js`). Do not create any in-app products. Do not add wording in the app, the listing screenshots or the description that sends people to the website to pay; Google's payments policy only allows that under its external-offers programme. Telling people on the website, in emails, and on social media is fine.
+* If you later want an in-app link to the website, look at Google's EEA external offers programme (enrolment, API integration, reporting, fees).
 
 ## Store listing
 * Title, short and full description: android-app/store/listing.md. The wording there says nothing about effects on the body and must stay that way.

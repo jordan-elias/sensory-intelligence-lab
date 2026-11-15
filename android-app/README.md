@@ -29,7 +29,7 @@ Run `npm run sync` again after any website change; the app does not update by it
 ## Not done yet
 - Sound with the screen off: written (`PlaybackService.java`, `PlaybackPlugin.java`, `assets/js/app/playback.js`) but NOT yet built or tried on a phone. Test: start a soundscape, switch the screen off, listen for ten minutes; check the notification "SIL is playing" and its Pause button; check the sequencer and Neural Synthesis keep time (the web page's timers may be slowed while hidden).
 - App icon and splash artwork (the Capacitor defaults are in place).
-- Sign-in email links opening the app, and the payment-rules decision (Google Play Billing or not).
+- Sign-in email links opening the app, (Payment rules: decided, the app is consumption-only; no Play Billing.)
 - Signing and the Play Console setup.
 
 ## Tests
