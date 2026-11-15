@@ -34,6 +34,9 @@
 
         </activity>
 
+        <!-- Keeps sound going with the screen off; shows the notification "SIL is playing" -->
+        <service android:name=".PlaybackService" android:exported="false" android:foregroundServiceType="mediaPlayback" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -53,4 +56,8 @@
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <!-- Daily check-in reminder chosen by the person -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Sound with the screen off: a foreground service of type media playback, and a wake lock while it runs -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 </manifest>

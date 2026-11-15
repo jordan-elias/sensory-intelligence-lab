@@ -21,13 +21,13 @@ Run `npm run sync` again after any website change; the app does not update by it
 
 ## Already set in the Android project
 - Package `de.jordanelias.sil`, secure origin `https://localhost`.
-- Permissions: internet, microphone, audio settings, notifications.
+- Permissions: internet, microphone, audio settings, notifications, foreground service (media playback), wake lock (only while sound plays, at most six hours).
 - No cloud backup or device-to-device copy of app data (the vault keys stay on the phone).
 - Screenshots and the recent-apps preview are blocked on every screen (`FLAG_SECURE` in `MainActivity.java`).
 - Return from the phone's browser after paying: `de.jordanelias.sil://open?path=/subscribe/` (via `/app-return/` on the site).
 
 ## Not done yet
-- Sound with the screen off (needs a foreground service with a media notification).
+- Sound with the screen off: written (`PlaybackService.java`, `PlaybackPlugin.java`, `assets/js/app/playback.js`) but NOT yet built or tried on a phone. Test: start a soundscape, switch the screen off, listen for ten minutes; check the notification "SIL is playing" and its Pause button; check the sequencer and Neural Synthesis keep time (the web page's timers may be slowed while hidden).
 - App icon and splash artwork (the Capacitor defaults are in place).
 - Sign-in email links opening the app, and the payment-rules decision (Google Play Billing or not).
 - Signing and the Play Console setup.
