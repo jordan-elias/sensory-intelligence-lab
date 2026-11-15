@@ -2,6 +2,8 @@
 
 Open work, roughly in the order it was raised. Constraints that apply to everything: private until the client shares; sharing never on by default; privacy claims must be true; no Netlify deploys from branches; Android API calls go through `assets/js/api.js`.
 
+Full review and the ordered plan: see `docs/review-2026-11.md`.
+
 ## In progress
 - **Neural Synthesis**: Instrument mode (network as oscillator), inspector, essay. Remaining: listening check by ear, mobile layout check.
 - **Experiments in Creativity**: guided one-step-at-a-time flow; drop hypothesis, prediction and the 1–5 surprise; open-ended reflection at the end.
