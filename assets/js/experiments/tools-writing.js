@@ -7,6 +7,7 @@ import { el } from './tools.js';
 import { mulberry32, newSeed } from './rng.js';
 import { endWordFrame, burnPlan, burnedAfter, pageWords, blackoutPoem } from './text-ops.js';
 import { draw } from './cards.js';
+import { LANGS, readPhotoWords } from './ocr.js';
 
 const reduced = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch { return false; } };
 const readDataUrl = file => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsDataURL(file); });
@@ -29,10 +30,24 @@ export function wordPoemTool(cfg) {
   const parts = [el('p', { class: 'xp-k' }, photo ? 'Words from a photo' : 'The borrowed line')];
   if (photo) {
     const file = el('input', { type: 'file', accept: 'image/*', class: 'xp-file', 'aria-label': 'Choose a photo' });
-    file.onchange = async () => { const f = file.files && file.files[0]; if (!f) return;
-      try { const url = await readDataUrl(f); preview.replaceChildren(el('img', { src: url, alt: 'Your photo, shown here only', style: 'max-width:100%;max-height:320px;border-radius:4px' })); }
+    const lang = el('select', { id: 'xpOcrLang', 'aria-label': 'Language of the words in the photo' }, Object.entries(LANGS).map(([v, t]) => el('option', { value: v }, t)));
+    const find = el('button', { type: 'button', class: 'xp-btn xp-btn--alt', id: 'xpOcr', disabled: true }, 'Find the words in the photo');
+    const status = el('p', { class: 'xp-hint', id: 'xpOcrStatus', role: 'status', 'aria-live': 'polite' });
+    let current = null;
+    file.onchange = async () => { const f = file.files && file.files[0]; current = null; find.disabled = true; status.textContent = ''; if (!f) return;
+      try { const url = await readDataUrl(f); current = f; find.disabled = false; preview.replaceChildren(el('img', { src: url, alt: 'Your photo, shown here only', style: 'max-width:100%;max-height:320px;border-radius:4px' })); }
       catch { preview.replaceChildren(el('p', { class: 'xp-hint' }, 'That photo could not be opened.')); } };
-    parts.push(el('div', { class: 'xp-row' }, file), preview, el('p', { class: 'xp-hint' }, 'The photo stays in this page. It is not uploaded.'));
+    find.onclick = async () => {
+      if (!current) return; find.disabled = true;
+      try {
+        const words = await readPhotoWords(current, lang.value, t => { status.textContent = t; });
+        if (!words.length) { status.textContent = 'No words could be read in this photo. You can type what you see, or try a photo with clearer lettering.'; }
+        else { area.value = words.join(' '); status.textContent = `Found ${words.length} word${words.length === 1 ? '' : 's'}. Check them below: take out any that are wrong and add any it missed.`; }
+      } catch (e) { status.textContent = e.message; }
+      find.disabled = false;
+    };
+    parts.push(el('div', { class: 'xp-row' }, file), preview, el('div', { class: 'xp-row' }, lang, find), status,
+      el('p', { class: 'xp-hint' }, 'The photo stays in this page and is not uploaded. Reading the words happens on your device, and nothing is saved.'));
   }
   parts.push(area, el('div', { class: 'xp-row' }, el('label', {}, shuf, ' Shuffle the order'), make), out);
   return el('div', { class: 'xp-tool' }, ...parts);

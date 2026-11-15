@@ -71,6 +71,8 @@ Honest limits: lexicons miss irony, slang, negation across clauses and context, 
 
 0e. Done (branch app-22): Sequencer step velocity (100/75/50/25 %), step chance, per-track length (polymeter), and savable patterns on the device only (`assets/js/seq/patterns.js`, validated on load, up to 30). Tested in `tests/seq/steps.test.mjs` and `t50`. Chance makes WAV export vary from run to run when a step is below 100 %.
 
+0f. Done (branch app-23): photo-words reads the words in the photo on the device (Tesseract, vendored under `assets/js/vendor/tesseract`, English and German, loaded only on button press, nothing stored or sent; typed words still work and the list is always editable). About 16 MB in the repo and, after `npm run sync`, in the Android app too. Not checked: how Netlify serves the `.gz` language files (if it adds `Content-Encoding: gzip` the reader will fail and show the typed fallback message); check once after the first deploy.
+
 ### Other open items
 - Background audio with the screen off (Android).
 - Daily path.

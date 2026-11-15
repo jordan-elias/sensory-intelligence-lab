@@ -496,7 +496,7 @@ export const EXPERIMENTS = [
     parameters: [['Photos', '1'], ['Found words', '5 to 16'], ['Time', '20 minutes'], ['Order', 'Shuffled']],
     procedure: [
       'Choose a photo you took yourself, with words or signs in it. Add it here.',
-      'Type every readable word you can find. Include numbers and brands. Between 5 and 16 words.',
+      'Press "Find the words in the photo" and let it read what it can, or type the words yourself. Then read the list: take out words that are wrong, add ones it missed, and include numbers and brands. Keep between 5 and 16 words.',
       'Make the frame with the order shuffled. Do not re-shuffle.',
       'Write one line for each word, ending on it. Fast. The line does not have to be about the photo.',
       'Leave it for 10 minutes. Read it aloud once. Change nothing except spelling.',
