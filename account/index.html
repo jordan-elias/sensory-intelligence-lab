@@ -549,7 +549,6 @@
 
       <!-- CONFIRM: shown after clicking Delete my account… -->
       <div id="deleteConfirmSection" style="display:none;margin-top:.75rem;">
-        <p id="deleteSubNote" hidden style="font-size:.8rem;margin-bottom:.5rem;">Deleting your account also ends your subscription. Nothing more will be charged.</p>
         <p style="font-size:.8rem;color:var(--error);font-weight:500;margin-bottom:.5rem;">
           Type <strong>DELETE</strong> to confirm:
         </p>
@@ -1059,14 +1058,13 @@ async function handleSignOutAll() {
 // ─────────────────────────────────────────────────────────
 function initiateDeleteFlow() {
   clearMsg('deleteMsg');
-  if (_userHasActiveStripeSubscription && !window.SIL_APP) {
+  if (_userHasActiveStripeSubscription) {
     document.getElementById('deleteInitSection').style.display    = 'none';
     document.getElementById('deleteGateSection').style.display    = 'block';
     document.getElementById('deleteGateSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     return;
   }
   document.getElementById('deleteInitSection').style.display    = 'none';
-  document.getElementById('deleteSubNote').hidden = !(_userHasActiveStripeSubscription && window.SIL_APP);
   document.getElementById('deleteConfirmSection').style.display = 'block';
   document.getElementById('deleteConfirmInput').focus();
 }
@@ -1084,7 +1082,7 @@ async function handleDeleteAccount() {
   if (input !== 'DELETE') {
     showMsg('deleteMsg', 'Please type DELETE exactly to confirm.', 'error'); return;
   }
-  if (_userHasActiveStripeSubscription && !window.SIL_APP) { // in the app, deleting the account ends the subscription for you
+  if (_userHasActiveStripeSubscription) {
     showMsg('deleteMsg', 'You still have an active subscription. Please cancel it via the billing portal before deleting your account.', 'error');
     return;
   }

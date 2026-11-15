@@ -6,7 +6,6 @@
 import { refreshReminder, listenForTaps } from './reminders.js';
 import { mountShell } from './shell.js';
 import { installPlayback } from './playback.js';
-import { installNoPay } from './nopay.js';
 
 // The app frame (tab bar, top bar) is for the installed app only; SIL_APP is set by the app build.
 if (window.SIL_APP) { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => mountShell()); else mountShell(); }
@@ -15,7 +14,6 @@ const cap = window.Capacitor;
 if (cap?.isNativePlatform?.()) {
   const P = cap.Plugins || {};
   document.documentElement.classList.add('is-app');
-  installNoPay(); // the app sells nothing and links to no payment: subscriptions are bought on the website
 
   // Back: go back inside the app; on the first page, leave the app.
   P.App?.addListener?.('backButton', ({ canGoBack }) => {
@@ -35,7 +33,7 @@ if (cap?.isNativePlatform?.()) {
     }
   }, true);
 
-  // Opening the app from a link (de.jordanelias.sil://open?path=/dashboard/)
+  // Coming back from the phone's browser (payment, billing portal): de.jordanelias.sil://open?path=/subscribe/?success=true
   P.App?.addListener?.('appUrlOpen', ({ url }) => {
     try {
       const to = new URL(url).searchParams.get('path') || '/dashboard/';
