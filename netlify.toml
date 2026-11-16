@@ -285,13 +285,18 @@
 
 [[redirects]]
   from = "/neural-network"
-  to   = "/compositions/neural-network.html"
-  status = 200
+  to   = "/neural-synthesis"
+  status = 301
 
 [[redirects]]
   from = "/neural-network/"
-  to   = "/compositions/neural-network.html"
-  status = 200
+  to   = "/neural-synthesis"
+  status = 301
+
+[[redirects]]
+  from = "/compositions/neural-network.html"
+  to   = "/compositions/neural-synthesis.html"
+  status = 301
 
 [[redirects]]
   from = "/semantic-synth"
@@ -362,6 +367,26 @@
 [[redirects]]
   from = "/therapist/client/"
   to   = "/therapist/client/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/therapist/caseload"
+  to   = "/therapist/caseload/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/therapist/caseload/"
+  to   = "/therapist/caseload/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/therapist/archive"
+  to   = "/therapist/archive/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/therapist/archive/"
+  to   = "/therapist/archive/index.html"
   status = 200
 
 [[redirects]]

@@ -1,0 +1,30 @@
+// Photo words: the words in a photo are read on the device (vendored Tesseract), the photo is never sent anywhere, and typing still works.
+import {launch,newPage} from './harness.mjs';
+const {browser,BASE,server}=await launch();
+let fail=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fail++; };
+const P=await newPage(await browser.createBrowserContext(),BASE,{tables:{}}); const page=P.page;
+const requests=[]; page.on('request',r=>requests.push(r.url()));
+await page.goto(`${BASE}/experiments/#/photo-words`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('#xpBegin'); await page.click('#xpBegin'); await page.waitForSelector('input.xp-file');
+ok(await page.$eval('#xpOcr',b=>b.disabled),'the button waits for a photo');
+await page.evaluate(async()=>{ const c=document.createElement('canvas'); c.width=1000; c.height=420; const x=c.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,1000,420); x.fillStyle='#000'; x.font='bold 110px Arial, Helvetica, sans-serif';
+  x.fillText('HOTEL BAKERY',40,150); x.fillText('OPEN TAXI',40,330);
+  const blob=await new Promise(r=>c.toBlob(r,'image/png')); const f=new File([blob],'sign.png',{type:'image/png'}); const dt=new DataTransfer(); dt.items.add(f); const i=document.querySelector('input.xp-file'); i.files=dt.files; i.dispatchEvent(new Event('change')); });
+await page.waitForFunction(()=>!document.getElementById('xpOcr').disabled,{timeout:10000});
+ok(true,'a photo enables the button');
+await page.click('#xpOcr');
+await page.waitForFunction(()=>/Found \d+ word|could not be read|No words/.test(document.getElementById('xpOcrStatus').textContent),{timeout:150000});
+const status=await page.$eval('#xpOcrStatus',e=>e.textContent), words=await page.$eval('#xpWords',e=>e.value);
+console.log('status:',status,'| words:',words);
+ok(/Found \d+ word/.test(status),'it reports what it found');
+const found=words.toLowerCase().split(/\s+/);
+ok(['hotel','bakery','open','taxi'].filter(w=>found.includes(w)).length>=3,'it read at least three of the four words in the sign');
+ok(await page.$eval('#xpOcr',b=>!b.disabled),'the button is ready again');
+const ext=requests.filter(u=>!u.startsWith(BASE)&&!u.startsWith('data:')&&!u.startsWith('blob:'));
+ok(ext.length===0,'nothing left this site while reading the photo '+ext.slice(0,3).join(' '));
+ok(requests.some(u=>/vendor\/tesseract\/lang\/eng/.test(u)),'the language data came from this site');
+// the words can still be edited and used
+await page.$eval('#xpWords',e=>{ e.value='HOTEL BAKERY OPEN TAXI door sign window'; });
+await page.click('#xpFrame'); await page.waitForSelector('.xp-frame li');
+ok(await page.$$eval('.xp-frame li',l=>l.length)>=5,'the frame is made from the (edited) words');
+ok(P.errors.filter(e=>!/Failed to load resource/.test(e)).length===0,'no page errors '+P.errors.join('|').slice(0,300));
+await browser.close(); server.close(); process.exit(fail?1:0);

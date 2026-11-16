@@ -62,7 +62,7 @@ export const encrypt=t=>s.encrypt(t), decrypt=p=>s.decrypt(p);
 export const promptIfOldEntries=async()=>{};
 export const decryptSafe=async p=>{try{return await s.decrypt(p)}catch{return null}};
 export const isEncrypted=v=>{try{const p=JSON.parse(v);return typeof p.iv==='string'&&typeof p.ciphertext==='string'}catch{return false}};
-export const lockVault=async()=>{}; export const hasUserKey=()=>true;
+export const lockVault=async()=>{}; export const hasUserKey=()=>true; export const currentSession=()=>s;
 `;
 const server = http.createServer((req,res)=>{
   const u=new URL(req.url,'http://x'); let p=u.pathname;

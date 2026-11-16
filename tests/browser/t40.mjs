@@ -11,7 +11,7 @@ const stream=`BT /F1 14 Tf 20 100 Td (${text}) Tj ET`; objs[3]=`<< /Length ${str
 let pdf='%PDF-1.4\n', offs=[]; objs.forEach((o,i)=>{ offs.push(pdf.length); pdf+=`${i+1} 0 obj\n${o}\nendobj\n`; });
 const xref=pdf.length; pdf+=`xref\n0 ${objs.length+1}\n0000000000 65535 f \n`+offs.map(o=>String(o).padStart(10,'0')+' 00000 n \n').join('')+`trailer\n<< /Size ${objs.length+1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
 const f=join(mkdtempSync(join(tmpdir(),'pdf-')),'page.pdf'); writeFileSync(f,pdf);
-await page.goto(`${BASE}/experiments/#/blackout-poem`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('#xpPaste');
+await page.goto(`${BASE}/experiments/#/blackout-poem`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('#xpBegin'); await page.click('#xpBegin'); await page.waitForSelector('#xpPaste');
 await (await page.$('input[type=file]')).uploadFile(f);
 await page.waitForFunction(()=>document.querySelectorAll('.xp-bw').length>0,{timeout:20000});
 ok((await page.$$eval('.xp-bw',b=>b.map(x=>x.textContent).join(' ')))===text,'the words of the PDF page appear');

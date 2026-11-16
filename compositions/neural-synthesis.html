@@ -4,26 +4,19 @@
   <meta charset="UTF-8">
   <script src="/assets/js/audio/safe-output.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Neural Synthesis</title>
-
+  <title>Neural Synthesis — a neural network you can hear, inspect and change</title>
   <meta name="robots" content="noindex, nofollow">
-  
   <link rel="icon" type="image/png" href="/images/favicon.png">
   <link rel="apple-touch-icon" href="/images/favicon.png">
   <link rel="manifest" href="/site.webmanifest">
-
   <script src="/dashboard/auth-guard.js" type="module"></script>
   <script type="module">
   import { applyGatingOnReady } from '/assets/js/gating.js';
-  applyGatingOnReady({
-    targetSelector: '.row',
-    moduleName: 'neural-synthesis',
-  });
-</script>
-
+  applyGatingOnReady({ targetSelector: '.nn-app', moduleName: 'neural-synthesis' });
+  </script>
   <link href="/assets/css/fonts.css" rel="stylesheet">
-
   <style>
+
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
       --font-body:'Inter',sans-serif;
@@ -53,1298 +46,487 @@
       letter-spacing:-.02em;line-height:1.2;margin-bottom:.4rem;}
     .ph p{font-size:.9rem;color:var(--muted);}
 
-    /* Card */
+    
     .card{border:1px solid var(--border);padding:1.5rem;margin-bottom:1.5rem;background:var(--bg)}
-    .card-title{font-family:var(--font-heading);font-size:.67rem;font-weight:600;
-      letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 1.25rem}
-
-    /* Network canvas */
-    .network-wrap{position:relative;width:100%;height:380px;background:var(--surface);
-      border:1px solid var(--border);margin-bottom:1em;overflow:hidden;cursor:crosshair}
-    #ns-canvas{display:block;width:100%;height:100%}
-    .network-overlay{position:absolute;bottom:8px;right:10px;
-      font-family:var(--font-body);font-size:.7rem;color:var(--muted);
-      pointer-events:none;letter-spacing:.05em}
-
-    /* Status display */
-    .iter-display{border:1px solid var(--border);padding:.75em 1.25em;margin-bottom:1em;
-      display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75em;background:var(--surface)}
-    .iter-count{font-family:var(--font-heading);font-size:1rem;font-weight:600;color:var(--text)}
-    .iter-sub{font-family:var(--font-body);font-size:.75rem;color:var(--muted)}
-    .iter-status{font-family:var(--font-body);font-size:.75rem;color:var(--muted);font-style:italic}
-
-    /* Energy bar */
-    .iter-progress{height:2px;background:var(--border);margin-bottom:1em;position:relative;overflow:hidden}
-    .iter-progress-fill{position:absolute;left:0;top:0;height:100%;background:var(--accent);
-      width:0%;transition:width .2s}
-
-    /* Rows */
-    .row{display:flex;align-items:center;gap:8px;margin-bottom:1em;flex-wrap:wrap}
-    .row-lbl{font-family:var(--font-body);font-size:.68rem;letter-spacing:.1em;
-      text-transform:uppercase;color:var(--muted);margin-right:4px;white-space:nowrap}
-
-    /* Buttons */
-    .btn{font-family:var(--font-heading);font-size:.78rem;font-weight:600;
-      background:transparent;color:var(--text);border:1px solid var(--border);
-      padding:.5em 1.2em;cursor:pointer;white-space:nowrap;transition:all .12s}
-    .btn:hover{background:var(--accent);color:white;border-color:var(--accent)}
-    .btn.on{background:var(--accent);color:white;border-color:var(--accent)}
-    .btn.on:hover{background:var(--accent-hover)}
-    .btn:disabled{opacity:.3;cursor:not-allowed;pointer-events:none}
-
-    .pill{font-family:var(--font-body);font-size:.78rem;background:transparent;
-      color:var(--text);border:1px solid var(--border);padding:3px 12px;cursor:pointer;
-      transition:all .12s}
-    .pill:hover{background:var(--accent);color:white;border-color:var(--accent)}
-    .pill.on{background:var(--accent);color:white;border-color:var(--accent)}
-
-    /* Sliders */
-    .sliders{display:flex;flex-direction:row;gap:24px;margin-bottom:1.25em}
-    .ctrl{flex:1;display:flex;flex-direction:column;gap:6px}
-    .ctrl input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:2px;
-      background:var(--border);outline:none;cursor:pointer}
-    .ctrl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;
-      height:14px;border-radius:50%;background:var(--accent);cursor:pointer}
-    .ctrl input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;
-      background:var(--accent);border:none;cursor:pointer}
-    .ctrl-bot{display:flex;justify-content:space-between;align-items:baseline}
-    .ctrl-lbl{font-family:var(--font-body);font-size:.68rem;letter-spacing:.1em;
-      text-transform:uppercase;color:var(--muted)}
-    .ctrl-val{font-family:var(--font-body);font-size:.75rem;color:var(--accent);font-weight:600}
-
-    /* Select */
-    .gen-select{font-family:var(--font-body);font-size:.78rem;background:transparent;
-      color:var(--text);border:1px solid var(--border);padding:3px 8px;cursor:pointer;
-      -webkit-appearance:none;appearance:none;}
-
-    /* Node info panel */
-    .node-info{border:1px solid var(--border);padding:.75em 1.25em;margin-bottom:1em;
-      background:var(--surface);display:none;font-size:.8rem;}
-    .node-info.visible{display:block}
-    .node-info-title{font-family:var(--font-heading);font-size:.67rem;font-weight:600;
-      letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.5em}
-    .node-info-grid{display:flex;gap:1.5em;flex-wrap:wrap}
-    .node-info-item{display:flex;flex-direction:column;gap:2px}
-    .node-info-key{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-    .node-info-val{font-family:var(--font-heading);font-size:.85rem;font-weight:600;color:var(--text)}
-    .node-info-desc{font-size:.78rem;color:var(--muted);margin-top:.5em;padding-top:.5em;
-      border-top:1px solid var(--border);line-height:1.55}
-    .node-info-conns{margin-top:.5em;padding-top:.5em;border-top:1px solid var(--border)}
-    .node-info-conns-title{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;
-      color:var(--muted);margin-bottom:.35em}
-    .conn-list{display:flex;flex-wrap:wrap;gap:.35em}
-    .conn-tag{font-family:'Courier New',monospace;font-size:.72rem;background:var(--bg);
-      border:1px solid var(--border);padding:1px 6px;color:var(--text)}
-    .conn-tag.in{border-color:#2a5c45;color:#2a5c45}
-    .conn-tag.out{border-color:#6b6b6b}
-
-    /* Canvas hover tooltip */
-    .node-tooltip{position:absolute;pointer-events:none;background:var(--bg);
-      border:1px solid var(--border);padding:.55em .8em;font-size:.75rem;
-      font-family:var(--font-body);color:var(--text);z-index:20;
-      max-width:220px;display:none;line-height:1.5;box-shadow:0 2px 8px rgba(0,0,0,.07)}
-    .node-tooltip.visible{display:block}
-    .node-tooltip-name{font-family:var(--font-heading);font-size:.78rem;font-weight:600;
-      color:var(--text);margin-bottom:.2em}
-    .node-tooltip-row{display:flex;justify-content:space-between;gap:.75em;font-size:.72rem}
-    .node-tooltip-key{color:var(--muted)}
-    .node-tooltip-val{font-weight:500;color:var(--text)}
-    .node-tooltip-desc{font-size:.7rem;color:var(--muted);margin-top:.3em;border-top:1px solid var(--border);padding-top:.3em}
-
-    .hint{font-family:var(--font-body);font-size:.8rem;color:var(--muted);margin-top:1em;text-align:center}
-
-    /* Instructions */
-    .instructions{font-size:.9rem;line-height:1.75;color:var(--text)}
-    .instructions h2{font-family:var(--font-heading);font-size:1rem;font-weight:600;
-      letter-spacing:-.01em;margin:1.5rem 0 .4rem;margin-top:0}
-    .instructions h2:first-child{margin-top:0}
-    .instructions a{color:var(--accent);text-decoration:underline}
-    .instructions a:hover{color:var(--accent-hover)}
-
-    footer{border-top:1px solid var(--border);padding:1.25rem 1.5rem;
-      text-align:center;font-size:.78rem;color:var(--muted);}
-    footer a{color:var(--muted);text-decoration:none;}
-    footer a:hover{color:var(--accent);}
-
-    @media(max-width:600px){
-      .sliders{flex-direction:row;flex-wrap:wrap;gap:16px}
-      .sliders .ctrl{flex:1 1 calc(50% - 8px);min-width:120px}
-      .network-wrap{height:260px}
-      .node-info-grid{gap:1em}
-      .row{gap:6px}
-      .btn{font-size:.74rem;padding:.45em .9em}
-      .pill{font-size:.74rem;padding:3px 9px}
-    }
-    @media(max-width:380px){
-      .sliders .ctrl{flex:1 1 100%}
-      .network-wrap{height:220px}
-    }
+    .card-title{font-family:var(--font-heading);font-size:.67rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 1rem}
+    .nn-stage{position:relative;background:var(--surface);border:1px solid var(--border)}
+    #nnCanvas{display:block;width:100%;height:340px}
+    .nn-stats{display:flex;flex-wrap:wrap;gap:1.5rem;margin:1rem 0;font-size:.85rem;color:var(--muted)}
+    .nn-stats strong{display:block;font:600 1.15rem var(--font-heading);color:var(--text)}
+    .nn-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem 1.5rem;margin-top:1rem}
+    .nn-controls label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:.25rem}
+    .nn-controls input[type=range]{width:100%}
+    .nn-btn{font:600 .9rem var(--font-body);padding:.7rem 1.4rem;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;min-height:44px}
+    .nn-btn--alt{background:none;color:var(--accent)} .nn-btn:focus-visible{outline:3px solid var(--text);outline-offset:2px}
+    .nn-scopes{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin:.6rem 0}.nn-scopes canvas{width:100%;height:130px;background:var(--surface);border:1px solid var(--border);display:block}.nn-scopes figcaption{font-size:.75rem;color:var(--muted)}@media(max-width:600px){.nn-scopes{grid-template-columns:1fr}}.nn-keys{display:flex;gap:2px;margin:.8rem 0;flex-wrap:wrap}.nn-keys button{flex:1 1 0;min-width:34px;min-height:64px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font:.7rem var(--font-body);padding:0}.nn-keys button.black{background:#222;color:#fff}.nn-keys button.on{background:var(--accent);color:#fff}.nn-modes{margin-bottom:.8rem}.nn-btn[aria-pressed=false]{background:transparent;color:var(--accent)}[hidden]{display:none!important}.nn-row{display:flex;gap:.75rem;flex-wrap:wrap;align-items:center}
+    .nn-log{font-size:.82rem;color:var(--muted);min-height:1.3rem;margin-top:.6rem}
+    .essay{max-width:44rem} .essay h3{font:600 1.15rem var(--font-heading);margin:2rem 0 .5rem} .essay p,.essay li{font-size:.95rem;line-height:1.7;margin:.6rem 0}
+    .essay ul,.essay ol{margin:.5rem 0 .5rem 1.3rem} .essay table{border-collapse:collapse;width:100%;font-size:.85rem;margin:.8rem 0}
+    .essay th,.essay td{border:1px solid var(--border);padding:.5rem .6rem;text-align:left;vertical-align:top} .essay th{background:var(--surface)}
+    .essay .eq{font-family:ui-monospace,Menlo,monospace;background:var(--surface);border:1px solid var(--border);padding:.7rem .9rem;font-size:.85rem;overflow-x:auto;white-space:pre}
+    .essay dt{font-weight:600;margin-top:.7rem} .essay dd{margin-left:0;color:var(--muted);font-size:.92rem}
+    footer{border-top:1px solid var(--border);padding:1.25rem 1.5rem;text-align:center;font-size:.78rem;color:var(--muted);margin-top:auto}
+    footer a{color:var(--muted);text-decoration:none} footer a:hover{color:var(--accent)}
+    #nnCanvas{height:400px;cursor:pointer}
+    .nn-tabs{display:flex;gap:.25rem;border-bottom:1px solid var(--border);margin:1.2rem 0 0;flex-wrap:wrap}
+    .nn-tabs [role=tab]{font:600 .85rem var(--font-body);padding:.7rem 1rem;border:1px solid transparent;border-bottom:0;background:none;color:var(--muted);cursor:pointer;min-height:44px}
+    .nn-tabs [role=tab][aria-selected=true]{color:var(--text);border-color:var(--border);background:var(--bg);margin-bottom:-1px}
+    .nn-pane{padding:1.2rem 0 0}
+    .nn-pick{display:flex;gap:.8rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem;font-size:.85rem;color:var(--muted)}
+    .nn-pick select,.nn-pane select{font:inherit;padding:.4rem .5rem;border:1px solid var(--border);background:var(--bg);color:var(--text);min-height:36px}
+    .nn-h4{font:600 1.05rem var(--font-heading);margin:.2rem 0 .5rem;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+    .nn-badge{font:600 .66rem var(--font-body);letter-spacing:.06em;text-transform:uppercase;color:var(--accent);background:var(--accent-light);padding:.2rem .5rem;border-radius:3px}
+    .nn-nums{display:flex;gap:1.5rem;flex-wrap:wrap;margin:.8rem 0;font-size:.78rem;color:var(--muted)} .nn-nums strong{display:block;font:600 1.1rem var(--font-heading);color:var(--text)}
+    .nn-formula{font-family:ui-monospace,Menlo,monospace;font-size:.8rem;background:var(--surface);border:1px solid var(--border);padding:.6rem .8rem;overflow-x:auto;white-space:nowrap;margin:.5rem 0}
+    .nn-plot{display:block;width:100%;max-width:340px;height:120px;border:1px solid var(--border);background:var(--surface);margin:.6rem 0}
+    .nn-tab{border-collapse:collapse;width:100%;font-size:.8rem;margin:.8rem 0} .nn-tab th,.nn-tab td{border:1px solid var(--border);padding:.3rem .5rem;text-align:left;font-variant-numeric:tabular-nums} .nn-tab th{background:var(--surface);font-weight:600}
+    .nn-click{cursor:pointer} .nn-click:hover,.nn-click:focus{outline:2px solid var(--accent);outline-offset:-2px}
+    .nn-ctl{margin:.8rem 0;font-size:.85rem} .nn-ctl input[type=range]{width:min(320px,100%);vertical-align:middle}
+    .nn-hint{font-size:.82rem;color:var(--muted);line-height:1.55;margin:.4rem 0}
+    .nn-btn--sm{padding:.45rem .8rem;font-size:.8rem;min-height:36px}
+    .nn-weights{border-collapse:collapse;font-size:.7rem;font-variant-numeric:tabular-nums;margin:.6rem 0} .nn-weights th{font-weight:600;color:var(--muted);padding:.2rem .35rem;text-align:center}
+    .nn-weights td{border:1px solid var(--border);min-width:2.6rem;text-align:center;padding:.3rem .2rem;cursor:pointer} .nn-weights td:focus,.nn-weights td:hover{outline:2px solid var(--text);outline-offset:-2px}
+    .nn-wrap{overflow-x:auto}
+    .nn-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem 1.6rem}
+    .nn-grid label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:.2rem} .nn-grid input[type=range]{width:100%} .nn-grid output{color:var(--text);font-weight:600}
+    .nn-ref{border:1px solid var(--border);margin:.5rem 0;padding:.2rem .9rem} .nn-ref summary{cursor:pointer;padding:.6rem 0;display:flex;gap:.7rem;align-items:center;flex-wrap:wrap} .nn-ref p{margin:.4rem 0 .8rem}
+    .nn-acts{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem;margin:1rem 0} .nn-acts figure{border:1px solid var(--border);padding:.8rem} .nn-acts figcaption{display:block;font-size:.82rem;line-height:1.5} .nn-acts figcaption>*{display:block;margin:.2rem 0}
+    .nn-acts code{font-family:ui-monospace,Menlo,monospace;font-size:.78rem;color:var(--muted)}
+    .toc{border:1px solid var(--border);background:var(--surface);padding:1rem 1.3rem;margin:1rem 0 2rem;columns:2;column-gap:2rem;font-size:.88rem} .toc a{color:var(--accent);text-decoration:none;display:block;padding:.15rem 0} .toc a:hover{text-decoration:underline}
+    @media(max-width:600px){.toc{columns:1} #nnCanvas{height:340px}}
+    .essay h2{font:600 1.35rem var(--font-heading);margin:2.6rem 0 .3rem;padding-top:1rem;border-top:1px solid var(--border)} .essay .eq{white-space:pre-wrap}
+    .essay blockquote{border-left:3px solid var(--accent);padding:.1rem 1rem;margin:1rem 0;color:var(--muted)}
+    .essay-ref a{color:var(--accent)}
   </style>
   <link rel="stylesheet" href="/assets/css/header.css">
   <link rel="stylesheet" href="/assets/css/a11y.css">
 </head>
 <body>
-
 <script src="/assets/js/site-header.js"></script>
-
-<nav aria-label="Breadcrumb" class="bc">
-  <ol>
-    <li><a href="/dashboard/">Dashboard</a></li>
-    <li><a href="/compositions/">Compositions</a></li>
-    <li>Neural Synthesis</li>
-  </ol>
-</nav>
-
+<nav aria-label="Breadcrumb" class="bc"><ol><li><a href="/dashboard/">Dashboard</a></li><li><a href="/compositions/">Compositions</a></li><li>Neural Synthesis</li></ol></nav>
 <main>
-
   <div class="ph">
     <h2>Neural Synthesis</h2>
-    <p>A self-organizing sonic network — nodes generate sound, connections transmit signals, weights evolve through learning. Sound emerges from interaction, not composition.</p>
+    <p>A real neural network that is the instrument. In <strong>Instrument</strong> mode the network is the oscillator: tens of thousands of times a second it is asked "what is the wave doing at this point in its cycle?", and its answer is the sound. Select any neuron or connection, change a weight or an activation function, and hear what that does. In <strong>Self-playing</strong> mode the network learns and composes on its own.</p>
   </div>
 
-  <div class="card">
-    <p class="card-title">neural synthesis</p>
+  <div class="card nn-app">
+    <p class="card-title">the network, live</p>
+    <div class="nn-row nn-modes" role="group" aria-label="Mode"><button type="button" class="nn-btn" id="modeInst" aria-pressed="true">Instrument</button><button type="button" class="nn-btn nn-btn--alt" id="modePlay" aria-pressed="false">Self-playing</button></div>
+    <div class="nn-stage"><canvas id="nnCanvas" role="img" aria-label="The network: 6 inputs, two hidden layers and 8 outputs. Brighter circles are more active. Lines are the connections between neurons. Select a neuron or a line to inspect it; the same choices are available in the lists below."></canvas></div>
+    <div class="nn-stats" aria-live="off">
+      <div><strong id="nnLoss">–</strong>Error (loss)</div>
+      <div><strong id="nnKey">–</strong>Key</div>
+      <div><strong id="nnEpisode">0</strong>Episodes so far</div>
+      <div><strong id="nnParams">–</strong>Trainable numbers</div>
+      <div><strong id="nnTime">0:00</strong>Running</div>
+    </div>
+    <div class="nn-row"><button type="button" class="nn-btn" id="nnPlay">Start sound</button><button type="button" class="nn-btn nn-btn--alt" id="nnNew">New network</button></div>
+    <p class="nn-log" id="nnLog" role="status" aria-live="polite">It starts out knowing nothing. Press start, then leave it for a few minutes: it changes slowly, and it does not repeat. Circles are neurons (brighter is more active); lines are weights (green positive, orange negative, thicker is stronger). Select one.</p>
 
-    <!-- Status bar -->
-    <div class="iter-display">
-      <div>
-        <div class="iter-count" id="ns-count">network idle</div>
-        <div class="iter-sub" id="ns-sub">12 nodes · 0 active connections</div>
+
+    <div id="instPanel" class="nn-inst">
+      <p class="nn-hint">Every sample, the network is given where we are in the wave (φ, from 0 to 1, as a sine and cosine pair) plus your two knobs. Its first two outputs are the left and right speaker. Press Start, play a note, then pick a neuron in the picture and change it.</p>
+      <div class="nn-scopes"><figure><canvas id="nnScope" role="img" aria-label="One cycle of the wave the network is producing"></canvas><figcaption>One cycle of the output (the wave). Dashed: the wave it is being taught.</figcaption></figure>
+        <figure><canvas id="nnSpec" role="img" aria-label="The loudness of the first 24 harmonics"></canvas><figcaption>Harmonics 1 to 24: the recipe of sine waves this wave is made of.</figcaption></figure></div>
+      <div class="nn-grid">
+        <div><label for="nnPitch">Pitch <output id="nnPitchV">220 Hz</output></label><input type="range" id="nnPitch" min="0" max="1" step="0.001" value="0.5"></div>
+        <div><label for="nnKnobA">Knob A (input 5) <output id="nnKnobAV">0.00</output></label><input type="range" id="nnKnobA" min="-1" max="1" step="0.01" value="0"></div>
+        <div><label for="nnKnobB">Knob B (input 6) <output id="nnKnobBV">0.00</output></label><input type="range" id="nnKnobB" min="-1" max="1" step="0.01" value="0"></div>
+        <div><label for="nnWob">Wobble: sweeps knob A <output id="nnWobV">0.00</output></label><input type="range" id="nnWob" min="0" max="1" step="0.01" value="0"></div>
+        <div><label for="nnWobRate">Wobble speed <output id="nnWobRateV">3.0 Hz</output></label><input type="range" id="nnWobRate" min="0.1" max="12" step="0.1" value="3"></div>
+        <div><label for="nnPhase">Look at the network at φ = <output id="nnPhaseV">0.00</output></label><input type="range" id="nnPhase" min="0" max="1" step="0.01" value="0"><label><input type="checkbox" id="nnSweep" checked> Sweep through the cycle</label></div>
       </div>
-      <div class="iter-status" id="ns-status">stopped</div>
+      <div class="nn-keys" id="nnKeys" role="group" aria-label="Keyboard: hold a key to play. Computer keys A to K also play."></div>
+      <div class="nn-row"><label><input type="checkbox" id="nnHoldNote"> Hold the note</label>
+        <button type="button" class="nn-btn nn-btn--sm nn-btn--alt" id="nnGainUp">All weights ×1.25</button><button type="button" class="nn-btn nn-btn--sm nn-btn--alt" id="nnGainDown">All weights ×0.8</button>
+        <label>Teach it <select id="nnTeachWave"></select></label><button type="button" class="nn-btn nn-btn--sm" id="nnTeach">Teach</button><span class="nn-hint" id="nnTeachStatus" role="status"></span></div>
+      <p class="nn-hint">Bigger weights drive the neurons harder, which bends the wave and adds harmonics. Teaching shows the network a target shape at every point of the cycle and nudges all its weights toward it: it is ordinary training, except that what it learns is a sound.</p>
     </div>
 
-    <!-- Energy bar -->
-    <div class="iter-progress"><div class="iter-progress-fill" id="ns-energy-fill"></div></div>
-
-    <!-- Network canvas -->
-    <div class="network-wrap" id="ns-wrap">
-      <canvas id="ns-canvas"></canvas>
-      <div class="network-overlay" id="ns-overlay">hover node for info · click to inject · drag to reposition</div>
-      <!-- Hover tooltip -->
-      <div class="node-tooltip" id="ns-tooltip">
-        <div class="node-tooltip-name" id="tt-name">—</div>
-        <div class="node-tooltip-row"><span class="node-tooltip-key">freq</span><span class="node-tooltip-val" id="tt-freq">—</span></div>
-        <div class="node-tooltip-row"><span class="node-tooltip-key">activation</span><span class="node-tooltip-val" id="tt-act">—</span></div>
-        <div class="node-tooltip-row"><span class="node-tooltip-key">amplitude</span><span class="node-tooltip-val" id="tt-amp">—</span></div>
-        <div class="node-tooltip-row"><span class="node-tooltip-key">inputs</span><span class="node-tooltip-val" id="tt-in">—</span></div>
-        <div class="node-tooltip-row"><span class="node-tooltip-key">outputs</span><span class="node-tooltip-val" id="tt-out">—</span></div>
-        <div class="node-tooltip-desc" id="tt-desc">—</div>
-      </div>
+    <div class="nn-tabs" role="tablist" aria-label="Explore and change the network">
+      <button role="tab" id="tabNeuron" aria-selected="true" aria-controls="paneNeuron" type="button">Neuron</button>
+      <button role="tab" id="tabWeights" aria-selected="false" aria-controls="paneWeights" tabindex="-1" type="button">Weights</button>
+      <button role="tab" id="tabNetwork" aria-selected="false" aria-controls="paneNetwork" tabindex="-1" type="button">Network</button>
+      <button role="tab" class="play-only" id="tabSound" aria-selected="false" aria-controls="paneSound" tabindex="-1" type="button">Sound</button>
     </div>
 
-    <!-- Node info panel (shown when node selected) -->
-    <div class="node-info" id="ns-node-info">
-      <div class="node-info-title">selected node</div>
-      <div class="node-info-grid">
-        <div class="node-info-item"><span class="node-info-key">type</span><span class="node-info-val" id="ni-type">—</span></div>
-        <div class="node-info-item"><span class="node-info-key">frequency</span><span class="node-info-val" id="ni-freq">—</span></div>
-        <div class="node-info-item"><span class="node-info-key">activation</span><span class="node-info-val" id="ni-act">—</span></div>
-        <div class="node-info-item"><span class="node-info-key">amplitude</span><span class="node-info-val" id="ni-amp">—</span></div>
-        <div class="node-info-item"><span class="node-info-key">output</span><span class="node-info-val" id="ni-output">—</span></div>
-        <div class="node-info-item"><span class="node-info-key">bias</span><span class="node-info-val" id="ni-bias">—</span></div>
+    <div class="nn-pane" id="paneNeuron" role="tabpanel" aria-labelledby="tabNeuron">
+      <div class="nn-pick">
+        <label>Layer <select id="nnPickLayer"><option value="0">Input</option><option value="1">Hidden 1</option><option value="2">Hidden 2</option><option value="3">Output</option></select></label>
+        <label>Neuron <select id="nnPickNeuron"></select></label>
       </div>
-      <div class="node-info-desc" id="ni-desc">—</div>
-      <div class="node-info-conns" id="ni-conns-wrap">
-        <div class="node-info-conns-title">incoming connections</div>
-        <div class="conn-list" id="ni-ins"></div>
-        <div class="node-info-conns-title" style="margin-top:.5em">outgoing connections</div>
-        <div class="conn-list" id="ni-outs"></div>
-      </div>
+      <div id="nnInspector" aria-live="off"></div>
     </div>
 
-    <!-- Transport -->
-    <div class="row">
-      <button class="btn" id="ns-start" style="min-width:80px"><svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> start</button>
-      <button class="btn" id="ns-stop" style="min-width:80px" disabled><svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg> stop</button>
-      <button class="btn" id="ns-mutate" disabled>↯ mutate</button>
-      <button class="btn" id="ns-rewire" disabled>⇄ rewire</button>
-      <button class="btn" id="ns-reset">reset</button>
+    <div class="nn-pane" id="paneWeights" role="tabpanel" aria-labelledby="tabWeights" hidden>
+      <p class="nn-hint">Every number the network has learned is a weight. Each table is one layer's weights, updating as it learns.</p>
+      <div class="nn-pick"><label>Layer of connections <select id="nnWLayer"><option value="0">Input → Hidden 1</option><option value="1">Hidden 1 → Hidden 2</option><option value="2">Hidden 2 → Output</option></select></label></div>
+      <div class="nn-wrap"><table class="nn-weights" id="nnWeights" aria-describedby="nnWCaption"></table></div>
+      <p class="nn-hint" id="nnWCaption"></p>
     </div>
 
-    <!-- Modes -->
-    <div class="row">
-      <span class="row-lbl">topology →</span>
-      <button class="pill on" id="ns-mode-random" data-mode="random">random</button>
-      <button class="pill" id="ns-mode-ring" data-mode="ring">ring</button>
-      <button class="pill" id="ns-mode-cluster" data-mode="cluster">cluster</button>
-      <button class="pill" id="ns-mode-chain" data-mode="chain">chain</button>
-    </div>
-
-    <!-- Parameter sliders -->
-    <div class="sliders">
-      <div class="ctrl">
-        <input type="range" id="ns-temp" min="0" max="1" value="0.4" step="0.01">
-        <div class="ctrl-bot">
-          <span class="ctrl-lbl">temperature</span>
-          <span class="ctrl-val" id="ns-temp-val">40%</span>
-        </div>
+    <div class="nn-pane" id="paneNetwork" role="tabpanel" aria-labelledby="tabNetwork" hidden>
+      <div class="nn-grid">
+        <div class="play-only"><label for="nnLearn">Learning rate <output id="nnLearnV"></output></label><input type="range" id="nnLearn" min="0.005" max="0.15" step="0.005" value="0.05"></div>
+        <div class="play-only"><label for="nnHeat">Heat: how hard it is shaken at each new episode <output id="nnHeatV"></output></label><input type="range" id="nnHeat" min="0" max="1" step="0.05" value="0.5"></div>
+        <div class="play-only"><label for="nnPace">Pace: how often the goal changes <output id="nnPaceV"></output></label><input type="range" id="nnPace" min="0.25" max="3" step="0.05" value="1"></div>
+        <div class="play-only"><label for="nnAdv">Adventure: how freely it picks notes <output id="nnAdvV"></output></label><input type="range" id="nnAdv" min="0" max="1" step="0.05" value="0.5"></div>
+        <div class="play-only"><label for="nnRate">Note rate <output id="nnRateV"></output></label><input type="range" id="nnRate" min="0.25" max="2.5" step="0.05" value="1"></div>
+        <div><label for="nnVol">Volume <output id="nnVolV"></output></label><input type="range" id="nnVol" min="0" max="1" step="0.05" value="0.6"></div>
+        <div><label for="nnH1">Neurons in hidden layer 1 <output id="nnH1V">10</output></label><input type="range" id="nnH1" min="2" max="16" step="1" value="10"></div>
+        <div><label for="nnH2">Neurons in hidden layer 2 <output id="nnH2V">8</output></label><input type="range" id="nnH2" min="2" max="12" step="1" value="8"></div>
+        <div><label for="nnAct1">Activation function, hidden 1</label><select id="nnAct1"></select></div>
+        <div><label for="nnAct2">Activation function, hidden 2</label><select id="nnAct2"></select></div>
       </div>
-      <div class="ctrl">
-        <input type="range" id="ns-feedback" min="0" max="1" value="0.5" step="0.01">
-        <div class="ctrl-bot">
-          <span class="ctrl-lbl">feedback</span>
-          <span class="ctrl-val" id="ns-feedback-val">50%</span>
-        </div>
-      </div>
-      <div class="ctrl">
-        <input type="range" id="ns-nonlin" min="0" max="1" value="0.35" step="0.01">
-        <div class="ctrl-bot">
-          <span class="ctrl-lbl">nonlinearity</span>
-          <span class="ctrl-val" id="ns-nonlin-val">35%</span>
-        </div>
-      </div>
-      <div class="ctrl">
-        <input type="range" id="ns-vol" min="0" max="1" value="0.7" step="0.01">
-        <div class="ctrl-bot">
-          <span class="ctrl-lbl">volume</span>
-          <span class="ctrl-val" id="ns-vol-val">70%</span>
-        </div>
+      <p class="nn-hint">Changing the number of neurons makes a new network of that shape (it forgets what it has learned). Changing an activation function keeps the weights, so the network has to relearn around the change.</p>
+      <div class="nn-row play-only" style="margin-top:.8rem">
+        <label><input type="checkbox" id="nnHold"> Hold the goal still (no new chords or episodes)</label>
+        <label><input type="checkbox" id="nnLockKey"> Lock the key to</label>
+        <select id="nnKeyRoot" aria-label="Key"></select><select id="nnKeyMode" aria-label="Mode"></select>
       </div>
     </div>
 
-    <!-- Learning row -->
-    <div class="row">
-      <span class="row-lbl">learning →</span>
-      <button class="pill on" id="ns-hebbian">hebbian</button>
-      <button class="pill on" id="ns-drift">frequency drift</button>
-      <button class="pill" id="ns-spatial">spatial pan</button>
+    <div class="nn-pane" id="paneSound" role="tabpanel" aria-labelledby="tabSound" hidden>
+      <p class="nn-hint">Each part of the network has its own voice. Turn one down to hear what the others are doing, or to hear only one part of the computation.</p>
+      <div class="nn-grid">
+        <div><label for="nnMix-drone">Drone: hidden layer 1 <output id="nnMixV-drone">1.00</output></label><input type="range" id="nnMix-drone" min="0" max="1.5" step="0.05" value="1"></div>
+        <div><label for="nnMix-shimmer">Shimmer: hidden layer 2 <output id="nnMixV-shimmer">1.00</output></label><input type="range" id="nnMix-shimmer" min="0" max="1.5" step="0.05" value="1"></div>
+        <div><label for="nnMix-melody">Melody: the output layer <output id="nnMixV-melody">1.00</output></label><input type="range" id="nnMix-melody" min="0" max="1.5" step="0.05" value="1"></div>
+        <div><label for="nnMix-weighing">Weighing: the strongest products <output id="nnMixV-weighing">1.00</output></label><input type="range" id="nnMix-weighing" min="0" max="1.5" step="0.05" value="1"></div>
+        <div><label for="nnMix-texture">Texture: the loss <output id="nnMixV-texture">1.00</output></label><input type="range" id="nnMix-texture" min="0" max="1.5" step="0.05" value="1"></div>
+      </div>
+      <table class="nn-tab" style="margin-top:1.2rem"><thead><tr><th>What the network computes</th><th>What you hear</th></tr></thead><tbody>
+        <tr><td>Hidden layer 1 activations</td><td>Loudness of harmonics of the key's root: a drone whose colour is the pattern of those neurons.</td></tr>
+        <tr><td>Hidden layer 2 activations</td><td>Inharmonic upper partials spread across the stereo field, stretched out of tune when the loss is high.</td></tr>
+        <tr><td>Output probabilities</td><td>Which note of the scale is played next, drawn from the seven note outputs. The Adventure setting flattens or sharpens the draw.</td></tr>
+        <tr><td>Gate neuron</td><td>Whether a note sounds at all, scaled by a slow density cycle.</td></tr>
+        <tr><td>Largest weight × activation products</td><td>Soft blips: which connections are doing the most work right now.</td></tr>
+        <tr><td>The loss</td><td>Brightness, noise texture, and how long the notes ring.</td></tr></tbody></table>
     </div>
-
-    <p class="hint">neural synthesis to study/relax to · click any node to inject energy</p>
   </div>
 
-  <!-- Instructions -->
-  <div class="instructions">
-    <h2>How it works</h2>
-    <p>Neural Synthesis models a small network of sound-generating and signal-processing nodes connected by weighted edges. When the network runs, each node sums its incoming signals, passes them through a nonlinear activation function, and emits an audio output that flows to neighboring nodes. No sound is pre-composed — it emerges from the interaction of the system with itself.</p>
-    <p>The design follows David Tudor's approach in works like <em>Rainforest</em>: circuits that listen to each other, feeding back, accumulating instability, then resolving into unexpected textures. Paired with Hebbian learning — "neurons that fire together wire together" — the network's behavior slowly changes over time as active connections strengthen and quiet ones fade.</p>
+  <div class="card essay" id="nnRef" aria-labelledby="refH"><p class="card-title" id="refH">reference: the parts of the network</p></div>
+  <article class="card essay" aria-labelledby="essayH">
+    <p class="card-title" id="essayH">a deep dive: how neural networks work</p>
+    <p>This is a long essay, written for people who are curious about what neural networks actually are and are willing to follow some arithmetic. It does not assume you know any mathematics beyond multiplication and addition, but it does not avoid the mathematics either, because the mathematics is the explanation. Everything described here is happening, live, in the network above.</p>
 
-    <h2>Node types</h2>
-    <p>The network contains four kinds of nodes. <strong>Oscillator nodes</strong> generate continuous tones — sine, triangle, or chaotic waveforms — whose frequency drifts slowly if drift is enabled. <strong>Filter nodes</strong> shape incoming signals with low-pass or bandpass filters, carving the spectrum. <strong>Nonlinear nodes</strong> apply functions like tanh, wave-folding, or sigmoid to their input, introducing harmonic complexity and instability. <strong>Delay nodes</strong> hold signal in memory, creating echoes, rhythmic patterns, and phase relationships between distant parts of the network.</p>
+    <nav class="toc" aria-label="Contents of the essay">
+      <a href="#e-what">1. What a neural network is</a>
+      <a href="#e-history">2. Where the idea comes from</a>
+      <a href="#e-neuron">3. The neuron: a weighted vote</a>
+      <a href="#e-layers">4. Layers, and the matrix view</a>
+      <a href="#e-nonlinear">5. Why the activation function matters</a>
+      <a href="#e-learning">6. How a network learns</a>
+      <a href="#e-backprop">7. Backpropagation, step by step</a>
+      <a href="#e-practice">8. Making learning work in practice</a>
+      <a href="#e-wrong">9. What goes wrong</a>
+      <a href="#e-inside">10. What the hidden layers become</a>
+      <a href="#e-arch">11. Architectures: networks of many shapes</a>
+      <a href="#e-language">12. How large language models fit in</a>
+      <a href="#e-uses">13. What they are used for</a>
+      <a href="#e-limits">14. Limits, risks and open questions</a>
+      <a href="#e-sound">15. Sound as a function: Instrument mode</a>
+      <a href="#e-here">16. What this page is and is not</a>
+      <a href="#e-try">17. Experiments to try here</a>
+      <a href="#e-gloss">18. Glossary</a>
+      <a href="#e-read">19. Where to go next</a>
+    </nav>
 
-    <h2>Temperature</h2>
-    <p>The temperature slider is the primary expressive control. At low values the network settles into stable drones — slow, organ-like tones reminiscent of Eliane Radigue's long-form works. At high values feedback accumulates faster, nonlinear nodes begin to saturate, and the system produces chaotic bursts and unstable resonance. The sweet spot around 40–60% produces slow evolution with occasional turbulence.</p>
+    <h2 id="e-what">1. What a neural network is</h2>
+    <p>A neural network is a function: something that takes in a list of numbers and produces another list of numbers. What makes it special is how the function is built and how it is found. It is built from many very simple units, each doing a tiny calculation, wired together in layers. And it is not written by anyone: its behaviour is set by thousands to billions of adjustable numbers, called <em>parameters</em>, and those numbers are found by showing the network examples and nudging them, a little at a time, in whatever direction makes its mistakes smaller. This process is called <em>training</em>.</p>
+    <p>That is the whole idea. An image classifier is a function from the brightness of every pixel to a list of probabilities for "cat", "dog", "car". A speech recogniser is a function from sound to text. A language model is a function from the words so far to a probability for each possible next word. The network above is a function from six wandering numbers to eight outputs, and it is being trained to make those outputs spell out a chord. Same machinery, much smaller.</p>
+    <p>The network here has 6 inputs, then two hidden layers (10 and 8 neurons by default), then 8 outputs. With the default shape it has 230 adjustable numbers: 60 + 80 + 64 = 204 weights, plus 10 + 8 + 8 = 26 biases (both terms are explained below). The live count is shown under the picture, and it changes when you change the size of the layers.</p>
 
-    <h2>Injecting energy</h2>
-    <p>Click any node in the visualization to inject a pulse of energy directly into it. The network responds — neighboring nodes light up, connections glow, and the sonic texture shifts. This is the most immediate way to disturb the system and hear it recover. Try clicking the same node repeatedly to force a feedback loop, or click different nodes to set multiple regions of the network into activity.</p>
+    <h2 id="e-history">2. Where the idea comes from</h2>
+    <p>In 1943 Warren McCulloch and Walter Pitts proposed a simplified mathematical model of a neuron: a unit that adds up its inputs and "fires" if the total passes a threshold. In 1958 Frank Rosenblatt built the <em>perceptron</em>, a machine that used a unit like this and could learn to classify simple patterns by adjusting its weights. It attracted enormous attention, and enormous promises.</p>
+    <p>In 1969 Marvin Minsky and Seymour Papert published <em>Perceptrons</em>, which showed, rigorously, that a single layer of such units cannot compute some simple functions, the best known being <em>exclusive or</em> (XOR: output 1 if exactly one of two inputs is 1). Networks with a hidden layer can, but at the time there was no good way to train them, and interest and funding in the field fell away for years.</p>
+    <p>The method that solved this was <em>backpropagation</em>: an efficient way of working out how every weight in a many-layered network contributed to an error. Its mathematical ingredients had been discovered more than once by different people (reverse-mode automatic differentiation in the 1960s and 1970s, and Paul Werbos's 1974 thesis applying it to networks), and the 1986 paper by David Rumelhart, Geoffrey Hinton and Ronald Williams showed convincingly that it made networks learn useful internal representations. In 1989 Yann LeCun and colleagues used a convolutional network trained by backpropagation to read handwritten postcode digits. In 1997 Sepp Hochreiter and Jürgen Schmidhuber introduced the LSTM, a unit for learning from sequences.</p>
+    <p>For about two decades after that, other machine-learning methods were often better in practice. The turn came in 2012, when a deep convolutional network, AlexNet (Alex Krizhevsky, Ilya Sutskever and Geoffrey Hinton), won an image-recognition competition by a wide margin. Three things had come together: much more labelled data, graphics processors that could do the arithmetic fast, and a set of practical improvements to training that made deep networks work. Since then the field has moved quickly: generative adversarial networks (2014), networks that beat human champions at Go (2016), and the <em>transformer</em> architecture (Vaswani and colleagues, 2017), which underlies most current large language models.</p>
 
-    <h2>Mutate and rewire</h2>
-    <p>Press <strong>↯ mutate</strong> to randomly shift node frequencies, weights, and activation functions — producing a new sonic species without stopping the network. Press <strong>⇄ rewire</strong> to randomly add and remove connections, changing the network's topology while it runs. Together these tools let you evolve the system continuously, never returning to the same configuration twice.</p>
+    <h2 id="e-neuron">3. The neuron: a weighted vote</h2>
+    <p>A neuron receives some numbers. Each incoming connection has a <em>weight</em>, which says how much that input counts. The neuron multiplies each input by its weight and adds up the results. It then adds a <em>bias</em>, a number of its own that shifts the total up or down whatever the inputs are. The result is called the <em>pre-activation</em> and is usually written z. Finally z is passed through an <em>activation function</em> f, which produces the neuron's output a.</p>
+    <div class="eq">z = w₁x₁ + w₂x₂ + … + wₙxₙ + b
+a = f(z)</div>
+    <p>It is a vote in which some voters count more than others (their weights), some count against (negative weights), and the neuron has a built-in leaning (its bias). If you select any neuron in the picture above, the Neuron tab shows precisely this: every input, the weight applied to it, the product, the total and the output.</p>
+    <p>A worked example. A neuron has inputs 0.5 and -1, weights 0.8 and 0.3, and bias 0.1. Then z = 0.5×0.8 + (-1)×0.3 + 0.1 = 0.4 − 0.3 + 0.1 = 0.2. With tanh as the activation function, a = tanh(0.2) ≈ 0.197.</p>
+    <p><strong>A word on biology.</strong> The name "neural network" and the diagrams of connected circles come from an analogy with the brain, and the analogy was a real source of the idea. But the analogy is loose. A real neuron is an elaborate cell with many kinds of chemistry and timing, and brains learn by mechanisms that are not backpropagation. Artificial neurons are best thought of as a convenient mathematical building block, inspired by biology but not a model of it.</p>
 
-    <h2>Topology modes</h2>
-    <p>The topology selector changes how nodes are connected when you reset. <strong>Random</strong> connects nodes at chance, producing unpredictable behavior. <strong>Ring</strong> arranges nodes in a loop — signal circulates continuously. <strong>Cluster</strong> creates two groups with sparse inter-group connections, producing two interacting ecosystems. <strong>Chain</strong> passes signal through nodes in sequence, like a physical room with multiple chambers.</p>
+    <h2 id="e-layers">4. Layers, and the matrix view</h2>
+    <p>Neurons are arranged in layers, and every neuron in a layer takes input from every neuron in the layer before. If you collect all the weights going into a layer into a table (a <em>matrix</em> W, with one row for each neuron in the layer and one column for each neuron in the layer before it) and all the biases into a list b, then the whole layer's calculation is one line:</p>
+    <div class="eq">a_next = f( W · a_previous + b )</div>
+    <p>The Weights tab above shows exactly these tables, one for each pair of layers. A network is this line repeated: the output of one layer becomes the input of the next, until the last layer produces the answer. This pass from input to output is the <em>forward pass</em>. It is the reason graphics processors are so good at neural networks: matrix multiplication is what they were built for.</p>
+    <p>The first layer is the <em>input layer</em>, which just holds the data. The last is the <em>output layer</em>, whose values are the answer. Everything in between is <em>hidden</em>, a word that only means "neither input nor output". "Deep" learning means many hidden layers.</p>
+    <p>Parameter counts: a layer going from m neurons to n neurons has m × n weights and n biases. Doubling the width of a layer therefore roughly quadruples its weights. Large systems have billions of parameters; this one has a few hundred.</p>
 
-    <h2>Tudor and feedback</h2>
-    <p>David Tudor spent decades building electronic instruments from scratch — not instruments in the traditional sense, but networks of circuits, each one feeding signal into the next, listening and responding in ways no single hand could predict or control. Works like <em>Rainforest</em> (1968) distributed transducers across physical objects — metal sheets, ceramic bowls, wooden planks — letting each surface shape and color sound according to its own resonant character. Tudor's instruments had no score, no fixed output. They had behavior.</p>
-    <p>The key concept is feedback: the output of a system becomes its input. In electronics, feedback can stabilize, sustain, or push a signal into runaway oscillation. It can produce rich harmonic content from nothing, or collapse a structured signal into noise. Tudor embraced this indeterminacy. He didn't ask what the circuit would produce — he asked what conditions would allow the circuit to become interesting, and then listened. The performer's role shifted from expression to cultivation: setting parameters, introducing perturbations, then stepping back as the system found its own behavior.</p>
-    <p>Neural Synthesis inherits this disposition. The temperature and feedback controls are not mix parameters — they are ecological conditions. You set the climate; the network decides what grows.</p>
+    <h2 id="e-nonlinear">5. Why the activation function matters</h2>
+    <p>Suppose there were no activation function, so each neuron simply output its weighted sum. Then two layers in a row would compute W₂(W₁x + b₁) + b₂, which can be rewritten as (W₂W₁)x + (W₂b₁ + b₂): that is, a single layer with different weights. A hundred layers would collapse into one. Without a <em>nonlinearity</em> in between, depth adds no power, and a linear function can only ever draw straight boundaries through the data. XOR cannot be separated by a straight line, which is exactly the limitation Minsky and Papert pointed out.</p>
+    <p>The activation function bends the line. Once every layer applies a nonlinear function, stacking layers lets the network compose simple bends into complicated shapes. There is a famous mathematical result, the <em>universal approximation theorem</em> (George Cybenko, 1989; Kurt Hornik, 1991), which says that a network with just one hidden layer and enough neurons can approximate any continuous function on a bounded region as closely as you like. It is a reassuring fact, and it is easy to misread: it says such a network <em>exists</em>, not that training will find it, nor how many neurons would be needed. In practice, depth tends to be far more efficient than width.</p>
+    <p>Different functions have different characters. This page offers four, which you can choose for each hidden layer and compare in the reference section above. <strong>tanh</strong> and <strong>softsign</strong> squash every input into -1 to +1, and flatten out for large inputs (<em>saturation</em>). <strong>Leaky ReLU</strong> passes positive values unchanged and nearly blocks negative ones; the plain version, the rectified linear unit, became the default choice in large networks because it does not saturate on the positive side and is cheap to compute. <strong>Sine</strong> is periodic and unusual, and makes a neuron respond in bands. The output layer here always uses tanh because the targets are between -1 and +1.</p>
 
-    <h2>Neural networks</h2>
-    <p>A neural network, in its most abstract form, is a graph: a set of nodes and the weighted connections between them. Each <strong>node</strong> receives signals from its neighbors, combines them, and produces a new output. The combination is shaped by a <strong>weight</strong> — a number that scales how strongly one node influences another. Positive weights amplify; negative weights suppress; weights near zero allow signals to pass but barely notice them.</p>
-    <p>The output of a node is not simply the sum of its inputs. It passes through an <strong>activation function</strong> — a mathematical transform that introduces <strong>nonlinearity</strong>. Without nonlinearity, a network of any depth reduces to a single linear equation; there is no complexity, no emergence. Activation functions like tanh, sigmoid, and wave-folding bend and saturate the signal, enabling a small network to represent vastly more complex relationships than its size would suggest. They are the origin of the harmonic richness you hear as nodes interact: two pure sine waves entering a tanh function produce a spectrum that neither wave contained on its own.</p>
-    <p>In machine learning, weights are adjusted through training — repeated exposure to examples, with errors propagated backward through the graph. In this instrument, weights evolve through Hebbian learning: nodes that activate together strengthen their connection. There is no target, no error signal, no optimization toward a goal. The network learns only what it does — a self-referential loop that slowly sculpts its own behavior through the act of running.</p>
+    <h2 id="e-learning">6. How a network learns</h2>
+    <p>Learning needs a way of saying how wrong the network is. That is the <em>loss function</em>: a single number, computed from the network's outputs and the correct answers, which is large when the network is wrong and zero when it is perfect. This network uses the <em>mean squared error</em>: for each output, take the difference between what the network said and what it should have said, square it, and average. The number labelled "Error (loss)" under the picture is that.</p>
+    <div class="eq">loss = average of (output − target)²</div>
+    <p>Other problems use other losses. For classification, <em>cross-entropy</em> is standard: it penalises a network heavily for being confidently wrong. The choice of loss is a choice about what counts as a mistake, and it matters.</p>
+    <p>Now imagine all the parameters of the network as coordinates, so that the network at any moment is a point in a space with hundreds, or billions, of dimensions. The loss is a height at each point: a landscape. Training is a walk downhill on this landscape. At the current point you work out which way is steepest, and take a small step that way. The steepness and direction at a point are given by the <em>gradient</em> (a list containing the slope of the loss with respect to each parameter), and the method is <em>gradient descent</em>. The size of each step is the <em>learning rate</em>, which you can set in the Network tab.</p>
+    <div class="eq">w ← w − η × (slope of the loss with respect to w)</div>
+    <p>The hard part was never the stepping; it was finding the slope for every one of millions of parameters efficiently. That is what backpropagation does.</p>
 
-    <h2>The brain</h2>
-    <p>The brain is, at its substrate, a network: roughly 86 billion neurons, each connected to thousands of others, exchanging electrochemical signals across synapses whose strength changes with activity. What makes it remarkable is not the complexity of any individual neuron — a single cell is relatively simple — but the patterns of coordinated activity that emerge across millions of them simultaneously. Consciousness, perception, memory: none of these live in a single place. They are processes, distributed across the network's behavior in time.</p>
-    <p>One of the most persistent features of brain activity is <strong>oscillation</strong>. Neurons across distant regions synchronize their firing into rhythmic waves — alpha, beta, theta, gamma — at frequencies that shift with attention, sleep, emotion, and cognitive load. These oscillations are not noise; they are the brain's coordination mechanism. When two regions need to communicate, they synchronize. When they need to decouple, their oscillations drift apart. The <strong>coupling</strong> between oscillators — the degree to which one region's rhythm entrains another's — is a fundamental computational operation of the nervous system.</p>
-    <p><strong>Emergence</strong> is what happens when local interactions produce global behavior that no individual element contains or could predict. A single neuron does not hear; billions of them, organized into the right patterns of connectivity and timing, produce auditory experience. In Neural Synthesis, individual oscillator nodes are trivial — a sine wave at a harmonic frequency. But as connections form, weights evolve, and feedback propagates through delay and nonlinear transformation, textures arise that none of the nodes produce alone. This is not a metaphor for neural emergence. It is the same phenomenon at a different scale: local rules, global behavior, and the irreducible surprise of a system listening to itself.</p>
-  </div>
+    <h2 id="e-backprop">7. Backpropagation, step by step</h2>
+    <p>The slope of the loss with respect to a weight can be found with the <em>chain rule</em> from calculus: if A affects B and B affects the loss, then the effect of A on the loss is the effect of A on B times the effect of B on the loss. The network is a chain of such steps, so the effect of any weight on the loss is a product of local effects along the path from that weight to the output.</p>
+    <p>Backpropagation arranges the arithmetic so that it is done once, working from the output backward. For each neuron, define δ (delta) as the slope of the loss with respect to that neuron's pre-activation z. For an output neuron with target t:</p>
+    <div class="eq">δ = (2 / n) × (output − target) × f′(z)</div>
+    <p>Here n is the number of outputs and f′ is the slope of the activation function at z: how sensitive the neuron is, right now, to a change in its input sum. For a hidden neuron, the error is whatever it contributed to the deltas of the neurons it feeds, weighted by the connections:</p>
+    <div class="eq">δ(hidden) = f′(z) × Σ ( weight to next neuron × δ(next neuron) )</div>
+    <p>That is the "back-propagation" of error: each layer's deltas are computed from the next layer's. Once a neuron has its δ, the update for every weight going into it is the same simple rule:</p>
+    <div class="eq">Δw = −η × δ × (the input that came along that weight)
+Δb = −η × δ</div>
+    <p>Pick any neuron and look at its table in the Neuron tab: the "Its output" column is the input to each weight, and those are exactly the numbers that multiply δ in the update.</p>
+    <p><strong>Worked example, continued.</strong> Take the neuron from earlier (inputs 0.5 and -1, weights 0.8 and 0.3, bias 0.1, output 0.197) and suppose it should have output 0.9. With one output, δ = 2 × (0.197 − 0.9) × (1 − 0.197²) ≈ -1.35, where the last bracket is the slope of tanh at that point. With η = 0.05:</p>
+    <ul>
+      <li>weight 1: 0.8 − 0.05 × (-1.35) × 0.5 ≈ 0.834</li>
+      <li>weight 2: 0.3 − 0.05 × (-1.35) × (-1) ≈ 0.232 (it goes down, because its input was negative)</li>
+      <li>bias: 0.1 − 0.05 × (-1.35) ≈ 0.168</li>
+    </ul>
+    <p>Running the neuron again gives tanh(0.5×0.834 − 0.232 + 0.168) = tanh(0.352) ≈ 0.338: closer to 0.9. This is repeated many times, and the page does it about twenty times a second across all its parameters at once. The numbers in this example are checked by an automatic test against the code that runs this page.</p>
+    <p>In 1986 this was a breakthrough; today it is automated. Machine-learning software records the calculations of the forward pass and computes all the gradients for you (<em>automatic differentiation</em>), so nobody writes backpropagation by hand for each new architecture.</p>
 
+    <h2 id="e-practice">8. Making learning work in practice</h2>
+    <p><strong>Learning rate.</strong> Too small and learning is painfully slow; too large and each step overshoots the valley and the loss bounces or blows up. You can see both here: set the learning rate to its lowest, and the network trails the changing chords; set it high and it follows quickly but with overshoot and roughness.</p>
+    <p><strong>Stochastic and mini-batch gradient descent.</strong> Real training data has millions of examples. Computing the exact gradient over all of them for every step is wasteful, so training uses small random batches. The gradient from a batch is a noisy estimate of the true one, but it is far cheaper, and the noise is even helpful. This page takes the extreme form, one example at a time, because its "dataset" is a single moving input.</p>
+    <p><strong>Better optimisers.</strong> Plain gradient descent has many refinements. <em>Momentum</em> keeps some of the previous step's direction, which smooths the path; <em>Adam</em> (Diederik Kingma and Jimmy Ba, 2014) adapts the step size of each parameter individually, and is among the most widely used methods.</p>
+    <p><strong>Initialisation.</strong> You cannot start with all weights equal to zero. If two neurons in a layer start identical they receive identical updates for ever and stay identical, so the layer is wasted. Weights are started at small random values, and their scale is chosen so that signals neither shrink nor grow as they pass through layers. This page uses <em>Xavier (Glorot) initialisation</em>, from a 2010 paper by Xavier Glorot and Yoshua Bengio, which draws weights with a spread of √(2 / (inputs + outputs)). For ReLU units a related scheme (He initialisation) is used.</p>
+    <p><strong>Normalisation, regularisation and data.</strong> Large networks add many further techniques, such as normalising the numbers in each layer, and using <em>weight decay</em> (a small pull that keeps weights from growing), <em>dropout</em> (randomly silencing neurons during training; Nitish Srivastava and colleagues, 2014) and <em>data augmentation</em> (training on altered copies of the data). The common purpose is to help the network generalise, which is the next topic.</p>
+
+    <h2 id="e-wrong">9. What goes wrong</h2>
+    <p><strong>Overfitting.</strong> A network with enough parameters can memorise its training examples, including their noise, and then perform badly on new ones. What you want is <em>generalisation</em>: doing well on examples it has never seen. This is why data is split into a training set (used to learn), a validation set (used to tune choices) and a test set (touched only at the end to measure real performance). A falling training loss alone tells you very little.</p>
+    <p><strong>Vanishing and exploding gradients.</strong> In a deep network the gradient for early layers is a long product of numbers from later layers. If those numbers are mostly smaller than one the product shrinks toward zero and early layers barely learn; if mostly larger than one it explodes. Saturating activation functions make the first problem worse: where a tanh neuron is saturated, its slope f′(z) is close to zero, and almost no learning signal passes through it. Much of the progress of the last decade is a catalogue of fixes for this: ReLU-style activations, careful initialisation, normalisation layers and residual connections (see below).</p>
+    <p><strong>Dead neurons.</strong> A plain ReLU neuron whose input is always negative outputs zero and has zero slope, so it can never recover. The "leaky" version used here keeps a small slope on the negative side for that reason.</p>
+    <p><strong>Local minima, plateaus and saddle points.</strong> The loss landscape is not a simple bowl. In very high dimensions, however, pure local minima turn out to be rarer than saddle points (flat regions that slope down in some directions), and the practical difficulty is more often slow progress along plateaus than being trapped.</p>
+    <p><strong>Optimising the wrong thing.</strong> A network minimises the loss you give it, not what you meant. If the loss rewards the wrong thing, or the data is unrepresentative, the network will faithfully learn that. The most important problems with deployed networks are usually problems of data and objectives, not of arithmetic.</p>
+
+    <h2 id="e-inside">10. What the hidden layers become</h2>
+    <p>Nobody tells a hidden neuron what to detect. Training pushes its weights toward whatever combination of its inputs helps reduce the loss, so its meaning emerges. In image networks, researchers who visualised what neurons respond to found a rough hierarchy: neurons in early layers respond to edges and colour contrasts, middle layers to textures and parts, later layers to whole objects. The network builds up its own description of the data, layer by layer. These descriptions are called <em>representations</em>, and the ability to learn good ones, rather than having a human design them by hand, is the real strength of the approach.</p>
+    <p>A particularly useful kind of representation is an <em>embedding</em>: a list of numbers that places each word, image or song at a point in a space where similar things are close together. Word embeddings learned from large amounts of text famously capture some relationships as directions in the space (the vector from "man" to "woman" is roughly similar to that from "king" to "queen"), though such examples are approximate and are easier to pick out than to rely on.</p>
+    <p>Interpreting what a trained network is doing is a hard and active research field. For a large network it is generally not possible to say, in a sentence, why it produced a particular output. On this page, you can do a small version of the investigation yourself: select a neuron in the second hidden layer, silence it, and listen to what changes. That is a miniature of an <em>ablation</em> experiment, a standard technique in interpretability research.</p>
+
+    <h2 id="e-arch">11. Architectures: networks of many shapes</h2>
+    <p>The network on this page is a <em>multilayer perceptron</em> (MLP), or fully connected network. It is the plainest design. Most of the progress in practical systems has come from architectures that build in assumptions about the data:</p>
+    <ul>
+      <li><strong>Convolutional networks</strong> are designed for images and other grid-like data. A small filter of shared weights slides across the image, so the same pattern is detected wherever it appears. Reusing weights makes them far more efficient than connecting every pixel to every neuron.</li>
+      <li><strong>Recurrent networks</strong> process sequences one step at a time, feeding some of their output back as input to the next step, which gives them a form of memory. LSTM and GRU units add learned gates that control what to remember and forget.</li>
+      <li><strong>Transformers</strong> (2017) replace recurrence with <em>attention</em>: for each position in a sequence, the network computes how relevant every other position is, and takes a weighted average of what it finds. This can be computed in parallel across the whole sequence, which suits modern hardware and scales well. Transformers are the basis of most current language models and are also used for images, audio and more.</li>
+      <li><strong>Autoencoders</strong> are trained to squeeze data through a narrow middle layer and reconstruct it, so the middle layer becomes a compact representation.</li>
+      <li><strong>Generative adversarial networks</strong> (Ian Goodfellow and colleagues, 2014) pit a generator, which makes fake examples, against a discriminator, which tries to tell fakes from real ones, so that each improves the other. <strong>Diffusion models</strong> learn to reverse a process of gradually adding noise, and generate images and audio by starting from noise and removing it step by step.</li>
+      <li><strong>Reinforcement learning</strong> uses a network to choose actions, and trains it from rewards rather than correct answers. It was central to the systems that mastered Go and many video games.</li>
+    </ul>
+    <p>Residual connections, which add a layer's input directly to its output, deserve a note: they let information and gradients bypass layers, and are what made networks of hundreds of layers trainable. The reference section above lists these and other units.</p>
+
+    <h2 id="e-language">12. How large language models fit in</h2>
+    <p>A large language model is a transformer network with billions of parameters trained on a very large amount of text. The basic training task is <em>next-token prediction</em>: given a stretch of text, predict what comes next. A token is a piece of a word. The loss is the cross-entropy between the network's predicted probabilities and the word that actually followed. To predict well across enormous quantities of varied text, the network has to build internal representations of grammar, facts, styles and a great deal more, which is why such a simple objective yields general abilities.</p>
+    <p>The raw trained model is then usually refined, often with <em>fine-tuning</em> on examples of the desired behaviour and with feedback from human raters, to make it follow instructions and avoid harmful output. When a model generates text, it does something very like the note choice on this page: it computes a probability for each possible next token, and one is drawn, with a setting (the <em>temperature</em>) controlling how adventurous the draw is. The Adventure slider is the same idea.</p>
+    <p>The key differences from this page are scale, the architecture, and above all the data. Understanding the mechanism does not make the behaviour of a large model predictable, and it is important to remember that such a model produces plausible text, which is not the same as true text.</p>
+
+    <h2 id="e-uses">13. What they are used for</h2>
+    <ul>
+      <li><strong>Images and video:</strong> recognising objects and faces, reading handwriting and documents, medical imaging (for example, helping flag suspicious regions in scans for a clinician to review), generating and editing pictures.</li>
+      <li><strong>Speech and language:</strong> speech recognition and synthesis, translation, summarisation, search, and conversational systems.</li>
+      <li><strong>Science:</strong> predicting the three-dimensional structure of proteins from their sequence (AlphaFold), modelling materials and weather, and finding patterns in large experimental data sets.</li>
+      <li><strong>Recommendation and ranking:</strong> which video, product or song to show next; this is one of the largest commercial uses.</li>
+      <li><strong>Control and games:</strong> robotics, game-playing, and optimising complex systems.</li>
+      <li><strong>Audio and music:</strong> separating a mix into instruments, transcribing music, noise reduction in phones and hearing aids, compressing audio, and generating sound and music. For a field built on sound, they are now everywhere.</li>
+    </ul>
+    <p>In health and mental-health settings the potential is real and so are the risks. Networks can pick up subtle patterns in speech, text or physiological signals, but a pattern is not a diagnosis, models can perform much worse on groups that were poorly represented in their training data, and training such models typically requires gathering large amounts of very sensitive personal information. Those are among the reasons this Lab keeps your data encrypted on your device and calculates its insights there.</p>
+
+    <h2 id="e-limits">14. Limits, risks and open questions</h2>
+    <ul>
+      <li><strong>Opacity.</strong> A trained network is a large pile of numbers. It is difficult to explain individual decisions, which matters where decisions affect people.</li>
+      <li><strong>Bias.</strong> A network learns the patterns in its data, including unfair ones. It can reproduce and amplify them while looking objective.</li>
+      <li><strong>Brittleness.</strong> Networks can fail on inputs unlike those they were trained on, and can be fooled by <em>adversarial examples</em>: tiny, carefully chosen changes to an input that humans cannot perceive but that change the output completely.</li>
+      <li><strong>Confident error.</strong> Generative systems can produce fluent output that is false. Fluency is not evidence.</li>
+      <li><strong>Privacy.</strong> Models can sometimes reveal parts of their training data, and building them concentrates personal data. Approaches such as training or running models on the user's own device exist partly for this reason.</li>
+      <li><strong>Cost and power.</strong> Training the largest models takes a great deal of computation and energy.</li>
+      <li><strong>Open questions.</strong> Why large networks generalise as well as they do despite having so many parameters, how to interpret them reliably, and how to align their behaviour with human intentions are all active areas of research, without settled answers.</li>
+    </ul>
+
+    <h2 id="e-sound">15. Sound as a function: Instrument mode</h2>
+    <p>A sound wave is also a function. Pick any point in one cycle of a repeating wave, written as a number φ (phi) from 0 to 1, and the wave has one height there. A sine wave is the function that maps φ to sin(2πφ). A sawtooth maps it to a straight ramp. A recording of a violin is a much more complicated function of the same kind. Since a neural network is a function from numbers to numbers, it can be the wave: give it φ and let the answer be the height.</p>
+    <p>That is exactly what Instrument mode does. The six inputs are sin φ, cos φ, sin 2φ and cos 2φ (so the network can tell every point of the cycle apart, and the end of the cycle joins the start) plus two knobs you control. The first two outputs are the left and right speaker. To make a note at 220 Hz, φ runs from 0 to 1 two hundred and twenty times a second, and at each of the 48,000 samples a second the whole network is calculated once. The program that does this contains no oscillator, no filter and no wavetable. Everything you hear is the arithmetic you see in the Neuron tab.</p>
+    <h3>What the parts do to the sound</h3>
+    <ul>
+      <li><strong>Weights.</strong> A weight scales one signal on its way to the next neuron. Making many weights larger drives the neurons harder, and a neuron driven hard enough saturates: its output flattens at the top and bottom. A flattened sine is no longer a sine, and the difference is new harmonics. That is why the "All weights ×1.25" button makes the sound brighter. A symmetric squashing like tanh adds only odd harmonics (3, 5, 7…), which is why a square wave, the limit of flattening, has only those.</li>
+      <li><strong>Bias.</strong> A bias moves a neuron's working point away from zero. For a squashing function, a shifted wave is squashed lopsidedly, and lopsided squashing creates <em>even</em> harmonics (2, 4, 6…). Try changing one hidden neuron's bias while you watch the spectrum.</li>
+      <li><strong>Activation functions.</strong> The function is the character of the oscillator. With tanh the output is smooth and rounded. With leaky ReLU, whose graph has a corner, the wave gets sharp corners and a rich, buzzy spectrum. With sine the network folds the wave back on itself, which is the wave-folding of modular synthesizers and gives bright, metallic tones as weights grow.</li>
+      <li><strong>The knobs.</strong> Because knob A and knob B are just inputs, turning them changes what every neuron receives, so they bend the wave as a whole, with different effects depending on the weights each neuron has for them. A fixed network turned by two knobs is a small synthesizer whose controls were not designed but found.</li>
+      <li><strong>Muting and cutting.</strong> Silencing a hidden neuron removes one of the shapes the output is built from. Cutting a connection removes one term from one weighted sum. Both are small surgeries you can hear and see in the wave.</li>
+    </ul>
+    <h3>The harmonic view</h3>
+    <p>The bar chart shows how loud each harmonic of the note is. Any repeating wave can be written as a sum of sine waves at whole-number multiples of its pitch, and this chart is that recipe, found with a discrete Fourier transform of the single cycle the network just produced. A change in the network is a change in the wave, and a change in the wave is a change in the recipe, so you can see in the chart what you are hearing.</p>
+    <h3>Teaching it a wave</h3>
+    <p>Training is the same procedure as everywhere else in this essay. Choose a target (say a triangle wave), pick a random φ, ask the network for its output, compare it with the target's height at that φ, and use backpropagation to nudge every weight a little to make the error smaller. After a few thousand of these examples the whole function is close to the target. Watching the solid line crawl toward the dashed one is what "learning a function" means, and it makes the point that the network has no special knowledge of sound: it is simply fitting a curve.</p>
+    <p>You can also see why this is hard. A neuron is smooth, so a perfect square wave with its instant jumps is something the network can only approximate, and the sharper the target, the larger the weights have to be, which is the same effect as turning the gain up. Teaching a wave and then changing a single neuron shows how the knowledge is spread across all the weights rather than stored in one place.</p>
+    <p>This is also the idea behind a family of research systems: networks used as oscillators and sound generators, taught from recordings, or whose weights are explored by ear. Here the network is small enough to understand completely, which is the point.</p>
+
+    <h2 id="e-here">16. What this page is and is not</h2>
+    <p>Real: the network, its loss, its learning, and every number going through it. In Instrument mode the sound is the network's own output, sample by sample. The neuron tables, the weight tables and the formulas you see are read directly from the running network, and the example calculations in this essay are checked against its code.</p>
+    <p>Chosen, in Self-playing mode: every mapping from numbers to sound. Making the first hidden layer a drone, the second a shimmer and the output a melody is a composer's decision, and other mappings would make the same network sound entirely different. This is <em>sonification</em>: a way of making the shape of a computation audible. It is not the voice of a mind. The network has no understanding of music, or of anything: it adjusts a few hundred numbers to match a pattern of eight values.</p>
+    <p>Also simplified: the network learns online, from one constantly changing example, rather than from a large data set in batches; it has no validation data and so cannot overfit in the usual sense; and its goal keeps moving by design, so it never converges. These choices are what make it musical.</p>
+
+    <h2 id="e-try">17. Experiments to try here</h2>
+    <h3>In Instrument mode</h3>
+    <ol>
+      <li><strong>Gain and harmonics.</strong> Hold a note. Press "All weights ×0.8" five times, then "×1.25" ten times. Watch the harmonics chart as you go. Where does the sound change character? What happens to the loudness, given that every neuron's output is limited?</li>
+      <li><strong>Swap the function.</strong> In the Network tab set hidden layer 1 to sine, then leaky ReLU, then back to tanh. Listen and look: which one has the most harmonics? Which has the sharpest corners in the wave?</li>
+      <li><strong>Odd and even.</strong> Select a neuron in hidden layer 1 and move its bias slowly from −3 to +3. Watch the even harmonics (2, 4, 6) appear and disappear.</li>
+      <li><strong>Teach and damage.</strong> Teach a triangle wave. Then silence one hidden neuron at a time. Does any single neuron hold the shape, or is it shared?</li>
+      <li><strong>Knobs are inputs.</strong> Turn Wobble up and look at which wave shapes appear as knob A sweeps. Then select a neuron and cut the connection from "knob A" to it. What changes?</li>
+      <li><strong>Teach with a knob.</strong> Set knob A to −1 and teach a sine, then set knob A to +1 and teach a saw. Sweep the knob. You have taught the network a morph between two sounds.</li>
+    </ol>
+    <h3>In Self-playing mode</h3>
+    <ol>
+      <li><strong>Ablation.</strong> In the Neuron tab, silence a neuron in hidden layer 2 and listen. Then silence a different one. Do some matter more than others? Does the network adapt over the next minute by relying on the others?</li>
+      <li><strong>Capacity.</strong> In the Network tab set both hidden layers to 2 neurons. Can it still track the chord? Now set them to the maximum. What does extra capacity buy, and what does it cost in the time taken to learn?</li>
+      <li><strong>Nonlinearity.</strong> Change hidden layer 1 to leaky ReLU, then sine. Which changes the sound of the drone most? Which settles to a lower loss?</li>
+      <li><strong>Teaching.</strong> Select the output neuron for the 1st scale degree and set "Teach it" to always on. Then to always off. Listen to the melody follow.</li>
+      <li><strong>Freezing.</strong> Freeze every neuron in hidden layer 2 (one by one), and watch the loss when the next chord change arrives. What can a network do if only part of it is allowed to learn?</li>
+      <li><strong>Cutting connections.</strong> In the Weights tab select the largest weights in a layer and cut them. How quickly does the network repair itself?</li>
+      <li><strong>Learning rate.</strong> Set it to the minimum, then the maximum. Describe how each sounds, and how the loss trace in the picture looks.</li>
+      <li><strong>Heat and pace.</strong> Turn both up and wait for an episode. Then hold the goal still and watch the loss trace flatten.</li>
+    </ol>
+
+    <h2 id="e-gloss">18. Glossary</h2>
+    <dl>
+      <dt>Activation (of a neuron)</dt><dd>The neuron's output for the current input.</dd>
+      <dt>Activation function</dt><dd>The nonlinear function applied to a neuron's weighted sum.</dd>
+      <dt>Backpropagation</dt><dd>An efficient way to compute the gradient of the loss with respect to every weight, by working backward from the output.</dd>
+      <dt>Batch / mini-batch</dt><dd>A group of training examples used together for one update.</dd>
+      <dt>Bias</dt><dd>A neuron's own constant added to its weighted sum.</dd>
+      <dt>Cross-entropy</dt><dd>A loss for probabilities that penalises confident wrong answers heavily.</dd>
+      <dt>Embedding</dt><dd>A learned list of numbers representing an item, placed so that similar items are near each other.</dd>
+      <dt>Epoch</dt><dd>One full pass through the training data. (This page uses "episode" for a change of goal.)</dd>
+      <dt>Forward pass</dt><dd>Computing the output from the input, layer by layer.</dd>
+      <dt>Generalisation</dt><dd>Performing well on examples not seen in training.</dd>
+      <dt>Gradient</dt><dd>The list of slopes of the loss with respect to each parameter.</dd>
+      <dt>Gradient descent</dt><dd>Repeatedly stepping parameters against the gradient to reduce the loss.</dd>
+      <dt>Hidden layer</dt><dd>A layer that is neither input nor output.</dd>
+      <dt>Hyperparameter</dt><dd>A setting chosen by the designer, such as the learning rate or layer sizes, rather than learned.</dd>
+      <dt>Learning rate</dt><dd>The size of each parameter update.</dd>
+      <dt>Loss</dt><dd>A number measuring how wrong the network currently is.</dd>
+      <dt>Overfitting</dt><dd>Fitting the training data, noise included, at the cost of performance on new data.</dd>
+      <dt>Parameter</dt><dd>Any number the network learns: the weights and biases.</dd>
+      <dt>Regularisation</dt><dd>Any technique that discourages overfitting.</dd>
+      <dt>Representation</dt><dd>The internal description of the data that a layer builds.</dd>
+      <dt>Saturation</dt><dd>A neuron's output sitting on the flat part of its activation function, where its slope, and so its learning, is near zero.</dd>
+      <dt>Softmax</dt><dd>A function turning a list of numbers into probabilities that sum to one.</dd>
+      <dt>Sonification</dt><dd>Turning data into sound.</dd>
+      <dt>Weight</dt><dd>A learned number scaling one connection.</dd>
+    </dl>
+
+    <h2 id="e-read">19. Where to go next</h2>
+    <ul class="essay-ref">
+      <li>Michael Nielsen, <em>Neural Networks and Deep Learning</em>: a free online book that builds up exactly the material in sections 3 to 8, with code.</li>
+      <li>3Blue1Brown, the video series on neural networks: the clearest visual introduction to the forward pass, gradient descent and backpropagation.</li>
+      <li>Andrej Karpathy, <em>Neural Networks: Zero to Hero</em>: a video course that builds a small network and a language model from scratch in code.</li>
+      <li>Ian Goodfellow, Yoshua Bengio and Aaron Courville, <em>Deep Learning</em> (MIT Press, 2016): the standard textbook, free to read online. It is mathematical.</li>
+      <li>The journal <em>Distill</em> (archived online): beautifully illustrated explanations of how networks represent and process data.</li>
+    </ul>
+  </article>
 </main>
+<footer><p><a href="/compositions/">Compositions</a> · <a href="/privacy/">Privacy</a></p></footer>
 
-<footer>
-  <p>Jordan Elias Music Therapy · Berlin ·
-    <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a> ·
-    <a href="https://jordanelias.de/" target="_blank" rel="noopener">jordanelias.de</a>
-  </p>
-</footer>
-
-<script>
-(function(){
-'use strict';
-
-/* ══════════════════════════════════════════════════════════════
-   NEURAL SYNTHESIS ENGINE
-   Inspired by David Tudor's Rainforest and Hebbian neural networks.
-
-   Architecture:
-   - 12 nodes (oscillator, filter, nonlinear, delay types)
-   - Weighted directed graph connections
-   - Per-tick signal propagation through activation functions
-   - Hebbian learning: active connection weights grow, inactive decay
-   - AudioWorklet-style processing via ScriptProcessor fallback
-   - Force-directed layout with collision
-════════════════════════════════════════════════════════════════ */
-
-var audioCtx = null;
-var masterGain = null;
-var masterLimiter = null;
-var isRunning = false;
-var animFrame = null;
-
-function getCtx(){
-  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  return audioCtx;
+<script type="module">
+import { NeuralEngine } from '/assets/js/neural/engine.js';
+import { InstrumentEngine } from '/assets/js/neural/synth-engine.js';
+import { WAVES, WAVE_NAMES, INPUT_LABELS } from '/assets/js/neural/synth.js';
+import { setInspectMode } from '/assets/js/neural/inspect.js';
+import { draw } from '/assets/js/neural/draw.js';
+import { mountUI, mountReference, plotCycle } from '/assets/js/neural/ui.js';
+const NOTE = ['C','C♯','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
+const $ = id => document.getElementById(id), cv = $('nnCanvas');
+let seed = Math.floor(Math.random() * 1e6), t0 = 0, last = null, frame = 0, mode = 'inst';
+const state = { sel: null };
+let ui = null;
+const onFrame = s => { last = s; paint(); frame++; if (frame % 3 === 0 && ui) ui.refresh(); };
+const playEng = new NeuralEngine({ seed, volume: 0.6, onFrame: s => { if (mode === 'play') onFrame(s); } });
+const instEng = new InstrumentEngine({ seed, volume: 0.6, onFrame: s => { if (mode === 'inst') onFrame(s); } });
+let engine = instEng;
+const host = { get conductor() { return engine.conductor; }, get mode() { return mode; }, get a() { return instEng.a; }, get b() { return instEng.b; }, get phase() { return instEng.phase; },
+  set: o => engine.set(o), setLevel: (v, x) => engine.setLevel(v, x) };
+const status = a => { $('nnLog').textContent = a; };
+const params = net => net.W.reduce((n, L, l) => n + L.reduce((m, row, j) => m + row.reduce((k, w, i) => k + net.M[l][j][i], 0) + 1, 0), 0);
+const hz = v => 55 * Math.pow(16, v), noteName = f => { const n = Math.round(12 * Math.log2(f / 440)) + 69; return NOTE[((n % 12) + 12) % 12] + (Math.floor(n / 12) - 1); };
+function paintInstrument() {
+  const e = instEng; if (!e.cycle) return;
+  const sc = $('nnScope'), tgt = e.teaching ? Float32Array.from({ length: 128 }, (_, k) => WAVES[e.teaching.wave](k / 127)) : null;
+  plotCycle(sc, e.cycle, e.phase, tgt);
+  const sp = $('nnSpec'), dpr = window.devicePixelRatio || 1, w = sp.clientWidth || 300, h = sp.clientHeight || 130; sp.width = Math.round(w * dpr); sp.height = Math.round(h * dpr);
+  const g = sp.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
+  const hs = e.harm || [], mx = Math.max(0.3, ...hs), bw = w / 24;
+  hs.forEach((v, k) => { const bh = (v / mx) * (h - 18); g.fillStyle = '#2a5c45'; g.fillRect(k * bw + 1, h - 14 - bh, bw - 2, bh); if (k % 3 === 0) { g.fillStyle = '#6b6b6b'; g.font = '9px sans-serif'; g.fillText(k + 1, k * bw + 2, h - 3); } });
+  const t = e.teaching; $('nnTeachStatus').textContent = t ? `Teaching ${t.wave}… error ${t.loss == null ? '–' : t.loss.toFixed(3)}` : $('nnTeachStatus').textContent;
 }
-function resumeCtx(){
-  var c = getCtx();
-  if(c.state === 'suspended') c.resume();
-  return c;
+function paint() {
+  const c = engine.conductor, s = last || { acts: c.lastActs };
+  draw(cv, c.net, s.acts || c.lastActs, c.lossNow, state.sel, mode === 'inst' ? { layers: ['input: where in the cycle', 'hidden 1', 'hidden 2', 'output: the sound'], inputs: INPUT_LABELS, outputs: ['left', 'right', '', '', '', '', '', ''] } : {});
+  $('nnLoss').textContent = c.lossNow.toFixed(3); $('nnParams').textContent = params(c.net);
+  if (mode === 'play') { $('nnKey').textContent = `${NOTE[c.root]} ${c.mode}`; $('nnEpisode').textContent = c.episode; if (ui) ui.syncKey(); } else paintInstrument();
+  if (engine.running) { const sec = Math.floor((performance.now() - t0) / 1000); $('nnTime').textContent = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`; }
 }
-
-/* ── Network state ── */
-var NS = {
-  nodes: [],
-  edges: [],
-  selectedNode: null,
-  topology: 'random',
-  temperature: 0.4,
-  feedback: 0.5,
-  nonlinearity: 0.35,
-  volume: 0.7,
-  hebbianOn: true,
-  driftOn: true,
-  spatialOn: false,
-  time: 0,
-  energyLevel: 0,
-  totalEnergy: 0,
-  activeConns: 0
+ui = mountUI({ engine: host, canvas: cv, state, onSelect: () => paint() });
+mountReference($('nnRef'));
+const play = $('nnPlay');
+const startLabel = () => (mode === 'inst' ? 'Start sound' : 'Start listening');
+play.onclick = async () => {
+  if (engine.running) { await engine.pause(); play.textContent = 'Resume'; status('Paused. The network is still there, just not running. You can still look around and change things.'); return; }
+  t0 = performance.now(); play.textContent = 'Pause';
+  status(mode === 'inst' ? 'The sound is on, but the instrument is silent until you play a note: press a key below, or hold the note. Then select a neuron and change something.' : 'Listening. At first it is rough while it works out its first chord. Give it a minute, and try selecting a neuron.');
+  try { await (engine.ctx ? engine.resume() : engine.start()); } catch (e) { status('The browser would not start audio here: ' + (e && e.message || e)); play.textContent = startLabel(); }
 };
-
-/* ── Node types and activation functions ── */
-var NODE_TYPES = ['oscillator','oscillator','oscillator','oscillator',
-                  'filter','filter','filter',
-                  'nonlinear','nonlinear','nonlinear',
-                  'delay','delay'];
-
-var ACTIVATION_NAMES = ['tanh','sin','fold','sigmoid','relu','abs'];
-function applyActivation(x, fn, strength){
-  var s = strength || 1;
-  switch(fn){
-    case 'tanh':    return Math.tanh(x * s * 2);
-    case 'sin':     return Math.sin(x * s * Math.PI);
-    case 'fold':    var v = x * s; return v > 1 ? 2 - v : v < -1 ? -2 - v : v;
-    case 'sigmoid': return 2/(1+Math.exp(-x*s*3)) - 1;
-    case 'relu':    return Math.max(0, x * s);
-    case 'abs':     return Math.abs(x * s) * Math.sign(x);
-    default:        return Math.tanh(x);
-  }
-}
-
-/* ── Harmonic series for musical coherence ── */
-var BASE_HZ = 55; // A1
-var HARMONICS = [1,2,3,4,5,6,7,8,9,10,12,15,16,18,20,24];
-
-function harmonicFreq(idx){
-  return BASE_HZ * HARMONICS[idx % HARMONICS.length];
-}
-
-/* ── Color mapping: frequency → hue ── */
-function freqToHue(hz){
-  // Map 55–880 Hz to 160–340 (green→blue→purple range, fitting accent palette)
-  var min = 55, max = 880;
-  var t = Math.max(0, Math.min(1, (Math.log(hz/min)) / Math.log(max/min)));
-  return 160 + t * 180;
-}
-
-/* ── Build network ── */
-function buildNetwork(topology){
-  // Stop existing audio nodes
-  NS.nodes.forEach(function(n){ if(n.osc){ try{n.osc.stop();}catch(e){} n.osc=null; } });
-  NS.edges = [];
-  NS.nodes = [];
-  NS.selectedNode = null;
-  hoveredNode = null;
-  hideTooltip();
-  hideNodeInfo();
-
-  var types = NODE_TYPES.slice();
-  var W = canvas.clientWidth || 600, H = canvas.clientHeight || 380;
-  var cx = W/2, cy = H/2, r = Math.min(W,H)*0.35;
-
-  for(var i = 0; i < 12; i++){
-    var angle = (i / 12) * Math.PI * 2 - Math.PI/2;
-    var px = cx + Math.cos(angle) * r * (0.7 + Math.random()*0.3);
-    var py = cy + Math.sin(angle) * r * (0.7 + Math.random()*0.3);
-
-    NS.nodes.push({
-      id: i,
-      type: types[i],
-      x: px, y: py,
-      vx: 0, vy: 0,
-      freq: harmonicFreq(i),
-      targetFreq: harmonicFreq(i),
-      activation: ACTIVATION_NAMES[i % ACTIVATION_NAMES.length],
-      output: 0,
-      prevOutput: 0,
-      energy: 0,
-      bias: (Math.random() - 0.5) * 0.1,
-      learningRate: 0.001 + Math.random() * 0.002,
-      delay: [],
-      delayIdx: 0,
-      delayLen: Math.floor((0.01 + Math.random()*0.04) * 44100 / 100), // in ticks
-      osc: null,
-      oscGain: null,
-      panNode: null,
-      phase: Math.random() * Math.PI * 2,
-      color: freqToHue(harmonicFreq(i))
-    });
-  }
-
-  // Create edges by topology
-  if(topology === 'random'){
-    for(var i = 0; i < 12; i++){
-      var numConns = 2 + Math.floor(Math.random() * 2);
-      for(var k = 0; k < numConns; k++){
-        var j = Math.floor(Math.random() * 12);
-        if(j !== i) addEdge(i, j, (Math.random()*0.8 - 0.1));
-      }
-    }
-  } else if(topology === 'ring'){
-    for(var i = 0; i < 12; i++){
-      addEdge(i, (i+1)%12, 0.6 + Math.random()*0.3);
-      if(Math.random() < 0.3) addEdge(i, (i+3)%12, 0.2 + Math.random()*0.3);
-    }
-    // A few backward connections
-    for(var i = 0; i < 3; i++){
-      var a = Math.floor(Math.random()*12), b = Math.floor(Math.random()*12);
-      if(a!==b) addEdge(a,b,-0.3 - Math.random()*0.3);
-    }
-  } else if(topology === 'cluster'){
-    // Two clusters of 6, with sparse inter-cluster
-    for(var i = 0; i < 6; i++){
-      for(var j = 0; j < 6; j++){
-        if(i!==j && Math.random()<0.4) addEdge(i,j,0.3+Math.random()*0.5);
-      }
-    }
-    for(var i = 6; i < 12; i++){
-      for(var j = 6; j < 12; j++){
-        if(i!==j && Math.random()<0.4) addEdge(i,j,0.3+Math.random()*0.5);
-      }
-    }
-    // Inter-cluster bridges
-    for(var k = 0; k < 3; k++){
-      addEdge(Math.floor(Math.random()*6), 6+Math.floor(Math.random()*6), 0.15+Math.random()*0.25);
-    }
-  } else if(topology === 'chain'){
-    for(var i = 0; i < 11; i++){
-      addEdge(i, i+1, 0.55 + Math.random()*0.3);
-    }
-    addEdge(11, 0, 0.3 + Math.random()*0.2); // feedback to start
-    for(var k = 0; k < 4; k++){
-      var a = Math.floor(Math.random()*12), b = Math.floor(Math.random()*12);
-      if(a!==b) addEdge(a,b,0.1+Math.random()*0.2);
-    }
-  }
-
-  updateStatus();
-}
-
-function addEdge(from, to, weight){
-  // Avoid duplicate
-  for(var i = 0; i < NS.edges.length; i++){
-    if(NS.edges[i].from===from && NS.edges[i].to===to) return;
-  }
-  NS.edges.push({
-    from: from, to: to,
-    weight: weight !== undefined ? weight : (Math.random()*1.0 - 0.2),
-    signal: 0,
-    age: 0
-  });
-}
-
-/* ══════════════════════════════════════════════════════════════
-   AUDIO ENGINE
-   Uses Web Audio oscillators per node, modulated by the
-   network state on each animation frame.
-════════════════════════════════════════════════════════════════ */
-
-function startAudio(){
-  var ctx = resumeCtx();
-
-  // Master chain: gain → compressor → destination
-  masterGain = ctx.createGain();
-  masterGain.gain.setValueAtTime(0, ctx.currentTime);
-  masterGain.gain.linearRampToValueAtTime(NS.volume, ctx.currentTime + 0.4);
-
-  masterLimiter = ctx.createDynamicsCompressor();
-  masterLimiter.threshold.value = -10;
-  masterLimiter.knee.value = 6;
-  masterLimiter.ratio.value = 12;
-  masterLimiter.attack.value = 0.015;
-  masterLimiter.release.value = 0.25;
-  masterGain.connect(masterLimiter);
-  masterLimiter.connect(ctx.destination);
-
-  // Create oscillators and gains for each oscillator node
-  NS.nodes.forEach(function(n){
-    if(n.type === 'oscillator'){
-      n.osc = ctx.createOscillator();
-      n.osc.type = 'sine';
-      n.osc.frequency.value = n.freq;
-
-      // Per-node gain starts silent - all changes via setTargetAtTime
-      n.oscGain = ctx.createGain();
-      n.oscGain.gain.setValueAtTime(0, ctx.currentTime);
-
-      // Per-node lowpass to soften harmonics and reduce inter-sample clicks
-      n.oscFilter = ctx.createBiquadFilter();
-      n.oscFilter.type = 'lowpass';
-      n.oscFilter.frequency.value = 800;
-      n.oscFilter.Q.value = 0.5;
-
-      n.panNode = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
-
-      n.osc.connect(n.oscGain);
-      n.oscGain.connect(n.oscFilter);
-      if(n.panNode){
-        n.oscFilter.connect(n.panNode);
-        n.panNode.connect(masterGain);
-      } else {
-        n.oscFilter.connect(masterGain);
-      }
-      n.osc.start();
-    }
-  });
-}
-
-function stopAudio(){
-  if(!audioCtx || !masterGain) return;
-  var ctx = audioCtx;
-  var now = ctx.currentTime;
-  // Fade master out smoothly before disconnecting
-  masterGain.gain.setValueAtTime(masterGain.gain.value, now);
-  masterGain.gain.linearRampToValueAtTime(0, now + 0.5);
-  var mg = masterGain, ml = masterLimiter;
-  setTimeout(function(){
-    NS.nodes.forEach(function(n){
-      if(n.osc){ try{n.osc.stop();}catch(e){} n.osc=null; }
-      n.oscGain = null; n.oscFilter = null; n.panNode = null;
-    });
-    try{ mg.disconnect(); } catch(e){}
-    try{ ml.disconnect(); } catch(e){}
-  }, 550);
-  masterGain = null;
-  masterLimiter = null;
-}
-
-/* ── Network tick: propagate signals, apply learning ── */
-var TICK_INTERVAL = 50; // ms between network updates
-var lastTick = 0;
-
-function networkTick(now){
-  if(now - lastTick < TICK_INTERVAL) return;
-  lastTick = now;
-  NS.time++;
-
-  var temp = NS.temperature;
-  var fbk = NS.feedback;
-  var nl = NS.nonlinearity;
-
-  // Compute new outputs
-  var newOutputs = new Array(12).fill(0);
-  var totalE = 0;
-  var activeC = 0;
-
-  NS.nodes.forEach(function(n){
-    var inp = n.bias;
-
-    // Sum weighted inputs from edges
-    NS.edges.forEach(function(e){
-      if(e.to === n.id){
-        var sig = NS.nodes[e.from].output * e.weight;
-        inp += sig;
-        e.signal = Math.abs(sig);
-        if(e.signal > 0.01) activeC++;
-      }
-    });
-
-    var rawOut;
-    if(n.type === 'oscillator'){
-      // Oscillator: self-generates + influenced by inputs
-      n.phase += (n.freq / 44100) * 2 * Math.PI * TICK_INTERVAL;
-      rawOut = Math.sin(n.phase) + inp * fbk;
-    } else if(n.type === 'filter'){
-      // Filter: smooth input with memory
-      rawOut = n.prevOutput * (0.7 - fbk * 0.3) + inp * (0.3 + fbk * 0.3);
-    } else if(n.type === 'delay'){
-      // Delay: use ring buffer
-      n.delay[n.delayIdx] = inp;
-      n.delayIdx = (n.delayIdx + 1) % n.delayLen;
-      rawOut = n.delay[n.delayIdx] || 0;
-    } else {
-      // Nonlinear: pure transform
-      rawOut = inp;
-    }
-
-    // Apply activation with nonlinearity control
-    var activated = applyActivation(rawOut, n.activation, 0.5 + nl * 2);
-
-    // Temperature adds noise
-    var noise = (Math.random() - 0.5) * temp * 0.3;
-    activated += noise;
-
-    // Soft clip
-    activated = Math.tanh(activated);
-
-    newOutputs[n.id] = activated;
-    n.prevOutput = n.output;
-
-    // Energy tracking
-    n.energy = Math.abs(activated);
-    totalE += n.energy;
-  });
-
-  // Apply new outputs
-  NS.nodes.forEach(function(n){ n.output = newOutputs[n.id]; });
-
-  // Hebbian learning
-  if(NS.hebbianOn){
-    NS.edges.forEach(function(e){
-      var a = NS.nodes[e.from].output, b = NS.nodes[e.to].output;
-      var hebb = a * b * NS.nodes[e.to].learningRate * 0.5;
-      e.weight += hebb;
-      e.weight *= (1 - 0.0005); // decay
-      // Clamp
-      e.weight = Math.max(-1.5, Math.min(1.5, e.weight));
-    });
-  }
-
-  // Frequency drift
-  if(NS.driftOn){
-    NS.nodes.forEach(function(n){
-      if(n.type === 'oscillator'){
-        n.freq += (Math.random() - 0.5) * 0.08 * NS.temperature;
-        // Attract toward nearest harmonic
-        var nearest = HARMONICS.reduce(function(best, h){
-          var f = BASE_HZ * h;
-          return Math.abs(f - n.freq) < Math.abs(best - n.freq) ? f : best;
-        }, BASE_HZ);
-        n.freq += (nearest - n.freq) * 0.001;
-        n.freq = Math.max(40, Math.min(1200, n.freq));
-        n.color = freqToHue(n.freq);
-      }
-    });
-  }
-
-  // Update audio from network state
-  if(audioCtx && masterGain){
-    var now = audioCtx.currentTime;
-    NS.nodes.forEach(function(n){
-      if(n.type === 'oscillator' && n.osc && n.oscGain){
-        // Very slow frequency glide — prevents pitch clicks entirely
-        n.osc.frequency.setTargetAtTime(n.freq, now, 0.4);
-        // Slow amplitude envelope — 120ms time constant prevents amplitude clicks
-        var amp = Math.max(0, Math.min(0.45, n.energy * 0.5));
-        n.oscGain.gain.setTargetAtTime(amp, now, 0.12);
-        // Modulate lowpass cutoff with energy for timbral interest, no clicks
-        if(n.oscFilter){
-          var cutoff = 300 + n.energy * 900;
-          n.oscFilter.frequency.setTargetAtTime(cutoff, now, 0.2);
-        }
-        // Spatial pan from x position — slow pan movement, no clicks
-        if(NS.spatialOn && n.panNode){
-          var cw = canvas.width || 600;
-          var pan = ((n.x / cw) * 2 - 1) * 0.7;
-          n.panNode.pan.setTargetAtTime(pan, now, 0.5);
-        }
-      }
-    });
-  }
-
-  // Update global state
-  NS.energyLevel = Math.min(1, totalE / 6);
-  NS.activeConns = Math.floor(activeC / 2);
-  NS.totalEnergy = totalE;
-
-  document.getElementById('ns-energy-fill').style.width = (NS.energyLevel * 100).toFixed(1) + '%';
-  updateStatus();
-}
-
-/* ── Inject energy into a node ── */
-function injectNode(nodeId){
-  var n = NS.nodes[nodeId];
-  if(!n) return;
-  // Smooth energy injection — avoid hard discontinuity in output
-  n.output = (n.output * 0.3) + 0.7 * (0.75 + Math.random() * 0.25);
-  n.energy = Math.min(1, n.energy + 0.6);
-  n._flash = 1.0;
-  setStatus('energy injected → ' + n.type + ' node ' + nodeId);
-}
-
-/* ── Mutate ── */
-function mutate(){
-  // Shift weights
-  NS.edges.forEach(function(e){
-    e.weight += (Math.random() - 0.5) * 0.4 * NS.temperature;
-    e.weight = Math.max(-1.5, Math.min(1.5, e.weight));
-  });
-  // Shift frequencies
-  NS.nodes.forEach(function(n){
-    if(n.type === 'oscillator'){
-      var harm = HARMONICS[Math.floor(Math.random()*HARMONICS.length)];
-      n.freq = BASE_HZ * harm;
-      n.color = freqToHue(n.freq);
-    }
-    // Randomize activation for nonlinear nodes
-    if(n.type === 'nonlinear'){
-      n.activation = ACTIVATION_NAMES[Math.floor(Math.random()*ACTIVATION_NAMES.length)];
-    }
-  });
-  setStatus('mutated');
-}
-
-/* ── Rewire ── */
-function rewire(){
-  // Remove a random edge
-  if(NS.edges.length > 6){
-    NS.edges.splice(Math.floor(Math.random()*NS.edges.length), 1);
-  }
-  // Add new random edges
-  var n = Math.floor(Math.random() * 3) + 1;
-  for(var k = 0; k < n; k++){
-    var a = Math.floor(Math.random()*12), b = Math.floor(Math.random()*12);
-    if(a !== b) addEdge(a, b, (Math.random()*1.0 - 0.2));
-  }
-  setStatus('rewired · ' + NS.edges.length + ' connections');
-}
-
-/* ══════════════════════════════════════════════════════════════
-   VISUALIZATION
-════════════════════════════════════════════════════════════════ */
-
-var canvas, ctx2d;
-var dragNode = null, dragConnStart = null;
-var mouseX = 0, mouseY = 0;
-var hoveredNode = null;
-var tooltip = null;
-
-var NODE_TYPE_SYMBOLS = {oscillator:'○', filter:'◈', nonlinear:'◆', delay:'◫'};
-var NODE_RADIUS = 22;
-
-function initCanvas(){
-  canvas = document.getElementById('ns-canvas');
-  ctx2d = canvas.getContext('2d');
-  var wrap = document.getElementById('ns-wrap');
-  tooltip = document.getElementById('ns-tooltip');
-
-  function resize(){
-    canvas.width = wrap.clientWidth;
-    canvas.height = wrap.clientHeight;
-  }
-  resize();
-  window.addEventListener('resize', function(){
-    resize();
-    if(!isRunning) drawNetwork();
-  });
-
-  // Mouse / touch events
-  canvas.addEventListener('mousedown', onCanvasDown);
-  canvas.addEventListener('mousemove', onCanvasMove);
-  canvas.addEventListener('mouseup', onCanvasUp);
-  canvas.addEventListener('click', onCanvasClick);
-  canvas.addEventListener('mouseleave', function(){ hideTooltip(); hoveredNode = null; });
-  canvas.addEventListener('touchstart', function(e){ e.preventDefault(); onCanvasDown(e.touches[0]); hideTooltip(); }, {passive:false});
-  canvas.addEventListener('touchmove', function(e){ e.preventDefault(); onCanvasMove(e.touches[0]); }, {passive:false});
-  canvas.addEventListener('touchend', function(e){ e.preventDefault(); onCanvasUp(e.touches[0]||e.changedTouches[0]); }, {passive:false});
-}
-
-function getNodeAt(x, y){
-  for(var i = NS.nodes.length-1; i >= 0; i--){
-    var n = NS.nodes[i];
-    var dx = n.x - x, dy = n.y - y;
-    if(Math.sqrt(dx*dx+dy*dy) < NODE_RADIUS + 4) return n;
-  }
-  return null;
-}
-
-function onCanvasDown(e){
-  var r = canvas.getBoundingClientRect();
-  var x = (e.clientX||0) - r.left, y = (e.clientY||0) - r.top;
-  var n = getNodeAt(x, y);
-  if(n){
-    dragNode = n;
-    dragConnStart = null;
-  }
-}
-function onCanvasMove(e){
-  var r = canvas.getBoundingClientRect();
-  mouseX = (e.clientX||0) - r.left;
-  mouseY = (e.clientY||0) - r.top;
-  if(dragNode){
-    dragNode.x = mouseX;
-    dragNode.y = mouseY;
-    dragNode.vx = 0; dragNode.vy = 0;
-    hideTooltip();
-    return;
-  }
-  // Hover tooltip
-  var n = getNodeAt(mouseX, mouseY);
-  if(n){
-    if(n !== hoveredNode){ hoveredNode = n; showTooltip(n, mouseX, mouseY, r); }
-    else { updateTooltipPos(mouseX, mouseY, r); }
-  } else {
-    if(hoveredNode){ hideTooltip(); hoveredNode = null; }
-  }
-}
-
-/* ── Tooltip functions ── */
-var NODE_TOOLTIP_DESCS = {
-  oscillator: 'Tone generator. Self-oscillates at its frequency, influenced by weighted inputs.',
-  filter: 'Signal smoother. Passes and shapes incoming audio without self-generating.',
-  nonlinear: 'Waveshaper. Distorts input through activation functions — creates harmonic complexity.',
-  delay: 'Memory buffer. Holds and replays signal with a short time offset.'
+$('nnNew').onclick = async () => {
+  seed = Math.floor(Math.random() * 1e6); engine.reseed(seed); ui.redraw(); ui.choose(null); last = null; paint();
+  status(mode === 'inst' ? 'A new network with new random weights. Every network of this shape makes a different wave.' : 'A new network with different random weights. It knows nothing yet.');
+  if (!engine.running) { play.textContent = 'Pause'; t0 = performance.now(); await (engine.ctx ? engine.resume() : engine.start()); }
 };
-
-function showTooltip(n, mx, my, r){
-  if(!tooltip) return;
-  var ins = NS.edges.filter(function(e){ return e.to === n.id; });
-  var outs = NS.edges.filter(function(e){ return e.from === n.id; });
-  document.getElementById('tt-name').textContent = 'node ' + n.id + ' · ' + n.type;
-  document.getElementById('tt-freq').textContent = n.type === 'oscillator' ? n.freq.toFixed(1) + ' Hz' : 'n/a';
-  document.getElementById('tt-act').textContent = n.activation;
-  document.getElementById('tt-amp').textContent = n.energy.toFixed(3);
-  document.getElementById('tt-in').textContent = ins.length === 0 ? 'none' :
-    ins.map(function(e){ return n.id===e.to ? 'n'+e.from+'('+e.weight.toFixed(2)+')' : ''; }).join(' ');
-  document.getElementById('tt-out').textContent = outs.length === 0 ? 'none' :
-    outs.map(function(e){ return 'n'+e.to+'('+e.weight.toFixed(2)+')'; }).join(' ');
-  document.getElementById('tt-desc').textContent = NODE_TOOLTIP_DESCS[n.type] || '';
-  tooltip.classList.add('visible');
-  updateTooltipPos(mx, my, r);
+function setMode(m) {
+  if (m === mode) return;
+  if (engine.running) engine.pause(); mode = m; engine = m === 'inst' ? instEng : playEng; setInspectMode(m); last = null;
+  $('modeInst').setAttribute('aria-pressed', String(m === 'inst')); $('modePlay').setAttribute('aria-pressed', String(m === 'play'));
+  $('instPanel').hidden = m !== 'inst'; document.querySelectorAll('.play-only').forEach(e => { e.hidden = m === 'inst'; });
+  $('nnKey').parentElement.hidden = $('nnEpisode').parentElement.hidden = m === 'inst';
+  if (m === 'inst' && $('tabSound').getAttribute('aria-selected') === 'true') $('tabNeuron').click();
+  play.textContent = startLabel(); ui.redraw(); ui.choose(null); paint();
+  status(m === 'inst' ? 'Instrument mode: the network is the oscillator. Press Start sound, then play a note.' : 'Self-playing mode: the network keeps learning and composes as it goes.');
 }
-function updateTooltipPos(mx, my, r){
-  if(!tooltip || !tooltip.classList.contains('visible')) return;
-  // If r not passed, compute from wrap
-  var wrapW = canvas.width, wrapH = canvas.height;
-  var tw = tooltip.offsetWidth || 220, th = tooltip.offsetHeight || 120;
-  var tx = mx + 14, ty = my - 10;
-  if(tx + tw > wrapW - 4) tx = mx - tw - 14;
-  if(ty + th > wrapH - 4) ty = wrapH - th - 4;
-  if(ty < 4) ty = 4;
-  tooltip.style.left = tx + 'px';
-  tooltip.style.top = ty + 'px';
-}
-function updateTooltipData(){
-  if(!hoveredNode || !tooltip || !tooltip.classList.contains('visible')) return;
-  document.getElementById('tt-amp').textContent = hoveredNode.energy.toFixed(3);
-  if(hoveredNode.type === 'oscillator') document.getElementById('tt-freq').textContent = hoveredNode.freq.toFixed(1) + ' Hz';
-  var ins = NS.edges.filter(function(e){ return e.to === hoveredNode.id; });
-  var outs = NS.edges.filter(function(e){ return e.from === hoveredNode.id; });
-  document.getElementById('tt-in').textContent = ins.length === 0 ? 'none' :
-    ins.map(function(e){ return 'n'+e.from+'('+e.weight.toFixed(2)+')'; }).join(' ');
-  document.getElementById('tt-out').textContent = outs.length === 0 ? 'none' :
-    outs.map(function(e){ return 'n'+e.to+'('+e.weight.toFixed(2)+')'; }).join(' ');
-}
-function hideTooltip(){
-  if(tooltip) tooltip.classList.remove('visible');
-}
-function onCanvasUp(e){
-  dragNode = null;
-}
-function onCanvasClick(e){
-  var r = canvas.getBoundingClientRect();
-  var x = (e.clientX||0) - r.left, y = (e.clientY||0) - r.top;
-  var n = getNodeAt(x, y);
-  if(n){
-    NS.selectedNode = n.id;
-    showNodeInfo(n);
-    if(isRunning) injectNode(n.id);
-  } else {
-    NS.selectedNode = null;
-    hideNodeInfo();
-  }
-}
+$('modeInst').onclick = () => setMode('inst'); $('modePlay').onclick = () => setMode('play');
 
-/* ── Node type descriptions ── */
-var NODE_DESCS = {
-  oscillator: 'Generates a continuous sine tone. Frequency drifts toward harmonic partials. Output flows to connected nodes and is heard directly.',
-  filter: 'Shapes incoming signals. Smooths transients with a one-pole filter, carving the spectrum over time. Does not self-generate.',
-  nonlinear: 'Applies a nonlinear activation function to its input. Creates harmonic complexity, instability, and emergent timbres through saturation and folding.',
-  delay: 'Holds signal in a short ring buffer. Introduces time offsets between parts of the network — producing echoes, rhythmic patterns, and phase displacement.'
-};
+// ── the instrument ──
+const keys = $('nnKeys'), KEYMAP = 'awsedftgyhujk', pressed = new Set();
+const keyHz = k => 130.81 * Math.pow(2, k / 12);                 // C3 upward
+for (let k = 0; k < 13; k++) { const b = document.createElement('button'); b.type = 'button'; b.className = [1, 3, 6, 8, 10].includes(k % 12) ? 'black' : ''; b.textContent = KEYMAP[k].toUpperCase(); b.setAttribute('aria-label', 'Play ' + noteName(keyHz(k))); b.dataset.k = k; keys.append(b); }
+async function ensureOn() { if (!instEng.running) await play.onclick(); }
+async function down(k) { await ensureOn(); pressed.add(k); instEng.noteOn(keyHz(k)); $('nnPitch').value = Math.log(keyHz(k) / 55) / Math.log(16); $('nnPitchV').textContent = `${Math.round(keyHz(k))} Hz · ${noteName(keyHz(k))}`; keys.children[k].classList.add('on'); }
+function up(k) { pressed.delete(k); keys.children[k].classList.remove('on'); if (!pressed.size) instEng.noteOff(); }
+keys.addEventListener('pointerdown', e => { const b = e.target.closest('button'); if (b) { e.preventDefault(); down(+b.dataset.k); } });
+addEventListener('pointerup', () => [...pressed].forEach(up));
+addEventListener('keydown', e => { if (mode !== 'inst' || e.repeat || e.ctrlKey || e.metaKey || e.altKey || /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return; const k = KEYMAP.indexOf(e.key.toLowerCase()); if (k >= 0) { e.preventDefault(); down(k); } });
+addEventListener('keyup', e => { const k = KEYMAP.indexOf(e.key.toLowerCase()); if (k >= 0 && pressed.has(k)) up(k); });
+const slide = (id, fn, fmt) => { const el = $(id), out = $(id + 'V'); const run = () => { const v = +el.value; fn(v); if (out) out.textContent = fmt(v); }; el.oninput = run; run(); };
+slide('nnPitch', v => instEng.setPitch(hz(v)), v => `${Math.round(hz(v))} Hz · ${noteName(hz(v))}`);
+slide('nnKnobA', v => instEng.setKnobs({ a: v }), v => v.toFixed(2)); slide('nnKnobB', v => instEng.setKnobs({ b: v }), v => v.toFixed(2));
+slide('nnWob', v => instEng.setKnobs({ wob: v }), v => v.toFixed(2)); slide('nnWobRate', v => instEng.setKnobs({ wobRate: v }), v => `${v.toFixed(1)} Hz`);
+$('nnSweep').onchange = e => { instEng.sweep = e.target.checked; };
+$('nnPhase').oninput = e => { $('nnSweep').checked = instEng.sweep = false; instEng.phase = +e.target.value; $('nnPhaseV').textContent = (+e.target.value).toFixed(2); instEng.tickNow(); paint(); ui.refresh(); };
+$('nnHoldNote').onchange = async e => { if (e.target.checked) await ensureOn(); instEng.setHold(e.target.checked); };
+$('nnGainUp').onclick = () => { instEng.scale(1.25); status('Every weight made 25% larger: neurons are driven harder, so the wave bends more and gains harmonics.'); };
+$('nnGainDown').onclick = () => { instEng.scale(0.8); status('Every weight made 20% smaller: the wave relaxes toward something simpler and quieter.'); };
+$('nnTeachWave').replaceChildren(...WAVE_NAMES.map(n => Object.assign(document.createElement('option'), { value: n, textContent: n })));
+$('nnTeach').onclick = async () => { await ensureOn(); instEng.teach($('nnTeachWave').value); status(`Showing the network a ${$('nnTeachWave').value} wave, over and over, and nudging every weight toward it. Watch the solid wave move toward the dashed one.`); };
 
-function showNodeInfo(n){
-  document.getElementById('ns-node-info').classList.add('visible');
-  document.getElementById('ni-type').textContent = n.type;
-  document.getElementById('ni-freq').textContent = n.type === 'oscillator' ? n.freq.toFixed(1) + ' Hz' : '—';
-  document.getElementById('ni-act').textContent = n.activation;
-  document.getElementById('ni-amp').textContent = n.energy.toFixed(3);
-  document.getElementById('ni-output').textContent = n.output.toFixed(3);
-  document.getElementById('ni-bias').textContent = n.bias.toFixed(3);
-  document.getElementById('ni-desc').textContent = NODE_DESCS[n.type] || '';
-
-  // Incoming connections
-  var ins = NS.edges.filter(function(e){ return e.to === n.id; });
-  var inEl = document.getElementById('ni-ins');
-  inEl.innerHTML = ins.length === 0 ? '<span style="font-size:.72rem;color:var(--muted)">none</span>' :
-    ins.map(function(e){
-      return '<span class="conn-tag in">node ' + e.from + ' → <strong>' + e.weight.toFixed(2) + '</strong></span>';
-    }).join('');
-
-  // Outgoing connections
-  var outs = NS.edges.filter(function(e){ return e.from === n.id; });
-  var outEl = document.getElementById('ni-outs');
-  outEl.innerHTML = outs.length === 0 ? '<span style="font-size:.72rem;color:var(--muted)">none</span>' :
-    outs.map(function(e){
-      return '<span class="conn-tag out">→ node ' + e.to + ' <strong>' + e.weight.toFixed(2) + '</strong></span>';
-    }).join('');
-}
-function hideNodeInfo(){
-  document.getElementById('ns-node-info').classList.remove('visible');
-}
-function updateNodeInfo(){
-  if(NS.selectedNode === null) return;
-  var n = NS.nodes[NS.selectedNode];
-  if(!n) return;
-  document.getElementById('ni-freq').textContent = n.type === 'oscillator' ? n.freq.toFixed(1) + ' Hz' : '—';
-  document.getElementById('ni-amp').textContent = n.energy.toFixed(3);
-  document.getElementById('ni-output').textContent = n.output.toFixed(3);
-  // Refresh connection weights (they evolve via Hebbian learning)
-  var ins = NS.edges.filter(function(e){ return e.to === n.id; });
-  var inEl = document.getElementById('ni-ins');
-  if(inEl) inEl.innerHTML = ins.length === 0 ? '<span style="font-size:.72rem;color:var(--muted)">none</span>' :
-    ins.map(function(e){
-      return '<span class="conn-tag in">node ' + e.from + ' → <strong>' + e.weight.toFixed(2) + '</strong></span>';
-    }).join('');
-  var outs = NS.edges.filter(function(e){ return e.from === n.id; });
-  var outEl = document.getElementById('ni-outs');
-  if(outEl) outEl.innerHTML = outs.length === 0 ? '<span style="font-size:.72rem;color:var(--muted)">none</span>' :
-    outs.map(function(e){
-      return '<span class="conn-tag out">→ node ' + e.to + ' <strong>' + e.weight.toFixed(2) + '</strong></span>';
-    }).join('');
-}
-
-/* ── Force-directed layout nudge (gentle) ── */
-function applyForces(){
-  var repulse = 1800, attract = 0.04;
-  for(var i = 0; i < NS.nodes.length; i++){
-    if(NS.nodes[i] === dragNode) continue;
-    NS.nodes[i].vx *= 0.85; NS.nodes[i].vy *= 0.85;
-    // Repulsion between nodes
-    for(var j = 0; j < NS.nodes.length; j++){
-      if(i===j) continue;
-      var dx = NS.nodes[i].x - NS.nodes[j].x;
-      var dy = NS.nodes[i].y - NS.nodes[j].y;
-      var d2 = dx*dx + dy*dy + 1;
-      NS.nodes[i].vx += (dx / d2) * repulse;
-      NS.nodes[i].vy += (dy / d2) * repulse;
-    }
-    // Attraction toward center
-    var cx = canvas.width/2, cy = canvas.height/2;
-    NS.nodes[i].vx += (cx - NS.nodes[i].x) * 0.005;
-    NS.nodes[i].vy += (cy - NS.nodes[i].y) * 0.005;
-  }
-  // Edge spring attraction
-  NS.edges.forEach(function(e){
-    var a = NS.nodes[e.from], b = NS.nodes[e.to];
-    if(!a||!b||a===dragNode||b===dragNode) return;
-    var dx = b.x - a.x, dy = b.y - a.y;
-    var d = Math.sqrt(dx*dx+dy*dy) || 1;
-    var f = (d - 120) * attract;
-    var fx = (dx/d)*f, fy = (dy/d)*f;
-    a.vx += fx; a.vy += fy;
-    b.vx -= fx; b.vy -= fy;
-  });
-  // Apply velocity, clamp to canvas
-  NS.nodes.forEach(function(n){
-    if(n === dragNode) return;
-    n.x += Math.max(-8, Math.min(8, n.vx));
-    n.y += Math.max(-8, Math.min(8, n.vy));
-    n.x = Math.max(NODE_RADIUS+4, Math.min(canvas.width - NODE_RADIUS - 4, n.x));
-    n.y = Math.max(NODE_RADIUS+4, Math.min(canvas.height - NODE_RADIUS - 4, n.y));
-  });
-}
-
-function drawNetwork(timestamp){
-  if(!ctx2d) return;
-  var W = canvas.width, H = canvas.height;
-
-  ctx2d.clearRect(0, 0, W, H);
-
-  // Background
-  ctx2d.fillStyle = '#f9f9f7';
-  ctx2d.fillRect(0, 0, W, H);
-
-  // Draw edges
-  NS.edges.forEach(function(e){
-    var a = NS.nodes[e.from], b = NS.nodes[e.to];
-    if(!a||!b) return;
-
-    var sig = Math.min(1, Math.abs(e.signal) * 2);
-    var wt = Math.abs(e.weight);
-
-    // Line color: accent when active, border when quiet
-    var alpha = 0.12 + sig * 0.6;
-    var r = sig > 0.1 ? 42 : 180, g = sig > 0.1 ? 92 : 180, bl = sig > 0.1 ? 69 : 176;
-    ctx2d.beginPath();
-    ctx2d.strokeStyle = 'rgba(' + r + ',' + g + ',' + bl + ',' + alpha + ')';
-    ctx2d.lineWidth = 0.5 + wt * 1.5 + sig * 2;
-
-    // Curved line for aesthetics
-    var mx = (a.x + b.x)/2 + (b.y - a.y) * 0.15;
-    var my = (a.y + b.y)/2 - (b.x - a.x) * 0.15;
-    ctx2d.moveTo(a.x, a.y);
-    ctx2d.quadraticCurveTo(mx, my, b.x, b.y);
-    ctx2d.stroke();
-
-    // Direction arrowhead
-    var t = 0.72;
-    var ax = (1-t)*(1-t)*a.x + 2*(1-t)*t*mx + t*t*b.x;
-    var ay = (1-t)*(1-t)*a.y + 2*(1-t)*t*my + t*t*b.y;
-    var tx2 = 2*(1-t)*(mx-a.x) + 2*t*(b.x-mx);
-    var ty2 = 2*(1-t)*(my-a.y) + 2*t*(b.y-my);
-    var ang = Math.atan2(ty2, tx2);
-    var as = 5 + sig * 3;
-    ctx2d.beginPath();
-    ctx2d.fillStyle = 'rgba(' + r + ',' + g + ',' + bl + ',' + (alpha*0.8) + ')';
-    ctx2d.moveTo(ax + Math.cos(ang)*as, ay + Math.sin(ang)*as);
-    ctx2d.lineTo(ax + Math.cos(ang+2.4)*as*0.5, ay + Math.sin(ang+2.4)*as*0.5);
-    ctx2d.lineTo(ax + Math.cos(ang-2.4)*as*0.5, ay + Math.sin(ang-2.4)*as*0.5);
-    ctx2d.closePath();
-    ctx2d.fill();
-
-    // Weight label for selected edges
-    if(NS.selectedNode !== null && (e.from===NS.selectedNode||e.to===NS.selectedNode)){
-      ctx2d.fillStyle = 'rgba(107,107,107,0.7)';
-      ctx2d.font = '9px Inter, sans-serif';
-      ctx2d.fillText(e.weight.toFixed(2), mx, my);
-    }
-  });
-
-  // Draw nodes
-  NS.nodes.forEach(function(n){
-    var hue = n.color || 180;
-    var amp = Math.min(1, n.energy);
-    var flash = n._flash || 0;
-    if(flash > 0) n._flash = Math.max(0, flash - 0.08);
-
-    var pulse = NODE_RADIUS + amp * 8 + flash * 10;
-    var selected = NS.selectedNode === n.id;
-
-    // Outer glow ring when energy high
-    if(amp > 0.1 || flash > 0){
-      ctx2d.beginPath();
-      ctx2d.arc(n.x, n.y, pulse + 4, 0, Math.PI*2);
-      ctx2d.fillStyle = 'hsla(' + hue + ',40%,60%,' + (amp * 0.15 + flash * 0.25) + ')';
-      ctx2d.fill();
-    }
-
-    // Main circle
-    ctx2d.beginPath();
-    ctx2d.arc(n.x, n.y, pulse, 0, Math.PI*2);
-
-    // Fill: surface with hue tint
-    var sat = 20 + amp * 30;
-    var lgt = selected ? 82 : 90 - amp * 15;
-    ctx2d.fillStyle = 'hsl(' + hue + ',' + sat + '%,' + lgt + '%)';
-    ctx2d.fill();
-
-    // Border
-    ctx2d.strokeStyle = selected
-      ? '#2a5c45'
-      : ('hsla(' + hue + ',35%,' + (50 - amp*15) + '%,' + (0.4 + amp*0.5) + ')');
-    ctx2d.lineWidth = selected ? 2 : (1 + amp * 1.5);
-    ctx2d.stroke();
-
-    // Symbol
-    ctx2d.fillStyle = selected ? '#2a5c45' : ('hsl(' + hue + ',30%,35%)');
-    ctx2d.font = 'bold ' + (10 + amp*3) + 'px Space Grotesk, sans-serif';
-    ctx2d.textAlign = 'center';
-    ctx2d.textBaseline = 'middle';
-    ctx2d.fillText(NODE_TYPE_SYMBOLS[n.type] || '○', n.x, n.y - 2);
-
-    // Node id label
-    ctx2d.fillStyle = 'rgba(107,107,107,0.6)';
-    ctx2d.font = '8px Inter, sans-serif';
-    ctx2d.fillText(n.id, n.x, n.y + 9);
-  });
-
-  ctx2d.textAlign = 'left';
-  ctx2d.textBaseline = 'alphabetic';
-}
-
-/* ── Main loop ── */
-function loop(timestamp){
-  if(!isRunning) return;
-  applyForces();
-  networkTick(timestamp);
-  drawNetwork(timestamp);
-  if(NS.selectedNode !== null) updateNodeInfo();
-  if(hoveredNode) updateTooltipData();
-  // Update cursor
-  var n = getNodeAt(mouseX, mouseY);
-  canvas.style.cursor = n ? 'pointer' : 'crosshair';
-  animFrame = requestAnimationFrame(loop);
-}
-
-/* ── Idle draw loop (not running) ── */
-var idleFrame = null;
-function idleLoop(timestamp){
-  applyForces();
-  drawNetwork(timestamp);
-  if(hoveredNode) updateTooltipData();
-  var n = getNodeAt(mouseX, mouseY);
-  canvas.style.cursor = n ? 'pointer' : 'crosshair';
-  idleFrame = requestAnimationFrame(idleLoop);
-}
-function stopIdleLoop(){
-  if(idleFrame){ cancelAnimationFrame(idleFrame); idleFrame=null; }
-}
-
-/* ── Status helpers ── */
-function updateStatus(){
-  var n = NS.nodes.length;
-  var activeConns = NS.edges.filter(function(e){ return e.signal > 0.01; }).length;
-  document.getElementById('ns-count').textContent = isRunning ? 'network active' : 'network idle';
-  document.getElementById('ns-sub').textContent =
-    n + ' nodes · ' + NS.edges.length + ' connections · ' + activeConns + ' active';
-  document.getElementById('ns-status').textContent = isRunning ? 'running' : 'stopped';
-}
-function setStatus(m){ document.getElementById('ns-status').textContent = m; }
-
-/* ══════════════════════════════════════════════════════════════
-   WIRE UP
-════════════════════════════════════════════════════════════════ */
-
-initCanvas();
-buildNetwork('random');
-idleLoop(0);
-
-/* Start */
-document.getElementById('ns-start').addEventListener('click', function(){
-  if(isRunning) return;
-  stopIdleLoop();
-  startAudio();
-  isRunning = true;
-  this.disabled = true;
-  document.getElementById('ns-stop').disabled = false;
-  document.getElementById('ns-mutate').disabled = false;
-  document.getElementById('ns-rewire').disabled = false;
-  setStatus('running');
-  // Inject initial energy into first oscillator
-  injectNode(0);
-  animFrame = requestAnimationFrame(loop);
-});
-
-/* Stop */
-document.getElementById('ns-stop').addEventListener('click', function(){
-  if(!isRunning) return;
-  isRunning = false;
-  if(animFrame){ cancelAnimationFrame(animFrame); animFrame=null; }
-  stopAudio();
-  this.disabled = true;
-  document.getElementById('ns-start').disabled = false;
-  document.getElementById('ns-mutate').disabled = true;
-  document.getElementById('ns-rewire').disabled = true;
-  document.getElementById('ns-energy-fill').style.width = '0%';
-  updateStatus();
-  idleLoop(0);
-});
-
-/* Mutate */
-document.getElementById('ns-mutate').addEventListener('click', mutate);
-
-/* Rewire */
-document.getElementById('ns-rewire').addEventListener('click', rewire);
-
-/* Reset */
-document.getElementById('ns-reset').addEventListener('click', function(){
-  var wasRunning = isRunning;
-  if(wasRunning){
-    isRunning = false;
-    if(animFrame){ cancelAnimationFrame(animFrame); animFrame=null; }
-    stopIdleLoop();
-    stopAudio();
-  }
-  buildNetwork(NS.topology);
-  if(wasRunning){
-    startAudio();
-    isRunning = true;
-    injectNode(0);
-    animFrame = requestAnimationFrame(loop);
-  } else {
-    stopIdleLoop();
-    idleLoop(0);
-  }
-  updateStatus();
-});
-
-/* Topology pills */
-document.querySelectorAll('[data-mode]').forEach(function(btn){
-  btn.addEventListener('click', function(){
-    NS.topology = this.dataset.mode;
-    document.querySelectorAll('[data-mode]').forEach(function(b){ b.classList.remove('on'); });
-    this.classList.add('on');
-    // Auto-rebuild
-    var wasRunning = isRunning;
-    if(wasRunning){
-      isRunning = false;
-      if(animFrame){ cancelAnimationFrame(animFrame); animFrame=null; }
-      stopIdleLoop();
-      stopAudio();
-    }
-    buildNetwork(NS.topology);
-    if(wasRunning){
-      startAudio();
-      isRunning = true;
-      injectNode(0);
-      animFrame = requestAnimationFrame(loop);
-    } else {
-      stopIdleLoop();
-      idleLoop(0);
-    }
-  });
-});
-
-/* Sliders */
-document.getElementById('ns-temp').addEventListener('input', function(){
-  NS.temperature = parseFloat(this.value);
-  document.getElementById('ns-temp-val').textContent = Math.round(NS.temperature*100) + '%';
-});
-document.getElementById('ns-feedback').addEventListener('input', function(){
-  NS.feedback = parseFloat(this.value);
-  document.getElementById('ns-feedback-val').textContent = Math.round(NS.feedback*100) + '%';
-});
-document.getElementById('ns-nonlin').addEventListener('input', function(){
-  NS.nonlinearity = parseFloat(this.value);
-  document.getElementById('ns-nonlin-val').textContent = Math.round(NS.nonlinearity*100) + '%';
-});
-document.getElementById('ns-vol').addEventListener('input', function(){
-  NS.volume = parseFloat(this.value);
-  document.getElementById('ns-vol-val').textContent = Math.round(NS.volume*100) + '%';
-  if(masterGain && audioCtx){
-    masterGain.gain.setTargetAtTime(NS.volume, audioCtx.currentTime, 0.05);
-  }
-});
-
-/* Learning toggles */
-document.getElementById('ns-hebbian').addEventListener('click', function(){
-  NS.hebbianOn = !NS.hebbianOn;
-  this.classList.toggle('on', NS.hebbianOn);
-});
-document.getElementById('ns-drift').addEventListener('click', function(){
-  NS.driftOn = !NS.driftOn;
-  this.classList.toggle('on', NS.driftOn);
-});
-document.getElementById('ns-spatial').addEventListener('click', function(){
-  NS.spatialOn = !NS.spatialOn;
-  this.classList.toggle('on', NS.spatialOn);
-});
-
-/* Space bar = inject energy into random node */
-document.addEventListener('keydown', function(e){
-  if(e.code === 'Space' && isRunning){
-    e.preventDefault();
-    if(!e.repeat) injectNode(Math.floor(Math.random()*12));
-  }
-});
-
-}());
-
-/* ── Header behaviour ── */
-const path = window.location.pathname.replace(/\/$/, '') || '/';
-
+addEventListener('resize', paint); paint();
+setInterval(() => { if (!engine.running) { if (mode === 'inst') instEng.tickNow(); last = null; paint(); ui.refresh(); } }, 500);
+if (window.silAudio?.mediaSession) window.silAudio.mediaSession({ title: 'Neural Synthesis', play: () => engine.running || play.click(), pause: () => engine.running && play.click() });
+document.querySelectorAll('.play-only').forEach(e => { e.hidden = true; }); $('nnKey').parentElement.hidden = $('nnEpisode').parentElement.hidden = true; $('instPanel').hidden = false; setInspectMode('inst'); ui.redraw(); ui.choose(null); paint();
+window.__nn = playEng; window.__inst = instEng; window.__nnui = ui; window.__nnmode = () => mode; window.__setMode = setMode;
 </script>
 
 </body>

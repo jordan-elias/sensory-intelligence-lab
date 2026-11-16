@@ -1,0 +1,92 @@
+# Improvements plan
+
+Open work, roughly in the order it was raised. Constraints that apply to everything: private until the client shares; sharing never on by default; privacy claims must be true; no Netlify deploys from branches; Android API calls go through `assets/js/api.js`.
+
+Full review and the ordered plan: see `docs/review-2026-11.md`.
+
+## In progress
+- **Neural Synthesis**: Instrument mode (network as oscillator), inspector, essay. Remaining: listening check by ear, mobile layout check.
+- **Experiments in Creativity**: guided one-step-at-a-time flow; drop hypothesis, prediction and the 1–5 surprise; open-ended reflection at the end.
+
+## Planned
+
+### Therapist client notes: a connected web of context
+**Goal.** Give a human therapist the context advantage people go to AI therapy for: everything about a client reachable in a click, and the links between things visible. The therapist stays the author and the decision-maker.
+
+**What it holds, per client**
+- Intake form and family history (already collected) as the first notes.
+- A note for each session (date, free text, optional structure: mood, goals, homework).
+- **Entities**: people (mother, ex-partner, boss), events (the move in 2019, the diagnosis), places, and recurring things.
+- **Themes and patterns** (perfectionism, avoidance, grief, sleep, "freezes when criticised"), each with a short description the therapist can refine over time.
+- **Links** between any two items, with an optional label ("triggered by", "same pattern as", "began after"). Written inline as `[[Mother]]` or `#perfectionism` while typing a note, Obsidian-style, so linking costs nothing.
+
+**Views**
+- Backlinks: open "Mother" and see every session and theme that mentions her.
+- Timeline: events and sessions along one line, filterable by theme.
+- Graph: people, events and themes as a network; click through to the notes.
+- Relational tables: themes × sessions (when did each come up), people × themes, with counts.
+- Pre-session brief: one screen with the last session's open threads, active themes, and anything the client shared since (check-ins, journal items they chose to share).
+
+**Obsidian ideas worth borrowing:** wiki-style links, backlinks, graph view, tags, daily-note feel, everything searchable as plain text, export as Markdown so the therapist is never locked in.
+
+**Decisions (from Jordan, 14 Nov)**
+- Total encryption: notes are encrypted on the therapist's device before they leave it. We cannot read them. Privacy comes first, ahead of any convenience feature.
+- Clients can have their records sent to them on request. The therapist generates the export (Markdown plus a PDF) from their own device and sends it; we hold nothing readable.
+- If a client leaves, the therapist chooses whether to keep or delete that client's records. Nothing is deleted or kept automatically. Provide both a one-click export-then-delete and a keep-as-archive option, each with a clear confirmation.
+- No LLM and no network: any analysis runs on the therapist's device.
+
+**Still to settle**
+1. How long records should be kept by default, and what the platform says about professional retention duties (these differ by country and profession; the therapist decides, we do not advise).
+2. Shared Cal.com account and freelancer-by-invoice model: notes are scoped per therapist, never per account.
+3. Anything the client sees (for example homework) stays a separate, explicit, per-item action.
+4. Key recovery: already handled by the vault's recovery key. The page should say plainly that without the passphrase and recovery key the notes cannot be opened by anyone.
+5. **Decided (14 Nov): therapists keep their records if the client deletes their account.** `phase12_001_keep_therapist_records.sql` removes the foreign key so notes survive, and the app copies the intake form, family history and client name into the therapist's own encrypted record when they open them. The privacy policy and the client-facing send screens say so plainly. Kept records open from the Archive page (`/therapist/archive/`). Still worth a short legal check by country on how long records should be kept and how a client's erasure request interacts with professional record-keeping duties.
+
+**On-device analysis: what is possible without an LLM**
+Built (`assets/js/notes/`, tested): all of this is plain code over the therapist's own words.
+- Word counts, recurring words across the record, and distinctive words per session (TF-IDF).
+- Backlinks for any person, event or theme; a themes-by-sessions table; a graph where two things are joined when they come up in the same session or the same sentence.
+- "Not revisited lately": a theme that used to come up and has been quiet for N sessions.
+- A tone reading per session from a small sentiment word list (handles "not happy", "really sad"), plus six emotion families per 100 words, shown with how many words were counted so thin evidence is visible.
+- Style markers researchers use descriptively: first-person share, absolutes ("always", "never"), questions, past versus future focus.
+- Theme suggestions from seed word lists (sleep, anxiety, low mood, grief, anger, self-criticism, avoidance, relationships, work, body, self-worth, trauma). Suggestions only: the therapist accepts, renames or ignores.
+- Markdown export with [[links]] kept, so notes open in Obsidian or any notes app.
+
+Possible later, still on-device: a small embedding model run in the browser (tens of MB, downloaded once from our own hosting, never sent anywhere) for "find sessions like this one" and grouping similar passages; (done) German word lists; a therapist-editable theme dictionary; simple trend lines per theme.
+
+Honest limits: lexicons miss irony, slang, negation across clauses and context, and they only know the words in their lists. Counts describe the notes; they do not describe the client. They are there to point the therapist back to what they wrote, never to score, label or diagnose a client, and the interface should say so.
+
+**Possible build order**
+0. Done: parsing, analysis, graph and export modules with tests.
+0c. Done: life story timeline filled in automatically from years, ages and life stages in the text; phrases (bigrams), rising and fading words, emotion trends, follow-a-word charts, and "comes up with / words around it" for every person or theme.
+0b. Done (branch app-18): the Record tab on the therapist's client page: notes with session dates, [[links]] and #themes, intake and family history in the same record, backlinks, search, map, themes by session, timeline with tone and theme suggestions, before-a-session brief, Markdown and text export, keep-or-delete with typed confirmation. Uses the existing vault (passphrase and recovery key), so no new key design was needed.
+1. Session notes per client, encrypted on the therapist's device, with date and free text. Intake and family history shown as the first entries.
+2. (done) `[[links]]` and `#themes`, backlinks.
+3. (done) A short description per person, event and theme, saved encrypted and included in the export.
+4. (done) Timeline and themes × sessions table.
+5. (done) Graph view and pre-session brief. Zoom and pan are done; arranging nodes by hand is not.
+6. (done) Markdown and text export, keep-or-delete. PDF is done through the print dialog (Save as PDF). Still to do: import of Markdown, an optional reminder when a retention period the therapist sets has passed.
+
+0c. Done (branch app-20): retention reminder (default 10 years for Germany, the therapist's own setting, 0 = off; in-app only on the therapist's device; counts from the latest of end of connection, last session, last note; never deletes anything; "remind me again in a year"). Caseload page (`/therapist/caseload/`): sessions with no note yet, clients not written up lately, themes across clients; people are never matched across clients. Markdown import dropped (notes are written in the Lab). To check with a lawyer: retention duty and client erasure rights by country.
+
+0d. Done (branch app-21): Regulation sound. The current-to-target arc and the drone/rhythm layers are unchanged. New: a melodic voice (`assets/js/regulation/character.js`, tested) whose scale, register, speed, note length, tone colour and echo move from the current state's character to the target's; a transparent safety limiter; page copy rewritten to make no claims about the nervous system. Plain Web Audio kept (live and WAV render share one graph); Tone.js not needed. Still to do: listen by ear and tune the per-state values in `character.js`. The home page meta description still says "nervous system regulation".
+
+0e. Done (branch app-22): Sequencer step velocity (100/75/50/25 %), step chance, per-track length (polymeter), and savable patterns on the device only (`assets/js/seq/patterns.js`, validated on load, up to 30). Tested in `tests/seq/steps.test.mjs` and `t50`. Chance makes WAV export vary from run to run when a step is below 100 %.
+
+0g. Done (branch app-28): Experiments in Creativity, storage and guidance (plan sections 2E and 4 of `docs/review-2026-11.md`).
+- Storage: one record (`assets/js/experiments/progress.js`): done, notes, saved step, Keep shelf. Local first; the two old keys are migrated once; merges across tabs and devices (newer wins, done never undone, deletes stay deleted). Optional encrypted sync (`sync.js`, table `course_progress`, SQL in `docs/sql/phase14_001_course_progress.sql`, ciphertext only, never prompts for the passphrase on page load). Recordings stay on the device (IndexedDB) and are never synced. Account deletion removes the row.
+- Guidance: tools shown with the step that uses them (rolled values carry forward), inline timers for steps that ask for a time (chime and vibration at the end), "before you begin" list, resume at the saved step, "which one for me?" suggestion, unit-finished note, capstone "ready" hint, screen kept awake during steps, Keep shelf (`#/keep`), looking-back counts on the notebook page.
+- Not done: spoken steps; a bank of capstones; more no-equipment experiments (content decisions); haptics through a native plugin (the browser vibrate call is used). Sitemap now lists about and therapy (robots.txt allows them).
+
+0f. Done (branch app-23): photo-words reads the words in the photo on the device (Tesseract, vendored under `assets/js/vendor/tesseract`, English and German, loaded only on button press, nothing stored or sent; typed words still work and the list is always editable). About 16 MB in the repo and, after `npm run sync`, in the Android app too. Not checked: how Netlify serves the `.gz` language files (if it adds `Content-Encoding: gzip` the reader will fail and show the typed fallback message); check once after the first deploy.
+
+### Other open items
+- Background audio with the screen off (Android).
+- Daily path.
+- Deep links for sign-in emails.
+- Play Store listing. Payments decided: Stripe on the website only; the Android app is consumption-only (no purchase links or billing buttons, `assets/js/app/consumption.js`). Look at the EEA external offers programme only if an in-app link to the website is wanted later.
+- Journal sharing with a therapist (needs go-ahead and a privacy policy change).
+- Regulation "worlds of sound"; Tone.js, Pure Data and SuperCollider spikes.
+- Sequencer: done (branch app-19): swing, mute/solo per track, Euclidean fill, WAV export matches. Soundscape Machine reviewed, already deep; waiting for the user to say what is missing.
+- Photo-words experiment: automatic OCR (currently typed by hand).
+- Listening test of the piano roll and sampler by ear.

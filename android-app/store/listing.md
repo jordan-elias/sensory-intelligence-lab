@@ -23,7 +23,7 @@ WHAT IS INSIDE
 - Check-ins: log mood, energy and sensory load in a few seconds, then see your own patterns.
 - Regulation and breathing: sound-based tools for calming and focusing.
 - Journal and worksheets: private by default.
-- Within Limits: a minicourse of 30+ creative experiments for when you are stuck, covering music, sound and writing, each with a clear limit and a result you let surprise you. It also works on paper.
+- Experiments in Creativity: a minicourse of 30+ creative prompts and guided activities for getting curious about how you make things and breaking out of creative blocks, covering music, sound and writing. It also works on paper.
 - Sequencer, soundscape machine, ear training and experimental compositions, including a small neural network that never stops learning.
 - Sessions: book with a music therapist, and send them only what you choose to share.
 
@@ -41,7 +41,7 @@ This app is not a substitute for medical or psychological care. If you are in cr
 ## Screenshots to prepare (phone, 1080x1920 or similar)
 1. Home with today's check-in
 2. Insights: "Your day has a shape"
-3. Within Limits course
+3. Experiments in Creativity course
 4. The network drawing while it plays
 5. Privacy statement
 

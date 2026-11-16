@@ -19,7 +19,7 @@ export async function mountIntake(root) {
   if (!link.intake_requested_at) { root.innerHTML = `<div class="ws-callout"><strong>Nothing to fill in</strong>${esc(name)} has not asked for an intake form. Nothing is sent unless you choose to send it.</div>`; return; }
 
   root.innerHTML = `<p class="th-lede">${esc(name)} asked you to fill this in. Skip anything you prefer not to answer.</p>
-    <div class="ws-callout"><strong>Who can read this</strong>Only you and ${esc(name)}. It is encrypted on your device before it is sent, so we cannot read it either. If you end the connection, you each choose whether to keep or delete your own copy.</div>
+    <div class="ws-callout"><strong>Who can read this</strong>Only you and ${esc(name)}. It is encrypted on your device before it is sent, so we cannot read it either. If you end the connection, you each choose whether to keep or delete your own copy. Your therapist keeps their own encrypted record of what you send, as a clinic would with a paper form. That record is private to them and stays with them if you end the connection or delete your account.</div>
     <div id="intakeBox"><p class="th-muted">Opening…</p></div>`;
   const box = root.querySelector('#intakeBox');
   try {

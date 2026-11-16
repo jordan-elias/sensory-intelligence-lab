@@ -158,15 +158,28 @@
       overflow: hidden;
     }
 
-    .module-grid--3 { grid-template-columns: repeat(3, 1fr); }
+    /* A row is never left with an empty cell: an odd last card widens to fill the row. */
+    .module-grid--1 { grid-template-columns: 1fr; }
     .module-grid--2 { grid-template-columns: repeat(2, 1fr); }
+    .module-grid--2 > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+    .module-grid--3 { grid-template-columns: repeat(6, 1fr); }
+    .module-grid--3 > * { grid-column: span 2; }
+    .module-grid--3 > :nth-child(3n+1):last-child { grid-column: span 6; }
+    .module-grid--3 > :nth-child(3n+1):nth-last-child(2),
+    .module-grid--3 > :nth-child(3n+2):last-child { grid-column: span 3; }
 
     @media (max-width: 860px) {
-      .module-grid--3 { grid-template-columns: repeat(2, 1fr); }
+      .module-grid--3 > *,
+      .module-grid--3 > :nth-child(3n+1):nth-last-child(2),
+      .module-grid--3 > :nth-child(3n+2):last-child { grid-column: span 3; }
+      .module-grid--3 > :last-child:nth-child(odd),
+      .module-grid--3 > :nth-child(3n+1):last-child { grid-column: span 6; }
     }
     @media (max-width: 640px) {
-      .module-grid--3,
-      .module-grid--2 { grid-template-columns: 1fr; }
+      .module-grid--3, .module-grid--2 { grid-template-columns: 1fr; }
+      .module-grid--3 > *, .module-grid--3 > :last-child:nth-child(odd), .module-grid--3 > :nth-child(3n+1):last-child,
+      .module-grid--3 > :nth-child(3n+1):nth-last-child(2), .module-grid--3 > :nth-child(3n+2):last-child,
+      .module-grid--2 > :last-child:nth-child(odd) { grid-column: auto; }
     }
 
     /* ══════════════════════════════════════
@@ -559,18 +572,6 @@
     <div class="modules-section">
       <p class="section-label">Creative tools</p>
       <div class="module-grid module-grid--2">
-
-        <a class="module-card" href="/experiments/">
-          <div class="module-top">
-            <span class="module-icon">✦</span>
-            <span class="module-arrow">→</span>
-          </div>
-          <h3>Within Limits</h3>
-          <p>A minicourse of 36 creative experiments for when you are stuck: music, sound and writing. A clear limit, a process, and an outcome you let surprise you.</p>
-          <span class="module-tag">Minicourse · Music · Writing · On paper too</span>
-        </a>
-
-
         <a class="module-card" href="/soundscape-machine/" data-gated="true">
           <div class="module-top">
             <span class="module-icon">▧</span>
@@ -614,6 +615,24 @@
       </div>
     </div>
 
+    <!-- ── Minicourses ── -->
+    <div class="modules-section">
+      <p class="section-label">Minicourses</p>
+      <div class="module-grid module-grid--1">
+
+        <a class="module-card" href="/experiments/">
+          <div class="module-top">
+            <span class="module-icon">✦</span>
+            <span class="module-arrow">→</span>
+          </div>
+          <h3>Experiments in Creativity</h3>
+          <p>Creative prompts and guided activities for getting curious about the creative process and breaking out of creative blocks with new approaches. Each one is a small experiment with a clear limit and a result you let surprise you. Work through them in order or choose your own, in the app or on paper.</p>
+          <span class="module-tag">Minicourse · 30+ experiments · Music · Sound · Writing</span>
+        </a>
+
+      </div>
+    </div>
+
     <!-- ── Library ── -->
     <div class="modules-section">
       <p class="section-label">Resources</p>
@@ -644,14 +663,7 @@
     <!-- ── Coming soon ── -->
     <div class="modules-section">
       <p class="section-label">Coming soon</p>
-      <div class="module-grid module-grid--3">
-
-        <div class="module-card disabled">
-          <div class="module-top"><span class="module-icon" style="opacity:.4">⬡</span></div>
-          <h3>Minicourses</h3>
-          <p>Interactive, self-guided courses about compositional techniques.</p>
-          <span class="module-tag coming-soon">In development</span>
-        </div>
+      <div class="module-grid module-grid--2">
 
         <div class="module-card disabled">
           <div class="module-top"><span class="module-icon" style="opacity:.4">⬡</span></div>

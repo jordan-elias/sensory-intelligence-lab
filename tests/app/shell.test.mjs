@@ -9,4 +9,4 @@ test('pages map to the right tab, and everything else sits under Home', () => {
     ['/account/', 'you'], ['/subscribe/', 'you']]) assert.equal(tabFor(p), t, p);
 });
 test('only the five tab roots count as roots', () => { assert.ok(isTabRoot('/account/index.html') && isTabRoot('/dashboard') && !isTabRoot('/journal/') && !isTabRoot('/messages/')); });
-test('titles lose the site name', () => { assert.equal(titleOf('Within Limits — Sensory Intelligence Lab'), 'Within Limits'); assert.equal(titleOf(''), 'Sensory Intelligence Lab'); assert.equal(normalise('/a/index.html'), '/a'); });
+test('titles lose the site name', () => { assert.equal(titleOf('Experiments in Creativity — Sensory Intelligence Lab'), 'Experiments in Creativity'); assert.equal(titleOf(''), 'Sensory Intelligence Lab'); assert.equal(normalise('/a/index.html'), '/a'); });

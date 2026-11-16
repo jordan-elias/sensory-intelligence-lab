@@ -5,6 +5,8 @@
  */
 import { refreshReminder, listenForTaps } from './reminders.js';
 import { mountShell } from './shell.js';
+import { installPlayback } from './playback.js';
+import { installConsumptionOnly } from './consumption.js';
 
 // The app frame (tab bar, top bar) is for the installed app only; SIL_APP is set by the app build.
 if (window.SIL_APP) { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => mountShell()); else mountShell(); }
@@ -13,6 +15,7 @@ const cap = window.Capacitor;
 if (cap?.isNativePlatform?.()) {
   const P = cap.Plugins || {};
   document.documentElement.classList.add('is-app');
+  installConsumptionOnly();
 
   // Back: go back inside the app; on the first page, leave the app.
   P.App?.addListener?.('backButton', ({ canGoBack }) => {
@@ -40,6 +43,9 @@ if (cap?.isNativePlatform?.()) {
       location.href = to.replace(/^([^?#]*\/)(?=[?#]|$)/, '$1index.html');
     } catch (_) {}
   });
+
+  // Sound keeps going with the screen off, with a notification that says so.
+  installPlayback(P);
 
   P.StatusBar?.setStyle?.({ style: 'DEFAULT' });
   listenForTaps();

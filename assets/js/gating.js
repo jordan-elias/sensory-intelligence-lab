@@ -67,11 +67,7 @@ const MODULE_MESSAGES = {
   },
    'neural-synthesis': {
     heading: 'Neural synthesis is part of the lab',
-    body: "Tudor inspired neural feedback networks for generating sound. Subscribe to use this tool and everything else the Lab offers.",
-  },
-  'neural-network': {
-    heading: 'The Network Learns to Sing is part of the lab',
-    body: "A small neural network that never stops learning, and whose computation is the music. Subscribe to use this tool and everything else the Lab offers.",
+    body: "A real neural network whose function is the sound: change its weights, neurons and activation functions and hear what happens. Subscribe to use this tool and everything else the Lab offers.",
   },
   // Fallback for any module name not listed above
   'default': {

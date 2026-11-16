@@ -8,7 +8,7 @@ const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').re
 const MAX = 20000;
 
 export function makeNotesStore(sb, session) {
-  const seal = text => session.encrypt(JSON.stringify({ v: 1, text }));
+  const seal = (text, date) => session.encrypt(JSON.stringify(date ? { v: 2, text, date } : { v: 1, text }));
   return {
     async list(clientId) {
       const { data, error } = await sb.from('therapist_notes').select('id, payload, created_at, updated_at')
@@ -16,24 +16,56 @@ export function makeNotesStore(sb, session) {
       if (error) throw new Error(error.message);
       const out = [];
       for (const r of data || []) {
-        let text = null;
-        try { text = JSON.parse(await session.decrypt(r.payload)).text; } catch { text = null; }
-        out.push({ id: r.id, created_at: r.created_at, updated_at: r.updated_at, text });
+        let text = null, date = null, kind = 'note', data = null;
+        try { const p = JSON.parse(await session.decrypt(r.payload)); kind = p.kind || 'note'; data = p.data ?? null; text = kind === 'note' ? p.text : ''; date = /^\d{4}-\d{2}-\d{2}$/.test(p.date || '') ? p.date : null; } catch { text = null; }
+        out.push({ id: r.id, created_at: r.created_at, updated_at: r.updated_at, text, kind, data, date: date || String(r.created_at).slice(0, 10) });
       }
       return out;
     },
-    async add(clientId, text) {
+    async add(clientId, text, date = null) {
       text = String(text || '').trim();
       if (!text) throw new Error('Write something first.');
       if (text.length > MAX) throw new Error('That note is too long.');
-      const { error } = await sb.from('therapist_notes').insert({ client_id: clientId, payload: await seal(text) });
+      const { error } = await sb.from('therapist_notes').insert({ client_id: clientId, payload: await seal(text, date) });
       if (error) throw new Error(error.message);
     },
-    async update(id, text) {
+    async update(id, text, date = null) {
       text = String(text || '').trim();
       if (!text) throw new Error('A note cannot be empty. Delete it instead.');
       if (text.length > MAX) throw new Error('That note is too long.');
-      const { error } = await sb.from('therapist_notes').update({ payload: await seal(text) }).eq('id', id);
+      const { error } = await sb.from('therapist_notes').update({ payload: await seal(text, date) }).eq('id', id);
+      if (error) throw new Error(error.message);
+    },
+    /**
+     * Keeps the therapist's own copy of something the client sent (their intake form, family history) or of who the client is,
+     * as an encrypted row of their own. It stays if the client later leaves or deletes their account. Rewritten only if it changed.
+     */
+    async keep(clientId, kind, data) {
+      const rows = (await this.list(clientId)).filter(r => r.kind === kind), same = r => JSON.stringify(r.data) === JSON.stringify(data);
+      if (rows.some(same)) return false;
+      const payload = await session.encrypt(JSON.stringify({ v: 3, kind, data }));
+      if (rows[0]) { const { error } = await sb.from('therapist_notes').update({ payload }).eq('id', rows[0].id); if (error) throw new Error(error.message); }
+      else { const { error } = await sb.from('therapist_notes').insert({ client_id: clientId, payload }); if (error) throw new Error(error.message); }
+      return true;
+    },
+    /** A short description the therapist writes for a person, event or theme (like a note of its own). Empty text removes it. */
+    async setItem(clientId, key, name, text) {
+      const rows = (await this.list(clientId)).filter(r => r.kind === 'item' && r.data && r.data.key === key), t = String(text || '').trim();
+      if (!t) { for (const r of rows) await this.remove(r.id); return; }
+      const payload = await session.encrypt(JSON.stringify({ v: 3, kind: 'item', data: { key, name, text: t.slice(0, 4000) } }));
+      if (rows[0]) { const { error } = await sb.from('therapist_notes').update({ payload }).eq('id', rows[0].id); if (error) throw new Error(error.message); }
+      else { const { error } = await sb.from('therapist_notes').insert({ client_id: clientId, payload }); if (error) throw new Error(error.message); }
+    },
+    /** Everyone this therapist holds records about (ids only, nothing decrypted). */
+    async people() {
+      const { data, error } = await sb.from('therapist_notes').select('client_id, created_at');
+      if (error) throw new Error(error.message);
+      const m = new Map(); for (const r of data || []) { const x = m.get(r.client_id) || { client_id: r.client_id, rows: 0, first: r.created_at, last: r.created_at }; x.rows++; if (r.created_at < x.first) x.first = r.created_at; if (r.created_at > x.last) x.last = r.created_at; m.set(r.client_id, x); }
+      return [...m.values()];
+    },
+    /** Deletes every note this therapist holds about one client. Used only when the therapist chooses to. */
+    async removeAll(clientId) {
+      const { error } = await sb.from('therapist_notes').delete().eq('client_id', clientId);
       if (error) throw new Error(error.message);
     },
     async remove(id) {
@@ -52,11 +84,11 @@ export async function mountNotes(box, { store, clientId, clientName }) {
 
   async function draw() {
     let notes;
-    try { notes = await store.list(clientId); }
+    try { notes = (await store.list(clientId)).filter(n => n.kind === 'note'); }
     catch (e) { box.innerHTML = `<p class="msg show error">${esc(e.message)}</p>`; return; }
     box.innerHTML = `
       <p class="th-hint" style="margin-top:0">Private to you. Notes are encrypted with your vault, so the client, the practice owner and the platform cannot read them.
-        They stay with you if the connection ends, and are removed if ${esc(clientName)} deletes their account.</p>
+        They stay with you if the connection ends or if ${esc(clientName)} deletes their account.</p>
       <label class="ws-label" for="noteNew">New note</label>
       <textarea class="ws-input" id="noteNew" rows="4" maxlength="20000" placeholder="Session notes, observations, plans…"></textarea>
       <div style="margin:.5rem 0 1rem"><button type="button" class="action-btn" id="noteAdd">Save note</button></div>

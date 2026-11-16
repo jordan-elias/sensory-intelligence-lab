@@ -12,6 +12,7 @@ content must not load executable code from third-party CDNs.
 | compromise.js | compromise | 14.14.0 | MIT (compromise-LICENSE.txt) | https://www.npmjs.com/package/compromise |
 | chart.umd.js | chart.js | 4.4.1 | MIT (chart-LICENSE.txt) | https://www.npmjs.com/package/chart.js |
 | pdf.min.js, pdf.worker.min.js | pdfjs-dist (loaded only by the blackout-poetry experiment; the PDF is read in the browser and never uploaded) | 4.10.38 | Apache-2.0 (pdfjs-LICENSE.txt) | https://www.npmjs.com/package/pdfjs-dist |
+| tesseract/ (tesseract.esm.min.js, worker.min.js, core/*-lstm.wasm.js, lang/eng and deu .traineddata.gz from the 4.0.0_best_int set) | tesseract.js, tesseract.js-core, @tesseract.js-data | 7.0.0, 7.0.0 (nested in tesseract.js), 1.0.0 | Apache-2.0 (tesseract-js-LICENSE.txt, core/LICENSE-tesseract-core.txt); language data Apache-2.0 | https://www.npmjs.com/package/tesseract.js — loaded only when someone presses "Find the words in the photo"; about 16 MB in all, never fetched otherwise; the photo is read on the device and never uploaded |
 
 To update: install the new version with npm in a scratch folder, copy the file named above,
 update the version above, and re-run `npm test`.

@@ -33,6 +33,7 @@ export const TABLES = [
   ["therapist_profiles", "user_id"],
   ["family_history", "user_id"],
   ["worksheets", "user_id"],
+  ["course_progress", "user_id"],
   ["locations", "user_id"],
   ["checkins", "user_id"],
   ["journal_entries", "user_id"],
