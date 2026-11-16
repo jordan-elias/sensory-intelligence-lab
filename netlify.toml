@@ -284,6 +284,16 @@
   status = 200
 
 [[redirects]]
+  from = "/neural-network"
+  to   = "/compositions/neural-network.html"
+  status = 200
+
+[[redirects]]
+  from = "/neural-network/"
+  to   = "/compositions/neural-network.html"
+  status = 200
+
+[[redirects]]
   from = "/semantic-synth"
   to   = "/compositions/semantic-synth.html"
   status = 200

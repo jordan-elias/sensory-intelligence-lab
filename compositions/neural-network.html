@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="/assets/js/audio/safe-output.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Network Learns to Sing</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <link rel="apple-touch-icon" href="/images/favicon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <script src="/dashboard/auth-guard.js" type="module"></script>
+  <script type="module">
+  import { applyGatingOnReady } from '/assets/js/gating.js';
+  applyGatingOnReady({ targetSelector: '.nn-app', moduleName: 'neural-network' });
+  </script>
+  <link href="/assets/css/fonts.css" rel="stylesheet">
+  <style>
+
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --font-body:'Inter',sans-serif;
+      --font-heading:'Space Grotesk',sans-serif;
+      --bg:#fff;--surface:#f9f9f7;--border:#e5e5e0;
+      --text:#1a1a1a;--muted:#6b6b6b;
+      --accent:#2a5c45;--accent-light:#edf4f0;--accent-hover:#1e4433;
+    }
+    html{font-size:16px}
+    body{font-family:var(--font-body);color:var(--text);background:var(--bg);
+      min-height:100vh;display:flex;flex-direction:column;}
+
+    /* Breadcrumb */
+    .bc{padding:.75rem 1.5rem 0;max-width:1100px;margin:0 auto;width:100%}
+    .bc ol{list-style:none;display:flex;gap:.3rem;align-items:center;font-size:.75rem;color:var(--muted);}
+    .bc li+li::before{content:'/';margin-right:.3rem;color:var(--border)}
+    .bc a{color:var(--muted);text-decoration:none;}
+    .bc a:hover{color:var(--accent);text-decoration:underline;}
+
+    /* Main */
+    main{max-width:1100px;margin:0 auto;padding:2.5rem 1.5rem 4rem;flex:1;width:100%;}
+    @media(max-width:600px){main{padding:1.5rem 1rem 3rem}}
+
+    /* Page header */
+    .ph{margin-bottom:2.5rem;padding-bottom:2rem;border-bottom:1px solid var(--border);}
+    .ph h2{font-family:var(--font-heading);font-size:1.5rem;font-weight:600;
+      letter-spacing:-.02em;line-height:1.2;margin-bottom:.4rem;}
+    .ph p{font-size:.9rem;color:var(--muted);}
+
+    
+    .card{border:1px solid var(--border);padding:1.5rem;margin-bottom:1.5rem;background:var(--bg)}
+    .card-title{font-family:var(--font-heading);font-size:.67rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 1rem}
+    .nn-stage{position:relative;background:var(--surface);border:1px solid var(--border)}
+    #nnCanvas{display:block;width:100%;height:340px}
+    .nn-stats{display:flex;flex-wrap:wrap;gap:1.5rem;margin:1rem 0;font-size:.85rem;color:var(--muted)}
+    .nn-stats strong{display:block;font:600 1.15rem var(--font-heading);color:var(--text)}
+    .nn-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem 1.5rem;margin-top:1rem}
+    .nn-controls label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:.25rem}
+    .nn-controls input[type=range]{width:100%}
+    .nn-btn{font:600 .9rem var(--font-body);padding:.7rem 1.4rem;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;min-height:44px}
+    .nn-btn--alt{background:none;color:var(--accent)} .nn-btn:focus-visible{outline:3px solid var(--text);outline-offset:2px}
+    .nn-row{display:flex;gap:.75rem;flex-wrap:wrap;align-items:center}
+    .nn-log{font-size:.82rem;color:var(--muted);min-height:1.3rem;margin-top:.6rem}
+    .essay{max-width:44rem} .essay h3{font:600 1.15rem var(--font-heading);margin:2rem 0 .5rem} .essay p,.essay li{font-size:.95rem;line-height:1.7;margin:.6rem 0}
+    .essay ul,.essay ol{margin:.5rem 0 .5rem 1.3rem} .essay table{border-collapse:collapse;width:100%;font-size:.85rem;margin:.8rem 0}
+    .essay th,.essay td{border:1px solid var(--border);padding:.5rem .6rem;text-align:left;vertical-align:top} .essay th{background:var(--surface)}
+    .essay .eq{font-family:ui-monospace,Menlo,monospace;background:var(--surface);border:1px solid var(--border);padding:.7rem .9rem;font-size:.85rem;overflow-x:auto;white-space:pre}
+    .essay dt{font-weight:600;margin-top:.7rem} .essay dd{margin-left:0;color:var(--muted);font-size:.92rem}
+    footer{border-top:1px solid var(--border);padding:1.25rem 1.5rem;text-align:center;font-size:.78rem;color:var(--muted);margin-top:auto}
+    footer a{color:var(--muted);text-decoration:none} footer a:hover{color:var(--accent)}
+  </style>
+  <link rel="stylesheet" href="/assets/css/header.css">
+  <link rel="stylesheet" href="/assets/css/a11y.css">
+</head>
+<body>
+<script src="/assets/js/site-header.js"></script>
+<nav aria-label="Breadcrumb" class="bc"><ol><li><a href="/dashboard/">Dashboard</a></li><li><a href="/compositions/">Compositions</a></li><li>The Network Learns to Sing</li></ol></nav>
+<main>
+  <div class="ph">
+    <h2>The Network Learns to Sing</h2>
+    <p>A small neural network that never finishes learning. What you hear is what it computes: its neurons set the loudness of the notes, its output chooses the melody, and its mistakes become tension. Under the sound is a real network, trained by the same method as the big ones.</p>
+  </div>
+
+  <div class="card nn-app">
+    <p class="card-title">the network, live</p>
+    <div class="nn-stage"><canvas id="nnCanvas" role="img" aria-label="The network: 6 inputs, two hidden layers and 8 outputs. Brighter circles are more active. Lines are the connections between neurons."></canvas></div>
+    <div class="nn-stats" aria-live="off">
+      <div><strong id="nnLoss">–</strong>Error (loss)</div>
+      <div><strong id="nnKey">–</strong>Key</div>
+      <div><strong id="nnEpisode">0</strong>Episodes so far</div>
+      <div><strong id="nnTime">0:00</strong>Running</div>
+    </div>
+    <div class="nn-row"><button type="button" class="nn-btn" id="nnPlay">Start listening</button><button type="button" class="nn-btn nn-btn--alt" id="nnNew">New network</button></div>
+    <div class="nn-controls">
+      <div><label for="nnLearn">How fast it learns</label><input type="range" id="nnLearn" min="0.01" max="0.12" step="0.005" value="0.05"></div>
+      <div><label for="nnWild">How restless it is</label><input type="range" id="nnWild" min="0" max="1" step="0.05" value="0.5"></div>
+      <div><label for="nnVol">Volume</label><input type="range" id="nnVol" min="0" max="1" step="0.05" value="0.6"></div>
+    </div>
+    <p class="nn-log" id="nnLog" role="status" aria-live="polite">It starts out knowing nothing. Press start, then leave it for a few minutes: it changes slowly, and it does not repeat.</p>
+  </div>
+
+  <article class="card essay" aria-labelledby="essayH">
+    <p class="card-title" id="essayH">how it works</p>
+
+    <h3>What you are hearing</h3>
+    <p>This is a very small neural network, the same kind of object that sits underneath image recognition and language tools, only with 32 neurons instead of billions. Every second it is doing arithmetic: taking in numbers, weighing them, and putting numbers out. The sound is those numbers made audible. Nothing is pre-recorded, nothing is looped, and nothing was composed in advance: the network is given a goal that keeps changing, and the music is what its effort to reach that goal sounds like.</p>
+
+    <h3>A neuron is a weighted vote</h3>
+    <p>A neuron receives some numbers, multiplies each by a <em>weight</em> (how much it trusts that input), adds them up, adds a <em>bias</em> (its own leaning), and squashes the total with an <em>activation function</em>. Here the squashing function is <em>tanh</em>, which maps any number to something between -1 and +1: very negative inputs come out near -1, very positive ones near +1, and zero stays at zero.</p>
+    <div class="eq">output = tanh( w1 × input1 + w2 × input2 + … + bias )</div>
+    <p>A worked example. A neuron has inputs 0.5 and -1, weights 0.8 and 0.3, and bias 0.1. The sum is 0.5×0.8 + (-1)×0.3 + 0.1 = 0.2, and tanh(0.2) is about 0.197. That is the neuron's output. It is a small positive number, a weak "yes".</p>
+
+    <h3>Layers</h3>
+    <p>Neurons are arranged in layers. Here there are four: six <em>input</em> numbers (a point that wanders slowly through space and never repeats), a first <em>hidden layer</em> of ten neurons, a second hidden layer of eight, and an <em>output layer</em> of eight. Every neuron in a layer takes a vote from every neuron in the layer before. The "hidden" layers are called that only because their values are neither the input nor the answer; they are where the network builds its own internal description of the input. Each time the network runs, the numbers move forward through the layers. That is called a <em>forward pass</em>, and this network does about twenty of them every second.</p>
+
+    <h3>What it is trying to do</h3>
+    <p>The eight outputs mean something here. The first seven stand for the seven notes of a scale, and the eighth is a "gate" that says how willing the network is to play a note. The goal the network is given is a <em>target</em>: a chord, which is three of the seven notes switched on (+0.9) and the rest off (-0.9), together with a gate level. Its job is to make its outputs match the target, whatever the inputs are doing.</p>
+    <p>How far off it is gets measured by the <em>loss</em>: the average squared difference between what the network output and what it should have output. Zero would mean a perfect match. The number you see on the page is this loss, and you can hear it: when it is high, the sound gets brighter, rougher and noisier, and when it falls the sound settles.</p>
+
+    <h3>How it learns</h3>
+    <p>Learning means nudging every weight and bias a little in the direction that would have made the loss smaller. Working out those directions is the job of <em>backpropagation</em>: the error is traced backward through the layers, and each weight is told how much it contributed. The size of each nudge is the <em>learning rate</em>, which you can change with the first slider. This repeated nudging is called <em>gradient descent</em>: you are walking downhill on a landscape whose height is the loss.</p>
+    <p>Continuing the example above. Suppose the neuron should have output 0.9 and gave 0.197. The error signal is 2 × (0.197 - 0.9) × (1 - 0.197²) ≈ -1.35, where the last factor is how steeply tanh is sloping at that point. With a learning rate of 0.05, each weight moves by 0.05 × 1.35 × its input, in the direction that raises the output. The first weight goes from 0.800 to 0.834, the second from 0.300 to 0.232 (because its input was negative), and the bias from 0.100 to 0.168. Run the neuron again and it now outputs about 0.338, closer to 0.9. Repeat that a few hundred times across all neurons and the output reaches the target. This page does exactly that, about twenty times a second.</p>
+
+    <h3>Why it never finishes</h3>
+    <p>A network that learned one target and stopped would give you one chord for ever. So the goal keeps moving, on several time scales:</p>
+    <ul>
+      <li><strong>Every few seconds</strong>, one or two notes of the target chord change. The network is suddenly wrong, the loss jumps, and you hear it reach toward the new chord.</li>
+      <li><strong>Continuously</strong>, the gate level drifts, so the network is always chasing a target that is slightly out of reach.</li>
+      <li><strong>About once a minute</strong>, a new <em>episode</em> begins: a fresh chord, a shake to every weight (heat, controlled by the restlessness slider), and a few of the weakest connections are cut and replaced with new random ones. This is called <em>rewiring</em>. The network that continues is a different network.</li>
+      <li><strong>Every couple of minutes</strong>, the key changes, sometimes along with the mode (major pentatonic, minor, dorian, mixolydian, lydian).</li>
+      <li><strong>Over about five minutes</strong>, the density of notes slowly swells and thins.</li>
+    </ul>
+    <p>None of this repeats exactly, because the input path is built from several slow waves of unrelated lengths plus a random walk, so the combination never comes back to the same point.</p>
+
+    <h3>How the numbers become sound</h3>
+    <p>The network produces numbers. Turning them into sound is a set of choices made by the composer, which here means me, and they could have been made differently. These are the choices:</p>
+    <table>
+      <thead><tr><th>What the network computes</th><th>What you hear</th></tr></thead>
+      <tbody>
+        <tr><td>The ten neurons of the first hidden layer</td><td>The loudness of ten harmonics of the key's root note: a drone whose tone colour is the pattern of those neurons.</td></tr>
+        <tr><td>The eight neurons of the second hidden layer</td><td>Eight high, inharmonic partials that shimmer, spread across the stereo field. They are stretched out of tune when the loss is high.</td></tr>
+        <tr><td>The output probabilities</td><td>Which note of the scale is played next: the seven outputs are turned into probabilities and one is drawn. Higher restlessness means more adventurous draws.</td></tr>
+        <tr><td>The gate neuron</td><td>Whether a note sounds at all, scaled by the slow density cycle.</td></tr>
+        <tr><td>The largest products of weight × activation between the two hidden layers</td><td>Soft blips, one for each of the strongest "weighings" in that moment. You are hearing which connections are doing the most work.</td></tr>
+        <tr><td>The loss</td><td>Brightness, the amount of noise texture, and how long the notes ring.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>What is real and what is chosen</h3>
+    <p>Real: the network, the loss, the learning, and the numbers going through it. Chosen: every mapping above. A different mapping would make the same network sound entirely different, so this is not "the sound of AI" or the voice of thought. It is a <em>sonification</em>: a way of letting you hear the shape of a computation that is otherwise invisible. Also worth knowing: this network is tiny and has no understanding of anything. It matches a pattern of eight numbers. Large networks work on the same principle, with vastly more neurons and far more data.</p>
+
+    <h3>Things to listen for</h3>
+    <ol>
+      <li>Listen for a chord change. Within a second or two there is a moment of roughness, then the melody finds the new notes. That is the loss rising and falling.</li>
+      <li>Turn the learning rate to its lowest. The network follows the target slowly and the sound stays rough for longer. At the highest setting it follows quickly but can overshoot.</li>
+      <li>Turn restlessness up and wait for an episode. A larger shake means a bigger change in character.</li>
+      <li>Press "New network" a few times. The structure is the same, but each one starts from different random weights and settles into a different musical personality.</li>
+      <li>Watch the picture while you listen. Bright circles are active neurons; blue and warm lines are positive and negative weights; thicker lines are stronger ones. Rewiring shows up as lines vanishing and new ones appearing.</li>
+    </ol>
+
+    <h3>Glossary</h3>
+    <dl>
+      <dt>Weight</dt><dd>How strongly one neuron listens to another. Positive weights excite, negative ones inhibit.</dd>
+      <dt>Bias</dt><dd>A neuron's own leaning, added before the squashing function.</dd>
+      <dt>Activation function</dt><dd>The squashing step. Without it, stacking layers would add no power.</dd>
+      <dt>Forward pass</dt><dd>Numbers moving from input to output through the layers.</dd>
+      <dt>Loss</dt><dd>A single number for how wrong the network is.</dd>
+      <dt>Backpropagation</dt><dd>Tracing the error backward to find how each weight should change.</dd>
+      <dt>Gradient descent</dt><dd>Repeatedly nudging weights to reduce the loss.</dd>
+      <dt>Learning rate</dt><dd>The size of each nudge.</dd>
+      <dt>Sonification</dt><dd>Turning data into sound.</dd>
+    </dl>
+  </article>
+</main>
+<footer><p><a href="/compositions/">Compositions</a> · <a href="/privacy/">Privacy</a></p></footer>
+
+<script type="module">
+import { NeuralEngine } from '/assets/js/neural/engine.js';
+import { draw } from '/assets/js/neural/draw.js';
+const NOTE = ['C','C♯','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
+const $ = id => document.getElementById(id), cv = $('nnCanvas');
+let seed = Math.floor(Math.random() * 1e6), t0 = 0, last = null;
+const engine = new NeuralEngine({ seed, volume: 0.6, onFrame: s => { last = s; paint(); } });
+const status = (a) => { $('nnLog').textContent = a; };
+function paint() {
+  const c = engine.conductor, s = last || { acts: c.lastActs, loss: c.lossNow };
+  draw(cv, c.net, s.acts, c.lossNow);
+  $('nnLoss').textContent = c.lossNow.toFixed(3); $('nnKey').textContent = `${NOTE[c.root]} ${c.mode}`; $('nnEpisode').textContent = c.episode;
+  if (engine.running) { const sec = Math.floor((performance.now() - t0) / 1000); $('nnTime').textContent = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`; }
+}
+const play = $('nnPlay');
+play.onclick = async () => {
+  if (engine.running) { engine.pause(); play.textContent = 'Resume'; status('Paused. The network is still there, just not running.'); return; }
+  t0 = performance.now() - 0; play.textContent = 'Pause'; status('Listening. At first it is rough while it works out its first chord. Give it a minute.');
+  await (engine.ctx ? engine.resume() : engine.start());
+};
+$('nnNew').onclick = () => { seed = Math.floor(Math.random() * 1e6); engine.reseed(seed); play.textContent = 'Pause'; t0 = performance.now(); status('A new network with different random weights. It knows nothing yet.'); };
+$('nnLearn').oninput = e => engine.set({ learn: +e.target.value });
+$('nnWild').oninput = e => engine.set({ wild: +e.target.value });
+$('nnVol').oninput = e => engine.set({ volume: +e.target.value });
+addEventListener('resize', paint); paint();
+if (window.silAudio?.mediaSession) window.silAudio.mediaSession({ title: 'The Network Learns to Sing', play: () => engine.running || play.click(), pause: () => engine.running && play.click() });
+window.__nn = engine;
+</script>
+</body>
+</html>

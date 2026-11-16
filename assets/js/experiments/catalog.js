@@ -25,6 +25,7 @@ export const CATEGORIES = {
   production: 'DAW & sequencer',
   limits: 'Limits & subtraction',
   writing: 'Writing',
+  capstone: 'Capstone',
 };
 export const NEEDS = {
   any: 'Any instrument or voice',
@@ -708,6 +709,89 @@ export const EXPERIMENTS = [
     tools: [{ type: 'gen', kind: 'notes', count: 1, label: 'Roll a new key' }, { type: 'groove', steps: 16, hits: 5, bpm: 90, roll: true, rollRange: [3, 9] }, { type: 'timer', minutes: 20 }],
     solo: 'Roll a die twice: the first roll chooses the key (1 to 6 steps from C in the circle of fifths), the second the rhythm (1 = waltz, 2 = even, 3 = shuffle, 4 = syncopated, 5 = half time, 6 = free).',
   },
+
+  // ───────────── Added: more borrowing, and a capstone
+  {
+    id: 'borrowed-contour', title: 'Borrowed contour', category: 'melody', needs: 'any', minutes: 20,
+    summary: 'Keep only the up-and-down shape of a melody you know. Replace every note.',
+    question: 'Is a melody its notes, or its shape?',
+    hypothesis: 'The shape alone will carry enough of the original that someone who knows it will feel it, even though no note is the same.',
+    variables: { fixed: ['The contour: up, down or same, between each pair of notes', 'The number of notes (8 to 12)'], changed: ['The actual notes', 'The rhythm', 'The key'], measured: ['Does the shape still feel like the original? (1 to 5)', 'Did anyone name it? (yes / no)'] },
+    parameters: [['Notes', '8 to 12'], ['Contour', 'Copied exactly'], ['Notes in common with the original', '0'], ['Time', '20 minutes']],
+    procedure: [
+      'Pick a melody you know well. Write down its first 8 to 12 notes as U (up), D (down) or S (same) between each pair.',
+      'Choose a new key and scale by rolling them. Do not use the original key.',
+      'Write new notes that follow the U, D and S exactly. No note may match the original.',
+      'Change the rhythm so it is clearly different. Play it.',
+      'Rate how much it still feels like the original, 1 to 5.',
+    ],
+    trials: ['The contour I wrote down', 'How much it still feels like the original'],
+    stop: 'After the melody is played once.',
+    reflect: 'What survived when every note was replaced?',
+    tools: [{ type: 'gen', kind: 'notes', count: 1, label: 'Roll a new key' }, { type: 'timer', minutes: 20 }],
+    solo: 'Write the contour as a line of arrows. Roll a die for each interval size (1 to 6 steps) and keep the direction.',
+  },
+  {
+    id: 'borrowed-form', title: 'Borrowed form', category: 'rhythm', needs: 'any', minutes: 30,
+    summary: 'Copy the structure of a piece you love: how long each section lasts. Fill it with anything.',
+    question: 'How much of a piece is the shape of its time?',
+    hypothesis: 'The borrowed section lengths will give me a sense of arrival and release that I did not have to invent.',
+    variables: { fixed: ['The number of sections', 'The length of each section in seconds'], changed: ['All content'], measured: ['Rating of the feeling of arrival (1 to 5)'] },
+    parameters: [['Sections', '3 to 6'], ['Section lengths', 'Copied to the second'], ['Content', 'Nothing from the original'], ['Time', '30 minutes']],
+    procedure: [
+      'Choose a piece. Play it with a timer and write down when each section starts. Round to the nearest second.',
+      'Make a blank timeline with exactly those lengths.',
+      'Fill each section with something new that does not use any sound, melody or words from the original.',
+      'Obey the lengths exactly. Cut or stretch to fit; do not change the timeline.',
+      'Play it through once. Rate the feeling of arrival, 1 to 5.',
+    ],
+    trials: ['The timeline I copied', 'Rating of the arrival'],
+    stop: 'After one full play-through.',
+    reflect: 'Did the shape of the time carry anything across?',
+    tools: [{ type: 'timer', minutes: 30 }],
+    solo: 'Write the section lengths as a row of boxes on paper, one box per 5 seconds. Fill each section in with a different mark.',
+  },
+  {
+    id: 'two-notes-and-a-word', title: 'Two notes and a word', category: 'limits', needs: 'none', minutes: 15,
+    summary: 'A song with two notes and one word. Nothing else is allowed in.',
+    question: 'How much can a single word and two pitches carry?',
+    hypothesis: 'Repeating one word on two notes will start to mean different things by the 8th repeat, and I will find that more interesting than adding material.',
+    variables: { fixed: ['Exactly 2 pitches', 'Exactly 1 word', '24 repeats'], changed: ['Rhythm', 'Volume', 'Emphasis'], measured: ['The repeat at which it began to mean something else'] },
+    parameters: [['Pitches', '2'], ['Words', '1'], ['Repeats', '24'], ['Time', '12 minutes']],
+    procedure: [
+      'Choose a word by rolling, or take the first word you hear when you open a book.',
+      'Choose 2 notes. Do not add a third.',
+      'Sing or play the word 24 times. Change only rhythm, volume and which note lands on which syllable.',
+      'Note the repeat where it began to sound like something else.',
+      'Record it, and listen back once.',
+    ],
+    trials: ['The word and the two notes', 'The repeat where it changed'],
+    stop: 'After 24 repeats.',
+    reflect: 'What did the repetition do to the word?',
+    tools: [{ type: 'gen', kind: 'notes', count: 2, label: 'Roll your two notes' }, { type: 'timer', minutes: 12 }],
+    solo: 'Roll a die twice for two pitches (1 = C ... 6 = A). Write the word 24 times in a grid and mark the stress.',
+  },
+  {
+    id: 'capstone-three-limits', title: 'Capstone: three limits', category: 'capstone', needs: 'any', minutes: 45,
+    summary: 'Finish with something of your own, under three limits drawn from earlier experiments.',
+    question: 'What do I make when I choose my own material but keep the discipline?',
+    hypothesis: 'Three limits I did not choose will give me a finished piece faster than a blank page would.',
+    variables: { fixed: ['Three drawn limits', 'A 40 minute limit', 'No re-draws'], changed: ['What I make: a song, a poem, a loop or a piece of any kind'], measured: ['Did I finish? (yes / no)', 'Rating (1 to 5)', 'Which limit helped the most'] },
+    parameters: [['Limits', '3'], ['Time', '40 minutes'], ['Re-draws', '0'], ['Finished means', 'It has a beginning, a middle and an end']],
+    procedure: [
+      'Draw three cards. They are your limits. Do not re-draw.',
+      'Decide what you are making in under 2 minutes: a song, a poem, a loop, anything.',
+      'Start the timer. Make it, obeying all three limits.',
+      'Stop at 40 minutes. It is finished when the time is up.',
+      'Look back through your notebook: which earlier experiment does this one owe the most to?',
+    ],
+    trials: ['What I made', 'Which limit helped most'],
+    stop: 'After 40 minutes.',
+    reflect: 'Which experiment from the course did you reach for without meaning to?',
+    tools: [{ type: 'cards', count: 3 }, { type: 'timer', minutes: 40 }],
+    solo: 'Write 20 limits from earlier experiments on slips of paper. Draw three with your eyes closed.',
+  },
+
 ];
 
 
@@ -734,8 +818,9 @@ export const UNIT_INTROS = {
   field: 'Take a recording and change it with exact operations.',
   production: 'Work inside a DAW or sequencer: one sample, swapped tracks, one knob.',
   writing: 'The same method for words: borrowed endings, burning pages, found text.',
+  capstone: 'Make something of your own under limits you did not choose.',
 };
-const ORDER = ['limits', 'melody', 'rhythm', 'field', 'production', 'writing'];
+const ORDER = ['limits', 'melody', 'rhythm', 'field', 'production', 'writing', 'capstone'];
 export const UNITS = ORDER.map((id, i) => ({ id, number: i + 1, title: CATEGORIES[id], intro: UNIT_INTROS[id], experiments: EXPERIMENTS.filter(e => e.category === id) }));
 /** The suggested order: unit by unit. */
 export const PATH = UNITS.flatMap(u => u.experiments);

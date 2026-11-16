@@ -143,8 +143,19 @@ test('treatments gives every track an effect, all different while there are enou
   for (let s = 0; s < 30; s++) { const t = treatments(mulberry32(s), ['a', 'b', 'c', 'd']); assert.equal(new Set(t.map(x => x.effect)).size, 4); assert.ok(t.every(x => /\d/.test(x.setting))); }
   assert.ok(EFFECTS.length >= 8);
 });
-test('the course has a name, six units, and every experiment is in the path once', () => {
-  assert.equal(COURSE.name, 'Within Limits'); assert.equal(UNITS.length, 6);
+test('the course has a name, seven units, and every experiment is in the path once', () => {
+  assert.equal(COURSE.name, 'Within Limits'); assert.equal(UNITS.length, 7);
   assert.equal(PATH.length, EXPERIMENTS.length); assert.equal(new Set(PATH.map(e => e.id)).size, EXPERIMENTS.length);
-  assert.ok(EXPERIMENTS.length >= 30);
+  assert.ok(EXPERIMENTS.length >= 36);
 });
+
+import { buildNotebook } from '../../assets/js/experiments/notebook.js';
+test('the notebook lists only what was recorded, in course order', () => {
+  const first = UNITS[0].experiments[0], second = UNITS[1].experiments[0];
+  const saved = id => id === second.id ? { pred: 'I expect a surprise', trials: { 0: { text: 'a thing', score: '4' } }, concl: { verdict: 'partly', text: 'It held up.' } } : {};
+  const t = buildNotebook({ course: 'Within Limits', units: UNITS, done: new Set([first.id]), saved });
+  assert.match(t, /^# Within Limits: my notebook/); assert.ok(t.indexOf(first.title) < t.indexOf(second.title));
+  assert.match(t, /Prediction: I expect a surprise/); assert.match(t, /surprise 4\/5/); assert.match(t, /Conclusion: Partly supported\. It held up\./);
+  assert.ok(!t.includes(UNITS[2].experiments[0].title));
+});
+test('an empty notebook says so', () => assert.match(buildNotebook({ course: 'X', units: UNITS, done: new Set(), saved: () => ({}) }), /Nothing recorded yet/));
