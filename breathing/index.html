@@ -80,6 +80,8 @@
     /* ── Breath session panel ── */
     .session{display:none;border:1px solid var(--border);background:var(--surface)}
     .session.vis{display:block}
+    .haptic-opt{display:block;text-align:center;font-size:.85rem;color:var(--muted);padding:.4rem 1rem 1rem} .haptic-opt input{width:20px;height:20px;vertical-align:-5px;margin-right:.35rem}
+    .end-note{text-align:center;padding:1rem 1.5rem 1.4rem;font-size:.95rem} .end-note p{margin:.3rem 0} .end-note a{color:var(--accent)}
 
     /* ── Visualiser ── */
     .viz-wrap{padding:2.5rem 1.5rem;display:flex;flex-direction:column;align-items:center;gap:1.5rem;border-bottom:1px solid var(--border);background:var(--bg)}
@@ -120,6 +122,7 @@
   <link rel="stylesheet" href="/assets/css/header.css">
   <link rel="stylesheet" href="/assets/css/ui.css">
   <script src="/assets/js/ui/icons.js" defer></script>
+  <script type="module" src="/assets/js/app/session.js"></script>
   <link rel="stylesheet" href="/assets/css/a11y.css">
 </head>
 <body>
@@ -209,6 +212,13 @@
         <span id="icon" data-icon="play"></span>
         <span id="plabel">Play</span>
       </button>
+    </div>
+
+    <label class="haptic-opt" id="hapticOpt" hidden><input type="checkbox" id="hapticBox"> Vibrate gently with each breath (phone)</label>
+
+    <div class="end-note" id="endNote" hidden role="status">
+      <p>That is the end. Stay as you are for a moment before you carry on.</p>
+      <p><a href="/check-in/">Check in</a> · <a href="/journal/">Timed journal</a> · <a href="/dashboard/">Dashboard</a></p>
     </div>
 
   </div>
@@ -407,6 +417,8 @@ function startSession() {
   S.phaseStart     = 0;
   S.inSettle       = true;
   S.done           = false;
+  S.lastPhaseKey   = null;
+  document.getElementById('endNote').hidden = true;
   S.vizSize        = SIZES.settle;
   S.vizHSL         = [...PHASE_HSL.settle];
 
@@ -484,6 +496,8 @@ function tick() {
 
   animateCircle(phaseType, eased, targetHSL);
   document.getElementById('vizLabel').textContent = phase.label;
+  const phaseKey = breathNum + ':' + phaseIdx;
+  if (phaseKey !== S.lastPhaseKey) { S.lastPhaseKey = phaseKey; window.SILSession?.cue(phaseType); }
 
   S.rafId = requestAnimationFrame(tick);
 }
@@ -521,6 +535,8 @@ function onComplete() {
   S.vizSize = SIZES.settle;
   S.vizHSL  = [...PHASE_HSL.settle];
   animateCircle('settle', 1, PHASE_HSL.settle);
+  window.SILSession?.cue('done');
+  document.getElementById('endNote').hidden = false;
 }
 
 // ─────────────────────────────────────────────────────────
@@ -553,6 +569,7 @@ function togglePlay() {
 const _ms = silAudio.mediaSession({ title: 'Breathing exercise', play: () => { if (!S.isPlaying) togglePlay(); }, pause: () => { if (S.isPlaying) togglePlay(); } });
 function setIcon(playing) {
   _ms.state(playing ? 'playing' : 'paused');
+  if (playing) window.SILSession?.start(); else window.SILSession?.end();
   const ic = document.getElementById('icon'), lb = document.getElementById('plabel');
   if (playing) {
     ic.innerHTML=silIcons.html('pause');
@@ -762,6 +779,8 @@ document.addEventListener('keydown', e => {
 
 // expose for inline onclick
 window.selectPattern = selectPattern;
+// the vibration option is only shown where the phone can vibrate
+window.addEventListener('load', () => { const S2 = window.SILSession, box = document.getElementById('hapticBox'); if (S2?.canVibrate()) { document.getElementById('hapticOpt').hidden = false; box.checked = S2.hapticsOn(); box.onchange = () => S2.setHaptics(box.checked); } });
 window.startSession  = startSession;
 window.togglePlay    = togglePlay;
 

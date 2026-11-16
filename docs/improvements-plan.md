@@ -78,6 +78,8 @@ Honest limits: lexicons miss irony, slang, negation across clauses and context, 
 - Guidance: tools shown with the step that uses them (rolled values carry forward), inline timers for steps that ask for a time (chime and vibration at the end), "before you begin" list, resume at the saved step, "which one for me?" suggestion, unit-finished note, capstone "ready" hint, screen kept awake during steps, Keep shelf (`#/keep`), looking-back counts on the notebook page.
 - Not done: spoken steps; a bank of capstones; more no-equipment experiments (content decisions); haptics through a native plugin (the browser vibrate call is used). Sitemap now lists about and therapy (robots.txt allows them).
 
+0h. Done (branch app-29): session comfort (`assets/js/app/session.js`). The screen stays on while breathing, regulation, the timed journal and the Soundscape Machine are running (Screen Wake Lock; released on pause, end or leaving). A phone buzzes once when a timed session ends; a gentle buzz with each breath phase is opt-in (breathing page, shown only where the phone can vibrate). Breathing now ends on a calm note with next steps. The Sequencer does not hold the screen yet.
+
 0f. Done (branch app-23): photo-words reads the words in the photo on the device (Tesseract, vendored under `assets/js/vendor/tesseract`, English and German, loaded only on button press, nothing stored or sent; typed words still work and the list is always editable). About 16 MB in the repo and, after `npm run sync`, in the Android app too. Not checked: how Netlify serves the `.gz` language files (if it adds `Content-Encoding: gzip` the reader will fail and show the typed fallback message); check once after the first deploy.
 
 ### Other open items

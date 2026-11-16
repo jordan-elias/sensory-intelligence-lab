@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <script src="/assets/js/audio/safe-output.js"></script>
+  <script type="module" src="/assets/js/app/session.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Journal</title>
 
@@ -848,6 +849,7 @@ function startSession() {
   updateTimer();
   if (S.music && S.music !== 'none') startMusic(S.music);
 
+  window.SILSession?.start();
   S.timerInterval = setInterval(() => {
     S.remainSec--;
     updateTimer();
@@ -882,6 +884,7 @@ function updateWordCount() {
 function endSession() {
   clearInterval(S.timerInterval);
   S.sessionOver = true;
+  window.SILSession?.end(); window.SILSession?.cue('done');
 
   const ta = document.getElementById('journalText');
   ta.classList.add('session-over');

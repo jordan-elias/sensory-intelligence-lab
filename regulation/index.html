@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <script>window.SIL_AUDIO_LATENCY = 'playback';</script>
   <script src="/assets/js/audio/safe-output.js"></script>
+  <script type="module" src="/assets/js/app/session.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Regulation</title>
 
@@ -833,6 +834,7 @@ function restartFull() {
 const _ms = silAudio.mediaSession({ title: 'Regulation soundscape', play: () => { if (!S.isPlaying) togglePlay(); }, pause: () => { if (S.isPlaying) togglePlay(); } });
 function setIcon(playing) {
   _ms.state(playing ? 'playing' : 'paused');
+  if (playing) window.SILSession?.start(); else window.SILSession?.end();
   const ic=document.getElementById('icon'), lb=document.getElementById('plabel');
   if (playing) { ic.innerHTML=silIcons.html('pause'); lb.textContent='Pause'; }
   else         { ic.innerHTML=silIcons.html('play'); lb.textContent = (S.pausedAt===null&&S.sessionStartWall===null)?'Play':'Resume'; }
