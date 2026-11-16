@@ -1,7 +1,7 @@
 /**
  * /assets/js/experiments/keep.js
- * The "Keep this" button on a tool. It reads what the tool is showing (the notes you rolled, the rhythm, the poem, the clip you
- * made) and hands it to the Keep shelf. Nothing is kept unless the person taps the button.
+ * What a tool could save. It reads what the tool is showing (the notes you rolled, the rhythm, the poem, the clip you
+ * made) and hands it to the Keep shelf. Nothing is saved unless the person leaves the tick on at the end of the experiment.
  */
 const text = (root, sel) => [...root.querySelectorAll(sel)].map(n => n.textContent.replace(/\s+/g, ' ').trim()).filter(Boolean);
 
@@ -23,17 +23,8 @@ export function readKeepable(type, root) {
 
 export const KEEPABLE = new Set(['gen', 'groove', 'clip', 'assign', 'wordpoem', 'blackout', 'burn', 'cards', 'treat']);
 
-/** Adds the button. `keep(item)` is given { label, kind, text | clip } and may return a promise; it is the page's job to store it. */
-export function attachKeep(type, root, keep, el) {
-  if (!keep || !KEEPABLE.has(type)) return root;
-  root.keepable = () => readKeepable(type, root);
-  const msg = el('span', { class: 'xp-keep-msg', role: 'status', 'aria-live': 'polite' });
-  const btn = el('button', { type: 'button', class: 'xp-btn xp-btn--alt xp-keepbtn' }, 'Keep this');
-  btn.onclick = async () => {
-    const item = readKeepable(type, root);
-    if (!item) { msg.textContent = 'Nothing to keep yet.'; return; }
-    try { await keep(item); msg.textContent = 'Kept on your Keep shelf.'; } catch { msg.textContent = 'Could not keep that.'; }
-  };
-  root.append(el('div', { class: 'xp-row xp-keep' }, btn, msg));
+/** Marks a tool as having something to save. There is no button on the tool: the page offers everything once, at the end. */
+export function attachKeep(type, root) {
+  if (KEEPABLE.has(type)) root.keepable = () => readKeepable(type, root);
   return root;
 }

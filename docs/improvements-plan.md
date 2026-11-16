@@ -123,7 +123,8 @@ Feedback: the course asks for too much, repeats itself, and looks unlike the res
 
 **Progress**
 - Done (branch app-32): C square styling for the course, Today card, dashboard check-in banner and insight card, app shell; F therapist-profile link on the account page; F worksheet sections collapsible with Expand all / Collapse all (state remembered per device, always open in print). Test: `tests/browser/t57.mjs`.
-- Next: B and A (start screen, auto-keep, one Save).
+- Done (branch app-33): B one-screen start (title, question, first step, Begin; time/needs/limits/solo/method folded into "About this experiment"; checklist removed). A auto-roll when a step opens for dice and rolled rhythms, "Roll again", per-tool Keep button removed, one pre-ticked "Save on this device" list on the end screen (saving again replaces, never duplicates), Keep never required, sticky Next on phones. Not done from A/B: merging trivial steps (needs a content pass over the catalog) and limits as inline hints (steps already state their numbers; limits stay in About).
+- Next: D (in-page writing area, phrase player, audit).
 
 **Suggested order**
 1. C (styling, small and visible) and F (account link, worksheets).

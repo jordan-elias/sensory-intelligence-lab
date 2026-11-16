@@ -15,18 +15,18 @@ const open=async id=>{ await page.goto(`${BASE}/experiments/#/`,{waitUntil:'domc
 for(const h of ['','method','keep','notebook']){ await page.goto(`${BASE}/experiments/#/${h}`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('#xpRoot > *'); await sleep(150); ok(!/\b(null|undefined)\b/.test(await page.$eval('#xpRoot',e=>e.innerText)),'no stray null/undefined text on #/'+h); }
 // start screen: what to have ready
 await open('dice-melody');
-ok((await page.$$eval('.xp-check li',l=>l.length))>=3,'the start screen lists what to have ready');
+ok(await page.$('.xp-check')===null&&await page.$('#xpAbout')!==null&&await page.$eval('#xpAbout',d=>!d.open),'the start screen is one screen: no checklist, details folded away in "About this experiment"');
+ok(!(await page.$eval('#xpRoot',e=>/Time|You need|Steps|The limits/.test(e.innerText.replace(/About this experiment[\s\S]*/,'')))),'time, needs and limits are not shown before you start');
 ok(await page.$('#xpResume')===null,'nothing to resume at first');
 await page.click('#xpBegin'); await page.waitForSelector('#xpTools'); ok(!/\b(null|undefined)\b/.test(await page.$eval('#xpRoot',e=>e.innerText)),'no stray null/undefined text on a step');
 // tools come with their step
 ok(await page.$('#xpTools .xp-step')!==null&&await page.$('#xpTools .xp-chips')===null,'step 1 shows the rhythm tool, not the dice');
 ok(await page.$('#xpOthers')!==null&&await page.$('#xpOthers .xp-chips, #xpOthers .xp-seed, #xpOthers .xp-btn')!==null,'the other tools are one tap away');
 await page.click('#xpNext'); await page.waitForSelector('#xpTools');
-ok(await page.evaluate(()=>[...document.querySelectorAll('#xpTools .xp-btn')].some(b=>b.textContent==='Roll seven notes')),'step 2 shows the dice');
-await btn('Roll seven notes'); await sleep(100);
+ok(await page.evaluate(()=>[...document.querySelectorAll('#xpTools .xp-btn')].some(b=>b.textContent==='Roll again'))&&(await page.$$eval('#xpTools .xp-chips li',l=>l.length))>0,'step 2 shows the dice already rolled, with a Roll again button');
+ok(await page.$('.xp-keepbtn')===null,'there is no Keep button on a tool');
+await btn('Roll again'); await sleep(100);
 ok((await page.$$eval('#xpTools .xp-chips li',l=>l.length))===7,'the roll works inside the step');
-ok(await page.evaluate(()=>{ const b=document.querySelector('#xpTools .xp-keepbtn'); b.click(); return true; }),'Keep this is offered next to the roll'); await sleep(200);
-ok(/Kept on your Keep shelf/.test(await text('#xpTools .xp-keep-msg')),'keeping gives a plain confirmation');
 await page.click('#xpNext'); await page.waitForSelector('#xpCarry');
 ok(/What I rolled/.test(await text('#xpCarry'))&&/Seed \d+/.test(await text('#xpCarry')),'the roll is shown again on later steps');
 ok((await page.$$eval('#xpTools .xp-chips li',l=>l.length))===0&&(await page.$$eval('#xpOthers .xp-chips li',l=>l.length))===7,'the dice are still there, with the same roll, under other tools');
@@ -42,7 +42,7 @@ await page.reload({waitUntil:'domcontentloaded'}); await page.waitForSelector('#
 ok(await page.evaluate(()=>{ try{ const s=JSON.parse(localStorage.getItem('sil.exp.v1')); return s.v===1&&s.pos['dice-melody'].s===3; }catch{ return false; } }),'the saved step is in the stored record');
 // finish: note, recap, banner
 await page.click('#xpBegin'); const n=+/of (\d+)/.exec(await text('.xp-stepno'))[1]; for(let k=0;k<n;k++){ await page.waitForSelector('#xpNext'); await page.click('#xpNext'); }
-await page.waitForSelector('#xpNote'); ok(/Kept from this experiment: .*What I rolled/.test(await text('#xpRecap')),'the end shows what you kept');
+await page.waitForSelector('#xpNote'); ok(await page.$$eval('#xpSave input[type=checkbox]',b=>b.length>0&&b.every(x=>x.checked))&&/What I rolled/.test(await text('#xpSave')),'the end offers to save what you rolled, already ticked');
 await page.type('#xpNote','Rolling first made me braver than choosing.'); await page.click('#xpFinish'); await page.waitForSelector('.xp-card');
 ok(await page.evaluate(()=>!JSON.parse(localStorage.getItem('sil.exp.v1')).pos['dice-melody'].s),'finishing clears the saved step');
 // keep shelf, notebook, looking back
@@ -53,6 +53,7 @@ const nb=await text('#xpNotebookText'); ok(/braver than choosing/.test(nb)&&/## 
 ok(/1 note, \d+ words|1 note/.test(await text('#xpReflect')),'looking back counts your own words');
 // step timer
 await open('fixed-notes-rhythm'); await page.click('#xpBegin'); await page.click('#xpNext');
+ok(await page.evaluate(()=>[...document.querySelectorAll('#xpTools .xp-btn')].some(b=>b.textContent==='Roll again')),'the rolled rhythm is ready on arrival, with Roll again');
 ok(/Start 02:00 timer/.test(await text('#xpStepTimer')),'a step that asks for 2 minutes has its own timer');
 await page.click('#xpStepTimer'); await sleep(1300); ok(/Pause/.test(await text('#xpStepTimer'))&&/01:5\d/.test(await text('.xp-st-time')),'the timer counts down');
 await page.click('#xpNext'); ok(await page.$('#xpStepTimer')!==null,'the next step with a time has its own');
@@ -71,7 +72,7 @@ ok(/Unit 1 finished/.test(await text('.xp-banner')),'finishing the last experime
 const sr=22050, data=Float32Array.from({length:sr*2},(_,i)=>Math.sin(i/20)*0.5*Math.exp(-(i%sr)/9000)); const dir=mkdtempSync(join(tmpdir(),'xp-')), wav=join(dir,'clip.wav'); writeFileSync(wav,encodeWav(data,sr));
 await open('reverse-answer'); await page.click('#xpBegin'); await page.waitForSelector('input[type=file]'); await (await page.$('input[type=file]')).uploadFile(wav);
 await page.waitForFunction(()=>/seconds/.test(document.querySelector('.xp-tool [role=status]').textContent),{timeout:8000});
-await btn('Reverse'); await sleep(200); await page.evaluate(()=>document.querySelector('.xp-keepbtn').click()); await sleep(500);
+await btn('Reverse'); await sleep(200); for(let k=0;k<30&&await page.$('#xpNext');k++){ await page.click('#xpNext'); await sleep(50); } await page.waitForSelector('#xpSave'); ok(/s of sound/.test(await text('#xpSave')),'the clip is offered at the end too'); await page.click('#xpFinish'); await sleep(600);
 await page.goto(`${BASE}/experiments/#/keep`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('.xp-kept-item audio',{timeout:5000});
 ok(await page.$('.xp-kept-item audio')!==null&&/this device only/.test(await page.$$eval('.xp-kept-item .xp-hint',h=>h.map(x=>x.textContent).join('|'))),'a kept recording plays from the shelf and says it stays on this device');
 // sync: ciphertext only

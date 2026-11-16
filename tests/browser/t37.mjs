@@ -30,7 +30,7 @@ ok(/Seed \d+/.test(await page.$eval('.xp-seed',e=>e.textContent)),'the seed is s
 await fresh('dice-melody'); await page.waitForSelector('#xpBegin');
 ok(await page.$('#xpHypothesis')===null&&await page.$('textarea[aria-label="Your prediction"]')===null&&await page.$('.xp-trials')===null&&await page.$('.xp-vars')===null,'no hypothesis, prediction, variables or surprise scores');
 ok(await page.$('details.xp-solo')!==null,'instructions for doing it without the app are there');
-ok(await page.$('.xp-tool')===null&&/Your first step/.test(await page.$eval('.xp-hint',e=>e.textContent)),'the start screen shows the idea and the first step, with no tools yet');
+ok(await page.$('.xp-tool')===null&&/^First:/.test(await page.$eval('.xp-hint',e=>e.textContent)),'the start screen shows the idea and the first step, with no tools yet');
 await page.click('#xpBegin'); await page.waitForSelector('#xpStep');
 const first=await page.$eval('#xpStep',e=>e.textContent), ofn=await page.$eval('.xp-stepno',e=>e.textContent);
 ok(/^Step 1 of \d+$/.test(ofn)&&first.length>10,'step 1 is shown alone ('+ofn+')');
@@ -45,8 +45,8 @@ ok(/1 of \d+ done/.test(await page.$eval('.xp-count',e=>e.textContent)),'finishi
 await fresh('dice-melody'); await page.waitForSelector('#xpBegin'); await page.click('#xpBegin'); for(let k=0;k<total;k++){ await page.waitForSelector('#xpNext'); await page.click('#xpNext'); }
 await page.waitForSelector('#xpNote'); ok((await page.$eval('#xpNote',e=>e.value)).includes('kept pulling me back'),'the note is remembered');
 await go('fixed-groove-chords',['.xp-tool']);
-await page.evaluate(()=>[...document.querySelectorAll('.xp-btn')].find(b=>b.textContent==='Roll four chords').click());
-ok((await page.$$eval('.xp-chips li',l=>l.length))===4,'rolling gives four chords');
+await page.evaluate(()=>[...document.querySelectorAll('.xp-btn')].find(b=>b.textContent==='Roll again').click());
+ok((await page.$$eval('.xp-chips li',l=>l.length))===4,'the chords are rolled on arrival and Roll again gives four more');
 ok((await page.$$eval('.xp-step',c=>c.length))===16,'the rhythm grid has 16 steps');
 await page.evaluate(()=>[...document.querySelectorAll('.xp-btn')].find(b=>b.textContent==='Roll a rhythm').click());
 ok((await page.$$eval('.xp-step[aria-pressed=true]',c=>c.length))>=1,'a rolled rhythm switches steps on');
