@@ -5,7 +5,7 @@
  */
 
 /** `saved(id)` returns the note text for an experiment. Only experiments with a note, or marked done, are included. */
-export function buildNotebook({ course, units, done, saved }) {
+export function buildNotebook({ course, units, done, saved, kept = [] }) {
   const out = [`# ${course}: my notebook`, ''];
   let n = 0;
   for (const u of units) {
@@ -18,6 +18,8 @@ export function buildNotebook({ course, units, done, saved }) {
     }
     if (parts.length) out.push(`## Unit ${u.number}: ${u.title}`, '', parts.join('\n\n'), '');
   }
+  const texts = kept.filter(k => k.kind === 'text' && String(k.text || '').trim());
+  if (texts.length) { n += texts.length; out.push('## Kept', '', texts.map(k => `### ${k.title}\n${String(k.text).trim()}`).join('\n\n'), ''); }
   if (!n) out.push('Nothing here yet. The notes you write at the end of an experiment will appear here.');
   return out.join('\n').trimEnd() + '\n';
 }

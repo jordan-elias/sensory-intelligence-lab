@@ -99,6 +99,21 @@
     .xp-notebook{white-space:pre-wrap;font:.88rem/1.6 ui-monospace,Menlo,monospace;background:var(--surface);border:1px solid var(--border);padding:1rem;margin:0 0 1rem;max-height:30rem;overflow:auto}
     .xp-bk{margin:1.2rem 0;break-inside:avoid} .xp-bk h4{font:600 1.1rem var(--font-heading)} .xp-bk p,.xp-bk li{font-size:.92rem;margin:.3rem 0} .xp-bk ol{margin-left:1.2rem}
     @media print{header,.sil-header,.skip-link,.bc,footer,.xp-noprint{display:none!important} .xp-breakb{break-before:page} main{padding:0;max-width:none}}
+    .xp-warn,.xp-banner{border:1px solid var(--border);border-left:3px solid var(--accent);background:var(--accent-light);padding:.8rem 1rem;margin:0 0 1rem;font-size:.9rem;border-radius:0 4px 4px 0}
+    .xp-warn{border-left-color:#b45309;background:#fdf6ec}
+    .xp-find{margin:1.4rem 0;padding:1rem 1.1rem;border:1px solid var(--border);border-radius:6px;background:var(--surface)} .xp-find .xp-h{margin-top:0}
+    .xp-suggest{margin-top:1rem} .xp-suggest .xp-card{margin:.4rem 0}
+    .xp-fin{font:600 .72rem var(--font-body);color:var(--accent);margin-left:.4rem}
+    .xp-check{list-style:none;margin:.4rem 0} .xp-check li{padding:.3rem 0;font-size:.92rem} .xp-check input{width:20px;height:20px;vertical-align:-4px}
+    .xp-note{font-size:.8rem;color:var(--muted);margin:.4rem 0}
+    .xp-st{margin:.4rem 0 .2rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap} .xp-st-time{font:600 1.8rem var(--font-heading);font-variant-numeric:tabular-nums}
+    .xp-carry{margin:1rem 0;padding:.7rem .9rem;border-left:3px solid var(--border);background:var(--surface);font-size:.88rem} .xp-carry b{display:block;font:600 .66rem var(--font-heading);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.2rem} .xp-carry p{margin:.15rem 0} .xp-carry-k{color:var(--muted)}
+    .xp-others{margin:1rem 0;border:1px solid var(--border);border-radius:6px;padding:.4rem .9rem} .xp-others>summary{cursor:pointer;padding:.5rem 0;font-weight:600;font-size:.9rem;min-height:44px;display:flex;align-items:center}
+    .xp-keep{margin-top:.6rem} .xp-keep-msg{font-size:.82rem;color:var(--muted)}
+    .xp-recap{margin:1.2rem 0;padding:.8rem 1rem;border:1px solid var(--border);border-radius:6px;font-size:.92rem} .xp-recap p{margin:.3rem 0}
+    .xp-sync{margin:.4rem 0 2rem;padding:1rem 1.1rem;border:1px solid var(--border);border-radius:6px;font-size:.9rem} .xp-sync p{margin:0 0 .6rem}
+    .xp-kept-item{border:1px solid var(--border);border-radius:6px;padding:.9rem 1.1rem;margin:0 0 .9rem} .xp-kept-item h3{font:600 1rem var(--font-heading)} .xp-kept{white-space:pre-wrap;font:inherit;background:var(--surface);padding:.7rem .8rem;border-radius:4px;margin:.5rem 0;font-size:.9rem} .xp-kept-item audio{width:100%;margin:.5rem 0}
+    .xp-reflect{margin:1.6rem 0} .xp-reflect p,.xp-reflect li{font-size:.92rem;margin:.35rem 0} .xp-reflect-units{margin-left:1.2rem}
     footer{border-top:1px solid var(--border);padding:1.2rem 1.5rem;font-size:.78rem;color:var(--muted);text-align:center}
   </style>
   <link rel="stylesheet" href="/assets/css/header.css">
@@ -112,146 +127,8 @@
 
 <main id="xpRoot" aria-live="polite"></main>
 
-<footer>Anything you load or record here stays in your browser. Your notes and ticks are kept on this device only.</footer>
+<footer>Anything you load or record here stays in your browser. Your notes, ticks and what you keep are saved on this device. If you turn on sync, they are encrypted before they leave it.</footer>
 
-<script type="module">
-import { CATEGORIES, NEEDS, EXPERIMENTS, byId, COURSE, METHOD, UNITS, PATH } from '/assets/js/experiments/catalog.js';
-import { buildTool, el } from '/assets/js/experiments/tools.js';
-import { buildNotebook } from '/assets/js/experiments/notebook.js';
-
-const root = document.getElementById('xpRoot');
-const KEY_DONE = 'sil.exp.done', NOTE = id => `sil.exp.note.${id}`;
-const read = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
-const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* private window */ } };
-let filter = { needs: 'all' };
-
-function list() {
-  const done = new Set(read(KEY_DONE, []));
-  const next = PATH.find(e => !done.has(e.id));
-  const chip = (key, label) => el('button', { type: 'button', class: 'chip', 'aria-pressed': String(filter.needs === key), onclick: () => { filter.needs = key; list(); } }, label);
-  const pick = () => { const pool = PATH.filter(e => (filter.needs === 'all' || e.needs === filter.needs)); const fresh = pool.filter(e => !done.has(e.id)); const from = fresh.length ? fresh : pool; return from[Math.floor(Math.random() * from.length)]; };
-  const pct = Math.round(100 * done.size / PATH.length);
-  root.replaceChildren(
-    el('div', { class: 'ph' }, el('h2', {}, COURSE.name), el('p', {}, COURSE.tagline), el('p', { style: 'margin-top:.5rem' }, COURSE.intro)),
-    el('div', { class: 'xp-prog', role: 'img', 'aria-label': `${done.size} of ${PATH.length} experiments done` }, el('div', { class: 'xp-prog-bar' }, el('span', { style: `width:${pct}%` })), el('span', { class: 'xp-count' }, `${done.size} of ${PATH.length} done`)),
-    el('div', { class: 'xp-top' },
-      next ? el('a', { class: 'xp-btn', id: 'xpContinue', href: '#/' + next.id, style: 'text-decoration:none;display:inline-flex;align-items:center' }, done.size ? 'Continue: ' + next.title : 'Begin: ' + next.title) : el('span', { class: 'xp-hint' }, 'You have done them all. Do any again.'),
-      el('button', { type: 'button', class: 'xp-btn xp-btn--alt', id: 'xpSurprise', onclick: () => { const e = pick(); if (e) location.hash = '#/' + e.id; } }, 'Surprise me'),
-      el('a', { class: 'xp-btn xp-btn--alt', href: '#/book', style: 'text-decoration:none;display:inline-flex;align-items:center' }, 'Do it on paper'),
-      el('a', { class: 'xp-btn xp-btn--alt', href: '#/notebook', id: 'xpNotebookLink', style: 'text-decoration:none;display:inline-flex;align-items:center' }, 'My notebook')),
-    el('a', { class: 'xp-card xp-method', href: '#/method' }, el('h3', {}, 'Start here: ' + METHOD.title), el('p', {}, 'Five short ideas. Read once, then use them every time.'), el('small', {}, '1 minute')),
-    el('div', { class: 'xp-filters', role: 'group', 'aria-label': 'What you need' }, chip('all', 'Anything'), ...Object.entries(NEEDS).map(([k, v]) => chip(k, v))),
-    ...UNITS.map(u => {
-      const shown = u.experiments.filter(e => filter.needs === 'all' || e.needs === filter.needs);
-      if (!shown.length) return null;
-      const n = u.experiments.filter(e => done.has(e.id)).length;
-      return el('section', { class: 'xp-unit', 'aria-labelledby': 'u-' + u.id },
-        el('h3', { class: 'xp-unit-h', id: 'u-' + u.id }, `Unit ${u.number}: ${u.title}`, el('span', { class: 'xp-count' }, ` ${n} of ${u.experiments.length}`)),
-        el('p', { class: 'xp-hint' }, u.intro),
-        el('div', { class: 'xp-grid' }, shown.map(e => el('a', { class: 'xp-card' + (done.has(e.id) ? ' done' : ''), href: '#/' + e.id },
-          el('h3', {}, e.title), el('p', {}, e.summary), el('small', {}, `${NEEDS[e.needs]} · ${e.minutes} min`)))));
-    }));
-}
-
-function method() {
-  root.replaceChildren(
-    el('a', { class: 'xp-back', href: '#/' }, '← ' + COURSE.name),
-    el('div', { class: 'ph' }, el('h2', {}, METHOD.title), el('p', {}, 'The same five ideas apply to every experiment in this course.')),
-    el('ol', { class: 'xp-method-steps' }, METHOD.steps.map(([h, t]) => el('li', {}, el('strong', {}, h), el('p', {}, t)))),
-    el('p', { class: 'xp-hint' }, 'Your notes are kept on this device only. They are not sent anywhere.'),
-    el('p', {}, el('a', { class: 'xp-btn', href: '#/' + PATH[0].id, style: 'text-decoration:none;display:inline-block' }, 'Begin with ' + PATH[0].title)));
-  window.scrollTo(0, 0);
-}
-
-// Everything recorded in the course, as plain text to keep. It is read from this device and goes nowhere.
-function notebook() {
-  const done = new Set(read(KEY_DONE, []));
-  const text = buildNotebook({ course: COURSE.name, units: UNITS, done, saved: id => read(NOTE(id), '') });
-  const msg = el('p', { class: 'xp-hint', role: 'status', 'aria-live': 'polite' });
-  root.replaceChildren(
-    el('a', { class: 'xp-back', href: '#/' }, '← ' + COURSE.name),
-    el('div', { class: 'ph' }, el('h2', {}, 'My notebook'), el('p', {}, 'Everything you wrote at the end of an experiment, in one place. Kept on this device only.')),
-    el('pre', { class: 'xp-notebook', id: 'xpNotebookText' }, text),
-    el('div', { class: 'xp-row' },
-      el('button', { type: 'button', class: 'xp-btn', id: 'xpNbCopy', onclick: async () => { try { await navigator.clipboard.writeText(text); msg.textContent = 'Copied.'; } catch { msg.textContent = 'Select the text and copy it.'; } } }, 'Copy'),
-      el('button', { type: 'button', class: 'xp-btn xp-btn--alt', id: 'xpNbSave', onclick: () => { const url = URL.createObjectURL(new Blob([text], { type: 'text/plain' })); const a = el('a', { href: url, download: 'within-limits-notebook.txt' }); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000); msg.textContent = 'Saved as a text file.'; } }, 'Download')),
-    msg);
-  window.scrollTo(0, 0);
-}
-
-// A plain, printable version of the whole course: the same protocols with no tools, for working on paper.
-function book() {
-  const list2 = items => el('ul', {}, items.map(i => el('li', {}, i)));
-  root.replaceChildren(
-    el('a', { class: 'xp-back xp-noprint', href: '#/' }, '← ' + COURSE.name),
-    el('div', { class: 'ph' }, el('h2', {}, COURSE.name), el('p', {}, COURSE.tagline), el('p', { class: 'xp-noprint' }, el('button', { type: 'button', class: 'xp-btn', id: 'xpPrint', onclick: () => window.print() }, 'Print or save as PDF'))),
-    el('h3', { class: 'xp-h' }, METHOD.title), el('ol', {}, METHOD.steps.map(([h, t]) => el('li', {}, el('strong', {}, h + '. '), t))),
-    ...UNITS.flatMap(u => [el('h3', { class: 'xp-h xp-breakb' }, `Unit ${u.number}: ${u.title}`), ...u.experiments.map(e => el('article', { class: 'xp-bk' },
-      el('h4', {}, e.title), el('p', {}, el('em', {}, e.summary)),
-      el('p', {}, el('strong', {}, 'Finding out. '), e.question),
-      el('p', {}, el('strong', {}, 'Limits: '), e.parameters.map(([k, v]) => `${k}: ${v}`).join(' · ')),
-      el('ol', {}, e.procedure.map(x => el('li', {}, x))),
-      el('p', {}, el('strong', {}, 'Stop: '), e.stop), el('p', {}, el('strong', {}, 'On paper: '), e.solo),
-      el('p', {}, el('strong', {}, 'Your note: '), e.reflect, ' ______________________________________________')))]));
-  window.scrollTo(0, 0);
-}
-
-function detail(e) {
-  const done = new Set(read(KEY_DONE, []));
-  const note = el('textarea', { rows: 8, id: 'xpNote', 'aria-label': 'Your note', placeholder: 'Record your process, or share your thoughts. Anything at all, in any shape. Kept on this device only.' });
-  note.value = read(NOTE(e.id), ''); note.oninput = () => write(NOTE(e.id), note.value);
-  const toolBox = el('div', { class: 'xp-tools', id: 'xpTools' }, el('h3', { class: 'xp-h' }, 'Your tools'), ...e.tools.map(buildTool), ...(e.links || []).map(l => el('p', {}, el('a', { href: l.href }, l.label))));
-  const total = e.procedure.length, last = total + 1;                    // 0 = start, 1..total = steps, last = finish
-  let at = 0;
-  const idx = PATH.indexOf(e), next = PATH[(idx + 1) % PATH.length];
-
-  const dots = () => el('div', { class: 'xp-dots', role: 'img', 'aria-label': at === 0 ? 'Not started' : at > total ? 'All steps done' : `Step ${at} of ${total}` }, Array.from({ length: total + 2 }, (_, k) => el('span', { class: 'xp-dot' + (k <= at ? ' on' : '') })));
-  const nav = (...kids) => el('div', { class: 'xp-nav' }, ...kids);
-  const btn = (label, fn, alt, id) => el('button', { type: 'button', class: 'xp-btn' + (alt ? ' xp-btn--alt' : ''), id, onclick: fn }, label);
-  const go = n => { at = n; draw(); window.scrollTo(0, 0); };
-  const finish = () => { const d = new Set(read(KEY_DONE, [])); d.add(e.id); write(KEY_DONE, [...d]); location.hash = '#/'; };
-
-  function draw() {
-    const head = el('a', { class: 'xp-back', href: '#/' }, '← ' + COURSE.name);
-    toolBox.hidden = at === 0 || at === last;
-    if (at === 0) {
-      root.replaceChildren(head,
-        el('div', { class: 'ph' }, el('h2', {}, e.title), el('p', {}, e.summary)),
-        el('div', { class: 'xp-box', id: 'xpQuestion' }, el('b', {}, 'What you are finding out'), e.question),
-        el('ul', { class: 'xp-intro-list' },
-          el('li', {}, el('b', {}, 'Time'), `about ${e.minutes} minutes`),
-          el('li', {}, el('b', {}, 'You need'), NEEDS[e.needs]),
-          el('li', {}, el('b', {}, 'Steps'), `${total}, one at a time`),
-          el('li', {}, el('b', {}, 'The limits'), e.parameters.map(([k, v]) => `${k}: ${v}`).join(' · '))),
-        el('p', { class: 'xp-hint' }, 'Your first step: ' + e.procedure[0]),
-        nav(btn('Begin', () => go(1), false, 'xpBegin'), el('a', { href: '#/method', class: 'xp-hint' }, 'How it works')),
-        el('details', { class: 'xp-solo' }, el('summary', {}, 'Doing this without the app'), el('p', {}, e.solo)));
-    } else if (at <= total) {
-      root.replaceChildren(head, dots(),
-        el('div', { class: 'xp-stepcard', 'aria-live': 'polite' }, el('div', { class: 'xp-stepno' }, `Step ${at} of ${total}`), el('p', { class: 'xp-steptext', id: 'xpStep' }, e.procedure[at - 1])),
-        nav(btn(at === total ? 'Finish' : 'Next', () => go(at + 1), false, 'xpNext'), btn('Back', () => go(at - 1), true, 'xpBack')),
-        toolBox);
-    } else {
-      root.replaceChildren(head, dots(),
-        el('div', { class: 'ph' }, el('h2', {}, 'All done'), el('p', {}, 'Stop here: ' + e.stop)),
-        el('h3', { class: 'xp-h' }, 'Your note (optional)'),
-        el('p', { class: 'xp-hint' }, 'Record your process or share your thoughts. If it helps to start: ' + e.reflect),
-        note,
-        nav(btn(done.has(e.id) ? 'Save and finish' : 'Mark as done', finish, false, 'xpFinish'), btn('Back to the steps', () => go(total), true, 'xpBackSteps')),
-        el('p', { class: 'xp-hint', style: 'margin-top:1rem' }, el('a', { href: '#/' + next.id }, 'Next in the course: ' + next.title + ' →'), ' · ', el('a', { href: '#/' }, 'Choose another')));
-    }
-  }
-  draw(); window.scrollTo(0, 0);
-}
-
-function route() {
-  const id = location.hash.replace(/^#\/?/, '');
-  const e = id && byId(id);
-  document.title = (e ? e.title + ' — ' : '') + COURSE.name + ' — Sensory Intelligence Lab';
-  if (id === 'method') method(); else if (id === 'book') book(); else if (id === 'notebook') notebook(); else e ? detail(e) : list();
-}
-window.addEventListener('hashchange', route);
-route();
-</script>
+<script type="module" src="/assets/js/experiments/page.js"></script>
 </body>
 </html>

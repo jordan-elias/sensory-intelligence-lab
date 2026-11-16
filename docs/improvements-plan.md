@@ -73,6 +73,11 @@ Honest limits: lexicons miss irony, slang, negation across clauses and context, 
 
 0e. Done (branch app-22): Sequencer step velocity (100/75/50/25 %), step chance, per-track length (polymeter), and savable patterns on the device only (`assets/js/seq/patterns.js`, validated on load, up to 30). Tested in `tests/seq/steps.test.mjs` and `t50`. Chance makes WAV export vary from run to run when a step is below 100 %.
 
+0g. Done (branch app-28): Experiments in Creativity, storage and guidance (plan sections 2E and 4 of `docs/review-2026-11.md`).
+- Storage: one record (`assets/js/experiments/progress.js`): done, notes, saved step, Keep shelf. Local first; the two old keys are migrated once; merges across tabs and devices (newer wins, done never undone, deletes stay deleted). Optional encrypted sync (`sync.js`, table `course_progress`, SQL in `docs/sql/phase14_001_course_progress.sql`, ciphertext only, never prompts for the passphrase on page load). Recordings stay on the device (IndexedDB) and are never synced. Account deletion removes the row.
+- Guidance: tools shown with the step that uses them (rolled values carry forward), inline timers for steps that ask for a time (chime and vibration at the end), "before you begin" list, resume at the saved step, "which one for me?" suggestion, unit-finished note, capstone "ready" hint, screen kept awake during steps, Keep shelf (`#/keep`), looking-back counts on the notebook page.
+- Not done: spoken steps; a bank of capstones; more no-equipment experiments (content decisions); haptics through a native plugin (the browser vibrate call is used). Sitemap now lists about and therapy (robots.txt allows them).
+
 0f. Done (branch app-23): photo-words reads the words in the photo on the device (Tesseract, vendored under `assets/js/vendor/tesseract`, English and German, loaded only on button press, nothing stored or sent; typed words still work and the list is always editable). About 16 MB in the repo and, after `npm run sync`, in the Android app too. Not checked: how Netlify serves the `.gz` language files (if it adds `Content-Encoding: gzip` the reader will fail and show the typed fallback message); check once after the first deploy.
 
 ### Other open items

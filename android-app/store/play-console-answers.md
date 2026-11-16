@@ -37,6 +37,7 @@ Deletion: in the app under Account, Delete account. Web link for deletion reques
 * Foreground service, type media playback (FOREGROUND_SERVICE_MEDIA_PLAYBACK): the app plays soundscapes and regulation audio and keeps them playing with the screen off, with a visible notification and a Pause button. Google asks for a short video showing a person start playback, turn the screen off, hear it continue, and see the notification. ASK: record this on a real phone once the build works.
 * Notifications (POST_NOTIFICATIONS): check-in reminders the person sets and the playback notice.
 * Wake lock: only while that service runs, at most six hours.
+* Vibrate (VIBRATE): a short buzz when a timed step in the course ends. Nothing is stored or sent.
 
 ## Financial features, news, government, COVID, other declarations
 * Financial features: none (no loans, banking, crypto, trading). Not a news app. Not a government app. No COVID-19 features.

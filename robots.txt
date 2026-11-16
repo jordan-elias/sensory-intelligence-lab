@@ -1,6 +1,8 @@
 User-agent: *
 Allow: /$
 Allow: /privacy/
+Allow: /about/
+Allow: /therapy/
 Allow: /sitemap.xml
 Disallow: /
 

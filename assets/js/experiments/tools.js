@@ -7,6 +7,7 @@
 import { mulberry32, newSeed, generate, SCALES, NOTE_NAMES, rotateAssign, euclid, int } from './rng.js';
 import { wordPoemTool, burnTool, cardsTool, blackoutTool } from './tools-writing.js';
 import { rollTool, samplerTool, treatTool } from './tools-music.js';
+import { attachKeep } from './keep.js';
 import { mixToMono, resample, reverse, chopShuffle, stutter, pitchedGrains, contrastLayer, normalise, encodeWav } from './audio-ops.js';
 
 export function el(tag, attrs = {}, ...kids) {
@@ -165,8 +166,9 @@ function clipTool(cfg) {
   };
   for (const o of cfg.ops) ops.append(el('button', { type: 'button', class: 'xp-btn', onclick: () => st.data && OPS[o][1]() }, OPS[o][0]));
   ops.append(orig);
+  root.__clip = () => (st.result ? { data: st.result, sr: st.sr } : null);
   root.append(el('p', { class: 'xp-k' }, 'Your clip'), el('div', { class: 'xp-row' }, rec, el('label', { class: 'xp-filelabel' }, 'or load a file ', file)),
-    el('p', { class: 'xp-hint' }, 'Audio stays in your browser. It is not uploaded or saved.'), status, grainBox, ops, el('div', { class: 'xp-row' }, play, save), info);
+    el('p', { class: 'xp-hint' }, 'Audio stays in your browser and is never uploaded. It is only kept, on this device, if you press Keep this.'), status, grainBox, ops, el('div', { class: 'xp-row' }, play, save), info);
   return root;
 }
 
@@ -229,7 +231,9 @@ function assignTool() {
   return el('div', { class: 'xp-tool' }, el('p', { class: 'xp-k' }, 'Swap'), area, el('div', { class: 'xp-row' }, btn), out);
 }
 
-export function buildTool(cfg) {
+/** `opts.keep(item)` (optional) adds a "Keep this" button to the tools that make something worth keeping. */
+export function buildTool(cfg, opts = {}) { return attachKeep(cfg.type, buildOne(cfg), opts.keep, el); }
+function buildOne(cfg) {
   switch (cfg.type) {
     case 'gen': return genTool(cfg);
     case 'timer': return timerTool(cfg);

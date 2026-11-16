@@ -181,3 +181,5 @@ export async function promptIfOldEntries() {
 }
 export const lockVault = () => vault.lock();
 export const hasUserKey = () => !!vault.getSession();
+/** The unlocked session if there is one, without ever showing the unlock dialog. */
+export const currentSession = () => vault.getSession();
