@@ -35,7 +35,7 @@ export function wordPoemTool(cfg) {
     const status = el('p', { class: 'xp-hint', id: 'xpOcrStatus', role: 'status', 'aria-live': 'polite' });
     let current = null;
     file.onchange = async () => { const f = file.files && file.files[0]; current = null; find.disabled = true; status.textContent = ''; if (!f) return;
-      try { const url = await readDataUrl(f); current = f; find.disabled = false; preview.replaceChildren(el('img', { src: url, alt: 'Your photo, shown here only', style: 'max-width:100%;max-height:320px;border-radius:4px' })); }
+      try { const url = await readDataUrl(f); current = f; find.disabled = false; preview.replaceChildren(el('img', { src: url, alt: 'Your photo, shown here only', style: 'max-width:100%;max-height:320px;border-radius:0' })); }
       catch { preview.replaceChildren(el('p', { class: 'xp-hint' }, 'That photo could not be opened.')); } };
     find.onclick = async () => {
       if (!current) return; find.disabled = true;

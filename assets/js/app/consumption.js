@@ -15,7 +15,7 @@ export function installConsumptionOnly(doc = document, loc = location) {
       const m = doc.querySelector('main'); if (!m) return;
       m.innerHTML = '<section style="max-width:36rem;margin:3rem auto;padding:0 16px"><h1 style="font-size:1.4rem">Your plan</h1>' +
         '<p>Plans are not sold in this app. If your account has a plan, it works here once you sign in.</p>' +
-        '<p><a href="/dashboard/" style="display:inline-block;padding:.7rem 1.1rem;border-radius:999px;background:#1C554E;color:#fff;text-decoration:none">Back to the dashboard</a></p></section>';
+        '<p><a href="/dashboard/" style="display:inline-block;padding:.7rem 1.1rem;border-radius:0;background:#1C554E;color:#fff;text-decoration:none">Back to the dashboard</a></p></section>';
     };
     // The page renders its own content after sign-in; replace it now and once more when it has finished.
     show(); doc.addEventListener('DOMContentLoaded', show); setTimeout(show, 1200); setTimeout(show, 3000);

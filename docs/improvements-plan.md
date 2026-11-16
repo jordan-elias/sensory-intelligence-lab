@@ -121,6 +121,10 @@ Feedback: the course asks for too much, repeats itself, and looks unlike the res
 **G. Today path (done, branch app-30)**
 - Dashboard "Today" card: check-in, then one tool chosen from the person's answers and recent use, then a one-line note; first-run questions are local and skippable. Needs the square styling from C.
 
+**Progress**
+- Done (branch app-32): C square styling for the course, Today card, dashboard check-in banner and insight card, app shell; F therapist-profile link on the account page; F worksheet sections collapsible with Expand all / Collapse all (state remembered per device, always open in print). Test: `tests/browser/t57.mjs`.
+- Next: B and A (start screen, auto-keep, one Save).
+
 **Suggested order**
 1. C (styling, small and visible) and F (account link, worksheets).
 2. B and A (start screen, auto-keep, one Save), with the existing `t37`/`t54` tests updated.
