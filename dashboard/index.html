@@ -438,6 +438,7 @@
   </style>
   <link rel="stylesheet" href="/assets/css/header.css">
   <link rel="stylesheet" href="/assets/css/a11y.css">
+  <link rel="stylesheet" href="/assets/css/today.css">
 </head>
 <body>
 
@@ -445,6 +446,7 @@
        HEADER
   ══════════════════════════════════════ -->
   <script src="/assets/js/site-header.js"></script>
+  <script type="module" src="/assets/js/dashboard/today-ui.js"></script>
 
   <!-- ══════════════════════════════════════
        BREADCRUMB
@@ -475,6 +477,9 @@
     </div>
 
     <div id="insightCard" hidden></div>
+
+    <!-- Today: a short path chosen from two answers; filled in by today-ui.js -->
+    <section class="today" id="todayPath" aria-label="Today" hidden></section>
 
     <!-- Daily listening prompt -->
     <div class="prompt-block">
