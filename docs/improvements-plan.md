@@ -82,9 +82,55 @@ Honest limits: lexicons miss irony, slang, negation across clauses and context, 
 
 0f. Done (branch app-23): photo-words reads the words in the photo on the device (Tesseract, vendored under `assets/js/vendor/tesseract`, English and German, loaded only on button press, nothing stored or sent; typed words still work and the list is always editable). About 16 MB in the repo and, after `npm run sync`, in the Android app too. Not checked: how Netlify serves the `.gz` language files (if it adds `Content-Encoding: gzip` the reader will fail and show the typed fallback message); check once after the first deploy.
 
+### Simplify the experiments, match the lab's look, and finish in place (raised 16 Nov 2026)
+Feedback: the course asks for too much, repeats itself, and looks unlike the rest of the lab. Principle for everything below: **the person should never have to confirm something the app can decide, and should never need another tool or sheet of paper to finish an experiment.** Nothing here changes privacy: results stay on the device unless the person turns on the existing encrypted sync.
+
+**A. Fewer decisions: auto-keep, redo, one save**
+- Remove the per-tool "Keep this" button. Every roll, draw or result is held automatically in that experiment's working record. The button becomes **Roll again** (or **Redo**), and the last result is the one that counts.
+- Keep is never required to move on. Reaching the end counts as done.
+- One **Save** at the end, pre-ticked: note, rolled values, chosen rhythm, and any clip (clip stays on the device). Untick to finish without saving.
+- Auto-roll when a step opens, so the first thing seen is a result, not a button.
+- Merge trivial steps (for example "draw", then "write down what you drew") so most experiments take 3 to 5 taps, not 8 to 12.
+- Sticky Next on phones; offer the next experiment on the end screen with one tap.
+
+**B. A one-screen start**
+- Start screen = title, one-line question, the first step, one **Begin**. Nothing else.
+- Drop the Time / You need / Steps / The limits block and the "Before you begin" checklist. Move everything into a collapsed **About this experiment** (time, what you need, limits).
+- Limits appear only as a small hint inside the step they apply to ("2 pitches", "12 minutes").
+
+**C. Square, like the rest of the lab**
+- Boxes, chips, toggles, progress bar and buttons use `border-radius: 0`, hairline borders and the `.btn` classes from `assets/css/ui.css` (heading font, no pills or circles).
+- Same fix for the rounded dashboard **check-in banner** (`.checkin-hero`), the **insight card** (`.insight-card`), the Today path (`assets/css/today.css`) and the course CSS in `experiments/index.html`.
+- Check: a test that fails if any lab stylesheet or page sets a radius above 0 (allow-list for avatars/dots if needed).
+
+**D. Do it right there**
+- **Written part in place:** photo-words and every experiment whose step says "write..." gets a text area under the step. Text saves with the experiment note automatically (no "keep"). Words from a photo: the word list, the shuffled frame and the line-per-word writing all in one screen, with a counter.
+- **Phrase player** (new tool for fixed-notes-rhythm, five-note-cage, borrowed-chords, dice-melody, borrowed-rhythm, random-pitch-fixed-rhythm and similar): take the rolled notes and the rolled rhythm and **apply the notes to the rhythm any way the person wants**: in order, cycle, reverse, random per hit, or tap a note onto each step by hand; octave and tempo controls; **Play** and loop so they hear it at once. Optional "record this" saves a clip to the shelf.
+- **Audit pass over all 36 experiments**: for each, list what the person still has to do outside the page (open another tool, use paper, play an instrument) and add an in-page version where it is feasible (a tap pad, a simple keyboard, a text area, a built-in recorder for clip experiments). The on-paper and instrument versions stay as the default wording.
+- Tool groups that exist today and will gain a "finish here" action: gen+groove (9 experiments), clip (6), gen+clip (1), wordpoem (2), cards (2), assign (2), loops (2).
+
+**E. Tool improvements**
+- **Breathing**: richer sound (soft pad plus a filtered noise "breath" that rises and falls with the phase), choice of sound (tones, pad, noise, silence), per-phase fades so there are no clicks, optional bell at the end. Needs a listening check by ear.
+- **Cocktail party problem**: an immediate visible **Loading sounds... n%** state; Play stays disabled until ready; show an error with Retry (the loader currently swallows failures); the three empty choice buttons get accessible names before the first round.
+- **Spatial game**: streaks and a combo score; endless/adaptive mode that gets harder or easier from how the person is doing; a daily challenge; a headphones check before round one; replay the path after a miss; environments with different reverb; haptics on Android; personal bests kept on the device. Goal: more fun and more of a reason to come back, with no leaderboards and nothing sent anywhere.
+
+**F. Account page and worksheets**
+- **Therapists**: add "Edit your therapist profile" (to `/therapist/profile/`) on the account page, shown only when the person has a `therapist_profiles` row.
+- **Worksheets**: make "Before we begin" and "Reflection" collapsible like the other sections, and add **Expand all / Collapse all** on every worksheet (music autobiography first). Remember open/closed state on the device; printing always expands everything.
+
+**G. Today path (done, branch app-30)**
+- Dashboard "Today" card: check-in, then one tool chosen from the person's answers and recent use, then a one-line note; first-run questions are local and skippable. Needs the square styling from C.
+
+**Suggested order**
+1. C (styling, small and visible) and F (account link, worksheets).
+2. B and A (start screen, auto-keep, one Save), with the existing `t37`/`t54` tests updated.
+3. D (writing area, phrase player, audit).
+4. E (cocktail loading first, then breathing, then spatial game).
+Each as its own stacked branch after app-31; tests for each; no deploys.
+
 ### Other open items
 - Background audio with the screen off (Android).
-- Daily path.
+- Daily path: done (app-30), see the simplify section.
 - Deep links for sign-in emails.
 - Play Store listing. Payments decided: Stripe on the website only; the Android app is consumption-only (no purchase links or billing buttons, `assets/js/app/consumption.js`). Look at the EEA external offers programme only if an in-app link to the website is wanted later.
 - Journal sharing with a therapist (needs go-ahead and a privacy policy change).
