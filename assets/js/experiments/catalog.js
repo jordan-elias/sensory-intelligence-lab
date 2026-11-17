@@ -34,7 +34,7 @@ export const NEEDS = {
 };
 
 const DICE = 'Use a real die, or slips of paper in a hat. ';
-const KEEP = 'Keep what you made once. No second takes.';
+const KEEP = 'Record one take of it, or write it down, and stop. No second takes.';
 
 export const EXPERIMENTS = [
   // ───────────── Melody & harmony
@@ -44,8 +44,8 @@ export const EXPERIMENTS = [
     question: 'If I do not choose the notes, does my rhythm alone make a melody sound like mine?',
     parameters: [['Notes', '7, rolled once, no re-rolls'], ['Tempo', '80 BPM'], ['Versions', '3'], ['Time', '20 minutes'], ['Takes', 'One per version']],
     procedure: [
-      'Pick a key and a scale. Start the metronome at 80 BPM.',
-      'Roll seven notes once. Write them down in the order rolled.',
+      'Pick a key and a scale below. Then start the rhythm tool at 80 BPM.',
+      'Press the roll button once to get seven notes. Write them down in the order they came.',
       'Version A: play the notes in the rolled order, one note per beat, then one beat of rest.',
       'Version B: same order, but you choose the rhythm. Eight beats at most.',
       'Version C: the notes in reverse order, using the rhythm of version B.',
@@ -62,7 +62,7 @@ export const EXPERIMENTS = [
     question: 'Which of my familiar shapes survive a retuning, and which become something new?',
     parameters: [['Retuned', 'One string, rolled once'], ['Shapes', '3 you know by heart'], ['Length', '4 beats each, 4 times through'], ['Tempo', '70 BPM'], ['Time', '25 minutes']],
     procedure: [
-      'Roll which string and how many semitones. A synth owner detunes one oscillator by the same amount.',
+      'Press the roll button once to get a string and a number of semitones. A synth owner detunes one oscillator by the same amount.',
       'Retune it. Do not tune it back until the end.',
       'Play the first shape exactly as you always play it. Hold it for 4 beats at 70 BPM. Notice how it sounds.',
       'Do the same for the second and third shapes.',
@@ -80,8 +80,8 @@ export const EXPERIMENTS = [
     question: 'What do I write when I cannot reach for my usual notes?',
     parameters: [['Notes', '5, drawn once'], ['Length', '16 bars of 4 beats'], ['Tempo', '90 BPM'], ['Time', '25 minutes'], ['Transposing', 'Not allowed']],
     procedure: [
-      'Draw five notes once. Write them down. Listen to each once, then put the sound away.',
-      'Set 90 BPM. Write or improvise 16 bars using only those notes.',
+      'Press the button once to draw five notes. Write them down. Hear each once, then put the sound away.',
+      'Set the tempo to 90 BPM. Then write or improvise 16 bars using only those five notes.',
       'Do not stop to judge until bar 16.',
       'Play it through once without stopping. Record it.',
       'Mark the bar you like most, and any clash you kept.',
@@ -97,8 +97,8 @@ export const EXPERIMENTS = [
     question: 'How much of a piece is the rhythm and how much is the harmony?',
     parameters: [['Rhythm', 'A rolled 5-hit pattern, 16 steps, locked'], ['Tempo', '95 BPM'], ['Chords', '4, rolled once'], ['Loops per chord', '4'], ['Time', '25 minutes']],
     procedure: [
-      'Roll a key and four chords. Write them down.',
-      'Roll a rhythm (5 hits in 16 steps) and start it at 95 BPM. It must not change until the end.',
+      'Press the roll button once to get a key and four chords. Write them down.',
+      'Press “Roll a rhythm” once (5 hits in 16 steps), then start it at 95 BPM. It must not change until the end.',
       'Play chord 1 for 4 loops using only that rhythm. Then chord 2, chord 3, chord 4.',
       'Play the sequence of four chords twice through. Do not alter the rhythm to rescue a bad change.',
       KEEP,
@@ -114,10 +114,10 @@ export const EXPERIMENTS = [
     question: 'How far can rhythm alone carry a melody?',
     parameters: [['Notes', '4, drawn once'], ['Rhythms', '3, rolled one at a time'], ['Length', '16 steps'], ['Tempo', '100 BPM'], ['Time', '25 minutes']],
     procedure: [
-      'Draw four notes once. They never change.',
-      'Roll rhythm 1. Start it at 100 BPM. Play the four notes over it for 2 minutes, in any order.',
-      'Roll rhythm 2. Same notes. 2 minutes.',
-      'Roll rhythm 3. Same notes. 2 minutes.',
+      'Press the button once to draw four notes. Write them down. They never change.',
+      'Press “Roll a rhythm”, then start it at 100 BPM. Play your four notes over it for 2 minutes, in any order. (Try them in Play it first if you like.)',
+      'Roll a new rhythm. Same four notes. Play for 2 minutes.',
+      'Roll one more rhythm. Same four notes. Play for 2 minutes.',
       'Without playing, hum the one you remember best. Write down which it was.',
     ],
     stop: 'After the third rhythm and the humming test, or 25 minutes.',
@@ -132,7 +132,7 @@ export const EXPERIMENTS = [
     parameters: [['Chord', '1, chosen before you start'], ['Treatments', '9, in rolled order'], ['Time each', '2 minutes'], ['Total', '18 minutes plus 2 to listen back']],
     procedure: [
       'Choose a chord you know well. Write its name down. It does not change.',
-      'Roll the order of the nine treatments.',
+      'Press the roll button to get the order of the nine treatments. Write it down.',
       'Play each treatment for exactly 2 minutes. Do not move on early.',
       'After each one, notice how different it felt from the plain chord.',
       'Pick the one you would never have chosen on purpose.',
@@ -169,7 +169,7 @@ export const EXPERIMENTS = [
     question: 'How long does an odd length take to feel natural?',
     parameters: [['Bar length', '5 to 13 beats, rolled once'], ['Tempo', '100 BPM'], ['Playing time', '5 minutes without changing the groove'], ['Total', '20 minutes']],
     procedure: [
-      'Roll the number of beats in the bar. Write it down.',
+      'Press the roll button to get the number of beats in the bar. Write it down.',
       'Count it out loud at 100 BPM until you can do it without losing the place.',
       'Build a one-bar groove of exactly that many beats. Do not split it into fours.',
       'Play it for 5 minutes without changing it. Note the minute when it stops feeling odd.',
@@ -186,7 +186,7 @@ export const EXPERIMENTS = [
     question: 'Can a rhythm taken from speech carry a melody by itself?',
     parameters: [['Sentence', '1, drawn once'], ['Notes', '3, drawn once'], ['Repeats', 'Say it 3 times, tap it 3 times, play it 3 times'], ['Time', '15 minutes']],
     procedure: [
-      'Draw a sentence and three notes.',
+      'Press the button to draw a sentence and three notes. Write both down.',
       'Say the sentence out loud 3 times at natural speed.',
       'Tap its rhythm 3 times on your knee. Count the syllables.',
       'Play the rhythm on your instrument using only the three notes. One note per syllable. Do not smooth out awkward stresses.',
@@ -228,7 +228,7 @@ export const EXPERIMENTS = [
     parameters: [['Clip', '10 to 30 seconds'], ['Slices', '6 to 24, rolled once'], ['Shuffles', 'Up to 5'], ['Time', '20 minutes']],
     procedure: [
       'Record or load one clip, 10 to 30 seconds.',
-      'Roll the number of slices (6 to 24). Do not change it.',
+      'Press the roll button to get a number of slices (6 to 24). Do not change it.',
       'Chop and shuffle. Listen once through.',
       'Describe the new rhythm in one sentence. Do not move any slice.',
       'Shuffle up to 4 more times. Keep the one you did not expect.',
@@ -314,8 +314,8 @@ export const EXPERIMENTS = [
     question: 'How much does a pattern depend on its pitches when the rhythm is held still?',
     parameters: [['Steps', '8, one sound'], ['Tempo', '110 BPM'], ['Versions', '5'], ['Listen to version 3', '4 minutes'], ['Time', '25 minutes']],
     procedure: [
-      'Program a steady eight-step rhythm on one sound at 110 BPM. It never changes.',
-      'Roll five patterns. Each gives a five-note set and a pitch for each step.',
+      'Use the rhythm tool to switch on a steady eight-step rhythm, one sound, 110 BPM. It never changes.',
+      'Press the roll button five times, once for each version. Each gives a five-note set and a pitch for each step. Write them down.',
       'Enter version 1. Listen for 1 minute. Notice how much you like it, and say one word for it.',
       'Do the same for versions 2, 3, 4 and 5.',
       'Listen to version 3 for 4 minutes. Then line up all five from the one you like most to the one you like least.',
@@ -348,8 +348,8 @@ export const EXPERIMENTS = [
     question: 'What can one parameter do when nothing else is allowed to move?',
     parameters: [['Loop', '4 bars at 100 BPM'], ['Control', '1, rolled once'], ['Sweep', '4 minutes, start to end of range'], ['Time', '20 minutes']],
     procedure: [
-      'Make a 4-bar loop at 100 BPM and leave it alone.',
-      'Roll the one control you may touch.',
+      'In your own music software, make a 4-bar loop at 100 BPM. Then leave it alone.',
+      'Press the roll button to get the one control you may touch.',
       'Set it to its minimum. Move it slowly to its maximum over 4 minutes. Record it.',
       'Listen back. Note the timestamp of any sweet spot.',
       'Choose your favourite 20 seconds.',
@@ -383,7 +383,7 @@ export const EXPERIMENTS = [
     question: 'Who leads when one part is fixed and the other can only respond?',
     parameters: [['Mood', '1, rolled once'], ['Soundscape', 'Built once, then left alone'], ['Avoid its notes', 'First 60 seconds'], ['Recording', '3 minutes'], ['Time', '30 minutes']],
     procedure: [
-      'Roll a mood. Build a soundscape for it in the Soundscape Machine. Then do not change it.',
+      'Press the roll button to get a mood. Build a soundscape for it in the Soundscape Machine, then do not change it.',
       'Let it run for one minute and listen.',
       'Play a melody that responds to it. Avoid its notes for the first 60 seconds.',
       'Record 3 minutes of the pair.',
@@ -403,7 +403,7 @@ export const EXPERIMENTS = [
     question: 'What do I do when my usual fluency is taken away?',
     parameters: [['Limit', '1, rolled once'], ['Time', '10 minutes of playing'], ['Tempo', '80 BPM'], ['Repeat', 'Play the chosen phrase 3 times']],
     procedure: [
-      'Roll your limit. You cannot re-roll it.',
+      'Press the roll button once to get your limit. You cannot roll again.',
       'Start the metronome at 80 BPM.',
       'Improvise inside the limit for 10 minutes. Do not stop to change it.',
       'Mark the phrase that looks the least tidy.',
@@ -475,7 +475,7 @@ export const EXPERIMENTS = [
     question: 'What turns up in a list after the easy answers are gone?',
     parameters: [['Items', '15'], ['Time', '8 minutes'], ['Crossing out', 'Not allowed while writing'], ['Prompts', '1']],
     procedure: [
-      'Roll a prompt. You may not re-roll it.',
+      'Press the roll button once to get a prompt. You may not roll again.',
       'Start the timer. Write exactly 15 items, one per line. Short is fine.',
       'Do not cross anything out until the timer ends.',
       'Mark the single best item. Note its number.',
@@ -496,8 +496,8 @@ export const EXPERIMENTS = [
     parameters: [['Photos', '1'], ['Found words', '5 to 16'], ['Time', '20 minutes'], ['Order', 'Shuffled']],
     procedure: [
       'Choose a photo you took yourself, with words or signs in it. Add it here.',
-      'Press "Find the words in the photo" and let it read what it can, or type the words yourself. Then read the list: take out words that are wrong, add ones it missed, and include numbers and brands. Keep between 5 and 16 words.',
-      'Make the frame with the order shuffled. Do not re-shuffle.',
+      'Press “Find the words in the photo”, or type the words yourself. Then fix the list: delete wrong words, add any it missed (numbers and brands count). End with 5 to 16 words.',
+      'Press “Make the frame” once. The order is shuffled for you. Do not shuffle again.',
       'Write one line for each word, ending on it. Fast. The line does not have to be about the photo.',
       'Leave it for 10 minutes. Read it aloud once. Change nothing except spelling.',
     ],
@@ -529,7 +529,7 @@ export const EXPERIMENTS = [
     question: 'What happens when three small rules arrive together and none can be dropped?',
     parameters: [['Cards', '3'], ['Re-draws', '0'], ['Time', '20 minutes'], ['Finished means', 'It can be played start to end once']],
     procedure: [
-      'Draw three cards. Read them out. Do not re-draw.',
+      'Press “Draw 3 cards” once. Read them out loud. Do not draw again.',
       'Start the timer. Begin something that obeys all three.',
       'If two cards conflict, the one you drew first wins.',
       'Stop at the timer. Play or read through what you have once.',
@@ -548,7 +548,7 @@ export const EXPERIMENTS = [
     question: 'Can a melody make sense of a chord progression you did not choose?',
     parameters: [['Chords', '4'], ['Length', '16 sixteenth-note steps'], ['Re-rolls', '0'], ['Time', '20 minutes']],
     procedure: [
-      'Choose a key and a mode. Roll the chords once. Do not roll again.',
+      'Choose a key and a mode. Press the roll button once to get the chords. Do not roll again.',
       'Play the chords through three times, without writing anything.',
       'Place notes on the grid, one per step. Leave at least 3 steps empty.',
       'Play it. Change at most 4 notes. Notice how it feels.',
@@ -601,8 +601,8 @@ export const EXPERIMENTS = [
     parameters: [['Chords', '4 to 8'], ['Key', 'Different from the original'], ['Rhythm', 'Different from the original'], ['Time', '20 minutes']],
     procedure: [
       'Pick a song you know well. Work out its chords as numerals (for example I, vi, IV, V). Write them down.',
-      'Roll a new key. Write the chords in that key.',
-      'Roll a new rhythm to play them in (a groove tool is below).',
+      'Press the roll button to get a new key. Write the same chord numerals as chords in that key.',
+      'Press “Roll a rhythm” below to get a new rhythm to play the chords in.',
       'Write a new melody over them. Do not use any note of the original melody.',
       'Play it for someone, if you can, and ask them to name the song.',
     ],
@@ -620,7 +620,7 @@ export const EXPERIMENTS = [
     parameters: [['Notes', '8 to 12'], ['Contour', 'Copied exactly'], ['Notes in common with the original', '0'], ['Time', '20 minutes']],
     procedure: [
       'Pick a melody you know well. Write down its first 8 to 12 notes as U (up), D (down) or S (same) between each pair.',
-      'Choose a new key and scale by rolling them. Do not use the original key.',
+      'Press the roll button to get a new key and scale. Do not use the original key.',
       'Write new notes that follow the U, D and S exactly. No note may match the original.',
       'Change the rhythm so it is clearly different. Play it.',
       'Notice how much it still feels like the original.',
@@ -653,8 +653,8 @@ export const EXPERIMENTS = [
     question: 'How much can a single word and two pitches carry?',
     parameters: [['Pitches', '2'], ['Words', '1'], ['Repeats', '24'], ['Time', '12 minutes']],
     procedure: [
-      'Choose a word by rolling, or take the first word you hear when you open a book.',
-      'Choose 2 notes. Do not add a third.',
+      'Press the roll button to get a word, or open a book and take the first word you see.',
+      'Press the button to draw 2 notes. Do not add a third.',
       'Sing or play the word 24 times. Change only rhythm, volume and which note lands on which syllable.',
       'Note the repeat where it began to sound like something else.',
       'Record it, and listen back once.',
@@ -670,7 +670,7 @@ export const EXPERIMENTS = [
     question: 'What do I make when I choose my own material but keep the discipline?',
     parameters: [['Limits', '3'], ['Time', '40 minutes'], ['Re-draws', '0'], ['Finished means', 'It has a beginning, a middle and an end']],
     procedure: [
-      'Draw three cards. They are your limits. Do not re-draw.',
+      'Press “Draw 3 cards” once. They are your limits. Do not draw again.',
       'Decide what you are making in under 2 minutes: a song, a poem, a loop, anything.',
       'Start the timer. Make it, obeying all three limits.',
       'Stop at 40 minutes. It is finished when the time is up.',

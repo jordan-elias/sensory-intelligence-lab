@@ -9,11 +9,11 @@ page.on("pageerror",e=>console.log("ERR",e.message)); await page.goto(`${BASE}/e
 for(let k=0;k<8&&!(await page.$('#xpTools #xpPhrasePlay'));k++){ await page.evaluate(()=>{ const r=[...document.querySelectorAll('#xpTools .xp-btn')].find(b=>/^Roll|Draw/.test(b.textContent)); r&&r.click(); }); await page.click('#xpNext'); await sleep(80); }
 ok(await page.$('#xpTools #xpPhrasePlay')!==null,'Play it appears on a step of the five-note cage');
 // nothing is decided for the person
-ok(await page.$$eval('#xpTools .xp-phrase .xp-chips li button',b=>b.length)===0,'no notes are put in for you');
+ok(await page.$$eval('#xpTools .xp-phrase .xp-pool li button',b=>b.length)===0,'no notes are put in for you');
 ok(/Add at least one note/.test(await (async()=>{ await page.click('#xpPhrasePlay'); return page.$eval('.xp-phrase > p.xp-hint:last-child',e=>e.textContent); })()),'playing with nothing set explains what to do');
 // set the notes by hand
 await page.evaluate(()=>{ const k=[...document.querySelectorAll('.xp-key')]; [0,4,7].forEach(i=>k[i].click()); });
-ok(await page.$$eval('.xp-phrase .xp-chips li button',b=>b.length)===3,'three notes set by hand');
+ok(await page.$$eval('.xp-phrase .xp-pool li button',b=>b.length)===3,'three notes set by hand');
 // set the rhythm by hand: beats 1, 4, 7, 10
 await page.evaluate(()=>{ const c=()=>[...document.querySelectorAll('.xp-phrase .xp-step')]; [0,3,6,9].forEach(i=>c()[i].click()); });
 ok(await page.$$eval('.xp-phrase select[aria-label^="Note for beat"]',s=>s.length)===4,'each switched-on beat gets a note choice');

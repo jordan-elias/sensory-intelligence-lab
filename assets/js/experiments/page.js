@@ -262,8 +262,10 @@ function detail(e) {
       const carry = tools.map((t, i) => ({ t, i })).filter(({ t, i }) => !shownIdx.has(i) && firstAt(i) >= 0 && firstAt(i) < at - 1 && t.keepable).map(({ t }) => ({ t, k: t.keepable() })).filter(x => x.k);
       const rest = tools.map((t, i) => ({ t, i })).filter(({ i }) => !shownIdx.has(i)).map(({ t }) => t);
       const secs = parseTimer(e.procedure[at - 1]);
+      const CUE = { gen: 'the button below', groove: 'the rhythm below', phrase: '“Play it” below', clip: 'the sound tool below', loops: 'the loops below', assign: 'the swap tool below', wordpoem: 'the word tool below', burn: 'the page below', cards: 'the cards below', blackout: 'the text below', roll: 'the chord tool below', sampler: 'the sampler below', treat: 'the treatments below' };
+      const cue = [...new Set(here.map(i => CUE[cfgs[i].type]).filter(Boolean))];
       render(head, dots(),
-        el('div', { class: 'xp-stepcard', 'aria-live': 'polite' }, el('div', { class: 'xp-stepno' }, `Step ${at} of ${n}`), el('p', { class: 'xp-steptext', id: 'xpStep' }, e.procedure[at - 1])),
+        el('div', { class: 'xp-stepcard', 'aria-live': 'polite' }, el('div', { class: 'xp-stepno' }, `Step ${at} of ${n}`), el('p', { class: 'xp-steptext', id: 'xpStep' }, e.procedure[at - 1]), cue.length ? el('p', { class: 'xp-cue', id: 'xpCue' }, 'Use ' + cue.join(' and ')) : null),
         secs ? stepTimer(secs) : null,
         el('div', { class: 'xp-nav xp-nav--sticky' }, btn(at === n ? 'Finish' : 'Next', () => go(at + 1), false, 'xpNext'), btn('Back', () => go(at - 1), true, 'xpBack')),
         carry.length ? el('div', { class: 'xp-carry', id: 'xpCarry' }, el('b', {}, 'From earlier'), carry.map(({ k }) => el('p', {}, el('span', { class: 'xp-carry-k' }, k.label + ': '), k.kind === 'text' ? k.text.replace(/\n/g, ' · ') : 'a clip you made'))) : null,

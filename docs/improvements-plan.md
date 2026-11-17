@@ -124,7 +124,9 @@ Feedback: the course asks for too much, repeats itself, and looks unlike the res
 **Progress**
 - Done (branch app-32): C square styling for the course, Today card, dashboard check-in banner and insight card, app shell; F therapist-profile link on the account page; F worksheet sections collapsible with Expand all / Collapse all (state remembered per device, always open in print). Test: `tests/browser/t57.mjs`.
 - Done (branch app-33): B one-screen start (title, question, first step, Begin; time/needs/limits/solo/method folded into "About this experiment"; checklist removed). A auto-roll when a step opens for dice and rolled rhythms, "Roll again", per-tool Keep button removed, one pre-ticked "Save on this device" list on the end screen (saving again replaces, never duplicates), Keep never required, sticky Next on phones. Not done from A/B: merging trivial steps (needs a content pass over the catalog) and limits as inline hints (steps already state their numbers; limits stay in About).
-- Next: D (in-page writing area, phrase player, audit).
+- Correction (17 Nov): drawing and rolling stay manual. Auto-roll was removed; only the per-tool Keep button is gone (results are saved once at the end).
+- Done (branch app-34): D phrase player "Play it" (appears wherever notes are drawn: set notes by hand or use the drawn ones, switch beats on and off or use the rolled rhythm, choose which note each beat plays or fill by rule (in order, backwards, random, first note), octave and tempo, Play/Stop, offered for saving as "My phrase"). Steps made clearer: about 30 steps now say exactly which button to press, and each step shows a "Use ... below" cue for its tool. Tests t58, steps unit test.
+- Next: in-place writing area for the written experiments, audit of the rest, then breathing audio, cocktail loading, spatial game.
 
 **Suggested order**
 1. C (styling, small and visible) and F (account link, worksheets).

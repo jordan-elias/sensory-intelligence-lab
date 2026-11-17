@@ -19,7 +19,7 @@ export function phraseTool(cfg, { el, audioCtx }) {
   let bpm = cfg.bpm || 90, oct = 0, mode = 'order', pool = [], pat = Array(n).fill(0), assign = Array(n).fill(-1), timer = null, step = 0, next = 0;
   let sources = { notes: () => null, pattern: () => null };
 
-  const poolEl = el('ul', { class: 'xp-chips', 'aria-label': 'Your notes' });
+  const poolEl = el('ul', { class: 'xp-pool', 'aria-label': 'Your notes' });
   const grid = el('div', { class: 'xp-phrase-grid', style: `grid-template-columns:repeat(${Math.min(n, 16)},1fr)` });
   const info = el('p', { class: 'xp-hint', 'aria-live': 'polite' });
   const playBtn = el('button', { type: 'button', class: 'xp-btn', id: 'xpPhrasePlay' }, 'Play');
