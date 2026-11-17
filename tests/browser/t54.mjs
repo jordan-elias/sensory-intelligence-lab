@@ -48,6 +48,7 @@ await page.type('#xpNote','Rolling first made me braver than choosing.'); await 
 ok(await page.evaluate(()=>!JSON.parse(localStorage.getItem('sil.exp.v1')).pos['dice-melody'].s),'finishing clears the saved step');
 // keep shelf, notebook, looking back
 await page.goto(`${BASE}/experiments/#/keep`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('.xp-kept-item');
+await sleep(300);
 ok(/What I rolled/.test(await text('.xp-kept-item h3'))&&(await text('.xp-kept')).split('·').length>=7,'the Keep shelf shows what was kept');
 await page.goto(`${BASE}/experiments/#/notebook`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('#xpReflect');
 const nb=await text('#xpNotebookText'); ok(/braver than choosing/.test(nb)&&/## Kept/.test(nb),'the notebook has the note and what was kept');

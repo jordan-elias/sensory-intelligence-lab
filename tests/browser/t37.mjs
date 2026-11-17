@@ -57,10 +57,10 @@ await page.evaluate(()=>[...document.querySelectorAll('.xp-btn')].find(b=>b.text
 await go('subtract',['.xp-time']);
 ok(/20:00/.test(await page.$eval('.xp-time',e=>e.textContent)),'the timer shows its length');
 // loops
-await go('loop-mismatch',['.xp-lane']);
-ok((await page.$$eval('.xp-lane',l=>l.length))===3,'three loop lanes');
-await page.evaluate(()=>[...document.querySelectorAll('.xp-btn')].find(b=>b.textContent==='Start' && b.closest('.xp-tool').querySelector('.xp-lane')).click()); await sleep(1200);
-ok(await page.$('.xp-lane i.on')!==null,'the loops run');
+await go('loop-mismatch',['#xpBench']);
+ok((await page.$$eval('#xpBench .xp-btrack',l=>l.length))===3,'three loop tracks');
+await page.evaluate(()=>{ document.querySelectorAll('#xpBench .xp-btrack')[0].querySelector('.xp-bs').click(); }); await page.click('#xpBenchPlay'); await sleep(1200);
+ok(await page.$('#xpBench .xp-bs.now')!==null,'the loops run'); await page.click('#xpBenchPlay');
 await page.evaluate(()=>[...document.querySelectorAll('.xp-btn')].find(b=>b.textContent==='Stop')?.click());
 // clip tool with a generated file
 const sr=22050, data=Float32Array.from({length:sr*2},(_,i)=>Math.sin(i/20)*0.5*Math.exp(-(i%sr)/9000));

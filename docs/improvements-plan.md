@@ -132,6 +132,13 @@ Feedback: the course asks for too much, repeats itself, and looks unlike the res
 
 **Round 2 (17 Nov review: the experiments as seeds of inspiration)**: see `docs/course-review-2026-11-17.md`. Headline: every experiment should end in a Seed card you can take away (MIDI, WAV, text, image), played with real voices instead of bare oscillators, with one shared rhythm/notes workbench, Next below the tool, a shorter list page, in-app tools for subtract, borrowed form, one knob and wrong tuning, then combining seeds. Proposed branches app-37 to app-42.
 
+**Round 2 direction (17 Nov, Jordan): better, more refined in-app tools, closer to the lab's own modules. Not voices, not mutate.**
+- Done (branch app-37-real-tools):
+  - **Workbench** (`bench.js`, `bench-core.js`, `seq/voices.js`): replaces "Play it" and the loops tool. A step sequencer in the Sequencer's style: kick, snare, hi-hat, bass and lead tracks using the Sequencer's own sounds and rules (`seq/groove.js`: swing, chance, velocity, per-track length, mute/solo, Euclidean spread); scale-locked note picker for bass and lead; Loudness and Chance modes; per-track cycle length with "lines up again every N steps"; tempo, key and scale; bring in the notes you drew (in order, backwards, random, first) and the rhythm you rolled; Download MIDI (type 1, drums on channel 10); offered for saving as "My loop". Used in every experiment that draws notes, and in Loop mismatch (cycles 3, 4, 5, locked) and Odd meter (every track takes the rolled number).
+  - **Stopwatch with marks**: Borrowed form (time the sections, edit times and names, see the timeline, play it through with a chime at each boundary) and One knob (mark sweet spots).
+  - **Take it apart**: Subtract (list the parts, remove half each round, rate clarity per round).
+- Still to do for in-app coverage: a plucked-string instrument for Wrong tuning; a 4-bar (64-step) loop view for One knob and DAW-unit experiments; Random pitch, fixed rhythm on the workbench with a "next version" and ranking list; share the Sequencer's voices with the Sequencer page itself (today the sound code is copied, not shared); WAV render of the workbench; a larger piano roll for Melody over chords with note lengths; the Sequencer's saved patterns shared with the course; capstone choices.
+
 **Suggested order**
 1. C (styling, small and visible) and F (account link, worksheets).
 2. B and A (start screen, auto-keep, one Save), with the existing `t37`/`t54` tests updated.

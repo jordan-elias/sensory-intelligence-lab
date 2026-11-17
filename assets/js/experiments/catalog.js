@@ -356,7 +356,7 @@ export const EXPERIMENTS = [
     ],
     stop: 'After the 4 minute sweep and one listen-back.',
     reflect: 'Was there a sweet spot you had not found before?',
-    tools: [{ type: 'gen', kind: 'choice', label: 'Roll the control', options: [
+    tools: [{ type: 'marks', mode: 'spots', label: 'Sweet spots', noun: 'spot' }, { type: 'gen', kind: 'choice', label: 'Roll the control', options: [
       'Filter cutoff', 'Reverb size', 'Delay time', 'Pitch of everything', 'Bit depth', 'Playback speed', 'Stereo width', 'Grain size', 'Distortion drive', 'Envelope release'] }, { type: 'groove', steps: 4, hits: 4, bpm: 100 }, { type: 'timer', minutes: 4 }],
     solo: DICE + 'Write ten controls on slips of paper and draw one.',
   },
@@ -430,7 +430,7 @@ export const EXPERIMENTS = [
     ],
     stop: 'After at most two cuts.',
     reflect: 'Did the piece feel clearer after the cut, or emptier?',
-    tools: [{ type: 'timer', minutes: 20 }],
+    tools: [{ type: 'subtract' }, { type: 'timer', minutes: 20 }],
     solo: 'Copy your piece before you start, so that nothing is really lost.',
   },
 
@@ -644,7 +644,7 @@ export const EXPERIMENTS = [
     ],
     stop: 'After one full play-through.',
     reflect: 'Did the shape of the time carry anything across?',
-    tools: [{ type: 'timer', minutes: 30 }],
+    tools: [{ type: 'marks', mode: 'sections' }, { type: 'timer', minutes: 30 }],
     solo: 'Write the section lengths as a row of boxes on paper, one box per 5 seconds. Fill each section in with a different mark.',
   },
   {
