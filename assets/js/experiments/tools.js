@@ -8,6 +8,7 @@ import { mulberry32, newSeed, generate, SCALES, NOTE_NAMES, rotateAssign, euclid
 import { wordPoemTool, burnTool, cardsTool, blackoutTool } from './tools-writing.js';
 import { rollTool, samplerTool, treatTool } from './tools-music.js';
 import { attachKeep } from './keep.js';
+import { phraseTool } from './tools-phrase.js';
 import { mixToMono, resample, reverse, chopShuffle, stutter, pitchedGrains, contrastLayer, normalise, encodeWav } from './audio-ops.js';
 
 export function el(tag, attrs = {}, ...kids) {
@@ -79,7 +80,7 @@ function genTool(cfg) {
     hear.hidden = !(last.pitchClasses || last.chords);
     rollBtn.textContent = 'Roll again';
   };
-  root.shown = () => { if (!last) rollBtn.onclick(); };   // the first result is there when the step opens
+  root.pitches = () => (last?.pitchClasses ? [...last.pitchClasses] : null);
   hear.onclick = () => { stop(); if (last?.chords) stop = playChords(last.chords); else if (last?.pitchClasses) stop = playTones(last.pitchClasses, { step: cfg.kind === 'notes' ? 0.6 : 0.4 }); };
   root.append(el('div', { class: 'xp-row' }, rollBtn, hear), bar, out, el('div', { class: 'xp-meta' }, seedEl, el('p', { class: 'xp-hint' }, 'The seed makes a roll repeatable.')),
     cfg.noHistory ? null : el('details', { class: 'xp-details' }, el('summary', {}, 'Earlier rolls'), hist));
@@ -220,7 +221,7 @@ function grooveTool(cfg) {
   const root = el('div', { class: 'xp-tool' }, el('p', { class: 'xp-k' }, cfg.roll ? 'Rhythm to play over' : 'Metronome / rhythm'), el('div', { class: 'xp-row' }, btn, rollBtn, el('label', {}, 'Tempo ', tempo)),
     el('div', { class: 'xp-steps-grid', style: `grid-template-columns:repeat(${Math.min(n, 16)},1fr)` }, cells), label,
     el('p', { class: 'xp-hint' }, 'Tap a step to switch it on or off. Once you have started an experiment that fixes the rhythm, stop editing it.'));
-  if (rollBtn) root.shown = () => { if (!rolled) doRoll(); };
+  root.pattern = () => ({ pat: [...pat], n, bpm });
   return root;
 }
 
@@ -254,7 +255,8 @@ function buildOne(cfg) {
     case 'roll': return rollTool(cfg);
     case 'sampler': return samplerTool(cfg);
     case 'treat': return treatTool(cfg);
+    case 'phrase': return phraseTool(cfg, { el, audioCtx });
     default: return el('p', {}, '');
   }
 }
-export const TOOL_TYPES = ['gen', 'timer', 'clip', 'loops', 'groove', 'assign', 'wordpoem', 'burn', 'cards', 'blackout', 'roll', 'sampler', 'treat'];
+export const TOOL_TYPES = ['gen', 'timer', 'clip', 'loops', 'groove', 'assign', 'wordpoem', 'burn', 'cards', 'blackout', 'roll', 'sampler', 'treat', 'phrase'];

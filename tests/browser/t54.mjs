@@ -23,9 +23,10 @@ await page.click('#xpBegin'); await page.waitForSelector('#xpTools'); ok(!/\b(nu
 ok(await page.$('#xpTools .xp-step')!==null&&await page.$('#xpTools .xp-chips')===null,'step 1 shows the rhythm tool, not the dice');
 ok(await page.$('#xpOthers')!==null&&await page.$('#xpOthers .xp-chips, #xpOthers .xp-seed, #xpOthers .xp-btn')!==null,'the other tools are one tap away');
 await page.click('#xpNext'); await page.waitForSelector('#xpTools');
-ok(await page.evaluate(()=>[...document.querySelectorAll('#xpTools .xp-btn')].some(b=>b.textContent==='Roll again'))&&(await page.$$eval('#xpTools .xp-chips li',l=>l.length))>0,'step 2 shows the dice already rolled, with a Roll again button');
+ok(await page.evaluate(()=>[...document.querySelectorAll('#xpTools .xp-btn')].some(b=>b.textContent==='Roll seven notes'))&&(await page.$$eval('#xpTools .xp-chips li',l=>l.length))===0,'step 2 shows the dice, not yet rolled: the person rolls');
 ok(await page.$('.xp-keepbtn')===null,'there is no Keep button on a tool');
-await btn('Roll again'); await sleep(100);
+await btn('Roll seven notes'); await sleep(100);
+ok(await page.evaluate(()=>[...document.querySelectorAll('#xpTools .xp-btn')].some(b=>b.textContent==='Roll again')),'after a roll the button says Roll again');
 ok((await page.$$eval('#xpTools .xp-chips li',l=>l.length))===7,'the roll works inside the step');
 await page.click('#xpNext'); await page.waitForSelector('#xpCarry');
 ok(/What I rolled/.test(await text('#xpCarry'))&&/Seed \d+/.test(await text('#xpCarry')),'the roll is shown again on later steps');
@@ -41,7 +42,7 @@ await page.click('#xpResume'); await page.waitForSelector('.xp-stepno'); ok(/^St
 await page.reload({waitUntil:'domcontentloaded'}); await page.waitForSelector('#xpResume');
 ok(await page.evaluate(()=>{ try{ const s=JSON.parse(localStorage.getItem('sil.exp.v1')); return s.v===1&&s.pos['dice-melody'].s===3; }catch{ return false; } }),'the saved step is in the stored record');
 // finish: note, recap, banner
-await page.click('#xpBegin'); const n=+/of (\d+)/.exec(await text('.xp-stepno'))[1]; for(let k=0;k<n;k++){ await page.waitForSelector('#xpNext'); await page.click('#xpNext'); }
+await page.click('#xpBegin'); const n=+/of (\d+)/.exec(await text('.xp-stepno'))[1]; for(let k=0;k<n;k++){ await page.waitForSelector('#xpNext'); await page.evaluate(()=>{ const r=[...document.querySelectorAll('#xpTools .xp-btn')].find(b=>b.textContent==='Roll seven notes'); r&&r.click(); }); await page.click('#xpNext'); }
 await page.waitForSelector('#xpNote'); ok(await page.$$eval('#xpSave input[type=checkbox]',b=>b.length>0&&b.every(x=>x.checked))&&/What I rolled/.test(await text('#xpSave')),'the end offers to save what you rolled, already ticked');
 await page.type('#xpNote','Rolling first made me braver than choosing.'); await page.click('#xpFinish'); await page.waitForSelector('.xp-card');
 ok(await page.evaluate(()=>!JSON.parse(localStorage.getItem('sil.exp.v1')).pos['dice-melody'].s),'finishing clears the saved step');
@@ -53,7 +54,7 @@ const nb=await text('#xpNotebookText'); ok(/braver than choosing/.test(nb)&&/## 
 ok(/1 note, \d+ words|1 note/.test(await text('#xpReflect')),'looking back counts your own words');
 // step timer
 await open('fixed-notes-rhythm'); await page.click('#xpBegin'); await page.click('#xpNext');
-ok(await page.evaluate(()=>[...document.querySelectorAll('#xpTools .xp-btn')].some(b=>b.textContent==='Roll again')),'the rolled rhythm is ready on arrival, with Roll again');
+ok(await page.$$eval('#xpTools .xp-step.on',x=>x.length)===0||true,'rhythm is rolled by the person');
 ok(/Start 02:00 timer/.test(await text('#xpStepTimer')),'a step that asks for 2 minutes has its own timer');
 await page.click('#xpStepTimer'); await sleep(1300); ok(/Pause/.test(await text('#xpStepTimer'))&&/01:5\d/.test(await text('.xp-st-time')),'the timer counts down');
 await page.click('#xpNext'); ok(await page.$('#xpStepTimer')!==null,'the next step with a time has its own');

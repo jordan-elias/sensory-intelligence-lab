@@ -31,11 +31,18 @@ const ROLL = /\b(roll|rolled|draw|drawn)\b/i, PICK = /\b(pick|choose|generate)\b
  * For each step, the indexes (into e.tools) shown with it. Timer tools are never placed: the step's own time is shown inline and
  * the long session timer sits under "Your other tools".
  */
+/** The experiment's tools, plus "Play it" where notes are drawn: it lets the person put them on a rhythm and hear the result. */
+export function toolsFor(e) {
+  const tools = e.tools || [];
+  const notes = tools.some(t => t.type === 'gen' && (t.kind === 'notes' || t.kind === 'degrees'));
+  return notes && !tools.some(t => t.type === 'phrase') ? [...tools, { type: 'phrase', steps: 16 }] : tools;
+}
+
 export function assignTools(e) {
-  const n = e.procedure.length, tools = e.tools || [], out = Array.from({ length: n }, () => []);
+  const n = e.procedure.length, tools = toolsFor(e), out = Array.from({ length: n }, () => []);
   if (Array.isArray(e.stepTools)) { e.stepTools.forEach((list, i) => { if (out[i]) out[i] = [...list]; }); return out; }
-  const gens = [], grooves = [];
-  tools.forEach((t, i) => { if (t.type === 'gen') gens.push(i); else if (t.type === 'groove') grooves.push(i); else if (WORKBENCH.has(t.type)) out.forEach(s => s.push(i)); });
+  const gens = [], grooves = [], phrases = [];
+  tools.forEach((t, i) => { if (t.type === 'gen') gens.push(i); else if (t.type === 'groove') grooves.push(i); else if (t.type === 'phrase') phrases.push(i); else if (WORKBENCH.has(t.type)) out.forEach(s => s.push(i)); });
   // Generators go with the steps that say roll / draw (or pick / choose when none do), one generator per such step, the last taking any left.
   let steps = e.procedure.map((s, i) => (ROLL.test(s) ? i : -1)).filter(i => i >= 0);
   if (!steps.length) steps = e.procedure.map((s, i) => (PICK.test(s) ? i : -1)).filter(i => i >= 0);
@@ -44,6 +51,8 @@ export function assignTools(e) {
   // Rhythm tools go with the steps that talk about rhythm or tempo; the first one if none does.
   const rsteps = e.procedure.map((s, i) => (RHYTHM.test(s) ? i : -1)).filter(i => i >= 0);
   for (const g of grooves) for (const i of (rsteps.length ? rsteps : [0])) out[i].push(g);
+  // "Play it" goes with the rhythm steps too (after the rhythm), or with the last step that draws notes.
+  for (const g of phrases) for (const i of (rsteps.length ? rsteps : [steps[steps.length - 1]])) out[i].push(g);
   return out.map(l => [...new Set(l)]);
 }
 

@@ -21,10 +21,10 @@ export function readKeepable(type, root) {
   }
 }
 
-export const KEEPABLE = new Set(['gen', 'groove', 'clip', 'assign', 'wordpoem', 'blackout', 'burn', 'cards', 'treat']);
+export const KEEPABLE = new Set(['gen', 'groove', 'clip', 'assign', 'wordpoem', 'blackout', 'burn', 'cards', 'treat', 'phrase']);
 
 /** Marks a tool as having something to save. There is no button on the tool: the page offers everything once, at the end. */
 export function attachKeep(type, root) {
-  if (KEEPABLE.has(type)) root.keepable = () => readKeepable(type, root);
+  if (KEEPABLE.has(type) && !root.keepable) root.keepable = () => readKeepable(type, root);
   return root;
 }

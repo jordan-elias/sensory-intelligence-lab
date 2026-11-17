@@ -45,8 +45,8 @@ ok(/1 of \d+ done/.test(await page.$eval('.xp-count',e=>e.textContent)),'finishi
 await fresh('dice-melody'); await page.waitForSelector('#xpBegin'); await page.click('#xpBegin'); for(let k=0;k<total;k++){ await page.waitForSelector('#xpNext'); await page.click('#xpNext'); }
 await page.waitForSelector('#xpNote'); ok((await page.$eval('#xpNote',e=>e.value)).includes('kept pulling me back'),'the note is remembered');
 await go('fixed-groove-chords',['.xp-tool']);
-await page.evaluate(()=>[...document.querySelectorAll('.xp-btn')].find(b=>b.textContent==='Roll again').click());
-ok((await page.$$eval('.xp-chips li',l=>l.length))===4,'the chords are rolled on arrival and Roll again gives four more');
+await page.evaluate(()=>[...document.querySelectorAll('.xp-btn')].find(b=>b.textContent==='Roll four chords').click());
+ok((await page.$$eval('.xp-chips li',l=>l.length))===4,'rolling gives four chords');
 ok((await page.$$eval('.xp-step',c=>c.length))===16,'the rhythm grid has 16 steps');
 await page.evaluate(()=>[...document.querySelectorAll('.xp-btn')].find(b=>b.textContent==='Roll a rhythm').click());
 ok((await page.$$eval('.xp-step[aria-pressed=true]',c=>c.length))>=1,'a rolled rhythm switches steps on');

@@ -8,7 +8,7 @@ import { buildTool, el, playTones } from '/assets/js/experiments/tools.js';
 import { buildNotebook } from '/assets/js/experiments/notebook.js';
 import { createProgress } from '/assets/js/experiments/progress.js';
 import { createSync } from '/assets/js/experiments/sync.js';
-import { parseTimer, assignTools, setupChecklist, fmtClock } from '/assets/js/experiments/steps.js';
+import { parseTimer, assignTools, toolsFor, setupChecklist, fmtClock } from '/assets/js/experiments/steps.js';
 import { recommend, TIMES, continueLabel } from '/assets/js/experiments/recommend.js';
 import { reflect } from '/assets/js/experiments/reflect.js';
 import { putAudio, getAudio, deleteAudio } from '/assets/js/experiments/shelf-audio.js';
@@ -210,8 +210,9 @@ function detail(e) {
   const n = total(e), last = n + 1;                                 // 0 = start, 1..n = steps, last = finish
   const note = el('textarea', { rows: 8, id: 'xpNote', 'aria-label': 'Your note', placeholder: 'Record your process, or share your thoughts. Anything at all, in any shape. Kept on this device only.' });
   note.value = progress.note(e.id); note.oninput = () => progress.setNote(e.id, note.value);
-  const tools = e.tools.map(cfg => buildTool(cfg));        // built once, so rolls and running rhythms survive moving between steps
-  const per = assignTools(e), isTimer = i => e.tools[i].type === 'timer';
+  const cfgs = toolsFor(e), tools = cfgs.map(cfg => buildTool(cfg));
+  tools.forEach(t => t.link && t.link(tools));        // built once, so rolls and running rhythms survive moving between steps
+  const per = assignTools(e), isTimer = i => cfgs[i].type === 'timer';
   const firstAt = i => per.findIndex(l => l.includes(i));
   let at = 0;
   const idx = PATH.indexOf(e), nextExp = PATH[(idx + 1) % PATH.length];
@@ -261,7 +262,6 @@ function detail(e) {
       const carry = tools.map((t, i) => ({ t, i })).filter(({ t, i }) => !shownIdx.has(i) && firstAt(i) >= 0 && firstAt(i) < at - 1 && t.keepable).map(({ t }) => ({ t, k: t.keepable() })).filter(x => x.k);
       const rest = tools.map((t, i) => ({ t, i })).filter(({ i }) => !shownIdx.has(i)).map(({ t }) => t);
       const secs = parseTimer(e.procedure[at - 1]);
-      here.forEach(i => tools[i].shown && tools[i].shown());
       render(head, dots(),
         el('div', { class: 'xp-stepcard', 'aria-live': 'polite' }, el('div', { class: 'xp-stepno' }, `Step ${at} of ${n}`), el('p', { class: 'xp-steptext', id: 'xpStep' }, e.procedure[at - 1])),
         secs ? stepTimer(secs) : null,
