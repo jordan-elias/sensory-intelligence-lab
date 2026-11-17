@@ -72,7 +72,7 @@ test('euclid generator gives a pattern of the requested length', () => {
 });
 
 test('every experiment is a complete protocol with real parameters, tools and generators', () => {
-  const ids = new Set(), kinds = ['degrees', 'notes', 'tuning', 'range', 'choice', 'shuffle', 'pattern', 'chords', 'euclid'], tools = ['gen', 'timer', 'clip', 'loops', 'groove', 'assign', 'wordpoem', 'burn', 'cards', 'blackout', 'roll', 'sampler', 'treat', 'pad', 'phrase'], ops = ['slow', 'fast', 'contrast', 'reverse', 'chop', 'stutter', 'grain'];
+  const ids = new Set(), kinds = ['degrees', 'notes', 'tuning', 'range', 'choice', 'shuffle', 'pattern', 'chords', 'euclid'], tools = ['gen', 'timer', 'clip', 'loops', 'groove', 'assign', 'wordpoem', 'burn', 'cards', 'blackout', 'roll', 'sampler', 'treat', 'pad', 'bench'], ops = ['slow', 'fast', 'contrast', 'reverse', 'chop', 'stutter', 'grain'];
   for (const e of EXPERIMENTS) {
     assert.ok(!ids.has(e.id), 'duplicate id ' + e.id); ids.add(e.id);
     assert.ok(CATEGORIES[e.category], e.id); assert.ok(NEEDS[e.needs], e.id);

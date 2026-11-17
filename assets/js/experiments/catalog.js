@@ -160,7 +160,7 @@ export const EXPERIMENTS = [
     ],
     stop: 'After 6 sounds and one more cycle, or at 20 minutes.',
     reflect: 'When did the best moments happen: near the start of the cycle or later?',
-    tools: [{ type: 'loops', lengths: [3, 4, 5] }, { type: 'timer', minutes: 20 }],
+    tools: [{ type: 'bench', tracks: ['kick', 'snare', 'hihat'], lengths: { kick: 3, snare: 4, hihat: 5 }, lockLength: true, bring: false, bpm: 90 }, { type: 'timer', minutes: 20 }],
     solo: 'Clap or tap three patterns at once with two friends: one counting to 3, one to 4, one to 5, each stressing its first beat. Or set three loops of those lengths in any looper.',
   },
   {
@@ -177,7 +177,7 @@ export const EXPERIMENTS = [
     ],
     stop: 'After 5 minutes of playing the finished groove.',
     reflect: 'When did it stop feeling odd, and what changed?',
-    tools: [{ type: 'gen', kind: 'range', min: 5, max: 13, count: 1, label: 'Roll the number of beats' }, { type: 'loops', lengths: [7] }, { type: 'timer', minutes: 5 }],
+    tools: [{ type: 'gen', kind: 'range', min: 5, max: 13, count: 1, label: 'Roll the number of beats' }, { type: 'bench', tracks: ['kick', 'snare', 'hihat'], number: true, bring: false, bpm: 100 }, { type: 'timer', minutes: 5 }],
     solo: DICE + 'Roll two dice and add them, then add 3 (range 5 to 15; re-roll 14 and 15). Count aloud and tap the groove.',
   },
   {

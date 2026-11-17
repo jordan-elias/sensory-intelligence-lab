@@ -79,6 +79,17 @@
     .xp-key{padding:.3rem .5rem;min-width:2.2rem} .xp-chip-btn{background:none;border:1px solid var(--border);border-radius:0;padding:.15rem .5rem;color:inherit;font:inherit;cursor:pointer}
     .xp-cue{margin:.4rem 0 0;font-size:.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
     .xp-pool{list-style:none;display:flex;gap:.4rem;flex-wrap:wrap;margin:.5rem 0;padding:0}
+    .xp-bench .xp-btrack{margin:.7rem 0;padding:.5rem;border:1px solid var(--border)}
+    .xp-bhead{display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem} .xp-grow{flex:1}
+    .xp-ms{min-width:2rem;padding:.2rem .5rem}
+    .xp-bgrid{display:grid;grid-template-columns:repeat(16,minmax(0,1fr));gap:2px}
+    .xp-bs{min-height:2.1rem;padding:0;border:1px solid var(--border);border-radius:0;background:var(--bg);color:var(--text);font:inherit;font-size:.62rem;cursor:pointer;position:relative;overflow:hidden}
+    .xp-bs.bar{border-left-color:var(--muted)} .xp-bs.off{opacity:.25}
+    .xp-bs.on{background:color-mix(in srgb,var(--accent,#1c554e) calc(var(--lv,1)*100%),var(--bg));color:#fff;border-color:var(--accent,#1c554e)}
+    .xp-bs.now{outline:2px solid var(--text);outline-offset:-2px} .xp-bs.sel{outline:2px solid #c0742b;outline-offset:-2px}
+    .xp-picker[hidden]{display:none} .xp-picker{display:flex;flex-wrap:wrap;gap:3px;margin:.4rem 0} .xp-pk{padding:.25rem .5rem;min-width:2.3rem}
+    .xp-bmore summary{cursor:pointer;font-size:.8rem;color:var(--muted);margin-top:.4rem} .xp-num{width:3.2rem}
+    .xp-bench [aria-pressed="true"].xp-btn--alt{background:var(--accent,#1c554e);color:#fff}
     .xp-save{margin:1.2rem 0;padding:.8rem 1rem;border:1px solid var(--border)} .xp-save .xp-h{margin-top:0}
     @media (max-width:700px){ .xp-nav--sticky{position:sticky;bottom:0;background:var(--bg);padding:.6rem 0;border-top:1px solid var(--border);z-index:2} }
     .xp-prog-bar{flex:1;height:6px;background:var(--border);border-radius:0;overflow:hidden} .xp-prog-bar span{display:block;height:100%;background:var(--accent)}
