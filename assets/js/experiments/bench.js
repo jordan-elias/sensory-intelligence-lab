@@ -9,6 +9,7 @@ import { el, audioCtx } from './tools.js';
 import { NOTE_NAMES, SCALES } from './rng.js';
 import { makeVoices } from '../seq/voices.js';
 import * as B from './bench-core.js';
+import { encodeWav, normalise, mixToMono } from './audio-ops.js';
 
 const noteName = n => NOTE_NAMES[((n % 12) + 12) % 12];
 const MODES = [['notes', 'Notes'], ['vel', 'Loudness'], ['prob', 'Chance']];
@@ -31,8 +32,8 @@ export function benchTool(cfg = {}) {
 
   /* ── sound ── */
   const ensure = () => { if (!ctx) { ctx = audioCtx(); master = ctx.createGain(); master.gain.value = 0.8; master.connect(ctx.destination); voices = makeVoices(ctx, master); } return ctx; };
-  const sound = (e, t) => {
-    const v = voices, at = t + e.delay, vol = 0.5 * e.vol;
+  const sound = (e, t, v = voices) => {
+    const at = t + e.delay, vol = 0.5 * e.vol;
     if (e.id === 'kick') v.kick(at, vol); else if (e.id === 'snare') v.snare(at, vol); else if (e.id === 'hihat') v.hihat(at, vol, false); else if (e.id === 'cymbal') v.cymbal(at, vol);
     else if (e.id === 'bass') v.bass(at, B.midiHz(e.note), vol); else v.lead(at, B.midiHz(e.note) / 2, vol, 0);
   };
@@ -165,6 +166,21 @@ export function benchTool(cfg = {}) {
     download('my-loop.mid', B.encodeBenchMidi(b), 'audio/midi'); say('Saved as a MIDI file: open it in any DAW. Chance is not applied, and tracks of different lengths are written out in full.');
   } }, 'Download MIDI');
 
+  const wav = el('button', { type: 'button', class: 'xp-btn xp-btn--alt', id: 'xpBenchWav', onclick: async () => {
+    if (!b.tracks.some(t => B.hits(t))) { say('Nothing to save yet.'); return; }
+    wav.disabled = true; say('Rendering…');
+    try {
+      const sr = 44100, stepS = stepSec(), n = B.exportLength(b), loops = 2, secs = n * loops * stepS + 1.5;
+      const off = new OfflineAudioContext(1, Math.ceil(secs * sr), sr), out = off.createGain(); out.gain.value = 0.8; out.connect(off.destination);
+      const v = makeVoices(off, out);
+      for (let k = 0; k < n * loops; k++) B.eventsAt(b, k, stepS).forEach(e => sound(e, k * stepS + 0.02, v));
+      const buf = await off.startRendering();
+      download('my-loop.wav', encodeWav(normalise(mixToMono([buf.getChannelData(0)])), sr), 'audio/wav');
+      say('Saved as a WAV file: two passes of your loop, ready to drop into a DAW or sampler. Chance is applied as heard.');
+    } catch (e) { say('Could not render the sound here. The MIDI file still works.'); }
+    wav.disabled = false;
+  } }, 'Download WAV');
+
   const root = el('div', { class: 'xp-tool xp-bench', id: 'xpBench' },
     el('p', { class: 'xp-k' }, 'Workbench: build it, hear it'),
     bring,
@@ -173,7 +189,7 @@ export function benchTool(cfg = {}) {
     el('div', { class: 'xp-row' }, el('label', {}, 'Key ', rootSel), el('label', {}, scaleSel), el('label', {}, 'Swing ', swing), swingOut),
     el('div', { class: 'xp-row' }, el('span', { class: 'xp-hint' }, 'A tap on a step changes:'), modeRow),
     ...blocks,
-    el('div', { class: 'xp-row' }, save), msg,
+    el('div', { class: 'xp-row' }, save, wav), msg,
     el('p', { class: 'xp-hint' }, 'Tap a step to switch it on. On a melodic track, tap it again to choose its note (only notes of the key), and once more to switch it off. Loudness and Chance cycle full, ¾, ½, ¼.'));
   root.link = list => {
     sources = {

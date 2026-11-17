@@ -49,6 +49,9 @@ await page.click('#xpBenchPlay'); ok(/Play/.test(await page.$eval('#xpBenchPlay'
 // export
 await page.click('#xpBenchMidi'); await sleep(200);
 ok(await page.evaluate(()=>window.__dl.some(x=>/audio\/midi/.test(x))),'Download MIDI produces a MIDI file');
+await page.click('#xpBenchWav'); await page.waitForFunction(()=>window.__dl.some(x=>/audio\/wav/.test(x)),{timeout:15000}).catch(()=>{});
+const wavSize=await page.evaluate(()=>{const w=window.__dl.find(x=>/audio\/wav/.test(x));return w?+w.split(':')[0]:0;});
+ok(wavSize>44100*2,'Download WAV renders audio (two passes plus tail), size '+wavSize);
 // save at the end
 for(let k=0;k<12&&await page.$('#xpNext');k++){ await page.click('#xpNext'); await sleep(40); }
 await page.waitForSelector('#xpSave'); ok(/My loop/.test(await page.$eval('#xpSave',e=>e.textContent)),'the loop is offered for saving at the end');
