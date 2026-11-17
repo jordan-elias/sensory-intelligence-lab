@@ -91,3 +91,8 @@
 
 .th-print { display: none; } .th-print-body { white-space: pre-wrap; font: 11pt/1.5 Georgia, serif; }
 @media print { body.th-printing > *:not(#recPrint) { display: none !important; } body.th-printing #recPrint { display: block; padding: 1.5cm; } }
+
+/* Client folder: contents list and grouped worksheets */
+.th-index { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .5rem; }
+.th-index li { border: 1px solid var(--border); padding: .6rem .8rem; display: flex; flex-direction: column; gap: .15rem; }
+#panel-folder .th-h3 { margin: 1rem 0 .4rem; }

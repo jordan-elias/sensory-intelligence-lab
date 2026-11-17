@@ -30,10 +30,10 @@ const sc=(await txt('#safetyCode')).trim(); console.log('code:',JSON.stringify(s
 await P.page.click('#tab-messages'); await sleep(900);
 t=await txt('#panel-messages');
 ok(/See you soon/.test(t)&&!!(await P.page.$('#panel-messages #mxForm')),'Messages tab shows the thread and a way to reply');
-await P.page.click('#tab-shared'); await sleep(900);
-t=await txt('#panel-shared');
-ok(/1 check-in/.test(t)&&/<b>quiet<\/b> walk/.test(t),'Shared tab shows check-ins, notes as text');
-ok(/My coping plan/.test(t)&&/Coping/.test(t),'Shared tab lists the shared document');
+await P.page.click('#tab-folder'); await sleep(1200);
+t=await txt('#panel-folder');
+ok(/1 check-in/.test(t)&&/<b>quiet<\/b> walk/.test(t),'Folder tab shows check-ins, notes as text');
+ok(/My coping plan/.test(t)&&/Coping/.test(t),'Folder tab lists the shared document');
 await P.page.click('.th-docbtn'); await sleep(200);
 t=await txt('.th-docbody');
 ok(/Q1 feelings/i.test(t)&&/<i>tense<\/i>/.test(t)&&/walk/.test(t)&&!/empty/i.test(t),'document opens read-only with tidy labels, empty answers skipped, text not markup');

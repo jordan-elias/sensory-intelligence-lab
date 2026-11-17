@@ -156,3 +156,8 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 - Sequencer: done (branch app-19): swing, mute/solo per track, Euclidean fill, WAV export matches. Soundscape Machine reviewed, already deep; waiting for the user to say what is missing.
 - Photo-words experiment: automatic OCR (currently typed by hand).
 - Listening test of the piano roll and sampler by ear.
+
+### Progress: app-38 worksheets and therapist folder
+- New worksheets **DEAR MAN**, **GROW** and **FAST** (`/worksheets/dear-man|grow|fast/`), each with a side-by-side comparison (two versions of the ask; three options with effort/fit ratings; give in vs hold steady). Shared builders in `assets/js/worksheets/frame.js`. Types are free-form in the `worksheets` table, so no SQL is needed.
+- Every worksheet already offers "Share with <therapist>" (generic in `page.js`). t65 checks this on all nine pages: hidden until saved, never shared by default.
+- Therapist client page: **Shared** and **Intake** tabs merged into one **Folder** tab (contents list, intake form, family history, worksheets grouped by type, check-ins). Messages stays separate. Old `#shared` / `#intake` links open the Folder. Tests t22, t66.
