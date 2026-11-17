@@ -12,7 +12,7 @@ export function readKeepable(type, root) {
     case 'groove': { const cells = [...root.querySelectorAll('.xp-step')]; if (!cells.length) return null; const pat = cells.map(c => (c.getAttribute('aria-pressed') === 'true' ? 'x' : '.')).join(''); const info = root.querySelector('p[aria-live]')?.textContent.trim() || ''; return { label: 'My rhythm', kind: 'text', text: `${pat}\n${info}`.trim() }; }
     case 'clip': { const c = root.__clip?.(); return c ? { label: 'My result', kind: 'audio', clip: c } : null; }
     case 'assign': { const t = text(root, '.xp-out li'); return t.length ? { label: 'The swaps', kind: 'text', text: t.join('\n') } : null; }
-    case 'wordpoem': { const t = text(root, '.xp-frame li'); return t.length ? { label: 'The frame', kind: 'text', text: t.join('\n') } : null; }
+    case 'wordpoem': { const t = [...root.querySelectorAll('.xp-frame li')].map(li => `${li.querySelector('input')?.value.trim() || '…'} ${li.querySelector('strong')?.textContent || ''}`.trim()); return t.length ? { label: 'The frame', kind: 'text', text: t.join('\n') } : null; }
     case 'blackout': { const t = root.querySelector('#xpPoem')?.textContent.trim(); return t ? { label: 'My poem', kind: 'text', text: t } : null; }
     case 'burn': { const t = text(root, '#xpHaiku p'); return t.length ? { label: 'What was left', kind: 'text', text: t.join('\n') } : null; }
     case 'cards': { const t = text(root, '.xp-card-face'); return t.length ? { label: 'My cards', kind: 'text', text: t.join('\n') } : null; }
@@ -21,7 +21,7 @@ export function readKeepable(type, root) {
   }
 }
 
-export const KEEPABLE = new Set(['gen', 'groove', 'clip', 'assign', 'wordpoem', 'blackout', 'burn', 'cards', 'treat', 'phrase']);
+export const KEEPABLE = new Set(['gen', 'groove', 'clip', 'assign', 'wordpoem', 'blackout', 'burn', 'cards', 'treat', 'phrase', 'pad']);
 
 /** Marks a tool as having something to save. There is no button on the tool: the page offers everything once, at the end. */
 export function attachKeep(type, root) {

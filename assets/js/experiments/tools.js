@@ -5,7 +5,7 @@
  * when you leave the page unless you download it yourself.
  */
 import { mulberry32, newSeed, generate, SCALES, NOTE_NAMES, rotateAssign, euclid, int } from './rng.js';
-import { wordPoemTool, burnTool, cardsTool, blackoutTool } from './tools-writing.js';
+import { wordPoemTool, burnTool, cardsTool, blackoutTool, padTool } from './tools-writing.js';
 import { rollTool, samplerTool, treatTool } from './tools-music.js';
 import { attachKeep } from './keep.js';
 import { phraseTool } from './tools-phrase.js';
@@ -255,8 +255,9 @@ function buildOne(cfg) {
     case 'roll': return rollTool(cfg);
     case 'sampler': return samplerTool(cfg);
     case 'treat': return treatTool(cfg);
+    case 'pad': return padTool(cfg);
     case 'phrase': return phraseTool(cfg, { el, audioCtx });
     default: return el('p', {}, '');
   }
 }
-export const TOOL_TYPES = ['gen', 'timer', 'clip', 'loops', 'groove', 'assign', 'wordpoem', 'burn', 'cards', 'blackout', 'roll', 'sampler', 'treat', 'phrase'];
+export const TOOL_TYPES = ['gen', 'timer', 'clip', 'loops', 'groove', 'assign', 'wordpoem', 'burn', 'cards', 'blackout', 'roll', 'sampler', 'treat', 'phrase', 'pad'];

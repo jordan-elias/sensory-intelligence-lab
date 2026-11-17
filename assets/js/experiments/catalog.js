@@ -486,7 +486,7 @@ export const EXPERIMENTS = [
     tools: [{ type: 'gen', kind: 'choice', label: 'Roll a prompt', options: [
       'Things you heard today that you did not notice at the time', 'Sounds you would put in a room if the room were a mood', 'Words your family says that no one else does',
       'Places you have been alone', 'Things you were told to stop doing', 'Instruments you have never played and what they would say',
-      'Questions you have never asked anyone', 'Things that are quieter than they look', 'What you would do with one more hour of daylight'] }, { type: 'timer', minutes: 8 }],
+      'Questions you have never asked anyone', 'Things that are quieter than they look', 'What you would do with one more hour of daylight'] }, { type: 'pad', label: 'Your list', target: 15 }, { type: 'timer', minutes: 8 }],
     solo: 'Write nine prompts on slips of paper. Draw one with your eyes closed. Count your items on your fingers, and then on the page.',
   },
   {
