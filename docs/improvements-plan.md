@@ -130,6 +130,8 @@ Feedback: the course asks for too much, repeats itself, and looks unlike the res
 - Done (branch app-35): E cocktail party (visible "Loading sounds… n%" from first paint, Play off until ready, Try again on failure, named answer buttons); spatial game (in-a-row and longest-run counters kept on the device, optional "move the level up and down for me", haptics, headphone check); breathing sound choice (soft drone as before, drone with an audible breath, warm pad, quiet chimes; remembered on the device). Tests t59 to t62.
 - Not done yet: spatial game daily challenge (needs seeded paths), environments with different reverb, path replay after a miss (the path is already drawn); breathing sounds need a listening check by ear; the "do it right there" audit for clip, loops and DAW-style experiments (they still rely on your own instrument or software for some steps); merging trivial steps.
 
+**Round 2 (17 Nov review: the experiments as seeds of inspiration)**: see `docs/course-review-2026-11-17.md`. Headline: every experiment should end in a Seed card you can take away (MIDI, WAV, text, image), played with real voices instead of bare oscillators, with one shared rhythm/notes workbench, Next below the tool, a shorter list page, in-app tools for subtract, borrowed form, one knob and wrong tuning, then combining seeds. Proposed branches app-37 to app-42.
+
 **Suggested order**
 1. C (styling, small and visible) and F (account link, worksheets).
 2. B and A (start screen, auto-keep, one Save), with the existing `t37`/`t54` tests updated.
