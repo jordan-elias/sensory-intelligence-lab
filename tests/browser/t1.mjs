@@ -2,7 +2,7 @@ import {launch,newPage} from './harness.mjs';
 const {browser,BASE,server}=await launch();
 let fail=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fail++; };
 // 1. every page loads and renders without errors
-for (const s of ['','goals-values','music-autobiography','session-reflection','lyric-analysis','coping','interpersonal']) {
+for (const s of ['','goals-values','music-autobiography','session-reflection','lyric-analysis','coping','interpersonal','dear-man','grow','fast']) {
   const {page,errors}=await newPage(browser,BASE);
   await page.goto(`${BASE}/worksheets/${s?s+'/':''}`,{waitUntil:'networkidle0'});
   await new Promise(r=>setTimeout(r,400));

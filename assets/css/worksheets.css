@@ -942,3 +942,13 @@ button.search-result-item:last-child { border-bottom: none; }
   .chapter-player-label { min-width: 0; }
 }
 .song-search-bar input { min-width: 0; }
+
+/* Framework worksheets: side-by-side comparison columns */
+.ws-compare { display: grid; gap: 1rem; margin: 0 0 1rem; }
+.ws-compare--2 { grid-template-columns: 1fr 1fr; }
+.ws-compare--3 { grid-template-columns: 1fr 1fr 1fr; }
+.ws-compare__col { border: 1px solid var(--border); padding: .85rem; min-width: 0; }
+.ws-compare__head { font-weight: 600; font-size: .85rem; margin-bottom: .6rem; }
+.ws-scale input.ws-input { max-width: 6rem; }
+@media (max-width: 700px) { .ws-compare--2, .ws-compare--3 { grid-template-columns: 1fr; } }
+@media print { .ws-compare { grid-template-columns: 1fr 1fr; } .ws-compare--3 { grid-template-columns: 1fr 1fr 1fr; } }
