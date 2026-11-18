@@ -177,3 +177,6 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 
 ### Progress: app-43 plucked strings
 - New `strings` tool (Wrong-tuning chords): six plucked strings made in the page (Karplus-Strong), retune each string by up to an octave, three chord shapes by fret, strum, "standard then retuned" comparison, play shapes 1-2-3 at the experiment's tempo, standard-tuning reset. The roll stays the user's own. Kept as text. Tests: unit `strings-core.test.mjs`, browser t68. (t54 flakes occasionally; passes on rerun.)
+
+### Progress: app-44 note lengths
+- Melody over chords: notes have lengths (sixteenth, eighth, quarter, half), drawn as bars. A note stops at the next one, a note placed inside a longer one shortens it, playback and the MIDI file keep the lengths, and there is a Clear button. Tests: unit (experiments.test.mjs), browser t37.
