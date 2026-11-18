@@ -21,7 +21,7 @@ function download(name, bytes, type) {
 }
 
 export function benchTool(cfg = {}) {
-  const b = B.makeBench(cfg.tracks || B.DEFAULT_TRACKS, { bpm: cfg.bpm || 100 });
+  const b = B.makeBench(cfg.tracks || B.DEFAULT_TRACKS, { bpm: cfg.bpm || 100, steps: [16, 32, 64].includes(cfg.steps) ? cfg.steps : 16 });
   if (cfg.lengths) for (const [id, n] of Object.entries(cfg.lengths)) if (B.track(b, id)) B.setLen(b, id, n);
   let mode = 'notes', sel = null, timer = null, raf = 0, tick = 0, nextTime = 0, queue = [], voices = null, ctx = null, master = null;
   let sources = { notes: () => null, pattern: () => null, number: () => null };
@@ -135,7 +135,7 @@ export function benchTool(cfg = {}) {
   } }, 'Use the rhythm I rolled');
   const useNumber = el('button', { type: 'button', class: 'xp-btn xp-btn--alt', id: 'xpBenchNumber', onclick: () => {
     const n = sources.number(); if (!n) { say('Roll the number first (the tool above), then press this.'); return; }
-    b.tracks.forEach(t => B.setLen(b, t.id, n)); b.tracks.forEach(t => { const sl = ui[t.id].lenSel; if (sl) sl.value = String(Math.min(16, Math.max(2, n))); }); sel = null; drawAll(); say(`Every track now cycles every ${n} steps.`);
+    b.tracks.forEach(t => B.setLen(b, t.id, n)); b.tracks.forEach(t => { const sl = ui[t.id].lenSel; if (sl) sl.value = String(Math.min(b.steps, Math.max(2, n))); }); sel = null; drawAll(); say(`Every track now cycles every ${n} steps.`);
   } }, 'Use the number I rolled');
   const bring = cfg.bring === false && !cfg.number ? null : el('details', { class: 'xp-solo', id: 'xpBenchBring', open: true }, el('summary', {}, cfg.number ? 'Bring in the number you rolled' : 'Bring in what you drew and rolled'),
     ...(cfg.number ? [el('div', { class: 'xp-row' }, useNumber)] : []),
@@ -148,7 +148,8 @@ export function benchTool(cfg = {}) {
     u.mute = el('button', { type: 'button', class: 'xp-btn xp-btn--alt xp-ms', 'aria-label': `Mute ${def.name}`, onclick: () => { t.mute = !t.mute; drawTrack(t); } }, 'M');
     u.solo = el('button', { type: 'button', class: 'xp-btn xp-btn--alt xp-ms', 'aria-label': `Solo ${def.name}`, onclick: () => { t.solo = !t.solo; b.tracks.forEach(drawTrack); } }, 'S');
     u.count = el('span', { class: 'xp-hint' });
-    const lenSel = u.lenSel = el('select', { 'aria-label': `${def.name} length in steps`, onchange: () => { B.setLen(b, t.id, +lenSel.value); drawTrack(t); } }, Array.from({ length: 15 }, (_, k) => k + 2).map(n => el('option', { value: n, selected: n === t.len }, n + ' steps')));
+    const lenChoices = () => b.steps <= 16 ? Array.from({ length: 15 }, (_, k) => k + 2) : [4, 8, 12, 16, 24, 32, 48, 64].filter(n => n <= b.steps);
+    const lenSel = u.lenSel = el('select', { 'aria-label': `${def.name} length in steps`, onchange: () => { B.setLen(b, t.id, +lenSel.value); drawTrack(t); } }, lenChoices().map(n => el('option', { value: n, selected: n === t.len }, n + ' steps')));
     const pulses = el('input', { type: 'number', min: 0, max: 16, value: 4, 'aria-label': `${def.name} hits to spread`, class: 'xp-num' });
     const fill = el('button', { type: 'button', class: 'xp-btn xp-btn--alt', onclick: () => { B.fillEuclid(b, t.id, +pulses.value || 0, 0); sel = null; drawAll(); } }, 'Spread');
     const clear = el('button', { type: 'button', class: 'xp-btn xp-btn--alt', onclick: () => { B.clear(b, t.id); sel = null; drawAll(); } }, 'Clear');

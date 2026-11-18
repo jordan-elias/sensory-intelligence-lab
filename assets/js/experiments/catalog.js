@@ -357,7 +357,7 @@ export const EXPERIMENTS = [
     stop: 'After the 4 minute sweep and one listen-back.',
     reflect: 'Was there a sweet spot you had not found before?',
     tools: [{ type: 'marks', mode: 'spots', label: 'Sweet spots', noun: 'spot' }, { type: 'gen', kind: 'choice', label: 'Roll the control', options: [
-      'Filter cutoff', 'Reverb size', 'Delay time', 'Pitch of everything', 'Bit depth', 'Playback speed', 'Stereo width', 'Grain size', 'Distortion drive', 'Envelope release'] }, { type: 'groove', steps: 4, hits: 4, bpm: 100 }, { type: 'timer', minutes: 4 }],
+      'Filter cutoff', 'Reverb size', 'Delay time', 'Pitch of everything', 'Bit depth', 'Playback speed', 'Stereo width', 'Grain size', 'Distortion drive', 'Envelope release'] }, { type: 'bench', tracks: ['kick', 'snare', 'hihat', 'bass'], steps: 64, bring: false, bpm: 100 }, { type: 'timer', minutes: 4 }],
     solo: DICE + 'Write ten controls on slips of paper and draw one.',
   },
   {
