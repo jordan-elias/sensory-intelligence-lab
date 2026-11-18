@@ -11,6 +11,7 @@ import { attachKeep } from './keep.js';
 import { benchTool } from './bench.js';
 import { marksTool, subtractTool } from './tools-marks.js';
 import { stringsTool } from './tools-strings.js';
+import { versionsTool } from './tools-versions.js';
 import { mixToMono, resample, reverse, chopShuffle, stutter, pitchedGrains, contrastLayer, normalise, encodeWav } from './audio-ops.js';
 
 export function el(tag, attrs = {}, ...kids) {
@@ -262,8 +263,9 @@ function buildOne(cfg) {
     case 'bench': return benchTool(cfg);
     case 'marks': return marksTool(cfg);
     case 'strings': return stringsTool(cfg);
+    case 'versions': return versionsTool(cfg);
     case 'subtract': return subtractTool(cfg);
     default: return el('p', {}, '');
   }
 }
-export const TOOL_TYPES = ['gen', 'timer', 'clip', 'loops', 'groove', 'assign', 'wordpoem', 'burn', 'cards', 'blackout', 'roll', 'sampler', 'treat', 'bench', 'pad', 'marks', 'subtract', 'strings'];
+export const TOOL_TYPES = ['gen', 'timer', 'clip', 'loops', 'groove', 'assign', 'wordpoem', 'burn', 'cards', 'blackout', 'roll', 'sampler', 'treat', 'bench', 'pad', 'marks', 'subtract', 'strings', 'versions'];

@@ -322,7 +322,7 @@ export const EXPERIMENTS = [
     ],
     stop: 'After you have lined all five up.',
     reflect: 'Did the order you would have picked change after four minutes with version 3?',
-    tools: [{ type: 'gen', kind: 'pattern', steps: 8, setSize: 5, label: 'Roll a pattern' }, { type: 'groove', steps: 8, hits: 8, bpm: 110 }, { type: 'timer', minutes: 4 }],
+    tools: [{ type: 'gen', kind: 'pattern', steps: 8, setSize: 5, label: 'Roll a pattern' }, { type: 'groove', steps: 8, hits: 8, bpm: 110 }, { type: 'versions', max: 5, bpm: 110 }, { type: 'timer', minutes: 4 }],
     solo: DICE + 'Pick five notes from a hat, then draw one of them for each of eight steps (put it back each time).',
   },
   {

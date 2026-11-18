@@ -180,3 +180,6 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 
 ### Progress: app-44 note lengths
 - Melody over chords: notes have lengths (sixteenth, eighth, quarter, half), drawn as bars. A note stops at the next one, a note placed inside a longer one shortens it, playback and the MIDI file keep the lengths, and there is a Clear button. Tests: unit (experiments.test.mjs), browser t37.
+
+### Progress: app-45 versions
+- New `versions` tool (Random pitch, fixed rhythm): save each roll as a version (up to five), loop it, give it one word, put the versions in order with arrows, then put them in order again after listening and see which moved ("Version 5 moved from 5th to 3rd."). The roll stays the user's own. Kept as text. Tests: unit `versions-core.test.mjs`, browser t69.
