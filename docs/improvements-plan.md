@@ -162,3 +162,6 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 - Every worksheet already offers "Share with <therapist>" (generic in `page.js`). t65 checks this on all nine pages: hidden until saved, never shared by default.
 - Therapist client page: **Shared** and **Intake** tabs merged into one **Folder** tab (contents list, intake form, family history, worksheets grouped by type, check-ins). Messages stays separate. Old `#shared` / `#intake` links open the Folder. Tests t22, t66.
 - Workbench: **Download WAV** (offline render of two passes of the loop, plus tail) next to Download MIDI. Test t58.
+
+### Progress: app-39 take it with you
+- Course end screen: the save list is now "Take it with you" with per-item downloads (text as .txt, recordings as .wav, the workbench loop also as .mid). Items still go on the Keep shelf when ticked. Test t58.

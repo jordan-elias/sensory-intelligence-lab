@@ -233,9 +233,17 @@ function detail(e) {
     ticks = tools.map(t => t.keepable && t.keepable()).filter(Boolean).map(item => ({ item, box: el('input', { type: 'checkbox', checked: true }) }));
     if (!ticks.length) return null;
     const what = it => it.kind === 'audio' ? `${it.label} (${Math.round(it.clip.data.length / it.clip.sr)} s of sound)` : `${it.label}: ${it.text.replace(/\s+/g, ' ').slice(0, 70)}${it.text.length > 70 ? '…' : ''}`;
-    return el('div', { class: 'xp-save', id: 'xpSave' }, el('h3', { class: 'xp-h' }, 'Save on this device'),
-      el('ul', { class: 'xp-check' }, ticks.map(({ item, box }) => el('li', {}, el('label', {}, box, ' ' + what(item))))),
-      el('p', { class: 'xp-hint' }, 'Ticked items go on your Keep shelf when you finish. Untick anything you do not want to keep.'));
+    const slug = it => (e.id + '-' + it.label).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const grab = (name, bytes, type) => { const url = URL.createObjectURL(new Blob([bytes], { type })), a = el('a', { href: url, download: name }); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000); };
+    const files = it => [
+      it.kind === 'audio' ? ['Download WAV', () => grab(slug(it) + '.wav', encodeWav(it.clip.data, it.clip.sr), 'audio/wav')] : ['Download text', () => grab(slug(it) + '.txt', `${e.title}: ${it.label}\n\n${it.text}\n`, 'text/plain')],
+      it.midi ? ['Download MIDI', () => grab(slug(it) + '.mid', it.midi(), 'audio/midi')] : null,
+    ].filter(Boolean);
+    return el('div', { class: 'xp-save', id: 'xpSave' }, el('h3', { class: 'xp-h' }, 'Take it with you'),
+      el('p', { class: 'xp-hint' }, 'What you made here is a seed. Download it and carry it into your DAW, instrument or notebook.'),
+      el('ul', { class: 'xp-check' }, ticks.map(({ item, box }) => el('li', {}, el('label', {}, box, ' ' + what(item)), ' ',
+        ...files(item).map(([label, fn]) => el('button', { type: 'button', class: 'xp-btn xp-btn--alt xp-dl', onclick: fn }, label))))),
+      el('p', { class: 'xp-hint' }, 'Ticked items also go on your Keep shelf when you finish. Untick anything you do not want to keep.'));
   }
 
   function draw() {

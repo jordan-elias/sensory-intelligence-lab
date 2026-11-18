@@ -198,7 +198,7 @@ export function benchTool(cfg = {}) {
       number: () => { for (const t of list) { const r = t.number?.(); if (r) return r; } return null; },
     };
   };
-  root.keepable = () => { const text = B.benchText(b); return text ? { label: 'My loop', kind: 'text', text } : null; };
+  root.keepable = () => { const text = B.benchText(b); return text ? { label: 'My loop', kind: 'text', text, midi: () => B.encodeBenchMidi(b) } : null; };
   root.__bench = b;
   drawAll();
   return root;

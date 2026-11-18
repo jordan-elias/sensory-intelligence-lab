@@ -55,5 +55,12 @@ ok(wavSize>44100*2,'Download WAV renders audio (two passes plus tail), size '+wa
 // save at the end
 for(let k=0;k<12&&await page.$('#xpNext');k++){ await page.click('#xpNext'); await sleep(40); }
 await page.waitForSelector('#xpSave'); ok(/My loop/.test(await page.$eval('#xpSave',e=>e.textContent)),'the loop is offered for saving at the end');
+ok(/Take it with you/.test(await page.$eval('#xpSave',e=>e.textContent)),'end screen offers "Take it with you"');
+const before=await page.evaluate(()=>window.__dl.length);
+const btns=await page.$$eval('#xpSave .xp-dl',b=>b.map(x=>x.textContent));
+ok(btns.includes('Download MIDI')&&btns.includes('Download text'),'the loop can be downloaded as MIDI or text: '+btns.join());
+for(const h of await page.$$('#xpSave .xp-dl')) await h.click();
+await sleep(200);
+ok(await page.evaluate(b=>window.__dl.slice(b).some(x=>/audio\/midi/.test(x))&&window.__dl.slice(b).some(x=>/text\/plain/.test(x)),before),'both downloads produce files');
 ok(P.errors.length===0,'no page errors '+P.errors.join('|'));
 await browser.close(); server.close(); process.exit(fail?1:0);
