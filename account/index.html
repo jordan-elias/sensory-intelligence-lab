@@ -277,6 +277,7 @@
   </div>
 
   <div id="myTherapist" hidden style="margin-bottom:.5rem"></div>
+  <p id="therapistProfileLink" hidden style="margin:0 0 1rem"><a class="btn btn-outline" href="/therapist/profile/">Edit your therapist profile</a></p>
 
   <!-- ── Profile ── -->
   <p class="sl">Profile</p>
@@ -904,6 +905,11 @@ onAuthReady(async () => {
     const ent = null;
     renderSubscription(profile, ent);
     mountMyTherapist(document.getElementById('myTherapist'), { supabase, profile });
+    // Therapists get a way back to their public profile.
+    try {
+      const { data: tp } = await supabase.from('therapist_profiles').select('user_id').eq('user_id', window._currentUser.id).maybeSingle();
+      if (tp) document.getElementById('therapistProfileLink').hidden = false;
+    } catch (_) { /* not a therapist, or offline: link stays hidden */ }
   }
 
   // Wire notification toggles

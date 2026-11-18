@@ -1,12 +1,12 @@
 import test from 'node:test'; import assert from 'node:assert/strict';
-import { parseTimer, assignTools, setupChecklist, fmtClock } from '../../assets/js/experiments/steps.js';
+import { parseTimer, assignTools, toolsFor, setupChecklist, fmtClock } from '../../assets/js/experiments/steps.js';
 import { recommend, continueLabel } from '../../assets/js/experiments/recommend.js';
 import { reflect } from '../../assets/js/experiments/reflect.js';
 import { createAwake } from '../../assets/js/app/awake.js';
 import { EXPERIMENTS, UNITS, PATH } from '../../assets/js/experiments/catalog.js';
 
 test('times in steps are found, and lengths of a clip are not mistaken for a time', () => {
-  const cases = [['Listen for 1 minute.', 60], ['Play it for 5 minutes without changing it.', 300], ['Play each treatment for exactly 2 minutes.', 120], ['Same notes. 2 minutes.', 120], ['Let it run for one minute and listen.', 60],
+  const cases = [['Listen for 1 minute.', 60], ['the workbench for 5 minutes without changing it.', 300], ['Play each treatment for exactly 2 minutes.', 120], ['Same notes. 2 minutes.', 120], ['Let it run for one minute and listen.', 60],
     ['Listen for two full cycles (80 seconds) without playing.', 80], ['Press Start and write for the whole minute.', 60], ['After 15 minutes, stop.', 900], ['Record or load one clip, 5 to 20 seconds, of a place.', 0], ['Roll seven notes once.', 0], ['Hold it for 4 beats at 70 BPM.', 0], ['Record 60 seconds of wherever you are.', 0]];
   for (const [text, want] of cases) assert.equal(parseTimer(text), want, text);
   assert.equal(fmtClock(125), '02:05');
@@ -14,8 +14,8 @@ test('times in steps are found, and lengths of a clip are not mistaken for a tim
 test('every tool of every experiment is reachable, and none is invented', () => {
   for (const e of EXPERIMENTS) {
     const per = assignTools(e); assert.equal(per.length, e.procedure.length, e.id);
-    const shown = new Set(per.flat()); for (const i of shown) assert.ok(i >= 0 && i < e.tools.length, e.id + ' index ' + i);
-    e.tools.forEach((t, i) => { if (t.type !== 'timer') assert.ok(shown.has(i), `${e.id}: tool ${t.type} is never shown with a step`); else assert.ok(!shown.has(i), `${e.id}: the session timer is not placed on a step`); });
+    const shown = new Set(per.flat()); for (const i of shown) assert.ok(i >= 0 && i < toolsFor(e).length, e.id + ' index ' + i);
+    toolsFor(e).forEach((t, i) => { if (t.type !== 'timer') assert.ok(shown.has(i), `${e.id}: tool ${t.type} is never shown with a step`); else assert.ok(!shown.has(i), `${e.id}: the session timer is not placed on a step`); });
   }
 });
 test('the dice are with the step that rolls them, the metronome with the step that starts it', () => {
@@ -51,4 +51,12 @@ test('the screen is kept on only while wanted, retaken when you come back, and i
   await a.hold(); assert.equal(requests, 1); assert.ok(a.held); a.release(); assert.equal(released, 1); assert.ok(!a.held);
   await a.hold(); a.release(); vis = 'visible'; await onVis(); assert.equal(requests, 2);
   const none = createAwake({}, doc); await none.hold(); assert.ok(!none.held); none.release();
+});
+
+test('the workbench is added wherever notes are drawn, shown with a rhythm or drawing step, and not elsewhere', () => {
+  for (const id of ['five-note-cage', 'fixed-notes-rhythm', 'borrowed-rhythm', 'dice-melody']) {
+    const e = EXPERIMENTS.find(x => x.id === id), all = toolsFor(e), k = all.findIndex(t => t.type === 'bench');
+    assert.ok(k >= 0, id + ' has the workbench'); assert.ok(assignTools(e).some(l => l.includes(k)), id + ' shows it');
+  }
+  for (const id of ['stutter', 'photo-words', 'fixed-groove-chords']) assert.ok(!toolsFor(EXPERIMENTS.find(x => x.id === id)).some(t => t.type === 'bench'), id);
 });

@@ -25,7 +25,8 @@ export function wordPoemTool(cfg) {
     const frame = endWordFrame(area.value, mulberry32(newSeed()), { shuffled: shuf.checked, max: cfg.max || 16 });
     if (frame.length < (cfg.min || 4)) { out.replaceChildren(el('p', { class: 'xp-hint' }, `Give me at least ${cfg.min || 4} words.`)); return; }
     out.replaceChildren(el('p', { class: 'xp-hint' }, `Write ${frame.length} lines. Each line must end with its word.`),
-      el('ol', { class: 'xp-frame' }, frame.map(f => el('li', {}, el('span', { class: 'xp-blank' }, '………………'), ' ', el('strong', {}, f.word)))));
+      el('ol', { class: 'xp-frame' }, frame.map((f, i) => el('li', {}, el('input', { type: 'text', class: 'xp-line', 'aria-label': `Line ${i + 1}, ending with ${f.word}`, placeholder: 'write here…', autocomplete: 'off' }), ' ', el('strong', {}, f.word)))),
+      el('p', { class: 'xp-hint' }, 'Write each line right here. They are saved with your note if you tick them at the end.'));
   };
   const parts = [el('p', { class: 'xp-k' }, photo ? 'Words from a photo' : 'The borrowed line')];
   if (photo) {
@@ -35,7 +36,7 @@ export function wordPoemTool(cfg) {
     const status = el('p', { class: 'xp-hint', id: 'xpOcrStatus', role: 'status', 'aria-live': 'polite' });
     let current = null;
     file.onchange = async () => { const f = file.files && file.files[0]; current = null; find.disabled = true; status.textContent = ''; if (!f) return;
-      try { const url = await readDataUrl(f); current = f; find.disabled = false; preview.replaceChildren(el('img', { src: url, alt: 'Your photo, shown here only', style: 'max-width:100%;max-height:320px;border-radius:4px' })); }
+      try { const url = await readDataUrl(f); current = f; find.disabled = false; preview.replaceChildren(el('img', { src: url, alt: 'Your photo, shown here only', style: 'max-width:100%;max-height:320px;border-radius:0' })); }
       catch { preview.replaceChildren(el('p', { class: 'xp-hint' }, 'That photo could not be opened.')); } };
     find.onclick = async () => {
       if (!current) return; find.disabled = true;
@@ -148,4 +149,16 @@ export function blackoutTool() {
   clear.onclick = () => { kept = new Set(); covered = false; draw(); };
   return el('div', { class: 'xp-tool' }, el('p', { class: 'xp-k' }, 'Blackout poetry'), el('div', { class: 'xp-row' }, file), paste, pageRow, status, board,
     el('div', { class: 'xp-row' }, cover, clear), el('p', { class: 'xp-k' }, 'Your poem'), poem);
+}
+
+// ── a plain place to write, with a count ──
+export function padTool(cfg) {
+  const area = el('textarea', { rows: 10, id: 'xpPad', 'aria-label': cfg.label || 'Your writing', placeholder: cfg.placeholder || 'Write here. One item per line.' });
+  const count = el('p', { class: 'xp-hint', 'aria-live': 'polite' });
+  const lines = () => area.value.split('\n').map(x => x.trim()).filter(Boolean);
+  const upd = () => { const n = lines().length; count.textContent = cfg.target ? `${n} of ${cfg.target}${n === cfg.target ? '. That is all of them.' : n > cfg.target ? '. That is more than asked: you may stop.' : ''}` : `${n} line${n === 1 ? '' : 's'}`; };
+  area.oninput = upd; upd();
+  const root = el('div', { class: 'xp-tool' }, el('p', { class: 'xp-k' }, cfg.label || 'Write here'), area, count);
+  root.keepable = () => (lines().length ? { label: cfg.label || 'What I wrote', kind: 'text', text: lines().join('\n') } : null);
+  return root;
 }

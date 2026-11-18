@@ -78,11 +78,77 @@ Honest limits: lexicons miss irony, slang, negation across clauses and context, 
 - Guidance: tools shown with the step that uses them (rolled values carry forward), inline timers for steps that ask for a time (chime and vibration at the end), "before you begin" list, resume at the saved step, "which one for me?" suggestion, unit-finished note, capstone "ready" hint, screen kept awake during steps, Keep shelf (`#/keep`), looking-back counts on the notebook page.
 - Not done: spoken steps; a bank of capstones; more no-equipment experiments (content decisions); haptics through a native plugin (the browser vibrate call is used). Sitemap now lists about and therapy (robots.txt allows them).
 
+0h. Done (branch app-29): session comfort (`assets/js/app/session.js`). The screen stays on while breathing, regulation, the timed journal and the Soundscape Machine are running (Screen Wake Lock; released on pause, end or leaving). A phone buzzes once when a timed session ends; a gentle buzz with each breath phase is opt-in (breathing page, shown only where the phone can vibrate). Breathing now ends on a calm note with next steps. The Sequencer does not hold the screen yet.
+
 0f. Done (branch app-23): photo-words reads the words in the photo on the device (Tesseract, vendored under `assets/js/vendor/tesseract`, English and German, loaded only on button press, nothing stored or sent; typed words still work and the list is always editable). About 16 MB in the repo and, after `npm run sync`, in the Android app too. Not checked: how Netlify serves the `.gz` language files (if it adds `Content-Encoding: gzip` the reader will fail and show the typed fallback message); check once after the first deploy.
+
+### Simplify the experiments, match the lab's look, and finish in place (raised 16 Nov 2026)
+Feedback: the course asks for too much, repeats itself, and looks unlike the rest of the lab. Principle for everything below: **the person should never have to confirm something the app can decide, and should never need another tool or sheet of paper to finish an experiment.** Nothing here changes privacy: results stay on the device unless the person turns on the existing encrypted sync.
+
+**A. Fewer decisions: auto-keep, redo, one save**
+- Remove the per-tool "Keep this" button. Every roll, draw or result is held automatically in that experiment's working record. The button becomes **Roll again** (or **Redo**), and the last result is the one that counts.
+- Keep is never required to move on. Reaching the end counts as done.
+- One **Save** at the end, pre-ticked: note, rolled values, chosen rhythm, and any clip (clip stays on the device). Untick to finish without saving.
+- Auto-roll when a step opens, so the first thing seen is a result, not a button.
+- Merge trivial steps (for example "draw", then "write down what you drew") so most experiments take 3 to 5 taps, not 8 to 12.
+- Sticky Next on phones; offer the next experiment on the end screen with one tap.
+
+**B. A one-screen start**
+- Start screen = title, one-line question, the first step, one **Begin**. Nothing else.
+- Drop the Time / You need / Steps / The limits block and the "Before you begin" checklist. Move everything into a collapsed **About this experiment** (time, what you need, limits).
+- Limits appear only as a small hint inside the step they apply to ("2 pitches", "12 minutes").
+
+**C. Square, like the rest of the lab**
+- Boxes, chips, toggles, progress bar and buttons use `border-radius: 0`, hairline borders and the `.btn` classes from `assets/css/ui.css` (heading font, no pills or circles).
+- Same fix for the rounded dashboard **check-in banner** (`.checkin-hero`), the **insight card** (`.insight-card`), the Today path (`assets/css/today.css`) and the course CSS in `experiments/index.html`.
+- Check: a test that fails if any lab stylesheet or page sets a radius above 0 (allow-list for avatars/dots if needed).
+
+**D. Do it right there**
+- **Written part in place:** photo-words and every experiment whose step says "write..." gets a text area under the step. Text saves with the experiment note automatically (no "keep"). Words from a photo: the word list, the shuffled frame and the line-per-word writing all in one screen, with a counter.
+- **Phrase player** (new tool for fixed-notes-rhythm, five-note-cage, borrowed-chords, dice-melody, borrowed-rhythm, random-pitch-fixed-rhythm and similar): take the rolled notes and the rolled rhythm and **apply the notes to the rhythm any way the person wants**: in order, cycle, reverse, random per hit, or tap a note onto each step by hand; octave and tempo controls; **Play** and loop so they hear it at once. Optional "record this" saves a clip to the shelf.
+- **Audit pass over all 36 experiments**: for each, list what the person still has to do outside the page (open another tool, use paper, play an instrument) and add an in-page version where it is feasible (a tap pad, a simple keyboard, a text area, a built-in recorder for clip experiments). The on-paper and instrument versions stay as the default wording.
+- Tool groups that exist today and will gain a "finish here" action: gen+groove (9 experiments), clip (6), gen+clip (1), wordpoem (2), cards (2), assign (2), loops (2).
+
+**E. Tool improvements**
+- **Breathing**: richer sound (soft pad plus a filtered noise "breath" that rises and falls with the phase), choice of sound (tones, pad, noise, silence), per-phase fades so there are no clicks, optional bell at the end. Needs a listening check by ear.
+- **Cocktail party problem**: an immediate visible **Loading sounds... n%** state; Play stays disabled until ready; show an error with Retry (the loader currently swallows failures); the three empty choice buttons get accessible names before the first round.
+- **Spatial game**: streaks and a combo score; endless/adaptive mode that gets harder or easier from how the person is doing; a daily challenge; a headphones check before round one; replay the path after a miss; environments with different reverb; haptics on Android; personal bests kept on the device. Goal: more fun and more of a reason to come back, with no leaderboards and nothing sent anywhere.
+
+**F. Account page and worksheets**
+- **Therapists**: add "Edit your therapist profile" (to `/therapist/profile/`) on the account page, shown only when the person has a `therapist_profiles` row.
+- **Worksheets**: make "Before we begin" and "Reflection" collapsible like the other sections, and add **Expand all / Collapse all** on every worksheet (music autobiography first). Remember open/closed state on the device; printing always expands everything.
+
+**G. Today path (done, branch app-30)**
+- Dashboard "Today" card: check-in, then one tool chosen from the person's answers and recent use, then a one-line note; first-run questions are local and skippable. Needs the square styling from C.
+
+**Progress**
+- Done (branch app-32): C square styling for the course, Today card, dashboard check-in banner and insight card, app shell; F therapist-profile link on the account page; F worksheet sections collapsible with Expand all / Collapse all (state remembered per device, always open in print). Test: `tests/browser/t57.mjs`.
+- Done (branch app-33): B one-screen start (title, question, first step, Begin; time/needs/limits/solo/method folded into "About this experiment"; checklist removed). A auto-roll when a step opens for dice and rolled rhythms, "Roll again", per-tool Keep button removed, one pre-ticked "Save on this device" list on the end screen (saving again replaces, never duplicates), Keep never required, sticky Next on phones. Not done from A/B: merging trivial steps (needs a content pass over the catalog) and limits as inline hints (steps already state their numbers; limits stay in About).
+- Correction (17 Nov): drawing and rolling stay manual. Auto-roll was removed; only the per-tool Keep button is gone (results are saved once at the end).
+- Done (branch app-34): D phrase player "Play it" (appears wherever notes are drawn: set notes by hand or use the drawn ones, switch beats on and off or use the rolled rhythm, choose which note each beat plays or fill by rule (in order, backwards, random, first note), octave and tempo, Play/Stop, offered for saving as "My phrase"). Steps made clearer: about 30 steps now say exactly which button to press, and each step shows a "Use ... below" cue for its tool. Tests t58, steps unit test.
+- Done (branch app-34): in-place writing: a line to type under each end-word in the poem tools (Words from a photo, Borrowed end-words), a counting writing pad for List prompts (n of 15); both offered for saving at the end.
+- Done (branch app-35): E cocktail party (visible "Loading sounds… n%" from first paint, Play off until ready, Try again on failure, named answer buttons); spatial game (in-a-row and longest-run counters kept on the device, optional "move the level up and down for me", haptics, headphone check); breathing sound choice (soft drone as before, drone with an audible breath, warm pad, quiet chimes; remembered on the device). Tests t59 to t62.
+- Not done yet: spatial game daily challenge (needs seeded paths), environments with different reverb, path replay after a miss (the path is already drawn); breathing sounds need a listening check by ear; the "do it right there" audit for clip, loops and DAW-style experiments (they still rely on your own instrument or software for some steps); merging trivial steps.
+
+**Round 2 (17 Nov review: the experiments as seeds of inspiration)**: see `docs/course-review-2026-11-17.md`. Headline: every experiment should end in a Seed card you can take away (MIDI, WAV, text, image), played with real voices instead of bare oscillators, with one shared rhythm/notes workbench, Next below the tool, a shorter list page, in-app tools for subtract, borrowed form, one knob and wrong tuning, then combining seeds. Proposed branches app-37 to app-42.
+
+**Round 2 direction (17 Nov, Jordan): better, more refined in-app tools, closer to the lab's own modules. Not voices, not mutate.**
+- Done (branch app-37-real-tools):
+  - **Workbench** (`bench.js`, `bench-core.js`, `seq/voices.js`): replaces "Play it" and the loops tool. A step sequencer in the Sequencer's style: kick, snare, hi-hat, bass and lead tracks using the Sequencer's own sounds and rules (`seq/groove.js`: swing, chance, velocity, per-track length, mute/solo, Euclidean spread); scale-locked note picker for bass and lead; Loudness and Chance modes; per-track cycle length with "lines up again every N steps"; tempo, key and scale; bring in the notes you drew (in order, backwards, random, first) and the rhythm you rolled; Download MIDI (type 1, drums on channel 10); offered for saving as "My loop". Used in every experiment that draws notes, and in Loop mismatch (cycles 3, 4, 5, locked) and Odd meter (every track takes the rolled number).
+  - **Stopwatch with marks**: Borrowed form (time the sections, edit times and names, see the timeline, play it through with a chime at each boundary) and One knob (mark sweet spots).
+  - **Take it apart**: Subtract (list the parts, remove half each round, rate clarity per round).
+- Still to do for in-app coverage: a plucked-string instrument for Wrong tuning; a 4-bar (64-step) loop view for One knob and DAW-unit experiments; Random pitch, fixed rhythm on the workbench with a "next version" and ranking list; share the Sequencer's voices with the Sequencer page itself (today the sound code is copied, not shared); WAV render of the workbench; a larger piano roll for Melody over chords with note lengths; the Sequencer's saved patterns shared with the course; capstone choices.
+
+**Suggested order**
+1. C (styling, small and visible) and F (account link, worksheets).
+2. B and A (start screen, auto-keep, one Save), with the existing `t37`/`t54` tests updated.
+3. D (writing area, phrase player, audit).
+4. E (cocktail loading first, then breathing, then spatial game).
+Each as its own stacked branch after app-31; tests for each; no deploys.
 
 ### Other open items
 - Background audio with the screen off (Android).
-- Daily path.
+- Daily path: done (app-30), see the simplify section.
 - Deep links for sign-in emails.
 - Play Store listing. Payments decided: Stripe on the website only; the Android app is consumption-only (no purchase links or billing buttons, `assets/js/app/consumption.js`). Look at the EEA external offers programme only if an in-app link to the website is wanted later.
 - Journal sharing with a therapist (needs go-ahead and a privacy policy change).
@@ -90,3 +156,12 @@ Honest limits: lexicons miss irony, slang, negation across clauses and context, 
 - Sequencer: done (branch app-19): swing, mute/solo per track, Euclidean fill, WAV export matches. Soundscape Machine reviewed, already deep; waiting for the user to say what is missing.
 - Photo-words experiment: automatic OCR (currently typed by hand).
 - Listening test of the piano roll and sampler by ear.
+
+### Progress: app-38 worksheets and therapist folder
+- New worksheets **DEAR MAN**, **GROW** and **FAST** (`/worksheets/dear-man|grow|fast/`), each with a side-by-side comparison (two versions of the ask; three options with effort/fit ratings; give in vs hold steady). Shared builders in `assets/js/worksheets/frame.js`. Types are free-form in the `worksheets` table, so no SQL is needed.
+- Every worksheet already offers "Share with <therapist>" (generic in `page.js`). t65 checks this on all nine pages: hidden until saved, never shared by default.
+- Therapist client page: **Shared** and **Intake** tabs merged into one **Folder** tab (contents list, intake form, family history, worksheets grouped by type, check-ins). Messages stays separate. Old `#shared` / `#intake` links open the Folder. Tests t22, t66.
+- Workbench: **Download WAV** (offline render of two passes of the loop, plus tail) next to Download MIDI. Test t58.
+
+### Progress: app-39 take it with you
+- Course end screen: the save list is now "Take it with you" with per-item downloads (text as .txt, recordings as .wav, the workbench loop also as .mid). Items still go on the Keep shelf when ticked. Test t58.

@@ -8,7 +8,7 @@ import { buildTool, el, playTones } from '/assets/js/experiments/tools.js';
 import { buildNotebook } from '/assets/js/experiments/notebook.js';
 import { createProgress } from '/assets/js/experiments/progress.js';
 import { createSync } from '/assets/js/experiments/sync.js';
-import { parseTimer, assignTools, setupChecklist, fmtClock } from '/assets/js/experiments/steps.js';
+import { parseTimer, assignTools, toolsFor, setupChecklist, fmtClock } from '/assets/js/experiments/steps.js';
 import { recommend, TIMES, continueLabel } from '/assets/js/experiments/recommend.js';
 import { reflect } from '/assets/js/experiments/reflect.js';
 import { putAudio, getAudio, deleteAudio } from '/assets/js/experiments/shelf-audio.js';
@@ -138,6 +138,10 @@ function notebook() {
 /* ───────── the Keep shelf ───────── */
 async function keepItem(e, item) {
   const title = `${e.title}: ${item.label}`;
+  for (const old of progress.shelf().filter(k => k.exp === e.id && k.title === title)) {   // saving again replaces, it does not pile up
+    if (old.kind === 'audio') { try { await deleteAudio(old.id); } catch { /* already gone */ } }
+    progress.unkeep(old.id);
+  }
   if (item.kind === 'audio') {
     const blob = new Blob([encodeWav(item.clip.data, item.clip.sr)], { type: 'audio/wav' });
     const id = progress.keep({ exp: e.id, kind: 'audio', title, secs: Math.round(item.clip.data.length / item.clip.sr) });
@@ -206,9 +210,9 @@ function detail(e) {
   const n = total(e), last = n + 1;                                 // 0 = start, 1..n = steps, last = finish
   const note = el('textarea', { rows: 8, id: 'xpNote', 'aria-label': 'Your note', placeholder: 'Record your process, or share your thoughts. Anything at all, in any shape. Kept on this device only.' });
   note.value = progress.note(e.id); note.oninput = () => progress.setNote(e.id, note.value);
-  const keep = item => keepItem(e, item);
-  const tools = e.tools.map(cfg => buildTool(cfg, { keep }));        // built once, so rolls and running rhythms survive moving between steps
-  const per = assignTools(e), isTimer = i => e.tools[i].type === 'timer';
+  const cfgs = toolsFor(e), tools = cfgs.map(cfg => buildTool(cfg));
+  tools.forEach(t => t.link && t.link(tools));        // built once, so rolls and running rhythms survive moving between steps
+  const per = assignTools(e), isTimer = i => cfgs[i].type === 'timer';
   const firstAt = i => per.findIndex(l => l.includes(i));
   let at = 0;
   const idx = PATH.indexOf(e), nextExp = PATH[(idx + 1) % PATH.length];
@@ -216,12 +220,31 @@ function detail(e) {
   const nav = (...kids) => el('div', { class: 'xp-nav' }, ...kids);
   const btn = (label, fn, alt, id) => el('button', { type: 'button', class: 'xp-btn' + (alt ? ' xp-btn--alt' : ''), id, onclick: fn }, label);
   const go = k => { at = k; if (k >= 1) progress.setPos(e.id, Math.min(k, n)); draw(); window.scrollTo(0, 0); };
-  const finish = () => {
+  let ticks = [];                                                     // end-screen choices: { box, item }
+  const finish = async () => {
+    for (const { box, item } of ticks) if (box.checked) { try { await keepItem(e, item); } catch { /* storage full or blocked: the note is still saved */ } }
     const unit = UNITS.find(u => u.experiments.includes(e)), was = unit.experiments.every(x => progress.isDone(x.id));
     progress.markDone(e.id);
     if (!was && unit.experiments.every(x => progress.isDone(x.id))) justFinished = unit;
     location.hash = '#/';
   };
+
+  function savePanel() {
+    ticks = tools.map(t => t.keepable && t.keepable()).filter(Boolean).map(item => ({ item, box: el('input', { type: 'checkbox', checked: true }) }));
+    if (!ticks.length) return null;
+    const what = it => it.kind === 'audio' ? `${it.label} (${Math.round(it.clip.data.length / it.clip.sr)} s of sound)` : `${it.label}: ${it.text.replace(/\s+/g, ' ').slice(0, 70)}${it.text.length > 70 ? '…' : ''}`;
+    const slug = it => (e.id + '-' + it.label).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const grab = (name, bytes, type) => { const url = URL.createObjectURL(new Blob([bytes], { type })), a = el('a', { href: url, download: name }); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000); };
+    const files = it => [
+      it.kind === 'audio' ? ['Download WAV', () => grab(slug(it) + '.wav', encodeWav(it.clip.data, it.clip.sr), 'audio/wav')] : ['Download text', () => grab(slug(it) + '.txt', `${e.title}: ${it.label}\n\n${it.text}\n`, 'text/plain')],
+      it.midi ? ['Download MIDI', () => grab(slug(it) + '.mid', it.midi(), 'audio/midi')] : null,
+    ].filter(Boolean);
+    return el('div', { class: 'xp-save', id: 'xpSave' }, el('h3', { class: 'xp-h' }, 'Take it with you'),
+      el('p', { class: 'xp-hint' }, 'What you made here is a seed. Download it and carry it into your DAW, instrument or notebook.'),
+      el('ul', { class: 'xp-check' }, ticks.map(({ item, box }) => el('li', {}, el('label', {}, box, ' ' + what(item)), ' ',
+        ...files(item).map(([label, fn]) => el('button', { type: 'button', class: 'xp-btn xp-btn--alt xp-dl', onclick: fn }, label))))),
+      el('p', { class: 'xp-hint' }, 'Ticked items also go on your Keep shelf when you finish. Untick anything you do not want to keep.'));
+  }
 
   function draw() {
     stopTimers();
@@ -230,27 +253,29 @@ function detail(e) {
       awake.release();
       const saved = progress.pos(e.id);
       render(head,
-        el('div', { class: 'ph' }, el('h2', {}, e.title), el('p', {}, e.summary)),
-        el('div', { class: 'xp-box', id: 'xpQuestion' }, el('b', {}, 'What you are finding out'), e.question),
-        el('ul', { class: 'xp-intro-list' },
-          el('li', {}, el('b', {}, 'Time'), `about ${e.minutes} minutes`),
-          el('li', {}, el('b', {}, 'You need'), NEEDS[e.needs]),
-          el('li', {}, el('b', {}, 'Steps'), `${n}, one at a time`),
-          el('li', {}, el('b', {}, 'The limits'), e.parameters.map(([k, v]) => `${k}: ${v}`).join(' · '))),
-        el('p', { class: 'xp-hint' }, 'Your first step: ' + e.procedure[0]),
-        el('div', { class: 'xp-ready' }, el('h3', { class: 'xp-h' }, 'Before you begin'), el('ul', { class: 'xp-check' }, setupChecklist(e).map((t, i) => el('li', {}, el('label', {}, el('input', { type: 'checkbox', 'aria-label': t, id: 'xpChk' + i }), ' ' + t)))), el('p', { class: 'xp-note' }, 'These are only a reminder. Tick them or not.')),
-        nav(btn('Begin', () => go(1), false, 'xpBegin'), saved >= 1 && saved <= n ? btn(`Resume at step ${saved}`, () => go(saved), true, 'xpResume') : null, el('a', { href: '#/method', class: 'xp-hint' }, 'How it works')),
-        el('details', { class: 'xp-solo' }, el('summary', {}, 'Doing this without the app'), el('p', {}, e.solo)));
+        el('div', { class: 'ph' }, el('h2', {}, e.title), el('p', { id: 'xpQuestion' }, e.question)),
+        el('p', { class: 'xp-hint' }, 'First: ' + e.procedure[0]),
+        nav(btn('Begin', () => go(1), false, 'xpBegin'), saved >= 1 && saved <= n ? btn(`Resume at step ${saved}`, () => go(saved), true, 'xpResume') : null),
+        el('details', { class: 'xp-solo', id: 'xpAbout' }, el('summary', {}, 'About this experiment'),
+          el('ul', { class: 'xp-intro-list' },
+            el('li', {}, el('b', {}, 'Time'), `about ${e.minutes} minutes`),
+            el('li', {}, el('b', {}, 'You need'), NEEDS[e.needs]),
+            el('li', {}, el('b', {}, 'Limits'), e.parameters.map(([k, v]) => `${k}: ${v}`).join(' · '))),
+          el('p', {}, e.summary),
+          el('p', {}, el('b', {}, 'Without the app: '), e.solo),
+          el('p', {}, el('a', { href: '#/method', class: 'xp-hint' }, 'How the course works'))));
     } else if (at <= n) {
       awake.hold();
       const here = per[at - 1].filter(i => !isTimer(i)), shownIdx = new Set(here);
       const carry = tools.map((t, i) => ({ t, i })).filter(({ t, i }) => !shownIdx.has(i) && firstAt(i) >= 0 && firstAt(i) < at - 1 && t.keepable).map(({ t }) => ({ t, k: t.keepable() })).filter(x => x.k);
       const rest = tools.map((t, i) => ({ t, i })).filter(({ i }) => !shownIdx.has(i)).map(({ t }) => t);
       const secs = parseTimer(e.procedure[at - 1]);
+      const CUE = { gen: 'the button below', groove: 'the rhythm below', bench: 'the workbench below', marks: 'the stopwatch below', subtract: 'the parts list below', clip: 'the sound tool below', loops: 'the loops below', assign: 'the swap tool below', wordpoem: 'the word tool below', burn: 'the page below', cards: 'the cards below', blackout: 'the text below', roll: 'the chord tool below', sampler: 'the sampler below', treat: 'the treatments below' };
+      const cue = [...new Set(here.map(i => CUE[cfgs[i].type]).filter(Boolean))];
       render(head, dots(),
-        el('div', { class: 'xp-stepcard', 'aria-live': 'polite' }, el('div', { class: 'xp-stepno' }, `Step ${at} of ${n}`), el('p', { class: 'xp-steptext', id: 'xpStep' }, e.procedure[at - 1])),
+        el('div', { class: 'xp-stepcard', 'aria-live': 'polite' }, el('div', { class: 'xp-stepno' }, `Step ${at} of ${n}`), el('p', { class: 'xp-steptext', id: 'xpStep' }, e.procedure[at - 1]), cue.length ? el('p', { class: 'xp-cue', id: 'xpCue' }, 'Use ' + cue.join(' and ')) : null),
         secs ? stepTimer(secs) : null,
-        nav(btn(at === n ? 'Finish' : 'Next', () => go(at + 1), false, 'xpNext'), btn('Back', () => go(at - 1), true, 'xpBack')),
+        el('div', { class: 'xp-nav xp-nav--sticky' }, btn(at === n ? 'Finish' : 'Next', () => go(at + 1), false, 'xpNext'), btn('Back', () => go(at - 1), true, 'xpBack')),
         carry.length ? el('div', { class: 'xp-carry', id: 'xpCarry' }, el('b', {}, 'From earlier'), carry.map(({ k }) => el('p', {}, el('span', { class: 'xp-carry-k' }, k.label + ': '), k.kind === 'text' ? k.text.replace(/\n/g, ' · ') : 'a clip you made'))) : null,
         el('div', { class: 'xp-tools', id: 'xpTools' }, here.length ? el('h3', { class: 'xp-h' }, 'For this step') : null, ...here.map(i => tools[i])),
         rest.length ? el('details', { class: 'xp-others', id: 'xpOthers' }, el('summary', {}, here.length ? 'Your other tools' : 'Your tools'), ...rest) : null);
@@ -266,7 +291,8 @@ function detail(e) {
         el('div', { class: 'xp-recap', id: 'xpRecap' },
           el('p', {}, `${n} steps done. ${unitDone} of ${unit.experiments.length} in Unit ${unit.number} (${unit.title}) once you mark this one.`),
           kept.length ? el('p', {}, `Kept from this experiment: `, ...kept.flatMap((k, i) => [i ? ', ' : '', k.title.replace(e.title + ': ', '')]), '. ', el('a', { href: '#/keep' }, 'Open the Keep shelf')) : el('p', { class: 'xp-note' }, 'You did not keep anything from this one. Go back to the steps and press "Keep this" on a tool if you want to.')),
-        nav(btn(progress.isDone(e.id) ? 'Save and finish' : 'Mark as done', finish, false, 'xpFinish'), btn('Back to the steps', () => go(n), true, 'xpBackSteps')),
+        savePanel(),
+        nav(btn('Finish', finish, false, 'xpFinish'), btn('Back to the steps', () => go(n), true, 'xpBackSteps')),
         el('p', { class: 'xp-hint', style: 'margin-top:1rem' }, el('a', { href: '#/' + nextExp.id }, 'Next in the course: ' + nextExp.title + ' →'), ' · ', el('a', { href: '#/' }, 'Choose another')));
     }
   }

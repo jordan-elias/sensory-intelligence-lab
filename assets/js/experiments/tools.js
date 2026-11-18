@@ -5,9 +5,11 @@
  * when you leave the page unless you download it yourself.
  */
 import { mulberry32, newSeed, generate, SCALES, NOTE_NAMES, rotateAssign, euclid, int } from './rng.js';
-import { wordPoemTool, burnTool, cardsTool, blackoutTool } from './tools-writing.js';
+import { wordPoemTool, burnTool, cardsTool, blackoutTool, padTool } from './tools-writing.js';
 import { rollTool, samplerTool, treatTool } from './tools-music.js';
 import { attachKeep } from './keep.js';
+import { benchTool } from './bench.js';
+import { marksTool, subtractTool } from './tools-marks.js';
 import { mixToMono, resample, reverse, chopShuffle, stutter, pitchedGrains, contrastLayer, normalise, encodeWav } from './audio-ops.js';
 
 export function el(tag, attrs = {}, ...kids) {
@@ -77,7 +79,10 @@ function genTool(cfg) {
     seedEl.textContent = `Seed ${seed}`;
     hist.prepend(el('li', {}, last.summary)); while (hist.children.length > 5) hist.lastChild.remove();
     hear.hidden = !(last.pitchClasses || last.chords);
+    rollBtn.textContent = 'Roll again';
   };
+  root.number = () => (last && last.kind === 'range' && last.values.length ? last.values[0] : null);
+  root.pitches = () => (last?.pitchClasses ? [...last.pitchClasses] : null);
   hear.onclick = () => { stop(); if (last?.chords) stop = playChords(last.chords); else if (last?.pitchClasses) stop = playTones(last.pitchClasses, { step: cfg.kind === 'notes' ? 0.6 : 0.4 }); };
   root.append(el('div', { class: 'xp-row' }, rollBtn, hear), bar, out, el('div', { class: 'xp-meta' }, seedEl, el('p', { class: 'xp-hint' }, 'The seed makes a roll repeatable.')),
     cfg.noHistory ? null : el('details', { class: 'xp-details' }, el('summary', {}, 'Earlier rolls'), hist));
@@ -168,7 +173,7 @@ function clipTool(cfg) {
   ops.append(orig);
   root.__clip = () => (st.result ? { data: st.result, sr: st.sr } : null);
   root.append(el('p', { class: 'xp-k' }, 'Your clip'), el('div', { class: 'xp-row' }, rec, el('label', { class: 'xp-filelabel' }, 'or load a file ', file)),
-    el('p', { class: 'xp-hint' }, 'Audio stays in your browser and is never uploaded. It is only kept, on this device, if you press Keep this.'), status, grainBox, ops, el('div', { class: 'xp-row' }, play, save), info);
+    el('p', { class: 'xp-hint' }, 'Audio stays in your browser and is never uploaded. It is only saved, on this device, if you choose to save it when you finish.'), status, grainBox, ops, el('div', { class: 'xp-row' }, play, save), info);
   return root;
 }
 
@@ -210,12 +215,16 @@ function grooveTool(cfg) {
   const tick = () => { const c = audioCtx(); while (next < c.currentTime + 0.15) { const i = step % n; if (pat[i]) hit(next, i === 0); const when = next, k = i;
     setTimeout(() => draw(k), Math.max(0, (when - c.currentTime) * 1000)); step++; next += stepDur(); } };
   btn.onclick = () => { if (timer) { clearInterval(timer); timer = null; btn.textContent = 'Start'; draw(); return; } step = 0; next = audioCtx().currentTime + 0.1; timer = setInterval(tick, 50); btn.textContent = 'Stop'; };
-  const rollBtn = cfg.roll ? el('button', { type: 'button', class: 'xp-btn xp-btn--alt', onclick: () => {
-    const [lo, hi] = cfg.rollRange || [cfg.hits || 5, cfg.hits || 5], k = int(mulberry32(newSeed()), lo, hi); pat = euclid(k, n, int(mulberry32(newSeed()), 0, n - 1)); draw(); } }, 'Roll a rhythm') : null;
+  let rolled = false;
+  const doRoll = () => {
+    const [lo, hi] = cfg.rollRange || [cfg.hits || 5, cfg.hits || 5], k = int(mulberry32(newSeed()), lo, hi); pat = euclid(k, n, int(mulberry32(newSeed()), 0, n - 1)); rolled = true; rollBtn.textContent = 'Roll again'; draw(); };
+  const rollBtn = cfg.roll ? el('button', { type: 'button', class: 'xp-btn xp-btn--alt', onclick: doRoll }, 'Roll a rhythm') : null;
   draw();
-  return el('div', { class: 'xp-tool' }, el('p', { class: 'xp-k' }, cfg.roll ? 'Rhythm to play over' : 'Metronome / rhythm'), el('div', { class: 'xp-row' }, btn, rollBtn, el('label', {}, 'Tempo ', tempo)),
+  const root = el('div', { class: 'xp-tool' }, el('p', { class: 'xp-k' }, cfg.roll ? 'Rhythm to play over' : 'Metronome / rhythm'), el('div', { class: 'xp-row' }, btn, rollBtn, el('label', {}, 'Tempo ', tempo)),
     el('div', { class: 'xp-steps-grid', style: `grid-template-columns:repeat(${Math.min(n, 16)},1fr)` }, cells), label,
     el('p', { class: 'xp-hint' }, 'Tap a step to switch it on or off. Once you have started an experiment that fixes the rhythm, stop editing it.'));
+  root.pattern = () => ({ pat: [...pat], n, bpm });
+  return root;
 }
 
 // ── tool: reassign ──────────────────────────────────────────────────
@@ -231,7 +240,7 @@ function assignTool() {
   return el('div', { class: 'xp-tool' }, el('p', { class: 'xp-k' }, 'Swap'), area, el('div', { class: 'xp-row' }, btn), out);
 }
 
-/** `opts.keep(item)` (optional) adds a "Keep this" button to the tools that make something worth keeping. */
+/** Tools that make something worth saving expose `root.keepable()`; the page offers it once, at the end of the experiment. */
 export function buildTool(cfg, opts = {}) { return attachKeep(cfg.type, buildOne(cfg), opts.keep, el); }
 function buildOne(cfg) {
   switch (cfg.type) {
@@ -248,7 +257,11 @@ function buildOne(cfg) {
     case 'roll': return rollTool(cfg);
     case 'sampler': return samplerTool(cfg);
     case 'treat': return treatTool(cfg);
+    case 'pad': return padTool(cfg);
+    case 'bench': return benchTool(cfg);
+    case 'marks': return marksTool(cfg);
+    case 'subtract': return subtractTool(cfg);
     default: return el('p', {}, '');
   }
 }
-export const TOOL_TYPES = ['gen', 'timer', 'clip', 'loops', 'groove', 'assign', 'wordpoem', 'burn', 'cards', 'blackout', 'roll', 'sampler', 'treat'];
+export const TOOL_TYPES = ['gen', 'timer', 'clip', 'loops', 'groove', 'assign', 'wordpoem', 'burn', 'cards', 'blackout', 'roll', 'sampler', 'treat', 'bench', 'pad', 'marks', 'subtract'];

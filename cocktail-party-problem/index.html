@@ -118,6 +118,8 @@
     .lab-hint { font-size: .72rem; color: var(--muted); margin-top: .65rem; text-align: center; line-height: 1.5; }
 
     /* Loading indicator */
+    .load-status { margin: 0 0 .5rem; font-size: .9rem; }
+    .load-status[hidden] { display: none; }
     .loading-bar { height: 2px; background: var(--border); margin-bottom: .75rem; position: relative; overflow: hidden; display: none; }
     .loading-bar.visible { display: block; }
     .loading-bar-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--accent); transition: width .3s; }
@@ -191,7 +193,8 @@
   </div>
 
   <!-- Loading bar -->
-  <div class="loading-bar" id="loading-bar"><div class="loading-bar-fill" id="loading-bar-fill"></div></div>
+  <div class="load-status" id="load-status" role="status" aria-live="polite"><span id="load-text">Loading sounds… 0%</span> <button type="button" class="lab-btn" id="load-retry" hidden>Try again</button></div>
+  <div class="loading-bar visible" id="loading-bar"><div class="loading-bar-fill" id="loading-bar-fill"></div></div>
 
   <!-- Main game -->
   <div class="lab-section">
@@ -220,16 +223,16 @@
     </div>
 
     <div class="control-row">
-      <button class="lab-btn primary" id="btn-play"><svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> Play</button>
+      <button class="lab-btn primary" id="btn-play" disabled><svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> Play</button>
       <button class="lab-btn" id="btn-repeat" disabled>↺ Repeat</button>
       <div class="feedback-msg" id="feedback-msg"></div>
     </div>
 
     <div class="choice-buttons" id="choice-buttons">
-      <button class="choice-btn" disabled></button>
-      <button class="choice-btn" disabled></button>
-      <button class="choice-btn" disabled></button>
-      <button class="choice-btn" disabled></button>
+      <button class="choice-btn" disabled aria-label="Answer choice 1"></button>
+      <button class="choice-btn" disabled aria-label="Answer choice 2"></button>
+      <button class="choice-btn" disabled aria-label="Answer choice 3"></button>
+      <button class="choice-btn" disabled aria-label="Answer choice 4"></button>
     </div>
 
     <div class="cocktail-stats">
@@ -390,7 +393,7 @@ class AudioEngine {
 class AssetLoader {
   constructor(audioCtx) { this.audioCtx = audioCtx; this.targets = {}; this.maskers = {}; this.loading = new Set(); }
   async _fetch(url) {
-    try { const res = await fetch(url); const ab = await res.arrayBuffer(); return await this.audioCtx.decodeAudioData(ab); }
+    try { const res = await fetch(url); if (!res.ok) throw new Error('HTTP ' + res.status); const ab = await res.arrayBuffer(); return await this.audioCtx.decodeAudioData(ab); }
     catch(e) { console.warn('Audio load failed:', url, e); return null; }
   }
   async loadWord(word, variant = 0) {
@@ -398,12 +401,15 @@ class AssetLoader {
     if (this.loading.has(key)) return;
     this.loading.add(key);
     const buf = await this._fetch(`/audio/targets/${word}_${variant}.mp3`);
+    if (!buf) { this.loading.delete(key); return; }   // failed: allow a retry
     if (!this.targets[word]) this.targets[word] = [];
     this.targets[word][variant] = buf;
   }
   async loadMasker(type) {
+    if (this.maskers[type]) return this.maskers[type];
     const buf = await this._fetch(`/audio/maskers/${type}.mp3`);
-    this.maskers[type] = buf; return buf;
+    if (buf) this.maskers[type] = buf;
+    return buf;
   }
   getWord(word) { const variants = (this.targets[word] || []).filter(Boolean); return variants.length ? variants[Math.floor(Math.random() * variants.length)] : null; }
   getMasker(type) { return this.maskers[type] || null; }
@@ -461,25 +467,33 @@ async function saveSession(level, correct, trials, accuracy, avgReactionMs) {
 }
 
 // ═══ PRELOADING ══════════════════════════════════════════
-async function preloadWordSet(wordSet, onProgress) {
-  if (S.preloadedSets.has(wordSet)) return;
+/** Loads the maskers and one word set. Resolves true when everything needed is ready, false if something could not be loaded. */
+async function preloadAll(wordSet, onProgress) {
   const words = WORD_SETS[wordSet];
-  const total = words.length * TARGET_VARIANT_COUNT;
-  let done = 0;
-
-  // Load all variants in parallel using Promise.all
   const tasks = [];
-  for (const word of words) {
-    for (let v = 0; v < TARGET_VARIANT_COUNT; v++) {
-      tasks.push(loader.loadWord(word, v).then(() => { done++; if (onProgress) onProgress(done / total); }));
-    }
-  }
-  await Promise.all(tasks);
-  S.preloadedSets.add(wordSet);
+  MASKER_TYPES.forEach(t => tasks.push(() => loader.loadMasker(t)));
+  if (!S.preloadedSets.has(wordSet)) for (const word of words) for (let v = 0; v < TARGET_VARIANT_COUNT; v++) tasks.push(() => loader.loadWord(word, v));
+  let done = 0;
+  await Promise.all(tasks.map(t => t().then(() => { done++; if (onProgress) onProgress(done / tasks.length); })));
+  const maskersOk = MASKER_TYPES.every(t => loader.maskers[t]);
+  const wordsOk = words.every(w => loader.isWordReady(w));
+  if (wordsOk) S.preloadedSets.add(wordSet);
+  return maskersOk && wordsOk;
 }
 
-async function preloadMaskers() {
-  await Promise.all(MASKER_TYPES.map(t => loader.loadMasker(t)));
+/** Shows what is happening while sounds load: a message with a percentage, Play switched off, and a Retry if something failed. */
+async function loadSounds(wordSet) {
+  const status = document.getElementById('load-status'), text = document.getElementById('load-text'), retry = document.getElementById('load-retry');
+  const fill = document.getElementById('loading-bar-fill'), bar = document.getElementById('loading-bar'), play = document.getElementById('btn-play');
+  status.hidden = false; retry.hidden = true; play.disabled = true; bar.classList.add('visible');
+  text.textContent = 'Loading sounds… 0%';
+  let ok = false;
+  try { ok = await preloadAll(wordSet, p => { const pc = Math.round(p * 100); fill.style.width = pc + '%'; text.textContent = `Loading sounds… ${pc}%`; }); } catch (e) { console.warn(e); }
+  bar.classList.remove('visible'); fill.style.width = '0%';
+  if (ok) { status.hidden = true; play.disabled = false; return true; }
+  text.textContent = 'Some sounds could not be loaded. Check your connection and try again.';
+  retry.hidden = false; retry.onclick = () => loadSounds(wordSet);
+  return false;
 }
 
 // ═══ SPECTROGRAM ═════════════════════════════════════════
@@ -581,6 +595,7 @@ async function play() {
   const btns = document.querySelectorAll('#choice-buttons .choice-btn');
   S.choices.forEach((word, i) => {
     btns[i].textContent = word.charAt(0).toUpperCase() + word.slice(1);
+    btns[i].removeAttribute('aria-label');   // the word is now the name
     btns[i].disabled = true;
     btns[i].className = 'choice-btn'; // hidden via CSS (visibility: hidden, no 'revealed' class)
     btns[i].onclick = () => checkAnswer(word);
@@ -786,25 +801,7 @@ async function init() {
   await engine.init();
   loader = new AssetLoader(engine.audioCtx);
 
-  // Show loading bar while preloading active set (colors by default)
-  const loadingBar = document.getElementById('loading-bar');
-  const loadingFill = document.getElementById('loading-bar-fill');
-  loadingBar.classList.add('visible');
-  setFeedback('Loading audio…');
-  document.getElementById('btn-play').disabled = true;
-
-  // Preload maskers first (fast, only 3 files)
-  await preloadMaskers();
-
-  // Preload active word set with progress
-  await preloadWordSet('colors', (progress) => {
-    loadingFill.style.width = Math.round(progress * 100) + '%';
-  });
-
-  loadingBar.classList.remove('visible');
-  loadingFill.style.width = '0%';
-  setFeedback('');
-  document.getElementById('btn-play').disabled = false;
+  await loadSounds(S.wordSet);
 
   startSpectrogram();
   renderLevelGrid();
@@ -812,7 +809,7 @@ async function init() {
   updateStats();
 
   // Background-load numbers set
-  setTimeout(() => { preloadWordSet('numbers'); }, 500);
+  setTimeout(() => { preloadAll('numbers').catch(() => {}); }, 500);
 
   document.getElementById('btn-play').addEventListener('click', play);
   document.getElementById('btn-repeat').addEventListener('click', repeat);
@@ -825,16 +822,7 @@ async function init() {
       if (newSet !== S.wordSet) {
         S.wordSet = newSet;
         // Preload this set if not already done
-        if (!S.preloadedSets.has(newSet)) {
-          const loadingBar = document.getElementById('loading-bar');
-          const loadingFill = document.getElementById('loading-bar-fill');
-          loadingBar.classList.add('visible');
-          document.getElementById('btn-play').disabled = true;
-          preloadWordSet(newSet, (p) => { loadingFill.style.width = Math.round(p * 100) + '%'; }).then(() => {
-            loadingBar.classList.remove('visible'); loadingFill.style.width = '0%';
-            document.getElementById('btn-play').disabled = false;
-          });
-        }
+        if (!S.preloadedSets.has(newSet)) loadSounds(newSet);
         if (S.trialsInLevel > 0) selectLevel(S.currentLevel);
       }
     });

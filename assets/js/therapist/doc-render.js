@@ -4,7 +4,7 @@
  * always set as text (never as markup), and nested content (lists, chapters) is shown in order.
  */
 export const WORKSHEET_LABEL = {
-  coping: 'Coping', 'goals-values': 'Goals and values', goals: 'Goals and values', interpersonal: 'Interpersonal',
+  coping: 'Coping', 'goals-values': 'Goals and values', goals: 'Goals and values', interpersonal: 'Interpersonal', 'dear-man': 'DEAR MAN', grow: 'GROW', fast: 'FAST',
   'lyric-analysis': 'Lyric analysis', 'music-autobiography': 'Music autobiography', 'session-reflection': 'Session reflection',
 };
 export const worksheetLabel = t => WORKSHEET_LABEL[t] || String(t || 'Worksheet').replace(/[-_]+/g, ' ').replace(/^./, c => c.toUpperCase());

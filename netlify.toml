@@ -479,6 +479,36 @@
   to   = "/worksheets/interpersonal/index.html"
   status = 200
   
+[[redirects]]
+  from = "/worksheets/dear-man"
+  to   = "/worksheets/dear-man/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/worksheets/dear-man/"
+  to   = "/worksheets/dear-man/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/worksheets/grow"
+  to   = "/worksheets/grow/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/worksheets/grow/"
+  to   = "/worksheets/grow/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/worksheets/fast"
+  to   = "/worksheets/fast/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/worksheets/fast/"
+  to   = "/worksheets/fast/index.html"
+  status = 200
+
 # ── Subscribe ──
 
 [[redirects]]

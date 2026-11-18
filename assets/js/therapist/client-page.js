@@ -21,7 +21,8 @@ const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').re
 const day = iso => iso ? new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '';
 const when = iso => iso ? new Date(iso).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
 const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
-const TABS = ['overview', 'messages', 'shared', 'intake', 'notes', 'sessions'];
+const TABS = ['overview', 'messages', 'folder', 'notes', 'sessions'];
+const TAB_ALIAS = { shared: 'folder', intake: 'folder' };
 
 export async function mountClientPage(root) {
   const sb = await new Promise(res => { if (window._supabase && window._currentUser) res(window._supabase); else window.addEventListener('authReady', () => res(window._supabase), { once: true }); });
@@ -50,6 +51,7 @@ export async function mountClientPage(root) {
   const copies = copiesQ.data || [];
   const nCheckins = copies.filter(c => c.category === 'checkins').length;
   const nDocs = copies.filter(c => c.category === 'worksheets').length;
+  const nForms = copies.filter(c => c.category === 'intake' || c.category === 'family').length;
   const sessions = splitSessions(sessQ.data || []);
   let unread = unreadQ.count || 0;
 
@@ -65,16 +67,20 @@ export async function mountClientPage(root) {
     <div class="th-tabs" role="tablist" aria-label="Client sections">
       <button role="tab" id="tab-overview" aria-controls="panel-overview" data-tab="overview">Overview</button>
       <button role="tab" id="tab-messages" aria-controls="panel-messages" data-tab="messages">Messages<span class="th-count" id="cntMessages"></span></button>
-      <button role="tab" id="tab-shared" aria-controls="panel-shared" data-tab="shared">Shared<span class="th-count">${nCheckins + nDocs || ''}</span></button>
-      <button role="tab" id="tab-intake" aria-controls="panel-intake" data-tab="intake">Intake</button>
+      <button role="tab" id="tab-folder" aria-controls="panel-folder" data-tab="folder">Folder<span class="th-count">${nCheckins + nDocs + nForms || ''}</span></button>
       <button role="tab" id="tab-notes" aria-controls="panel-notes" data-tab="notes">Record</button>
       <button role="tab" id="tab-sessions" aria-controls="panel-sessions" data-tab="sessions">Sessions<span class="th-count">${sessions.upcoming.length || ''}</span></button>
     </div>
     <section role="tabpanel" id="panel-overview" aria-labelledby="tab-overview" hidden></section>
     <section role="tabpanel" id="panel-messages" aria-labelledby="tab-messages" hidden></section>
-    <section role="tabpanel" id="panel-shared" aria-labelledby="tab-shared" hidden></section>
+    <section role="tabpanel" id="panel-folder" aria-labelledby="tab-folder" hidden>
+      <ul class="th-index" id="folderIndex"></ul>
+      <h2 class="th-h2">Intake and family history</h2>
+      <section id="folder-intake" aria-label="Intake form and family history"></section>
+      <section id="folder-docs" aria-label="Worksheets"></section>
+      <section id="folder-checkins" aria-label="Check-ins"></section>
+    </section>
     <section role="tabpanel" id="panel-sessions" aria-labelledby="tab-sessions" hidden></section>
-    <section role="tabpanel" id="panel-intake" aria-labelledby="tab-intake" hidden></section>
     <section role="tabpanel" id="panel-notes" aria-labelledby="tab-notes" hidden></section>`;
   const $ = id => root.querySelector('#' + id);
   const setUnread = n => { unread = n; $('cntMessages').textContent = n ? `${n} new` : ''; };
@@ -87,8 +93,8 @@ export async function mountClientPage(root) {
     $('panel-overview').innerHTML = `<div class="th-cards">
       ${card('Next session', next ? `${esc(describe(next).when)}<br><span class="th-muted">${esc(describe(next).kind)}${describe(next).minutes ? ` · ${describe(next).minutes} min` : ''}</span>` : '<span class="th-muted">None booked.</span>', `<button type="button" class="action-btn outline sm" data-go="sessions">All sessions</button>`)}
       ${card('Messages', unread ? `<strong>${plural(unread, 'new message')}</strong>` : '<span class="th-muted">Nothing new.</span>', `<button type="button" class="action-btn outline sm" data-go="messages">${active ? 'Open messages' : 'Read messages'}</button>`)}
-      ${card('Shared with you', nCheckins || nDocs ? `${plural(nCheckins, 'check-in')}<br>${plural(nDocs, 'document')}` : '<span class="th-muted">Nothing shared yet. Everything else stays private to the client.</span>', nCheckins || nDocs ? `<button type="button" class="action-btn outline sm" data-go="shared">View shared</button>` : '')}
-      ${card('Intake form', client.intake_received ? '<strong>Received.</strong>' : client.intake_requested_at ? `<span class="th-muted">Asked ${esc(day(client.intake_requested_at))}. Not sent yet.</span>` : '<span class="th-muted">Not requested.</span>', `<button type="button" class="action-btn outline sm" data-go="intake">${client.intake_received ? 'View intake' : 'Intake form'}</button>`)}
+      ${card('Shared with you', nCheckins || nDocs ? `${plural(nCheckins, 'check-in')}<br>${plural(nDocs, 'document')}` : '<span class="th-muted">Nothing shared yet. Everything else stays private to the client.</span>', nCheckins || nDocs ? `<button type="button" class="action-btn outline sm" data-go="folder">View shared</button>` : '')}
+      ${card('Intake form', client.intake_received ? '<strong>Received.</strong>' : client.intake_requested_at ? `<span class="th-muted">Asked ${esc(day(client.intake_requested_at))}. Not sent yet.</span>` : '<span class="th-muted">Not requested.</span>', `<button type="button" class="action-btn outline sm" data-go="folder">${client.intake_received ? 'View intake' : 'Intake form'}</button>`)}
       ${card('Safety code', key ? '<span class="th-muted">Compare this with the client to confirm your keys are genuine.</span><div id="safetyCode"></div>' : '<span class="th-muted">Available while connected, once the client has set up their vault.</span>', key ? `<button type="button" class="action-btn outline sm" id="showCode">Show safety code</button>` : '')}
     </div>
     <div class="th-card" style="margin-top:1rem"><p class="th-card-title">${active ? 'Connection' : 'Archive'}</p>
@@ -123,22 +129,36 @@ export async function mountClientPage(root) {
       onChange: async () => { const { count } = await sb.from('messages').select('id', { count: 'exact', head: true }).eq('link_id', linkId).eq('recipient_id', me.id).is('read_at', null); setUnread(count || 0); } });
   }
 
-  // ── Shared ──
-  let sharedMounted = false;
+  // ── Folder: everything this client has sent, in one place ──
+  const folderIndex = () => {
+    const forms = [
+      ['Intake form', client.intake_received ? 'Received' : client.intake_requested_at ? `Asked ${day(client.intake_requested_at)}, not sent yet` : 'Not requested'],
+      ['Family history', copies.some(c => c.category === 'family') ? 'Received' : client.family_requested_at ? `Asked ${day(client.family_requested_at)}, not sent yet` : 'Not requested'],
+      ['Worksheets', nDocs ? plural(nDocs, 'document') + ' shared' : 'None shared'],
+      ['Check-ins', nCheckins ? plural(nCheckins, 'check-in') + ' shared' : 'None shared'],
+    ];
+    $('folderIndex').innerHTML = forms.map(([k, v]) => `<li><strong>${esc(k)}</strong> <span class="th-muted">${esc(v)}</span></li>`).join('');
+  };
+  let folderMounted = false;
+  async function showFolder() {
+    if (folderMounted) return; folderMounted = true;
+    folderIndex();
+    await showShared();     // one vault unlock, then the forms
+    showIntake();
+  }
   async function showShared() {
-    if (sharedMounted) return; sharedMounted = true;
-    const box = $('panel-shared');
-    if (!copies.length) { box.innerHTML = `<p class="th-muted">${esc(name)} has not shared anything yet. Check-ins and worksheets stay private until the client chooses to share them.</p>`; return; }
-    box.innerHTML = '<p class="th-muted">Opening shared items…</p>';
+    const docsBox = $('folder-docs'), checkBox = $('folder-checkins');
+    const none = (box, what) => { box.innerHTML = `<h2 class="th-h2">${what === 'docs' ? 'Worksheets' : 'Check-ins'}</h2><p class="th-muted">${what === 'docs' ? 'No worksheets shared.' : 'No check-ins shared.'}${copies.length ? '' : ` ${esc(name)} chooses what to share. Everything else stays private.`}</p>`; };
+    if (!copies.some(c => c.category === 'worksheets' || c.category === 'checkins')) { none(docsBox, 'docs'); none(checkBox, 'check'); return; }
+    docsBox.innerHTML = '<p class="th-muted">Opening shared items…</p>';
     try {
       const session = await ensureVaultReady();
       const { items, unreadable } = await openCopies(session, copies);
       const checkins = items.filter(i => i.category === 'checkins');
       const docs = items.filter(i => i.category === 'worksheets');
       const sum = summarize(checkins);
-      box.innerHTML = `
-        ${unreadable ? `<p class="th-hint">${plural(unreadable, 'shared item')} could not be opened with your current keys.</p>` : ''}
-        <h2 class="th-h2" style="margin-top:0">Check-ins</h2>
+      checkBox.innerHTML = `
+        <h2 class="th-h2">Check-ins</h2>
         ${checkins.length ? `
           <p class="th-summary"><strong>${sum.count}</strong> check-in${sum.count === 1 ? '' : 's'}, ${esc(day(sum.first))} to ${esc(day(sum.last))}.
             Average energy ${sum.arousal ?? '–'}/10, mood ${sum.valence ?? '–'}/10, sensory load ${sum.sensory_load ?? '–'}/10.
@@ -146,23 +166,32 @@ export async function mountClientPage(root) {
           <ul class="th-list">${checkins.map(i => `<li><span class="th-muted">${esc(when(i.created_at))}</span>
             Energy ${i.arousal ?? '–'}, mood ${i.valence ?? '–'}, load ${i.sensory_load ?? '–'}
             ${i.emotion_words?.length ? '· ' + i.emotion_words.map(esc).join(', ') : ''}${i.location_tag ? ' · ' + esc(i.location_tag) : ''}
-            ${i.notes ? `<div class="th-note">“${esc(i.notes)}”</div>` : ''}</li>`).join('')}</ul>` : '<p class="th-muted">No check-ins shared.</p>'}
-        <h2 class="th-h2">Documents</h2>
-        ${docs.length ? '<div id="docList"></div>' : '<p class="th-muted">No documents shared.</p>'}`;
-      const list = box.querySelector('#docList');
-      docs.sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at))).forEach(d => {
-        const wrap = document.createElement('div'); wrap.className = 'th-docitem';
-        const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'th-docbtn'; btn.setAttribute('aria-expanded', 'false');
-        const t = document.createElement('strong'); t.textContent = d.title || 'Untitled';
-        const m = document.createElement('span'); m.className = 'th-muted'; m.textContent = `${worksheetLabel(d.type)} · updated ${day(d.updated_at)}`;
-        btn.append(t, m);
-        const body = document.createElement('div'); body.hidden = true; body.className = 'th-docbody';
-        const rowsOut = toRows(d.data);
-        if (rowsOut.length) body.appendChild(renderRows(document, rowsOut)); else body.textContent = 'This worksheet is empty.';
-        btn.onclick = () => { body.hidden = !body.hidden; btn.setAttribute('aria-expanded', String(!body.hidden)); };
-        wrap.append(btn, body); list.appendChild(wrap);
+            ${i.notes ? `<div class="th-note">“${esc(i.notes)}”</div>` : ''}</li>`).join('')}</ul>` : '<p class="th-muted">No check-ins shared.</p>'}`;
+      docsBox.innerHTML = `
+        ${unreadable ? `<p class="th-hint">${plural(unreadable, 'shared item')} could not be opened with your current keys.</p>` : ''}
+        <h2 class="th-h2">Worksheets</h2>
+        ${docs.length ? '<div id="docList"></div>' : '<p class="th-muted">No worksheets shared.</p>'}`;
+      const list = docsBox.querySelector('#docList');
+      // Grouped by worksheet type, newest first inside each group.
+      const groups = new Map();
+      docs.sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at)))
+        .forEach(d => { const k = worksheetLabel(d.type); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(d); });
+      groups.forEach((group, label) => {
+        const h = document.createElement('h3'); h.className = 'th-h3'; h.textContent = `${label} (${group.length})`; list.appendChild(h);
+        group.forEach(d => {
+          const wrap = document.createElement('div'); wrap.className = 'th-docitem';
+          const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'th-docbtn'; btn.setAttribute('aria-expanded', 'false');
+          const t = document.createElement('strong'); t.textContent = d.title || 'Untitled';
+          const m = document.createElement('span'); m.className = 'th-muted'; m.textContent = `${label} · updated ${day(d.updated_at)}`;
+          btn.append(t, m);
+          const body = document.createElement('div'); body.hidden = true; body.className = 'th-docbody';
+          const rowsOut = toRows(d.data);
+          if (rowsOut.length) body.appendChild(renderRows(document, rowsOut)); else body.textContent = 'This worksheet is empty.';
+          btn.onclick = () => { body.hidden = !body.hidden; btn.setAttribute('aria-expanded', String(!body.hidden)); };
+          wrap.append(btn, body); list.appendChild(wrap);
+        });
       });
-    } catch (e) { sharedMounted = false; box.innerHTML = `<p class="msg show error">${esc(e.message)}</p>`; }
+    } catch (e) { docsBox.innerHTML = `<p class="msg show error">${esc(e.message)}</p>`; folderMounted = false; }
   }
 
   // Whatever the therapist opens from the client is also copied into their own encrypted record, so it survives if the client leaves or deletes their account.
@@ -172,7 +201,7 @@ export async function mountClientPage(root) {
   let intakeMounted = false;
   async function showIntake() {
     if (intakeMounted) return; intakeMounted = true;
-    const box = $('panel-intake');
+    const box = $('folder-intake');
     const ask = async () => {
       const { error: e } = await sb.rpc('request_intake', { p_link: linkId });
       if (e) throw new Error(e.message);
@@ -257,6 +286,7 @@ export async function mountClientPage(root) {
 
   // ── Tabs ──
   function show(tab, push = true) {
+    tab = TAB_ALIAS[tab] || tab;
     if (!TABS.includes(tab)) tab = 'overview';
     for (const t of TABS) {
       const on = t === tab;
@@ -264,7 +294,7 @@ export async function mountClientPage(root) {
       $('panel-' + t).hidden = !on;
     }
     if (push) history.replaceState(null, '', `?link=${encodeURIComponent(linkId)}#${tab}`);
-    if (tab === 'messages') showMessages(); else if (tab === 'shared') showShared(); else if (tab === 'notes') showNotes(); else if (tab === 'intake') showIntake();
+    if (tab === 'messages') showMessages(); else if (tab === 'folder') showFolder(); else if (tab === 'notes') showNotes();
   }
   root.querySelectorAll('[role=tab]').forEach(b => {
     b.addEventListener('click', () => show(b.dataset.tab));

@@ -84,11 +84,11 @@ export async function launch({extraArgs=[]}={}){
   const browser=await puppeteer.launch({executablePath:CHROME,headless:true,args:['--no-sandbox','--disable-gpu',...extraArgs]});
   return {browser,BASE,DB,server};
 }
-export async function newPage(browser,BASE,{hasUpdatedAt=true,db=null,mobile=false,tables=null,noLegacy=false}={}){
+export async function newPage(browser,BASE,{hasUpdatedAt=true,db=null,mobile=false,tables=null,noLegacy=false,onRequest=null}={}){
   const page=await browser.newPage();
   const errors=[]; page.on('pageerror',e=>errors.push('pageerror: '+e.message)); page.on('console',m=>{ if(m.type()==='error' && !/ERR_FAILED/.test(m.text())) errors.push('console: '+m.text()); });
   await page.setRequestInterception(true);
-  page.on('request',r=>{ const u=r.url();
+  page.on("request",r=>{ if(onRequest&&onRequest(r)) return; const u=r.url();
     if(u.startsWith(BASE)) return r.continue();
     if(u.includes('sortablejs')) return r.respond({status:200,contentType:'text/javascript',headers:{'access-control-allow-origin':'*'},body:fs.readFileSync(SORTABLE,'utf8')});
     return r.abort(); });

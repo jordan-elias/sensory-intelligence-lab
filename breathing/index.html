@@ -80,6 +80,9 @@
     /* ── Breath session panel ── */
     .session{display:none;border:1px solid var(--border);background:var(--surface)}
     .session.vis{display:block}
+    #soundSel{font:inherit;margin-left:.4rem;padding:.25rem .4rem;border:1px solid var(--border);border-radius:0;background:var(--bg);color:var(--text)}
+    .haptic-opt{display:block;text-align:center;font-size:.85rem;color:var(--muted);padding:.4rem 1rem 1rem} .haptic-opt input{width:20px;height:20px;vertical-align:-5px;margin-right:.35rem}
+    .end-note{text-align:center;padding:1rem 1.5rem 1.4rem;font-size:.95rem} .end-note p{margin:.3rem 0} .end-note a{color:var(--accent)}
 
     /* ── Visualiser ── */
     .viz-wrap{padding:2.5rem 1.5rem;display:flex;flex-direction:column;align-items:center;gap:1.5rem;border-bottom:1px solid var(--border);background:var(--bg)}
@@ -120,6 +123,7 @@
   <link rel="stylesheet" href="/assets/css/header.css">
   <link rel="stylesheet" href="/assets/css/ui.css">
   <script src="/assets/js/ui/icons.js" defer></script>
+  <script type="module" src="/assets/js/app/session.js"></script>
   <link rel="stylesheet" href="/assets/css/a11y.css">
 </head>
 <body>
@@ -209,6 +213,20 @@
         <span id="icon" data-icon="play"></span>
         <span id="plabel">Play</span>
       </button>
+    </div>
+
+    <label class="haptic-opt" id="soundOpt">Sound
+      <select id="soundSel" aria-label="Sound">
+        <option value="drone">Soft drone</option>
+        <option value="breath">Drone and a breath you can hear</option>
+        <option value="pad">Warm pad</option>
+        <option value="chimes">Quiet chimes only</option>
+      </select></label>
+    <label class="haptic-opt" id="hapticOpt" hidden><input type="checkbox" id="hapticBox"> Vibrate gently with each breath (phone)</label>
+
+    <div class="end-note" id="endNote" hidden role="status">
+      <p>That is the end. Stay as you are for a moment before you carry on.</p>
+      <p><a href="/check-in/">Check in</a> · <a href="/journal/">Timed journal</a> · <a href="/dashboard/">Dashboard</a></p>
     </div>
 
   </div>
@@ -407,6 +425,8 @@ function startSession() {
   S.phaseStart     = 0;
   S.inSettle       = true;
   S.done           = false;
+  S.lastPhaseKey   = null;
+  document.getElementById('endNote').hidden = true;
   S.vizSize        = SIZES.settle;
   S.vizHSL         = [...PHASE_HSL.settle];
 
@@ -484,6 +504,8 @@ function tick() {
 
   animateCircle(phaseType, eased, targetHSL);
   document.getElementById('vizLabel').textContent = phase.label;
+  const phaseKey = breathNum + ':' + phaseIdx;
+  if (phaseKey !== S.lastPhaseKey) { S.lastPhaseKey = phaseKey; window.SILSession?.cue(phaseType); }
 
   S.rafId = requestAnimationFrame(tick);
 }
@@ -521,6 +543,8 @@ function onComplete() {
   S.vizSize = SIZES.settle;
   S.vizHSL  = [...PHASE_HSL.settle];
   animateCircle('settle', 1, PHASE_HSL.settle);
+  window.SILSession?.cue('done');
+  document.getElementById('endNote').hidden = false;
 }
 
 // ─────────────────────────────────────────────────────────
@@ -553,6 +577,7 @@ function togglePlay() {
 const _ms = silAudio.mediaSession({ title: 'Breathing exercise', play: () => { if (!S.isPlaying) togglePlay(); }, pause: () => { if (S.isPlaying) togglePlay(); } });
 function setIcon(playing) {
   _ms.state(playing ? 'playing' : 'paused');
+  if (playing) window.SILSession?.start(); else window.SILSession?.end();
   const ic = document.getElementById('icon'), lb = document.getElementById('plabel');
   if (playing) {
     ic.innerHTML=silIcons.html('pause');
@@ -573,10 +598,60 @@ function buildLive() {
   const dur = totalDuration(p);
   const rng = mkRng(S.seed);
   S.liveCtx = new (window.AudioContext||window.webkitAudioContext)({sampleRate:SR});
-  buildGraph(S.liveCtx, p, rng, dur);
+  let sound = 'drone'; try { sound = localStorage.getItem('sil.breathing.sound') || 'drone'; } catch (_) { /* default */ }
+  const sel = document.getElementById('soundSel'); if (sel && sel.value) sound = sel.value;
+  buildGraph(S.liveCtx, p, rng, dur, sound);
 }
 
-function buildGraph(ctx, pattern, rng, dur) {
+/** The start and end of every breath phase, in seconds from the start of the sound. */
+function phaseTimes(pattern) {
+  const out = []; let t = pattern.settleTime;
+  for (let b = 0; b < pattern.breaths; b++) for (const ph of pattern.phases) { out.push({ type: ph.type, t0: t, t1: t + ph.dur }); t += ph.dur; }
+  return out;
+}
+
+/** Extra voices that follow the breath. They are added to the master, so the fade in and out still applies. */
+function addSoundLayers(ctx, master, pattern, rng, dur, sound, now) {
+  const times = phaseTimes(pattern), fund = pattern.fund;
+  if (sound === 'breath') {                       // a soft airy swell that rises as you breathe in and falls as you breathe out
+    const len = SR * 4, buf = ctx.createBuffer(1, len, SR), d = buf.getChannelData(0); let last = 0;
+    for (let i = 0; i < len; i++) { const w = rng() * 2 - 1; last = (last + 0.02 * w) / 1.02; d[i] = last * 3.5; }
+    const src = ctx.createBufferSource(); src.buffer = buf; src.loop = true;
+    const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 650; bp.Q.value = 0.6;
+    const g = ctx.createGain(); g.gain.setValueAtTime(0, now);
+    src.connect(bp); bp.connect(g); g.connect(master);
+    for (const { type, t0, t1 } of times) {
+      if (type === 'inhale') { bp.frequency.linearRampToValueAtTime(1100, now + t1); g.gain.linearRampToValueAtTime(0.16, now + t1); }
+      else if (type === 'hold') { g.gain.linearRampToValueAtTime(0.1, now + t1); }
+      else if (type === 'exhale') { bp.frequency.linearRampToValueAtTime(450, now + t1); g.gain.linearRampToValueAtTime(0.0, now + t1); }
+      else g.gain.linearRampToValueAtTime(0.0, now + t1);
+    }
+    src.start(now); src.stop(now + dur + 0.2);
+  } else if (sound === 'pad') {                   // two slightly detuned triangle pairs, brighter on the way in, darker on the way out
+    const filt = ctx.createBiquadFilter(); filt.type = 'lowpass'; filt.frequency.value = 700; filt.Q.value = 0.4;
+    const g = ctx.createGain(); g.gain.setValueAtTime(0.0, now); g.gain.linearRampToValueAtTime(0.05, now + pattern.settleTime);
+    filt.connect(g); g.connect(master);
+    [[2, -5], [2, 5], [3, -4], [3, 4]].forEach(([mult, cents]) => {
+      const o = ctx.createOscillator(); o.type = 'triangle'; o.frequency.value = fund * mult; o.detune.value = cents; o.connect(filt); o.start(now); o.stop(now + dur + 0.2);
+    });
+    for (const { type, t1 } of times) {
+      filt.frequency.linearRampToValueAtTime(type === 'inhale' ? 1900 : type === 'hold' ? 1700 : 520, now + t1);
+      g.gain.linearRampToValueAtTime(type === 'inhale' ? 0.08 : type === 'hold' ? 0.07 : 0.035, now + t1);
+    }
+  } else if (sound === 'chimes') {                // one soft bell at the start of each phase: rising for in, lower for out
+    for (const { type, t0 } of times) {
+      if (type !== 'inhale' && type !== 'exhale' && type !== 'hold') continue;
+      const f = type === 'inhale' ? fund * 4 : type === 'exhale' ? fund * 3 : fund * 3.5, amp = type === 'hold' ? 0.04 : 0.09;
+      [[1, 1], [2.76, 0.25]].forEach(([m, a]) => {
+        const o = ctx.createOscillator(), e = ctx.createGain(); o.type = 'sine'; o.frequency.value = f * m;
+        e.gain.setValueAtTime(0.0001, now + t0); e.gain.linearRampToValueAtTime(amp * a, now + t0 + 0.03); e.gain.exponentialRampToValueAtTime(0.0001, now + t0 + (type === 'hold' ? 1.2 : 2.6));
+        o.connect(e); e.connect(master); o.start(now + t0); o.stop(now + t0 + 2.8);
+      });
+    }
+  }
+}
+
+function buildGraph(ctx, pattern, rng, dur, sound = 'drone') {
   const now  = ctx.currentTime;
   const FI   = 3, FO = 6;
 
@@ -586,6 +661,9 @@ function buildGraph(ctx, pattern, rng, dur) {
   master.gain.linearRampToValueAtTime(0.85, now+FI);
   master.gain.setValueAtTime(0.85, now+dur-FO);
   master.gain.linearRampToValueAtTime(0, now+dur);
+
+  if (sound === 'chimes') { addSoundLayers(ctx, master, pattern, rng, dur, sound, now); return master; }
+  addSoundLayers(ctx, master, pattern, rng, dur, sound, now);
 
   const fund = pattern.fund;
   const cycleLen = pattern.phases.reduce((s,ph)=>s+ph.dur,0);
@@ -762,6 +840,9 @@ document.addEventListener('keydown', e => {
 
 // expose for inline onclick
 window.selectPattern = selectPattern;
+// the vibration option is only shown where the phone can vibrate
+window.addEventListener('load', () => { try { const sv = localStorage.getItem('sil.breathing.sound'); if (sv) document.getElementById('soundSel').value = sv; } catch (_) { /* default */ } document.getElementById('soundSel').addEventListener('change', e => { try { localStorage.setItem('sil.breathing.sound', e.target.value); } catch (_) { /* ignore */ } }); });
+window.addEventListener('load', () => { const S2 = window.SILSession, box = document.getElementById('hapticBox'); if (S2?.canVibrate()) { document.getElementById('hapticOpt').hidden = false; box.checked = S2.hapticsOn(); box.onchange = () => S2.setHaptics(box.checked); } });
 window.startSession  = startSession;
 window.togglePlay    = togglePlay;
 

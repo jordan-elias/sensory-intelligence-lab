@@ -130,3 +130,50 @@ export function downloadText(filename, text) {
 }
 
 export { esc };
+
+
+/**
+ * Make every titled section collapsible and add "Expand all / Collapse all".
+ * UI only: the answers stay in the DOM when a section is closed, so saving, export and print are unchanged.
+ * Open/closed state of the plain sections is remembered on this device per worksheet.
+ */
+export function makeSectionsCollapsible(root, slug) {
+  const key = `sil.ws.collapsed.${slug || 'x'}`;
+  let closed = [];
+  try { closed = JSON.parse(localStorage.getItem(key) || '[]'); } catch (_) { /* storage unavailable */ }
+  const save = () => {
+    const now = [...root.querySelectorAll('.ws-section.ws-collapsed > .ws-section-title')].map(t => t.textContent.trim());
+    try { localStorage.setItem(key, JSON.stringify(now)); } catch (_) { /* ignore */ }
+  };
+  const sections = [...root.querySelectorAll('.ws-section')].filter(sec => sec.querySelector(':scope > .ws-section-title'));
+  const set = (sec, collapse) => {
+    sec.classList.toggle('ws-collapsed', collapse);
+    sec.querySelector(':scope > .ws-section-title').setAttribute('aria-expanded', String(!collapse));
+  };
+  sections.forEach(sec => {
+    const t = sec.querySelector(':scope > .ws-section-title');
+    t.setAttribute('role', 'button'); t.tabIndex = 0;
+    set(sec, closed.includes(t.textContent.trim()));
+    const flip = () => { set(sec, !sec.classList.contains('ws-collapsed')); save(); };
+    t.addEventListener('click', flip);
+    t.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } });
+  });
+  if (root.querySelector('.ws-expandbar')) return;
+  const bar = document.createElement('div');
+  bar.className = 'ws-expandbar';
+  const mk = (label, collapse) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'action-btn outline sm'; b.textContent = label;
+    b.addEventListener('click', () => {
+      sections.forEach(sec => set(sec, collapse));
+      // Chapters keep their own state in the worksheet; use their own toggle.
+      root.querySelectorAll('.dyn-section').forEach(sec => {
+        if (sec.classList.contains('collapsed') !== collapse) sec.querySelector('[data-action="toggle-chapter"]')?.click();
+      });
+      save();
+    });
+    return b;
+  };
+  bar.append(mk('Expand all', false), mk('Collapse all', true));
+  root.prepend(bar);
+}

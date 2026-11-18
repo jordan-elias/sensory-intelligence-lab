@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <script src="/assets/js/audio/safe-output.js"></script>
+  <script type="module" src="/assets/js/app/session.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Soundscape Machine</title>
   <meta name="robots" content="noindex, nofollow">
@@ -812,6 +813,7 @@ function scheduleDropout(t){
 }
 
 function updateTransportUI(playing){
+  if (playing) window.SILSession?.start(); else window.SILSession?.end();
   document.getElementById('playBtn').disabled=playing;
   document.getElementById('stopBtn').disabled=!playing;
   document.getElementById('mixRecordBtn').disabled=!playing;

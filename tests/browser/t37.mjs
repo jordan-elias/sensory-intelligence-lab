@@ -30,7 +30,7 @@ ok(/Seed \d+/.test(await page.$eval('.xp-seed',e=>e.textContent)),'the seed is s
 await fresh('dice-melody'); await page.waitForSelector('#xpBegin');
 ok(await page.$('#xpHypothesis')===null&&await page.$('textarea[aria-label="Your prediction"]')===null&&await page.$('.xp-trials')===null&&await page.$('.xp-vars')===null,'no hypothesis, prediction, variables or surprise scores');
 ok(await page.$('details.xp-solo')!==null,'instructions for doing it without the app are there');
-ok(await page.$('.xp-tool')===null&&/Your first step/.test(await page.$eval('.xp-hint',e=>e.textContent)),'the start screen shows the idea and the first step, with no tools yet');
+ok(await page.$('.xp-tool')===null&&/^First:/.test(await page.$eval('.xp-hint',e=>e.textContent)),'the start screen shows the idea and the first step, with no tools yet');
 await page.click('#xpBegin'); await page.waitForSelector('#xpStep');
 const first=await page.$eval('#xpStep',e=>e.textContent), ofn=await page.$eval('.xp-stepno',e=>e.textContent);
 ok(/^Step 1 of \d+$/.test(ofn)&&first.length>10,'step 1 is shown alone ('+ofn+')');
@@ -57,10 +57,10 @@ await page.evaluate(()=>[...document.querySelectorAll('.xp-btn')].find(b=>b.text
 await go('subtract',['.xp-time']);
 ok(/20:00/.test(await page.$eval('.xp-time',e=>e.textContent)),'the timer shows its length');
 // loops
-await go('loop-mismatch',['.xp-lane']);
-ok((await page.$$eval('.xp-lane',l=>l.length))===3,'three loop lanes');
-await page.evaluate(()=>[...document.querySelectorAll('.xp-btn')].find(b=>b.textContent==='Start' && b.closest('.xp-tool').querySelector('.xp-lane')).click()); await sleep(1200);
-ok(await page.$('.xp-lane i.on')!==null,'the loops run');
+await go('loop-mismatch',['#xpBench']);
+ok((await page.$$eval('#xpBench .xp-btrack',l=>l.length))===3,'three loop tracks');
+await page.evaluate(()=>{ document.querySelectorAll('#xpBench .xp-btrack')[0].querySelector('.xp-bs').click(); }); await page.click('#xpBenchPlay'); await sleep(1200);
+ok(await page.$('#xpBench .xp-bs.now')!==null,'the loops run'); await page.click('#xpBenchPlay');
 await page.evaluate(()=>[...document.querySelectorAll('.xp-btn')].find(b=>b.textContent==='Stop')?.click());
 // clip tool with a generated file
 const sr=22050, data=Float32Array.from({length:sr*2},(_,i)=>Math.sin(i/20)*0.5*Math.exp(-(i%sr)/9000));

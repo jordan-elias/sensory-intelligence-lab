@@ -19,7 +19,7 @@ import * as store from './store.js';
 import { createAutosaver } from './autosave.js';
 import * as docSharing from '/assets/js/sharing/documents.js';
 import { therapistTarget } from '/assets/js/sharing/store.js';
-import { collectFields, restoreFields, initScales, initChoices, exportTextFromDom, downloadText, syncScales } from './ui.js';
+import { makeSectionsCollapsible, collectFields, restoreFields, initScales, initChoices, exportTextFromDom, downloadText, syncScales } from './ui.js';
 
 export async function mount(ws) {
   mountLayout({ crumbs: [{ label: 'Worksheets', href: '/worksheets/' }, { label: ws.label }] });
@@ -141,6 +141,7 @@ export async function mount(ws) {
     content.addEventListener('input', e => { if (!e.target.closest('[data-transient]')) markDirty(); });
     content.addEventListener('change', e => { if (!e.target.closest('[data-transient]')) markDirty(); });
     ws.init && ws.init({ root: content, markDirty, flush: () => autosaver.flush() });
+    makeSectionsCollapsible(content, ws.slug);
     if (!ws.collect) ws.collect = () => ({ schema: 1, data: collectFields(content) });
     if (!ws.restore) ws.restore = payload => restoreFields(content, payload.data || {});
     syncScales(content);

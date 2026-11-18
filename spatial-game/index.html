@@ -286,6 +286,13 @@
       <div class="stat-item"><span class="stat-label">Trials</span><span class="stat-value" id="stat-trials">0</span></div>
       <div class="stat-item"><span class="stat-label">Correct</span><span class="stat-value" id="stat-correct">0</span></div>
       <div class="stat-item"><span class="stat-label">Accuracy</span><span class="stat-value" id="stat-accuracy">—</span></div>
+      <div class="stat-item"><span class="stat-label">In a row</span><span class="stat-value" id="stat-streak">0</span></div>
+      <div class="stat-item"><span class="stat-label">Longest run</span><span class="stat-value" id="stat-best-streak">0</span></div>
+    </div>
+
+    <div class="control-row">
+      <label class="lab-hint" style="display:flex;gap:.4rem;align-items:center;margin:0"><input type="checkbox" id="auto-level"> Move the level up and down for me (3 right in a row goes up, 2 wrong in a row goes down)</label>
+      <button type="button" class="lab-btn" id="btn-headphones">Check headphones</button>
     </div>
 
     <p class="lab-hint">Headphones recommended · The filled dot plays the bowed string · Click where it ends up</p>
@@ -798,7 +805,7 @@ const G = {
   audioCtx: null, resonanceScene: null, sources: [], paths: [],
   targetIndex: 0, phase: 'idle',
   trialsInLevel: 0, trialResults: [],
-  trials: 0, correct: 0,
+  trials: 0, correct: 0, streak: 0, misses: 0, bestStreak: 0,
   currentLevel: 1, animRaf: null, trackStart: null, trackDuration: 0,
   bestScores: {},
 };
@@ -933,7 +940,49 @@ function updateStats() {
   document.getElementById('stat-correct').textContent = G.correct;
   const pct = G.trials > 0 ? Math.round((G.correct / G.trials) * 100) + '%' : '—';
   document.getElementById('stat-accuracy').textContent = pct;
+  document.getElementById('stat-streak').textContent = G.streak;
+  document.getElementById('stat-best-streak').textContent = G.bestStreak;
 }
+
+// ─── RUNS, LEVEL AUTO-ADJUST, HAPTICS, HEADPHONE CHECK (all on this device) ───
+try { G.bestStreak = parseInt(localStorage.getItem('sil.spatial.bestStreak') || '0', 10) || 0; } catch (_) { /* storage unavailable */ }
+const autoLevel = () => document.getElementById('auto-level').checked;
+const buzz = pattern => { try { navigator.vibrate && navigator.vibrate(pattern); } catch (_) { /* not supported */ } };
+function noteResult(isCorrect) {
+  if (isCorrect) {
+    G.streak++; G.misses = 0; buzz(25);
+    if (G.streak > G.bestStreak) { G.bestStreak = G.streak; try { localStorage.setItem('sil.spatial.bestStreak', String(G.bestStreak)); } catch (_) { /* ignore */ } }
+  } else { G.streak = 0; G.misses++; buzz([40, 60, 40]); }
+}
+/** In "move me" mode: returns a short message when the level changed. */
+function adjustLevel() {
+  if (!autoLevel()) return '';
+  let to = G.currentLevel, msg = '';
+  if (G.streak >= 3 && G.currentLevel < 10) { to = G.currentLevel + 1; msg = `Level ${to}`; G.streak = 0; }
+  else if (G.misses >= 2 && G.currentLevel > 1) { to = G.currentLevel - 1; msg = `Back to level ${to}`; G.misses = 0; }
+  if (to !== G.currentLevel) {
+    G.currentLevel = to;
+    document.querySelectorAll('.level-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.level) === to));
+    levelDesc.innerHTML = `<strong>Level ${to}:</strong> ${LEVELS[to - 1].label}`;
+    document.getElementById('level-badge').textContent = `Level ${to}`;
+  }
+  return msg;
+}
+window.__spatial = { G, noteResult, adjustLevel };   // for the browser tests
+document.getElementById('btn-headphones').addEventListener('click', async () => {
+  setFeedback('You should hear one tone on the left, then one on the right. If not, check your headphones.');
+  setTimeout(() => setFeedback(''), 5000);
+  try {
+    initAudio(); if (G.audioCtx.state === 'suspended') await G.audioCtx.resume();
+    const c = G.audioCtx, t = c.currentTime + 0.05;
+    [-1, 1].forEach((pan, i) => {
+      const o = c.createOscillator(), g = c.createGain(), p = c.createStereoPanner();
+      o.frequency.value = 440; p.pan.value = pan;
+      g.gain.setValueAtTime(0, t + i * 1.2); g.gain.linearRampToValueAtTime(0.15, t + i * 1.2 + 0.05); g.gain.linearRampToValueAtTime(0, t + i * 1.2 + 0.8);
+      o.connect(g).connect(p).connect(c.destination); o.start(t + i * 1.2); o.stop(t + i * 1.2 + 0.9);
+    });
+  } catch (e) { setFeedback('Sound could not start. Check that your browser allows audio.'); }
+});
 
 function renderPips() {
   const container = document.getElementById('trial-pips'); container.innerHTML = '';
@@ -1071,15 +1120,17 @@ async function handleGuess(selectedIndex) {
   G.trials++; G.trialsInLevel++;
   if (isCorrect) G.correct++;
   G.trialResults.push({ correct: isCorrect });
+  noteResult(isCorrect);
+  const runBefore = G.streak, levelMsg = adjustLevel();
   updateStats(); renderPips();
 
   const selectedDot = diagram.querySelector(`.sound-source[data-idx="${selectedIndex}"]`);
   if (selectedDot) selectedDot.classList.add('source-selected');
 
   if (isCorrect) {
-    setFeedback('Correct', 'success');
+    setFeedback(levelMsg ? `Correct · ${levelMsg}` : runBefore >= 3 ? `Correct · ${runBefore} in a row` : 'Correct', 'success');
     setPhase('');
-    if (G.trialsInLevel >= 10) {
+    if (G.trialsInLevel >= 10 && !autoLevel()) {
       await sleep(1000);
       showLevelComplete();
     } else {
@@ -1088,7 +1139,7 @@ async function handleGuess(selectedIndex) {
       resetTrial();
     }
   } else {
-    setFeedback('Incorrect — target revealed', 'error');
+    setFeedback(levelMsg ? `Incorrect — target revealed · ${levelMsg}` : 'Incorrect — target revealed', 'error');
     const targetDot = diagram.querySelector(`.sound-source[data-idx="${G.targetIndex}"]`);
     if (targetDot) targetDot.classList.add('source-revealed');
     drawPathTrace(G.targetIndex);
@@ -1100,7 +1151,7 @@ async function handleGuess(selectedIndex) {
       playRevealTone(G.audioCtx, G.resonanceScene, finalPos.sx, finalPos.sy, finalPos.sz);
     }
 
-    if (G.trialsInLevel >= 10) {
+    if (G.trialsInLevel >= 10 && !autoLevel()) {
       await sleep(1200);
       showLevelComplete();
     } else {
@@ -1184,7 +1235,7 @@ function buildLevelUI() {
 function setLevel(num) {
   G.currentLevel = num;
   G.trialsInLevel = 0; G.trialResults = [];
-  G.trials = 0; G.correct = 0;
+  G.trials = 0; G.correct = 0; G.streak = 0; G.misses = 0;
   document.querySelectorAll('.level-btn').forEach(b => { b.classList.toggle('active', parseInt(b.dataset.level) === num); });
   const lvl = LEVELS[num - 1];
   levelDesc.innerHTML = `<strong>Level ${num}:</strong> ${lvl.label}`;
@@ -1197,7 +1248,7 @@ function setLevel(num) {
 btnPlay.addEventListener('click', async () => {
   initAudio();
   if (G.audioCtx.state === 'suspended') await G.audioCtx.resume();
-  if (G.trialsInLevel >= 10) { setLevel(G.currentLevel); }
+  if (G.trialsInLevel >= 10 && !autoLevel()) { setLevel(G.currentLevel); }
   buildSources();
   runTrial();
 });

@@ -16,6 +16,12 @@ export const WORKSHEETS = [
     blurb: 'DBT-informed tools for navigating difficult emotions and moments of distress.' },
   { slug: 'interpersonal',       type: 'interpersonal',      label: 'Interpersonal Effectiveness',
     blurb: 'Explore connection, communication, and relationships in a neurodiversity-affirming way.' },
+  { slug: 'dear-man',           type: 'dear-man',           label: 'DEAR MAN',
+    blurb: 'Plan how to ask for something or say no, then compare two versions and look back afterwards.' },
+  { slug: 'grow',               type: 'grow',               label: 'GROW',
+    blurb: 'Goal, Reality, Options, Will: compare three ways forward and choose one small step.' },
+  { slug: 'fast',               type: 'fast',               label: 'FAST',
+    blurb: 'Keep your self-respect: be fair, skip needless apologies, stick to your values, be truthful.' },
 ];
 
 export const bySlug = slug => WORKSHEETS.find(w => w.slug === slug);
