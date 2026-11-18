@@ -48,7 +48,7 @@ function ask() {
 }
 
 function view() {
-  const p = todayPath({ answers: answers?.skipped ? null : answers, checkedIn, includeCheckin: !window.SIL_APP, recent: recent(), experiment: nextExperiment() });
+  const p = todayPath({ answers: answers?.skipped ? null : answers, checkedIn, includeCheckin: false, recent: recent(), experiment: nextExperiment() });
   const free = window._accessTier === 'free';
   const gated = href => free && document.querySelector(`.module-card[href="${href}"]`)?.dataset.gated === 'true';
   put(
@@ -63,10 +63,9 @@ function view() {
 function draw() { box.hidden = false; if (!answers || editing) ask(); else view(); }
 
 async function init() {
+  // The Today path is an app feature. On the website the dashboard shows the module list only.
+  if (!window.SIL_APP) return;
   await new Promise(r => { if (window._currentUser && window._supabase) r(); else window.addEventListener('authReady', () => r(), { once: true }); });
-  if (!window.SIL_APP) {
-    try { const start = new Date(); start.setHours(0, 0, 0, 0); const { count } = await window._supabase.from('checkins').select('id', { count: 'exact', head: true }).eq('user_id', window._currentUser.id).gte('created_at', start.toISOString()); checkedIn = count > 0; } catch { /* the path still works */ }
-  }
   draw();
 }
 init();

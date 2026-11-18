@@ -168,3 +168,6 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 
 ### Progress: app-40 longer loops
 - Workbench takes `steps: 16 | 32 | 64` (rows of 16, cycle lengths up to the full length). One knob now has a 64-step, four-bar loop at 100 BPM (kick, snare, hat, bass) that exports as MIDI and WAV. Test t67.
+
+### Progress: app-41 Today is app-only
+- The dashboard "Today" path (two questions, short path) now appears only in the installed app (`window.SIL_APP`). The website dashboard goes straight to the modules. Tests t56 (app behaviour plus "not shown on the website"), t34.
