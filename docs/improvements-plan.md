@@ -171,3 +171,6 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 
 ### Progress: app-41 Today is app-only
 - The dashboard "Today" path (two questions, short path) now appears only in the installed app (`window.SIL_APP`). The website dashboard goes straight to the modules. Tests t56 (app behaviour plus "not shown on the website"), t34.
+
+### Progress: app-42 sliders
+- The 0 to 10 ratings on DEAR MAN, GROW and FAST are small sliders (start unset, value shown, Clear). Saved in a hidden field so saving, restore, text export and therapist sharing are unchanged. Test t65.

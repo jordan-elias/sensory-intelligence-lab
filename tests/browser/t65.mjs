@@ -20,10 +20,17 @@ for (const s of ['goals-values','music-autobiography','session-reflection','lyri
 {
   const {page}=await newPage(await browser.createBrowserContext(),BASE,{db:[],tables:{}});
   await page.goto(`${BASE}/worksheets/grow/`,{waitUntil:'networkidle0'}); await sleep(400);
-  await page.type('[data-field="opt1_name"]','Ask for a trial'); await page.type('[data-field="opt1_fit"]','8');
+  await page.type('[data-field="opt1_name"]','Ask for a trial'); ok(await page.$('input[type=range].ws-slider')!==null&&await page.$('input[type=number][data-field]')===null,'ratings are small sliders, not number boxes');
+  ok(await page.$eval('#sc-opt1-fit-r',r=>r.classList.contains('is-unset'))&&await page.$eval('#sc-opt1-fit',h=>h.value===''),'a slider starts unset, so an untouched rating is not saved as 5');
+  await page.$eval('#sc-opt1-fit-r',r=>{ r.value=8; r.dispatchEvent(new Event('input',{bubbles:true})); });
+  ok(await page.$eval('.ws-slider-val',o=>true)&&await page.$$eval('#sc-opt1-fit-r ~ .ws-slider-val',o=>o[0].textContent)==='8','the chosen number is shown beside the slider');
   const cols=await page.$$eval('.ws-compare--3 .ws-compare__col',c=>c.length);
   ok(cols===3,'GROW compares three options side by side');
   const got=await page.evaluate(async()=>{const m=await import('/assets/js/worksheets/ui.js');return m.collectFields(document.body);});
-  ok(got.opt1_name==='Ask for a trial'&&got.opt1_fit==='8','scale and text fields are collected');
+  ok(got.opt1_name==='Ask for a trial'&&got.opt1_fit==='8'&&got.opt2_fit==='','slider value is collected, untouched ones stay empty');
+  await page.evaluate(async()=>{const m=await import('/assets/js/worksheets/ui.js'); m.restoreFields(document.body,{opt2_fit:'3',opt1_fit:''});});
+  ok(await page.$eval('#sc-opt2-fit-r',r=>r.value==='3'&&!r.classList.contains('is-unset'))&&await page.$eval('#sc-opt1-fit-r',r=>r.classList.contains('is-unset')),'restoring a saved worksheet moves the sliders');
+  await page.evaluate(()=>{ document.querySelector('[data-clear=sc-opt2-fit]').click(); });
+  ok(await page.$eval('#sc-opt2-fit',h=>h.value===''),'Clear unsets a rating');
 }
 await browser.close(); server.close(); process.exit(fail?1:0);

@@ -21,7 +21,14 @@ export function initScales(root, onChange) {
       row.appendChild(b);
     }
   });
+  root.addEventListener('input', e => {
+    const r = e.target.closest?.('.ws-slider'); if (!r) return;
+    root.querySelector('#' + r.dataset.for).value = r.value;
+    syncScales(root); onChange && onChange(r);
+  });
   root.addEventListener('click', e => {
+    const clr = e.target.closest?.('.ws-slider-clear');
+    if (clr) { root.querySelector('#' + clr.dataset.clear).value = ''; syncScales(root); onChange && onChange(clr); return; }
     const btn = e.target.closest('.scale-btn');
     if (!btn) return;
     const row = btn.closest('.scale-row');
@@ -34,6 +41,13 @@ export function initScales(root, onChange) {
 }
 
 export function syncScales(root) {
+  root.querySelectorAll('.ws-slider[data-for]').forEach(r => {
+    const v = root.querySelector('#' + r.dataset.for)?.value || '', row = r.closest('.ws-slider-row');
+    r.classList.toggle('is-unset', v === ''); if (v !== '') r.value = v;
+    r.setAttribute('aria-valuetext', v === '' ? 'not set' : v + ' out of 10');
+    row.querySelector('.ws-slider-val').textContent = v === '' ? '–' : v;
+    row.querySelector('.ws-slider-clear').hidden = v === '';
+  });
   root.querySelectorAll('.scale-row[data-for]').forEach(row => {
     const val = root.querySelector('#' + row.dataset.for)?.value || '';
     row.querySelectorAll('.scale-btn').forEach(b => {
@@ -107,7 +121,7 @@ export function exportTextFromDom(root, title) {
       lines.push('', el.textContent.trim().toUpperCase(), '');
     } else if (el.matches('.lyric-block-num, .dyn-section-num')) {
       lines.push('', el.textContent.trim().replace(/^[▾▸]\s*/, ''), '');
-    } else if (el.type !== 'hidden' && el.value && el.value.trim()) {
+    } else if ((el.type !== 'hidden' || el.closest('.ws-scale')) && el.value && el.value.trim()) {
       const label = el.closest('.ws-field')?.querySelector('.ws-label')?.textContent.replace(/\s+/g, ' ').trim()
         || el.getAttribute('placeholder') || '';
       lines.push(label, el.value.trim(), '');

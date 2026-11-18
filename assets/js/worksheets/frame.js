@@ -19,10 +19,16 @@ export function field(key, label, { size = 'sm', ph = '' } = {}) {
     <textarea class="ws-input ${size}" data-field="${esc(key)}" placeholder="${esc(ph)}"></textarea></div>`;
 }
 
-/** A 0 to 10 number box. */
+/** A small 0 to 10 slider. It starts unset (shows a dash); the value is kept in a hidden [data-field] so saving and sharing work as for every other field. */
 export function scale(key, label) {
-  return `<div class="ws-field ws-scale"><label class="ws-label">${label}</label>
-    <input type="number" class="ws-input" data-field="${esc(key)}" min="0" max="10" step="1" inputmode="numeric" placeholder="0–10"></div>`;
+  const id = 'sc-' + String(key).replace(/[^a-z0-9]+/gi, '-');
+  return `<div class="ws-field ws-scale"><label class="ws-label" for="${id}-r">${label}</label>
+    <div class="ws-slider-row">
+      <input type="range" class="ws-slider is-unset" id="${id}-r" data-for="${id}" min="0" max="10" step="1" value="5" aria-valuetext="not set">
+      <output class="ws-slider-val" for="${id}-r" aria-hidden="true">–</output>
+      <button type="button" class="ws-slider-clear" data-clear="${id}" aria-label="Clear this rating" hidden>Clear</button>
+    </div>
+    <input type="hidden" data-field="${esc(key)}" id="${id}" value=""></div>`;
 }
 
 /** Two or three columns that sit side by side on wide screens and stack on narrow ones. */
