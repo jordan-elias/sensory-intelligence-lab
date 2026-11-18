@@ -174,3 +174,6 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 
 ### Progress: app-42 sliders
 - The 0 to 10 ratings on DEAR MAN, GROW and FAST are small sliders (start unset, value shown, Clear). Saved in a hidden field so saving, restore, text export and therapist sharing are unchanged. Test t65.
+
+### Progress: app-43 plucked strings
+- New `strings` tool (Wrong-tuning chords): six plucked strings made in the page (Karplus-Strong), retune each string by up to an octave, three chord shapes by fret, strum, "standard then retuned" comparison, play shapes 1-2-3 at the experiment's tempo, standard-tuning reset. The roll stays the user's own. Kept as text. Tests: unit `strings-core.test.mjs`, browser t68. (t54 flakes occasionally; passes on rerun.)

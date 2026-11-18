@@ -71,7 +71,7 @@ export const EXPERIMENTS = [
     ],
     stop: 'After the fourth time through the progression, or 25 minutes.',
     reflect: 'Which shape changed the most? Was it the one you least expected?',
-    tools: [{ type: 'gen', kind: 'tuning', label: 'Roll the retuning' }, { type: 'groove', steps: 4, hits: 4, bpm: 70 }, { type: 'timer', minutes: 25 }],
+    tools: [{ type: 'gen', kind: 'tuning', label: 'Roll the retuning' }, { type: 'strings', bpm: 70 }, { type: 'timer', minutes: 25 }],
     solo: DICE + 'Number your strings (or groups of keys) on slips and draw one. Roll a die twice for the shift: the first roll for direction (even is down, odd is up), the second for the number of semitones.',
   },
   {
