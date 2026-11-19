@@ -52,6 +52,7 @@ export async function mountClientPage(root) {
   const nCheckins = copies.filter(c => c.category === 'checkins').length;
   const nDocs = copies.filter(c => c.category === 'worksheets').length;
   const nForms = copies.filter(c => c.category === 'intake' || c.category === 'family').length;
+  const nJournal = copies.filter(c => c.category === 'journal').length;
   const sessions = splitSessions(sessQ.data || []);
   let unread = unreadQ.count || 0;
 
@@ -67,7 +68,7 @@ export async function mountClientPage(root) {
     <div class="th-tabs" role="tablist" aria-label="Client sections">
       <button role="tab" id="tab-overview" aria-controls="panel-overview" data-tab="overview">Overview</button>
       <button role="tab" id="tab-messages" aria-controls="panel-messages" data-tab="messages">Messages<span class="th-count" id="cntMessages"></span></button>
-      <button role="tab" id="tab-folder" aria-controls="panel-folder" data-tab="folder">Folder<span class="th-count">${nCheckins + nDocs + nForms || ''}</span></button>
+      <button role="tab" id="tab-folder" aria-controls="panel-folder" data-tab="folder">Folder<span class="th-count">${nCheckins + nDocs + nForms + nJournal || ''}</span></button>
       <button role="tab" id="tab-notes" aria-controls="panel-notes" data-tab="notes">Record</button>
       <button role="tab" id="tab-sessions" aria-controls="panel-sessions" data-tab="sessions">Sessions<span class="th-count">${sessions.upcoming.length || ''}</span></button>
     </div>
@@ -78,6 +79,7 @@ export async function mountClientPage(root) {
       <h2 class="th-h2">Intake and family history</h2>
       <section id="folder-intake" aria-label="Intake form and family history"></section>
       <section id="folder-docs" aria-label="Worksheets"></section>
+      <section id="folder-journal" aria-label="Journal entries"></section>
       <section id="folder-checkins" aria-label="Check-ins"></section>
     </section>
     <section role="tabpanel" id="panel-sessions" aria-labelledby="tab-sessions" hidden></section>
@@ -135,6 +137,7 @@ export async function mountClientPage(root) {
       ['Intake form', client.intake_received ? 'Received' : client.intake_requested_at ? `Asked ${day(client.intake_requested_at)}, not sent yet` : 'Not requested'],
       ['Family history', copies.some(c => c.category === 'family') ? 'Received' : client.family_requested_at ? `Asked ${day(client.family_requested_at)}, not sent yet` : 'Not requested'],
       ['Worksheets', nDocs ? plural(nDocs, 'document') + ' shared' : 'None shared'],
+      ['Journal entries', nJournal ? `${nJournal} entr${nJournal === 1 ? 'y' : 'ies'} shared` : 'None shared'],
       ['Check-ins', nCheckins ? plural(nCheckins, 'check-in') + ' shared' : 'None shared'],
     ];
     $('folderIndex').innerHTML = forms.map(([k, v]) => `<li><strong>${esc(k)}</strong> <span class="th-muted">${esc(v)}</span></li>`).join('');
@@ -149,13 +152,28 @@ export async function mountClientPage(root) {
   async function showShared() {
     const docsBox = $('folder-docs'), checkBox = $('folder-checkins');
     const none = (box, what) => { box.innerHTML = `<h2 class="th-h2">${what === 'docs' ? 'Worksheets' : 'Check-ins'}</h2><p class="th-muted">${what === 'docs' ? 'No worksheets shared.' : 'No check-ins shared.'}${copies.length ? '' : ` ${esc(name)} chooses what to share. Everything else stays private.`}</p>`; };
-    if (!copies.some(c => c.category === 'worksheets' || c.category === 'checkins')) { none(docsBox, 'docs'); none(checkBox, 'check'); return; }
+    const jBox = $('folder-journal');
+    if (!copies.some(c => c.category === 'worksheets' || c.category === 'checkins' || c.category === 'journal')) { none(docsBox, 'docs'); none(checkBox, 'check'); jBox.innerHTML = '<h2 class="th-h2">Journal entries</h2><p class="th-muted">No journal entries shared. A client shares them one at a time.</p>'; return; }
     docsBox.innerHTML = '<p class="th-muted">Opening shared items…</p>';
     try {
       const session = await ensureVaultReady();
       const { items, unreadable } = await openCopies(session, copies);
       const checkins = items.filter(i => i.category === 'checkins');
       const docs = items.filter(i => i.category === 'worksheets');
+      const journal = items.filter(i => i.category === 'journal');
+      jBox.innerHTML = '<h2 class="th-h2">Journal entries</h2>' + (journal.length ? '<div id="journalList"></div>' : '<p class="th-muted">No journal entries shared. A client shares them one at a time.</p>');
+      const jl = jBox.querySelector('#journalList');
+      journal.forEach(j => {
+        const wrap = document.createElement('div'); wrap.className = 'th-docitem';
+        const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'th-docbtn'; btn.setAttribute('aria-expanded', 'false');
+        const t = document.createElement('strong'); t.textContent = j.title || 'Untitled entry';
+        const m = document.createElement('span'); m.className = 'th-muted'; m.textContent = `Written ${day(j.created_at)} · shared ${day(j.shared_at || j.created_at)}`;
+        btn.append(t, m);
+        const body = document.createElement('div'); body.hidden = true; body.className = 'th-docbody th-journalbody';
+        body.style.whiteSpace = 'pre-wrap'; body.textContent = j.text || '';
+        btn.onclick = () => { body.hidden = !body.hidden; btn.setAttribute('aria-expanded', String(!body.hidden)); };
+        wrap.append(btn, body); jl.appendChild(wrap);
+      });
       const sum = summarize(checkins);
       checkBox.innerHTML = `
         <h2 class="th-h2">Check-ins</h2>

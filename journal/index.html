@@ -531,7 +531,7 @@
     <p class="section-label">Saved entries</p>
     <div class="privacy-notice">
       <span class="privacy-notice__icon">⚷</span>
-      <span>Your entries are encrypted before saving. Only you can read them — they cannot be accessed by anyone else, including the platform.</span>
+      <span>Your entries are encrypted before saving. Only you can read them — they cannot be accessed by anyone else, including the platform. If you are connected to a therapist you can share one entry at a time, and only by choice.</span>
     </div>
     <div class="entries-list" id="entriesList">
       <div class="entries-empty">No saved entries yet.</div>
@@ -561,7 +561,9 @@
     <div class="viewer-footer">
       <button class="action-btn outline" onclick="closeModal('viewerModal')">Close</button>
       <button class="action-btn outline" onclick="downloadViewing()">Download .txt</button>
+      <button class="action-btn outline" id="shareEntryBtn" onclick="toggleShareEntry()" hidden>Share with my therapist</button>
     </div>
+    <p class="viewer-meta" id="shareEntryMsg" role="status" aria-live="polite"></p>
   </div>
 </div>
 
@@ -574,6 +576,8 @@
 <script type="module">
 'use strict';
 
+import { therapistTarget } from '/assets/js/sharing/store.js';
+import { shareJournalEntry, unshareJournalEntry, sharedJournalIds, afterJournalDelete } from '/assets/js/sharing/journal.js';
 import {
   ensureVaultReady,
   encrypt,
@@ -1156,6 +1160,7 @@ async function viewEntry(id) {
   // Show modal immediately with a decrypting state
   const textEl = document.getElementById('viewerText');
   textEl.innerHTML = '<span class="decrypting">Decrypting…</span>';
+  document.getElementById('shareEntryBtn').hidden = true;
   document.getElementById('viewerModal').classList.add('open');
 
   // Ensure vault is ready then decrypt
@@ -1172,10 +1177,55 @@ async function viewEntry(id) {
 
     S.viewingPlaintext = plaintext;
     textEl.textContent = plaintext;
+    document.getElementById('shareEntryMsg').textContent = '';
+    await loadShareState(); renderShareBtn();
   } catch (err) {
     textEl.innerHTML = `<span class="decrypting">Could not decrypt this entry. (${escHtml(err.message)})</span>`;
   }
 }
+
+// ── Share ONE entry with a connected therapist (only when this button is pressed) ──
+const SH = { target: null, ids: new Set(), loaded: false, name: 'my therapist' };
+async function loadShareState() {
+  if (SH.loaded) return; SH.loaded = true;
+  try {
+    const sb = window._supabase;
+    SH.target = await therapistTarget(sb);
+    if (SH.target) {
+      SH.ids = await sharedJournalIds(sb);
+      const { data } = await sb.from('my_therapists').select('display_name').eq('link_id', SH.target.link_id).limit(1);
+      if (data && data[0]?.display_name) SH.name = data[0].display_name;
+    }
+  } catch { SH.target = null; }
+}
+function renderShareBtn() {
+  const b = document.getElementById('shareEntryBtn'), e = S.viewingEntry;
+  if (!SH.target || !e || !S.viewingPlaintext) { b.hidden = true; return; }
+  const on = SH.ids.has(e.id);
+  b.hidden = false;
+  b.textContent = on ? `Shared with ${SH.name} · Take back` : `Share with ${SH.name}`;
+  document.getElementById('shareEntryMsg').textContent = on ? 'Only this entry is shared. Your other entries stay private.' : '';
+}
+async function toggleShareEntry() {
+  const e = S.viewingEntry, b = document.getElementById('shareEntryBtn'), msg = document.getElementById('shareEntryMsg');
+  if (!e || !SH.target) return;
+  b.disabled = true; msg.textContent = '';
+  try {
+    const sb = window._supabase;
+    if (SH.ids.has(e.id)) {
+      await unshareJournalEntry(sb, e.id); SH.ids.delete(e.id);
+      msg.textContent = 'Taken back. It is no longer available to them on the platform. They keep anything they had already read.';
+    } else {
+      if (!confirm(`Share this one entry with ${SH.name}? They get a copy of its title, date and text, and keep it in your client file. Nothing else is shared, and nothing about your other entries.`)) { b.disabled = false; return; }
+      const session = await ensureVaultReady();
+      await shareJournalEntry({ sb, session, target: SH.target, entry: { id: e.id, title: e.title, text: S.viewingPlaintext, created_at: e.created_at } });
+      SH.ids.add(e.id);
+      msg.textContent = `Shared with ${SH.name}. This is the only entry they can see.`;
+    }
+  } catch (err) { msg.textContent = 'Sharing failed: ' + err.message; }
+  b.disabled = false; const t = msg.textContent; renderShareBtn(); if (t) msg.textContent = t;
+}
+window.toggleShareEntry = toggleShareEntry;
 
 async function downloadViewing() {
   if (!S.viewingEntry) return;
@@ -1197,6 +1247,7 @@ async function deleteEntry(ev, id) {
     .from('journal_entries').delete().eq('id', id);
 
   if (error) { alert('Delete failed: ' + error.message); return; }
+  if (SH.ids.has(id)) { await afterJournalDelete(window._supabase, id); SH.ids.delete(id); }
   await loadEntries();
 }
 

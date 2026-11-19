@@ -190,3 +190,6 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 ### Progress: app-48 privacy policy 2.1 (19 Nov 2026)
 - Added: an Email section and a Resend row (confirmation, post-session, subscription, optional check-in reminder; never content), the Lab member rate on Cal.com bookings, the on-device Today path and settings, and wording that matches "Take it with you" (ticked items are kept, downloads stay on the device). Version 2.1.
 - Not yet reflected, pending the owner's answers: how session payment works on Cal.com, and any journal-sharing decision.
+
+### Progress: app-49 share one journal entry
+- A saved journal entry can be shared with a connected therapist, one at a time, with a confirmation that says so. The therapist gets a copy of title, date and text only (not soundscape, prompt, timer or counts), listed under "Journal entries" in the client Folder and kept in their client file. The client can take the copy back from the platform; deleting the entry withdraws it. There is no "share all" switch. New SQL: `docs/sql/phase15_001_share_journal.sql` (widens the allowed `shared_copies.category` values; run once). Privacy policy 2.2 and the journal page text updated. Tests t70, t66, unit.

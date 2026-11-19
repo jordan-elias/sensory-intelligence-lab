@@ -11,6 +11,7 @@ Tick these off in roughly this order. I cannot reach your Supabase, Netlify, Res
 - [ ] **Supabase Auth emails:** Supabase, Authentication, Emails (SMTP). Check that custom SMTP uses Resend, so password reset, magic link and "change email" go through Resend too, not only the signup confirmation. Check the template wording for each.
 
 ## 2. Supabase
+- [ ] **Run `docs/sql/phase15_001_share_journal.sql`** (new, needed for journal sharing; safe to run twice).
 - [ ] **SQL to run, in the SQL editor:** `phase14_001_course_progress.sql` (in `docs/sql/`, new course sync table). Also `phase11_001_family_history.sql` (if not yet) and `phase12_001_keep_therapist_records.sql`. **I could not find those two files in this repository**; they were run or written earlier, so check they exist and ran. If they are missing, tell me and I will recreate them from the code.
 - [ ] **Auth URL settings:** Site URL and Redirect URLs include `https://lab.jordanelias.de` (and later the app deep link).
 - [ ] **Row Level Security** is on for every table (Table Editor shows a shield). Worth one look after the SQL runs.

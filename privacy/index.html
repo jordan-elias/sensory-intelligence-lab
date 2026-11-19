@@ -243,7 +243,7 @@
       <a href="#faq">FAQ</a>
       <a href="#contact">Contact</a>
     </nav>
-    <p class="sidebar__updated">Last updated<br>19 November 2026<br>Version 2.1</p>
+    <p class="sidebar__updated">Last updated<br>19 November 2026<br>Version 2.2</p>
   </aside>
 
   <main>
@@ -337,7 +337,8 @@ you have a Lab plan, your intake status, and the times of the sessions you book 
 <li><strong>Check-ins</strong> are shared only if you switch sharing on for that therapist, and you choose whether notes are included.</li>
 <li><strong>Worksheets</strong> are shared one document at a time. There is no switch that shares them all.</li>
 <li><strong>Messages</strong> between you and your therapist can be read only by the two of you.</li>
-<li>Journal entries, recordings and saved places are not shareable through the platform.</li>
+<li>A journal entry is shared one at a time, only when you press Share on that entry. There is no switch that shares your journal. Your therapist receives a copy of that entry's title, date and text, and keeps it in their client file. The soundscape, prompt, timer and word counts are not sent. You can take the copy back from the platform; what they had already read stays with them.</li>
+<li>Recordings and saved places are not shareable through the platform.</li>
 </ul>
 <p class="prose">
 Shared items are re-encrypted so that only you and that therapist can open them. You can stop sharing, and either of
@@ -400,7 +401,7 @@ The table covers every category of data the platform stores. Anything you downlo
 <tbody>
 <tr><td>Email address</td><td class="td-mono">Login records</td><td><span class="badge badge--plain">Plaintext</span></td><td>You. Platform operator. Supabase.</td></tr>
 <tr><td>Display name, subscription tier and status, intake status</td><td class="td-mono">Profile</td><td><span class="badge badge--plain">Plaintext</span></td><td>You. Platform operator. Your therapist, if you connect to one (see above).</td></tr>
-<tr><td>Journal entries (text and title)</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You only. Journal entries cannot be shared through the platform.</td></tr>
+<tr><td>Journal entries (text and title)</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You. Your therapist, only for an individual entry you press Share on. There is no way to share more than one entry at once.</td></tr>
 <tr><td>Journal details: date, length, duration, soundscape, prompt</td><td class="td-mono">Database</td><td><span class="badge badge--plain">Plaintext</span></td><td>You. Platform operator.</td></tr>
 <tr><td>Offline copy of the tool pages you have opened</td><td class="td-mono">This device</td><td><span class="badge badge--enc">No personal content</span></td><td>You. It holds only the site's own pages, scripts and images, never your journal, check-ins, messages or account.</td></tr>
 <tr><td>Intake form: name, pronouns, date of birth, contact, emergency contact, reason for therapy, medications, health, history, sound</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You. Your therapist, only after they ask for it and you choose to send it. We store only that it exists.</td></tr>
@@ -708,7 +709,7 @@ Can Jordan read my journal entries or worksheets?
 <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
 </button>
 <div class="faq-a">
-<p>No. Saved content is encrypted in your browser with a key protected by your passphrase, and the server never has it. A therapist can see a check-in or worksheet only if you choose to share it, and then only that item, sealed to you and them.</p>
+<p>No. Saved content is encrypted in your browser with a key protected by your passphrase, and the server never has it. A therapist can see a check-in, a worksheet or a single journal entry only if you choose to share it, and then only that item, sealed to you and them.</p>
 </div>
 </div>
 <div class="faq-item">

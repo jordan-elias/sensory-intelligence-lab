@@ -178,3 +178,11 @@ test('MIDI uses the note lengths', () => {
   const single = Array.from(encodeMidi({ melody: [60, null, null, null, 62], bpm: 120 }));
   assert.notDeepEqual(b, single, 'a four-step note is written differently from a one-step note');
 });
+
+import { journalPayload, JOURNAL_CATEGORY } from '../../assets/js/sharing/journal.js';
+test('a shared journal entry carries the title, date and text only', () => {
+  const p = JSON.parse(journalPayload({ id: 'j1', title: 'T', text: 'words', created_at: '2026-11-01T00:00:00Z', music: 'amber', prompt: 'x', word_count: 9 }));
+  assert.equal(JOURNAL_CATEGORY, 'journal');
+  assert.deepEqual(Object.keys(p).sort(), ['created_at', 'id', 'kind', 'shared_at', 'text', 'title', 'v']);
+  assert.equal(p.text, 'words');
+});
