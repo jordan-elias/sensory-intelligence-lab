@@ -137,7 +137,7 @@ Feedback: the course asks for too much, repeats itself, and looks unlike the res
   - **Workbench** (`bench.js`, `bench-core.js`, `seq/voices.js`): replaces "Play it" and the loops tool. A step sequencer in the Sequencer's style: kick, snare, hi-hat, bass and lead tracks using the Sequencer's own sounds and rules (`seq/groove.js`: swing, chance, velocity, per-track length, mute/solo, Euclidean spread); scale-locked note picker for bass and lead; Loudness and Chance modes; per-track cycle length with "lines up again every N steps"; tempo, key and scale; bring in the notes you drew (in order, backwards, random, first) and the rhythm you rolled; Download MIDI (type 1, drums on channel 10); offered for saving as "My loop". Used in every experiment that draws notes, and in Loop mismatch (cycles 3, 4, 5, locked) and Odd meter (every track takes the rolled number).
   - **Stopwatch with marks**: Borrowed form (time the sections, edit times and names, see the timeline, play it through with a chime at each boundary) and One knob (mark sweet spots).
   - **Take it apart**: Subtract (list the parts, remove half each round, rate clarity per round).
-- Still to do for in-app coverage: a plucked-string instrument for Wrong tuning; a 4-bar (64-step) loop view for One knob and DAW-unit experiments; Random pitch, fixed rhythm on the workbench with a "next version" and ranking list; share the Sequencer's voices with the Sequencer page itself (today the sound code is copied, not shared); WAV render of the workbench; a larger piano roll for Melody over chords with note lengths; the Sequencer's saved patterns shared with the course; capstone choices.
+- In-app coverage: plucked strings (app-43), 64-step loops (app-40), versions and ranking (app-45), WAV render (app-38), note lengths (app-44) and the take-it-with-you downloads (app-39) are DONE. Still open: share the Sequencer's voices and saved patterns with the course (the sound code is copied, not shared); capstone choices; merge trivial steps (needs a wording pass); seed combining and a daily seed. See `docs/status-2026-11-19.md`.
 
 **Suggested order**
 1. C (styling, small and visible) and F (account link, worksheets).
@@ -154,7 +154,7 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 - Journal sharing with a therapist (needs go-ahead and a privacy policy change).
 - Regulation "worlds of sound"; Tone.js, Pure Data and SuperCollider spikes.
 - Sequencer: done (branch app-19): swing, mute/solo per track, Euclidean fill, WAV export matches. Soundscape Machine reviewed, already deep; waiting for the user to say what is missing.
-- Photo-words experiment: automatic OCR (currently typed by hand).
+- Photo-words experiment: automatic OCR was built in app-23. Check it after the first deploy (Netlify serving the `.gz` OCR data).
 - Listening test of the piano roll and sampler by ear.
 
 ### Progress: app-38 worksheets and therapist folder
