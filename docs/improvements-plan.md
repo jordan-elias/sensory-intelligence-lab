@@ -186,3 +186,7 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 
 ### Progress: app-46 course layout
 - Next now sits below the tool (sticky bar on phones). "From earlier" is one line. Roll clutter (seed, "the seed makes a roll repeatable", earlier rolls) is folded into one "Details". Scale-degree chips show the plain note ("E"), with the degree as a tooltip. List page: first-time visitors see one "Start here" card and one Continue button; paper, notebook and Keep shelf are small links; "Which one for me?" is collapsed. Tests t54 (also made less flaky), t37, t58.
+
+### Progress: app-48 privacy policy 2.1 (19 Nov 2026)
+- Added: an Email section and a Resend row (confirmation, post-session, subscription, optional check-in reminder; never content), the Lab member rate on Cal.com bookings, the on-device Today path and settings, and wording that matches "Take it with you" (ticked items are kept, downloads stay on the device). Version 2.1.
+- Not yet reflected, pending the owner's answers: how session payment works on Cal.com, and any journal-sharing decision.
