@@ -4,6 +4,7 @@
  * Audio you load or record here is held in memory only: it is not uploaded, and it is gone
  * when you leave the page unless you download it yourself.
  */
+import { dailySeed, localDate } from './seeds-core.js';
 import { mulberry32, newSeed, generate, SCALES, NOTE_NAMES, rotateAssign, euclid, int } from './rng.js';
 import { wordPoemTool, burnTool, cardsTool, blackoutTool, padTool } from './tools-writing.js';
 import { rollTool, samplerTool, treatTool } from './tools-music.js';
@@ -74,8 +75,7 @@ function genTool(cfg) {
     bar.append(el('label', {}, 'Key ', key), el('label', {}, 'Scale ', sc));
   }
   let last = null;
-  rollBtn.onclick = () => {
-    const seed = newSeed();
+  const rollWith = seed => {
     last = generate({ ...cfg, root: state.root, scale: state.scale }, mulberry32(seed));
     out.replaceChildren(el('ul', { class: 'xp-chips' }, last.items.map(i => el('li', i.title ? { title: i.title } : {}, i.label ? el('span', { class: 'xp-chip-k' }, i.label) : null, ' ', i.text))));
     seedEl.textContent = `Seed ${seed}`;
@@ -83,10 +83,12 @@ function genTool(cfg) {
     hear.hidden = !(last.pitchClasses || last.chords);
     rollBtn.textContent = 'Roll again';
   };
+  rollBtn.onclick = () => rollWith(newSeed());
+  const today = el('button', { type: 'button', class: 'xp-btn xp-btn--alt', onclick: () => rollWith(dailySeed(localDate(), cfg.label || cfg.kind)) }, "Today's roll");
   root.number = () => (last && last.kind === 'range' && last.values.length ? last.values[0] : null);
   root.pitches = () => (last?.pitchClasses ? [...last.pitchClasses] : null);
   hear.onclick = () => { stop(); if (last?.chords) stop = playChords(last.chords); else if (last?.pitchClasses) stop = playTones(last.pitchClasses, { step: cfg.kind === 'notes' ? 0.6 : 0.4 }); };
-  root.append(el('div', { class: 'xp-row' }, rollBtn, hear), bar, out, el('details', { class: 'xp-details xp-rolldetails' }, el('summary', {}, 'Details'),
+  root.append(el('div', { class: 'xp-row' }, rollBtn, today, hear), bar, out, el('details', { class: 'xp-details xp-rolldetails' }, el('summary', {}, 'Details'),
       el('div', { class: 'xp-meta' }, seedEl, el('p', { class: 'xp-hint' }, 'The seed makes a roll repeatable.')),
       cfg.noHistory ? null : el('p', { class: 'xp-k' }, 'Earlier rolls'), cfg.noHistory ? null : hist));
   return root;

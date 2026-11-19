@@ -201,3 +201,5 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 - Removed `create-single-session-checkout` and the call1/call2 plans and their monthly allowance and carry-over logic (`booking/entitlement-logic.js` is now small). The one plan is Lab; sessions are booked and paid on Cal.com. Privacy policy 2.3: session payment is entered with Cal.com, we keep only that a session was booked; therapist retention reminder after ten years, nothing deleted automatically.
 
 - app-52: the Sequencer holds the screen awake while it plays (same helper as guided sessions), released on stop. Test t72.
+
+- app-53: Keep shelf renamed "My seeds"; "Today's roll" on roll tools (same seed all day, from the local date); pick two text rolls and combine them (taking turns). seeds-core.js, t73.
