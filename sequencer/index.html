@@ -745,6 +745,7 @@
      SEQUENCER ENGINE
 ═══════════════════════════════════════════════════════ -->
 <script type="module">import * as G from '/assets/js/seq/groove.js'; import * as P from '/assets/js/seq/patterns.js'; window.SEQGROOVE = G; window.SEQPAT = P;</script>
+<script type="module">import { createAwake } from '/assets/js/app/awake.js'; window.SEQAWAKE = createAwake();</script>
 <script>
 (function () {
 'use strict';
@@ -1600,8 +1601,10 @@ const SEQ = window.SEQ = {
       btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg> stop';
       btn.classList.add('playing');
       scheduler();
+      window.SEQAWAKE?.hold();
     } else {
       clearTimeout(scheduleTimer);
+      window.SEQAWAKE?.release();
       btn.innerHTML = '<svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> play';
       btn.classList.remove('playing');
       // Clear playhead
