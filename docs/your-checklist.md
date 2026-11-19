@@ -34,7 +34,7 @@ Set (names as the code reads them): `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
 - [ ] Listen once to: breathing sounds, workbench, strings, versions loops, regulation voice, piano roll. Tell me what to change.
 
 ## 6. Legal and privacy (not legal advice; check with a professional)
-- [ ] **Impressum** (provider identification). I found none in the site files. A German-hosted commercial site normally needs one. Check.
+- [ ] **Impressum:** the page is built (`/impressum/`, linked from the footers, in robots and the sitemap) but the blanks marked in yellow need your details: street, postcode, phone (optional), VAT ID or the small-business sentence, and the dispute-resolution sentence. Run `npm run check:launch` to list what is still blank. Have it checked, since the exact wording depends on your status.
 - [ ] **Privacy policy** must match what the app now does: encrypted course sync, worksheets you can share with a therapist, the therapist Folder, family history, Stripe, Resend, Supabase, Netlify. Journal sharing is not built, so it stays out until you say go.
 - [ ] **Data-processing agreements** with Supabase, Netlify, Resend and Stripe (most offer them in their dashboards).
 - [ ] **Therapist record retention:** decide the default and get a legal opinion for the countries you serve.

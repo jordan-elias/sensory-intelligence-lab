@@ -193,3 +193,6 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 
 ### Progress: app-49 share one journal entry
 - A saved journal entry can be shared with a connected therapist, one at a time, with a confirmation that says so. The therapist gets a copy of title, date and text only (not soundscape, prompt, timer or counts), listed under "Journal entries" in the client Folder and kept in their client file. The client can take the copy back from the platform; deleting the entry withdraws it. There is no "share all" switch. New SQL: `docs/sql/phase15_001_share_journal.sql` (widens the allowed `shared_copies.category` values; run once). Privacy policy 2.2 and the journal page text updated. Tests t70, t66, unit.
+
+### Progress: app-50 Impressum
+- `/impressum/` (provider, contact, tax, content responsibility, dispute resolution, links, privacy), linked from the landing page, dashboard, subscribe, privacy and Neural Synthesis footers; in robots.txt, the sitemap and the Netlify redirects. Blanks the owner must fill in are marked `[[LIKE THIS]]`; `npm run check:launch` lists them. Test t71.
