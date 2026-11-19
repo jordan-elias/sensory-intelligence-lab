@@ -52,7 +52,7 @@ export function generate(spec, rng) {
       const scale = SCALES[spec.scale] || SCALES.major, root = spec.root ?? 0, n = spec.count ?? 7;
       const degs = Array.from({ length: n }, () => int(rng, 1, scale.length));
       const names = degreeNotes(root, spec.scale || 'major', degs);
-      return { kind: 'degrees', items: degs.map((d, i) => ({ label: `${i + 1}`, text: `${names[i]} (degree ${d})` })),
+      return { kind: 'degrees', items: degs.map((d, i) => ({ label: `${i + 1}`, text: names[i], title: `scale degree ${d}` })),
         pitchClasses: degs.map(d => (root + scale[d - 1]) % 12), summary: names.join(' – ') };
     }
     case 'notes': {

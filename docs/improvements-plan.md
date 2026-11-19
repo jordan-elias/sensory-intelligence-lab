@@ -183,3 +183,6 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 
 ### Progress: app-45 versions
 - New `versions` tool (Random pitch, fixed rhythm): save each roll as a version (up to five), loop it, give it one word, put the versions in order with arrows, then put them in order again after listening and see which moved ("Version 5 moved from 5th to 3rd."). The roll stays the user's own. Kept as text. Tests: unit `versions-core.test.mjs`, browser t69.
+
+### Progress: app-46 course layout
+- Next now sits below the tool (sticky bar on phones). "From earlier" is one line. Roll clutter (seed, "the seed makes a roll repeatable", earlier rolls) is folded into one "Details". Scale-degree chips show the plain note ("E"), with the degree as a tooltip. List page: first-time visitors see one "Start here" card and one Continue button; paper, notebook and Keep shelf are small links; "Which one for me?" is collapsed. Tests t54 (also made less flaky), t37, t58.
