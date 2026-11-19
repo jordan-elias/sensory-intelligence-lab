@@ -8,7 +8,7 @@ async function run(keys){
   await P.page.goto(`${BASE}/vault/`,{waitUntil:'domcontentloaded'}); await sleep(800);
   const r=await P.page.evaluate(async()=>{ const d=document.createElement('div'); document.body.append(d);
     const m=await import('/assets/js/therapist/my-therapist.js');
-    await m.mountMyTherapist(d,{supabase:window._supabase,profile:{subscription_tier:'call1',subscription_status:'active'}});
+    await m.mountMyTherapist(d,{supabase:window._supabase,profile:{subscription_tier:'lab',subscription_status:'active'}});
     await new Promise(r=>setTimeout(r,800));
     const en=d.querySelector('#shEnable'); return {text:d.innerText, exists:!!en, checked:en?.checked, disabled:en?.disabled, notesDisabled:d.querySelector('#shNotes')?.disabled, copies:window.__tbl.shared_copies.length, prefs:window.__tbl.sharing_preferences.length}; });
   return {r,errors:P.errors};

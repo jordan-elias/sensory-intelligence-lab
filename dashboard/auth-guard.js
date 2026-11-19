@@ -72,29 +72,29 @@ async function checkAuth() {
 
   // Canonical access tier:
   // - Beta users get full lab access regardless of subscription_tier
-  // - Paid users (lab / call1 / call2) get full access when active
+  // - Paid users (lab) get full access when active
   // - Everyone else is treated as free
   const isActiveSubscription = status === "active" || status === "trialing";
-  const hasPaidTier = tier === "lab" || tier === "call1" || tier === "call2";
+  const hasPaidTier = tier === "lab";
 
   let accessTier;
   if (isBeta) {
     accessTier = "beta";
   } else if (hasPaidTier && isActiveSubscription) {
-    accessTier = tier; // 'lab', 'call1', or 'call2'
+    accessTier = tier; // 'lab'
   } else {
     accessTier = "free";
   }
 
   // isPaidUser: true for any user with full lab access
-  // (beta, lab, call1, call2 with active subscription)
+  // (beta, or lab with an active subscription)
   const isPaidUser = accessTier !== "free";
 
   // Expose everything globally for use by page scripts
   window._offline        = offline;
   window._currentUser    = user;
   window._userProfile    = profile;
-  window._accessTier     = accessTier;   // 'free' | 'lab' | 'call1' | 'call2' | 'beta'
+  window._accessTier     = accessTier;   // 'free' | 'lab' | 'beta'
   window._isPaidUser     = isPaidUser;   // boolean — true if full lab access
   window._isBeta         = isBeta;       // boolean
   window._subscriptionStatus = status;  // raw stripe status string

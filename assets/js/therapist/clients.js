@@ -3,7 +3,7 @@
  * What a therapist sees of a client: plain labels, opening the check-ins the client shared,
  * and a short summary. Pure functions plus one loader that takes the vault session.
  */
-export const TIER_LABEL = { lab: 'Lab member', beta: 'Lab member', call1: 'Lab member', call2: 'Lab member', free: 'No Lab plan' };
+export const TIER_LABEL = { lab: 'Lab member', beta: 'Lab member', free: 'No Lab plan' };
 export const INTAKE_LABEL = { not_started: 'Intake not started', in_progress: 'Intake in progress', completed: 'Intake complete', complete: 'Intake complete' };
 
 export const tierLabel = t => TIER_LABEL[t] || 'No Lab plan';

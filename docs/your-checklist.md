@@ -18,7 +18,7 @@ Tick these off in roughly this order. I cannot reach your Supabase, Netlify, Res
 - [ ] **Backups:** check what your plan includes. The client-side vault means a lost recovery key cannot be recovered by us.
 
 ## 3. Netlify (environment variables, Site settings)
-Set (names as the code reads them): `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SITE_URL`, `RESEND_API_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_LAB_MONTHLY_PRICE_ID`, `STRIPE_LAB_YEARLY_PRICE_ID`, `STRIPE_SINGLE_SESSION_PRICE_ID`, `CAL_WEBHOOK_SECRET`, `GENIUS_CLIENT_TOKEN`, `YOUTUBE_API_KEY`. Optional: `RESEND_FROM_ADDRESS`.
+Set (names as the code reads them): `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SITE_URL`, `RESEND_API_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_LAB_MONTHLY_PRICE_ID`, `STRIPE_LAB_YEARLY_PRICE_ID`, `CAL_WEBHOOK_SECRET`, `GENIUS_CLIENT_TOKEN`, `YOUTUBE_API_KEY`. Optional: `RESEND_FROM_ADDRESS`.
 - [ ] Scheduled functions (`send-session-reminders`, hourly; `send-checkin-reminders`, daily 17:00 UTC) show up under Functions after the first deploy.
 - [ ] After the first deploy, check the photo-words OCR works (Netlify serving the `.gz` data files).
 

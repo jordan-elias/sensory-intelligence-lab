@@ -196,3 +196,6 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 
 ### Progress: app-50 Impressum
 - `/impressum/` (provider, contact, tax, content responsibility, dispute resolution, links, privacy), linked from the landing page, dashboard, subscribe, privacy and Neural Synthesis footers; in robots.txt, the sitemap and the Netlify redirects. Blanks the owner must fill in are marked `[[LIKE THIS]]`; `npm run check:launch` lists them. Test t71.
+
+### Progress: app-51 one plan, sessions on Cal.com
+- Removed `create-single-session-checkout` and the call1/call2 plans and their monthly allowance and carry-over logic (`booking/entitlement-logic.js` is now small). The one plan is Lab; sessions are booked and paid on Cal.com. Privacy policy 2.3: session payment is entered with Cal.com, we keep only that a session was booked; therapist retention reminder after ten years, nothing deleted automatically.

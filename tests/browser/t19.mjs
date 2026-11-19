@@ -32,7 +32,7 @@ ok(r.calls.includes('rivera/intro')&&/Your therapist/i.test(r.text)&&/Dr Rivera/
 r=await run([T({booking_link:null})]);
 ok(/not added a booking link/.test(r.text),'no link yet: plain message');
 const DIR=[{user_id:'t1',display_name:'Dr Rivera',bio:'Music therapist, Berlin.',booking_link:'https://cal.com/rivera/monthly',accepting_clients:true,is_default:true},{user_id:'t2',display_name:'Sam Okoye',bio:'Sound and trauma work.',booking_link:'https://calendly.com/sam/x',accepting_clients:true}];
-r=await run([],'call1',DIR);
+r=await run([],'lab',DIR);
 ok(/Choose your therapist/i.test(r.text)&&/Dr Rivera/.test(r.text)&&/Sam Okoye/.test(r.text)&&/Music therapist, Berlin/.test(r.text),'not connected: every available therapist is listed with name and bio');
 ok(/Tomorrow, \d\d:\d\d/.test(r.text)&&/See availability/.test(r.text),'next available time shown, with a prompt when unknown');
 ok(!r.calls.includes('jordan-elias')&&!r.hasCal,'not connected: no shared practice calendar any more');
@@ -40,7 +40,7 @@ await r.page.page.click('[data-choose="t2"]'); await sleep(300);
 ok(/Connect with Sam Okoye/.test(await r.page.page.evaluate(()=>document.getElementById('tpConsent').innerText))&&/name, email, whether you have a Lab plan/i.test(await r.page.page.evaluate(()=>document.getElementById('tpConsent').innerText)),'choosing shows what the therapist will see before connecting');
 await r.page.page.click('#tpAgree'); await sleep(900);
 ok(JSON.parse(await r.page.page.evaluate(()=>sessionStorage.getItem('linked')||'{}')).therapist_id==='t2','agreeing connects with the chosen therapist');
-r=await run([],'call1',[]);
+r=await run([],'lab',[]);
 ok(/No therapist is taking new clients/.test(r.text),'no therapists available: says so');
 r=await run([T({})],'lab');
 ok(!/Monthly session with Dr Rivera/i.test(r.text),'Lab members are not sent to a therapist calendar');

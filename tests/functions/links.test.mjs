@@ -37,7 +37,7 @@ function fakeDb(seed, users) {
 const call = (h, body, token = 't-client', method = 'POST') => h({ httpMethod: method, headers: token ? { authorization: 'Bearer ' + token } : {}, body: JSON.stringify(body) });
 const users = { 't-client': { id: 'c1' }, 't-other': { id: 'c2' }, 't-th': { id: 'th1' }, 't-free': { id: 'c3' }, 't-lab': { id: 'c4' }, 't-lapsed': { id: 'c5' } };
 const seed = () => ({
-  profiles: [{ id: 'c1', subscription_tier: 'call1', subscription_status: 'active' }, { id: 'c2', subscription_tier: 'call2', subscription_status: 'trialing' }, { id: 'c5', subscription_tier: 'call2', subscription_status: 'canceled' }, { id: 'c3', subscription_tier: 'free', subscription_status: 'free' }, { id: 'c4', subscription_tier: 'lab', subscription_status: 'active' }, { id: 'th1', subscription_tier: 'call2', subscription_status: 'active' }],
+  profiles: [{ id: 'c1', subscription_tier: 'lab', subscription_status: 'active' }, { id: 'c2', subscription_tier: 'lab', subscription_status: 'trialing' }, { id: 'c5', subscription_tier: 'lab', subscription_status: 'canceled' }, { id: 'c3', subscription_tier: 'free', subscription_status: 'free' }, { id: 'c4', subscription_tier: 'lab', subscription_status: 'active' }, { id: 'th1', subscription_tier: 'lab', subscription_status: 'active' }],
   therapist_profiles: [{ user_id: 'th1', practice_id: 'p1', accepting_clients: true, is_default: true }],
   client_therapists: [],
 });
