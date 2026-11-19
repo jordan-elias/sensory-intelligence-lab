@@ -177,7 +177,7 @@ function shelf() {
     el('a', { class: 'xp-back', href: '#/' }, '← ' + COURSE.name),
     el('div', { class: 'ph' }, el('h2', {}, 'My seeds'), el('p', {}, 'What you chose to keep from the experiments. Tick "Keep" at the end of an experiment to put something here. Pick two rolls to combine them into a new one. Text and patterns sync if you turn sync on; recordings stay on this device only.')),
     items.filter(i => i.kind === 'text').length >= 2 ? el('div', { class: 'xp-row' }, combineBtn) : null,
-    items.length ? el('div', { class: 'xp-kept-list' }, items.map(card)) : el('p', { class: 'xp-hint', id: 'xpShelfEmpty' }, 'Nothing here yet. Make something in an experiment and leave the tick on at the end.'));
+    items.length ? el('div', { class: 'xp-kept-list' }, items.map(card)) : el('p', { class: 'xp-hint', id: 'xpShelfEmpty' }, 'Nothing here yet. Make something in an experiment and save it here.'));
   window.scrollTo(0, 0);
 }
 

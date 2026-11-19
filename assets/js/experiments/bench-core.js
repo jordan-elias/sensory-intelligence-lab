@@ -122,3 +122,31 @@ export function benchText(b) {
   const lines = b.tracks.filter(t => hits(t)).map(t => `${TRACK_DEFS[t.id].name.padEnd(7)} ${t.on.slice(0, t.len).map((v, i) => (v ? (TRACK_DEFS[t.id].kind === 'melodic' ? names[t.note[i] % 12] : 'x') : '.').padEnd(2)).join('')}`);
   return lines.length ? `${lines.join('\n')}\n${b.bpm} BPM, swing ${Math.round(b.swing * 100)}%, ${names[b.root]} ${b.scale}` : '';
 }
+
+/* ── patterns saved in the Sequencer ── */
+const SEQ_ROOTS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const SEQ_SCALES = { major: 'major', minor: 'natural minor', minor_pentatonic: 'minor pentatonic', major_pentatonic: 'major pentatonic', harmonic_minor: 'natural minor' };
+/** The Sequencer track that feeds each workbench track (it has three leads; the workbench has one). */
+const SEQ_TRACK = { kick: 0, snare: 1, hihat: 2, cymbal: 3, bass: 4, lead: 5 };
+/**
+ * Puts one loop of a saved Sequencer pattern (as patterns.js unpacks it) onto the bench. Changes `b` and returns how many tracks got notes.
+ * Only the first `b.steps` (up to 16) steps come across. Tracks the bench does not have are skipped.
+ */
+export function applyPattern(b, p, loopIdx = 0) {
+  if (!p || !Array.isArray(p.loops) || !p.loops[loopIdx]) return 0;
+  b.bpm = Math.max(50, Math.min(180, Math.round(p.bpm) || b.bpm)); b.swing = Math.max(0, Math.min(1, +p.swing || 0));
+  b.root = Math.max(0, SEQ_ROOTS.indexOf(p.root)); b.scale = SEQ_SCALES[p.scale] || 'major';
+  let n = 0;
+  for (const t of b.tracks) {
+    const si = SEQ_TRACK[t.id]; if (si == null) continue;
+    const cells = p.loops[loopIdx][si] || [], vel = p.vel?.[loopIdx]?.[si] || [], prob = p.prob?.[loopIdx]?.[si] || [], ch = TRACK_DEFS[t.id].kind === 'melodic' ? pitchChoices(b, t.id) : null;
+    t.on.fill(false); t.note.fill(0); t.vel.fill(1); t.prob.fill(1); t.len = clampLen(Math.min(p.len?.[loopIdx]?.[si] || 16, b.steps), b.steps);
+    for (let i = 0; i < Math.min(16, b.steps); i++) {
+      const c = cells[i]; if (c == null) continue;
+      t.on[i] = true; t.vel[i] = vel[i] ?? 1; t.prob[i] = prob[i] ?? 1;
+      if (ch) t.note[i] = ch[Math.min(Number.isInteger(c) ? c : 0, ch.length - 1)];
+    }
+    if (hits(t)) n++;
+  }
+  return n;
+}

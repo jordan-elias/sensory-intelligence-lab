@@ -203,3 +203,5 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 - app-52: the Sequencer holds the screen awake while it plays (same helper as guided sessions), released on stop. Test t72.
 
 - app-53: Keep shelf renamed "My seeds"; "Today's roll" on roll tools (same seed all day, from the local date); pick two text rolls and combine them (taking turns). seeds-core.js, t73.
+
+- app-54: My seeds empty-state wording; the Sequencer now plays through assets/js/seq/voices.js (one set of sounds, shared with the workbench); the workbench can open a loop of a pattern saved in the Sequencer (a copy). t74.

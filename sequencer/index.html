@@ -745,7 +745,7 @@
      SEQUENCER ENGINE
 ═══════════════════════════════════════════════════════ -->
 <script type="module">import * as G from '/assets/js/seq/groove.js'; import * as P from '/assets/js/seq/patterns.js'; window.SEQGROOVE = G; window.SEQPAT = P;</script>
-<script type="module">import { createAwake } from '/assets/js/app/awake.js'; window.SEQAWAKE = createAwake();</script>
+<script type="module">import { createAwake } from '/assets/js/app/awake.js'; import { makeVoices } from '/assets/js/seq/voices.js'; window.SEQAWAKE = createAwake(); window.SEQVOICES = makeVoices;</script>
 <script>
 (function () {
 'use strict';
@@ -921,145 +921,15 @@ function stepDuration() {
 
 /* ── SYNTHESIS FUNCTIONS ── */
 
-function playKick(time, vol) {
-  const g = AC.createGain();
-  g.connect(AC.destination);
-
-  const osc = AC.createOscillator();
-  osc.connect(g);
-  osc.frequency.setValueAtTime(150, time);
-  osc.frequency.exponentialRampToValueAtTime(40, time + 0.08);
-  osc.type = 'sine';
-
-  g.gain.setValueAtTime(vol * 1.2, time);
-  g.gain.exponentialRampToValueAtTime(0.001, time + 0.38);
-
-  // Click transient
-  const click = AC.createOscillator();
-  const clickG = AC.createGain();
-  click.connect(clickG); clickG.connect(AC.destination);
-  click.frequency.value = 800;
-  click.type = 'square';
-  clickG.gain.setValueAtTime(vol * 0.4, time);
-  clickG.gain.exponentialRampToValueAtTime(0.001, time + 0.025);
-
-  osc.start(time); osc.stop(time + 0.4);
-  click.start(time); click.stop(time + 0.03);
-}
-
-function playSnare(time, vol) {
-  // Noise burst
-  const bufLen = AC.sampleRate * 0.2;
-  const buf = AC.createBuffer(1, bufLen, AC.sampleRate);
-  const data = buf.getChannelData(0);
-  for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
-
-  const src = AC.createBufferSource();
-  src.buffer = buf;
-
-  const hpf = AC.createBiquadFilter();
-  hpf.type = 'highpass'; hpf.frequency.value = 1500;
-
-  const g = AC.createGain();
-  src.connect(hpf); hpf.connect(g); g.connect(AC.destination);
-  g.gain.setValueAtTime(vol * 0.9, time);
-  g.gain.exponentialRampToValueAtTime(0.001, time + 0.18);
-
-  // Tone component
-  const osc = AC.createOscillator();
-  const og  = AC.createGain();
-  osc.connect(og); og.connect(AC.destination);
-  osc.frequency.value = 180; osc.type = 'triangle';
-  og.gain.setValueAtTime(vol * 0.4, time);
-  og.gain.exponentialRampToValueAtTime(0.001, time + 0.08);
-
-  src.start(time); src.stop(time + 0.22);
-  osc.start(time); osc.stop(time + 0.1);
-}
-
-function playHiHat(time, vol, open) {
-  const bufLen = AC.sampleRate * (open ? 0.35 : 0.06);
-  const buf = AC.createBuffer(1, bufLen, AC.sampleRate);
-  const data = buf.getChannelData(0);
-  for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
-
-  const src = AC.createBufferSource();
-  src.buffer = buf;
-
-  const hpf = AC.createBiquadFilter();
-  hpf.type = 'highpass'; hpf.frequency.value = 7000;
-  hpf.Q.value = 0.7;
-
-  const g = AC.createGain();
-  src.connect(hpf); hpf.connect(g); g.connect(AC.destination);
-  g.gain.setValueAtTime(vol * 0.6, time);
-  g.gain.exponentialRampToValueAtTime(0.001, time + (open ? 0.32 : 0.055));
-
-  src.start(time); src.stop(time + bufLen / AC.sampleRate + 0.01);
-}
-
-function playCymbal(time, vol) {
-  const bufLen = AC.sampleRate * 0.7;
-  const buf = AC.createBuffer(1, bufLen, AC.sampleRate);
-  const data = buf.getChannelData(0);
-  for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
-
-  const src = AC.createBufferSource();
-  src.buffer = buf;
-
-  const hpf = AC.createBiquadFilter();
-  hpf.type = 'bandpass'; hpf.frequency.value = 5000; hpf.Q.value = 0.5;
-
-  const g = AC.createGain();
-  src.connect(hpf); hpf.connect(g); g.connect(AC.destination);
-  g.gain.setValueAtTime(vol * 0.55, time);
-  g.gain.exponentialRampToValueAtTime(0.001, time + 0.65);
-
-  src.start(time); src.stop(time + 0.72);
-}
-
-function playBass(time, hz, vol) {
-  const osc  = AC.createOscillator();
-  const osc2 = AC.createOscillator();
-  const lpf  = AC.createBiquadFilter();
-  const g    = AC.createGain();
-
-  lpf.type = 'lowpass'; lpf.frequency.value = 500; lpf.Q.value = 1.5;
-  osc.type = 'sawtooth'; osc.frequency.value = hz;
-  osc2.type = 'square';  osc2.frequency.value = hz;
-
-  const g2 = AC.createGain(); g2.gain.value = 0.3;
-  osc.connect(lpf); osc2.connect(g2); g2.connect(lpf);
-  lpf.connect(g); g.connect(AC.destination);
-
-  g.gain.setValueAtTime(0.001, time);
-  g.gain.linearRampToValueAtTime(vol * 0.7, time + 0.015);
-  g.gain.exponentialRampToValueAtTime(0.001, time + 0.28);
-
-  osc.start(time);  osc.stop(time + 0.32);
-  osc2.start(time); osc2.stop(time + 0.32);
-}
-
-function playLead(time, hz, vol, variant) {
-  const osc = AC.createOscillator();
-  const lpf = AC.createBiquadFilter();
-  const g   = AC.createGain();
-
-  const types    = ['triangle', 'sawtooth', 'sine'];
-  const cutoffs  = [1800, 2400, 1200];
-  osc.type = types[variant % types.length];
-  lpf.type = 'lowpass'; lpf.frequency.value = cutoffs[variant % cutoffs.length];
-  lpf.Q.value = 1.2;
-  osc.frequency.value = hz * 2; // leads an octave up
-
-  osc.connect(lpf); lpf.connect(g); g.connect(AC.destination);
-
-  g.gain.setValueAtTime(0.001, time);
-  g.gain.linearRampToValueAtTime(vol * 0.5, time + 0.02);
-  g.gain.exponentialRampToValueAtTime(0.001, time + 0.22);
-
-  osc.start(time); osc.stop(time + 0.25);
-}
+// The sounds live in /assets/js/seq/voices.js, shared with the Experiments workbench, so both play the same thing.
+let VOICES = null;
+const voices = () => (VOICES ||= window.SEQVOICES(AC));
+function playKick(time, vol)            { voices().kick(time, vol); }
+function playSnare(time, vol)           { voices().snare(time, vol); }
+function playHiHat(time, vol, open)     { voices().hihat(time, vol, open); }
+function playCymbal(time, vol)          { voices().cymbal(time, vol); }
+function playBass(time, hz, vol)        { voices().bass(time, hz, vol); }
+function playLead(time, hz, vol, variant) { voices().lead(time, hz, vol, variant); }
 
 /* ── OFFLINE RENDERING FOR EXPORT ── */
 function renderDrumOffline(ctx, id, time, vol) {

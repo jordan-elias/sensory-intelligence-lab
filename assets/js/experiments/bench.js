@@ -9,6 +9,7 @@ import { el, audioCtx } from './tools.js';
 import { NOTE_NAMES, SCALES } from './rng.js';
 import { makeVoices } from '../seq/voices.js';
 import * as B from './bench-core.js';
+import * as SP from '../seq/patterns.js';
 import { encodeWav, normalise, mixToMono } from './audio-ops.js';
 
 const noteName = n => NOTE_NAMES[((n % 12) + 12) % 12];
@@ -137,10 +138,21 @@ export function benchTool(cfg = {}) {
     const n = sources.number(); if (!n) { say('Roll the number first (the tool above), then press this.'); return; }
     b.tracks.forEach(t => B.setLen(b, t.id, n)); b.tracks.forEach(t => { const sl = ui[t.id].lenSel; if (sl) sl.value = String(Math.min(b.steps, Math.max(2, n))); }); sel = null; drawAll(); say(`Every track now cycles every ${n} steps.`);
   } }, 'Use the number I rolled');
+  const saved = (() => { try { return SP.list(); } catch { return []; } })();
+  const seqPick = el('select', { 'aria-label': 'A pattern saved in the Sequencer', id: 'xpBenchSeq' }, saved.map(p => el('option', { value: p.name }, p.name)));
+  const seqLoop = el('select', { 'aria-label': 'Which loop', id: 'xpBenchSeqLoop' }, [1, 2, 3, 4].map(n => el('option', { value: n - 1 }, `Loop ${n}`)));
+  const useSeq = el('button', { type: 'button', class: 'xp-btn xp-btn--alt', id: 'xpBenchSeqGo', onclick: () => {
+    const p = SP.load(seqPick.value); if (!p) { say('That pattern could not be opened.'); return; }
+    const n = B.applyPattern(b, p, +seqLoop.value); sel = null;
+    tempo.value = b.bpm; tempoOut.textContent = `${b.bpm} BPM`; swing.value = Math.round(b.swing * 100); swingOut.textContent = `swing ${swing.value}%`; rootSel.value = b.root; scaleSel.value = b.scale;
+    b.tracks.forEach(t => { const sl = ui[t.id].lenSel; if (sl) sl.value = String(t.len); });
+    rebuildPickers(); drawAll(); say(n ? `Loop ${+seqLoop.value + 1} of "${seqPick.value}" is on the workbench. It is a copy: the Sequencer keeps the original.` : 'That loop is empty.');
+  } }, 'Open it');
+  const fromSeq = saved.length ? el('div', { class: 'xp-row', id: 'xpBenchFromSeq' }, el('label', {}, 'From the Sequencer ', seqPick), el('label', {}, seqLoop), useSeq) : null;
   const bring = cfg.bring === false && !cfg.number ? null : el('details', { class: 'xp-solo', id: 'xpBenchBring', open: true }, el('summary', {}, cfg.number ? 'Bring in the number you rolled' : 'Bring in what you drew and rolled'),
     ...(cfg.number ? [el('div', { class: 'xp-row' }, useNumber)] : []),
     ...(cfg.number ? [] : [el('div', { class: 'xp-row' }, useRhythm, el('label', {}, 'on ', rhyTrack)),
-    el('div', { class: 'xp-row' }, useNotes, el('label', {}, 'on ', noteTrack), el('label', {}, rule))]));
+    el('div', { class: 'xp-row' }, useNotes, el('label', {}, 'on ', noteTrack), el('label', {}, rule)), ...(fromSeq ? [fromSeq] : [])]));
 
   /* ── track blocks ── */
   const blocks = b.tracks.map(t => {

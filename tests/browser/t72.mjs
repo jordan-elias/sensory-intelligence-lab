@@ -9,4 +9,6 @@ await page.evaluate(()=>window.SEQ.togglePlay()); await new Promise(r=>setTimeou
 ok((await page.evaluate(()=>window.__wl.req))===1,'play takes a wake lock');
 await page.evaluate(()=>window.SEQ.togglePlay()); await new Promise(r=>setTimeout(r,100));
 ok((await page.evaluate(()=>window.__wl.rel))===1,'stop releases it');
+await page.evaluate(()=>window.SEQ.togglePlay()); await new Promise(r=>setTimeout(r,600)); await page.evaluate(()=>window.SEQ.togglePlay());
+ok(P.errors.filter(e=>!/Failed to load resource/.test(e)).length===0,'playing with the shared sounds raises no errors '+P.errors.join('|'));
 await browser.close(); server.close(); process.exit(fail?1:0);
