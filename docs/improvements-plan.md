@@ -65,7 +65,7 @@ Honest limits: lexicons miss irony, slang, negation across clauses and context, 
 3. (done) A short description per person, event and theme, saved encrypted and included in the export.
 4. (done) Timeline and themes × sessions table.
 5. (done) Graph view and pre-session brief. Zoom and pan are done; arranging nodes by hand is not.
-6. (done) Markdown and text export, keep-or-delete. PDF is done through the print dialog (Save as PDF). Still to do: import of Markdown, an optional reminder when a retention period the therapist sets has passed.
+6. (done) Markdown and text export, keep-or-delete. PDF is done through the print dialog (Save as PDF). Import of Markdown is done (app-57). Still to do: an optional reminder when a retention period the therapist sets has passed.
 
 0c. Done (branch app-20): retention reminder (default 10 years for Germany, the therapist's own setting, 0 = off; in-app only on the therapist's device; counts from the latest of end of connection, last session, last note; never deletes anything; "remind me again in a year"). Caseload page (`/therapist/caseload/`): sessions with no note yet, clients not written up lately, themes across clients; people are never matched across clients. Markdown import dropped (notes are written in the Lab). To check with a lawyer: retention duty and client erasure rights by country.
 
@@ -209,3 +209,5 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 - app-55: the capstone is now four choices: three limits, a loop from chance (workbench), a short piece of writing, remake something of yours. Unit wording and the "ready" note say "these". t75. Still open from the course list: merge trivial steps (a wording pass over all experiments), spatial game daily challenge and rooms with reverb, Markdown import for therapist records, then Android.
 
 - app-56: spatial game: "Today's challenge" (seeded paths, same for everyone each day, per level and trial) and four rooms with different reverb (small room is the usual; other rooms are practice and do not set best scores). Room and mode remembered on the device. daily.js, t76. Course/minicourse: finished for now, awaiting review.
+
+- app-57: Markdown import for therapist records: Record tab, "Export and delete", "Import notes". Reads a .md/.txt on the device, previews dated sections ("## 2026-03-04" or 04.03.2026), skips undated sections and ones already in the record, saves nothing until Import, each note encrypted as usual. notes/import.js, t77.
