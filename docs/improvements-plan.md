@@ -205,3 +205,5 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 - app-53: Keep shelf renamed "My seeds"; "Today's roll" on roll tools (same seed all day, from the local date); pick two text rolls and combine them (taking turns). seeds-core.js, t73.
 
 - app-54: My seeds empty-state wording; the Sequencer now plays through assets/js/seq/voices.js (one set of sounds, shared with the workbench); the workbench can open a loop of a pattern saved in the Sequencer (a copy). t74.
+
+- app-55: the capstone is now four choices: three limits, a loop from chance (workbench), a short piece of writing, remake something of yours. Unit wording and the "ready" note say "these". t75. Still open from the course list: merge trivial steps (a wording pass over all experiments), spatial game daily challenge and rooms with reverb, Markdown import for therapist records, then Android.

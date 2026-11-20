@@ -60,3 +60,11 @@ test('the workbench is added wherever notes are drawn, shown with a rhythm or dr
   }
   for (const id of ['stutter', 'photo-words', 'fixed-groove-chords']) assert.ok(!toolsFor(EXPERIMENTS.find(x => x.id === id)).some(t => t.type === 'bench'), id);
 });
+
+import { UNITS as U2 } from '../../assets/js/experiments/catalog.js';
+test('the capstone offers four choices, each with a timer, a reflect question and no more than one re-draw rule', () => {
+  const cap = U2.find(u => u.id === 'capstone').experiments;
+  assert.equal(cap.length, 4);
+  for (const e of cap) { assert.ok(e.tools.some(t => t.type === 'timer'), e.id + ' has a timer'); assert.ok(e.reflect && e.solo && e.procedure.length >= 4, e.id + ' is complete'); }
+  assert.ok(cap.some(e => e.tools.some(t => t.type === 'bench')) && cap.some(e => e.needs === 'none'));
+});
