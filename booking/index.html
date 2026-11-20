@@ -606,7 +606,7 @@ function render(ent, therapist) {
   root.innerHTML = '';
   const sections = [];
 
-  const isMember = ent.isActive && !ent.isPastDue && (ent.isBeta || ['lab', 'call1', 'call2'].includes(ent.tier));
+  const isMember = ent.isActive && !ent.isPastDue && (ent.isBeta || ent.tier === 'lab');
   const planName = isMember ? PLAN_LABELS.lab : PLAN_LABELS.free;
   const memberRate = PRICES.member ? `€${PRICES.member}` : null;
 

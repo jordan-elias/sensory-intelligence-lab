@@ -6,7 +6,7 @@ const THER={user_id:'th1',display_name:'Jordan Elias',bio:'Music therapist in Be
 
 // ── client card ──
 const A=await newPage(await browser.createBrowserContext(),BASE,{tables:{therapist_directory:[THER],my_therapists:[]}});
-await A.page.evaluateOnNewDocument(()=>{ window.__tier='call1';
+await A.page.evaluateOnNewDocument(()=>{ window.__tier='lab';
   const f=window.fetch.bind(window);
   window.fetch=async(u,o)=>{ const s=String(u);
     if(s.includes('/.netlify/functions/link-therapist')){ const b=JSON.parse(o.body); if(b.consent_version!=='link-2.0') return new Response(JSON.stringify({error:'stale'}),{status:409}); window.__tbl.my_therapists.push({link_id:'L1',status:'active',started_at:new Date().toISOString(),...window.__tbl.therapist_directory[0]}); window.__linked=b; return new Response('{"ok":true}',{status:200}); }
