@@ -11,6 +11,7 @@ import { createSync } from '/assets/js/experiments/sync.js';
 import { parseTimer, assignTools, toolsFor, setupChecklist, fmtClock } from '/assets/js/experiments/steps.js';
 import { recommend, TIMES, continueLabel } from '/assets/js/experiments/recommend.js';
 import { reflect } from '/assets/js/experiments/reflect.js';
+import { combineRolls } from '/assets/js/experiments/seeds-core.js';
 import { putAudio, getAudio, deleteAudio } from '/assets/js/experiments/shelf-audio.js';
 import { encodeWav } from '/assets/js/experiments/audio-ops.js';
 import { createAwake } from '/assets/js/app/awake.js';
@@ -75,7 +76,7 @@ function list() {
     done.size === 0 && !resume ? el('a', { class: 'xp-card xp-method', href: '#/method' }, el('h3', {}, 'Start here: ' + METHOD.title), el('p', {}, 'Five short ideas. Read once, then use them every time.'), el('small', {}, '1 minute')) : null,
     el('div', { class: 'xp-top' }, lead,
       el('button', { type: 'button', class: 'xp-btn xp-btn--alt', id: 'xpSurprise', onclick: () => { const e = pick(); if (e) location.hash = '#/' + e.id; } }, 'Surprise me')),
-    el('p', { class: 'xp-links' }, ...(done.size === 0 && !resume ? [] : [el('a', { href: '#/method' }, 'The five ideas'), ' · ']), el('a', { href: '#/book' }, 'Do it on paper'), ' · ', el('a', { href: '#/notebook', id: 'xpNotebookLink' }, 'My notebook'), ' · ', el('a', { href: '#/keep', id: 'xpKeepLink' }, `Keep shelf${progress.shelf().length ? ' (' + progress.shelf().length + ')' : ''}`)),
+    el('p', { class: 'xp-links' }, ...(done.size === 0 && !resume ? [] : [el('a', { href: '#/method' }, 'The five ideas'), ' · ']), el('a', { href: '#/book' }, 'Do it on paper'), ' · ', el('a', { href: '#/notebook', id: 'xpNotebookLink' }, 'My notebook'), ' · ', el('a', { href: '#/keep', id: 'xpKeepLink' }, `My seeds${progress.shelf().length ? ' (' + progress.shelf().length + ')' : ''}`)),
     el('details', { class: 'xp-find xp-details', id: 'xpFindWrap', open: !!suggestion },
       el('summary', {}, 'Which one for me?'),
       el('p', { class: 'xp-hint' }, 'Say what you have and how long you have. Your answers are not saved.'),
@@ -151,9 +152,15 @@ async function keepItem(e, item) {
 function shelf() {
   view = 'keep'; awake.release(); stopTimers();
   const items = progress.shelf();
+  const combineBtn = el('button', { type: 'button', class: 'xp-btn', id: 'xpCombine', disabled: true, onclick: () => {
+    const ids = [...document.querySelectorAll('.xp-pickbox:checked')].map(b => b.dataset.id), [a, b] = ids.map(id => items.find(x => x.id === id));
+    if (!a || !b) return;
+    progress.keep({ exp: a.exp, kind: 'text', title: 'Combined seed', text: combineRolls(a.text, b.text) }); shelf();
+  } }, 'Combine the two picked');
+  const syncCombine = () => { combineBtn.disabled = document.querySelectorAll('.xp-pickbox:checked').length !== 2; };
   const card = it => {
     const e = byId(it.exp), body = el('div', { class: 'xp-kept-body' });
-    const del = el('button', { type: 'button', class: 'xp-btn xp-btn--alt', onclick: async () => { if (!confirm('Delete this from your Keep shelf?')) return; if (it.kind === 'audio') { try { await deleteAudio(it.id); } catch { /* already gone */ } } progress.unkeep(it.id); shelf(); } }, 'Delete');
+    const del = el('button', { type: 'button', class: 'xp-btn xp-btn--alt', onclick: async () => { if (!confirm('Delete this from My seeds?')) return; if (it.kind === 'audio') { try { await deleteAudio(it.id); } catch { /* already gone */ } } progress.unkeep(it.id); shelf(); } }, 'Delete');
     if (it.kind === 'text') body.append(el('pre', { class: 'xp-kept' }, it.text), el('div', { class: 'xp-row' }, el('button', { type: 'button', class: 'xp-btn xp-btn--alt', onclick: async ev => { try { await navigator.clipboard.writeText(it.text); ev.target.textContent = 'Copied'; } catch { ev.target.textContent = 'Select and copy'; } } }, 'Copy'), del));
     else {
       body.append(el('p', { class: 'xp-hint' }, 'Loading the recording…'));
@@ -163,12 +170,14 @@ function shelf() {
         body.replaceChildren(el('audio', { controls: true, src: url, 'aria-label': it.title }), el('div', { class: 'xp-row' }, el('a', { class: 'xp-btn xp-btn--alt', href: url, download: 'experiment.wav', style: 'text-decoration:none' }, 'Download'), del));
       }).catch(() => body.replaceChildren(el('p', { class: 'xp-hint' }, 'Recordings could not be opened here.'), del));
     }
-    return el('article', { class: 'xp-kept-item' }, el('h3', {}, it.title), el('p', { class: 'xp-hint' }, `${when(it.at)}${e ? ' · ' : ''}`, e ? el('a', { href: '#/' + e.id }, e.title) : null, it.kind === 'audio' ? ' · this device only' : ''), body);
+    const pick = it.kind === 'text' ? el('label', { class: 'xp-pick' }, el('input', { type: 'checkbox', class: 'xp-pickbox', 'data-id': it.id, onchange: syncCombine }), ' Pick to combine') : null;
+    return el('article', { class: 'xp-kept-item' }, el('h3', {}, it.title), pick, el('p', { class: 'xp-hint' }, `${when(it.at)}${e ? ' · ' : ''}`, e ? el('a', { href: '#/' + e.id }, e.title) : null, it.kind === 'audio' ? ' · this device only' : ''), body);
   };
   render(
     el('a', { class: 'xp-back', href: '#/' }, '← ' + COURSE.name),
-    el('div', { class: 'ph' }, el('h2', {}, 'Keep shelf'), el('p', {}, 'What you chose to keep from the experiments. Press "Keep this" on a tool to put something here. Text and patterns sync if you turn sync on; recordings stay on this device only.')),
-    items.length ? el('div', { class: 'xp-kept-list' }, items.map(card)) : el('p', { class: 'xp-hint', id: 'xpShelfEmpty' }, 'Nothing here yet. Make something in an experiment and press "Keep this".'));
+    el('div', { class: 'ph' }, el('h2', {}, 'My seeds'), el('p', {}, 'What you chose to keep from the experiments. Tick "Keep" at the end of an experiment to put something here. Pick two rolls to combine them into a new one. Text and patterns sync if you turn sync on; recordings stay on this device only.')),
+    items.filter(i => i.kind === 'text').length >= 2 ? el('div', { class: 'xp-row' }, combineBtn) : null,
+    items.length ? el('div', { class: 'xp-kept-list' }, items.map(card)) : el('p', { class: 'xp-hint', id: 'xpShelfEmpty' }, 'Nothing here yet. Make something in an experiment and save it here.'));
   window.scrollTo(0, 0);
 }
 
@@ -243,7 +252,7 @@ function detail(e) {
       el('p', { class: 'xp-hint' }, 'What you made here is a seed. Download it and carry it into your DAW, instrument or notebook.'),
       el('ul', { class: 'xp-check' }, ticks.map(({ item, box }) => el('li', {}, el('label', {}, box, ' ' + what(item)), ' ',
         ...files(item).map(([label, fn]) => el('button', { type: 'button', class: 'xp-btn xp-btn--alt xp-dl', onclick: fn }, label))))),
-      el('p', { class: 'xp-hint' }, 'Ticked items also go on your Keep shelf when you finish. Untick anything you do not want to keep.'));
+      el('p', { class: 'xp-hint' }, 'Ticked items also go into My seeds when you finish. Untick anything you do not want to keep.'));
   }
 
   function draw() {
@@ -290,7 +299,7 @@ function detail(e) {
         note,
         el('div', { class: 'xp-recap', id: 'xpRecap' },
           el('p', {}, `${n} steps done. ${unitDone} of ${unit.experiments.length} in Unit ${unit.number} (${unit.title}) once you mark this one.`),
-          kept.length ? el('p', {}, `Kept from this experiment: `, ...kept.flatMap((k, i) => [i ? ', ' : '', k.title.replace(e.title + ': ', '')]), '. ', el('a', { href: '#/keep' }, 'Open the Keep shelf')) : el('p', { class: 'xp-note' }, 'You did not keep anything from this one. Go back to the steps and press "Keep this" on a tool if you want to.')),
+          kept.length ? el('p', {}, `Kept from this experiment: `, ...kept.flatMap((k, i) => [i ? ', ' : '', k.title.replace(e.title + ': ', '')]), '. ', el('a', { href: '#/keep' }, 'Open My seeds')) : el('p', { class: 'xp-note' }, 'You did not keep anything from this one.')),
         savePanel(),
         nav(btn('Finish', finish, false, 'xpFinish'), btn('Back to the steps', () => go(n), true, 'xpBackSteps')),
         el('p', { class: 'xp-hint', style: 'margin-top:1rem' }, el('a', { href: '#/' + nextExp.id }, 'Next in the course: ' + nextExp.title + ' →'), ' · ', el('a', { href: '#/' }, 'Choose another')));

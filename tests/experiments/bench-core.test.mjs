@@ -65,3 +65,16 @@ test('text picture lists only tracks with hits', () => {
   const b = makeBench(['kick', 'snare']); assert.equal(benchText(b), ''); fillEuclid(b, 'kick', 4);
   const t = benchText(b); assert.match(t, /Kick\s+x/); assert.ok(!/Snare/.test(t)); assert.match(t, /100 BPM/);
 });
+
+import { applyPattern as applySeq, makeBench as mkBench, track as trk } from '../../assets/js/experiments/bench-core.js';
+test('a saved Sequencer loop lands on the matching workbench tracks, as a copy', () => {
+  const mk = () => Array.from({ length: 4 }, () => Array.from({ length: 8 }, () => Array(16).fill(null)));
+  const loops = mk(); loops[0][0][0] = true; loops[0][0][8] = true; loops[0][4][3] = 2; loops[0][6][1] = 4;   // kick, bass note, lead 2 (ignored)
+  const p = { bpm: 140, swing: 0.2, root: 'D', scale: 'minor', loops, vel: null, prob: null, len: null };
+  const b = mkBench(); const n = applySeq(b, p, 0);
+  assert.equal(n, 2); assert.equal(b.bpm, 140); assert.equal(b.root, 2); assert.equal(b.scale, 'natural minor');
+  assert.deepEqual([0, 8].map(i => trk(b, 'kick').on[i]), [true, true]);
+  assert.ok(trk(b, 'bass').on[3] && trk(b, 'bass').note[3] > 30);
+  assert.equal(trk(b, 'lead').on.some(Boolean), false);
+  assert.equal(applySeq(b, null, 0), 0); assert.equal(applySeq(b, p, 9), 0);
+});
