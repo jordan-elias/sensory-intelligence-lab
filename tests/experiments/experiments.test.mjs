@@ -72,7 +72,7 @@ test('euclid generator gives a pattern of the requested length', () => {
 });
 
 test('every experiment is a complete protocol with real parameters, tools and generators', () => {
-  const ids = new Set(), kinds = ['degrees', 'notes', 'tuning', 'range', 'choice', 'shuffle', 'pattern', 'chords', 'euclid'], tools = ['gen', 'timer', 'clip', 'loops', 'groove', 'assign', 'wordpoem', 'burn', 'cards', 'blackout', 'roll', 'sampler', 'treat', 'pad', 'bench', 'marks', 'subtract'], ops = ['slow', 'fast', 'contrast', 'reverse', 'chop', 'stutter', 'grain'];
+  const ids = new Set(), kinds = ['degrees', 'notes', 'tuning', 'range', 'choice', 'shuffle', 'pattern', 'chords', 'euclid'], tools = ['gen', 'timer', 'clip', 'loops', 'groove', 'assign', 'wordpoem', 'burn', 'cards', 'blackout', 'roll', 'sampler', 'treat', 'pad', 'bench', 'marks', 'subtract', 'strings', 'versions'], ops = ['slow', 'fast', 'contrast', 'reverse', 'chop', 'stutter', 'grain'];
   for (const e of EXPERIMENTS) {
     assert.ok(!ids.has(e.id), 'duplicate id ' + e.id); ids.add(e.id);
     assert.ok(CATEGORIES[e.category], e.id); assert.ok(NEEDS[e.needs], e.id);
@@ -159,3 +159,30 @@ test('the notebook lists only what was written, in course order', () => {
   assert.ok(!t.includes(UNITS[2].experiments[0].title));
 });
 test('an empty notebook says so', () => assert.match(buildNotebook({ course: 'X', units: UNITS, done: new Set(), saved: () => '' }), /Nothing here yet/));
+
+import { placeNote, coverage } from '../../assets/js/experiments/music-ops.js';
+test('notes have lengths: they stop at the next note, shorten when cut into, and toggle off', () => {
+  const E = () => Array(8).fill(null), L = () => Array(8).fill(1);
+  let r = placeNote(E(), L(), 0, 60, 4); assert.equal(r.lens[0], 4);
+  r = placeNote(r.melody, r.lens, 2, 62, 2); assert.equal(r.lens[0], 2, 'the first note is shortened where the new one begins'); assert.equal(r.lens[2], 2);
+  r = placeNote(r.melody, r.lens, 0, 64, 8); assert.equal(r.lens[0], 2, 'a new long note stops at the next one');
+  r = placeNote(E(), L(), 6, 60, 8); assert.equal(r.lens[6], 2, 'and at the end of the grid');
+  r = placeNote(r.melody, r.lens, 6, 60, 2); assert.equal(r.melody[6], null, 'the same note again removes it');
+  const cov = coverage([60, null, null, null, 62, null, null, null], [3, 1, 1, 1, 1, 1, 1, 1]);
+  assert.deepEqual(cov.map(c => c && c.kind), ['start', 'hold', 'hold', null, 'start', null, null, null]);
+});
+test('MIDI uses the note lengths', () => {
+  const m = encodeMidi({ melody: [60, null, null, null, 62], lengths: [4, 1, 1, 1, 1], bpm: 120 }), b = Array.from(m);
+  const offs = []; for (let i = 0; i < b.length - 2; i++) if (b[i] === 0x80 && b[i + 1] === 60) offs.push(i);
+  assert.ok(offs.length === 1);
+  const single = Array.from(encodeMidi({ melody: [60, null, null, null, 62], bpm: 120 }));
+  assert.notDeepEqual(b, single, 'a four-step note is written differently from a one-step note');
+});
+
+import { journalPayload, JOURNAL_CATEGORY } from '../../assets/js/sharing/journal.js';
+test('a shared journal entry carries the title, date and text only', () => {
+  const p = JSON.parse(journalPayload({ id: 'j1', title: 'T', text: 'words', created_at: '2026-11-01T00:00:00Z', music: 'amber', prompt: 'x', word_count: 9 }));
+  assert.equal(JOURNAL_CATEGORY, 'journal');
+  assert.deepEqual(Object.keys(p).sort(), ['created_at', 'id', 'kind', 'shared_at', 'text', 'title', 'v']);
+  assert.equal(p.text, 'words');
+});

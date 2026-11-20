@@ -72,12 +72,12 @@ function list() {
     unitBanner,
     el('div', { class: 'ph' }, el('h2', {}, COURSE.name), el('p', {}, COURSE.tagline), el('p', { style: 'margin-top:.5rem' }, COURSE.intro)),
     el('div', { class: 'xp-prog', role: 'img', 'aria-label': `${done.size} of ${PATH.length} experiments done` }, el('div', { class: 'xp-prog-bar' }, el('span', { style: `width:${pct}%` })), el('span', { class: 'xp-count' }, `${done.size} of ${PATH.length} done`)),
+    done.size === 0 && !resume ? el('a', { class: 'xp-card xp-method', href: '#/method' }, el('h3', {}, 'Start here: ' + METHOD.title), el('p', {}, 'Five short ideas. Read once, then use them every time.'), el('small', {}, '1 minute')) : null,
     el('div', { class: 'xp-top' }, lead,
-      el('button', { type: 'button', class: 'xp-btn xp-btn--alt', id: 'xpSurprise', onclick: () => { const e = pick(); if (e) location.hash = '#/' + e.id; } }, 'Surprise me'),
-      linkBtn('#/book', 'Do it on paper'), linkBtn('#/notebook', 'My notebook', 'xpNotebookLink'), linkBtn('#/keep', `Keep shelf${progress.shelf().length ? ' (' + progress.shelf().length + ')' : ''}`, 'xpKeepLink')),
-    el('a', { class: 'xp-card xp-method', href: '#/method' }, el('h3', {}, 'Start here: ' + METHOD.title), el('p', {}, 'Five short ideas. Read once, then use them every time.'), el('small', {}, '1 minute')),
-    el('div', { class: 'xp-find', 'aria-label': 'Which one for me?' },
-      el('h3', { class: 'xp-h' }, 'Which one for me?'),
+      el('button', { type: 'button', class: 'xp-btn xp-btn--alt', id: 'xpSurprise', onclick: () => { const e = pick(); if (e) location.hash = '#/' + e.id; } }, 'Surprise me')),
+    el('p', { class: 'xp-links' }, ...(done.size === 0 && !resume ? [] : [el('a', { href: '#/method' }, 'The five ideas'), ' · ']), el('a', { href: '#/book' }, 'Do it on paper'), ' · ', el('a', { href: '#/notebook', id: 'xpNotebookLink' }, 'My notebook'), ' · ', el('a', { href: '#/keep', id: 'xpKeepLink' }, `Keep shelf${progress.shelf().length ? ' (' + progress.shelf().length + ')' : ''}`)),
+    el('details', { class: 'xp-find xp-details', id: 'xpFindWrap', open: !!suggestion },
+      el('summary', {}, 'Which one for me?'),
       el('p', { class: 'xp-hint' }, 'Say what you have and how long you have. Your answers are not saved.'),
       el('div', { class: 'xp-filters', role: 'group', 'aria-label': 'What you need' }, chip(filter.needs, v => { filter.needs = v; }, 'Anything', 'all'), ...Object.entries(NEEDS).map(([k, v]) => chip(filter.needs, x => { filter.needs = x; }, v, k))),
       el('div', { class: 'xp-filters', role: 'group', 'aria-label': 'Time you have' }, ...TIMES.map(([label, m]) => chip(filter.minutes, x => { filter.minutes = x; }, label, m))),
@@ -270,14 +270,14 @@ function detail(e) {
       const carry = tools.map((t, i) => ({ t, i })).filter(({ t, i }) => !shownIdx.has(i) && firstAt(i) >= 0 && firstAt(i) < at - 1 && t.keepable).map(({ t }) => ({ t, k: t.keepable() })).filter(x => x.k);
       const rest = tools.map((t, i) => ({ t, i })).filter(({ i }) => !shownIdx.has(i)).map(({ t }) => t);
       const secs = parseTimer(e.procedure[at - 1]);
-      const CUE = { gen: 'the button below', groove: 'the rhythm below', bench: 'the workbench below', marks: 'the stopwatch below', subtract: 'the parts list below', clip: 'the sound tool below', loops: 'the loops below', assign: 'the swap tool below', wordpoem: 'the word tool below', burn: 'the page below', cards: 'the cards below', blackout: 'the text below', roll: 'the chord tool below', sampler: 'the sampler below', treat: 'the treatments below' };
+      const CUE = { gen: 'the button below', groove: 'the rhythm below', bench: 'the workbench below', marks: 'the stopwatch below', subtract: 'the parts list below', clip: 'the sound tool below', loops: 'the loops below', assign: 'the swap tool below', wordpoem: 'the word tool below', burn: 'the page below', cards: 'the cards below', blackout: 'the text below', roll: 'the chord tool below', sampler: 'the sampler below', treat: 'the treatments below', strings: 'the strings below', versions: 'the versions below' };
       const cue = [...new Set(here.map(i => CUE[cfgs[i].type]).filter(Boolean))];
       render(head, dots(),
         el('div', { class: 'xp-stepcard', 'aria-live': 'polite' }, el('div', { class: 'xp-stepno' }, `Step ${at} of ${n}`), el('p', { class: 'xp-steptext', id: 'xpStep' }, e.procedure[at - 1]), cue.length ? el('p', { class: 'xp-cue', id: 'xpCue' }, 'Use ' + cue.join(' and ')) : null),
         secs ? stepTimer(secs) : null,
-        el('div', { class: 'xp-nav xp-nav--sticky' }, btn(at === n ? 'Finish' : 'Next', () => go(at + 1), false, 'xpNext'), btn('Back', () => go(at - 1), true, 'xpBack')),
-        carry.length ? el('div', { class: 'xp-carry', id: 'xpCarry' }, el('b', {}, 'From earlier'), carry.map(({ k }) => el('p', {}, el('span', { class: 'xp-carry-k' }, k.label + ': '), k.kind === 'text' ? k.text.replace(/\n/g, ' · ') : 'a clip you made'))) : null,
+        carry.length ? el('p', { class: 'xp-carry', id: 'xpCarry' }, el('b', {}, 'From earlier: '), carry.map(({ k }) => (k.label + ' ' + (k.kind === 'text' ? k.text.replace(/\n/g, ' · ') : '(a clip you made)')).slice(0, 90)).join('   |   ')) : null,
         el('div', { class: 'xp-tools', id: 'xpTools' }, here.length ? el('h3', { class: 'xp-h' }, 'For this step') : null, ...here.map(i => tools[i])),
+        el('div', { class: 'xp-nav xp-nav--sticky' }, btn(at === n ? 'Finish' : 'Next', () => go(at + 1), false, 'xpNext'), btn('Back', () => go(at - 1), true, 'xpBack')),
         rest.length ? el('details', { class: 'xp-others', id: 'xpOthers' }, el('summary', {}, here.length ? 'Your other tools' : 'Your tools'), ...rest) : null);
     } else {
       awake.release();

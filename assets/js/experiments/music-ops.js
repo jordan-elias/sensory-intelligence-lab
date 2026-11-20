@@ -20,6 +20,26 @@ export function setStep(melody, step, note) {
   return next;
 }
 
+/**
+ * Notes with lengths. `lens[step]` is how many steps the note starting at `step` lasts (1 when missing).
+ * Placing a note on a step that already holds that same note takes it away. A note stops where the next one starts
+ * or at the end of the grid, and a note placed in the middle of a longer one shortens it.
+ */
+export function placeNote(melody, lens, step, note, len = 1) {
+  const m = melody.slice(), l = (lens && lens.length ? lens : melody.map(() => 1)).slice(), n = m.length;
+  if (m[step] === note) { m[step] = null; l[step] = 1; return { melody: m, lens: l }; }
+  for (let j = 0; j < step; j++) if (m[j] != null && j + (l[j] || 1) > step) l[j] = step - j;
+  let room = n - step; for (let j = step + 1; j < n && j < step + len; j++) if (m[j] != null) { room = j - step; break; }
+  m[step] = note; l[step] = Math.max(1, Math.min(len, room, n - step));
+  return { melody: m, lens: l };
+}
+/** For drawing: what each step shows: 'start' (a note begins), 'hold' (the tail of a longer note) or null. */
+export function coverage(melody, lens) {
+  const out = melody.map(() => null);
+  melody.forEach((note, i) => { if (note == null) return; const L = (lens && lens[i]) || 1; out[i] = { kind: 'start', note, len: L }; for (let k = 1; k < L && i + k < melody.length; k++) out[i + k] = { kind: 'hold', note, from: i }; });
+  return out;
+}
+
 const vlq = n => { const b = [n & 0x7f]; while ((n >>= 7) > 0) b.unshift((n & 0x7f) | 0x80); return b; };
 const u32 = n => [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255];
 const u16 = n => [(n >> 8) & 255, n & 255];
@@ -28,9 +48,9 @@ const u16 = n => [(n >> 8) & 255, n & 255];
  * A Standard MIDI File (type 0) holding a melody, one note per step, each step a sixteenth note,
  * and optionally chords (arrays of MIDI notes, one per `stepsPerChord` steps) on a second channel.
  */
-export function encodeMidi({ melody, chords = [], stepsPerChord = 4, bpm = 90 }) {
+export function encodeMidi({ melody, lengths = null, chords = [], stepsPerChord = 4, bpm = 90 }) {
   const PPQ = 480, step = PPQ / 4, ev = [];                        // events: [tick, order, bytes]
-  melody.forEach((n, i) => { if (n != null) { ev.push([i * step, 1, [0x90, n, 96]]); ev.push([(i + 1) * step - 10, 0, [0x80, n, 0]]); } });
+  melody.forEach((n, i) => { if (n != null) { ev.push([i * step, 1, [0x90, n, 96]]); ev.push([(i + ((lengths && lengths[i]) || 1)) * step - 10, 0, [0x80, n, 0]]); } });
   chords.forEach((c, k) => c.forEach(n => { ev.push([k * stepsPerChord * step, 1, [0x91, n, 64]]); ev.push([(k + 1) * stepsPerChord * step - 10, 0, [0x81, n, 0]]); }));
   ev.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
   const mpqn = Math.round(60e6 / bpm), body = [0, 0xff, 0x51, 3, (mpqn >> 16) & 255, (mpqn >> 8) & 255, mpqn & 255];

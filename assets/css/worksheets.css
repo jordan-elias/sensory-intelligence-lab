@@ -949,6 +949,11 @@ button.search-result-item:last-child { border-bottom: none; }
 .ws-compare--3 { grid-template-columns: 1fr 1fr 1fr; }
 .ws-compare__col { border: 1px solid var(--border); padding: .85rem; min-width: 0; }
 .ws-compare__head { font-weight: 600; font-size: .85rem; margin-bottom: .6rem; }
-.ws-scale input.ws-input { max-width: 6rem; }
+.ws-slider-row { display: flex; align-items: center; gap: .6rem; max-width: 18rem; }
+.ws-slider { flex: 1; min-width: 0; accent-color: var(--accent); height: 1.2rem; }
+.ws-slider.is-unset { opacity: .45; }
+.ws-slider-val { min-width: 1.5rem; text-align: right; font-weight: 600; font-size: .9rem; }
+.ws-slider-clear { background: none; border: none; border-radius: 0; color: var(--muted); font: inherit; font-size: .72rem; text-decoration: underline; cursor: pointer; padding: .2rem; }
+@media print { .ws-slider-clear { display: none; } }
 @media (max-width: 700px) { .ws-compare--2, .ws-compare--3 { grid-template-columns: 1fr; } }
 @media print { .ws-compare { grid-template-columns: 1fr 1fr; } .ws-compare--3 { grid-template-columns: 1fr 1fr 1fr; } }

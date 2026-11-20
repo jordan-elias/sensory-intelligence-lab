@@ -82,6 +82,10 @@
     .xp-bench .xp-btrack{margin:.7rem 0;padding:.5rem;border:1px solid var(--border)}
     .xp-bhead{display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem} .xp-grow{flex:1}
     .xp-ms{min-width:2rem;padding:.2rem .5rem}
+    .xp-str-row{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .8rem;padding:.35rem 0;border-bottom:1px solid var(--border)}
+    .xp-str-lab{min-width:7.5rem;font-size:.85rem} .xp-str-note{min-width:2.8rem;font-weight:600;font-variant-numeric:tabular-nums}
+    .xp-str-row select{font:inherit;border:1px solid var(--border);border-radius:0;background:var(--bg);color:var(--text);padding:.2rem .3rem}
+    .xp-str-tab.on{background:var(--accent,#1c554e);color:#fff;border-color:var(--accent,#1c554e)}
     .xp-bgrid{display:grid;grid-template-columns:repeat(16,minmax(0,1fr));gap:2px}
     .xp-bs{min-height:2.1rem;padding:0;border:1px solid var(--border);border-radius:0;background:var(--bg);color:var(--text);font:inherit;font-size:.62rem;cursor:pointer;position:relative;overflow:hidden}
     .xp-bs.bar{border-left-color:var(--muted)} .xp-bs.off{opacity:.25}
@@ -105,7 +109,7 @@
     .xp-bw.keep{background:var(--accent);color:#fff} .xp-bw.cover{background:#111;color:#111} .xp-poem{font:500 1.1rem/1.6 var(--font-heading);min-height:1.6rem}
     .xp-roll-wrap{overflow-x:auto;margin:.6rem 0} .xp-roll{display:grid;gap:2px;min-width:34rem} .xp-roll-k{font-size:.7rem;color:var(--muted);align-self:center}
     .xp-rc{min-height:24px;border:1px solid var(--border);background:var(--bg);border-radius:0;padding:0;cursor:pointer} .xp-rc.bar{border-left:2px solid var(--muted)}
-    .xp-rc.on{background:var(--accent);border-color:var(--accent)} .xp-rc.now{outline:2px solid var(--text)} .xp-chords{font:600 1.05rem var(--font-heading);margin:.5rem 0}
+    .xp-rc.on{background:var(--accent);border-color:var(--accent)} .xp-rc.hold{background:color-mix(in srgb,var(--accent) 55%,var(--bg));border-color:var(--accent);border-left-color:transparent} .xp-rc.now{outline:2px solid var(--text)} .xp-chords{font:600 1.05rem var(--font-heading);margin:.5rem 0}
     .xp-lane2{margin:.5rem 0} .xp-lane-k{font-size:.78rem;color:var(--muted);display:block;margin-bottom:.2rem} .xp-lane-steps{display:grid;grid-template-columns:repeat(16,1fr);gap:2px}
     .xp-ls{min-height:28px;border:1px solid var(--border);background:var(--bg);border-radius:0;padding:0;cursor:pointer} .xp-ls.bar{border-left:2px solid var(--muted)} .xp-ls.on{background:var(--accent);border-color:var(--accent)} .xp-ls.now{outline:2px solid var(--text)}
     .xp-treat{list-style:none;margin:.5rem 0} .xp-treat li{padding:.4rem 0;border-bottom:1px solid var(--border);font-size:.92rem}
@@ -124,7 +128,8 @@
     .xp-check{list-style:none;margin:.4rem 0} .xp-check li{padding:.3rem 0;font-size:.92rem} .xp-check input{width:20px;height:20px;vertical-align:-4px}
     .xp-note{font-size:.8rem;color:var(--muted);margin:.4rem 0}
     .xp-st{margin:.4rem 0 .2rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap} .xp-st-time{font:600 1.8rem var(--font-heading);font-variant-numeric:tabular-nums}
-    .xp-carry{margin:1rem 0;padding:.7rem .9rem;border-left:3px solid var(--border);background:var(--surface);font-size:.88rem} .xp-carry b{display:block;font:600 .66rem var(--font-heading);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.2rem} .xp-carry p{margin:.15rem 0} .xp-carry-k{color:var(--muted)}
+    .xp-links{margin:.2rem 0 1rem;font-size:.88rem;color:var(--muted)} .xp-links a{color:var(--accent)}
+    .xp-carry{margin:1rem 0;padding:.7rem .9rem;border-left:3px solid var(--border);background:var(--surface);font-size:.88rem} .xp-carry b{font:600 .66rem var(--font-heading);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)} .xp-carry p{margin:.15rem 0} .xp-carry-k{color:var(--muted)}
     .xp-others{margin:1rem 0;border:1px solid var(--border);border-radius:0;padding:.4rem .9rem} .xp-others>summary{cursor:pointer;padding:.5rem 0;font-weight:600;font-size:.9rem;min-height:44px;display:flex;align-items:center}
     .xp-keep{margin-top:.6rem} .xp-keep-msg{font-size:.82rem;color:var(--muted)}
     .xp-recap{margin:1.2rem 0;padding:.8rem 1rem;border:1px solid var(--border);border-radius:0;font-size:.92rem} .xp-recap p{margin:.3rem 0}

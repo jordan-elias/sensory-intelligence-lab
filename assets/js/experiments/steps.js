@@ -24,7 +24,7 @@ export function parseTimer(step) {
 export const fmtClock = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 
 /** Tools that every step works on (the clip you loaded, the loops, the poem). They stay with the step the whole time. */
-const WORKBENCH = new Set(['clip', 'loops', 'assign', 'wordpoem', 'burn', 'blackout', 'cards', 'roll', 'sampler', 'treat', 'pad', 'bench', 'marks', 'subtract']);
+const WORKBENCH = new Set(['clip', 'loops', 'assign', 'wordpoem', 'burn', 'blackout', 'cards', 'roll', 'sampler', 'treat', 'pad', 'bench', 'marks', 'subtract', 'strings', 'versions']);
 const ROLL = /\b(roll|rolled|draw|drawn)\b/i, PICK = /\b(pick|choose|generate)\b/i, RHYTHM = /\b(metronome|bpm|rhythm|groove|beats?|loops?|pulse)\b/i;
 
 /**

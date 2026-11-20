@@ -29,7 +29,8 @@ await btn('Roll seven notes'); await sleep(100);
 ok(await page.evaluate(()=>[...document.querySelectorAll('#xpTools .xp-btn')].some(b=>b.textContent==='Roll again')),'after a roll the button says Roll again');
 ok((await page.$$eval('#xpTools .xp-chips li',l=>l.length))===7,'the roll works inside the step');
 await page.click('#xpNext'); await page.waitForSelector('#xpCarry');
-ok(/What I rolled/.test(await text('#xpCarry'))&&/Seed \d+/.test(await text('#xpCarry')),'the roll is shown again on later steps');
+ok(/What I rolled/.test(await text('#xpCarry')),'the roll is shown again on later steps, as one line');
+ok((await page.$$eval('#xpCarry p',p=>p.length))===0&&await page.evaluate(()=>{const c=document.querySelector('#xpCarry'),t=document.querySelector('#xpTools'),n=document.querySelector('#xpNext');return c.compareDocumentPosition(t)&4&&t.compareDocumentPosition(n)&4;}),'the order is: earlier line, tool, then Next below the tool');
 ok((await page.$$eval('#xpTools .xp-chips li',l=>l.length))===0&&(await page.$$eval('#xpOthers .xp-chips li',l=>l.length))===7,'the dice are still there, with the same roll, under other tools');
 // resume
 await page.goto(`${BASE}/experiments/#/`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('#xpContinue');
@@ -48,8 +49,8 @@ await page.type('#xpNote','Rolling first made me braver than choosing.'); await 
 ok(await page.evaluate(()=>!JSON.parse(localStorage.getItem('sil.exp.v1')).pos['dice-melody'].s),'finishing clears the saved step');
 // keep shelf, notebook, looking back
 await page.goto(`${BASE}/experiments/#/keep`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('.xp-kept-item');
-await sleep(300);
-ok(/What I rolled/.test(await text('.xp-kept-item h3'))&&(await text('.xp-kept')).split('·').length>=7,'the Keep shelf shows what was kept');
+await sleep(500);
+ok(await page.evaluate(()=>[...document.querySelectorAll('.xp-kept-item')].some(a=>/What I rolled/.test(a.querySelector('h3').textContent)&&(a.querySelector('.xp-kept')?.textContent||'').split('·').length>=7)),'the Keep shelf shows what was kept');
 await page.goto(`${BASE}/experiments/#/notebook`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('#xpReflect');
 const nb=await text('#xpNotebookText'); ok(/braver than choosing/.test(nb)&&/## Kept/.test(nb),'the notebook has the note and what was kept');
 ok(/1 note, \d+ words|1 note/.test(await text('#xpReflect')),'looking back counts your own words');
@@ -62,7 +63,7 @@ await page.click('#xpNext'); ok(await page.$('#xpStepTimer')!==null,'the next st
 // suggestions
 await page.goto(`${BASE}/experiments/#/`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('#xpSuggest');
 await page.evaluate(()=>[...document.querySelectorAll('.chip')].find(b=>b.textContent==='Nothing but you').click()); await page.evaluate(()=>[...document.querySelectorAll('.chip')].find(b=>b.textContent==='Up to 15 minutes').click());
-await page.click('#xpSuggest'); await page.waitForSelector('#xpSuggestion a.xp-card');
+await page.$eval('#xpFindWrap summary',s=>s.click()); await page.click('#xpSuggest'); await page.waitForSelector('#xpSuggestion a.xp-card');
 ok(/Nothing but you · (\d+) min/.test(await text('#xpSuggestion a.xp-card small'))&&+/· (\d+) min/.exec(await text('#xpSuggestion a.xp-card small'))[1]<=15,'a suggestion fits what you have and the time');
 // unit finished banner
 await page.evaluate(()=>{ const s=JSON.parse(localStorage.getItem('sil.exp.v1')); for(const id of ['weakest-hand','subtract','strategy-cards']) s.done[id]=1; localStorage.setItem('sil.exp.v1',JSON.stringify(s)); });

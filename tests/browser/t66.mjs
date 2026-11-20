@@ -12,6 +12,7 @@ const copies=[
  ws('w1','grow','Change jobs',{goal:'Find calmer work',opt1_fit:'8'}),
  ws('w2','grow','Move house',{goal:'Be closer to friends'}),
  ws('w3','dear-man','Ask for a quiet desk',{d:'The office is loud',a:'A desk by the window'}),
+ {link_id:'L1',category:'journal',source_id:'j1',source_created_at:iso,sealed:plain({v:1,kind:'journal',title:'A hard week',text:'It was loud and I was tired',created_at:iso,shared_at:iso})},
  {link_id:'L1',category:'checkins',source_id:'s1',source_created_at:iso,sealed:plain({v:1,created_at:iso,arousal:4,valence:7,sensory_load:3,emotion_words:['calm'],notes:'ok'})}];
 const tables={therapist_profiles:[{user_id:'u1',display_name:'Jordan'}],my_clients:[client],
   my_client_keys:[{link_id:'L1',client_id:'c1',public_enc:{},public_sign:null,fingerprint:'CCCC-DDDD'}],my_client_sessions:[],shared_copies:copies,messages:[]};
@@ -26,6 +27,10 @@ ok(/Intake form\s*Received/.test(t)&&/Family history\s*Received/.test(t)&&/3 doc
 t=await txt('#panel-folder');
 ok(/she\/her/.test(t)&&/Grew up by the sea/.test(t),'intake form and family history are in the folder');
 ok(/GROW \(2\)/.test(t)&&/DEAR MAN \(1\)/.test(t),'worksheets are grouped by type with counts');
+ok(/Journal entries/.test(t)&&/A hard week/.test(t),'a shared journal entry is listed in its own group');
+await P.page.$$eval('#journalList .th-docbtn',b=>b[0].click()); await sleep(150);
+ok(/It was loud and I was tired/.test(await txt('.th-journalbody')),'and opens to the full text, read-only');
+ok(/1 entry shared/.test(await txt('#folderIndex')),'the contents list counts journal entries');
 ok(/Change jobs/.test(t)&&/Ask for a quiet desk/.test(t),'documents are listed by title');
 await P.page.click('.th-docbtn'); await sleep(200);
 ok(/Find calmer work/.test(await txt('.th-docbody')),'a worksheet opens read-only inside the folder');

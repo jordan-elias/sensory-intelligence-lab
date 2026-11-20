@@ -71,7 +71,7 @@ export const EXPERIMENTS = [
     ],
     stop: 'After the fourth time through the progression, or 25 minutes.',
     reflect: 'Which shape changed the most? Was it the one you least expected?',
-    tools: [{ type: 'gen', kind: 'tuning', label: 'Roll the retuning' }, { type: 'groove', steps: 4, hits: 4, bpm: 70 }, { type: 'timer', minutes: 25 }],
+    tools: [{ type: 'gen', kind: 'tuning', label: 'Roll the retuning' }, { type: 'strings', bpm: 70 }, { type: 'timer', minutes: 25 }],
     solo: DICE + 'Number your strings (or groups of keys) on slips and draw one. Roll a die twice for the shift: the first roll for direction (even is down, odd is up), the second for the number of semitones.',
   },
   {
@@ -322,7 +322,7 @@ export const EXPERIMENTS = [
     ],
     stop: 'After you have lined all five up.',
     reflect: 'Did the order you would have picked change after four minutes with version 3?',
-    tools: [{ type: 'gen', kind: 'pattern', steps: 8, setSize: 5, label: 'Roll a pattern' }, { type: 'groove', steps: 8, hits: 8, bpm: 110 }, { type: 'timer', minutes: 4 }],
+    tools: [{ type: 'gen', kind: 'pattern', steps: 8, setSize: 5, label: 'Roll a pattern' }, { type: 'groove', steps: 8, hits: 8, bpm: 110 }, { type: 'versions', max: 5, bpm: 110 }, { type: 'timer', minutes: 4 }],
     solo: DICE + 'Pick five notes from a hat, then draw one of them for each of eight steps (put it back each time).',
   },
   {
@@ -357,7 +357,7 @@ export const EXPERIMENTS = [
     stop: 'After the 4 minute sweep and one listen-back.',
     reflect: 'Was there a sweet spot you had not found before?',
     tools: [{ type: 'marks', mode: 'spots', label: 'Sweet spots', noun: 'spot' }, { type: 'gen', kind: 'choice', label: 'Roll the control', options: [
-      'Filter cutoff', 'Reverb size', 'Delay time', 'Pitch of everything', 'Bit depth', 'Playback speed', 'Stereo width', 'Grain size', 'Distortion drive', 'Envelope release'] }, { type: 'groove', steps: 4, hits: 4, bpm: 100 }, { type: 'timer', minutes: 4 }],
+      'Filter cutoff', 'Reverb size', 'Delay time', 'Pitch of everything', 'Bit depth', 'Playback speed', 'Stereo width', 'Grain size', 'Distortion drive', 'Envelope release'] }, { type: 'bench', tracks: ['kick', 'snare', 'hihat', 'bass'], steps: 64, bring: false, bpm: 100 }, { type: 'timer', minutes: 4 }],
     solo: DICE + 'Write ten controls on slips of paper and draw one.',
   },
   {

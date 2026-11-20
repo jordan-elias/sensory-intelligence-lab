@@ -6,7 +6,7 @@
 import { el, audioCtx } from './tools.js';
 import { mulberry32, newSeed, generate, euclid, NOTE_NAMES, int } from './rng.js';
 import { encodeWav } from './audio-ops.js';
-import { scaleNotes, setStep, encodeMidi, makeLanes, LANE_ROLES, treatments } from './music-ops.js';
+import { scaleNotes, setStep, placeNote, coverage, encodeMidi, makeLanes, LANE_ROLES, treatments } from './music-ops.js';
 
 const midiFreq = n => 440 * Math.pow(2, (n - 69) / 12);
 const noteName = n => NOTE_NAMES[((n % 12) + 12) % 12];
@@ -23,29 +23,33 @@ function tone(ctx, dest, freq, t, dur, { type = 'triangle', gain = 0.25 } = {}) 
 // ── a melody over a rolled chord progression, scale-locked, one note per step ──
 export function rollTool(cfg) {
   const STEPS = 16, PER = 4;
-  const st = { root: 0, mode: 'major', chords: null, chordNames: [], melody: Array(STEPS).fill(null), bpm: 90, playing: false };
+  const st = { root: 0, mode: 'major', chords: null, chordNames: [], melody: Array(STEPS).fill(null), lens: Array(STEPS).fill(1), newLen: 1, bpm: 90, playing: false };
   const rootSel = el('select', { 'aria-label': 'Key' }, NOTE_NAMES.map((n, i) => el('option', { value: i }, n)));
   const modeSel = el('select', { 'aria-label': 'Mode' }, el('option', { value: 'major' }, 'Major'), el('option', { value: 'natural minor' }, 'Minor'));
   const chordOut = el('p', { class: 'xp-chords', id: 'xpChords', 'aria-live': 'polite' }, 'Roll the chords first.');
-  const grid = el('div', { class: 'xp-roll', id: 'xpRoll', role: 'group', 'aria-label': 'Melody: one note per step' });
+  const grid = el('div', { class: 'xp-roll', id: 'xpRoll', role: 'group', 'aria-label': 'Melody: tap a row to place a note' });
   const rollBtn = el('button', { type: 'button', class: 'xp-btn', id: 'xpRollChords' }, 'Roll 4 chords');
   const play = el('button', { type: 'button', class: 'xp-btn xp-btn--alt', id: 'xpRollPlay' }, 'Play');
   const save = el('button', { type: 'button', class: 'xp-btn xp-btn--alt', id: 'xpRollMidi' }, 'Download MIDI');
   const tempo = el('input', { type: 'range', min: 60, max: 140, value: st.bpm, 'aria-label': 'Tempo', oninput: e => { st.bpm = +e.target.value; } });
   const msg = el('p', { class: 'xp-hint', role: 'status' });
+  const lenSel = el('select', { 'aria-label': 'How long a new note lasts', id: 'xpRollLen', onchange: () => { st.newLen = +lenSel.value; } },
+    [[1, 'a sixteenth (1 step)'], [2, 'an eighth (2 steps)'], [4, 'a quarter (4 steps)'], [8, 'a half (8 steps)']].map(([v, t]) => el('option', { value: v }, t)));
+  const clearBtn = el('button', { type: 'button', class: 'xp-btn xp-btn--alt', id: 'xpRollClear', onclick: () => { st.melody = Array(STEPS).fill(null); st.lens = Array(STEPS).fill(1); draw(); } }, 'Clear the melody');
   let timer = null, cells = [];
 
   const rows = () => scaleNotes(st.root, st.mode, 2).slice().reverse();         // highest first
   const draw = (on = -1) => {
-    const R = rows(); cells = [];
+    const R = rows(), cov = coverage(st.melody, st.lens); cells = [];
     grid.style.gridTemplateColumns = `3rem repeat(${STEPS}, minmax(1.5rem, 1fr))`;
     grid.replaceChildren();
     R.forEach(n => {
       grid.append(el('span', { class: 'xp-roll-k' }, noteName(n)));
       for (let s = 0; s < STEPS; s++) {
-        const b = el('button', { type: 'button', class: 'xp-rc' + (st.melody[s] === n ? ' on' : '') + (s === on ? ' now' : '') + (s % PER === 0 ? ' bar' : ''),
-          'aria-pressed': String(st.melody[s] === n), 'aria-label': `Step ${s + 1}, ${noteName(n)}`,
-          onclick: () => { st.melody = setStep(st.melody, s, n); if (!st.playing) preview(n); draw(); } });
+        const c = cov[s], here = c && c.note === n, start = here && c.kind === 'start';
+        const b = el('button', { type: 'button', class: 'xp-rc' + (start ? ' on' : '') + (here && c.kind === 'hold' ? ' hold' : '') + (s === on ? ' now' : '') + (s % PER === 0 ? ' bar' : ''),
+          'aria-pressed': String(!!start), 'aria-label': `Step ${s + 1}, ${noteName(n)}${start && c.len > 1 ? `, lasts ${c.len} steps` : here && c.kind === 'hold' ? ', held' : ''}`,
+          onclick: () => { const r = placeNote(st.melody, st.lens, s, n, st.newLen); st.melody = r.melody; st.lens = r.lens; if (!st.playing) preview(n); draw(); } });
         grid.append(b);
       }
     });
@@ -56,7 +60,7 @@ export function rollTool(cfg) {
   const loop = () => {
     const ctx = audioCtx(), t0 = ctx.currentTime + 0.08, sd = 60 / st.bpm / 4, cm = st.chords ? chordMidi() : [];
     cm.forEach((c, k) => c.forEach(n => tone(ctx, ctx.destination, midiFreq(n), t0 + k * PER * sd, PER * sd * 0.98, { gain: 0.1 })));
-    st.melody.forEach((n, i) => { if (n != null) tone(ctx, ctx.destination, midiFreq(n), t0 + i * sd, sd * 0.95, { gain: 0.22 }); });
+    st.melody.forEach((n, i) => { if (n != null) tone(ctx, ctx.destination, midiFreq(n), t0 + i * sd, sd * (st.lens[i] || 1) * 0.95, { gain: 0.22 }); });
     for (let i = 0; i < STEPS; i++) setTimeout(() => { if (st.playing) draw(i); }, (t0 - ctx.currentTime + i * sd) * 1000);
     timer = setTimeout(() => { if (st.playing) loop(); }, (t0 - ctx.currentTime + STEPS * sd) * 1000);
   };
@@ -66,17 +70,17 @@ export function rollTool(cfg) {
     st.chords = r.chords; chordOut.textContent = r.items.map(i => i.text).join('   →   ');
     msg.textContent = 'Write a melody over these. Only notes of the key are offered. You may not re-roll once you have started.';
   };
-  rootSel.onchange = () => { st.root = +rootSel.value; st.melody = Array(STEPS).fill(null); draw(); };
-  modeSel.onchange = () => { st.mode = modeSel.value; st.melody = Array(STEPS).fill(null); draw(); };
+  rootSel.onchange = () => { st.root = +rootSel.value; st.melody = Array(STEPS).fill(null); st.lens = Array(STEPS).fill(1); draw(); };
+  modeSel.onchange = () => { st.mode = modeSel.value; st.melody = Array(STEPS).fill(null); st.lens = Array(STEPS).fill(1); draw(); };
   save.onclick = () => {
     if (!st.chords) { msg.textContent = 'Roll the chords first.'; return; }
-    download('melody-over-chords.mid', encodeMidi({ melody: st.melody, chords: chordMidi(), stepsPerChord: PER, bpm: st.bpm }), 'audio/midi');
+    download('melody-over-chords.mid', encodeMidi({ melody: st.melody, lengths: st.lens, chords: chordMidi(), stepsPerChord: PER, bpm: st.bpm }), 'audio/midi');
     msg.textContent = 'Saved as a MIDI file. Open it in any DAW or notation program.';
   };
   draw();
   return el('div', { class: 'xp-tool' }, el('p', { class: 'xp-k' }, 'Chords and melody'), el('div', { class: 'xp-row' }, el('label', {}, 'Key ', rootSel), modeSel, rollBtn), chordOut,
-    el('div', { class: 'xp-roll-wrap' }, grid), el('div', { class: 'xp-row' }, play, save, el('label', {}, 'Tempo ', tempo)), msg,
-    el('p', { class: 'xp-hint' }, 'Each column is a sixteenth note and holds one note. Tap a note to place it; tap it again to take it away. Four steps per chord.'));
+    el('div', { class: 'xp-row' }, el('label', {}, 'New notes last ', lenSel), clearBtn), el('div', { class: 'xp-roll-wrap' }, grid), el('div', { class: 'xp-row' }, play, save, el('label', {}, 'Tempo ', tempo)), msg,
+    el('p', { class: 'xp-hint' }, 'Each column is a sixteenth note. Pick how long a new note lasts, then tap a row to place it; a longer note shows as a bar. Tap the start of a note again to take it away. Placing a note in the middle of a longer one shortens it. Four steps per chord.'));
 }
 
 // ── a beat built from one sample ──

@@ -137,7 +137,7 @@ Feedback: the course asks for too much, repeats itself, and looks unlike the res
   - **Workbench** (`bench.js`, `bench-core.js`, `seq/voices.js`): replaces "Play it" and the loops tool. A step sequencer in the Sequencer's style: kick, snare, hi-hat, bass and lead tracks using the Sequencer's own sounds and rules (`seq/groove.js`: swing, chance, velocity, per-track length, mute/solo, Euclidean spread); scale-locked note picker for bass and lead; Loudness and Chance modes; per-track cycle length with "lines up again every N steps"; tempo, key and scale; bring in the notes you drew (in order, backwards, random, first) and the rhythm you rolled; Download MIDI (type 1, drums on channel 10); offered for saving as "My loop". Used in every experiment that draws notes, and in Loop mismatch (cycles 3, 4, 5, locked) and Odd meter (every track takes the rolled number).
   - **Stopwatch with marks**: Borrowed form (time the sections, edit times and names, see the timeline, play it through with a chime at each boundary) and One knob (mark sweet spots).
   - **Take it apart**: Subtract (list the parts, remove half each round, rate clarity per round).
-- Still to do for in-app coverage: a plucked-string instrument for Wrong tuning; a 4-bar (64-step) loop view for One knob and DAW-unit experiments; Random pitch, fixed rhythm on the workbench with a "next version" and ranking list; share the Sequencer's voices with the Sequencer page itself (today the sound code is copied, not shared); WAV render of the workbench; a larger piano roll for Melody over chords with note lengths; the Sequencer's saved patterns shared with the course; capstone choices.
+- In-app coverage: plucked strings (app-43), 64-step loops (app-40), versions and ranking (app-45), WAV render (app-38), note lengths (app-44) and the take-it-with-you downloads (app-39) are DONE. Still open: share the Sequencer's voices and saved patterns with the course (the sound code is copied, not shared); capstone choices; merge trivial steps (needs a wording pass); seed combining and a daily seed. See `docs/status-2026-11-19.md`.
 
 **Suggested order**
 1. C (styling, small and visible) and F (account link, worksheets).
@@ -154,7 +154,7 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 - Journal sharing with a therapist (needs go-ahead and a privacy policy change).
 - Regulation "worlds of sound"; Tone.js, Pure Data and SuperCollider spikes.
 - Sequencer: done (branch app-19): swing, mute/solo per track, Euclidean fill, WAV export matches. Soundscape Machine reviewed, already deep; waiting for the user to say what is missing.
-- Photo-words experiment: automatic OCR (currently typed by hand).
+- Photo-words experiment: automatic OCR was built in app-23. Check it after the first deploy (Netlify serving the `.gz` OCR data).
 - Listening test of the piano roll and sampler by ear.
 
 ### Progress: app-38 worksheets and therapist folder
@@ -165,3 +165,34 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 
 ### Progress: app-39 take it with you
 - Course end screen: the save list is now "Take it with you" with per-item downloads (text as .txt, recordings as .wav, the workbench loop also as .mid). Items still go on the Keep shelf when ticked. Test t58.
+
+### Progress: app-40 longer loops
+- Workbench takes `steps: 16 | 32 | 64` (rows of 16, cycle lengths up to the full length). One knob now has a 64-step, four-bar loop at 100 BPM (kick, snare, hat, bass) that exports as MIDI and WAV. Test t67.
+
+### Progress: app-41 Today is app-only
+- The dashboard "Today" path (two questions, short path) now appears only in the installed app (`window.SIL_APP`). The website dashboard goes straight to the modules. Tests t56 (app behaviour plus "not shown on the website"), t34.
+
+### Progress: app-42 sliders
+- The 0 to 10 ratings on DEAR MAN, GROW and FAST are small sliders (start unset, value shown, Clear). Saved in a hidden field so saving, restore, text export and therapist sharing are unchanged. Test t65.
+
+### Progress: app-43 plucked strings
+- New `strings` tool (Wrong-tuning chords): six plucked strings made in the page (Karplus-Strong), retune each string by up to an octave, three chord shapes by fret, strum, "standard then retuned" comparison, play shapes 1-2-3 at the experiment's tempo, standard-tuning reset. The roll stays the user's own. Kept as text. Tests: unit `strings-core.test.mjs`, browser t68. (t54 flakes occasionally; passes on rerun.)
+
+### Progress: app-44 note lengths
+- Melody over chords: notes have lengths (sixteenth, eighth, quarter, half), drawn as bars. A note stops at the next one, a note placed inside a longer one shortens it, playback and the MIDI file keep the lengths, and there is a Clear button. Tests: unit (experiments.test.mjs), browser t37.
+
+### Progress: app-45 versions
+- New `versions` tool (Random pitch, fixed rhythm): save each roll as a version (up to five), loop it, give it one word, put the versions in order with arrows, then put them in order again after listening and see which moved ("Version 5 moved from 5th to 3rd."). The roll stays the user's own. Kept as text. Tests: unit `versions-core.test.mjs`, browser t69.
+
+### Progress: app-46 course layout
+- Next now sits below the tool (sticky bar on phones). "From earlier" is one line. Roll clutter (seed, "the seed makes a roll repeatable", earlier rolls) is folded into one "Details". Scale-degree chips show the plain note ("E"), with the degree as a tooltip. List page: first-time visitors see one "Start here" card and one Continue button; paper, notebook and Keep shelf are small links; "Which one for me?" is collapsed. Tests t54 (also made less flaky), t37, t58.
+
+### Progress: app-48 privacy policy 2.1 (19 Nov 2026)
+- Added: an Email section and a Resend row (confirmation, post-session, subscription, optional check-in reminder; never content), the Lab member rate on Cal.com bookings, the on-device Today path and settings, and wording that matches "Take it with you" (ticked items are kept, downloads stay on the device). Version 2.1.
+- Not yet reflected, pending the owner's answers: how session payment works on Cal.com, and any journal-sharing decision.
+
+### Progress: app-49 share one journal entry
+- A saved journal entry can be shared with a connected therapist, one at a time, with a confirmation that says so. The therapist gets a copy of title, date and text only (not soundscape, prompt, timer or counts), listed under "Journal entries" in the client Folder and kept in their client file. The client can take the copy back from the platform; deleting the entry withdraws it. There is no "share all" switch. New SQL: `docs/sql/phase15_001_share_journal.sql` (widens the allowed `shared_copies.category` values; run once). Privacy policy 2.2 and the journal page text updated. Tests t70, t66, unit.
+
+### Progress: app-50 Impressum
+- `/impressum/` (provider, contact, tax, content responsibility, dispute resolution, links, privacy), linked from the landing page, dashboard, subscribe, privacy and Neural Synthesis footers; in robots.txt, the sitemap and the Netlify redirects. Blanks the owner must fill in are marked `[[LIKE THIS]]`; `npm run check:launch` lists them. Test t71.

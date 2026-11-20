@@ -243,7 +243,7 @@
       <a href="#faq">FAQ</a>
       <a href="#contact">Contact</a>
     </nav>
-    <p class="sidebar__updated">Last updated<br>November 2026<br>Version 2.0</p>
+    <p class="sidebar__updated">Last updated<br>19 November 2026<br>Version 2.2</p>
   </aside>
 
   <main>
@@ -337,7 +337,8 @@ you have a Lab plan, your intake status, and the times of the sessions you book 
 <li><strong>Check-ins</strong> are shared only if you switch sharing on for that therapist, and you choose whether notes are included.</li>
 <li><strong>Worksheets</strong> are shared one document at a time. There is no switch that shares them all.</li>
 <li><strong>Messages</strong> between you and your therapist can be read only by the two of you.</li>
-<li>Journal entries, recordings and saved places are not shareable through the platform.</li>
+<li>A journal entry is shared one at a time, only when you press Share on that entry. There is no switch that shares your journal. Your therapist receives a copy of that entry's title, date and text, and keeps it in their client file. The soundscape, prompt, timer and word counts are not sent. You can take the copy back from the platform; what they had already read stays with them.</li>
+<li>Recordings and saved places are not shareable through the platform.</li>
 </ul>
 <p class="prose">
 Shared items are re-encrypted so that only you and that therapist can open them. You can stop sharing, and either of
@@ -400,14 +401,15 @@ The table covers every category of data the platform stores. Anything you downlo
 <tbody>
 <tr><td>Email address</td><td class="td-mono">Login records</td><td><span class="badge badge--plain">Plaintext</span></td><td>You. Platform operator. Supabase.</td></tr>
 <tr><td>Display name, subscription tier and status, intake status</td><td class="td-mono">Profile</td><td><span class="badge badge--plain">Plaintext</span></td><td>You. Platform operator. Your therapist, if you connect to one (see above).</td></tr>
-<tr><td>Journal entries (text and title)</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You only. Journal entries cannot be shared through the platform.</td></tr>
+<tr><td>Journal entries (text and title)</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You. Your therapist, only for an individual entry you press Share on. There is no way to share more than one entry at once.</td></tr>
 <tr><td>Journal details: date, length, duration, soundscape, prompt</td><td class="td-mono">Database</td><td><span class="badge badge--plain">Plaintext</span></td><td>You. Platform operator.</td></tr>
 <tr><td>Offline copy of the tool pages you have opened</td><td class="td-mono">This device</td><td><span class="badge badge--enc">No personal content</span></td><td>You. It holds only the site's own pages, scripts and images, never your journal, check-ins, messages or account.</td></tr>
 <tr><td>Intake form: name, pronouns, date of birth, contact, emergency contact, reason for therapy, medications, health, history, sound</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You. Your therapist, only after they ask for it and you choose to send it. We store only that it exists.</td></tr>
 <tr><td>Family history: people, relationships, history (optional)</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You. Your therapist, only if you press send, and only a snapshot. You can take the copy back at any time.</td></tr>
 <tr><td>Check-ins: scores, emotion words, notes</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You. Your therapist, only if you turn sharing on.</td></tr>
 <tr><td>Saved places</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You only.</td></tr>
-<tr><td>Experiments in Creativity (minicourse) progress, notes and kept items</td><td class="td-mono">Your device; optionally the database</td><td><span class="badge badge--plain">On your device: not encrypted</span> <span class="badge badge--enc">If you turn on sync: encrypted in your browser</span></td><td>You only. By default everything stays on your device. If you press "Turn on sync" in the course, your progress, notes and the text you chose to keep are encrypted in your browser with your vault key before they are stored, so they can be read only by you. Recordings you keep from an experiment stay on your device and are never synced. Audio, photos, PDFs and text you load or write in an experiment are read in your browser and are not uploaded; they are only kept, on your device, if you press "Keep this". This includes the automatic reading of words in a photo, which runs on your device with software served from this site. You can turn sync off at any time, and deleting your account deletes the synced copy.</td></tr>
+<tr><td>The app's daily Today path and small settings (which device you trust, the step you were on)</td><td class="td-mono">This device</td><td><span class="badge badge--plain">On your device: not encrypted</span></td><td>You. Never sent to the server. They contain no journal, check-in or worksheet content.</td></tr>
+<tr><td>Experiments in Creativity (minicourse) progress, notes and kept items</td><td class="td-mono">Your device; optionally the database</td><td><span class="badge badge--plain">On your device: not encrypted</span> <span class="badge badge--enc">If you turn on sync: encrypted in your browser</span></td><td>You only. By default everything stays on your device. If you press "Turn on sync" in the course, your progress, notes and the text you chose to keep are encrypted in your browser with your vault key before they are stored, so they can be read only by you. Recordings you keep from an experiment stay on your device and are never synced. Audio, photos, PDFs and text you load or write in an experiment are read in your browser and are not uploaded; they are only kept, on your device, if you leave them ticked in the save list at the end of the experiment. Downloads from that list (text, WAV or MIDI files) go straight to your device and are not sent anywhere. This includes the automatic reading of words in a photo, which runs on your device with software served from this site. You can turn sync off at any time, and deleting your account deletes the synced copy.</td></tr>
 <tr><td>Worksheets</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You. Your therapist, only for the individual worksheets you share.</td></tr>
 <tr><td>Audio recordings and compositions (audio, title, length)</td><td class="td-mono">Private file storage</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You only. Files are never at public links.</td></tr>
 <tr><td>Messages with your therapist</td><td class="td-mono">Database</td><td><span class="badge badge--enc">Encrypted in your browser</span></td><td>You and your therapist only.</td></tr>
@@ -499,6 +501,16 @@ When you book a session, the booking is made on <a href="https://cal.com" target
 or, if your therapist uses their own calendar, on their own booking page. That service receives your name, email and
 chosen time and has its own privacy policy. The platform records only when the session is and which therapist it is
 with, so that sessions can be counted and shown to you and to that therapist.
+Sessions are offered at a standard rate and a lower Lab member rate. The booking page shows you the rate that applies to your plan and
+opens the matching booking on Cal.com, so Cal.com can see which of the two you booked.
+</p>
+<h3 class="section__sub">Email</h3>
+<p class="prose">
+Email is sent through <a href="https://resend.com" target="_blank" rel="noopener">Resend</a>. We send: the message that confirms your email address when you
+create an account, a note after a subscription starts, a short message after a session asking how it went, and, only if you switch it on in your
+account settings, a daily check-in reminder. Resend receives your email address and the text of the message. These emails never contain
+anything from your journal, check-ins, worksheets, messages or recordings; the check-in reminder does not even say whether you have checked in.
+We send no newsletters and no marketing email.
 </p>
 <h3 class="section__sub">Intake</h3>
 <p class="prose">
@@ -553,7 +565,8 @@ Your data is not sold, rented or shared with third parties for commercial purpos
 <tr><td><strong>Supabase</strong> (EU, Frankfurt)</td><td>Database, login and file storage</td><td>All stored data, encrypted where marked above</td></tr>
 <tr><td><strong>Netlify</strong></td><td>Website hosting and server functions</td><td>Web requests (IP address and the pages you open)</td></tr>
 <tr><td><strong>Stripe</strong></td><td>Payments</td><td>Email, name, subscription. Card data goes to Stripe only.</td></tr>
-<tr><td><strong>Cal.com</strong></td><td>Session booking</td><td>Name, email, booking details</td></tr>
+<tr><td><strong>Cal.com</strong></td><td>Session booking</td><td>Name, email, booking details, and which rate (standard or Lab member) you booked</td></tr>
+<tr><td><strong>Resend</strong></td><td>Sending account and reminder email</td><td>Email address, and the text of the message (never your saved content)</td></tr>
 <tr><td><strong>YouTube</strong></td><td>Playing songs you choose in some exercises</td><td>Standard embed data, only on pages where you use it</td></tr>
 <tr><td><strong>Genius and LRCLIB</strong></td><td>Song and lyric lookup in the worksheets</td><td>Your search text, passed through our server function for Genius</td></tr>
 </tbody>
@@ -696,7 +709,7 @@ Can Jordan read my journal entries or worksheets?
 <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
 </button>
 <div class="faq-a">
-<p>No. Saved content is encrypted in your browser with a key protected by your passphrase, and the server never has it. A therapist can see a check-in or worksheet only if you choose to share it, and then only that item, sealed to you and them.</p>
+<p>No. Saved content is encrypted in your browser with a key protected by your passphrase, and the server never has it. A therapist can see a check-in, a worksheet or a single journal entry only if you choose to share it, and then only that item, sealed to you and them.</p>
 </div>
 </div>
 <div class="faq-item">
@@ -786,7 +799,7 @@ Where is my data stored?
 <svg class="faq-arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l5 5 5-5"/></svg>
 </button>
 <div class="faq-a">
-<p>The database and file storage are hosted by Supabase in the EU (Frankfurt). Netlify hosts the website and server functions and does not keep your content. Stripe and Cal.com have their own storage under their own policies.</p>
+<p>The database and file storage are hosted by Supabase in the EU (Frankfurt). Netlify hosts the website and server functions and does not keep your content. Stripe, Cal.com and Resend have their own storage under their own policies.</p>
 </div>
 </div>
 <div class="faq-item">
@@ -832,6 +845,7 @@ What happens if the platform closes?
 <footer>
   <p>
     Jordan Elias Music Therapy · Berlin ·
+    <a href="/impressum/">Impressum</a> ·
     <a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a>
   </p>
 </footer>

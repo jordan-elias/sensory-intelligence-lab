@@ -10,6 +10,8 @@ import { rollTool, samplerTool, treatTool } from './tools-music.js';
 import { attachKeep } from './keep.js';
 import { benchTool } from './bench.js';
 import { marksTool, subtractTool } from './tools-marks.js';
+import { stringsTool } from './tools-strings.js';
+import { versionsTool } from './tools-versions.js';
 import { mixToMono, resample, reverse, chopShuffle, stutter, pitchedGrains, contrastLayer, normalise, encodeWav } from './audio-ops.js';
 
 export function el(tag, attrs = {}, ...kids) {
@@ -75,7 +77,7 @@ function genTool(cfg) {
   rollBtn.onclick = () => {
     const seed = newSeed();
     last = generate({ ...cfg, root: state.root, scale: state.scale }, mulberry32(seed));
-    out.replaceChildren(el('ul', { class: 'xp-chips' }, last.items.map(i => el('li', {}, i.label ? el('span', { class: 'xp-chip-k' }, i.label) : null, ' ', i.text))));
+    out.replaceChildren(el('ul', { class: 'xp-chips' }, last.items.map(i => el('li', i.title ? { title: i.title } : {}, i.label ? el('span', { class: 'xp-chip-k' }, i.label) : null, ' ', i.text))));
     seedEl.textContent = `Seed ${seed}`;
     hist.prepend(el('li', {}, last.summary)); while (hist.children.length > 5) hist.lastChild.remove();
     hear.hidden = !(last.pitchClasses || last.chords);
@@ -84,8 +86,9 @@ function genTool(cfg) {
   root.number = () => (last && last.kind === 'range' && last.values.length ? last.values[0] : null);
   root.pitches = () => (last?.pitchClasses ? [...last.pitchClasses] : null);
   hear.onclick = () => { stop(); if (last?.chords) stop = playChords(last.chords); else if (last?.pitchClasses) stop = playTones(last.pitchClasses, { step: cfg.kind === 'notes' ? 0.6 : 0.4 }); };
-  root.append(el('div', { class: 'xp-row' }, rollBtn, hear), bar, out, el('div', { class: 'xp-meta' }, seedEl, el('p', { class: 'xp-hint' }, 'The seed makes a roll repeatable.')),
-    cfg.noHistory ? null : el('details', { class: 'xp-details' }, el('summary', {}, 'Earlier rolls'), hist));
+  root.append(el('div', { class: 'xp-row' }, rollBtn, hear), bar, out, el('details', { class: 'xp-details xp-rolldetails' }, el('summary', {}, 'Details'),
+      el('div', { class: 'xp-meta' }, seedEl, el('p', { class: 'xp-hint' }, 'The seed makes a roll repeatable.')),
+      cfg.noHistory ? null : el('p', { class: 'xp-k' }, 'Earlier rolls'), cfg.noHistory ? null : hist));
   return root;
 }
 
@@ -260,8 +263,10 @@ function buildOne(cfg) {
     case 'pad': return padTool(cfg);
     case 'bench': return benchTool(cfg);
     case 'marks': return marksTool(cfg);
+    case 'strings': return stringsTool(cfg);
+    case 'versions': return versionsTool(cfg);
     case 'subtract': return subtractTool(cfg);
     default: return el('p', {}, '');
   }
 }
-export const TOOL_TYPES = ['gen', 'timer', 'clip', 'loops', 'groove', 'assign', 'wordpoem', 'burn', 'cards', 'blackout', 'roll', 'sampler', 'treat', 'bench', 'pad', 'marks', 'subtract'];
+export const TOOL_TYPES = ['gen', 'timer', 'clip', 'loops', 'groove', 'assign', 'wordpoem', 'burn', 'cards', 'blackout', 'roll', 'sampler', 'treat', 'bench', 'pad', 'marks', 'subtract', 'strings', 'versions'];
