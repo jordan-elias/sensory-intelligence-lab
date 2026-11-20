@@ -44,4 +44,10 @@ ok(await page.evaluate(()=>window.__tbl.therapist_notes.length)===before+1,'only
 ok(!/Mia|grief/.test(await page.evaluate(()=>JSON.stringify(window.__tbl.therapist_notes))),'the imported note is stored encrypted');
 await tab('Notes'); ok(/Older note about/.test(await txt()),'the imported note shows in Notes with its date');
 ok(errors.filter(e=>!/Failed to load resource/.test(e)).length===0,'no page errors '+errors.join('|'));
+await tab('Notes');
+await page.select('#recTpl','soap'); ok(/S \(what they told me\)/.test(await page.$eval('#recText',e=>e.value)),'choosing a template puts its structure in the note box');
+await page.evaluate(()=>{ window.prompt=()=>'My intake'; }); await page.$eval('#recText',e=>{ e.value='Why they came:\n\nGoals:\n'; });
+await page.evaluate(()=>[...window.__box.querySelectorAll('button')].find(b=>b.textContent==='Save this as my template').click()); await sleep(100);
+ok(await page.$$eval('#recTpl option',l=>l.some(o=>/My intake \(mine\)/.test(o.textContent))),'my own template appears in the list');
+ok(!/Why they came/.test(await page.evaluate(()=>JSON.stringify(window.__tbl.therapist_notes))),'templates are not sent to the database');
 await browser.close(); server.close(); process.exit(fail?1:0);

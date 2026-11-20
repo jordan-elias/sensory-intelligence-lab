@@ -8,6 +8,7 @@
 import { parseNote, keyOf } from '../notes/parse.js';
 import { recurring, suggestThemes, bigrams, shifts, emotionSeries, termSeries } from '../notes/analysis.js';
 import { items, backlinks, matrix, graph, notRevisited, timeline, toMarkdown, ordered, related } from '../notes/graph.js';
+import { BUILTIN, loadMine, saveMine, removeMine, applyTemplate } from '../notes/templates.js';
 import { parseMarkdownRecord } from '../notes/import.js';
 import { lifeEvents, lifeLanes, birthYearOf } from '../notes/life.js';
 import { intakeEntry, familyEntry, familyPeople, intakeFull } from '../notes/entries.js';
@@ -90,6 +91,15 @@ export async function mountRecord(box, { store, clientId, clientName, intake = n
     const area = h('textarea', { class: 'ws-input', id: 'recText', rows: '7', maxlength: '20000', placeholder: 'What happened, what you noticed, what you plan. Write [[Mother]] to link a person, event or place, and #perfectionism to tag a theme.' });
     const insert = t => { const s = area.selectionStart ?? area.value.length, e = area.selectionEnd ?? s; area.setRangeText((s && !/\s$/.test(area.value.slice(0, s)) ? ' ' : '') + t + ' ', s, e, 'end'); area.focus(); };
     const chips = h('div', { class: 'th-chips', 'aria-label': 'Insert a link or theme' }, [...known.values()].slice(0, 24).map(k => btn(k.label, () => insert(k.text), 'th-chip')));
+    const mineStore = (() => { try { return window.localStorage; } catch { return null; } })();
+    const tplSel = h('select', { id: 'recTpl', 'aria-label': 'Start from a template' });
+    const fillTpl = () => { const all = [...BUILTIN, ...(mineStore ? loadMine(mineStore) : [])]; tplSel.replaceChildren(h('option', { value: '' }, 'Start from a template…'), ...all.map(t => h('option', { value: t.id }, t.mine ? t.name + ' (mine)' : t.name))); tplSel._all = all; };
+    fillTpl();
+    tplSel.onchange = () => { const t = tplSel._all.find(x => x.id === tplSel.value); if (t) { area.value = applyTemplate(area.value, t); area.focus(); } tplSel.value = ''; };
+    const saveTpl = mineStore ? btn('Save this as my template', () => {
+      const name = (window.prompt('Name for this template (kept on this device only):') || '').trim();
+      if (name && saveMine(mineStore, name, area.value)) { fillTpl(); say(`Saved “${name}” as a template on this device.`); } else if (name) say('Write the structure in the note box first.', 'error');
+    }, 'action-btn outline sm') : null;
     const save = btn('Save note', async e => { e.target.disabled = true; try { await store.add(clientId, area.value, date.value || today()); await load(); draw(); } catch (err) { say(err.message, 'error'); e.target.disabled = false; } }, 'action-btn');
     const search = h('input', { type: 'search', class: 'ws-input', id: 'recFind', placeholder: 'Search this record', value: filter, 'aria-label': 'Search this record' });
     const list = h('ul', { class: 'th-list', id: 'recList' });
@@ -113,8 +123,8 @@ export async function mountRecord(box, { store, clientId, clientName, intake = n
     };
     search.oninput = () => { filter = search.value; paint(); };
     panel.append(h('p', { class: 'th-hint', style: 'margin-top:0' }, `Private to you. Notes are encrypted with your vault before they leave this device, so the client, the practice owner and the platform cannot read them. ${NOTE_FOR_ANALYSIS}`),
-      h('label', { class: 'ws-label', for: 'recDate' }, 'Session date'), date, h('label', { class: 'ws-label', for: 'recText', style: 'margin-top:.8rem' }, 'New note'), area, chips,
-      h('div', { style: 'margin:.5rem 0 1rem' }, save), h('div', { class: 'msg', id: 'recMsg', role: 'status' }),
+      h('label', { class: 'ws-label', for: 'recDate' }, 'Session date'), date, h('label', { class: 'ws-label', for: 'recText', style: 'margin-top:.8rem' }, 'New note'), tplSel, area, chips,
+      h('div', { style: 'margin:.5rem 0 1rem' }, save, ' ', saveTpl), h('div', { class: 'msg', id: 'recMsg', role: 'status' }),
       h('h2', { class: 'th-h2' }, 'The record'), search, list); paint();
   }
 

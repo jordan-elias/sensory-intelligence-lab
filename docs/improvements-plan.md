@@ -211,3 +211,5 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 - app-56: spatial game: "Today's challenge" (seeded paths, same for everyone each day, per level and trial) and four rooms with different reverb (small room is the usual; other rooms are practice and do not set best scores). Room and mode remembered on the device. daily.js, t76. Course/minicourse: finished for now, awaiting review.
 
 - app-57: Markdown import for therapist records: Record tab, "Export and delete", "Import notes". Reads a .md/.txt on the device, previews dated sections ("## 2026-03-04" or 04.03.2026), skips undated sections and ones already in the record, saves nothing until Import, each note encrypted as usual. notes/import.js, t77.
+
+- app-58: session note templates (short, first session, SOAP, DAP, after check-ins) in the Record tab note box; the therapist's own templates are kept on that device only. notes/templates.js, t77.
