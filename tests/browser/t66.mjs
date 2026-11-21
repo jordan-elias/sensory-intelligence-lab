@@ -38,4 +38,5 @@ ok(!(await P.page.$('#panel-folder input, #panel-folder textarea')),'nothing in 
 await P.page.click('#tab-messages'); await sleep(500);
 ok(await P.page.$('#panel-messages #mxForm')!==null,'private messaging is still its own tab');
 ok(P.errors.filter(e=>!/Failed to load resource/.test(e)).length===0,'no page errors '+P.errors.join('|'));
+ok(/This week/.test(await page.$eval('#folder-week',e=>e.innerText)),'the folder starts with a This week summary');
 await browser.close(); server.close(); process.exit(fail?1:0);

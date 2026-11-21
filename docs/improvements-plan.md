@@ -213,3 +213,5 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 - app-57: Markdown import for therapist records: Record tab, "Export and delete", "Import notes". Reads a .md/.txt on the device, previews dated sections ("## 2026-03-04" or 04.03.2026), skips undated sections and ones already in the record, saves nothing until Import, each note encrypted as usual. notes/import.js, t77.
 
 - app-58: session note templates (short, first session, SOAP, DAP, after check-ins) in the Record tab note box; the therapist's own templates are kept on that device only. notes/templates.js, t77.
+
+- app-59: "This week" page at the top of the client Folder tab (last 7 days of check-ins vs the week before, worksheets, journal titles) with Copy as text. therapist/week.js.
