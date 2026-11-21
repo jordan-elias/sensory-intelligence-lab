@@ -217,3 +217,5 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 - app-59: "This week" page at the top of the client Folder tab (last 7 days of check-ins vs the week before, worksheets, journal titles) with Copy as text. therapist/week.js.
 
 - app-60: a therapist can assign a worksheet from the Messages tab (sent inside the encrypted message, so no new table or SQL); the client gets a card with an Open link in Messages and the usual unread badge, and chooses whether to share the result back. messages/store.js `assign`, test in messages.test.mjs.
+
+- app-61: "Sessions by month" page for therapists (/therapist/sessions/): a month of booked sessions from the Cal.com records they can already see, totals per client, CSV download made on the device; prices stay on Cal.com. therapist/month.js, t78. A Cal.com calendar embed is not done (needs each therapist's Cal.com link).

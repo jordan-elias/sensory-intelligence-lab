@@ -65,6 +65,7 @@ export async function mountDashboard(root) {
     const ended = state.clients.filter(c => c.status === 'ended');
     root.innerHTML = `
       ${active.length ? '<p style="margin-top:0"><a href="/therapist/caseload/">Caseload overview &rarr;</a> <span class="th-muted">sessions without notes, and themes across your clients</span></p>' : ''}
+      <p style="margin-top:0"><a href="/therapist/sessions/">Sessions by month &rarr;</a> <span class="th-muted">a list for your invoicing</span></p>
       <h2 class="th-h2" style="margin-top:0">Active clients</h2>
       ${active.length ? active.map(c => card(c, false)).join('') : '<p class="th-muted">No active clients yet. Clients on a session plan appear here after they choose to connect with you. Free and Lab members are never shown to you.</p>'}
       <h2 class="th-h2">Archive</h2>

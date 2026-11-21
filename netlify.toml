@@ -390,6 +390,16 @@
   status = 200
 
 [[redirects]]
+  from = "/therapist/sessions"
+  to   = "/therapist/sessions/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/therapist/sessions/"
+  to   = "/therapist/sessions/index.html"
+  status = 200
+
+[[redirects]]
   from = "/therapist/archive"
   to   = "/therapist/archive/index.html"
   status = 200
