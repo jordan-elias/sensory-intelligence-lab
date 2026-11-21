@@ -11,6 +11,8 @@ import { post } from '../api.js';
 import { mountThread } from '../messages/thread.js';
 import { tierLabel, intakeLabel, summarize, openCopies } from './clients.js';
 import { splitSessions, describe } from './sessions.js';
+import { currentConsents } from '../messages/handover.js';
+import { loadConversation } from '../messages/store.js';
 import { weekSummary, weekText } from './week.js';
 import { toRows, renderRows, worksheetLabel } from './doc-render.js';
 import { makeNotesStore } from './notes.js';
@@ -296,7 +298,9 @@ export async function mountClientPage(root) {
       // The intake form and family history join the record, so everything about this client is in one place. Opened here, read here.
       const open = async (cat, fn) => { const c = copies.find(x => x.category === cat); if (!c) return null; try { return await fn(session, { ...c, link_id: linkId }); } catch { return null; } };
       const [intake, fam] = await Promise.all([open('intake', openIntake), open('family', openFamily)]);
-      await mountRecord(box, { store: makeNotesStore(sb, session), clientId: client.client_id, clientName: name, active, intake, fam, profile: { name },
+      // The client's own agreements to a handover (messages they signed). Without one, no handover can be prepared.
+      let consents = []; try { consents = currentConsents(await loadConversation({ sb, session, linkId, otherSignKey: key?.public_sign || null })); } catch { consents = []; }
+      await mountRecord(box, { store: makeNotesStore(sb, session), clientId: client.client_id, clientName: name, active, intake, fam, profile: { name }, consents,
         sharedDates: copies.filter(c => c.category === 'checkins').map(c => c.source_created_at).filter(Boolean) });
     } catch (e) { notesMounted = false; box.innerHTML = `<p class="msg show error">${esc(e.message)}</p>`; }
   }

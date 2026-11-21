@@ -159,7 +159,7 @@ export function mountVaultPanel(root, vault) {
 
       <section class="vault-section" aria-labelledby="ckHead">
         <h4 id="ckHead">Check your recovery key</h4>
-        ${state.recoveryDue ? '<div class="ws-callout ws-callout--care"><strong>A gentle reminder</strong>It has been a while since you checked that you still have your recovery key. Checking takes a minute and changes nothing.</div>' : ''}
+        ${state.recoveryDue ? '<div class="ws-callout ws-callout--care"><strong>A gentle reminder</strong>It has been a while since you checked that you still have your recovery key.</div>' : ''}
         <p class="vault-help">Type your recovery key to see that it still opens your vault. ${state.recoveryConfirmedAt ? 'Last confirmed ' + esc(state.recoveryConfirmedAt.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })) + '.' : 'Not confirmed yet.'} Nothing is changed and the key is not kept.</p>
         <form id="checkRkForm" novalidate>
           <label class="ws-label" for="ckInput">Recovery key</label>

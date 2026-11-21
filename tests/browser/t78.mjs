@@ -12,6 +12,6 @@ ok(/2 sessions/.test(await t())&&/Ana Client/.test(await t())&&/Ben Client/.test
 ok(!/Cancelled/.test(await t()),'cancelled sessions are hidden by default');
 await page.$eval('#mCan',e=>e.click()); await sleep(100); ok(/Cancelled/.test(await t()),'and shown when asked');
 await page.$eval('#mPrev',e=>e.click()); await sleep(100); ok(/No sessions this month/.test(await t()),'the previous month is empty');
-ok(/Prices are on Cal.com/.test(await t()),'it says prices are on Cal.com');
+ok(/Sessions booked with you through Cal.com/.test(await t()),'the page says what it lists');
 ok(P.errors.filter(e=>!/Failed to load resource/.test(e)).length===0,'no page errors '+P.errors.join('|'));
 await browser.close(); server.close(); process.exit(fail?1:0);

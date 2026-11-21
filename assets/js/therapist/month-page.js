@@ -21,7 +21,7 @@ export async function mountMonthPage(root) {
   function draw() {
     const l = monthList(sessions, names, ym, { cancelled });
     root.innerHTML = `<p class="th-back"><a href="/therapist/">&larr; All clients</a></p><h1 class="th-title">Sessions by month</h1>
-      <p class="th-lede">The sessions booked with you through Cal.com, for your own invoicing. Prices are on Cal.com, so none are shown here.</p>
+      <p class="th-lede">Sessions booked with you through Cal.com</p>
       <p><button type="button" class="action-btn outline sm" id="mPrev">&larr; ${esc(label(shiftMonth(ym, -1)))}</button>
         <strong style="margin:0 .8rem">${esc(label(ym))}</strong>
         <button type="button" class="action-btn outline sm" id="mNext">${esc(label(shiftMonth(ym, 1)))} &rarr;</button></p>

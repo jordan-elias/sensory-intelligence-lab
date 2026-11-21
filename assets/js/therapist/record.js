@@ -8,6 +8,7 @@
 import { parseNote, keyOf } from '../notes/parse.js';
 import { recurring, suggestThemes, bigrams, shifts, emotionSeries, termSeries } from '../notes/analysis.js';
 import { items, backlinks, matrix, graph, notRevisited, timeline, toMarkdown, ordered, related } from '../notes/graph.js';
+import { handoverHeader } from '../messages/handover.js';
 import { BUILTIN, loadMine, saveMine, removeMine, applyTemplate } from '../notes/templates.js';
 import { parseMarkdownRecord } from '../notes/import.js';
 import { lifeEvents, lifeLanes, birthYearOf } from '../notes/life.js';
@@ -52,7 +53,7 @@ function printRecord(text, title) {
   const done = () => { document.body.classList.remove('th-printing'); doc.remove(); removeEventListener('afterprint', done); };
   document.body.append(doc); document.body.classList.add('th-printing'); addEventListener('afterprint', done); window.print();
 }
-export async function mountRecord(box, { store, clientId, clientName, intake = null, fam = null, profile = null, sharedDates = [], active = true, onDeleted = () => {} }) {
+export async function mountRecord(box, { store, clientId, clientName, intake = null, fam = null, profile = null, consents = [], sharedDates = [], active = true, onDeleted = () => {} }) {
   let notes = [], view = 'notes', panel = null, filter = '', intakeD = null, famD = null, extras = [], people = [], kept = false, descs = new Map();
   const load = async () => {
     const rows = await store.list(clientId), arch = k => rows.find(r => r.kind === k)?.data || null;
@@ -218,6 +219,21 @@ export async function mountRecord(box, { store, clientId, clientName, intake = n
       h('h2', { class: 'th-h2' }, 'Since your last note'), h('p', {}, since ? `${clientName} has shared ${since} check-in${since === 1 ? '' : 's'}. See the Shared tab.` : 'Nothing new shared.'));
   }
 
+  // ── Handover ──
+  // Only with the client's own agreement (a signed message from them). The file is made here, on this device, and passed on by the therapist.
+  function handoverPanel(full) {
+    const wrap = h('div', {});
+    if (!consents.length) { wrap.append(h('p', { class: 'th-hint' }, `A handover needs ${clientName}'s agreement. They can give it in their Messages, under “Hand my record to another therapist”. It will show here once they have.`)); return wrap; }
+    wrap.append(h('p', { class: 'th-hint' }, `${clientName} has agreed to a handover. Prepare a Markdown file and pass it to the other therapist in a way you both trust. They bring it in with “Import notes”. It is made on this device; nothing is sent from here.`));
+    for (const c of consents) {
+      wrap.append(h('div', { style: 'margin:.5rem 0' }, btn(`Prepare handover for ${c.to}`, () => {
+        const md = handoverHeader({ client: clientName, to: c.to, at: c.at, verified: c.verified, today: today() }) + full();
+        download(`${(clientName + '-to-' + c.to).replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '')}-handover.md`, md); say(`The file for ${c.to} was downloaded. ${clientName}'s agreement was ${c.verified ? 'checked against their signature' : 'received'} (${String(c.at).slice(0, 10)}).`);
+      }, 'action-btn'), h('span', { class: 'th-muted' }, ` agreed ${String(c.at).slice(0, 10)}`)));
+    }
+    return wrap;
+  }
+
   // ── Import from Markdown ──
   // The file is read on this device. Nothing is saved until the therapist has looked at the list and pressed Import; each note is then
   // encrypted with their own key like any other note. Sections already in the record, or without a date, are not imported.
@@ -252,6 +268,8 @@ export async function mountRecord(box, { store, clientId, clientName, intake = n
       btn('Download as Markdown', () => download(`${safe}-record.md`, full()), 'action-btn'), ' ', btn('Print or save as PDF', () => printRecord(full(), clientName), 'action-btn outline'), ' ', btn('Download as plain text', () => download(`${safe}-record.txt`, full(), 'text/plain'), 'action-btn outline'),
       h('h2', { class: 'th-h2' }, 'Import notes'),
       importPanel(),
+      h('h2', { class: 'th-h2' }, 'Hand over to another therapist'),
+      handoverPanel(full),
       h('h2', { class: 'th-h2' }, 'Keep or delete'),
       h('p', {}, active ? 'Your notes stay until you delete them.' : `This connection has ended. Your notes about ${clientName} are yours: nothing is deleted automatically, so keep them or delete them when you choose.`),
       h('p', { class: 'th-hint' }, `Ending a connection does not remove your notes. They stay until you delete them here, even if ${clientName} deletes their own account.`));

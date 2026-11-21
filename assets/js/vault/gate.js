@@ -190,7 +190,7 @@ export async function recoveryNudge(into = document.querySelector('main')) {
     if (st.state === 'no-vault' || !st.recoveryDue || !into || document.getElementById('recoveryNudge')) return;
     try { if (Date.now() < Number(localStorage.getItem(NUDGE_KEY) || 0)) return; } catch { /* storage blocked: ask anyway */ }
     const box = document.createElement('div'); box.id = 'recoveryNudge'; box.className = 'ws-callout ws-callout--care'; box.setAttribute('role', 'note');
-    box.innerHTML = '<strong>Do you still have your recovery key?</strong> It has been a while. Checking takes a minute and changes nothing. <a href="/vault/">Check it now</a> · <button type="button" class="link-btn" id="recoveryNudgeLater">Not now</button>';
+    box.innerHTML = '<strong>Do you still have your recovery key?</strong> It has been a while. <a href="/vault/">Check it now</a> · <button type="button" class="link-btn" id="recoveryNudgeLater">Not now</button>';
     box.querySelector('#recoveryNudgeLater').onclick = () => { try { localStorage.setItem(NUDGE_KEY, String(Date.now() + 14 * 864e5)); } catch { /* fine */ } box.remove(); };
     into.prepend(box);
   } catch (e) { console.warn('[vault] reminder skipped:', e.message); }

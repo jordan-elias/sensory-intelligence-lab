@@ -6,6 +6,7 @@
  */
 import { seal, verifySignature } from '../vault/vault-crypto.js';
 import { bySlug } from '../worksheets/registry.js';
+import { cleanHandover } from './handover.js';
 
 export const MAX_CHARS = 4000;
 const ctx = (linkId, id) => `msg:${linkId}:${id}`;
@@ -18,15 +19,17 @@ export const signedString = (linkId, id, senderId, sealed) => `sil-msg|${linkId}
 /** A worksheet slug a therapist can attach to a message, or null. Only worksheets we have are accepted. */
 export const cleanAssign = a => (typeof a === 'string' && bySlug(a) ? a : null);
 
-export async function sendMessage({ sb, session, linkId, other, text, assign = null }) {
+export async function sendMessage({ sb, session, linkId, other, text, assign = null, handover = null }) {
+  const ho = handover == null ? null : cleanHandover(handover);
+  if (handover != null && !ho) throw new Error('Write the name of the therapist first.');
   const body = String(text ?? '').trim();
   const slug = assign == null ? null : cleanAssign(assign);
   if (assign != null && !slug) throw new Error('That worksheet is not available.');
-  if (!body && !slug) throw new Error('Write something first.');
+  if (!body && !slug && !ho) throw new Error('Write something first.');
   if (body.length > MAX_CHARS) throw new Error(`Messages can be up to ${MAX_CHARS} characters.`);
   if (!other?.public_enc) throw new Error('This person has not finished setting up their secure vault yet, so a message cannot be sent.');
   const id = crypto.randomUUID();
-  const sealed = await seal(JSON.stringify(slug ? { v: 1, text: body, assign: slug } : { v: 1, text: body }),
+  const sealed = await seal(JSON.stringify({ v: 1, text: body, ...(slug ? { assign: slug } : {}), ...(ho ? { handover: ho } : {}) }),
     [{ id: other.id, encPublicJwk: other.public_enc }, { id: session.userId, encPublicJwk: session.publicKeys.enc }],
     { context: ctx(linkId, id) });
   const signature = await session.sign(signedString(linkId, id, session.userId, sealed));
@@ -47,11 +50,11 @@ export async function loadConversation({ sb, session, linkId, otherSignKey }) {
   const out = [];
   for (const m of data || []) {
     const mine = m.sender_id === session.userId;
-    let text = null, verified = null, assign = null;
-    try { const p = JSON.parse(await session.open(m.sealed, { context: ctx(linkId, m.id) })); text = p.text; assign = cleanAssign(p.assign); } catch { text = null; }
+    let text = null, verified = null, assign = null, handover = null;
+    try { const p = JSON.parse(await session.open(m.sealed, { context: ctx(linkId, m.id) })); text = p.text; assign = cleanAssign(p.assign); handover = cleanHandover(p.handover); } catch { text = null; }
     const signKey = mine ? session.publicKeys.sign : otherSignKey;
     if (text !== null && signKey) verified = await verifySignature(signKey, signedString(linkId, m.id, m.sender_id, m.sealed), m.signature);
-    out.push({ id: m.id, mine, text, assign, verified, read_at: m.read_at, created_at: m.created_at });
+    out.push({ id: m.id, mine, text, assign, handover, verified, read_at: m.read_at, created_at: m.created_at });
   }
   return out;
 }
