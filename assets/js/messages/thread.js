@@ -10,9 +10,9 @@ import { sendMessage, loadConversation, markRead, hideConversation, MAX_CHARS } 
 
 const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 const stamp = iso => new Date(iso).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-const POLL_MS = 30000;
+const POLL_MS = 30000, WORKSHEETS_PATH = '/worksheets/';
 /** A worksheet sent along with a message. The person it was sent to gets a link to open it; the sender just sees what was sent. */
-const assignCard = m => { const w = bySlug(m.assign); return w ? `<div class="msg-assign"><strong>Worksheet: ${esc(w.label)}</strong>${m.mine ? '' : `<br><a href="/worksheets/${esc(w.slug)}/">Open it</a>`}</div>` : ''; };
+const assignCard = m => { const w = bySlug(m.assign); return w ? `<div class="msg-assign"><strong>Worksheet: ${esc(w.label)}</strong>${m.mine ? '' : `<br><a href="${WORKSHEETS_PATH}${esc(w.slug)}/">Open it</a>`}</div>` : ''; };
 
 /**
  * @param opts.sb, opts.linkId
