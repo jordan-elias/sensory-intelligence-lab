@@ -85,3 +85,14 @@ test('the pair safety code is a readable code, the same for both people', async 
   assert.equal(typeof a, 'string'); assert.match(a, /\d/); assert.equal(a, b);
   assert.notEqual(a, await pairSafetyCode('FP-A', 'FP-C'));
 });
+
+test('a worksheet can be assigned along with a message; unknown worksheets are refused; the server sees nothing readable', async () => {
+  const th = await person('t1'), client = await person('c1'), sb = fakeSb();
+  await M.sendMessage({ sb: sb.as('t1'), session: th.session, linkId: 'L', other: { id: 'c1', public_enc: client.pub.enc }, text: 'Try this before Thursday.', assign: 'dear-man' });
+  await M.sendMessage({ sb: sb.as('t1'), session: th.session, linkId: 'L', other: { id: 'c1', public_enc: client.pub.enc }, text: '', assign: 'grow' });
+  const got = await M.loadConversation({ sb: sb.as('c1'), session: client.session, linkId: 'L', otherSignKey: th.pub.sign });
+  assert.deepEqual(got.map(m => [m.assign, m.text, m.verified]), [['dear-man', 'Try this before Thursday.', true], ['grow', '', true]]);
+  assert.ok(!/dear-man|grow|Thursday/.test(JSON.stringify(sb.rows)), 'stored sealed');
+  await assert.rejects(M.sendMessage({ sb: sb.as('t1'), session: th.session, linkId: 'L', other: { id: 'c1', public_enc: client.pub.enc }, text: 'x', assign: '../evil' }), /not available/);
+  assert.equal(M.cleanAssign('fast'), 'fast'); assert.equal(M.cleanAssign('nope'), null); assert.equal(M.cleanAssign({}), null);
+});

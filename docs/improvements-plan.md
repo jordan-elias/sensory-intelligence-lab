@@ -215,3 +215,5 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 - app-58: session note templates (short, first session, SOAP, DAP, after check-ins) in the Record tab note box; the therapist's own templates are kept on that device only. notes/templates.js, t77.
 
 - app-59: "This week" page at the top of the client Folder tab (last 7 days of check-ins vs the week before, worksheets, journal titles) with Copy as text. therapist/week.js.
+
+- app-60: a therapist can assign a worksheet from the Messages tab (sent inside the encrypted message, so no new table or SQL); the client gets a card with an Open link in Messages and the usual unread badge, and chooses whether to share the result back. messages/store.js `assign`, test in messages.test.mjs.

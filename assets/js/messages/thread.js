@@ -5,19 +5,23 @@
  */
 import { ensureVaultReady } from '../vault/gate.js';
 import { pairSafetyCode } from '../vault/vault-crypto.js';
+import { WORKSHEETS, bySlug } from '../worksheets/registry.js';
 import { sendMessage, loadConversation, markRead, hideConversation, MAX_CHARS } from './store.js';
 
 const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 const stamp = iso => new Date(iso).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 const POLL_MS = 30000;
+/** A worksheet sent along with a message. The person it was sent to gets a link to open it; the sender just sees what was sent. */
+const assignCard = m => { const w = bySlug(m.assign); return w ? `<div class="msg-assign"><strong>Worksheet: ${esc(w.label)}</strong>${m.mine ? '' : `<br><a href="/worksheets/${esc(w.slug)}/">Open it</a>`}</div>` : ''; };
 
 /**
  * @param opts.sb, opts.linkId
  * @param opts.other  { id, name, public_enc, public_sign, fingerprint } (keys are null once the connection has ended)
  * @param opts.active whether the connection is still active (can write)
+ * @param opts.canAssign therapist only: shows a way to send a worksheet along with a message
  * @param opts.onChange called after messages were read or the conversation was deleted
  */
-export async function mountThread(root, { sb, linkId, other, active, onChange }) {
+export async function mountThread(root, { sb, linkId, other, active, onChange, canAssign = false }) {
   root.innerHTML = '<p class="th-muted">Opening messages…</p>';
   let session;
   try { session = await ensureVaultReady(); }
@@ -32,6 +36,9 @@ export async function mountThread(root, { sb, linkId, other, active, onChange })
     ${active ? `
       <form id="mxForm" class="msg-form">
         <textarea id="mxText" rows="3" maxlength="${MAX_CHARS}" placeholder="Write a message…" aria-label="Message to ${esc(other.name)}"></textarea>
+        ${canAssign ? `<label class="ws-label" for="mxAssign" style="margin-top:.5rem">Assign a worksheet (optional)</label>
+        <select id="mxAssign" class="ws-input"><option value="">No worksheet</option>${WORKSHEETS.map(w => `<option value="${esc(w.slug)}">${esc(w.label)}</option>`).join('')}</select>
+        <p class="th-hint">${esc(other.name)} finds it in their messages and chooses whether to share the result back. Nothing is shared unless they choose to.</p>` : ''}
         <div class="btn-row" style="margin-top:.5rem"><button type="submit" class="action-btn sm" id="mxSend">Send</button></div>
       </form>` : `<p class="th-hint">This connection has ended, so no new messages can be sent. You can still read this conversation.</p>`}
     <div class="msg" id="mxMsg" role="status"></div>
@@ -47,7 +54,7 @@ export async function mountThread(root, { sb, linkId, other, active, onChange })
       const atBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 40;
       list.innerHTML = msgs.length ? msgs.map(m => `
         <div class="msg-row ${m.mine ? 'mine' : 'theirs'}">
-          <div class="msg-bubble">${m.text === null ? '<em>This message could not be opened.</em>' : esc(m.text).replace(/\n/g, '<br>')}</div>
+          <div class="msg-bubble">${m.text === null ? '<em>This message could not be opened.</em>' : (m.assign ? assignCard(m) : '') + esc(m.text).replace(/\n/g, '<br>')}</div>
           <div class="msg-meta">${esc(stamp(m.created_at))}${m.verified === false ? ' · <strong>signature does not match</strong>' : ''}</div>
         </div>`).join('') : '<p class="th-muted">No messages yet.</p>';
       if (atBottom) list.scrollTop = list.scrollHeight;
@@ -59,9 +66,9 @@ export async function mountThread(root, { sb, linkId, other, active, onChange })
   if (active) {
     $('mxForm').addEventListener('submit', async ev => {
       ev.preventDefault();
-      const box = $('mxText'), text = box.value;
+      const box = $('mxText'), text = box.value, assign = $('mxAssign')?.value || null;
       $('mxSend').disabled = true; say('');
-      try { await sendMessage({ sb, session, linkId, other: { id: other.id, public_enc: other.public_enc }, text }); box.value = ''; await refresh(); }
+      try { await sendMessage({ sb, session, linkId, other: { id: other.id, public_enc: other.public_enc }, text, assign }); box.value = ''; if ($('mxAssign')) $('mxAssign').value = ''; await refresh(); }
       catch (e) { say(e.message, 'error'); }
       $('mxSend').disabled = false;
     });

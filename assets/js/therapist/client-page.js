@@ -128,7 +128,7 @@ export async function mountClientPage(root) {
     if (threadMounted) return; threadMounted = true;
     const box = $('panel-messages');
     if (active && !key?.public_enc) { box.innerHTML = `<p class="th-muted">${esc(name)} has not finished setting up their secure vault yet, so messaging is not available.</p>`; return; }
-    threadStop = await mountThread(box, { sb, linkId, active,
+    threadStop = await mountThread(box, { sb, linkId, active, canAssign: true,
       other: { id: client.client_id, name, public_enc: key?.public_enc || null, public_sign: key?.public_sign || null, fingerprint: key?.fingerprint || null },
       onChange: async () => { const { count } = await sb.from('messages').select('id', { count: 'exact', head: true }).eq('link_id', linkId).eq('recipient_id', me.id).is('read_at', null); setUnread(count || 0); } });
   }
