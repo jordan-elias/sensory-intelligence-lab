@@ -67,9 +67,10 @@ export function mountVaultPanel(root, vault) {
       </form>`,
 
     recovery: () => `
-      <h3>${recovery.mode === 'rotate' ? 'Your new recovery key' : 'Save your recovery key'}</h3>
+      <h3>${recovery.mode === 'rotate' ? 'Your new recovery key' : recovery.mode === 'spare' ? 'Your spare recovery key' : 'Save your recovery key'}</h3>
       <p class="vault-lead">${recovery.mode === 'rotate'
         ? 'Your old recovery key stops working once you continue.'
+        : recovery.mode === 'spare' ? 'This is a second way back in. Your first recovery key keeps working. Keep this one in a different place, or with someone you trust completely.'
         : 'If you ever forget your passphrase, this key is the only way back in.'}</p>
       <div class="vault-printarea">
         <p class="vault-keylabel">Recovery key</p>
@@ -95,7 +96,7 @@ export function mountVaultPanel(root, vault) {
         ${msg()}
         <div class="vault-row">
           <button class="action-btn" type="submit" id="recoveryContinue" disabled>Continue</button>
-          ${recovery.mode === 'rotate' ? '<button type="button" class="action-btn outline" data-action="cancel-rotate">Cancel</button>' : ''}
+          ${recovery.mode !== 'setup' ? '<button type="button" class="action-btn outline" data-action="cancel-rotate">Cancel</button>' : ''}
         </div>
       </form>`,
 
@@ -165,6 +166,15 @@ export function mountVaultPanel(root, vault) {
           <label class="ws-label" for="ckInput">Recovery key</label>
           <input class="ws-input" id="ckInput" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false">
           <button class="action-btn outline" type="submit">Check it</button>
+        </form>
+      </section>
+
+      <section class="vault-section" aria-labelledby="spHead">
+        <h4 id="spHead">Spare recovery key</h4>
+        <p class="vault-help">${state.hasSpare ? 'You have a spare recovery key. Either key can get you back in if you forget your passphrase. Anyone who holds a recovery key can open your vault, so keep each one private.' : 'A second recovery key, to keep in another place or with someone you trust completely. Either key can get you back in. Anyone who holds one can open your vault.'}</p>
+        <form id="spareForm" novalidate>
+          ${passField('spPass', 'Your passphrase', 'current-password')}
+          <button class="action-btn outline" type="submit" name="act" value="${state.hasSpare ? 'remove' : 'make'}">${state.hasSpare ? 'Remove my spare recovery key' : 'Make a spare recovery key'}</button>
         </form>
       </section>
 
@@ -259,9 +269,10 @@ export function mountVaultPanel(root, vault) {
         const keep = !!q('keep')?.checked;
         await run('', async () => {
           if (recovery.mode === 'setup') await vault.finishSetup({ keepUnlocked: keep });
+          else if (recovery.mode === 'spare') await vault.finishSpareRecovery();
           else await vault.finishRecoveryRotation();
           const was = recovery.mode; recovery = null;
-          setNotice('ok', was === 'setup' ? 'Your vault is ready.' : 'Your new recovery key is active. The old one no longer works.');
+          setNotice('ok', was === 'setup' ? 'Your vault is ready.' : was === 'spare' ? 'Your spare recovery key is active. Your first one still works.' : 'Your new recovery key is active. The old one no longer works.');
           go('settings', true);
         }, err => { setNotice('error', friendly(err)); draw(); });
       });
@@ -303,6 +314,14 @@ export function mountVaultPanel(root, vault) {
       if (!key.trim()) { setNotice('error', 'Type your recovery key.'); return go('settings', true); }
       await run('Checking your recovery key…', async () => { await vault.checkRecoveryKey(key); busy = false; setNotice('ok', 'That recovery key opens your vault. Thank you for checking.'); go('settings', true); },
         err => { setNotice('error', err && err.code === 'wrong-recovery-key' ? 'That recovery key does not open this vault. Check it for typing mistakes, or make a new one below while you are unlocked.' : friendly(err)); go('settings', true); });
+    });
+
+    q('spareForm')?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const pass = q('spPass').value, removing = !!state.hasSpare;
+      if (!pass) { setNotice('error', 'Enter your passphrase.'); return go('settings', true); }
+      if (removing) await run('Removing your spare recovery key…', async () => { await vault.removeSpareRecovery(pass); busy = false; setNotice('ok', 'Your spare recovery key was removed. It no longer works.'); go('settings', true); }, err => { setNotice('error', friendly(err)); go('settings', true); });
+      else await run('Making a spare recovery key…', async () => { const r = await vault.startSpareRecovery(pass); recovery = { key: r.recoveryKey, mode: 'spare' }; busy = false; go('recovery'); }, err => { setNotice('error', friendly(err)); go('settings', true); });
     });
 
     q('rotateForm')?.addEventListener('submit', async e => {

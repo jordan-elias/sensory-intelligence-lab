@@ -16,10 +16,20 @@ await page.waitForSelector('.vault-status',{timeout:30000});
 ok(/Check your recovery key/.test(await page.$eval('.vault-card',e=>e.innerText)),'settings has a recovery key check');
 ok(!/gentle reminder/i.test(await page.$eval('.vault-card',e=>e.innerText)),'no reminder right after setup');
 await page.type('#ckInput','AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AA'); await page.click('#checkRkForm button'); await sleep(2500);
-ok(/typo|does not open this vault|not correct/.test(wrongTxt),'a wrong key is refused with a kind message');
+ok(/typo|does not open this vault|not correct/.test(await page.$eval('.vault-card',e=>e.innerText)),'a wrong key is refused with a kind message');
 await page.type('#ckInput',RK); await page.click('#checkRkForm button'); await sleep(2500);
 ok(/opens your vault\. Thank you/.test(await page.$eval('.vault-card',e=>e.innerText)),'the right key is confirmed');
 ok(/Last confirmed/.test(await page.$eval('.vault-card',e=>e.innerText)),'and the date is shown');
+// a spare recovery key
+ok(/Spare recovery key/.test(await page.$eval('.vault-card',e=>e.innerText)),'settings offers a spare recovery key');
+await page.type('#spPass',PASS); await page.$eval('#spareForm button[type=submit]',b=>b.click()); await page.waitForSelector('#recoveryKey',{timeout:30000});
+const spareKey=await page.$eval('#recoveryKey',e=>e.textContent); ok(/^([A-Z2-9]{4}-){8}[A-Z2-9]{2}$/.test(spareKey)&&spareKey!==RK,'a different key is shown');
+await page.type('#keyCheck',spareKey.split('-')[0]); await page.$eval('#savedBox',b=>b.click()); await sleep(300); await page.$eval('#recoveryContinue',b=>b.click()); await page.waitForSelector('#ckInput',{timeout:20000});
+ok(/spare recovery key is active/.test(await page.$eval('.vault-card',e=>e.innerText)),'the spare is active');
+await page.type('#ckInput',spareKey); await page.click('#checkRkForm button'); await sleep(2500);
+ok(/opens your vault\. Thank you/.test(await page.$eval('.vault-card',e=>e.innerText)),'the spare key passes the check');
+await page.type('#ckInput',RK); await page.click('#checkRkForm button'); await sleep(2500);
+ok(/opens your vault\. Thank you/.test(await page.$eval('.vault-card',e=>e.innerText)),'and the first still does');
 // due: pretend the vault was set up a year ago
 await page.evaluate(()=>{ const t=window.__tbl.user_keys; for(const r of t){ r.recovery_acknowledged_at=new Date(Date.now()-400*864e5).toISOString(); r.recovery_checked_at=null; } });
 await page.goto(`${BASE}/vault/`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('.vault-card',{timeout:20000}); await sleep(800);

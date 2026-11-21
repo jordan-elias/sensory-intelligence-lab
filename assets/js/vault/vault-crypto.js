@@ -231,9 +231,14 @@ async function unwrapRaw(bundle, credential, userId, opts) {
   if (credential.recoveryKey !== undefined) {
     const bytes = await parseRecoveryKey(credential.recoveryKey);
     const kek = await recoveryKek(bytes, b64d(bundle.recovery.salt));
-    wipe(bytes);
     try { return await aeadOpen(kek, bundle.recovery, aad(userId, 'content-key', 'recovery')); }
-    catch { throw new VaultError('wrong-recovery-key', 'That recovery key is not correct.'); }
+    catch {
+      if (bundle.recovery_spare) {   // a spare recovery key, if the person made one
+        try { return await aeadOpen(await recoveryKek(bytes, b64d(bundle.recovery_spare.salt)), bundle.recovery_spare, aad(userId, 'content-key', 'recovery-spare')); }
+        catch { /* fall through */ }
+      }
+      throw new VaultError('wrong-recovery-key', 'That recovery key is not correct.');
+    } finally { wipe(bytes); }
   }
   throw new VaultError('no-credential', 'A passphrase or recovery key is required.');
 }
@@ -329,6 +334,22 @@ export async function newRecoveryKey(bundle, credential, userId, opts = {}) {
   const recoveryKey = await formatRecoveryKey(rkBytes);
   wipe(rkBytes); wipe(raw);
   return { bundle: next, recoveryKey };
+}
+
+/** Add a second recovery key, so one can be kept in another place or with someone trusted. The first stays valid. Returns { bundle, recoveryKey }. */
+export async function addSpareRecoveryKey(bundle, credential, userId, opts = {}) {
+  const raw = await unwrapRaw(bundle, credential, userId, opts);
+  const rkBytes = rand(RK_BYTES), rSalt = rand(16), kek = await recoveryKek(rkBytes, rSalt);
+  const next = { ...bundle, recovery_spare: { salt: b64e(rSalt), ...(await aeadSeal(kek, raw, aad(userId, 'content-key', 'recovery-spare'))) } };
+  const recoveryKey = await formatRecoveryKey(rkBytes);
+  wipe(rkBytes); wipe(raw);
+  return { bundle: next, recoveryKey };
+}
+/** Take the spare recovery key away (it stops working). The passphrase or recovery key is needed so only the owner can do it. */
+export async function removeSpareRecoveryKey(bundle, credential, userId, opts = {}) {
+  wipe(await unwrapRaw(bundle, credential, userId, opts));
+  const { recovery_spare, ...rest } = bundle;
+  return rest;
 }
 
 /** True if the stored settings are weaker than today's default, so they can be upgraded at next unlock. */

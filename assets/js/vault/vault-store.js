@@ -66,6 +66,6 @@ export async function updateBundle(userId, bundle, expectedUpdatedAt, extra = {}
 /** Notes the day the person proved their recovery key still opens the vault. Best effort: it is only used to decide when to ask again. */
 export async function markRecoveryChecked(userId) {
   const sb = await client(), at = new Date().toISOString();
-  const { error } = await sb.from('user_keys').update({ recovery_checked_at: at }).eq('user_id', userId);
-  return error ? null : at;
+  const { data, error } = await sb.from('user_keys').update({ recovery_checked_at: at }).eq('user_id', userId).select('updated_at');
+  return error ? null : { at, updated_at: data?.[0]?.updated_at || null };   // updated_at may move on any change, so the caller keeps the new value
 }
