@@ -866,7 +866,7 @@
 
   <script type="module">
 
-    import { promptIfOldEntries } from '/assets/js/vault/gate.js';
+    import { promptIfOldEntries, recoveryNudge } from '/assets/js/vault/gate.js';
     import { showDashboardNudge } from '/assets/js/therapist/my-therapist.js';
 
     // ── Greeting ──
@@ -906,6 +906,7 @@ onAuthReady(async () => {
     }
   }
   promptIfOldEntries();   // only people with entries under the old key are asked
+  recoveryNudge();        // a gentle line if it has been a long while since the recovery key was confirmed
 
   const fullName  = profile?.full_name?.trim() || '';
   const firstName = fullName.split(' ')[0];

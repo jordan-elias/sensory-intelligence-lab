@@ -295,6 +295,13 @@ export async function unlockWithPassphrase(bundle, passphrase, userId, opts = {}
   return sessionFromRaw(raw, bundle, userId);
 }
 
+/** True if this recovery key opens the vault. Changes nothing and keeps nothing; throws 'wrong-recovery-key' or 'bad-recovery-key' otherwise. */
+export async function verifyRecoveryKey(bundle, recoveryKey, userId) {
+  const raw = await unwrapRaw(bundle, { recoveryKey }, userId, {});
+  wipe(raw);
+  return true;
+}
+
 export async function unlockWithRecoveryKey(bundle, recoveryKey, userId, opts = {}) {
   const raw = await unwrapRaw(bundle, { recoveryKey }, userId, opts);
   return sessionFromRaw(raw, bundle, userId);

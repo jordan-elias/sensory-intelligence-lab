@@ -265,3 +265,21 @@ test('files: another account cannot open them', async () => {
   const enc = await session.encryptBytes(new Uint8Array([1, 2, 3]));
   await assert.rejects(other.session.decryptBytes(enc));
 });
+
+test('a recovery key can be checked without changing anything; a wrong one and another account are refused', async () => {
+  const { bundle, recoveryKey } = await make();
+  assert.equal(await V.verifyRecoveryKey(bundle, recoveryKey, UID), true);
+  assert.equal(await V.verifyRecoveryKey(bundle, recoveryKey.toLowerCase().replace(/-/g, ' '), UID), true);
+  const other = recoveryKey.slice(0, -2) + (recoveryKey.endsWith('AA') ? 'BB' : 'AA');
+  await assert.rejects(V.verifyRecoveryKey(bundle, other, UID), e => e instanceof V.VaultError);
+  await assert.rejects(V.verifyRecoveryKey(bundle, recoveryKey, 'someone-else'), e => e instanceof V.VaultError);
+  await V.unlockWithPassphrase(bundle, PASS, UID, { allowWeak: true });   // the bundle is untouched
+});
+test('the reminder is due after 180 days from the later of setup and the last check, never without a vault', async () => {
+  const W = await import('../../assets/js/vault/vault.js'), now = Date.parse('2027-06-01T00:00:00Z'), ago = d => new Date(now - d * 864e5).toISOString();
+  assert.equal(W.recoveryDue(null, now), false);
+  assert.equal(W.recoveryDue({ recovery_acknowledged_at: ago(30) }, now), false);
+  assert.equal(W.recoveryDue({ recovery_acknowledged_at: ago(200) }, now), true);
+  assert.equal(W.recoveryDue({ recovery_acknowledged_at: ago(400), recovery_checked_at: ago(10) }, now), false);
+  assert.equal(W.recoveryDue({}, now), true);
+});

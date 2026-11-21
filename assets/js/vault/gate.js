@@ -179,6 +179,22 @@ export async function promptIfOldEntries() {
     await running;
   } catch (e) { console.warn('[vault] prompt skipped:', e.message); }
 }
+/**
+ * A gentle, dismissible line at the top of the page when it has been a while since the person confirmed their recovery key.
+ * Not shown to people with no vault, or within 14 days of choosing "Not now". It never blocks anything.
+ */
+const NUDGE_KEY = 'sil.vault.recoveryNudgeUntil';
+export async function recoveryNudge(into = document.querySelector('main')) {
+  try {
+    const st = await vault.load();
+    if (st.state === 'no-vault' || !st.recoveryDue || !into || document.getElementById('recoveryNudge')) return;
+    try { if (Date.now() < Number(localStorage.getItem(NUDGE_KEY) || 0)) return; } catch { /* storage blocked: ask anyway */ }
+    const box = document.createElement('div'); box.id = 'recoveryNudge'; box.className = 'ws-callout ws-callout--care'; box.setAttribute('role', 'note');
+    box.innerHTML = '<strong>Do you still have your recovery key?</strong> It has been a while. Checking takes a minute and changes nothing. <a href="/vault/">Check it now</a> · <button type="button" class="link-btn" id="recoveryNudgeLater">Not now</button>';
+    box.querySelector('#recoveryNudgeLater').onclick = () => { try { localStorage.setItem(NUDGE_KEY, String(Date.now() + 14 * 864e5)); } catch { /* fine */ } box.remove(); };
+    into.prepend(box);
+  } catch (e) { console.warn('[vault] reminder skipped:', e.message); }
+}
 export const lockVault = () => vault.lock();
 export const hasUserKey = () => !!vault.getSession();
 /** The unlocked session if there is one, without ever showing the unlock dialog. */

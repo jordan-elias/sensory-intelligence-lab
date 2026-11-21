@@ -157,6 +157,17 @@ export function mountVaultPanel(root, vault) {
         </form>
       </section>
 
+      <section class="vault-section" aria-labelledby="ckHead">
+        <h4 id="ckHead">Check your recovery key</h4>
+        ${state.recoveryDue ? '<div class="ws-callout ws-callout--care"><strong>A gentle reminder</strong>It has been a while since you checked that you still have your recovery key. Checking takes a minute and changes nothing.</div>' : ''}
+        <p class="vault-help">Type your recovery key to see that it still opens your vault. ${state.recoveryConfirmedAt ? 'Last confirmed ' + esc(state.recoveryConfirmedAt.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })) + '.' : 'Not confirmed yet.'} Nothing is changed and the key is not kept.</p>
+        <form id="checkRkForm" novalidate>
+          <label class="ws-label" for="ckInput">Recovery key</label>
+          <input class="ws-input" id="ckInput" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false">
+          <button class="action-btn outline" type="submit">Check it</button>
+        </form>
+      </section>
+
       <section class="vault-section" aria-labelledby="rkHead">
         <h4 id="rkHead">Recovery key</h4>
         <p class="vault-help">Lost your recovery key, or think someone saw it? Make a new one. The old one stops working.</p>
@@ -284,6 +295,14 @@ export function mountVaultPanel(root, vault) {
       if (v.error) { setNotice('error', v.error); return go('settings', true); }
       await run('Changing your passphrase…', async () => { await vault.changePassphrase(cur, v.pass); busy = false; setNotice('ok', 'Passphrase changed. Your content did not need to change.'); go('settings', true); },
         err => { setNotice('error', friendly(err)); go('settings', true); });
+    });
+
+    q('checkRkForm')?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const key = q('ckInput').value;
+      if (!key.trim()) { setNotice('error', 'Type your recovery key.'); return go('settings', true); }
+      await run('Checking your recovery key…', async () => { await vault.checkRecoveryKey(key); busy = false; setNotice('ok', 'That recovery key opens your vault. Thank you for checking.'); go('settings', true); },
+        err => { setNotice('error', err && err.code === 'wrong-recovery-key' ? 'That recovery key does not open this vault. Check it for typing mistakes, or make a new one below while you are unlocked.' : friendly(err)); go('settings', true); });
     });
 
     q('rotateForm')?.addEventListener('submit', async e => {

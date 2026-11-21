@@ -29,8 +29,31 @@ let lastActivity = Date.now();
 let idleTimer = null;
 const listeners = new Set();
 
+export const RECOVERY_CHECK_DAYS = 180;
+/** When the recovery key was last confirmed (set up, replaced or checked), as a Date, or null if unknown. */
+export function recoveryConfirmedAt(rec = record) {
+  const ts = [rec?.recovery_checked_at, rec?.recovery_acknowledged_at].map(x => Date.parse(x || '')).filter(t => !Number.isNaN(t));   // the later of the two
+  return ts.length ? new Date(Math.max(...ts)) : null;
+}
+/** True when it is time to gently ask the person to check they still have their recovery key. */
+export function recoveryDue(rec = record, now = Date.now()) {
+  if (!rec) return false;
+  const at = recoveryConfirmedAt(rec);
+  return !at || now - at.getTime() > RECOVERY_CHECK_DAYS * 864e5;
+}
+/** Proves a typed recovery key opens this vault, and notes the day. Changes nothing else. */
+export async function checkRecoveryKey(recoveryKey) {
+  if (!record) throw new C.VaultError('no-vault', 'There is no vault yet.');
+  await C.verifyRecoveryKey(record.bundle, recoveryKey, userId);
+  const at = await store.markRecoveryChecked(userId);
+  record = { ...record, recovery_checked_at: at || new Date().toISOString() };
+  emit();
+  return recoveryConfirmedAt();
+}
+
 function snapshot() {
   return {
+    recoveryDue: recoveryDue(), recoveryConfirmedAt: recoveryConfirmedAt(),
     state: !record ? 'no-vault' : session ? 'unlocked' : 'locked',
     fingerprint: record?.bundle?.fingerprint || null,
     trusted,
