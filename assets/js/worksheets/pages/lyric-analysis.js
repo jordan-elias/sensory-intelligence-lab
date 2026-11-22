@@ -47,7 +47,7 @@ function render() {
 
       <!-- LEFT: lyrics (desktop only) -->
       <div class="lyric-col-left">
-        <div class="lyric-col-label">Lyrics</div>
+        <div class="lyrics-head"><div class="lyric-col-label" style="margin:0">Lyrics</div><button type="button" class="lyrics-expand" id="lyricsExpandBtn2" hidden>Fill the screen</button></div>
         <div id="lyricsColLeft">
           <div class="lyrics-box-empty">Lyrics will appear here once you select a song.</div>
         </div>
@@ -58,7 +58,7 @@ function render() {
 
         <!-- Lyrics panel for mobile only -->
         <div class="lyrics-panel" id="lyricsPanel">
-          <p class="section-label" style="margin-bottom:.5rem;">Lyrics</p>
+          <div class="lyrics-head"><p class="section-label" style="margin:0;">Lyrics</p><button type="button" class="lyrics-expand" id="lyricsExpandBtn" hidden>Fill the screen</button></div>
           <div class="lyrics-box" id="lyricsBox"></div>
           <p class="lyrics-hint" id="lyricsHint" style="display:none;">Read through the lyrics, then add selections below to begin your reflection.</p>
         </div>
@@ -148,7 +148,32 @@ function addBlock() {
   return box.lastElementChild;
 }
 
+/** All the lyrics on a full-screen layer, in larger type, so they can be read at once. Close with the button, Escape, or the back gesture's usual route. */
+let lyricsShown = '', lyricsOpener = null;
+function openFull(opener) {
+  if (!lyricsShown) return;
+  lyricsOpener = opener || null;
+  let layer = document.getElementById('lyricsFull');
+  if (!layer) {
+    layer = document.createElement('div'); layer.id = 'lyricsFull'; layer.className = 'lyrics-full'; layer.setAttribute('role', 'dialog'); layer.setAttribute('aria-modal', 'true'); layer.setAttribute('aria-label', 'Lyrics');
+    layer.innerHTML = '<div class="lyrics-full-bar"><span class="lyrics-full-title"></span><button type="button" class="lyrics-expand" id="lyricsFullClose">Close</button></div><div class="lyrics-full-text" tabindex="0"></div>';
+    document.body.appendChild(layer);
+    layer.querySelector('#lyricsFullClose').onclick = closeFull;
+    layer.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); closeFull(); } });
+  }
+  layer.querySelector('.lyrics-full-title').textContent = document.querySelector('[data-field="song_title"]')?.value || 'Lyrics';
+  layer.querySelector('.lyrics-full-text').textContent = lyricsShown;
+  layer.hidden = false; document.body.classList.add('lyrics-full-open');
+  layer.querySelector('#lyricsFullClose').focus();
+}
+function closeFull() {
+  const layer = document.getElementById('lyricsFull'); if (layer) layer.hidden = true;
+  document.body.classList.remove('lyrics-full-open'); lyricsOpener?.focus?.();
+}
+
 function showLyrics(text) {
+  lyricsShown = text || '';
+  for (const id of ['lyricsExpandBtn', 'lyricsExpandBtn2']) { const b = document.getElementById(id); if (b) { b.hidden = !lyricsShown; b.onclick = () => openFull(b); } }
   const panel = $('#lyricsPanel');
   panel.classList.add('visible');
   $('#lyricsBox').textContent = text;
@@ -158,6 +183,7 @@ function showLyrics(text) {
 }
 
 function showLyricsMissing() {
+  lyricsShown = ''; for (const id of ['lyricsExpandBtn', 'lyricsExpandBtn2']) { const b = document.getElementById(id); if (b) b.hidden = true; }
   const note = '<span style="font-style:italic;color:var(--muted)">Lyrics not found automatically. Paste them in the field above if you\'d like them here.</span>';
   $('#lyricsPanel').classList.add('visible');
   $('#lyricsBox').innerHTML = note;
@@ -217,6 +243,7 @@ function changeSong() {
   $('#songPlayer').classList.remove('visible');
   $('#lyricsPanel').classList.remove('visible');
   $('#ytAudioWrap').innerHTML = '';
+  lyricsShown = ''; for (const id of ['lyricsExpandBtn', 'lyricsExpandBtn2']) { const b = document.getElementById(id); if (b) b.hidden = true; }
   $('#lyricsColLeft').innerHTML = '<div class="lyrics-box-empty">Lyrics will appear here once you select a song.</div>';
   $('#songLyricsAutoField').value = '';
   $('[data-field="song_title"]').value = '';

@@ -225,3 +225,5 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 - app-63: copy edits (reminder, sessions page); handover to another therapist: the client agrees in Messages ("Hand my record to another therapist", a signed message, can be withdrawn); the therapist then prepares a Markdown file on their own device (Record tab, "Hand over to another therapist") that the new therapist brings in with Import notes. Therapists keep deciding for themselves whether they take new clients (no capacity switch). Privacy policy 2.4.
 
 - app-64: spare recovery key (Vault settings: make or remove one; either key works; replacing the first leaves the spare alone; slots cannot be swapped). Fixed a bug found on the way: after a recovery-key check the saved vault version was stale, which could make the next save report a conflict. Privacy 2.5. t38 test fixed (public key export). t79.
+
+- app-65: Lyric analysis: "Fill the screen" button shows all the lyrics in a full-screen layer with larger type (Escape or Close to leave). t80.

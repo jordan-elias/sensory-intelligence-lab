@@ -1,0 +1,23 @@
+// Lyric analysis: the lyrics can fill the screen to be read at once, and close again.
+import {launch,newPage} from './harness.mjs';
+const {browser,BASE,server}=await launch();
+let fail=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fail++; };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const P=await newPage(await browser.createBrowserContext(),BASE,{}); const page=P.page;
+await page.setViewport({width:390,height:760,isMobile:true,hasTouch:true});
+await page.goto(`${BASE}/worksheets/lyric-analysis/`,{waitUntil:'networkidle0'}); await sleep(400);
+ok(await page.$eval('#lyricsExpandBtn',b=>b.hidden),'no expand button before a song has lyrics');
+const long=Array.from({length:60},(_,i)=>`Line number ${i+1} of the song`).join('\n');
+await page.evaluate(async t=>{ const m=await import('/assets/js/worksheets/pages/lyric-analysis.js'); m.default.restore({data:{song_title:'Test Song',song_artist:'Tester',song_lyrics_auto:t}}); },long);
+await sleep(300);
+ok(!(await page.$eval('#lyricsExpandBtn',b=>b.hidden)),'the button appears once lyrics are shown');
+await page.$eval('#lyricsExpandBtn',b=>b.click()); await sleep(100);
+const r=await page.evaluate(()=>{ const l=document.getElementById('lyricsFull'), t=l.querySelector('.lyrics-full-text'), b=l.getBoundingClientRect(); return {hidden:l.hidden, w:b.width, h:b.height, vw:innerWidth, vh:innerHeight, has:t.textContent.includes('Line number 60'), scrolls:t.scrollHeight>t.clientHeight, title:l.querySelector('.lyrics-full-title').textContent, locked:document.body.classList.contains('lyrics-full-open'), role:l.getAttribute('role'), focus:document.activeElement.id};});
+ok(!r.hidden&&r.w===r.vw&&r.h===r.vh,'it fills the whole screen'); ok(r.has&&r.scrolls,'all the lyrics are there and scroll'); ok(r.title==='Test Song','it shows the song title');
+ok(r.locked&&r.role==='dialog'&&r.focus==='lyricsFullClose','the page behind is locked, it is a dialog, and focus moves in');
+await page.keyboard.press('Escape'); await sleep(100);
+ok(await page.$eval('#lyricsFull',l=>l.hidden)&&!(await page.evaluate(()=>document.body.classList.contains('lyrics-full-open'))),'Escape closes it and unlocks the page');
+await page.$eval('#lyricsExpandBtn',b=>b.click()); await page.$eval('#lyricsFullClose',b=>b.click());
+ok(await page.$eval('#lyricsFull',l=>l.hidden),'the Close button works too');
+ok(P.errors.filter(e=>!/Failed to load resource/.test(e)).length===0,'no page errors '+P.errors.join('|'));
+await browser.close(); server.close(); process.exit(fail?1:0);
