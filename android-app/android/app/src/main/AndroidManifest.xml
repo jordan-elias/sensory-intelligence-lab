@@ -32,6 +32,19 @@
                 <data android:scheme="de.jordanelias.sil" android:host="open" />
             </intent-filter>
 
+            <!-- Sign-in email links and the hand-back page open in the app (Android App Links). They are only verified
+                 once https://lab.jordanelias.de/.well-known/assetlinks.json lists this app's signing fingerprint
+                 (see docs/android-your-steps.md). Keep the paths in step with assets/js/app/links.js. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="lab.jordanelias.de" />
+                <data android:pathPrefix="/account/" />
+                <data android:pathPrefix="/dashboard/" />
+                <data android:pathPrefix="/app-return/" />
+            </intent-filter>
+
         </activity>
 
         <!-- Keeps sound going with the screen off; shows the notification "SIL is playing" -->

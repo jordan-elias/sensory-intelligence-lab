@@ -11,4 +11,7 @@ await page.evaluate(()=>window.SEQ.togglePlay()); await new Promise(r=>setTimeou
 ok((await page.evaluate(()=>window.__wl.rel))===1,'stop releases it');
 await page.evaluate(()=>window.SEQ.togglePlay()); await new Promise(r=>setTimeout(r,600)); await page.evaluate(()=>window.SEQ.togglePlay());
 ok(P.errors.filter(e=>!/Failed to load resource/.test(e)).length===0,'playing with the shared sounds raises no errors '+P.errors.join('|'));
+await page.evaluate(()=>{ Object.defineProperty(document,'hidden',{configurable:true,get:()=>true}); window.SEQ.togglePlay(); });
+await new Promise(r=>setTimeout(r,800)); await page.evaluate(()=>window.SEQ.togglePlay());
+ok(P.errors.filter(e=>!/Failed to load resource/.test(e)).length===0,'playing with the page hidden (screen off) raises no errors');
 await browser.close(); server.close(); process.exit(fail?1:0);

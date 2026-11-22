@@ -19,10 +19,10 @@ Collected, and sent off the device:
 * Messages: messages with a therapist. Encrypted end to end. App functionality.
 * Photos, audio: audio recordings the person saves (encrypted, stored in private storage). Photos used in an experiment are read on the device and not uploaded.
 * App activity: game scores and instrument or mixer settings (stored unencrypted, disclosed in the privacy page); booking times. App functionality.
-* Financial info: none collected by the app. Payment is handled by Stripe on the website only; the app has no purchase flow.
+* Financial info: none collected by the app. The Lab subscription is paid on the website through Stripe; therapy sessions are booked and paid on Cal.com. The app has no purchase flow of its own.
 * Device or other IDs, location, contacts, calendar, web browsing, SMS, files and docs, installed apps: not collected.
 * Crash logs and diagnostics: not collected (no analytics or crash SDK). CHECK that none is added later.
-Shared with third parties: No data is shared for advertising or analytics. Service providers acting for us (Supabase for storage in Frankfurt, Netlify for hosting, Stripe for payments, Cal.com for booking) are processors and are not "sharing" in the form's terms; say so under the description if the form asks.
+Shared with third parties: No data is shared for advertising or analytics. Service providers acting for us (Supabase for storage in Frankfurt, Netlify for hosting, Stripe for the subscription, Cal.com for booking and session payments, Resend for email) are processors and are not "sharing" in the form's terms; say so under the description if the form asks.
 Security: data encrypted in transit (HTTPS): yes. Users can request that data be deleted: yes. Independent security review: no.
 Deletion: in the app under Account, Delete account. Web link for deletion requests (required by Google): https://lab.jordanelias.de/privacy/#account-deletion (it explains the in-app path and the email route). ASK: confirm that URL is live after the deploy.
 

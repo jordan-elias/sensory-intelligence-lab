@@ -25,15 +25,16 @@ WHAT IS INSIDE
 - Journal and worksheets: private by default.
 - Experiments in Creativity: a minicourse of 30+ creative prompts and guided activities for getting curious about how you make things and breaking out of creative blocks, covering music, sound and writing. It also works on paper.
 - Sequencer, soundscape machine, ear training and experimental compositions, including a small neural network that never stops learning.
-- Sessions: book with a music therapist, and send them only what you choose to share.
+- Sessions: book with a music therapist, and send them only what you choose to share. Sessions are paid separately, through Cal.com.
+- Worksheets you can choose to share with your therapist, including DEAR MAN, GROW and FAST, and one journal entry at a time if you wish.
 
 SUBSCRIPTION
-The Lab subscription gives access to every tool. Therapy sessions are booked separately.
+The Lab subscription gives access to every tool. It is bought on the website; the app does not sell it. Therapy sessions are booked and paid separately.
 
 This app is not a substitute for medical or psychological care. If you are in crisis, contact your local emergency number.
 
 ## Data safety form (answers to give; verify against the code before submitting)
-- Data collected: account email; encrypted content you create (stored encrypted, unreadable to us); booking details when you book.
+- Data collected: account email; encrypted content you create (stored encrypted, unreadable to us); booking details when you book. Emails are sent through Resend; session booking and payment run on Cal.com.
 - Data shared with third parties: none for advertising or analytics.
 - Encrypted in transit: yes. Users can request deletion: yes (Account > Delete account).
 - No ads SDK, no analytics SDK.

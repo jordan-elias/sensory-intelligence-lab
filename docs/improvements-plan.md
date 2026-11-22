@@ -227,3 +227,5 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 - app-64: spare recovery key (Vault settings: make or remove one; either key works; replacing the first leaves the spare alone; slots cannot be swapped). Fixed a bug found on the way: after a recovery-key check the saved vault version was stale, which could make the next save report a conflict. Privacy 2.5. t38 test fixed (public key export). t79.
 
 - app-65: Lyric analysis: "Fill the screen" button shows all the lyrics in a full-screen layer with larger type (Escape or Close to leave). t80.
+
+- app-66: Android prep done without a phone: App Links filter + links.js (sign-in email links), make-assetlinks.mjs + Netlify header, release signing and versionCode from Gradle properties, sequencer looks ahead further when the page is hidden, listing/Console answers updated (Cal.com, Resend, Stripe wording). Nothing built or tried on a device: see docs/android-your-steps.md.
