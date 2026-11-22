@@ -256,6 +256,11 @@
       <span class="level-selector-label">Level</span>
     </div>
     <div class="level-desc" id="level-desc"></div>
+    <div class="level-selector" id="mode-row">
+      <label class="level-selector-label" for="daily-toggle"><input type="checkbox" id="daily-toggle"> Today's challenge</label>
+      <label class="level-selector-label" for="room-select">Room <select id="room-select"></select></label>
+    </div>
+    <p class="level-desc" id="mode-note"></p>
 
     <!-- Level status bar -->
     <div class="level-status">
@@ -334,6 +339,9 @@
 
 <script type="module">
 'use strict';
+import { mulberry32 } from '/assets/js/experiments/rng.js';
+import { localDate } from '/assets/js/experiments/seeds-core.js';
+import { trialSeed, ROOMS, DEFAULT_ROOM, roomKey } from '/assets/js/spatial/daily.js';
 
 // ─── SUPABASE ───────────────────────────────────────────
 let _sb = null;
@@ -702,13 +710,14 @@ const DIAGRAM_RADIUS = 150;
 function polarToXY(angleDeg, distance) { const rad = (angleDeg - 90) * Math.PI / 180; return { x: distance * Math.cos(rad), y: distance * Math.sin(rad) }; }
 function xyToSpatial(x, y) { return { sx: (x / DIAGRAM_RADIUS) * 2, sy: 0, sz: -(y / DIAGRAM_RADIUS) * 2 }; }
 
+let rnd = Math.random;   // the day's challenge swaps in a seeded one, so everyone gets the same paths
 function generatePath(complexity, durationSec, startAngleDeg, speedMul) {
   const FPS = 60;
   const frames = Math.round((durationSec / speedMul) * FPS);
   const pts = [];
 
   if (complexity === 'simple') {
-    const baseR = DIAGRAM_RADIUS * (0.55 + Math.random() * 0.25);
+    const baseR = DIAGRAM_RADIUS * (0.55 + rnd() * 0.25);
     const wobbleAmp = DIAGRAM_RADIUS * 0.08;
     for (let i = 0; i <= frames; i++) {
       const t = i / frames;
@@ -738,8 +747,8 @@ function generatePath(complexity, durationSec, startAngleDeg, speedMul) {
     const raw = [];
 
     for (let i = 0; i <= frames; i++) {
-      angle += (Math.random() - 0.5) * 38;
-      distance += (Math.random() - 0.5) * 22;
+      angle += (rnd() - 0.5) * 38;
+      distance += (rnd() - 0.5) * 22;
       distance = Math.max(28, Math.min(DIAGRAM_RADIUS * 0.85, distance));
       const { x, y } = polarToXY(angle, distance);
       raw.push({ x, y });
@@ -771,7 +780,7 @@ function buildPathsWithSeparation(levelCfg) {
 
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     const paths = [];
-    for (let i = 0; i < numSrc; i++) { paths.push(generatePath(complexity, 5.0, Math.random() * 360, speedMul)); }
+    for (let i = 0; i < numSrc; i++) { paths.push(generatePath(complexity, 5.0, rnd() * 360, speedMul)); }
 
     let ok = true;
     for (let i = 0; i < numSrc && ok; i++) {
@@ -789,8 +798,8 @@ function buildPathsWithSeparation(levelCfg) {
   const paths = [];
   const angleStep = 360 / numSrc;
   for (let i = 0; i < numSrc; i++) {
-    const p = generatePath(complexity, 5.0, Math.random() * 360, speedMul);
-    const forcedAngle = (i * angleStep) + Math.random() * (angleStep * 0.4);
+    const p = generatePath(complexity, 5.0, rnd() * 360, speedMul);
+    const forcedAngle = (i * angleStep) + rnd() * (angleStep * 0.4);
     const forcedR = DIAGRAM_RADIUS * 0.65;
     const { x, y } = polarToXY(forcedAngle, forcedR);
     const { sx, sy, sz } = xyToSpatial(x, y);
@@ -807,18 +816,21 @@ const G = {
   trialsInLevel: 0, trialResults: [],
   trials: 0, correct: 0, streak: 0, misses: 0, bestStreak: 0,
   currentLevel: 1, animRaf: null, trackStart: null, trackDuration: 0,
-  bestScores: {},
+  bestScores: {}, daily: false, room: DEFAULT_ROOM,
 };
+
+// ─── ROOM ────────────────────────────────────────────────
+function applyRoom() {
+  const r = ROOMS[G.room]; if (!G.resonanceScene) return;
+  G.resonanceScene.setRoomProperties(r.size, r.materials);
+}
 
 // ─── AUDIO INIT ──────────────────────────────────────────
 function initAudio() {
   if (G.audioCtx) return;
   G.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   G.resonanceScene = new ResonanceAudio(G.audioCtx);
-  G.resonanceScene.setRoomProperties(
-    { width: 7, height: 3.5, depth: 7 },
-    { left: 'brick-bare', right: 'brick-bare', front: 'brick-bare', back: 'brick-bare', down: 'concrete-block', up: 'acoustic-ceiling-tiles' }
-  );
+  applyRoom();
   G.resonanceScene.output.connect(G.audioCtx.destination);
 }
 
@@ -968,7 +980,7 @@ function adjustLevel() {
   }
   return msg;
 }
-window.__spatial = { G, noteResult, adjustLevel };   // for the browser tests
+window.__spatial = { G, noteResult, adjustLevel, buildPaths: (lvl) => { rnd = G.daily ? mulberry32(trialSeed(localDate(), G.currentLevel, G.trialsInLevel)) : Math.random; return buildPathsWithSeparation(LEVELS[lvl - 1]); }, applyRoom };   // for the browser tests
 document.getElementById('btn-headphones').addEventListener('click', async () => {
   setFeedback('You should hear one tone on the left, then one on the right. If not, check your headphones.');
   setTimeout(() => setFeedback(''), 5000);
@@ -1027,6 +1039,7 @@ async function runTrial() {
   setFeedback('');
 
   const lvl = LEVELS[G.currentLevel - 1];
+  rnd = G.daily ? mulberry32(trialSeed(localDate(), G.currentLevel, G.trialsInLevel)) : Math.random;
   G.paths = buildPathsWithSeparation(lvl);
   G.trackDuration = (5.0 / lvl.speed) * 1000;
   G.trackStart = null;
@@ -1170,7 +1183,7 @@ async function showLevelComplete() {
 
   const prev = G.bestScores[G.currentLevel];
   const isNewBest = !prev || correct > (prev.correct || 0) || (correct === (prev.correct || 0) && accuracy > (prev.accuracy || 0));
-  if (isNewBest) {
+  if (isNewBest && G.room === DEFAULT_ROOM) {   // other rooms are practice: scores in different rooms are not comparable
     G.bestScores[G.currentLevel] = { correct, trials: 10, accuracy };
     saveBestScore(G.currentLevel, correct, 10, accuracy);
     updateLevelButtons();
@@ -1217,6 +1230,20 @@ function resetTrial() {
 }
 
 // ─── LEVEL SELECTOR ──────────────────────────────────────
+// ─── DAILY AND ROOM CONTROLS ─────────────────────────────
+const dailyToggle = document.getElementById('daily-toggle'), roomSelect = document.getElementById('room-select'), modeNote = document.getElementById('mode-note');
+Object.entries(ROOMS).forEach(([k, r]) => roomSelect.appendChild(Object.assign(document.createElement('option'), { value: k, textContent: r.label })));
+function describeMode() {
+  const parts = [];
+  if (G.daily) parts.push("Today's challenge: everyone gets the same paths today, at each level. Come back tomorrow for new ones.");
+  if (G.room !== DEFAULT_ROOM) parts.push('This room is for practice: scores here are not saved as your best, because the room changes how hard it is.');
+  modeNote.textContent = parts.join(' ');
+}
+try { G.room = roomKey(localStorage.getItem('sil.spatial.room')); G.daily = localStorage.getItem('sil.spatial.daily') === '1'; } catch {}
+dailyToggle.checked = G.daily; roomSelect.value = G.room; describeMode();
+dailyToggle.addEventListener('change', () => { G.daily = dailyToggle.checked; try { localStorage.setItem('sil.spatial.daily', G.daily ? '1' : '0'); } catch {} describeMode(); });
+roomSelect.addEventListener('change', () => { G.room = roomKey(roomSelect.value); try { localStorage.setItem('sil.spatial.room', G.room); } catch {} applyRoom(); describeMode(); });
+
 const levelSelector = document.getElementById('level-selector');
 const levelDesc = document.getElementById('level-desc');
 

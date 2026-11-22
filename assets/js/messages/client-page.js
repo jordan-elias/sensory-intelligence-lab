@@ -25,7 +25,7 @@ export async function mountClientMessages(root) {
     return;
   }
   await mountThread(root.querySelector('#thread'), {
-    sb, linkId: link.link_id, active,
+    sb, linkId: link.link_id, active, canConsent: true,
     other: { id: link.user_id, name, public_enc: keys.public_enc || null, public_sign: keys.public_sign || null, fingerprint: keys.fingerprint || null },
   });
 }

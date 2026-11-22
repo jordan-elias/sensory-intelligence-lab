@@ -681,6 +681,57 @@ export const EXPERIMENTS = [
     tools: [{ type: 'cards', count: 3 }, { type: 'timer', minutes: 40 }],
     solo: 'Write 20 limits from earlier experiments on slips of paper. Draw three with your eyes closed.',
   },
+  {
+    id: 'capstone-loop', title: 'Capstone: a loop from chance', category: 'capstone', needs: 'any', minutes: 45,
+    summary: 'Roll your notes, roll your rhythm, then build one short loop from them and take it with you.',
+    question: 'What can I make when chance picks the material and I decide everything else?',
+    parameters: [['Rolls', 'Once each, no re-rolls'], ['Time', '40 minutes'], ['Length', 'One loop, 16 steps'], ['Finished means', 'You can play it through and want to hear it again']],
+    procedure: [
+      'Roll your five notes once. Do not roll again.',
+      'Roll your rhythm once. Do not roll again.',
+      'Put both on the workbench. Change anything you like, but add no new notes.',
+      'Start the timer. Shape the loop: loudness, chance, swing, which tracks play.',
+      'Stop at 40 minutes. Download it as a WAV or MIDI file, and keep a copy in My seeds.',
+    ],
+    stop: 'After 40 minutes.',
+    reflect: 'What did you change most from what chance gave you, and why?',
+    tools: [{ type: 'gen', kind: 'notes', count: 5, label: 'Roll your five notes' }, { type: 'groove', steps: 16, hits: 0, bpm: 100, roll: true, rollRange: [3, 9] }, { type: 'bench', bpm: 100 }, { type: 'timer', minutes: 40 }],
+    solo: 'Roll a die five times for pitches (1 = C ... 6 = A). Clap a rhythm of your own, once. Play both on any instrument for 40 minutes and record the best pass.',
+  },
+  {
+    id: 'capstone-short-piece', title: 'Capstone: a short piece of writing', category: 'capstone', needs: 'none', minutes: 45,
+    summary: 'Roll a form and a mood, then write one short piece under them and keep it.',
+    question: 'What do I write when the form and the mood are not mine to choose?',
+    parameters: [['Rolls', 'Once each'], ['Time', '40 minutes'], ['Edits', 'None while writing'], ['Finished means', 'It has a first line and a last line you chose']],
+    procedure: [
+      'Roll the form once. Do not roll again.',
+      'Roll the mood once. Do not roll again.',
+      'Start the timer. Write without going back. If you hit a wall, repeat the last word and carry on.',
+      'Stop at 40 minutes. Read it aloud once.',
+      'Keep it in My seeds, or leave it as it is.',
+    ],
+    stop: 'After 40 minutes.',
+    reflect: 'Which line surprised you, and did the form or the mood cause it?',
+    tools: [{ type: 'gen', kind: 'choice', label: 'Roll the form', options: ['A poem of 12 lines', 'A letter that is never sent', 'A list that turns into a story', 'A poem with no verbs', 'A page of dialogue', 'A poem in one sentence'] }, { type: 'gen', kind: 'choice', label: 'Roll a mood', options: ['Waiting', 'Relief', 'Restless', 'Tender', 'Suspicious', 'Wide open', 'Tired but fond', 'Ceremonial'] }, { type: 'timer', minutes: 40 }],
+    solo: 'Write the six forms and the eight moods on slips of paper in two piles. Pick one from each pile with your eyes closed.',
+  },
+  {
+    id: 'capstone-remake', title: 'Capstone: remake something of yours', category: 'capstone', needs: 'any', minutes: 45,
+    summary: 'Take something you already made and rework it under two limits you did not choose.',
+    question: 'What is still in my old work once two of its habits are taken away?',
+    parameters: [['Limits', '2'], ['Time', '40 minutes'], ['Re-draws', '0'], ['Finished means', 'The new version stands on its own']],
+    procedure: [
+      'Choose one thing you made before: a song, a draft, a sketch. Do not change your mind.',
+      'Press “Draw 2 cards” once. They are your limits. Do not draw again.',
+      'Start the timer. Remake it, obeying both limits. Keep the original untouched.',
+      'Stop at 40 minutes.',
+      'Put the old and the new side by side. Write one sentence about what stayed.',
+    ],
+    stop: 'After 40 minutes.',
+    reflect: 'What survived the limits, and what turned out to be a habit?',
+    tools: [{ type: 'cards', count: 2 }, { type: 'timer', minutes: 40 }],
+    solo: 'Write 20 limits from earlier experiments on slips of paper. Draw two with your eyes closed.',
+  },
 
 ];
 
@@ -708,7 +759,7 @@ export const UNIT_INTROS = {
   field: 'Take a recording and change it with exact operations.',
   production: 'Work inside a DAW or sequencer: one sample, swapped tracks, one knob.',
   writing: 'The same method for words: borrowed endings, burning pages, found text.',
-  capstone: 'Make something of your own under limits you did not choose.',
+  capstone: 'Finish by making something of your own. Choose one of four ways, each under limits you did not choose.',
 };
 const ORDER = ['limits', 'melody', 'rhythm', 'field', 'production', 'writing', 'capstone'];
 export const UNITS = ORDER.map((id, i) => ({ id, number: i + 1, title: CATEGORIES[id], intro: UNIT_INTROS[id], experiments: EXPERIMENTS.filter(e => e.category === id) }));

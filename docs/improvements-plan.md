@@ -65,7 +65,7 @@ Honest limits: lexicons miss irony, slang, negation across clauses and context, 
 3. (done) A short description per person, event and theme, saved encrypted and included in the export.
 4. (done) Timeline and themes × sessions table.
 5. (done) Graph view and pre-session brief. Zoom and pan are done; arranging nodes by hand is not.
-6. (done) Markdown and text export, keep-or-delete. PDF is done through the print dialog (Save as PDF). Still to do: import of Markdown, an optional reminder when a retention period the therapist sets has passed.
+6. (done) Markdown and text export, keep-or-delete. PDF is done through the print dialog (Save as PDF). Import of Markdown is done (app-57). Still to do: an optional reminder when a retention period the therapist sets has passed.
 
 0c. Done (branch app-20): retention reminder (default 10 years for Germany, the therapist's own setting, 0 = off; in-app only on the therapist's device; counts from the latest of end of connection, last session, last note; never deletes anything; "remind me again in a year"). Caseload page (`/therapist/caseload/`): sessions with no note yet, clients not written up lately, themes across clients; people are never matched across clients. Markdown import dropped (notes are written in the Lab). To check with a lawyer: retention duty and client erasure rights by country.
 
@@ -205,3 +205,25 @@ Each as its own stacked branch after app-31; tests for each; no deploys.
 - app-53: Keep shelf renamed "My seeds"; "Today's roll" on roll tools (same seed all day, from the local date); pick two text rolls and combine them (taking turns). seeds-core.js, t73.
 
 - app-54: My seeds empty-state wording; the Sequencer now plays through assets/js/seq/voices.js (one set of sounds, shared with the workbench); the workbench can open a loop of a pattern saved in the Sequencer (a copy). t74.
+
+- app-55: the capstone is now four choices: three limits, a loop from chance (workbench), a short piece of writing, remake something of yours. Unit wording and the "ready" note say "these". t75. Still open from the course list: merge trivial steps (a wording pass over all experiments), spatial game daily challenge and rooms with reverb, Markdown import for therapist records, then Android.
+
+- app-56: spatial game: "Today's challenge" (seeded paths, same for everyone each day, per level and trial) and four rooms with different reverb (small room is the usual; other rooms are practice and do not set best scores). Room and mode remembered on the device. daily.js, t76. Course/minicourse: finished for now, awaiting review.
+
+- app-57: Markdown import for therapist records: Record tab, "Export and delete", "Import notes". Reads a .md/.txt on the device, previews dated sections ("## 2026-03-04" or 04.03.2026), skips undated sections and ones already in the record, saves nothing until Import, each note encrypted as usual. notes/import.js, t77.
+
+- app-58: session note templates (short, first session, SOAP, DAP, after check-ins) in the Record tab note box; the therapist's own templates are kept on that device only. notes/templates.js, t77.
+
+- app-59: "This week" page at the top of the client Folder tab (last 7 days of check-ins vs the week before, worksheets, journal titles) with Copy as text. therapist/week.js.
+
+- app-60: a therapist can assign a worksheet from the Messages tab (sent inside the encrypted message, so no new table or SQL); the client gets a card with an Open link in Messages and the usual unread badge, and chooses whether to share the result back. messages/store.js `assign`, test in messages.test.mjs.
+
+- app-61: "Sessions by month" page for therapists (/therapist/sessions/): a month of booked sessions from the Cal.com records they can already see, totals per client, CSV download made on the device; prices stay on Cal.com. therapist/month.js, t78. A Cal.com calendar embed is not done (needs each therapist's Cal.com link).
+
+- app-62: recovery key check in Vault settings (type the key to see it still opens the vault; nothing changes, key not kept) and a gentle, dismissible reminder on the dashboard when 180 days have passed since the key was set up or last checked. docs/sql/phase16_001_recovery_checked.sql adds recovery_checked_at (the app works without it). Second device: a new device already needs only the passphrase; a transfer from an unlocked device is NOT built, because the content key is deliberately non-extractable (see report).
+
+- app-63: copy edits (reminder, sessions page); handover to another therapist: the client agrees in Messages ("Hand my record to another therapist", a signed message, can be withdrawn); the therapist then prepares a Markdown file on their own device (Record tab, "Hand over to another therapist") that the new therapist brings in with Import notes. Therapists keep deciding for themselves whether they take new clients (no capacity switch). Privacy policy 2.4.
+
+- app-64: spare recovery key (Vault settings: make or remove one; either key works; replacing the first leaves the spare alone; slots cannot be swapped). Fixed a bug found on the way: after a recovery-key check the saved vault version was stale, which could make the next save report a conflict. Privacy 2.5. t38 test fixed (public key export). t79.
+
+- app-65: Lyric analysis: "Fill the screen" button shows all the lyrics in a full-screen layer with larger type (Escape or Close to leave). t80.

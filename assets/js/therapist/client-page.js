@@ -11,6 +11,9 @@ import { post } from '../api.js';
 import { mountThread } from '../messages/thread.js';
 import { tierLabel, intakeLabel, summarize, openCopies } from './clients.js';
 import { splitSessions, describe } from './sessions.js';
+import { currentConsents } from '../messages/handover.js';
+import { loadConversation } from '../messages/store.js';
+import { weekSummary, weekText } from './week.js';
 import { toRows, renderRows, worksheetLabel } from './doc-render.js';
 import { makeNotesStore } from './notes.js';
 import { mountRecord } from './record.js';
@@ -75,6 +78,7 @@ export async function mountClientPage(root) {
     <section role="tabpanel" id="panel-overview" aria-labelledby="tab-overview" hidden></section>
     <section role="tabpanel" id="panel-messages" aria-labelledby="tab-messages" hidden></section>
     <section role="tabpanel" id="panel-folder" aria-labelledby="tab-folder" hidden>
+      <section id="folder-week" aria-label="This week"></section>
       <ul class="th-index" id="folderIndex"></ul>
       <h2 class="th-h2">Intake and family history</h2>
       <section id="folder-intake" aria-label="Intake form and family history"></section>
@@ -126,7 +130,7 @@ export async function mountClientPage(root) {
     if (threadMounted) return; threadMounted = true;
     const box = $('panel-messages');
     if (active && !key?.public_enc) { box.innerHTML = `<p class="th-muted">${esc(name)} has not finished setting up their secure vault yet, so messaging is not available.</p>`; return; }
-    threadStop = await mountThread(box, { sb, linkId, active,
+    threadStop = await mountThread(box, { sb, linkId, active, canAssign: true,
       other: { id: client.client_id, name, public_enc: key?.public_enc || null, public_sign: key?.public_sign || null, fingerprint: key?.fingerprint || null },
       onChange: async () => { const { count } = await sb.from('messages').select('id', { count: 'exact', head: true }).eq('link_id', linkId).eq('recipient_id', me.id).is('read_at', null); setUnread(count || 0); } });
   }
@@ -153,6 +157,7 @@ export async function mountClientPage(root) {
     const docsBox = $('folder-docs'), checkBox = $('folder-checkins');
     const none = (box, what) => { box.innerHTML = `<h2 class="th-h2">${what === 'docs' ? 'Worksheets' : 'Check-ins'}</h2><p class="th-muted">${what === 'docs' ? 'No worksheets shared.' : 'No check-ins shared.'}${copies.length ? '' : ` ${esc(name)} chooses what to share. Everything else stays private.`}</p>`; };
     const jBox = $('folder-journal');
+    $('folder-week').innerHTML = '<h2 class="th-h2">This week</h2><p class="th-muted">Nothing shared this week.</p>';
     if (!copies.some(c => c.category === 'worksheets' || c.category === 'checkins' || c.category === 'journal')) { none(docsBox, 'docs'); none(checkBox, 'check'); jBox.innerHTML = '<h2 class="th-h2">Journal entries</h2><p class="th-muted">No journal entries shared. A client shares them one at a time.</p>'; return; }
     docsBox.innerHTML = '<p class="th-muted">Opening shared items…</p>';
     try {
@@ -174,6 +179,13 @@ export async function mountClientPage(root) {
         btn.onclick = () => { body.hidden = !body.hidden; btn.setAttribute('aria-expanded', String(!body.hidden)); };
         wrap.append(btn, body); jl.appendChild(wrap);
       });
+      const wk = weekSummary(items), wbox = $('folder-week'), c = wk.checkins, vs = k => c.vsLastWeek[k] == null ? '' : ` <span class="th-muted">(${c.vsLastWeek[k] > 0 ? '+' : ''}${c.vsLastWeek[k]} on the week before)</span>`;
+      wbox.innerHTML = `<h2 class="th-h2">This week</h2><p class="th-muted">What ${esc(name)} chose to share, ${esc(wk.from)} to ${esc(wk.to)}.</p>` + (wk.empty ? '<p class="th-muted">Nothing shared this week.</p>' : `<ul class="th-list">
+        <li><strong>Check-ins: ${c.count}.</strong> ${c.count ? `Energy ${c.arousal ?? '–'}${vs('arousal')}, mood ${c.valence ?? '–'}${vs('valence')}, sensory load ${c.sensory_load ?? '–'}${vs('sensory_load')}.${c.top_emotions.length ? ' Most used: ' + c.top_emotions.map(t => `${esc(t.word)} (${t.n})`).join(', ') + '.' : ''}` : ''}</li>
+        <li><strong>Worksheets: ${wk.worksheets.length}.</strong> ${wk.worksheets.map(x => esc(x.label)).join(', ')}</li>
+        <li><strong>Journal entries: ${wk.journal.length}.</strong> ${wk.journal.map(j => esc(j.title)).join('; ')}</li></ul>
+        <button type="button" class="action-btn outline sm" id="weekCopy">Copy as text</button> <span class="msg" id="weekMsg" role="status"></span>`);
+      const wc = $('weekCopy'); if (wc) wc.onclick = async () => { const m = $('weekMsg'); try { await navigator.clipboard.writeText(weekText(name, wk)); m.textContent = 'Copied.'; } catch { m.textContent = 'Could not copy. Select the text instead.'; } m.className = 'msg show'; };
       const sum = summarize(checkins);
       checkBox.innerHTML = `
         <h2 class="th-h2">Check-ins</h2>
@@ -286,7 +298,9 @@ export async function mountClientPage(root) {
       // The intake form and family history join the record, so everything about this client is in one place. Opened here, read here.
       const open = async (cat, fn) => { const c = copies.find(x => x.category === cat); if (!c) return null; try { return await fn(session, { ...c, link_id: linkId }); } catch { return null; } };
       const [intake, fam] = await Promise.all([open('intake', openIntake), open('family', openFamily)]);
-      await mountRecord(box, { store: makeNotesStore(sb, session), clientId: client.client_id, clientName: name, active, intake, fam, profile: { name },
+      // The client's own agreements to a handover (messages they signed). Without one, no handover can be prepared.
+      let consents = []; try { consents = currentConsents(await loadConversation({ sb, session, linkId, otherSignKey: key?.public_sign || null })); } catch { consents = []; }
+      await mountRecord(box, { store: makeNotesStore(sb, session), clientId: client.client_id, clientName: name, active, intake, fam, profile: { name }, consents,
         sharedDates: copies.filter(c => c.category === 'checkins').map(c => c.source_created_at).filter(Boolean) });
     } catch (e) { notesMounted = false; box.innerHTML = `<p class="msg show error">${esc(e.message)}</p>`; }
   }

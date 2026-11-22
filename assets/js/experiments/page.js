@@ -94,7 +94,7 @@ function list() {
       return el('section', { class: 'xp-unit', 'aria-labelledby': 'u-' + u.id },
         el('h3', { class: 'xp-unit-h', id: 'u-' + u.id }, `Unit ${u.number}: ${u.title}`, el('span', { class: 'xp-count' }, ` ${n} of ${u.experiments.length}`), n === u.experiments.length ? el('span', { class: 'xp-fin' }, ' Finished') : null),
         el('p', { class: 'xp-hint' }, u.intro),
-        u.id === 'capstone' ? el('p', { class: 'xp-hint' }, ready ? 'You have done enough to be ready for this. Open it whenever you like.' : `Open any time. It is meant for after about ${READY_AT} of the others (${othersDone} so far).`) : null,
+        u.id === 'capstone' ? el('p', { class: 'xp-hint' }, ready ? 'You have done enough to be ready for these. Choose any one, whenever you like.' : `Open any time. They are meant for after about ${READY_AT} of the others (${othersDone} so far).`) : null,
         el('div', { class: 'xp-grid' }, shown.map(e => el('a', { class: 'xp-card' + (done.has(e.id) ? ' done' : ''), href: '#/' + e.id },
           el('h3', {}, e.title), el('p', {}, e.summary), el('small', {}, `${NEEDS[e.needs]} · ${e.minutes} min${progress.pos(e.id) && !done.has(e.id) ? ` · in progress (step ${progress.pos(e.id)})` : ''}`)))));
     }),

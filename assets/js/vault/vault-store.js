@@ -26,9 +26,12 @@ export async function currentUserId() {
 /** @returns {Promise<{user_id, bundle, updated_at, recovery_acknowledged_at}|null>} */
 export async function fetchKeys(userId) {
   const sb = await client();
-  const { data, error } = await sb.from('user_keys')
-    .select('user_id, bundle, updated_at, recovery_acknowledged_at, legacy_migrated_at')
+  let { data, error } = await sb.from('user_keys')
+    .select('user_id, bundle, updated_at, recovery_acknowledged_at, legacy_migrated_at, recovery_checked_at')
     .eq('user_id', userId).maybeSingle();
+  if (error && (error.code === '42703' || /recovery_checked_at/.test(error.message || ''))) {   // the column is added by a later SQL file; the vault works without it
+    ({ data, error } = await sb.from('user_keys').select('user_id, bundle, updated_at, recovery_acknowledged_at, legacy_migrated_at').eq('user_id', userId).maybeSingle());
+  }
   if (error) throw new VaultError('network', 'Could not reach your key store: ' + error.message);
   return data || null;
 }
@@ -58,4 +61,11 @@ export async function updateBundle(userId, bundle, expectedUpdatedAt, extra = {}
   if (error) throw new VaultError('network', 'Could not save your keys: ' + error.message);
   if (!data || !data.length) throw new VaultError('conflict', 'Your vault was changed on another device. Reload this page and try again.');
   return data[0];
+}
+
+/** Notes the day the person proved their recovery key still opens the vault. Best effort: it is only used to decide when to ask again. */
+export async function markRecoveryChecked(userId) {
+  const sb = await client(), at = new Date().toISOString();
+  const { data, error } = await sb.from('user_keys').update({ recovery_checked_at: at }).eq('user_id', userId).select('updated_at');
+  return error ? null : { at, updated_at: data?.[0]?.updated_at || null };   // updated_at may move on any change, so the caller keeps the new value
 }

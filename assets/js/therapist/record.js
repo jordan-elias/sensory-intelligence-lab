@@ -8,6 +8,9 @@
 import { parseNote, keyOf } from '../notes/parse.js';
 import { recurring, suggestThemes, bigrams, shifts, emotionSeries, termSeries } from '../notes/analysis.js';
 import { items, backlinks, matrix, graph, notRevisited, timeline, toMarkdown, ordered, related } from '../notes/graph.js';
+import { handoverHeader } from '../messages/handover.js';
+import { BUILTIN, loadMine, saveMine, removeMine, applyTemplate } from '../notes/templates.js';
+import { parseMarkdownRecord } from '../notes/import.js';
 import { lifeEvents, lifeLanes, birthYearOf } from '../notes/life.js';
 import { intakeEntry, familyEntry, familyPeople, intakeFull } from '../notes/entries.js';
 import { INTAKE_FIELDS } from '../intake/intake.js';
@@ -50,7 +53,7 @@ function printRecord(text, title) {
   const done = () => { document.body.classList.remove('th-printing'); doc.remove(); removeEventListener('afterprint', done); };
   document.body.append(doc); document.body.classList.add('th-printing'); addEventListener('afterprint', done); window.print();
 }
-export async function mountRecord(box, { store, clientId, clientName, intake = null, fam = null, profile = null, sharedDates = [], active = true, onDeleted = () => {} }) {
+export async function mountRecord(box, { store, clientId, clientName, intake = null, fam = null, profile = null, consents = [], sharedDates = [], active = true, onDeleted = () => {} }) {
   let notes = [], view = 'notes', panel = null, filter = '', intakeD = null, famD = null, extras = [], people = [], kept = false, descs = new Map();
   const load = async () => {
     const rows = await store.list(clientId), arch = k => rows.find(r => r.kind === k)?.data || null;
@@ -89,6 +92,15 @@ export async function mountRecord(box, { store, clientId, clientName, intake = n
     const area = h('textarea', { class: 'ws-input', id: 'recText', rows: '7', maxlength: '20000', placeholder: 'What happened, what you noticed, what you plan. Write [[Mother]] to link a person, event or place, and #perfectionism to tag a theme.' });
     const insert = t => { const s = area.selectionStart ?? area.value.length, e = area.selectionEnd ?? s; area.setRangeText((s && !/\s$/.test(area.value.slice(0, s)) ? ' ' : '') + t + ' ', s, e, 'end'); area.focus(); };
     const chips = h('div', { class: 'th-chips', 'aria-label': 'Insert a link or theme' }, [...known.values()].slice(0, 24).map(k => btn(k.label, () => insert(k.text), 'th-chip')));
+    const mineStore = (() => { try { return window.localStorage; } catch { return null; } })();
+    const tplSel = h('select', { id: 'recTpl', 'aria-label': 'Start from a template' });
+    const fillTpl = () => { const all = [...BUILTIN, ...(mineStore ? loadMine(mineStore) : [])]; tplSel.replaceChildren(h('option', { value: '' }, 'Start from a template…'), ...all.map(t => h('option', { value: t.id }, t.mine ? t.name + ' (mine)' : t.name))); tplSel._all = all; };
+    fillTpl();
+    tplSel.onchange = () => { const t = tplSel._all.find(x => x.id === tplSel.value); if (t) { area.value = applyTemplate(area.value, t); area.focus(); } tplSel.value = ''; };
+    const saveTpl = mineStore ? btn('Save this as my template', () => {
+      const name = (window.prompt('Name for this template (kept on this device only):') || '').trim();
+      if (name && saveMine(mineStore, name, area.value)) { fillTpl(); say(`Saved “${name}” as a template on this device.`); } else if (name) say('Write the structure in the note box first.', 'error');
+    }, 'action-btn outline sm') : null;
     const save = btn('Save note', async e => { e.target.disabled = true; try { await store.add(clientId, area.value, date.value || today()); await load(); draw(); } catch (err) { say(err.message, 'error'); e.target.disabled = false; } }, 'action-btn');
     const search = h('input', { type: 'search', class: 'ws-input', id: 'recFind', placeholder: 'Search this record', value: filter, 'aria-label': 'Search this record' });
     const list = h('ul', { class: 'th-list', id: 'recList' });
@@ -112,8 +124,8 @@ export async function mountRecord(box, { store, clientId, clientName, intake = n
     };
     search.oninput = () => { filter = search.value; paint(); };
     panel.append(h('p', { class: 'th-hint', style: 'margin-top:0' }, `Private to you. Notes are encrypted with your vault before they leave this device, so the client, the practice owner and the platform cannot read them. ${NOTE_FOR_ANALYSIS}`),
-      h('label', { class: 'ws-label', for: 'recDate' }, 'Session date'), date, h('label', { class: 'ws-label', for: 'recText', style: 'margin-top:.8rem' }, 'New note'), area, chips,
-      h('div', { style: 'margin:.5rem 0 1rem' }, save), h('div', { class: 'msg', id: 'recMsg', role: 'status' }),
+      h('label', { class: 'ws-label', for: 'recDate' }, 'Session date'), date, h('label', { class: 'ws-label', for: 'recText', style: 'margin-top:.8rem' }, 'New note'), tplSel, area, chips,
+      h('div', { style: 'margin:.5rem 0 1rem' }, save, ' ', saveTpl), h('div', { class: 'msg', id: 'recMsg', role: 'status' }),
       h('h2', { class: 'th-h2' }, 'The record'), search, list); paint();
   }
 
@@ -207,6 +219,46 @@ export async function mountRecord(box, { store, clientId, clientName, intake = n
       h('h2', { class: 'th-h2' }, 'Since your last note'), h('p', {}, since ? `${clientName} has shared ${since} check-in${since === 1 ? '' : 's'}. See the Shared tab.` : 'Nothing new shared.'));
   }
 
+  // ── Handover ──
+  // Only with the client's own agreement (a signed message from them). The file is made here, on this device, and passed on by the therapist.
+  function handoverPanel(full) {
+    const wrap = h('div', {});
+    if (!consents.length) { wrap.append(h('p', { class: 'th-hint' }, `A handover needs ${clientName}'s agreement. They can give it in their Messages, under “Hand my record to another therapist”. It will show here once they have.`)); return wrap; }
+    wrap.append(h('p', { class: 'th-hint' }, `${clientName} has agreed to a handover. Prepare a Markdown file and pass it to the other therapist in a way you both trust. They bring it in with “Import notes”. It is made on this device; nothing is sent from here.`));
+    for (const c of consents) {
+      wrap.append(h('div', { style: 'margin:.5rem 0' }, btn(`Prepare handover for ${c.to}`, () => {
+        const md = handoverHeader({ client: clientName, to: c.to, at: c.at, verified: c.verified, today: today() }) + full();
+        download(`${(clientName + '-to-' + c.to).replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '')}-handover.md`, md); say(`The file for ${c.to} was downloaded. ${clientName}'s agreement was ${c.verified ? 'checked against their signature' : 'received'} (${String(c.at).slice(0, 10)}).`);
+      }, 'action-btn'), h('span', { class: 'th-muted' }, ` agreed ${String(c.at).slice(0, 10)}`)));
+    }
+    return wrap;
+  }
+
+  // ── Import from Markdown ──
+  // The file is read on this device. Nothing is saved until the therapist has looked at the list and pressed Import; each note is then
+  // encrypted with their own key like any other note. Sections already in the record, or without a date, are not imported.
+  function importPanel() {
+    const wrap = h('div', {}), pick = h('input', { type: 'file', id: 'recImportFile', accept: '.md,.markdown,.txt,text/markdown,text/plain', 'aria-label': 'Choose a Markdown file' });
+    wrap.append(h('p', { class: 'th-hint' }, `Bring in notes you wrote elsewhere, as a Markdown or text file. Each “## 2026-03-04” heading becomes one note with that date. [[links]] and #themes work as usual. The file is read on this device and you see a list before anything is saved. Sections that already match a note you have are left out, so importing a file you exported from here does not double it.`), pick, h('div', { id: 'recImportList' }));
+    pick.onchange = async () => {
+      const list = wrap.querySelector('#recImportList'); list.replaceChildren();
+      const f = pick.files?.[0]; if (!f) return;
+      if (f.size > 2_000_000) { say('That file is larger than 2 MB. Split it first.', 'error'); return; }
+      const r = parseMarkdownRecord(await f.text(), { existing: notes.filter(n => n.text != null), today: today() });
+      if (!r.notes.length) { list.replaceChildren(h('p', { class: 'th-muted' }, r.skipped.length ? `No dated sections found. Skipped: ${r.skipped.join(', ')}. A section needs a heading like “## 2026-03-04”.` : 'Nothing to import in that file.')); return; }
+      const rows = r.notes.map((n, i) => { const ok = !n.dup && !n.tooLong, cb = h('input', { type: 'checkbox', checked: ok, disabled: !ok, 'data-i': String(i), 'aria-label': `Import the note of ${n.date}` });
+        return { n, cb, li: h('li', {}, h('label', {}, cb, ' ', h('strong', {}, longDate(n.date)), n.dup ? ' (already in your record)' : n.tooLong ? ' (too long: over 20,000 characters)' : '', h('div', { class: 'th-note' }, n.text.slice(0, 160) + (n.text.length > 160 ? '…' : '')))) }; });
+      const go = btn('Import', async e => {
+        const chosen = rows.filter(x => x.cb.checked); if (!chosen.length) { say('Tick at least one note.', 'error'); return; }
+        e.target.disabled = true; let done = 0;
+        try { for (const x of chosen) { await store.add(clientId, x.n.text, x.n.date); done++; } await load(); say(`${done} note${done === 1 ? '' : 's'} imported. They are in the Notes tab.`); draw(); }
+        catch (err) { say(`${done} imported, then it stopped: ${err.message}`, 'error'); e.target.disabled = false; await load(); }
+      }, 'action-btn');
+      list.replaceChildren(h('p', {}, `${r.notes.length} dated section${r.notes.length === 1 ? '' : 's'} found${r.undated ? ' (the file had no dates, so it is one note for today: change the date in the note afterwards)' : ''}${r.skipped.length ? `. Skipped, no date: ${r.skipped.join(', ')}` : ''}.`), h('ul', { class: 'th-list' }, rows.map(x => x.li)), go);
+    };
+    return wrap;
+  }
+
   // ── Export and delete ──
   function viewRecords() {
     const all = entries(), nNotes = notes.filter(n => n.text != null).length, aboutMd = () => descs.size ? `\n## About the people, events and themes\n\n${[...descs.values()].map(d => `### ${d.name}\n\n${d.text}`).join('\n\n')}\n` : '', full = () => toMarkdown(clientName, all) + aboutMd() + (intakeFull(intakeD, INTAKE_FIELDS) ? `\n## Intake form, in full\n\n${intakeFull(intakeD, INTAKE_FIELDS)}\n` : ''), safe = clientName.replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '') || 'client';
@@ -214,6 +266,10 @@ export async function mountRecord(box, { store, clientId, clientName, intake = n
       h('p', {}, `${nNotes} session note${nNotes === 1 ? '' : 's'}${extras.filter(Boolean).length ? ' plus the intake form and family history' : ''}.`),
       h('p', { class: 'th-hint' }, kept ? 'A copy of the intake form and family history is kept in your own encrypted record, so it stays if the client leaves or deletes their account. ' : '', `A Markdown file keeps your [[links]] and #themes and opens in any notes app, Obsidian included. It is made on this device. If ${clientName} asks for their records, send them this file yourself; the platform never holds a readable copy.`),
       btn('Download as Markdown', () => download(`${safe}-record.md`, full()), 'action-btn'), ' ', btn('Print or save as PDF', () => printRecord(full(), clientName), 'action-btn outline'), ' ', btn('Download as plain text', () => download(`${safe}-record.txt`, full(), 'text/plain'), 'action-btn outline'),
+      h('h2', { class: 'th-h2' }, 'Import notes'),
+      importPanel(),
+      h('h2', { class: 'th-h2' }, 'Hand over to another therapist'),
+      handoverPanel(full),
       h('h2', { class: 'th-h2' }, 'Keep or delete'),
       h('p', {}, active ? 'Your notes stay until you delete them.' : `This connection has ended. Your notes about ${clientName} are yours: nothing is deleted automatically, so keep them or delete them when you choose.`),
       h('p', { class: 'th-hint' }, `Ending a connection does not remove your notes. They stay until you delete them here, even if ${clientName} deletes their own account.`));

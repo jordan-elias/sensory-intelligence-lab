@@ -85,3 +85,30 @@ test('the pair safety code is a readable code, the same for both people', async 
   assert.equal(typeof a, 'string'); assert.match(a, /\d/); assert.equal(a, b);
   assert.notEqual(a, await pairSafetyCode('FP-A', 'FP-C'));
 });
+
+test('a worksheet can be assigned along with a message; unknown worksheets are refused; the server sees nothing readable', async () => {
+  const th = await person('t1'), client = await person('c1'), sb = fakeSb();
+  await M.sendMessage({ sb: sb.as('t1'), session: th.session, linkId: 'L', other: { id: 'c1', public_enc: client.pub.enc }, text: 'Try this before Thursday.', assign: 'dear-man' });
+  await M.sendMessage({ sb: sb.as('t1'), session: th.session, linkId: 'L', other: { id: 'c1', public_enc: client.pub.enc }, text: '', assign: 'grow' });
+  const got = await M.loadConversation({ sb: sb.as('c1'), session: client.session, linkId: 'L', otherSignKey: th.pub.sign });
+  assert.deepEqual(got.map(m => [m.assign, m.text, m.verified]), [['dear-man', 'Try this before Thursday.', true], ['grow', '', true]]);
+  assert.ok(!/dear-man|grow|Thursday/.test(JSON.stringify(sb.rows)), 'stored sealed');
+  await assert.rejects(M.sendMessage({ sb: sb.as('t1'), session: th.session, linkId: 'L', other: { id: 'c1', public_enc: client.pub.enc }, text: 'x', assign: '../evil' }), /not available/);
+  assert.equal(M.cleanAssign('fast'), 'fast'); assert.equal(M.cleanAssign('nope'), null); assert.equal(M.cleanAssign({}), null);
+});
+
+test('a handover agreement is a signed message the therapist can check; a withdrawal cancels it', async () => {
+  const { currentConsents } = await import('../../assets/js/messages/handover.js');
+  const th = await person('t1'), client = await person('c1'), sb = fakeSb();
+  const send = (text, handover) => M.sendMessage({ sb: sb.as('c1'), session: client.session, linkId: 'L', other: { id: 't1', public_enc: th.pub.enc }, text, handover });
+  await send('I agree to a handover to Dr B.', { to: 'Dr B' });
+  const read = () => M.loadConversation({ sb: sb.as('t1'), session: th.session, linkId: 'L', otherSignKey: client.pub.sign });
+  assert.deepEqual(currentConsents(await read()).map(c => [c.to, c.verified]), [['Dr B', true]]);
+  assert.ok(!/Dr B/.test(JSON.stringify(sb.rows)), 'stored sealed');
+  await new Promise(r => setTimeout(r, 5)); await send('I take it back.', { to: 'dr b', withdrawn: true });
+  assert.deepEqual(currentConsents(await read()), []);
+  await assert.rejects(send('x', { to: '  ' }), /name of the therapist/);
+  // a therapist cannot forge the client's agreement: a message from the therapist is not "from the client"
+  await M.sendMessage({ sb: sb.as('t1'), session: th.session, linkId: 'L', other: { id: 'c1', public_enc: client.pub.enc }, text: 'x', handover: { to: 'Dr Evil' } });
+  assert.deepEqual(currentConsents(await read(), { fromClient: m => !m.mine }).map(c => c.to), []);
+});

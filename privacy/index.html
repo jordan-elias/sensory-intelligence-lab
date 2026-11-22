@@ -243,7 +243,7 @@
       <a href="#faq">FAQ</a>
       <a href="#contact">Contact</a>
     </nav>
-    <p class="sidebar__updated">Last updated<br>19 November 2026<br>Version 2.3</p>
+    <p class="sidebar__updated">Last updated<br>21 November 2026<br>Version 2.5</p>
   </aside>
 
   <main>
@@ -360,7 +360,7 @@ know</strong>.
 The first time you save something private you create a <strong>vault passphrase</strong>. Your browser turns it into
 a key using Argon2id (a deliberately slow function that makes guessing hard), and that key protects the random
 content key that encrypts your data. You also receive a <strong>recovery key</strong>, a second way to open the same
-vault if you forget the passphrase. The server stores only the protected bundle. It never receives your passphrase,
+vault if you forget the passphrase. You can also make one spare recovery key to keep in another place. The server stores only the protected bundle. It never receives your passphrase,
 your recovery key, or the unprotected content key.
 </p>
 <div class="tech-block">
@@ -657,7 +657,7 @@ to keep, and Supabase's backups are cleared on their own schedule. Your encrypte
 <div class="callout callout--amber">
 <span class="callout__label">Important</span>
 Deletion is permanent and cannot be undone. Download anything you want to keep first. If you are connected to a
-therapist, your message history with them is deleted for both of you, and what you shared is removed from the platform. A therapist's own private notes, and the record they keep of your intake form and family history (as a clinic keeps a paper file), belong to the therapist: they are encrypted so we cannot read them, they are not deleted with your account, and the therapist decides how long to keep them. Therapists are reminded, on their own device, when ten years have passed since treatment ended (they can change that period or switch the reminder off), but nothing is ever deleted automatically. To ask a therapist for a copy of your records, or to ask them to delete them, contact the therapist directly.
+therapist, your message history with them is deleted for both of you, and what you shared is removed from the platform. A therapist's own private notes, and the record they keep of your intake form and family history (as a clinic keeps a paper file), belong to the therapist: they are encrypted so we cannot read them, they are not deleted with your account, and the therapist decides how long to keep them. Therapists are reminded, on their own device, when ten years have passed since treatment ended (they can change that period or switch the reminder off), but nothing is ever deleted automatically. If you move to another therapist, you can agree in your messages to your therapist handing a copy of their notes to the therapist you name, and take that agreement back at any time. Without your agreement they cannot prepare the handover in the app, and the file is made on their own device and passed on by them, not by us. To ask a therapist for a copy of your records, or to ask them to delete them, contact the therapist directly.
 You can also request deletion by writing to <a href="mailto:hello@jordanelias.de">hello@jordanelias.de</a>.
 </div>
 </section>

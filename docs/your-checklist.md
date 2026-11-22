@@ -49,3 +49,5 @@ Set (names as the code reads them): `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
 - A decision on journal sharing, health wording, and what is missing from the Soundscape Machine.
 - Whether `phase11` and `phase12` SQL files exist on your side.
 - The SHA-256 fingerprint once the Play app signing key exists.
+
+- [ ] Run docs/sql/phase16_001_recovery_checked.sql in Supabase (recovery key check; the app works without it).

@@ -36,12 +36,12 @@ ok(await page.$eval('#fhOverview',e=>e.value)==='Two houses, one dog.'&&/Rosa/.t
 
 // connect a therapist: the send step appears, and sending is deliberate
 const uid=await page.evaluate(()=>window._currentUser.id);
-const my=await page.evaluate(async()=>{ const gate=await import('/assets/js/vault/gate.js'); const s=await gate.ensureVaultReady(); const k=s.publicKeys.enc; return {kty:k.kty,crv:k.crv,x:k.x,y:k.y}; });
+const my=await page.evaluate(async()=>{ const gate=await import('/assets/js/vault/gate.js'); const s=await gate.ensureVaultReady(); const k=s.publicKeys.enc; const j=k.kty?k:await crypto.subtle.exportKey('jwk',k); return {kty:j.kty,crv:j.crv,x:j.x,y:j.y}; });
 await page.evaluate((enc)=>{ window.__tbl.my_therapist_keys=[{link_id:'L1',therapist_id:'t1',public_enc:enc,fingerprint:'abcd'}]; localStorage.setItem('__state',JSON.stringify({db:window.__db,tbl:window.__tbl})); },my);
 await page.evaluate(()=>window.__mount()); await page.waitForSelector('#fhShare',{timeout:20000}); await sleep(500);
 ok(/Not sent to Dr Rivera/.test(await page.$eval('#fhShare',e=>e.innerText)),'it says it has not been sent');
 ok((await page.evaluate(()=>window.__tbl.shared_copies.length))===0,'nothing was sent just by connecting');
-await page.click('#fhSend'); await sleep(1500);
+await page.$eval('#fhSend',b=>b.click()); await sleep(1500);
 const sc=await page.evaluate(()=>window.__tbl.shared_copies);
 ok(sc.length===1&&sc[0].category==='family'&&sc[0].link_id==='L1'&&!/Rosa|Two houses/.test(JSON.stringify(sc)),'sending creates one sealed copy with no readable text');
 ok(/Dr Rivera has a copy/.test(await page.$eval('#fhShare',e=>e.innerText)),'it then says the therapist has a copy');

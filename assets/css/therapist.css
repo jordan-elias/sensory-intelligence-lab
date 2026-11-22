@@ -33,6 +33,7 @@
 .msg-row.theirs { align-self: flex-start; }
 .msg-bubble { padding: .55rem .8rem; background: var(--surface); border: 1px solid var(--border); font-size: .9rem; line-height: 1.5; overflow-wrap: anywhere; }
 .msg-row.mine .msg-bubble { background: var(--accent-light); }
+.msg-assign { margin-bottom: .4rem; padding: .4rem .6rem; border-left: 3px solid var(--accent); background: var(--surface); }
 .msg-meta { font-size: .7rem; color: var(--muted); margin-top: .15rem; }
 .msg-form textarea { width: 100%; font: inherit; padding: .6rem .7rem; border: 1px solid var(--border); background: var(--bg, #fff); color: inherit; resize: vertical; }
 
