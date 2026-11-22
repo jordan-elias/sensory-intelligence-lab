@@ -1,5 +1,12 @@
 apply plugin: 'com.android.application'
 
+// Release signing: the upload key lives on your computer, never in the repository.
+// Create android-app/android/keystore.properties (storeFile, storePassword, keyAlias, keyPassword); it is git-ignored.
+// Without it, a release build is made unsigned and Android Studio's own Generate Signed Bundle can sign it instead.
+def keystoreProps = new Properties()
+def keystoreFile = rootProject.file('keystore.properties')
+if (keystoreFile.exists()) { keystoreFile.withInputStream { keystoreProps.load(it) } }
+
 android {
     namespace "de.jordanelias.sil"
     compileSdk rootProject.ext.compileSdkVersion
@@ -7,8 +14,9 @@ android {
         applicationId "de.jordanelias.sil"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        // Raise versionCode for every upload to Google Play: ./gradlew bundleRelease -PversionCode=2 -PversionName=1.0.1
+        versionCode Integer.parseInt((project.findProperty('versionCode') ?: '1').toString())
+        versionName "${project.findProperty('versionName') ?: '1.0'}"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -16,8 +24,19 @@ android {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            if (keystoreFile.exists()) {
+                storeFile rootProject.file(keystoreProps['storeFile'])
+                storePassword keystoreProps['storePassword']
+                keyAlias keystoreProps['keyAlias']
+                keyPassword keystoreProps['keyPassword']
+            }
+        }
+    }
     buildTypes {
         release {
+            if (keystoreFile.exists()) signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

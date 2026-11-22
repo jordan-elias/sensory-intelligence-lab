@@ -1,3 +1,8 @@
 node_modules/
 .env
 .DS_Store
+
+# Android signing: never committed
+android-app/android/keystore.properties
+*.jks
+*.keystore

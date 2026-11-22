@@ -757,6 +757,8 @@ const NUM_STEPS   = 16;
 const NUM_LOOPS   = 4;
 const LOOKAHEAD   = 0.1;    // seconds to schedule ahead
 const SCHEDULE_INTERVAL = 25; // ms
+// With the screen off the page's timers run about once a second, so look much further ahead; the sound itself keeps exact time.
+const lookahead = () => (document.hidden ? 2.5 : LOOKAHEAD);
 
 /* Track definitions */
 const TRACKS = [
@@ -1080,7 +1082,7 @@ function scheduleStep(step, time, tick) {
 
 function scheduler() {
   if (!playing || !AC) return;
-  while (nextStepTime < AC.currentTime + LOOKAHEAD) {
+  while (nextStepTime < AC.currentTime + lookahead()) {
     scheduleStep(currentStep, nextStepTime + GROOVE().swingOffset(currentStep, swing, stepDuration()), tickCount);
     // Schedule UI update ~at playback time (approximate — RAF will handle actual display). The playhead follows the track being edited, which may have its own length.
     const stepSnap = GROOVE().trackStep(tickCount, lens[editingLoop][activeTrack]);

@@ -7,6 +7,7 @@ import { refreshReminder, listenForTaps } from './reminders.js';
 import { mountShell } from './shell.js';
 import { installPlayback } from './playback.js';
 import { installConsumptionOnly } from './consumption.js';
+import { appPathFromUrl } from './links.js';
 
 // The app frame (tab bar, top bar) is for the installed app only; SIL_APP is set by the app build.
 if (window.SIL_APP) { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => mountShell()); else mountShell(); }
@@ -36,12 +37,10 @@ if (cap?.isNativePlatform?.()) {
   }, true);
 
   // Coming back from the phone's browser (payment, billing portal): de.jordanelias.sil://open?path=/subscribe/?success=true
+  // and sign-in email links (https://lab.jordanelias.de/account/#...) opened by Android App Links. See links.js.
   P.App?.addListener?.('appUrlOpen', ({ url }) => {
-    try {
-      const to = new URL(url).searchParams.get('path') || '/dashboard/';
-      if (!to.startsWith('/') || to.startsWith('//')) return;
-      location.href = to.replace(/^([^?#]*\/)(?=[?#]|$)/, '$1index.html');
-    } catch (_) {}
+    const to = appPathFromUrl(url);
+    if (to) location.href = to;
   });
 
   // Sound keeps going with the screen off, with a notification that says so.

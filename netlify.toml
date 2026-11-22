@@ -624,3 +624,11 @@ Content-Security-Policy = """
   [headers.values]
     Cache-Control = "no-cache"
     Service-Worker-Allowed = "/"
+
+# The file that lets Android open sign-in links in the app. Created with android-app/scripts/make-assetlinks.mjs once the
+# signing fingerprint is known (docs/android-your-steps.md). It must be served as JSON, without redirects.
+[[headers]]
+  for = "/.well-known/assetlinks.json"
+  [headers.values]
+    Content-Type = "application/json"
+    Cache-Control = "public, max-age=3600"
