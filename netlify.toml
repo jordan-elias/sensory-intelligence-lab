@@ -340,6 +340,16 @@
   status = 200
 
 [[redirects]]
+  from = "/ambience"
+  to   = "/ambience/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/ambience/"
+  to   = "/ambience/index.html"
+  status = 200
+
+[[redirects]]
   from = "/intake"
   to   = "/intake/index.html"
   status = 200

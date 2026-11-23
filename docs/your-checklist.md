@@ -45,6 +45,11 @@ Set (names as the code reads them): `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
 - [ ] A **review account** for Google's testers (a login they can use), a **Data safety** form, the privacy policy URL, screenshots, and an **internal testing track** release.
 - [ ] A phone test of the app (nothing has run on a real device yet).
 
+## Ambience
+- [ ] Add the nature loops as listed in `docs/ambience-audio.md` (ocean, rain, stream, fire; birds already exists), with their sources in `audio/ambience/SOURCES.md`.
+- [ ] Listen: balance between rows, whether the lofi drums, chords and melody feel calm, whether Drift changes feel natural. Tell me what to change.
+- [ ] Spoken word files and where they come from (public domain, Creative Commons, or your own).
+
 ## Things I need from you
 - A decision on journal sharing, health wording, and what is missing from the Soundscape Machine.
 - Whether `phase11` and `phase12` SQL files exist on your side.

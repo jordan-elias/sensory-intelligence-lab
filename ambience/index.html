@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script>window.SIL_AUDIO_LATENCY = 'playback';</script>
+  <script src="/assets/js/audio/safe-output.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ambience</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <link rel="apple-touch-icon" href="/images/favicon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link href="/assets/css/fonts.css" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/header.css">
+  <link rel="stylesheet" href="/assets/css/a11y.css">
+  <link href="/assets/css/ambience.css" rel="stylesheet">
+</head>
+<body class="amb">
+<script src="/assets/js/site-header.js"></script>
+<nav aria-label="Breadcrumb" class="bc"><ol><li><a href="/dashboard/">Dashboard</a></li><li>Ambience</li></ol></nav>
+
+<main class="amb-main">
+  <div class="amb-top">
+    <h1>Ambience</h1>
+    <button id="play" class="amb-play" type="button" aria-pressed="false" aria-label="Play"></button>
+  </div>
+
+  <div id="bar" class="amb-bar" data-mode="steady">
+    <div class="amb-group"><span>Mode</span><button class="chip" type="button" data-mode="steady" aria-pressed="true">Steady</button><button class="chip" type="button" data-mode="drift" aria-pressed="false">Drift</button></div>
+    <div class="amb-group" id="feels"><span>Feel</span></div>
+    <div class="amb-group"><span>Volume</span><input id="master" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="Overall volume"></div>
+    <div class="amb-group"><button id="timer" class="chip" type="button" aria-pressed="false">Timer off</button><button id="surprise" class="chip" type="button">Surprise me</button></div>
+    <div class="amb-drift">
+      <div class="amb-group"><span>Pace</span><button class="chip" type="button" data-pace="slow" aria-pressed="false">Slow</button><button class="chip" type="button" data-pace="medium" aria-pressed="true">Medium</button></div>
+      <div class="amb-group"><span>Layers</span><button class="chip" type="button" data-density="sparse" aria-pressed="false">Few</button><button class="chip" type="button" data-density="medium" aria-pressed="true">Some</button><button class="chip" type="button" data-density="full" aria-pressed="false">Many</button></div>
+    </div>
+  </div>
+
+  <p id="hint" class="amb-hint" role="status" aria-live="polite"></p>
+
+  <div id="grid">
+    <section class="amb-section" aria-labelledby="h-music"><h2 id="h-music">Music</h2><div id="rows"></div></section>
+    <section class="amb-section" aria-labelledby="h-nature"><h2 id="h-nature">Nature</h2><div id="nature" class="amb-tiles"></div></section>
+    <section class="amb-section" aria-labelledby="h-noise"><h2 id="h-noise">Noise</h2><div id="noise" class="amb-tiles"></div></section>
+    <section class="amb-section" aria-labelledby="h-spoken" hidden><h2 id="h-spoken">Spoken</h2><div id="spoken" class="amb-tiles"></div></section>
+  </div>
+
+  <dialog id="sheet" class="amb-sheet" aria-labelledby="sheet-title-text">
+    <h3><span id="sheet-title-text"></span><button id="s-close" class="amb-x" type="button">Done</button></h3>
+    <label>Volume <input id="s-vol" type="range" min="0" max="1" step="0.01"></label>
+    <label>Pan <input id="s-pan" type="range" min="-1" max="1" step="0.01"></label>
+    <label><span>Alternate left and right</span><input id="s-alt" type="checkbox"></label>
+    <label id="s-rate-row" hidden>Speed <input id="s-rate" type="range" min="0.1" max="1.5" step="0.05"></label>
+    <p class="sub">Alternating works best with headphones.</p>
+    <label>Reverb <input id="s-rev" type="range" min="0" max="1" step="0.01"></label>
+    <div id="s-var-row" class="var"><span>Pattern</span><span><button class="chip" type="button" data-var="0">1</button> <button class="chip" type="button" data-var="1">2</button> <button class="chip" type="button" data-var="2">3</button></span></div>
+    <label id="s-pin-row" hidden><span>Always keep playing in Drift</span><input id="s-pin" type="checkbox"></label>
+  </dialog>
+
+  <p class="amb-note">Everything here plays on your device. Nothing you choose is sent anywhere.</p>
+</main>
+<script type="module" src="/assets/js/ambience/page.js"></script>
+</body>
+</html>
