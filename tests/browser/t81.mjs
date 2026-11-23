@@ -10,9 +10,8 @@ const vis=id=>page.$eval(`.tile[data-id="${id}"]`,b=>!b.hidden&&b.offsetParent!=
 
 ok((await page.$$('#rows .tile')).length===11,'eleven music tiles in five rows');
 ok((await page.$$('#noise .tile')).length===4,'four generated noises');
-ok(await vis('nature:birds'),'birds show (the file already exists)');
-ok(!(await vis('nature:ocean')),'sounds with no file yet are not shown');
-ok(await page.$eval('#h-spoken',e=>e.closest('section').hidden),'spoken word stays hidden until there are recordings');
+for(const n of ['birds','ocean','rain','stream','fire']) ok(await vis('nature:'+n),n+' shows');
+ok((await page.$$('#spoken .tile')).length===3&&!(await page.$eval('#h-spoken',e=>e.closest('section').hidden)),'three spoken readings show');
 ok((await page.evaluate(()=>window.AMBIENCE.running))===false,'nothing plays by itself');
 ok((await st('music:drums:lofi'))==='off','tiles start off');
 
@@ -37,6 +36,17 @@ await page.click('.tile[data-id="nature:birds"]'); await sleep(200);
 const loading=await st('nature:birds'); await page.waitForFunction(()=>document.querySelector('.tile[data-id="nature:birds"]').dataset.state==='on',{timeout:15000}).catch(()=>{});
 ok(['loading','on'].includes(loading)&&(await st('nature:birds'))==='on','the recorded birds load, then play');
 
+// two nature sounds at most
+await page.$eval('.tile[data-id="nature:rain"]',b=>b.click()); await sleep(200);
+await page.$eval('.tile[data-id="nature:ocean"]',b=>b.click()); await sleep(200);
+ok((await st('nature:birds'))==='off'&&['loading','on'].includes(await st('nature:rain'))&&['loading','on'].includes(await st('nature:ocean')),'a third nature sound makes the oldest step aside');
+// spoken word streams, and pauses (not restarts) when switched off
+await page.$eval('.tile[data-id="spoken:potatoes"]',b=>b.click()); await sleep(2500);
+const sp=await page.evaluate(()=>{const e=window.AMBIENCE.spokenElement('spoken:potatoes'); return e?{paused:e.paused,t:e.currentTime}:null;});
+ok(sp&&!sp.paused,'spoken word plays through an audio element '+JSON.stringify(sp));
+await page.$eval('.tile[data-id="spoken:lookingglass"]',b=>b.click()); await sleep(200); ok((await st('spoken:potatoes'))==='off','only one spoken reading at a time');
+await sleep(6500); const sp2=await page.evaluate(()=>window.AMBIENCE.spokenElement('spoken:potatoes').paused); ok(sp2,'the reading that was switched off pauses');
+await page.$eval('.tile[data-id="spoken:lookingglass"]',b=>b.click()); await page.$eval('.tile[data-id="nature:rain"]',b=>b.click()); await page.$eval('.tile[data-id="nature:ocean"]',b=>b.click()); await sleep(400);
 // hold opens settings
 await page.$eval('.tile[data-id="music:bass:sub"]',b=>b.scrollIntoView({block:'center'})); await sleep(150);
 const box=await (await page.$('.tile[data-id="music:bass:sub"]')).boundingBox();
@@ -102,4 +112,14 @@ for(const [k,v] of Object.entries(R)){ if(k==='q'||k==='drift'||k==='all') conti
 ok(R.all.bad===0&&R.all.pk<2.2&&R.all.rms>0.02,`everything together stays in range (peak ${R.all.pk.toFixed(2)}, rms ${R.all.rms.toFixed(3)})`);
 ok(R.q.mid==='pending'&&R.q.after==='on','a tile switched on mid-bar is pending, then on at the bar line '+JSON.stringify(R.q));
 ok(R.drift.states>=8&&R.drift.maxMusic<=2&&R.drift.silent===0,'Drift moves, keeps to its cap, and is never silent '+JSON.stringify(R.drift));
+// a missing file hides its tile; the real recordings decode, and the short fire is stretched
+{ const P2=await newPage(await browser.createBrowserContext(),BASE,{}); const p2=P2.page; p2.evaluateOnNewDocument(()=>{ const f=window.fetch; window.fetch=(u,o)=>/\/audio\/(rain|potatoes)\.mp3/.test(String(u))?Promise.resolve(new Response('no',{status:404,headers:{'content-type':'text/plain'}})):f(u,o); });
+  await p2.goto(`${BASE}/ambience/`,{waitUntil:'domcontentloaded'}); await p2.waitForSelector('.tile'); await sleep(800);
+  const v=id=>p2.$eval(`.tile[data-id="${id}"]`,b=>!b.hidden&&b.offsetParent!==null).catch(()=>false);
+  ok(!(await v('nature:rain'))&&await v('nature:ocean'),'a sound whose file is missing is not shown, the others are');
+  ok((await p2.$$('#spoken .tile')).length===2,'nor a missing reading');
+  const dur=await p2.evaluate(async()=>{ const { createEngine } = await import('/assets/js/ambience/engine.js'); const ctx=new OfflineAudioContext(2,44100,44100); const out={};
+    for(const n of ['fire','ocean','stream']){ const r=await fetch('/audio/'+n+'.mp3'); const raw=await ctx.decodeAudioData(await r.arrayBuffer()); const e=createEngine({ctx,timers:false,loadRecorded:async()=>raw}); e.setSelected(['nature:'+n]); e.begin(0); e.scheduleUntil(1); await new Promise(r=>setTimeout(r,2500)); out[n]={src:raw.duration, status:e.status('nature:'+n)}; }
+    return out; });
+  ok(dur.fire.src<10&&dur.ocean.src>30&&dur.fire.status==='on'&&dur.ocean.status==='on'&&dur.stream.status==='on','the real recordings decode and play '+JSON.stringify(dur)); }
 await browser.close(); server.close(); process.exit(fail?1:0);

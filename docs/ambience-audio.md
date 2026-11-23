@@ -4,15 +4,15 @@ Everything musical in Ambience is generated in the browser. Only nature and spok
 
 ## Nature (up to two at once)
 
-Put each file in `audio/ambience/` with exactly these names. A sound whose file is missing is simply not shown, so you can add them one at a time.
+The files you uploaded are in `audio/` (all `.mp3`). The page looks there first, then in `audio/ambience/` for `.m4a`. A sound whose file is missing is simply not shown, so you can add them one at a time.
 
 | Sound  | File                         | Notes |
 |--------|------------------------------|-------|
-| Ocean  | `audio/ambience/ocean.m4a`   | gentle shore, no crashing surf |
-| Rain   | `audio/ambience/rain.m4a`    | steady, no thunder |
-| Birds  | `audio/maskers/nature.mp3`   | already in the repo (the Cocktail Party Problem recording); nothing to add |
-| Stream | `audio/ambience/stream.m4a`  | small brook |
-| Fire   | `audio/ambience/fire.m4a`    | soft crackle |
+| Ocean  | `audio/ocean.mp3`            | 38 s |
+| Rain   | `audio/rain.mp3`             | 3 min 45 s |
+| Birds  | `audio/maskers/nature.mp3`   | the Cocktail Party Problem recording |
+| Stream | `audio/stream.mp3`           | 50 s |
+| Fire   | `audio/fire.mp3`             | only 7.5 s, so the page stretches it into a minute from random pieces so the repeat is not heard every few seconds. A longer recording (about a minute) would still sound better. |
 
 `.mp3` with the same base name also works if you prefer it (the page tries `.m4a` first, then `.mp3`).
 
@@ -23,9 +23,13 @@ Put each file in `audio/ambience/` with exactly these names. A sound whose file 
 
 ## Spoken word
 
-Not yet. The catalog has an empty `SPOKEN` list in `assets/js/ambience/catalog.js`. Add entries like
-`{ id: 'talk-1', label: 'Talk', src: ['/audio/ambience/spoken/talk-1.m4a'] }`
-and the Spoken row appears. In Drift it comes in rarely and leaves again after a few phrases. Use only recordings you have the rights to (public domain, Creative Commons with credit, or your own).
+Three public-domain readings are in `audio/`: `lookingglass.mp3` (Through the Looking-Glass, chapter 1), `montechristo.mp3` (The Count of Monte Cristo, chapter 1), `potatoes.mp3` (twenty ways of cooking potatoes). They are listed in `assets/js/ambience/catalog.js` (`SPOKEN`).
+
+- They are streamed, not loaded whole (the Monte Cristo reading would take about 180 MB of memory decoded), and they pause rather than restart when switched off, so a reading carries on where it left off.
+- The service worker does not copy them into the offline cache, so they need a connection on the web. In the Android app they are inside the app.
+- In Drift a reading comes in rarely and leaves after a few phrases. In Steady it plays while it is on.
+- Size: about 32 MB together, mono 128 kbps. Dropping them to 64 kbps mono (still clear for speech) would halve that.
+- Credits: please tell me the reader and the source (for example LibriVox) of each recording and I will add a small credits line to the page.
 
 ## Checking by ear (not done by me)
 I could check that every sound renders, is finite and stays in range, but not how it sounds. When you listen, tell me about: the balance between rows (drums, bass, chords, melody, pad against noise and nature), whether lofi drums feel lofi, whether the chord and melody patterns feel calm, and whether Drift changes feel natural.

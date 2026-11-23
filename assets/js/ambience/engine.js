@@ -11,12 +11,12 @@ import { makeVoices } from '../seq/voices.js';
 import { swingOffset } from '../seq/groove.js';
 import { events, STEPS, PHRASE, feelOf, midiHz, swingOf } from './music.js';
 import { NATURE, SPOKEN, DEFAULT_FEEL } from './catalog.js';
-import { loopable, makeNoise } from './loop.js';
+import { loopable, makeNoise, extendTexture } from './loop.js';
 import * as drift from './drift.js';
 import { cleanSettings, DEFAULT_SETTINGS } from './store.js';
 import { toggle as toggleSel } from './selection.js';
 
-const LOOKAHEAD = 0.2, HIDDEN_LOOKAHEAD = 2.5, TICK_MS = 25, FADE = 3, XFADE = 5;
+const LOOKAHEAD = 0.2, HIDDEN_LOOKAHEAD = 2.5, TICK_MS = 25, FADE = 3, XFADE = 5, SHORT = 20, KEEP = 3;   // recordings shorter than SHORT seconds are stretched; at most KEEP decoded recordings stay in memory
 const ROW_VOL = { drums: 0.55, bass: 0.6, chords: 0.45, melody: 0.35, pad: 0.4 };
 const family = id => id.split(':')[0];
 const isMusic = id => id.startsWith('music:');
@@ -40,7 +40,7 @@ export function createEngine({ ctx, loadRecorded, rand = Math.random, doc = glob
   const notify = (t = 0) => { const f = () => api.onchange && api.onchange(); const ms = (t - ctx.currentTime) * 1000; if (timers && ms > 30) setTimeout(f, ms); else f(); };
 
   /* ── strips ── */
-  const setting = key => settings[key] || (settings[key] = { ...DEFAULT_SETTINGS, ...(ROW_VOL[key.split(':')[1]] && key.startsWith('music:') ? { vol: ROW_VOL[key.split(':')[1]] } : { vol: key.startsWith('noise:') ? 0.3 : key.startsWith('spoken:') ? 0.7 : 0.6 }) });
+  const setting = key => settings[key] || (settings[key] = { ...DEFAULT_SETTINGS, ...(ROW_VOL[key.split(':')[1]] && key.startsWith('music:') ? { vol: ROW_VOL[key.split(':')[1]] } : { vol: key.startsWith('noise:') ? 0.3 : key.startsWith('spoken:') ? 0.55 : 0.6 }) });
   function applyStrip(s, set) {
     const now = ctx.currentTime;
     s.vol.gain.setTargetAtTime(set.vol, now, 0.04); s.send.gain.setTargetAtTime(set.reverb * 0.9, now, 0.05);
@@ -93,12 +93,16 @@ export function createEngine({ ctx, loadRecorded, rand = Math.random, doc = glob
     const n = Math.floor(ctx.sampleRate * 10), [ch] = loopable([makeNoise(kind === 'wind' ? 'pink' : kind, n, 11)], ctx.sampleRate), b = ctx.createBuffer(1, ch.length, ctx.sampleRate); b.getChannelData(0).set(ch); cache.set(key, b); return b;
   };
   async function recorded(id) {
-    if (cache.has(id)) return cache.get(id);
+    if (cache.has(id)) { const b = cache.get(id); cache.delete(id); cache.set(id, b); return b; }   // most recently used goes last
     const buf = loadRecorded ? await loadRecorded(id) : await defaultLoad(id); if (!buf) return null;
-    const chans = Array.from({ length: buf.numberOfChannels }, (_, c) => buf.getChannelData(c)), xf = Math.min(XFADE * buf.sampleRate, Math.floor(buf.length * 0.1));
-    const out = loopable(chans, xf), b = ctx.createBuffer(out.length, out[0].length, buf.sampleRate); out.forEach((a, c) => b.getChannelData(c).set(a));
-    cache.set(id, b); return b;
+    let chans = Array.from({ length: buf.numberOfChannels }, (_, c) => buf.getChannelData(c)); const sr = buf.sampleRate;
+    if (buf.duration < SHORT) chans = extendTexture(chans, sr * 60, Math.floor(buf.length * 0.5), Math.floor(buf.length * 0.15), rand);   // a few seconds of crackle becomes a minute
+    const out = loopable(chans, Math.min(XFADE * sr, Math.floor(chans[0].length * 0.1))), b = ctx.createBuffer(out.length, out[0].length, sr); out.forEach((a, c) => b.getChannelData(c).set(a));
+    cache.set(id, b);
+    for (const k of [...cache.keys()]) { if (cache.size <= KEEP + noiseKeys()) break; if (!k.startsWith('noise:')) cache.delete(k); }
+    return b;
   }
+  const noiseKeys = () => [...cache.keys()].filter(k => k.startsWith('noise:')).length;
   async function defaultLoad(id) {
     const def = [...NATURE, ...SPOKEN].find(x => id === `nature:${x.id}` || id === `spoken:${x.id}`); if (!def) return null;
     for (const src of def.src) { try { const r = await fetch(src); if (!r.ok) continue; return await ctx.decodeAudioData(await r.arrayBuffer()); } catch { /* try the next file */ } }
@@ -124,6 +128,7 @@ export function createEngine({ ctx, loadRecorded, rand = Math.random, doc = glob
     if (family(id) === 'noise') {
       const inst = bedSource(id, t); inst.g.gain.setTargetAtTime(1, t, FADE / 3); beds.set(id, inst); return;
     }
+    if (family(id) === 'spoken') { startSpoken(id, t); return; }
     if (loading.has(id)) return; loading.add(id); notify();
     recorded(id).then(buf => {
       loading.delete(id);
@@ -134,11 +139,23 @@ export function createEngine({ ctx, loadRecorded, rand = Math.random, doc = glob
       g.gain.setTargetAtTime(1, when, FADE / 3); beds.set(id, { g, nodes: [src] }); notify();
     });
   }
+  /* Spoken word is long, so it streams through an audio element instead of being decoded whole. It pauses (not restarts) when it leaves, so it carries on where it stopped. */
+  const spokenEls = new Map();
+  function startSpoken(id, t) {
+    const def = SPOKEN.find(x => id === `spoken:${x.id}`); if (!def || typeof Audio === 'undefined') return;
+    let rec = spokenEls.get(id);
+    if (!rec) { const el = new Audio(); el.preload = 'auto'; el.loop = true; el.src = def.src[0]; let node = null; try { node = ctx.createMediaElementSource(el); } catch { /* no streaming here */ } rec = { el, node }; spokenEls.set(id, rec); }
+    if (!rec.node) return;
+    const g = ctx.createGain(); g.gain.value = 0; g.connect(getStrip(id).input); try { rec.node.disconnect(); } catch { /* not connected yet */ } rec.node.connect(g);
+    rec.el.play().catch(() => { missing.add(id); api.onmissing && api.onmissing(id); });
+    g.gain.setTargetAtTime(1, ctx.currentTime, FADE / 3);
+    const inst = { g, nodes: [], after: () => { if (!beds.has(id) || beds.get(id) === inst) rec.el.pause(); } }; beds.set(id, inst);
+  }
   function stopBed(id, t) {
     const inst = beds.get(id); if (!inst || inst.stopping) return;
     inst.stopping = true; inst.g.gain.setTargetAtTime(0, t, FADE / 3);
     const end = t + FADE * 1.7; inst.nodes.forEach(n => { try { n.stop(end); } catch { /* already stopped */ } });
-    setTimeout(() => { if (beds.get(id) === inst) beds.delete(id); try { inst.g.disconnect(); } catch { /* gone */ } }, Math.max(0, (end - ctx.currentTime) * 1000) + 200);
+    setTimeout(() => { if (inst.after) inst.after(); if (beds.get(id) === inst) beds.delete(id); try { inst.g.disconnect(); } catch { /* gone */ } }, Math.max(0, (end - ctx.currentTime) * 1000) + 200);
   }
   function applyBeds(t) {
     const want = new Set(ds.beds);
@@ -238,7 +255,7 @@ export function createEngine({ ctx, loadRecorded, rand = Math.random, doc = glob
       if (isMusic(id)) { const [, row, option] = id.split(':'); if (ds.music[row]?.option === option) return 'on'; return musicPending.has(id) ? 'pending' : 'rest'; }
       if (loading.has(id)) return 'loading'; if (ds.beds.includes(id)) return 'on'; return 'rest';
     },
-    isPinned: id => pinned.includes(id), isMissing: id => missing.has(id),
+    isPinned: id => pinned.includes(id), isMissing: id => missing.has(id), spokenElement: id => spokenEls.get(id)?.el || null,
     get selected() { return selected.slice(); }, get running() { return running; }, get mode() { return mode; }, get feel() { return feelId; }, get bpm() { return feel.bpm; },
     get density() { return density; }, get pace() { return pace; }, get master() { return masterLevel; }, get pinnedIds() { return pinned.slice(); }, get node() { return master; },
     get sounding() { return drift.soundingIds(ds); },

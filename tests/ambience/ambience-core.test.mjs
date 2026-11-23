@@ -4,7 +4,7 @@ import { MUSIC, NATURE, NOISE, allTiles, strip } from '../../assets/js/ambience/
 import { toggle, clean, ofFamily } from '../../assets/js/ambience/selection.js';
 import { events, ROWS, STEPS, VARIATIONS, feelOf, chordMidi, degreeMidi, rng } from '../../assets/js/ambience/music.js';
 import { startState, step, reconcile, soundingIds, DENSITY } from '../../assets/js/ambience/drift.js';
-import { loopable, makeNoise } from '../../assets/js/ambience/loop.js';
+import { loopable, makeNoise, extendTexture } from '../../assets/js/ambience/loop.js';
 import { cleanPrefs, DEFAULT_SETTINGS } from '../../assets/js/ambience/store.js';
 
 const known = allTiles().map(t => t.id);
@@ -144,4 +144,19 @@ test('store: repairs bad input', () => {
 test('catalog: tile ids are unique and every nature sound has a file to try', () => {
   assert.equal(new Set(known).size, known.length);
   for (const n of NATURE) assert.ok(n.src.length >= 1); assert.equal(NOISE.length, 4); assert.equal(MUSIC.length, 5);
+});
+
+test('extendTexture: a short sound becomes a long one without jumps, and is not just the same loop', () => {
+  const sr = 8000, n = sr * 6, a = new Float32Array(n); const r = rng(4); for (let i = 0; i < n; i++) a[i] = (r() * 2 - 1) * 0.4 * (r() < 0.002 ? 2 : 0.3);
+  const [o] = extendTexture([a], sr * 60, Math.floor(n * 0.5), Math.floor(n * 0.15), rng(2));
+  assert.ok(o.length >= sr * 60); for (const v of o) assert.ok(Number.isFinite(v) && Math.abs(v) <= 1.5);
+  const first = o.slice(0, n), second = o.slice(n, 2 * n); let same = true; for (let i = 0; i < n; i += 50) if (Math.abs(first[i] - second[i]) > 1e-6) { same = false; break; }
+  assert.ok(!same, 'does not simply repeat');
+  assert.equal(extendTexture([a], n - 5, 100, 10)[0].length, n, 'long enough sounds are left alone');
+  const rmsOf = x => Math.sqrt(x.reduce((s2, v) => s2 + v * v, 0) / x.length);
+  assert.ok(Math.abs(rmsOf(o) - rmsOf(a)) / rmsOf(a) < 0.35, 'keeps about the same loudness');
+});
+test('catalog: the spoken readings and nature files are where the repo has them', async () => {
+  const { SPOKEN } = await import('../../assets/js/ambience/catalog.js'); const fs = await import('node:fs');
+  for (const x of [...SPOKEN, ...NATURE]) assert.ok(x.src.some(p => fs.existsSync('.' + p)), `${x.id} has a file`);
 });
