@@ -96,3 +96,33 @@ test('the plan: repeatable, sorted, empty text is safe, a long text is fast', ()
   const t0 = Date.now(); const lp = plan(long); assert.ok(Date.now() - t0 < 500, 'under half a second'); assert.ok(lp.events.length > 600);
   assert.equal(plan(TEXT, {}, { bpm: 100 }).bpm, 100); assert.ok(plan(TEXT).bpm >= 60 && plan(TEXT).bpm <= 84);
 });
+
+test('memory: the opening tune is kept as scale degrees', () => {
+  const p = plan(TEXT); assert.ok(p.theme.length >= 3 && p.theme.length <= 6);
+  for (const n of p.theme) assert.ok(Number.isInteger(n.deg) && n.at >= 0 && n.at < 4 && n.dur >= 0.5);
+  assert.equal(p.theme[0].at, 0); assert.deepEqual(plan(TEXT).theme, p.theme, 'repeatable');
+  assert.deepEqual(composePlan('', []).theme === undefined ? [] : composePlan('', []).theme, []);
+});
+test('memory: a similar text brings the old tune back in the introduction, a very similar one also at the end', () => {
+  const theme = plan(TEXT).theme, other = 'The sea falls softly over the stones, and I hear the water.';
+  const none = plan(other), mid = plan(other, {}, { memory: { theme, similarity: 0.7 } }), high = plan(other, {}, { memory: { theme, similarity: 0.9 } });
+  assert.equal(none.events.filter(e => e.recall).length, 0);
+  const rec = mid.events.filter(e => e.recall); assert.equal(rec.length, theme.length); assert.ok(rec.every(e => e.beat < 4), 'in the introduction bar');
+  assert.ok(high.events.filter(e => e.recall).length === theme.length * 2 && high.events.some(e => e.recall && e.beat >= high.endBeat - 4), 'and again at the end');
+  for (const e of [...mid.events, ...high.events]) for (const m of e.midi) assert.ok(mid.key.pcs.includes(m % 12), 'recalled notes stay in the new key');
+  assert.equal(mid.memory.mode, 'recall');
+});
+test('memory: a very different text ends on a deceptive cadence; a middling one is left alone', () => {
+  const theme = plan(TEXT).theme, text = 'This is a sentence that ends the piece today.';
+  const lastDeg = p => { const s = p.sentences.at(-1); return p.chords[Math.floor(s.words.at(-1).beat / 4)].deg; };
+  assert.equal(lastDeg(plan(text)), 0);
+  const dec = plan(text, {}, { memory: { theme, similarity: 0.2 } }); assert.equal(lastDeg(dec), 5); assert.equal(dec.memory.mode, 'deceptive');
+  assert.equal(lastDeg(plan(text, {}, { memory: { theme, similarity: 0.5 } })), 0);
+  assert.equal(lastDeg(plan('Is this a question today?', {}, { memory: { theme, similarity: 0.2 } })), 4, 'a question stays open');
+});
+test('echoes: a word said three times or more is answered by its own echo', () => {
+  const p = plan('echo echo echo and again echo'); const echoes = p.events.filter(e => e.echo);
+  assert.equal(echoes.length, 3, 'every repeat after the first');
+  assert.ok(echoes.every(e => e.vel < 0.25));
+  assert.equal(plan('echo echo and again').events.filter(e => e.echo).length, 0, 'twice is not enough');
+});
