@@ -22,6 +22,7 @@ export const TOOLS = {
   cocktail: { title: 'Cocktail Party Problem', href: '/cocktail-party-problem/', min: 10, why: 'Pick one voice out of several.' },
   spatial: { title: 'Spatial listening game', href: '/spatial-game/', min: 10, why: 'Find where a sound is coming from.' },
   soundscape: { title: 'Soundscape Machine', href: '/soundscape-machine/', min: 15, why: 'Build a soundscape and let it run.' },
+  ambience: { title: 'Ambience', href: '/ambience/', min: 10, why: 'Switch sounds on and off and let a calm mix play.' },
   sequencer: { title: 'Sequencer', href: '/sequencer/', min: 15, why: 'Make a beat, step by step.' },
   experiments: { title: 'Experiments in Creativity', href: '/experiments/', min: 15, why: 'One small experiment with a limit.' },
   journal: { title: 'Timed journal', href: '/journal/', min: 10, why: 'Write for a set time without stopping.' },
