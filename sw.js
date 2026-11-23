@@ -5,6 +5,7 @@
 const VERSION = 'sil-v1';
 const PAGES = ['/', '/breathing/', '/regulation/', '/soundscape-machine/', '/ear-training/', '/sequencer/', '/ambience/', '/spatial-game/', '/cocktail-party-problem/', '/creature/', '/experiments/', '/offline.html'];
 const STATIC = /^\/(assets|images|audio|dashboard)\//;
+const LONG = /^\/audio\/(lookingglass|montechristo|potatoes)\.mp3$/;   // long readings are streamed, never copied into the cache
 
 self.addEventListener('install', e => { e.waitUntil(caches.open(VERSION).then(c => c.add('/offline.html')).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
@@ -18,7 +19,7 @@ self.addEventListener('fetch', e => {
   const url = new URL(req.url);
   if (url.origin !== location.origin || url.pathname.startsWith('/.netlify/')) return;
   const nav = req.mode === 'navigate';
-  const keep = nav ? PAGES.includes(norm(url.pathname)) : STATIC.test(url.pathname);
+  const keep = nav ? PAGES.includes(norm(url.pathname)) : STATIC.test(url.pathname) && !LONG.test(url.pathname);
   if (!nav && !keep) return;
   e.respondWith((async () => {
     try {

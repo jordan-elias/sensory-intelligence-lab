@@ -16,11 +16,11 @@ export const MUSIC = [
 
 /** Recorded nature loops. `src` lists files to try in order; a sound whose file is missing is simply not shown. */
 export const NATURE = [
-  { id: 'ocean', label: 'Ocean', src: ['/audio/ambience/ocean.m4a', '/audio/ambience/ocean.mp3'] },
-  { id: 'rain', label: 'Rain', src: ['/audio/ambience/rain.m4a', '/audio/ambience/rain.mp3'] },
+  { id: 'ocean', label: 'Ocean', src: ['/audio/ocean.mp3', '/audio/ambience/ocean.m4a'] },
+  { id: 'rain', label: 'Rain', src: ['/audio/rain.mp3', '/audio/ambience/rain.m4a'] },
   { id: 'birds', label: 'Birds', src: ['/audio/maskers/nature.mp3'] },   // the same recording as the Cocktail Party Problem game
-  { id: 'stream', label: 'Stream', src: ['/audio/ambience/stream.m4a', '/audio/ambience/stream.mp3'] },
-  { id: 'fire', label: 'Fire', src: ['/audio/ambience/fire.m4a', '/audio/ambience/fire.mp3'] },
+  { id: 'stream', label: 'Stream', src: ['/audio/stream.mp3', '/audio/ambience/stream.m4a'] },
+  { id: 'fire', label: 'Fire', src: ['/audio/fire.mp3', '/audio/ambience/fire.m4a'] },
 ];
 
 /** Generated noise. */
@@ -28,8 +28,12 @@ export const NOISE = [
   { id: 'pink', label: 'Pink' }, { id: 'brown', label: 'Brown' }, { id: 'white', label: 'White' }, { id: 'wind', label: 'Wind' },
 ];
 
-/** Recorded spoken word. Empty until files are added: { id, label, src: ['/audio/ambience/spoken/<name>.m4a'] }. */
-export const SPOKEN = [];
+/** Recorded spoken word (public-domain readings). These are long, so they are streamed rather than loaded whole, and they carry on from where they left off. */
+export const SPOKEN = [
+  { id: 'lookingglass', label: 'Looking-Glass', src: ['/audio/lookingglass.mp3'] },        // Through the Looking-Glass, chapter 1
+  { id: 'montechristo', label: 'Monte Cristo', src: ['/audio/montechristo.mp3'] },        // The Count of Monte Cristo, chapter 1
+  { id: 'potatoes', label: 'Potatoes', src: ['/audio/potatoes.mp3'] },                    // Twenty ways of cooking potatoes
+];
 
 /** The tempo and key each feel sets. Everything generated follows it. `bpm` is quarter notes per minute. */
 export const FEELS = [

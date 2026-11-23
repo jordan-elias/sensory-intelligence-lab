@@ -29,3 +29,25 @@ export function makeNoise(kind, n, seed = 1) {
   else { let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0; for (let i = 0; i < n; i++) { const w = r() * 2 - 1; b0 = 0.99886 * b0 + w * 0.0555179; b1 = 0.99332 * b1 + w * 0.0750759; b2 = 0.969 * b2 + w * 0.153852; b3 = 0.8665 * b3 + w * 0.3104856; b4 = 0.55 * b4 + w * 0.5329522; b5 = -0.7616 * b5 - w * 0.016898; o[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362; b6 = w * 0.115926; } }
   return scale(o, 0.5);
 }
+
+/**
+ * Stretches a short texture (a few seconds of crackling fire, say) into a long one by joining overlapping pieces taken from
+ * random places in it, so the repeat is not heard every few seconds. Pieces are `piece` samples long and overlap by `xf`
+ * (equal-power crossfades). Returns arrays of about `target` samples. `rand` is a function returning [0, 1).
+ */
+export function extendTexture(channels, target, piece, xf, rand = Math.random) {
+  const n = channels[0].length;
+  if (n >= target || piece + 1 >= n) return channels.map(c => Float32Array.from(c));
+  const hop = piece - xf, count = Math.ceil((target - xf) / hop), out = channels.map(() => new Float32Array(count * hop + xf));
+  let last = -1;
+  for (let k = 0; k < count; k++) {
+    let at = Math.floor(rand() * (n - piece)); if (Math.abs(at - last) < piece / 2) at = (at + Math.floor(piece)) % (n - piece); last = at;
+    channels.forEach((src, c) => { const o = out[c], base = k * hop;
+      for (let i = 0; i < piece; i++) {
+        let g = 1; if (k > 0 && i < xf) g = Math.sin(((i + 0.5) / xf) * Math.PI / 2); else if (k < count - 1 && i >= piece - xf) g = Math.cos(((i - (piece - xf) + 0.5) / xf) * Math.PI / 2);
+        o[base + i] += src[at + i] * g;
+      }
+    });
+  }
+  return out;
+}

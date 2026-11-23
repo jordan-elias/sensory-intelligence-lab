@@ -62,3 +62,5 @@ body.amb .bc li+li::before{color:var(--amb-border)}
 .amb-x{font:inherit;background:transparent;border:1px solid var(--amb-border);color:var(--amb-text);border-radius:999px;padding:.25rem .8rem;cursor:pointer}
 .amb-note{font-size:.75rem;color:var(--amb-muted);margin-top:1.2rem;line-height:1.5}
 @media (prefers-reduced-motion:reduce){.tile,.amb-play{transition:none}.tile[data-state=pending],.tile[data-state=loading]{animation:none}}
+.amb-note a{color:var(--amb-accent)}
+.amb-note+.amb-note{margin-top:.4rem}

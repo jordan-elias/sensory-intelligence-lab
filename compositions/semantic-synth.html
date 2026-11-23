@@ -187,6 +187,16 @@
     input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;
       background:var(--accent);cursor:pointer;border:none;}
 
+    /* Mode chips */
+    .ctrl-mode{flex:0 0 auto;min-width:0}
+    .mode-chips{display:flex}
+    .mode-chip{font-family:var(--font-heading);font-size:.7rem;font-weight:600;padding:.4rem .9rem;border:1px solid var(--border);
+      background:var(--bg);color:var(--text);cursor:pointer;min-height:34px}
+    .mode-chip+.mode-chip{border-left:none}
+    .mode-chip:hover{border-color:var(--text)}
+    .mode-chip[aria-pressed=true]{background:var(--accent);color:#fff;border-color:var(--accent)}
+    .composed-note{font-size:.72rem;color:var(--muted);padding:.4rem .75rem;border:1px solid var(--border);background:var(--surface);
+      margin-bottom:.5rem;font-variant-numeric:tabular-nums}
     /* ── ESSAY ── */
     .essay{margin-top:2.5rem;padding-top:2rem;border-top:1px solid var(--border);
       font-size:.9rem;line-height:1.8;color:var(--text);}
@@ -251,15 +261,22 @@
 
     <!-- Global controls -->
     <div class="controls-strip">
+      <div class="ctrl-mini ctrl-mode">
+        <span class="ctrl-mini-label">Mode</span>
+        <div class="mode-chips" role="group" aria-label="Playback mode">
+          <button type="button" class="mode-chip" data-mode="composed" aria-pressed="true" onclick="SS.setMode('composed')">Composed</button>
+          <button type="button" class="mode-chip" data-mode="raw" aria-pressed="false" onclick="SS.setMode('raw')">Raw</button>
+        </div>
+      </div>
       <div class="ctrl-mini">
         <span class="ctrl-mini-label">Tempo <span class="ctrl-mini-val" id="tempo-val">100 ms</span></span>
         <input type="range" min="40" max="400" value="100" id="ctrl-tempo"
-          oninput="SS.tempo=+this.value;document.getElementById('tempo-val').textContent=this.value+' ms'">
+          oninput="SS.tempo=+this.value;SS.tempoTouched=true;document.getElementById('tempo-val').textContent=this.value+' ms'">
       </div>
       <div class="ctrl-mini">
         <span class="ctrl-mini-label">Voice mix <span class="ctrl-mini-val" id="mix-val">50%</span></span>
         <input type="range" min="0" max="100" value="50" id="ctrl-mix"
-          oninput="SS.mixBalance=+this.value/100;document.getElementById('mix-val').textContent=this.value+'%'">
+          oninput="SS.mixBalance=+this.value/100;document.getElementById('mix-val').textContent=this.value+'%';window.SSComposed&&SSComposed.setMix(SS.mixBalance)">
       </div>
       <div class="ctrl-mini">
         <span class="ctrl-mini-label">Complexity <span class="ctrl-mini-val" id="complexity-val">50%</span></span>
@@ -288,7 +305,7 @@
           placeholder="Type anything here — a sentence, a question, a memory, a fragment of thought…"
           rows="3"></textarea>
         <div class="input-footer">
-          <span class="input-hint" id="input-hint">Five voices · No understanding</span>
+          <span class="input-hint" id="input-hint">Five voices · Composed from your words</span>
           <div class="input-controls">
             <button class="stop-btn" id="stop-btn" onclick="SS.stop()" disabled>■ stop</button>
             <button class="analyze-btn" id="analyze-btn" onclick="SS.analyze()">analyze</button>
@@ -306,6 +323,14 @@
     <p>When you type a sentence, a human hears meaning — association, memory, tone, weight. A language processing system does something different and stranger: it counts, ranks, clusters, predicts. It breaks the sentence into tokens and looks each one up in a statistical table. It measures the distances between words in a high-dimensional space. It computes a probability distribution over what token most likely comes next, given everything that came before. It does not understand. It computes. And in that computation — in the weights and distances and distributions — there is something that has the structure of music, even though no one intended it to be.</p>
     <p>Each of the five voices you hear corresponds to a distinct mode of computational analysis. They run in parallel, simultaneously, the way a language model's layers run in parallel — not sequentially reading the text, but processing different aspects of it all at once. Together they form a texture that is precisely as complex as the linguistic structure of what you wrote. Not more expressive, not more emotional — exactly as structured as the language itself.</p>
 
+    <div class="essay-divider">
+      <div class="essay-divider-line"></div>
+      <span class="essay-divider-label">Raw and Composed</span>
+      <div class="essay-divider-line"></div>
+    </div>
+    <h2>Two ways to listen</h2>
+    <p><strong>Raw</strong> is the original: each word sets off its voices as they are measured, with no key and no rhythm beyond the order of the words. <strong>Composed</strong> takes the same measurements and arranges them as music, and it is honest about who decides what.</p>
+    <p><strong>The text decides</strong> the key (from its most common group of meanings), the mode (brighter when the language is rare, darker when it is negated or questioning), the pitch and length of every word, the chord of every bar, and how tense each chord of predicted next words sounds: when one continuation is likely the chord is plain, when many are equally likely it is open. <strong>I decide</strong> that the notes stay in the key, that commas are breaths, that a full stop rests until the next bar, that each sentence is a phrase that swells and falls and ends in a cadence (a question stays unresolved, an ellipsis hangs), and that the piece slows at the end. The same text always gives the same piece.</p>
     <div class="essay-divider">
       <div class="essay-divider-line"></div>
       <span class="essay-divider-label">The Five Voices</span>
@@ -613,6 +638,11 @@ function resumeAudio() {
   return AC;
 }
 
+/* ── Voice mix: 0 is all pulse and syntax, 1 is all probability and clusters; the middle is as before ── */
+function mixG(foreground) { const m = SS.mixBalance; return Math.min(1.6, 2 * (foreground ? 1 - m : m)); }
+/* The composed mode reaches the audio through this. */
+window.SS_AUDIO = () => ({ ctx: resumeAudio(), out: masterGain });
+
 /* ── Smooth gain helper ── */
 function ramp(param, val, t, dur) {
   param.setTargetAtTime(val, t || AC.currentTime, dur || 0.05);
@@ -678,7 +708,7 @@ function playTokenPulse(freqScore, charLen, time) {
 
   // Brief sharp envelope
   gain.gain.setValueAtTime(0, now);
-  gain.gain.linearRampToValueAtTime(0.18, now + 0.005);
+  gain.gain.linearRampToValueAtTime(0.18 * mixG(true), now + 0.005);
   gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
 
   const filt = AC.createBiquadFilter();
@@ -703,7 +733,7 @@ function playProbabilityChord(predictions, time) {
     const [word, weight] = pred;
     const freqScore = getFreqScore(word);
     const freq = 220 + freqScore * 660 + i * 40;
-    const amp  = (weight / 100) * 0.12;
+    const amp  = (weight / 100) * 0.12 * mixG(false);
 
     const osc  = AC.createOscillator();
     const gain = AC.createGain();
@@ -739,7 +769,7 @@ function playSemanticCluster(clusterA, clusterB, time) {
     osc.frequency.value = freq;
 
     gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(0.07, now + 0.12);
+    gain.gain.linearRampToValueAtTime(0.07 * mixG(false), now + 0.12);
     gain.gain.setTargetAtTime(0, now + 0.3, 0.25);
 
     const filt = AC.createBiquadFilter();
@@ -777,7 +807,7 @@ function playSyntax(pos, time) {
   osc.frequency.value = cfg.freq;
 
   gain.gain.setValueAtTime(0, now);
-  gain.gain.linearRampToValueAtTime(cfg.amp, now + 0.015);
+  gain.gain.linearRampToValueAtTime(cfg.amp * mixG(true), now + 0.015);
   gain.gain.exponentialRampToValueAtTime(0.001, now + cfg.dur);
 
   osc.connect(gain);
@@ -1022,8 +1052,15 @@ function drawVis(ctx, W, H, analysis) {
 let playbackTimer = null;
 let isPlaying = false;
 
-function schedulePlayback(analysis, responseEl) {
+function schedulePlayback(analysis, responseEl, text) {
   if (isPlaying) stopPlayback();
+  if (SS.mode === 'composed' && window.SSComposed) {
+    isPlaying = true;
+    document.getElementById('stop-btn').disabled = false;
+    document.getElementById('analyze-btn').disabled = true;
+    window.SSComposed.start(analysis, text, responseEl, finishPlayback);
+    return;
+  }
   isPlaying = true;
 
   document.getElementById('stop-btn').disabled = false;
@@ -1118,6 +1155,7 @@ function finishPlayback() {
 
 function stopPlayback() {
   isPlaying = false;
+  if (window.SSComposed) window.SSComposed.stop();
   clearTimeout(playbackTimer);
   fadeEntropyDrone();
   document.getElementById('stop-btn').disabled = true;
@@ -1261,10 +1299,19 @@ function buildResponseEl(analysis, similarity, memState, text) {
    MAIN CONTROLLER
 ══════════════════════════════════════════════════════════ */
 const SS = {
+  mode: 'composed',
+  tempoTouched: false,
   tempo: 100,
   mixBalance: 0.5,
   complexity: 0.5,
   volume: 0.7,
+
+  setMode(m) {
+    this.mode = m === 'raw' ? 'raw' : 'composed';
+    for (const b of document.querySelectorAll('.mode-chip')) b.setAttribute('aria-pressed', String(b.dataset.mode === this.mode));
+    document.getElementById('input-hint').textContent = this.mode === 'raw' ? 'Five voices · No understanding' : 'Five voices · Composed from your words';
+    if (isPlaying) stopPlayback();
+  },
 
   setVolume(v) {
     this.volume = v;
@@ -1305,7 +1352,7 @@ const SS = {
     input.value = '';
 
     // Schedule audio playback
-    schedulePlayback(analysis, responseEl);
+    schedulePlayback(analysis, responseEl, text);
   },
 
   stop() {
@@ -1326,6 +1373,40 @@ document.getElementById('main-input').addEventListener('keydown', e => {
 const path = window.location.pathname.replace(/\/$/, '') || '/';
 
 
+</script>
+<script type="module">
+import { composePlan } from '/assets/js/semantic/compose.js';
+import { createPlayer } from '/assets/js/semantic/player.js';
+
+let player = null;
+const clampBpm = ms => Math.max(48, Math.min(132, Math.round(12000 / ms)));
+
+window.SSComposed = {
+  start(analysis, text, responseEl, done) {
+    const { ctx, out } = window.SS_AUDIO();
+    if (!player) player = createPlayer({ ctx, out });
+    player.setMix(SS.mixBalance);
+    const tokens = analysis.tokens.map(t => ({ ...t, pred: BIGRAMS[t.lower] ? BIGRAMS[t.lower].map(([w, wt]) => [w, wt, getFreqScore(w)]) : undefined }));
+    const plan = composePlan(text, tokens, SS.tempoTouched ? { bpm: clampBpm(SS.tempo) } : {});
+    window.SS_LAST_PLAN = plan;
+    const note = document.createElement('div');
+    note.className = 'composed-note';
+    note.textContent = `Composed in ${plan.key.name} at ${plan.bpm} bpm`;
+    responseEl.insertBefore(note, responseEl.querySelector('.token-row'));
+    const chips = responseEl.querySelectorAll('.token-chip'), bars = responseEl.querySelectorAll('.voice-bar-fill');
+    if (bars[4]) bars[4].style.width = (analysis.entropy * 100) + '%';
+    player.play(plan, {
+      onWord(i) {
+        chips.forEach(c => c.classList.remove('playing'));
+        if (chips[i]) { chips[i].classList.add('playing'); if (i > 0 && chips[i - 1]) chips[i - 1].classList.add('played'); chips[i].scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+      },
+      onVoice(v, vel) { if (bars[v - 1] && v !== 5) bars[v - 1].style.width = Math.min(100, vel * 190) + '%'; },
+      onEnd() { chips.forEach(c => { c.classList.remove('playing'); c.classList.add('played'); }); done(); },
+    });
+  },
+  stop() { if (player) player.stop(); },
+  setMix(m) { if (player) player.setMix(m); },
+};
 </script>
 </body>
 </html>
