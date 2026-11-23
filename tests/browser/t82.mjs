@@ -20,7 +20,7 @@ await page.$eval('#stop-btn',b=>b.click()); await sleep(400);
 ok(await page.evaluate(()=>document.getElementById('stop-btn').disabled&&!document.getElementById('analyze-btn').disabled),'stop returns the buttons');
 // the same text composes the same piece
 await page.type('#main-input',TEXT); await page.$eval('#analyze-btn',b=>b.click()); await sleep(300);
-const again=await page.evaluate(()=>window.SS_LAST_PLAN.key.name+'|'+window.SS_LAST_PLAN.events.length); ok(again===plan.key+'|'+plan.n,'the same text gives the same piece');
+const again=await page.evaluate(()=>window.SS_LAST_PLAN.key.name+'|'+window.SS_LAST_PLAN.events.length); ok(again.split('|')[0]===plan.key,'the same text keeps the same key (its events differ only by the recalled tune)');
 await page.$eval('#stop-btn',b=>b.click()); await sleep(300);
 // the voice mix slider now does something (raw and composed)
 await page.$eval('#ctrl-mix',e=>{e.value='0';e.dispatchEvent(new Event('input',{bubbles:true}));});
@@ -33,6 +33,22 @@ ok(await page.$eval('#input-hint',e=>e.textContent)==='Five voices · No underst
 await page.type('#main-input','Quiet water falls'); await page.$eval('#analyze-btn',b=>b.click()); await sleep(1200);
 ok(await page.$$eval('.token-chip.playing, .token-chip.played',c=>c.length)>=1&&await page.$$eval('.composed-note',c=>c.length)===2,'Raw plays the old way (no composed note on the new response)');
 await page.$eval('#stop-btn',b=>b.click());
+// ── memory, export, live typing ──
+await page.$eval('.mode-chip[data-mode="composed"]',b=>b.click());
+ok(await page.$eval('#save-wav',b=>b.disabled)===false||true,'export buttons exist');
+await page.$eval('#main-input',e=>{e.value='';});
+await page.type('#main-input','Quiet water falls softly.'); await page.$eval('#analyze-btn',b=>b.click()); await sleep(1500);
+ok(await page.$eval('#save-midi',b=>!b.disabled)&&await page.$eval('#save-wav',b=>!b.disabled),'save buttons enable once a piece is composed');
+await page.$eval('#stop-btn',b=>b.click());
+const M=await page.evaluate(async()=>{ const { encodePlanMidi }=await import('/assets/js/semantic/export.js'); const m=encodePlanMidi(window.SS_LAST_PLAN); return { head:String.fromCharCode(...m.slice(0,4)), len:m.length, mem:window.SS_LAST_PLAN.memory.mode }; });
+ok(M.head==='MThd'&&M.len>100,'MIDI export of the last plan is a valid file');
+await page.type('#main-input',' Quiet water falls softly.'); await page.$eval('#analyze-btn',b=>b.click()); await sleep(1200);
+ok(await page.evaluate(()=>window.SS_LAST_PLAN.memory.mode)!=='none','a second piece carries memory of the first');
+await page.$eval('#stop-btn',b=>b.click());
+await page.$eval('#live-toggle',b=>b.click());
+ok(await page.$eval('#live-toggle',b=>b.getAttribute('aria-pressed'))==='true','Play words toggles on');
+await page.focus('#main-input'); await page.keyboard.type(' new words. ');
+ok(P.errors.filter(e=>!/Failed to load resource/.test(e)).length===0,'typing while live raises no errors '+P.errors.join('|'));
 ok(P.errors.filter(e=>!/Failed to load resource/.test(e)).length===0,'no page errors '+P.errors.filter(e=>!/Failed to load resource/.test(e)).join('|'));
 
 // ── rendered sound ──

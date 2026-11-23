@@ -268,6 +268,12 @@
           <button type="button" class="mode-chip" data-mode="raw" aria-pressed="false" onclick="SS.setMode('raw')">Raw</button>
         </div>
       </div>
+      <div class="ctrl-mini ctrl-mode">
+        <span class="ctrl-mini-label">While typing</span>
+        <div class="mode-chips" role="group" aria-label="Play while typing">
+          <button type="button" class="mode-chip" id="live-toggle" aria-pressed="false" onclick="SS.toggleLive()">Play words</button>
+        </div>
+      </div>
       <div class="ctrl-mini">
         <span class="ctrl-mini-label">Tempo <span class="ctrl-mini-val" id="tempo-val">100 ms</span></span>
         <input type="range" min="40" max="400" value="100" id="ctrl-tempo"
@@ -307,6 +313,8 @@
         <div class="input-footer">
           <span class="input-hint" id="input-hint">Five voices · Composed from your words</span>
           <div class="input-controls">
+            <button class="stop-btn" id="save-wav" onclick="SSComposed.saveWav()" disabled title="Save the last composed piece as audio">save WAV</button>
+            <button class="stop-btn" id="save-midi" onclick="SSComposed.saveMidi()" disabled title="Save the last composed piece as a MIDI file">save MIDI</button>
             <button class="stop-btn" id="stop-btn" onclick="SS.stop()" disabled>■ stop</button>
             <button class="analyze-btn" id="analyze-btn" onclick="SS.analyze()">analyze</button>
           </div>
@@ -1306,6 +1314,13 @@ const SS = {
   complexity: 0.5,
   volume: 0.7,
 
+  live: false,
+  toggleLive() {
+    this.live = !this.live;
+    document.getElementById('live-toggle').setAttribute('aria-pressed', String(this.live));
+    if (this.live) resumeAudio();
+  },
+
   setMode(m) {
     this.mode = m === 'raw' ? 'raw' : 'composed';
     for (const b of document.querySelectorAll('.mode-chip')) b.setAttribute('aria-pressed', String(b.dataset.mode === this.mode));
@@ -1340,6 +1355,7 @@ const SS = {
     // Analyze
     const analysis = analyzeText(text);
     const similarity = MEMORY.similarity(analysis.fingerprint);
+    analysis.similarity = similarity;
     const memState   = MEMORY.getState(similarity);
     MEMORY.add(analysis.fingerprint);
 
@@ -1375,10 +1391,11 @@ const path = window.location.pathname.replace(/\/$/, '') || '/';
 
 </script>
 <script type="module">
-import { composePlan } from '/assets/js/semantic/compose.js';
+import { composePlan, liveNote, liveMark, scan, deriveKey } from '/assets/js/semantic/compose.js';
+import { encodePlanMidi, encodeWavStereo } from '/assets/js/semantic/export.js';
 import { createPlayer } from '/assets/js/semantic/player.js';
 
-let player = null;
+let player = null, lastTheme = null;
 const clampBpm = ms => Math.max(48, Math.min(132, Math.round(12000 / ms)));
 
 window.SSComposed = {
@@ -1387,11 +1404,15 @@ window.SSComposed = {
     if (!player) player = createPlayer({ ctx, out });
     player.setMix(SS.mixBalance);
     const tokens = analysis.tokens.map(t => ({ ...t, pred: BIGRAMS[t.lower] ? BIGRAMS[t.lower].map(([w, wt]) => [w, wt, getFreqScore(w)]) : undefined }));
-    const plan = composePlan(text, tokens, SS.tempoTouched ? { bpm: clampBpm(SS.tempo) } : {});
+    const opts = SS.tempoTouched ? { bpm: clampBpm(SS.tempo) } : {};
+    if (lastTheme) opts.memory = { theme: lastTheme, similarity: analysis.similarity };
+    const plan = composePlan(text, tokens, opts);
+    if (plan.theme.length) lastTheme = plan.theme;
     window.SS_LAST_PLAN = plan;
     const note = document.createElement('div');
     note.className = 'composed-note';
-    note.textContent = `Composed in ${plan.key.name} at ${plan.bpm} bpm`;
+    note.textContent = `Composed in ${plan.key.name} at ${plan.bpm} bpm` + (plan.memory.mode === 'recall' ? ' · the earlier tune returns' : plan.memory.mode === 'deceptive' ? ' · ends unresolved' : '');
+    document.getElementById('save-wav').disabled = false; document.getElementById('save-midi').disabled = false;
     responseEl.insertBefore(note, responseEl.querySelector('.token-row'));
     const chips = responseEl.querySelectorAll('.token-chip'), bars = responseEl.querySelectorAll('.voice-bar-fill');
     if (bars[4]) bars[4].style.width = (analysis.entropy * 100) + '%';
@@ -1406,7 +1427,33 @@ window.SSComposed = {
   },
   stop() { if (player) player.stop(); },
   setMix(m) { if (player) player.setMix(m); },
+  saveMidi() {
+    const plan = window.SS_LAST_PLAN; if (!plan) return;
+    download(new Blob([encodePlanMidi(plan)], { type: 'audio/midi' }), `semantic-synth-${plan.key.name.replace(/\W+/g, '-')}.mid`);
+  },
+  async saveWav() {
+    const plan = window.SS_LAST_PLAN; if (!plan) return;
+    const btn = document.getElementById('save-wav'); btn.disabled = true; btn.textContent = 'rendering…';
+    try {
+      const SR = 44100, probe = new OfflineAudioContext(2, SR, SR), secs = Math.min(300, Math.ceil(createPlayer({ ctx: probe, out: probe.destination, timers: false }).renderAll(plan, 0.1)) + 1);
+      const ctx = new OfflineAudioContext(2, SR * secs, SR), pl = createPlayer({ ctx, out: ctx.destination, timers: false }); pl.renderAll(plan, 0.1);
+      const buf = await ctx.startRendering();
+      download(new Blob([encodeWavStereo(buf.getChannelData(0), buf.getChannelData(1), SR)], { type: 'audio/wav' }), `semantic-synth-${plan.key.name.replace(/\W+/g, '-')}.wav`);
+    } catch (e) { console.error('Export failed', e); }
+    btn.textContent = 'save WAV'; btn.disabled = false;
+  },
 };
+function download(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
+
+/* Play while typing: a finished word sounds a note in the key the text so far suggests; punctuation settles, asks or hangs. */
+document.getElementById('main-input').addEventListener('input', e => {
+  if (!SS.live || !e.data || !/[ \n.,!?;:…]/.test(e.data)) return;
+  const { ctx, out } = window.SS_AUDIO(); if (!player) player = createPlayer({ ctx, out });
+  const text = e.target.value, tokens = analyzeText(text).tokens; if (!tokens.length) return;
+  const note = liveNote(text, tokens);
+  if (/[.,!?;:…]/.test(e.data)) { const c = liveMark(e.data, note.key); if (c) player.playNow(c, 0); }
+  else player.playNow({ midi: [note.midi], kind: note.kind, vel: note.vel }, 0);
+});
 </script>
 </body>
 </html>

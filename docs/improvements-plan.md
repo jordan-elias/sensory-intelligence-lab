@@ -240,3 +240,9 @@ Phase A: scan each layer once into curves (scan on change, not every frame) and 
 Phase B: real polyphony (several marks in a column become several pitches, each with its own amp and timbre) with a Voices control that means something; optional snap to a scale and key (including the Ambience feels) with a glide control; pen pressure and touch refinements.
 Phase C: pan and reverb layers, a noise layer and a drawn spectrum (additive) timbre layer; a better analog (wow, flutter, tape saturation); loop region; undo/redo across layers.
 Phase D: accessibility (keyboard drawing, description, reduced motion); essay wording; send a drawing to the Sequencer as a pattern or to Ambience as a feel.
+
+## Semantic Synth phases C and D (branch app-69-semantic-memory-export)
+- Memory: a later piece recalls the first tune of the earlier one when the texts are similar; very different texts end on a deceptive cadence; repeated words echo.
+- Export: Save WAV (offline render, max 5 min) and Save MIDI (4 tracks, ritardando tempo map) for the last composed piece. Files are made on the device.
+- Play while typing: a note per finished word, a soft chord on . ? … (off by default).
+- Not verified by ear.

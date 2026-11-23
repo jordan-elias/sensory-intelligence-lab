@@ -61,7 +61,9 @@ export function snapToChord(deg, chordDeg) {
 
 /**
  * The plan: { key, bpm, events, words, endBeat, ritStart, chords, sentences }. Each event: { beat, dur, kind, midi, vel, pan, voice, word? }
- * with kind pluck, bell, rhodes, pad or bass, and `voice` 1 to 5 matching the five voices. `tokens` come from the page's analysis
+ * with kind pluck, bell, rhodes, pad or bass, and `voice` 1 to 5 matching the five voices. `plan.theme` is the opening tune as scale degrees, kept for
+ * the next piece; `opts.memory` ({ theme, similarity }) lets an earlier piece come back: a similar text recalls the old tune in the introduction (and at the
+ * end when it is very similar), and a very different one ends on a deceptive cadence. `tokens` come from the page's analysis
  * (word, lower, freqScore, cluster, pos, len, and optionally `pred`: [[word, weight, freqScore], ...]). `opts.bpm` overrides the tempo.
  */
 export function composePlan(text, tokens, opts = {}) {
@@ -105,6 +107,9 @@ export function composePlan(text, tokens, opts = {}) {
     else if (s.kind === '…') { chords[last].deg = 5; chords[last].sus = true; }
     else { chords[last].deg = 0; if (multi) chords[last - 1].deg = 4; }
   }
+  const mem = opts.memory && Array.isArray(opts.memory.theme) && opts.memory.theme.length ? opts.memory : null, sim = mem ? opts.memory.similarity : null;
+  plan.memory = { mode: !mem ? 'none' : sim >= 0.55 ? 'recall' : sim < 0.4 ? 'deceptive' : 'none', similarity: sim };
+  if (plan.memory.mode === 'deceptive') { const s = plan.sentences[plan.sentences.length - 1]; if (s.kind !== '?' && s.kind !== '…') { const last = barOf(s.words[s.words.length - 1].beat); chords[last].deg = 5; } }
   plan.chords = chords;
 
   /* 3. Dynamics: each phrase swells and falls; words in a subordinate clause are quieter; the last bars fade. */
@@ -128,6 +133,7 @@ export function composePlan(text, tokens, opts = {}) {
   plan.drone = { midi: [degreeMidi(feel, 0) - 24, degreeMidi(feel, 4) - 24], entropy: key.entropy };
 
   /* 5. The words: melody (voice 1), predicted-next chords (voice 2), bass and colour (voice 4). */
+  const repeats = {}, seen = {}; for (const w of plan.words) { const l = tokens[w.idx].lower; repeats[l] = (repeats[l] || 0) + 1; seen[l] = 0; }
   let prevDeg = null, lastProb = -9; const perBar = {}; const count = (bar, k) => (perBar[bar + k] = (perBar[bar + k] || 0) + 1);
   for (const w of plan.words) {
     const t = tokens[w.idx], bar = barOf(w.beat), chord = chords[bar], s = sentAt(w.beat), shape = arc(w.beat, s) * (w.depth ? 0.78 : 1) * fade(w.beat);
@@ -137,7 +143,8 @@ export function composePlan(text, tokens, opts = {}) {
     if (prevDeg !== null && Math.abs(deg - prevDeg) > 6) deg += deg > prevDeg ? -7 : 7;   // no wild leaps
     prevDeg = deg;
     const pan = (t.cluster >= 0 ? (t.cluster / 19 * 2 - 1) * 0.5 : 0) + (s ? ((w.beat - s.start) / Math.max(1, s.end - s.start) - 0.5) * 0.3 : 0);
-    ev({ beat: w.beat, dur: Math.min(w.dur, 1.5) * 0.95, kind: rank > 0.8 ? 'bell' : 'pluck', midi: [degreeMidi(feel, deg)], vel: (content ? 0.5 : 0.32) * shape, pan, voice: 1, word: w.idx });
+    ev({ beat: w.beat, dur: Math.min(w.dur, 1.5) * 0.95, kind: rank > 0.8 ? 'bell' : 'pluck', midi: [degreeMidi(feel, deg)], vel: (content ? 0.5 : 0.32) * shape, pan, voice: 1, word: w.idx, deg });
+    if (repeats[t.lower] >= 3 && seen[t.lower]++ > 0) ev({ beat: w.beat + 1, dur: 1, kind: 'pluck', midi: [degreeMidi(feel, deg)], vel: 0.2 * shape, pan: -pan, voice: 1, word: w.idx, echo: true });   // a word that keeps coming back is answered by its own echo
 
     const pred = t.pred;
     if (pred && pred.length && w.beat - lastProb >= 2) {
@@ -155,6 +162,32 @@ export function composePlan(text, tokens, opts = {}) {
   /* A bell on the tonic as the piece ends. */
   ev({ beat: plan.endBeat - 4, dur: 4, kind: 'bell', midi: [degreeMidi(feel, 0) + 12], vel: 0.35, pan: 0, voice: 1 });
 
+  /* The opening tune, kept for the next piece; and the last piece's tune, brought back when this one is alike. */
+  const mel = plan.events.filter(e => e.voice === 1 && e.deg !== undefined && !e.echo);
+  if (mel.length) { const t0 = mel[0].beat; plan.theme = mel.filter(e => e.beat - t0 < 4).slice(0, 6).map(e => ({ deg: e.deg, at: e.beat - t0, dur: Math.max(0.5, Math.min(1.5, e.dur)) })); }
+  else plan.theme = [];
+  if (plan.memory.mode === 'recall') {
+    for (const n of mem.theme) ev({ beat: Math.min(3.5, n.at), dur: n.dur, kind: 'rhodes', midi: [degreeMidi(feel, n.deg)], vel: 0.3, pan: 0.2, voice: 2, recall: true });
+    if (sim >= 0.8) for (const n of mem.theme) ev({ beat: plan.endBeat - 4 + Math.min(3.5, n.at), dur: n.dur, kind: 'bell', midi: [degreeMidi(feel, n.deg) + 12], vel: 0.22, pan: -0.2, voice: 2, recall: true });
+  }
   plan.events.sort((a, b) => a.beat - b.beat || a.voice - b.voice);
   return plan;
+}
+
+/**
+ * What typing a word plays, for the live "play while typing" mode. `tokens` are the analysis of the text so far; the last one is the
+ * word just finished. Returns { midi, kind, vel, key } for that word, in the key the text so far suggests, or null.
+ */
+export function liveNote(text, tokens) {
+  if (!tokens.length) return null;
+  const key = deriveKey(tokens, scan(text)), t = tokens[tokens.length - 1], rank = 1 - (t.freqScore ?? 0.5);
+  return { midi: degreeMidi({ root: key.root, mode: key.mode }, 7 + Math.round(rank * 8)), kind: rank > 0.8 ? 'bell' : 'pluck', vel: t.cluster === FUNCTION_CLUSTER ? 0.25 : 0.45, key };
+}
+/** The soft chord a mark of punctuation plays while typing: a full stop settles home, a question reaches for the dominant, an ellipsis hangs. Null for other marks. */
+export function liveMark(mark, key) {
+  const feel = { root: key.root, mode: key.mode }, chord = (d, third = 2) => [d, d + third, d + 4].map(x => degreeMidi(feel, x));
+  if (mark === '.' || mark === '!') return { midi: chord(0), kind: 'rhodes', vel: 0.28 };
+  if (mark === '?') return { midi: chord(4), kind: 'rhodes', vel: 0.28 };
+  if (mark === '…') return { midi: chord(5, 3), kind: 'rhodes', vel: 0.24 };
+  return null;
 }

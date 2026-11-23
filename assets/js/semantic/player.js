@@ -16,7 +16,7 @@ export const mixGains = m => { const x = Math.max(0, Math.min(1, Number.isFinite
 
 export function createPlayer({ ctx, out, rand = Math.random, doc = globalThis.document, timers = true }) {
   const synth = makeSynth(ctx);
-  let session = null, mix = 0.5, timer = null;
+  let session = null, mix = 0.5, timer = null, live = null;
 
   const busGain = v => { const g = mixGains(mix); return v === 1 || v === 4 ? g.fg : g.harmony; };
   function impulse(seconds) {
@@ -49,6 +49,12 @@ export function createPlayer({ ctx, out, rand = Math.random, doc = globalThis.do
   function endDrone(s, at) { if (s.drone) { s.drone.g.gain.cancelScheduledValues(at); s.drone.g.gain.setTargetAtTime(0.0001, at, 0.8); for (const o of s.drone.oscs) { try { o.stop(at + 4); } catch { /* already stopped */ } } } }
 
   const api = {
+    /** Plays a note or chord at once (for typing): { midi: [..], kind, vel }. */
+    playNow(n, pan = 0) {
+      if (!live) { live = ctx.createGain(); live.gain.value = 0.9; live.connect(out); }
+      const p = ctx.createStereoPanner(); p.pan.value = pan; p.connect(live); const t = ctx.currentTime + 0.02, f = synth[n.kind] || synth.pluck;
+      for (const m of n.midi) f(p, t, midiHz(m), n.kind === 'rhodes' ? 2.5 : 1, n.vel);
+    },
     setMix(m) { mix = m; if (session) for (let v = 1; v <= 5; v++) session.buses[v].gain.setTargetAtTime(busGain(v), ctx.currentTime, 0.05); },
     get playing() { return !!session && !session.done; },
     /** Starts a plan. hooks: onWord(wordIndex, beat), onVoice(voice, level, event), onEnd(). */
