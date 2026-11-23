@@ -28,8 +28,8 @@ Three public-domain readings are in `audio/`: `lookingglass.mp3` (Through the Lo
 - They are streamed, not loaded whole (the Monte Cristo reading would take about 180 MB of memory decoded), and they pause rather than restart when switched off, so a reading carries on where it left off.
 - The service worker does not copy them into the offline cache, so they need a connection on the web. In the Android app they are inside the app.
 - In Drift a reading comes in rarely and leaves after a few phrases. In Steady it plays while it is on.
-- Size: about 32 MB together, mono 128 kbps. Dropping them to 64 kbps mono (still clear for speech) would halve that.
-- Credits: please tell me the reader and the source (for example LibriVox) of each recording and I will add a small credits line to the page.
+- Size: about 16 MB together (mono, 64 kbps).
+- Credits: all three are LibriVox recordings (public domain). The page says so in one line with a link. If you want each reader named, send me the names.
 
 ## Checking by ear (not done by me)
 I could check that every sound renders, is finite and stays in range, but not how it sounds. When you listen, tell me about: the balance between rows (drums, bass, chords, melody, pad against noise and nature), whether lofi drums feel lofi, whether the chord and melody patterns feel calm, and whether Drift changes feel natural.

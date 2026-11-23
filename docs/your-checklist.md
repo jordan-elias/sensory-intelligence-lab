@@ -46,7 +46,7 @@ Set (names as the code reads them): `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
 - [ ] A phone test of the app (nothing has run on a real device yet).
 
 ## Ambience
-- [ ] Send me the readers and sources of the three readings, and the sources of the nature loops, for a credits line. A longer fire recording (about a minute) would be better than the 7.5 s one.
+- [ ] Sources of the nature loops (and reader names for the readings, if you want them named). A longer fire recording (about a minute) would be better than the 7.5 s one.
 - [ ] Listen: balance between rows, whether the lofi drums, chords and melody feel calm, whether Drift changes feel natural. Tell me what to change.
 
 ## Things I need from you
