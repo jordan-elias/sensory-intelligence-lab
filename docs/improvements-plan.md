@@ -251,3 +251,14 @@ Phase D: accessibility (keyboard drawing, description, reduced motion); essay wo
 Done: pencil, spray, fill, curve, rectangle and ellipse (outline or filled), eraser that follows fast strokes, selection with move, reverse (time), invert (pitch), repeat, copy/cut/paste/delete (optionally all four layers together), reading-head tool, redo and undo (per layer or across layers), pen pressure, optional snap-to-scale with glide (free glide stays the default), layers scanned once (only changed columns rescanned), WAV export through the same voices and mapping as live (voices, modulation, analog, snapping, speed), save/load on the device, save/open as a file, picture export, amp hint corrected, essay wording softened.
 Next: polyphony (several pitch lines), pan / reverb / noise layers, a scrolling longer film, keyboard drawing for accessibility, sends to Sequencer and Ambience, a short guide to Oram's own method on the page.
 Not verified by ear.
+
+## Spatial game rebuild (branch app-72-spatial-game)
+- Rooms removed. One nearly dry listening space, so no reverb tail blurs where a sound is. Third-order ambisonics (was first order) for sharper placement.
+- Bug fixed: the top of the screen used to be BEHIND the listener (z had the wrong sign). Top is now straight ahead; the arena is labelled front, behind, left, right, with a "you" marker.
+- New voices (assets/js/spatial/voices.js): all three carry energy up to about 6 kHz and never go silent, because the ear places sounds by high-frequency cues. Pad and string were too low and dull to localise.
+- Arena wider in the audio (2.6 m radius) and on screen (fills the phone width, stays round); paths kept inside the circle; positions sent to the audio engine every 16 ms from a smooth path, not 60 fps frames.
+- Phone layout: stage fills the width, finger-sized dots, level stepper, one big Play button pinned at the bottom, stats and settings folded away. A thin ring around the arena shows time passing without giving away where the sound is.
+- Tutorial: sound only starts from a tap inside it (browsers silently block it otherwise), 3 steps: headphones and a circling sound, hear each of the three voices from its side, how a round works. Uses the game's own engine. The old one made a second audio context that stayed muted on first visit.
+- The engine decodes its head-response tables when created; a source started before that is silent. It is now created early and the first sound waits for it.
+- Safe-output headphone note on phones was a narrow tall box; now sized to its text.
+- Not verified by ear. Offline renders show left/right placement (2x level difference or more) for all three voices.

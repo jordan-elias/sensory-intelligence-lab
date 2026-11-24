@@ -116,7 +116,7 @@
       var box = document.createElement('div');
       box.id = 'silHeadphoneNotice';
       box.setAttribute('role', 'status');
-      box.style.cssText = 'position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:100000;max-width:min(92vw,460px);' +
+      box.style.cssText = 'position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:100000;width:max-content;max-width:min(92vw,460px);' +
         'background:#1c1f26;color:#f3f1ec;border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:12px 14px;' +
         'font:14px/1.45 system-ui,sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.4);display:flex;gap:12px;align-items:flex-start;';
       var msg = document.createElement('span');

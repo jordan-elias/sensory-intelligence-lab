@@ -12,11 +12,8 @@ const r=await page.evaluate(()=>{
   return {open: a!==b, same: c===d, nextTrialDiffers: c!==e};
 });
 ok(r.open,'normally every trial is different'); ok(r.same,"today's challenge repeats the same paths"); ok(r.nextTrialDiffers,'the next trial in the day is a different one');
-ok((await page.$$eval('#room-select option',l=>l.length))===4,'four rooms to choose from');
-await page.select('#room-select','cathedral');
-ok(/practice/.test(await page.$eval('#mode-note',e=>e.textContent)),'a non-default room says it is practice and not saved as best');
-await page.reload({waitUntil:'domcontentloaded'}); await page.waitForSelector('#room-select'); await sleep(300);
-ok((await page.$eval('#room-select',e=>e.value))==='cathedral','the room is remembered on this device');
-await page.click('#daily-toggle'); ok(/same paths today/.test(await page.$eval('#mode-note',e=>e.textContent)),"today's challenge explains itself");
+ok(await page.$('#room-select')===null,'there is no room choice any more');
+await page.reload({waitUntil:'domcontentloaded'}); await page.waitForSelector('#btn-play'); await sleep(300); await page.$eval('#more',d=>{d.open=true;});
+await page.click('#daily-toggle'); ok(/same for everyone today/.test(await page.$eval('#mode-note',e=>e.textContent)),"today's challenge explains itself");
 ok(P.errors.filter(e=>!/Failed to load resource/.test(e)).length===0,'no page errors '+P.errors.join('|'));
 await browser.close(); server.close(); process.exit(fail?1:0);

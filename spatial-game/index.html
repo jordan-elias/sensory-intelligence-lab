@@ -18,218 +18,166 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --font-body: 'Inter', sans-serif;
-      --font-heading: 'Space Grotesk', sans-serif;
-      --bg: #ffffff; --surface: #f9f9f7; --border: #e5e5e0;
-      --text: #1a1a1a; --muted: #6b6b6b;
+      --font-body: 'Inter', sans-serif; --font-heading: 'Space Grotesk', sans-serif;
+      --bg: #ffffff; --surface: #f9f9f7; --border: #e5e5e0; --text: #1a1a1a; --muted: #6b6b6b;
       --accent: #2a5c45; --accent-light: #edf4f0; --accent-hover: #1e4433;
+      --stage-1: #1f4033; --stage-2: #11241c; --stage-3: #0a1511;
+      --c-string: #8ff0c0; --c-pad: #86bfff; --c-block: #d6a4ff;
     }
     html { font-size: 16px; }
     body { font-family: var(--font-body); color: var(--text); background: var(--bg); line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; }
-    a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
-    a:hover { color: var(--accent); }
-
+    a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; } a:hover { color: var(--accent); }
     .bc { padding: .75rem 1.5rem 0; max-width: 860px; margin: 0 auto; width: 100%; }
     .bc ol { list-style: none; display: flex; gap: .3rem; align-items: center; font-size: .75rem; color: var(--muted); flex-wrap: wrap; }
     .bc li + li::before { content: '/'; margin-right: .3rem; color: var(--border); }
-    .bc a { color: var(--muted); text-decoration: none; }
-    .bc a:hover { color: var(--accent); text-decoration: underline; }
-
-    main { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; flex: 1; width: 100%; }
-    @media (max-width: 600px) { main { padding: 1.5rem 1rem 3rem; } }
-
-    .ph { margin-bottom: 2rem; padding-bottom: 1.75rem; border-bottom: 1px solid var(--border); }
-    .ph h2 { font-family: var(--font-heading); font-size: 2rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; margin-bottom: .4rem; }
+    .bc a { color: var(--muted); text-decoration: none; } .bc a:hover { color: var(--accent); text-decoration: underline; }
+    main { max-width: 860px; margin: 0 auto; padding: 1.75rem 1.5rem 4rem; flex: 1; width: 100%; }
+    .ph { margin-bottom: 1.25rem; }
+    .ph h2 { font-family: var(--font-heading); font-size: 2rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; margin-bottom: .3rem; }
     .ph p { font-size: .9rem; color: var(--muted); }
 
-    .lab-section { border: 1px solid var(--border); padding: 1.5rem; margin-bottom: 1.5rem; background: var(--surface); }
-    .lab-section > h3 { font-family: var(--font-heading); font-size: .65rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 1.25rem; }
-
-    /* Level selector */
-    .level-selector { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: .85rem; align-items: center; }
-    .level-selector-label { font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; margin-right: 2px; }
-    .level-btn {
-      font-family: var(--font-heading); font-size: .72rem; font-weight: 600;
-      width: 38px; height: 38px;
-      border: 1px solid var(--border); background: var(--bg); color: var(--muted);
-      cursor: pointer; transition: all .12s;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 1px; flex-shrink: 0; padding: 2px;
-    }
-    .level-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
-    .level-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
-    .level-btn.level-hard { border-color: #c0a080; }
-    .level-btn.level-hard:hover { border-color: #8b4513; color: #8b4513; background: #fdf8f0; }
-    .level-btn.level-hard.active { background: #8b4513; border-color: #8b4513; color: white; }
-    .level-btn .lvl-num { font-size: .78rem; line-height: 1; }
-    .level-btn .lvl-best { font-size: .48rem; font-weight: 500; letter-spacing: .03em; color: var(--muted); white-space: nowrap; line-height: 1; }
-    .level-btn.active .lvl-best { color: rgba(255,255,255,.7); }
-    .level-btn .lvl-best.perfect { color: var(--accent); font-weight: 600; }
-    .level-btn.active .lvl-best.perfect { color: #a8e6cf; }
-
-    .level-desc { font-size: .72rem; color: var(--muted); margin-bottom: .75rem; min-height: 1.4em; }
-    .level-desc strong { color: var(--text); font-weight: 500; }
-
-    /* Level status bar */
-    .level-status { display: flex; align-items: center; justify-content: space-between; margin-bottom: .85rem; flex-wrap: wrap; gap: .5rem; }
-    .level-status-left { display: flex; align-items: center; gap: 1rem; }
-    .level-badge { font-family: var(--font-heading); font-size: .72rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); background: var(--accent-light); border: 1px solid #c0d9c8; padding: .2rem .65rem; }
-    .trial-counter { font-family: var(--font-heading); font-size: .82rem; font-weight: 600; color: var(--text); }
-    .trial-counter span { color: var(--muted); font-weight: 400; }
-
-    /* Trial progress pips */
-    .trial-pips { display: flex; gap: 4px; margin-bottom: .85rem; }
-    .trial-pip { height: 4px; flex: 1; background: var(--border); transition: background .2s; }
-    .trial-pip.correct { background: var(--accent); }
-    .trial-pip.incorrect { background: #c0a080; }
-    .trial-pip.current { background: var(--muted); }
-
-    /* Stats */
-    .spatial-stats { display: flex; gap: 1.5rem; justify-content: center; margin: .75rem 0; padding: .5rem 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
-    .stat-item { display: flex; align-items: baseline; gap: .35rem; }
-    .stat-label { font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
-    .stat-value { font-family: var(--font-heading); font-size: .9rem; font-weight: 600; color: var(--text); }
-
-    /* Buttons */
-    .lab-btn { font-family: var(--font-heading); font-size: .78rem; font-weight: 600; background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: .5rem 1.2rem; cursor: pointer; transition: all .12s; white-space: nowrap; }
+    .lab-section { border: 1px solid var(--border); padding: 1.25rem; margin-bottom: 1.5rem; background: var(--surface); }
+    .lab-btn { font-family: var(--font-heading); font-size: .82rem; font-weight: 600; background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: .6rem 1.2rem; min-height: 44px; cursor: pointer; transition: all .12s; display: inline-flex; align-items: center; justify-content: center; gap: .45rem; }
     .lab-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
-    .lab-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
-    .lab-btn.primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); }
-    .lab-btn:disabled { opacity: .35; cursor: not-allowed; }
+    .lab-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .lab-btn.primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); color: #fff; }
+    .lab-btn:disabled { opacity: .4; cursor: not-allowed; }
+    .lab-btn:focus-visible, .level-btn:focus-visible, .link-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .link-btn { font-family: var(--font-body); font-size: .78rem; color: var(--muted); background: none; border: none; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; padding: .5rem .25rem; min-height: 44px; }
+    .link-btn:hover { color: var(--accent); }
 
-    .control-row { display: flex; align-items: center; gap: 8px; margin-bottom: .6rem; flex-wrap: wrap; }
+    /* top bar: level, trial, help */
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: .6rem; }
+    .lvl-step { display: flex; align-items: center; gap: .35rem; }
+    .lvl-step button { width: 44px; height: 44px; border: 1px solid var(--border); background: var(--bg); font-size: 1rem; cursor: pointer; color: var(--text); }
+    .lvl-step button:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); } .lvl-step button:disabled { opacity: .3; }
+    .lvl-name { font-family: var(--font-heading); font-weight: 600; font-size: .95rem; min-width: 5.2rem; text-align: center; }
+    .lvl-name small { display: block; font-weight: 500; font-size: .62rem; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+    .trial-pips { display: flex; gap: 4px; margin: 0 0 .75rem; }
+    .trial-pip { height: 4px; flex: 1; background: var(--border); transition: background .2s; border-radius: 2px; }
+    .trial-pip.correct { background: var(--accent); } .trial-pip.incorrect { background: #c0a080; } .trial-pip.current { background: var(--muted); }
 
-    .feedback-msg { flex: 1; min-width: 120px; font-size: .8rem; color: var(--text); padding: .45rem 1rem; border: 1px solid var(--border); background: var(--bg); text-align: center; min-height: 38px; display: flex; align-items: center; justify-content: center; }
+    /* the stage */
+    .stage-wrap { display: flex; justify-content: center; margin: .25rem 0 .5rem; }
+    .stage { position: relative; width: min(100%, 580px, max(250px, calc(100dvh - 340px))); aspect-ratio: 1; border-radius: 50%;
+      background: radial-gradient(circle at 50% 46%, var(--stage-1) 0%, var(--stage-2) 58%, var(--stage-3) 100%);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.1), 0 12px 40px rgba(10,21,17,.22); touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    .stage svg.guides, .stage svg.arc { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+    .stage .g-ring { fill: none; stroke: rgba(255,255,255,.09); stroke-width: .35; } .stage .g-axis { stroke: rgba(255,255,255,.07); stroke-width: .3; stroke-dasharray: 1.2 1.6; }
+    .stage .g-label { fill: rgba(255,255,255,.38); font-size: 3.1px; font-family: var(--font-heading); letter-spacing: .12em; text-anchor: middle; text-transform: uppercase; }
+    .stage .g-you { fill: rgba(255,255,255,.88); } .stage .g-nose { fill: rgba(143,240,192,.95); }
+    .arc-track { fill: none; stroke: rgba(255,255,255,.08); stroke-width: .9; } .arc-fill { fill: none; stroke: rgba(143,240,192,.75); stroke-width: .9; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 50% 50%; }
+    .path-trace { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+    .sound-source { position: absolute; width: 22px; height: 22px; border-radius: 50%; transform: translate(-50%, -50%); transition: opacity .4s ease, transform .12s; --c: #fff; }
+    .sound-source::before { content: ''; position: absolute; inset: -14px; border-radius: 50%; }   /* a finger-sized touch area */
+    .source-target { background: var(--c); box-shadow: 0 0 14px 1px var(--c); z-index: 10; }
+    .source-distractor { background: rgba(255,255,255,.12); border: 2px solid var(--c); box-shadow: 0 0 8px rgba(255,255,255,.1); z-index: 5; }
+    .source-neutral { background: #fff; box-shadow: 0 0 14px rgba(255,255,255,.55); z-index: 6; }
+    .source-clickable { cursor: pointer; } .source-clickable:hover, .source-clickable:focus-visible { transform: translate(-50%, -50%) scale(1.25); outline: none; box-shadow: 0 0 0 3px rgba(143,240,192,.6), 0 0 14px #fff; }
+    .source-selected { background: var(--c); box-shadow: 0 0 0 4px rgba(255,255,255,.7); }
+    .source-revealed { box-shadow: 0 0 0 4px var(--c), 0 0 18px var(--c); }
+    @keyframes ring { 0% { box-shadow: 0 0 0 0 var(--c); } 100% { box-shadow: 0 0 0 16px transparent; } }
+    .pulse { animation: ring 560ms ease-out 1; }
+    .stage-msg { position: absolute; left: 50%; bottom: 17%; transform: translateX(-50%); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.55); font-family: var(--font-heading); pointer-events: none; text-align: center; width: 70%; }
+
+    .phase-indicator { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); text-align: center; min-height: 1.3em; margin: .35rem 0 .15rem; }
+    .feedback-msg { font-size: .85rem; text-align: center; padding: .5rem 1rem; min-height: 2.4rem; border: 1px solid transparent; }
     .feedback-msg.success { border-color: var(--accent); background: var(--accent-light); color: var(--accent-hover); font-weight: 500; }
     .feedback-msg.error { border-color: #c0a080; background: #fdf8f0; color: #6b4a1a; font-weight: 500; }
+    .dock { position: sticky; bottom: 0; z-index: 20; display: flex; gap: .5rem; padding: .6rem 0 calc(.6rem + env(safe-area-inset-bottom)); background: linear-gradient(to bottom, rgba(249,249,247,0), var(--surface) 28%); }
+    .dock .lab-btn { flex: 1; }
 
-    /* Spatial diagram */
-    .spatial-diagram-container { border: 1px solid var(--border); padding: 1.25rem; margin: .85rem 0; display: flex; justify-content: center; align-items: center; background: var(--bg); }
-    .spatial-diagram { position: relative; width: 300px; height: 300px; border: 1px solid var(--border); border-radius: 50%; background: transparent; }
-    @media (max-width: 400px) { .spatial-diagram { width: 240px; height: 240px; } }
+    details.more { margin-top: .5rem; border-top: 1px solid var(--border); }
+    details.more summary { cursor: pointer; padding: .8rem 0; font-family: var(--font-heading); font-size: .72rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); list-style: none; min-height: 44px; }
+    details.more summary::-webkit-details-marker { display: none; }
+    .levels { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: .6rem; }
+    .level-btn { font-family: var(--font-heading); font-size: .8rem; font-weight: 600; width: 46px; height: 46px; border: 1px solid var(--border); background: var(--bg); color: var(--muted); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
+    .level-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+    .level-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .level-btn.level-hard { border-color: #c0a080; } .level-btn.level-hard.active { background: #8b4513; border-color: #8b4513; color: #fff; }
+    .level-btn .lvl-best { font-size: .5rem; font-weight: 500; opacity: .75; line-height: 1; } .level-btn .lvl-best.perfect { font-weight: 700; }
+    .level-desc { font-size: .78rem; color: var(--muted); margin-bottom: .75rem; } .level-desc strong { color: var(--text); font-weight: 600; }
+    .opt { display: flex; gap: .5rem; align-items: center; font-size: .8rem; color: var(--text); padding: .45rem 0; min-height: 44px; cursor: pointer; } .opt input { width: 20px; height: 20px; accent-color: var(--accent); flex: none; }
+    .mode-note { font-size: .74rem; color: var(--muted); margin: .1rem 0 .5rem; }
+    .spatial-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: .5rem; text-align: center; padding: .75rem 0; border-top: 1px solid var(--border); margin-top: .5rem; }
+    .stat-label { display: block; font-size: .55rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); } .stat-value { font-family: var(--font-heading); font-size: 1rem; font-weight: 600; }
+    .lab-hint { font-size: .74rem; color: var(--muted); text-align: center; line-height: 1.5; margin-top: .4rem; }
 
-    .sound-source { position: absolute; width: 14px; height: 14px; border-radius: 50%; transform: translate(-50%, -50%); transition: opacity .4s ease; }
-    .source-target { background: var(--text); border: 2px solid var(--text); z-index: 10; }
-    .source-distractor { background: transparent; border: 2px solid var(--border); z-index: 5; }
-    .source-clickable { cursor: pointer; }
-    .source-clickable:hover { transform: translate(-50%, -50%) scale(1.3); border-color: var(--accent); }
-    .source-selected { background: var(--accent); border-color: var(--accent); }
-    .source-revealed { background: var(--text); border-color: var(--text); box-shadow: 0 0 0 3px var(--accent-light); }
-
-    /* pulse-string: sharp ring on quarter-note beat (600ms interval).
-       Fast expand then fade — mirrors the quick attack / bow-stroke accent. */
-    @keyframes pulse-string {
-      0%   { box-shadow: 0 0 0 0px  rgba(42,92,69,0.75); }
-      12%  { box-shadow: 0 0 0 9px  rgba(42,92,69,0.0);  }
-      100% { box-shadow: 0 0 0 0px  rgba(42,92,69,0.0);  }
-    }
-    /* pulse-pad: slow swell on half-note beat (1200ms interval).
-       Gentle bloom that lingers — mirrors the long attack/release envelope. */
-    @keyframes pulse-pad {
-      0%   { box-shadow: 0 0 0 0px  rgba(26,77,107,0.5); }
-      35%  { box-shadow: 0 0 0 10px rgba(26,77,107,0.2); }
-      100% { box-shadow: 0 0 0 0px  rgba(26,77,107,0.0); }
-    }
-    /* pulse-block: sharp pop with medium tail on dotted-quarter (900ms interval).
-       Quick expand, slow fade — mirrors the percussive hit + resonant tail. */
-    @keyframes pulse-block {
-      0%   { box-shadow: 0 0 0 0px rgba(92,42,92,0.65); }
-      10%  { box-shadow: 0 0 0 8px rgba(92,42,92,0.15); }
-      100% { box-shadow: 0 0 0 0px rgba(92,42,92,0.0);  }
-    }
-    /* Duration < interval so the ring clears before the next beat fires */
-    .pulse-string { animation: pulse-string  560ms ease-out 1 forwards; }
-    .pulse-pad    { animation: pulse-pad     1080ms ease-out 1 forwards; }
-    .pulse-block  { animation: pulse-block   820ms  ease-out 1 forwards; }
-
-    .path-trace { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-    .phase-indicator { font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); text-align: center; margin: .5rem 0; min-height: 1.2em; }
-    .lab-hint { font-size: .72rem; color: var(--muted); margin-top: .65rem; text-align: center; line-height: 1.5; }
-
-    /* Level complete overlay */
-    .level-complete { display: none; position: fixed; inset: 0; background: rgba(255,255,255,.97); z-index: 300; align-items: center; justify-content: center; flex-direction: column; padding: 2rem; }
-    .level-complete.visible { display: flex; }
-    .level-complete-inner { max-width: 440px; width: 100%; text-align: center; }
+    /* level complete */
+    .level-complete { display: none; position: fixed; inset: 0; background: rgba(255,255,255,.97); z-index: 300; align-items: center; justify-content: center; flex-direction: column; padding: 2rem; overflow-y: auto; }
+    .level-complete.visible { display: flex; } .level-complete-inner { max-width: 440px; width: 100%; text-align: center; }
     .level-complete-title { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 600; letter-spacing: -.02em; margin-bottom: .5rem; }
     .level-complete-score { font-family: var(--font-heading); font-size: 3rem; font-weight: 600; color: var(--accent); line-height: 1; margin-bottom: .25rem; }
     .level-complete-score-label { font-size: .75rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 1.5rem; }
-    .level-complete-stats { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: 1.75rem; border: 1px solid var(--border); padding: 1rem; background: var(--surface); }
-    .lc-stat { text-align: center; }
-    .lc-stat-val { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 600; color: var(--text); display: block; }
-    .lc-stat-label { font-size: .65rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
-    .level-complete-msg { font-size: .85rem; color: var(--muted); line-height: 1.65; margin-bottom: 1.5rem; font-style: italic; }
-    .lc-record { font-size: .75rem; color: var(--accent); font-weight: 500; margin-bottom: 1rem; display: none; }
-    .lc-record.visible { display: block; }
+    .level-complete-stats { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: 1.5rem; border: 1px solid var(--border); padding: 1rem; background: var(--surface); }
+    .lc-stat-val { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 600; display: block; } .lc-stat-label { font-size: .65rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
+    .level-complete-msg { font-size: .85rem; color: var(--muted); line-height: 1.65; margin-bottom: 1.25rem; font-style: italic; }
+    .lc-record { font-size: .78rem; color: var(--accent); font-weight: 600; margin-bottom: 1rem; display: none; } .lc-record.visible { display: block; }
     .level-complete-btns { display: flex; gap: .65rem; justify-content: center; flex-wrap: wrap; }
-    .lc-pip-row { display: flex; gap: 4px; justify-content: center; margin-bottom: 1.25rem; }
-    .lc-pip { width: 24px; height: 4px; background: var(--border); }
-    .lc-pip.correct { background: var(--accent); }
-    .lc-pip.incorrect { background: #c0a080; }
+    .lc-pip-row { display: flex; gap: 4px; justify-content: center; margin-bottom: 1.25rem; } .lc-pip { width: 24px; height: 4px; background: var(--border); } .lc-pip.correct { background: var(--accent); } .lc-pip.incorrect { background: #c0a080; }
 
-    /* Tutorial overlay */
-    .tutorial-overlay { position: fixed; inset: 0; background: rgba(26,26,26,0.72); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+    /* tutorial: a sheet at the bottom on phones, a card in the middle on larger screens */
+    .tutorial-overlay { position: fixed; inset: 0; background: rgba(10,21,17,.72); z-index: 500; display: flex; align-items: flex-end; justify-content: center; }
     .tutorial-overlay.hidden { display: none; }
-    .tutorial-card { background: var(--bg); border: 1px solid var(--border); max-width: 420px; width: 100%; padding: 2rem; position: relative; }
-    .tutorial-card h2 { font-family: var(--font-heading); font-size: 1.2rem; font-weight: 600; letter-spacing: -.01em; margin-bottom: .5rem; }
-    .tutorial-card p { font-size: .88rem; color: var(--muted); line-height: 1.7; margin-bottom: 1.25rem; }
-    .tutorial-diagram-wrap { display: flex; justify-content: center; margin-bottom: 1.25rem; }
-    .tutorial-diagram { position: relative; width: 200px; height: 200px; border: 1px solid var(--border); border-radius: 50%; background: var(--surface); overflow: hidden; }
-    .tutorial-dot { position: absolute; width: 14px; height: 14px; border-radius: 50%; background: var(--text); border: 2px solid var(--text); transform: translate(-50%, -50%); }
-    .tutorial-step-label { font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: .4rem; }
-    .tutorial-actions { display: flex; gap: .65rem; align-items: center; justify-content: space-between; flex-wrap: wrap; }
-    .tutorial-skip { font-size: .78rem; color: var(--muted); background: none; border: none; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; padding: .3rem 0; }
-    .tutorial-skip:hover { color: var(--text); }
-    .tutorial-dots-nav { display: flex; gap: 6px; align-items: center; }
-    .tutorial-dots-nav span { width: 6px; height: 6px; border-radius: 50%; background: var(--border); display: block; transition: background .2s; }
-    .tutorial-dots-nav span.active { background: var(--accent); }
+    .tutorial-card { background: var(--bg); width: 100%; max-width: 460px; max-height: 94dvh; overflow-y: auto; padding: 1.4rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom)); border-radius: 18px 18px 0 0; }
+    @media (min-width: 640px) { .tutorial-overlay { align-items: center; padding: 1rem; } .tutorial-card { border-radius: 4px; padding: 2rem; } }
+    .tut-step-label { font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: .4rem; }
+    .tutorial-card h2 { font-family: var(--font-heading); font-size: 1.25rem; font-weight: 600; letter-spacing: -.01em; margin-bottom: .45rem; }
+    .tutorial-card p { font-size: .9rem; color: var(--muted); line-height: 1.65; margin-bottom: .9rem; } .tutorial-card p strong { color: var(--text); }
+    .tut-stage { position: relative; width: min(220px, 62vw); aspect-ratio: 1; margin: .25rem auto 1rem; border-radius: 50%; background: radial-gradient(circle at 50% 46%, var(--stage-1), var(--stage-2) 60%, var(--stage-3)); box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); }
+    .tut-stage .sound-source { width: 18px; height: 18px; }
+    .tut-you { position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; transform: translate(-50%,-50%); border-radius: 50%; background: rgba(255,255,255,.88); }
+    .tut-you::after { content: ''; position: absolute; left: 50%; top: -6px; transform: translateX(-50%); border: 4px solid transparent; border-bottom: 7px solid #8ff0c0; border-top: 0; }
+    .tut-sounds { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; margin-bottom: 1rem; }
+    .tut-sounds .lab-btn { flex-direction: column; gap: .15rem; padding: .6rem .3rem; font-size: .74rem; }
+    .tut-sounds i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); display: block; }
+    .tut-status { font-size: .78rem; min-height: 1.3em; margin-bottom: .75rem; text-align: center; color: var(--accent); font-weight: 500; }
+    .tut-status.warn { color: #8b4513; }
+    .tutorial-actions { display: flex; gap: .65rem; align-items: center; justify-content: space-between; }
+    .tut-nav { display: flex; gap: 6px; } .tut-nav span { width: 7px; height: 7px; border-radius: 50%; background: var(--border); } .tut-nav span.active { background: var(--accent); }
 
-    /* How to play button */
-    .how-to-play-btn { font-family: var(--font-body); font-size: .72rem; color: var(--muted); background: none; border: none; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; padding: 0; }
-    .how-to-play-btn:hover { color: var(--accent); }
-
-    .article-text { margin-top: 2rem; }
-    .article-text h3 { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 600; margin-bottom: .6rem; }
+    .article-text { margin-top: 2rem; } .article-text h3 { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 600; margin-bottom: .6rem; }
     .article-text p { font-size: .9rem; color: var(--muted); line-height: 1.75; margin-bottom: 1rem; }
-
-    footer { border-top: 1px solid var(--border); padding: 1.25rem 1.5rem; text-align: center; font-size: .78rem; color: var(--muted); }
-    footer a { color: var(--muted); text-decoration: none; }
-    footer a:hover { color: var(--accent); }
+    footer { border-top: 1px solid var(--border); padding: 1.25rem 1.5rem; text-align: center; font-size: .78rem; color: var(--muted); } footer a { color: var(--muted); text-decoration: none; } footer a:hover { color: var(--accent); }
+    @media (max-width: 600px) { main { padding: .6rem .75rem 2rem; } .ph { margin-bottom: .5rem; } .ph h2 { font-size: 1.35rem; margin-bottom: 0; } .ph p { display: none; } .bc { display: none; } .lab-section { padding: .85rem; border-left: none; border-right: none; margin-left: -.75rem; margin-right: -.75rem; } }
+    @media (prefers-reduced-motion: reduce) { .pulse { animation: none; } .sound-source { transition: none; } }
   </style>
   <link rel="stylesheet" href="/assets/css/header.css">
   <link rel="stylesheet" href="/assets/css/a11y.css">
 </head>
 <body>
 
-<!-- Tutorial overlay -->
-<div class="tutorial-overlay hidden" id="tutorial-overlay" role="dialog" aria-modal="true" aria-label="Tutorial">
+<!-- Tutorial: sound starts only when you press a button inside it, so the browser always allows it -->
+<div class="tutorial-overlay hidden" id="tutorial-overlay" role="dialog" aria-modal="true" aria-labelledby="tut-title">
   <div class="tutorial-card">
     <div id="tut-step-1">
-      <div class="tutorial-step-label">Introduction · Step 1 of 2</div>
-      <h2>Sound moving through space</h2>
-      <p>Each dot in the circle represents a sound source. When you put on headphones, the dot's position maps directly to where you'll hear the sound — left, right, in front, or behind you.</p>
-      <div class="tutorial-diagram-wrap">
-        <div class="tutorial-diagram" id="tut-diagram">
-          <div class="tutorial-dot" id="tut-dot"></div>
-        </div>
-      </div>
-      <p>Watch the dot move around the circle and notice how the sound follows it through space.</p>
-      <div class="tutorial-actions">
-        <button class="tutorial-skip" id="tut-skip">Skip tutorial</button>
-        <div class="tutorial-dots-nav"><span class="active" id="tut-nav-1"></span><span id="tut-nav-2"></span></div>
-        <button class="lab-btn primary" id="tut-next-1">Next →</button>
-      </div>
+      <div class="tut-step-label">How it works · 1 of 3</div>
+      <h2 id="tut-title">Put your headphones on</h2>
+      <p>Everything here is about <strong>where a sound is</strong>. Headphones let you hear left, right, in front and behind. On speakers it will not work.</p>
+      <div class="tut-stage" id="tut-stage-1"><div class="tut-you"></div></div>
+      <div class="tut-status" id="tut-status-1" role="status" aria-live="polite">&nbsp;</div>
+      <div class="tutorial-actions" style="margin-bottom:.9rem"><button class="lab-btn primary" id="tut-hear" style="flex:1">▶ Hear it circle around you</button></div>
+      <p style="font-size:.78rem;margin-bottom:.4rem">You are in the middle. The green marker points straight ahead.</p>
+      <div class="tutorial-actions"><button class="link-btn" data-tut-skip>Skip</button><div class="tut-nav"><span class="active"></span><span></span><span></span></div><button class="lab-btn primary" data-tut-next>Next →</button></div>
     </div>
-    <div id="tut-step-2" style="display:none;">
-      <div class="tutorial-step-label">Introduction · Step 2 of 2</div>
-      <h2>The shell game</h2>
-      <p>You'll hear three distinct sounds — a bowed string, a soft pad, and a woodblock. The <strong>filled dot</strong> plays the bowed string. Watch it move, then track it by ear when the dots fade out.</p>
-      <p>When the movement stops, the dots reappear — all identical. <strong>Tap the one you were tracking.</strong></p>
-      <p style="font-size:.8rem; color: var(--accent); font-weight:500;">Headphones are strongly recommended for the full spatial effect.</p>
-      <div class="tutorial-actions">
-        <button class="tutorial-skip" id="tut-skip-2">Skip</button>
-        <div class="tutorial-dots-nav"><span id="tut-nav-1b"></span><span class="active" id="tut-nav-2b"></span></div>
-        <button class="lab-btn primary" id="tut-finish">Let's go →</button>
+    <div id="tut-step-2" hidden>
+      <div class="tut-step-label">How it works · 2 of 3</div>
+      <h2>Three different sounds</h2>
+      <p>Each moving dot has its own sound. Press each one to hear it from a different side. You will follow the <strong>bowed string</strong>.</p>
+      <div class="tut-sounds" id="tut-sounds">
+        <button class="lab-btn" data-timbre="string" style="--c:var(--c-string)"><i></i>Bowed string</button>
+        <button class="lab-btn" data-timbre="pad" style="--c:var(--c-pad)"><i></i>Soft pad</button>
+        <button class="lab-btn" data-timbre="woodblock" style="--c:var(--c-block)"><i></i>Woodblock</button>
       </div>
+      <div class="tut-status" id="tut-status-2" role="status" aria-live="polite">&nbsp;</div>
+      <div class="tutorial-actions"><button class="link-btn" data-tut-skip>Skip</button><div class="tut-nav"><span></span><span class="active"></span><span></span></div><button class="lab-btn primary" data-tut-next>Next →</button></div>
+    </div>
+    <div id="tut-step-3" hidden>
+      <div class="tut-step-label">How it works · 3 of 3</div>
+      <h2>The shell game, by ear</h2>
+      <p>The dots move, then <strong>fade away</strong>. Keep following the bowed string with your ears only. When the sound stops, the dots come back, all alike. <strong>Tap the one you were following.</strong></p>
+      <div class="tut-stage" id="tut-stage-3"><div class="tut-you"></div></div>
+      <div class="tutorial-actions"><button class="link-btn" data-tut-skip>Close</button><div class="tut-nav"><span></span><span></span><span class="active"></span></div><button class="lab-btn primary" id="tut-finish">Let's play →</button></div>
     </div>
   </div>
 </div>
@@ -237,73 +185,64 @@
 <script src="/assets/js/site-header.js"></script>
 
 <nav aria-label="Breadcrumb" class="bc">
-  <ol>
-    <li><a href="/dashboard/">Dashboard</a></li>
-    <li>Spatial Awareness</li>
-  </ol>
+  <ol><li><a href="/dashboard/">Dashboard</a></li><li>Spatial Awareness</li></ol>
 </nav>
 
 <main>
   <div class="ph">
     <h2>Spatial Awareness</h2>
-    <p>Track a moving sound source through 3D space. Trains auditory attention, scene analysis, and sound localisation.</p>
+    <p>The auditory shell game: follow one moving sound with your ears alone. Trains attention, scene analysis and sound localisation.</p>
   </div>
 
   <div class="lab-section">
-    <h3>The auditory shell game</h3>
-
-    <div class="level-selector" id="level-selector">
-      <span class="level-selector-label">Level</span>
-    </div>
-    <div class="level-desc" id="level-desc"></div>
-    <div class="level-selector" id="mode-row">
-      <label class="level-selector-label" for="daily-toggle"><input type="checkbox" id="daily-toggle"> Today's challenge</label>
-      <label class="level-selector-label" for="room-select">Room <select id="room-select"></select></label>
-    </div>
-    <p class="level-desc" id="mode-note"></p>
-
-    <!-- Level status bar -->
-    <div class="level-status">
-      <div class="level-status-left">
-        <span class="level-badge" id="level-badge">Level 1</span>
-        <span class="trial-counter">Trial <strong id="trial-num">—</strong><span> / 10</span></span>
+    <div class="topbar">
+      <div class="lvl-step">
+        <button type="button" id="lvl-prev" aria-label="Easier level">◂</button>
+        <div class="lvl-name" id="lvl-name">Level 1<small id="lvl-trial">&nbsp;</small></div>
+        <button type="button" id="lvl-next" aria-label="Harder level">▸</button>
       </div>
-      <button class="how-to-play-btn" id="how-to-play-btn">How to play</button>
+      <button class="link-btn" id="how-to-play-btn" type="button">How to play</button>
     </div>
-
-    <!-- Trial pips -->
     <div class="trial-pips" id="trial-pips"></div>
 
-    <div class="spatial-diagram-container">
-      <div class="spatial-diagram" id="spatial-diagram">
-        <svg class="path-trace" id="path-trace"></svg>
+    <div class="stage-wrap">
+      <div class="stage" id="spatial-diagram" role="group" aria-label="Arena: you are in the middle, the top is straight ahead">
+        <svg class="guides" viewBox="0 0 100 100" aria-hidden="true">
+          <circle class="g-ring" cx="50" cy="50" r="16.5"/><circle class="g-ring" cx="50" cy="50" r="33"/>
+          <line class="g-axis" x1="50" y1="4" x2="50" y2="96"/><line class="g-axis" x1="4" y1="50" x2="96" y2="50"/>
+          <text class="g-label" x="50" y="8.5">front</text><text class="g-label" x="50" y="95.5">behind</text><text class="g-label" x="8" y="51.2">left</text><text class="g-label" x="92" y="51.2">right</text>
+          <circle class="g-you" cx="50" cy="50" r="2.6"/><path class="g-nose" d="M50 44.2 L52.4 47.6 L47.6 47.6 Z"/>
+        </svg>
+        <svg class="arc" viewBox="0 0 100 100" aria-hidden="true"><circle class="arc-track" cx="50" cy="50" r="48.6"/><circle class="arc-fill" id="arc-fill" cx="50" cy="50" r="48.6" stroke-dasharray="305.4" stroke-dashoffset="305.4"/></svg>
+        <svg class="path-trace" id="path-trace" aria-hidden="true"></svg>
+        <div class="stage-msg" id="stage-msg"></div>
       </div>
     </div>
 
-    <div class="phase-indicator" id="phase-indicator"></div>
+    <div class="phase-indicator" id="phase-indicator" role="status" aria-live="polite"></div>
+    <div class="feedback-msg" id="feedback-msg" role="status" aria-live="polite"></div>
 
-    <div class="control-row">
-      <button class="lab-btn primary" id="btn-play"><svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> Play</button>
-      <div class="feedback-msg" id="feedback-msg"></div>
-    </div>
+    <div class="dock"><button class="lab-btn primary" id="btn-play" type="button"><svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true"><path d="M0 0l10 6L0 12z"/></svg> <span id="play-label">Play</span></button></div>
 
-    <div class="spatial-stats">
-      <div class="stat-item"><span class="stat-label">Trials</span><span class="stat-value" id="stat-trials">0</span></div>
-      <div class="stat-item"><span class="stat-label">Correct</span><span class="stat-value" id="stat-correct">0</span></div>
-      <div class="stat-item"><span class="stat-label">Accuracy</span><span class="stat-value" id="stat-accuracy">—</span></div>
-      <div class="stat-item"><span class="stat-label">In a row</span><span class="stat-value" id="stat-streak">0</span></div>
-      <div class="stat-item"><span class="stat-label">Longest run</span><span class="stat-value" id="stat-best-streak">0</span></div>
-    </div>
-
-    <div class="control-row">
-      <label class="lab-hint" style="display:flex;gap:.4rem;align-items:center;margin:0"><input type="checkbox" id="auto-level"> Move the level up and down for me (3 right in a row goes up, 2 wrong in a row goes down)</label>
-      <button type="button" class="lab-btn" id="btn-headphones">Check headphones</button>
-    </div>
-
-    <p class="lab-hint">Headphones recommended · The filled dot plays the bowed string · Click where it ends up</p>
+    <details class="more" id="more">
+      <summary>Levels, stats and settings</summary>
+      <div class="levels" id="level-selector" role="group" aria-label="Level"></div>
+      <div class="level-desc" id="level-desc"></div>
+      <label class="opt"><input type="checkbox" id="daily-toggle"> Today's challenge: everyone gets the same paths today</label>
+      <label class="opt"><input type="checkbox" id="auto-level"> Move the level up and down for me (3 right in a row goes up, 2 wrong in a row goes down)</label>
+      <p class="mode-note" id="mode-note"></p>
+      <div class="spatial-stats">
+        <div><span class="stat-label">Trials</span><span class="stat-value" id="stat-trials">0</span></div>
+        <div><span class="stat-label">Correct</span><span class="stat-value" id="stat-correct">0</span></div>
+        <div><span class="stat-label">Accuracy</span><span class="stat-value" id="stat-accuracy">—</span></div>
+        <div><span class="stat-label">In a row</span><span class="stat-value" id="stat-streak">0</span></div>
+        <div><span class="stat-label">Longest</span><span class="stat-value" id="stat-best-streak">0</span></div>
+      </div>
+      <button type="button" class="lab-btn" id="btn-headphones">Check headphones (left, then right)</button>
+    </details>
+    <p class="lab-hint">Headphones needed · the bright dot plays the bowed string · tap where it ended up</p>
   </div>
 
-  <!-- Level complete overlay -->
   <div class="level-complete" id="levelComplete">
     <div class="level-complete-inner">
       <div class="level-complete-title" id="lc-title">Level complete</div>
@@ -311,15 +250,12 @@
       <div class="level-complete-score-label">correct answers</div>
       <div class="lc-pip-row" id="lc-pips"></div>
       <div class="level-complete-stats">
-        <div class="lc-stat"><span class="lc-stat-val" id="lc-accuracy">70%</span><span class="lc-stat-label">Accuracy</span></div>
-        <div class="lc-stat"><span class="lc-stat-val" id="lc-prev-best">—</span><span class="lc-stat-label">Previous best</span></div>
+        <div><span class="lc-stat-val" id="lc-accuracy">70%</span><span class="lc-stat-label">Accuracy</span></div>
+        <div><span class="lc-stat-val" id="lc-prev-best">—</span><span class="lc-stat-label">Previous best</span></div>
       </div>
       <div class="lc-record" id="lc-record">★ New personal best</div>
       <div class="level-complete-msg" id="lc-msg"></div>
-      <div class="level-complete-btns">
-        <button class="lab-btn" onclick="retryLevel()">Try again</button>
-        <button class="lab-btn primary" id="lc-next-btn">Next level →</button>
-      </div>
+      <div class="level-complete-btns"><button class="lab-btn" onclick="retryLevel()">Try again</button><button class="lab-btn primary" id="lc-next-btn">Next level →</button></div>
     </div>
   </div>
 
@@ -336,1029 +272,298 @@
 </footer>
 
 <script src="/assets/js/vendor/resonance-audio.min.js"></script>
-
 <script type="module">
 'use strict';
 import { mulberry32 } from '/assets/js/experiments/rng.js';
 import { localDate } from '/assets/js/experiments/seeds-core.js';
-import { trialSeed, ROOMS, DEFAULT_ROOM, roomKey } from '/assets/js/spatial/daily.js';
+import { trialSeed, LISTENING_ROOM } from '/assets/js/spatial/daily.js';
+import { R, sampleAt, buildPaths } from '/assets/js/spatial/paths.js';
+import { ToneSource, SOURCE_CONFIGS, TIMBRE_NAMES } from '/assets/js/spatial/voices.js';
 
-// ─── SUPABASE ───────────────────────────────────────────
+// ─── SAVED SCORES (your account, if you are signed in) ───
 let _sb = null;
-async function getSupabase() {
-  if (_sb) return _sb;
-  const { createClient } = await import('/assets/js/vendor/supabase-js.js');
-  _sb = createClient('https://lrjuufvrgkuvfxcmybtf.supabase.co','sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1');
-  return _sb;
-}
-
-// ─── PERSISTENCE ────────────────────────────────────────
+async function getSupabase() { if (_sb) return _sb; const { createClient } = await import('/assets/js/vendor/supabase-js.js'); _sb = createClient('https://lrjuufvrgkuvfxcmybtf.supabase.co','sb_publishable_VyiIJOgsGueUOVU_ed49-Q_rS4mi7J1'); return _sb; }
 async function loadBestScores() {
-  try {
-    const sb = await getSupabase();
-    const uid = window._currentUser?.id;
-    if (!sb || !uid) return;
+  try { const sb = await getSupabase(), uid = window._currentUser?.id; if (!sb || !uid) return;
     const { data } = await sb.from('game_best_scores').select('level, correct, trials, accuracy').eq('user_id', uid).eq('game', 'spatial');
     if (data) data.forEach(row => { G.bestScores[row.level] = { correct: row.correct, trials: row.trials, accuracy: row.accuracy }; });
-  } catch(e) { console.warn('Could not load scores:', e); }
+  } catch (e) { console.warn('Could not load scores:', e); }
   updateLevelButtons();
 }
+async function saveBestScore(level, correct, trials, accuracy) { try { const sb = await getSupabase(), uid = window._currentUser?.id; if (!sb || !uid) return; await sb.from('game_best_scores').upsert({ user_id: uid, game: 'spatial', level, correct, trials, accuracy, updated_at: new Date().toISOString() }, { onConflict: 'user_id,game,level' }); } catch (e) { console.warn('Could not save score:', e); } }
+async function saveSession(level, correct, trials, accuracy) { try { const sb = await getSupabase(), uid = window._currentUser?.id; if (!sb || !uid) return; await sb.from('game_sessions').insert({ user_id: uid, game: 'spatial', level, correct, trials, accuracy, played_at: new Date().toISOString() }); } catch (e) { console.warn('Could not save session:', e); } }
 
-async function saveBestScore(level, correct, trials, accuracy) {
-  try {
-    const sb = await getSupabase(); const uid = window._currentUser?.id;
-    if (!sb || !uid) return;
-    await sb.from('game_best_scores').upsert({ user_id: uid, game: 'spatial', level, correct, trials, accuracy, updated_at: new Date().toISOString() }, { onConflict: 'user_id,game,level' });
-  } catch(e) { console.warn('Could not save score:', e); }
-}
-
-async function saveSession(level, correct, trials, accuracy) {
-  try {
-    const sb = await getSupabase(); const uid = window._currentUser?.id;
-    if (!sb || !uid) return;
-    await sb.from('game_sessions').insert({ user_id: uid, game: 'spatial', level, correct, trials, accuracy, played_at: new Date().toISOString() });
-  } catch(e) { console.warn('Could not save session:', e); }
-}
-
-// ─── HEADER ─────────────────────────────────────────────
-const pathName = window.location.pathname.replace(/\/$/, '') || '/';
-
-
-// ═══ LEVELS ═════════════════════════════════════════════
+// ═══ LEVELS ═══
 const LEVELS = [
-  { num: 1,  sources: 2, complexity: 'simple',  speed: 0.5,  minSep: 120, label: '2 sources · slow · wide spacing' },
-  { num: 2,  sources: 2, complexity: 'simple',  speed: 0.7,  minSep: 100, label: '2 sources · gentle pace · wide spacing' },
-  { num: 3,  sources: 2, complexity: 'medium',  speed: 0.9,  minSep:  70, label: '2 sources · moderate speed · medium spacing' },
-  { num: 4,  sources: 2, complexity: 'medium',  speed: 1.1,  minSep:  60, label: '2 sources · faster paths · medium spacing' },
-  { num: 5,  sources: 3, complexity: 'simple',  speed: 1.0,  minSep:  90, label: '3 sources introduced · slow paths · wide spacing' },
-  { num: 6,  sources: 3, complexity: 'medium',  speed: 1.2,  minSep:  60, label: '3 sources · medium paths · medium spacing' },
-  { num: 7,  sources: 3, complexity: 'medium',  speed: 1.4,  minSep:  35, label: '3 sources · fast paths · narrow spacing' },
-  { num: 8,  sources: 3, complexity: 'complex', speed: 1.6,  minSep:  25, label: '3 sources · complex paths · narrow spacing' },
-  { num: 9,  sources: 3, complexity: 'complex', speed: 1.8,  minSep:  15, label: '3 sources · complex paths · tight spacing' },
-  { num: 10, sources: 3, complexity: 'complex', speed: 2.2,  minSep:  10, label: '3 sources · maximum speed · can cluster' },
+  { num: 1,  sources: 2, complexity: 'simple',  speed: 0.5, minSep: 120, label: '2 sources · slow · wide spacing' },
+  { num: 2,  sources: 2, complexity: 'simple',  speed: 0.7, minSep: 100, label: '2 sources · gentle pace · wide spacing' },
+  { num: 3,  sources: 2, complexity: 'medium',  speed: 0.9, minSep:  70, label: '2 sources · moderate speed · medium spacing' },
+  { num: 4,  sources: 2, complexity: 'medium',  speed: 1.1, minSep:  60, label: '2 sources · faster paths · medium spacing' },
+  { num: 5,  sources: 3, complexity: 'simple',  speed: 1.0, minSep:  90, label: '3 sources introduced · slow paths · wide spacing' },
+  { num: 6,  sources: 3, complexity: 'medium',  speed: 1.2, minSep:  60, label: '3 sources · medium paths · medium spacing' },
+  { num: 7,  sources: 3, complexity: 'medium',  speed: 1.4, minSep:  35, label: '3 sources · fast paths · narrow spacing' },
+  { num: 8,  sources: 3, complexity: 'complex', speed: 1.6, minSep:  25, label: '3 sources · complex paths · narrow spacing' },
+  { num: 9,  sources: 3, complexity: 'complex', speed: 1.8, minSep:  15, label: '3 sources · complex paths · tight spacing' },
+  { num: 10, sources: 3, complexity: 'complex', speed: 2.2, minSep:  10, label: '3 sources · maximum speed · can cluster' },
 ];
-
 const LEVEL_MESSAGES = [
-  'A clear first step. The target sound stands out easily in open space.',
-  'Still accessible — two sources with a comfortable gap between them.',
-  'Paths are more varied now. Notice how the sound leads the eye.',
-  'Faster movement. The tracking phase demands more sustained attention.',
-  'A third sound enters — a woodblock. Three distinct voices to untangle.',
-  'Three sources at medium complexity. Your ear must choose and hold.',
-  'Fast, interweaving paths with narrower final spacing.',
-  'Complex movement and tight final positions. Elite-level tracking.',
-  'Very tight spacing. You are near the perceptual limits of localisation.',
-  'Maximum difficulty. The sources converge — only the sound can guide you.',
+  'A clear first step. The target sound stands out easily in open space.', 'Still accessible: two sources with a comfortable gap between them.',
+  'Paths are more varied now. Notice how the sound leads the eye.', 'Faster movement. The tracking phase demands more sustained attention.',
+  'A third sound enters: a woodblock. Three distinct voices to untangle.', 'Three sources at medium complexity. Your ear must choose and hold.',
+  'Fast, interweaving paths with narrower final spacing.', 'Complex movement and tight final positions. Elite-level tracking.',
+  'Very tight spacing. You are near the perceptual limits of localisation.', 'Maximum difficulty. The sources converge: only the sound can guide you.',
 ];
+const COLORS = ['var(--c-string)', 'var(--c-pad)', 'var(--c-block)'];
 
-// ═══════════════════════════════════════════════════════════════════
-// SHARED BPM GRID + CONTINUOUS TONE SOURCE
-// ═══════════════════════════════════════════════════════════════════
-//
-// All sources share a BPM of 100 (quarter note = 600ms).
-// Rhythm roles:
-//   string (target)  — quarter notes (every 1 beat = 600ms)
-//                      Prominent, bowed-string timbre, loudest accent
-//   pad (distractor) — half notes (every 2 beats = 1200ms)
-//                      Softer, sustained triangle pad
-//   woodblock        — dotted-quarter + eighth triplet feel
-//                      Accent every 1.5 beats (900ms) for syncopation
-//
-// Each source runs *continuously* — oscillators never stop.
-// Volume is shaped by a repeating gain envelope scheduled on the audio
-// clock so beats are sample-accurate and never drift.
-// Between beats the gain drops to a low sustain (~0.08) rather than
-// zero, so the spatial position is always audible and trackable.
-//
-// Visual pulses are triggered by the same audio-clock scheduler,
-// converting beat time → setTimeout delay so the CSS animation fires
-// exactly when the ear hears the accent.
+// ═══ STATE AND AUDIO ═══
+let rnd = Math.random;
+const G = { audioCtx: null, resonanceScene: null, sources: [], paths: [], targetIndex: 0, phase: 'idle', trialsInLevel: 0, trialResults: [], trials: 0, correct: 0, streak: 0, misses: 0, bestStreak: 0, currentLevel: 1, trackStart: null, trackDuration: 0, bestScores: {}, daily: false };
 
-const BPM        = 100;
-const BEAT_SEC   = 60 / BPM;          // 0.600 s  — quarter note
-const HALF_SEC   = BEAT_SEC * 2;      // 1.200 s
-const DOT_Q_SEC  = BEAT_SEC * 1.5;    // 0.900 s  — dotted quarter
-
-class ToneSource {
-  constructor(audioCtx, resonanceScene, config) {
-    this.audioCtx       = audioCtx;
-    this.resonanceScene = resonanceScene;
-    this.timbre         = config.timbre;
-    this.frequency      = config.frequency;
-    this.beatInterval   = config.beatInterval; // seconds between accents
-    this.isTarget       = config.isTarget;
-
-    this.position       = { x: 0, y: 0, z: -1 };
-    this.resonanceSource = null;
-
-    // continuous oscillator nodes (kept alive for the whole trial)
-    this._osc1      = null;
-    this._osc2      = null;
-    this._lfo       = null;
-    this._lfoGain   = null;  // vibrato depth gain (string only)
-    this._osc2Gain  = null;  // secondary oscillator gain (woodblock only)
-    this._masterGain = null;
-    this._filterNode = null;
-
-    this._stopped      = true;
-    this._nextBeatTime = 0;
-    this._schedTid     = null;
-
-    this.onBeat = null; // visual callback
-  }
-
-  // ── init: create resonance source and build the continuous audio graph ──
-  init() {
-    this.resonanceSource = this.resonanceScene.createSource();
-    this.resonanceSource.setPosition(this.position.x, this.position.y, this.position.z);
-    this._buildGraph();
-  }
-
-  _buildGraph() {
-    const ctx = this.audioCtx;
-
-    // Master gain — shaped by the beat envelope scheduler
-    this._masterGain = ctx.createGain();
-    this._masterGain.gain.value = 0.0;
-    this._masterGain.connect(this.resonanceSource.input);
-
-    if (this.timbre === 'string') {
-      // Bowed string: sawtooth + lowpass + vibrato LFO on pitch
-      this._osc1 = ctx.createOscillator();
-      this._osc1.type = 'sawtooth';
-      this._osc1.frequency.value = this.frequency;
-
-      // Vibrato
-      this._lfo = ctx.createOscillator();
-      this._lfo.type = 'sine';
-      this._lfo.frequency.value = 5.2; // Hz
-      this._lfoGain = ctx.createGain();
-      this._lfoGain.gain.value = 3.5; // cents-equivalent pitch deviation
-      this._lfo.connect(this._lfoGain);
-      this._lfoGain.connect(this._osc1.frequency);
-
-      // Tone shaping: lowpass removes harshness of raw sawtooth
-      this._filterNode = ctx.createBiquadFilter();
-      this._filterNode.type = 'lowpass';
-      this._filterNode.frequency.value = 1100;
-      this._filterNode.Q.value = 1.2;
-
-      // Second partial for warmth (one octave up, quieter)
-      this._osc2 = ctx.createOscillator();
-      this._osc2.type = 'sawtooth';
-      this._osc2.frequency.value = this.frequency * 2;
-      const osc2Gain = ctx.createGain();
-      osc2Gain.gain.value = 0.18;
-
-      this._osc1.connect(this._filterNode);
-      this._filterNode.connect(this._masterGain);
-      this._osc2.connect(osc2Gain);
-      osc2Gain.connect(this._masterGain);
-
-      this._lfo.start();
-      this._osc1.start();
-      this._osc2.start();
-
-    } else if (this.timbre === 'pad') {
-      // Sustained pad: two detuned triangle oscillators
-      this._osc1 = ctx.createOscillator();
-      this._osc1.type = 'triangle';
-      this._osc1.frequency.value = this.frequency;
-
-      this._osc2 = ctx.createOscillator();
-      this._osc2.type = 'triangle';
-      this._osc2.frequency.value = this.frequency * 1.007; // slight detune
-
-      this._filterNode = ctx.createBiquadFilter();
-      this._filterNode.type = 'lowpass';
-      this._filterNode.frequency.value = 1400;
-      this._filterNode.Q.value = 0.7;
-
-      this._osc1.connect(this._filterNode);
-      this._osc2.connect(this._filterNode);
-      this._filterNode.connect(this._masterGain);
-
-      this._osc1.start();
-      this._osc2.start();
-
-    } else if (this.timbre === 'woodblock') {
-      // Resonant woodblock: square wave + bandpass, continuous with percussive envelope
-      this._osc1 = ctx.createOscillator();
-      this._osc1.type = 'square';
-      this._osc1.frequency.value = this.frequency;
-
-      // Add a slightly detuned sine for body/resonance
-      this._osc2 = ctx.createOscillator();
-      this._osc2.type = 'sine';
-      this._osc2.frequency.value = this.frequency * 1.5;
-      this._osc2Gain = ctx.createGain();
-      this._osc2Gain.gain.value = 0.4;
-
-      this._filterNode = ctx.createBiquadFilter();
-      this._filterNode.type = 'bandpass';
-      this._filterNode.frequency.value = this.frequency * 1.4;
-      this._filterNode.Q.value = 3.5;
-
-      this._osc1.connect(this._filterNode);
-      this._filterNode.connect(this._masterGain);
-      this._osc2.connect(this._osc2Gain);
-      this._osc2Gain.connect(this._masterGain);
-
-      this._osc1.start();
-      this._osc2.start();
-    }
-  }
-
-  // ── startRhythm: begin the beat-envelope scheduler ──
-  startRhythm() {
-    this._stopped = false;
-    this._nextBeatTime = this.audioCtx.currentTime + 0.05; // tiny offset so first note isn't clipped
-    this._scheduleNext();
-  }
-
-  _scheduleNext() {
-    if (this._stopped) return;
-
-    const beatTime = this._nextBeatTime;
-    this._shapeEnvelope(beatTime);
-
-    // Visual callback: fire in JS time aligned to audio beat
-    if (this.onBeat) {
-      const msUntil = Math.max(0, (beatTime - this.audioCtx.currentTime) * 1000);
-      setTimeout(() => { if (!this._stopped && this.onBeat) this.onBeat(); }, msUntil);
-    }
-
-    this._nextBeatTime += this.beatInterval;
-
-    // Wake up 120ms before next beat to schedule it
-    const msUntilNext = (this._nextBeatTime - this.audioCtx.currentTime) * 1000 - 120;
-    this._schedTid = setTimeout(() => this._scheduleNext(), Math.max(0, msUntilNext));
-  }
-
-  // ── _shapeEnvelope: schedule gain curve for one accent at beatTime ──
-  // Each timbre has its own character:
-  //   string — strong accent, quick attack, slow decay to sustained hum
-  //   pad    — gentle swell, very slow attack/release, high sustain
-  //   woodblock — sharp percussive hit, fast decay to low resonant tail
-  _shapeEnvelope(beatTime) {
-    const g = this._masterGain.gain;
-    const now = this.audioCtx.currentTime;
-    // Clamp: never schedule into the past — use whichever is later
-    const t0 = Math.max(now, beatTime);
-    // Cancel from now so any still-running ramp is cleanly cut before we write new values
-    g.cancelScheduledValues(now);
-    // Snapshot current value so the ramp starts from wherever the gain actually is
-    g.setValueAtTime(g.value, now);
-
-    if (this.timbre === 'string') {
-      // Sustain level between beats: 0.09 (always audible)
-      // Accent peak: 0.52
-      const sustain   = 0.09;
-      const peak      = 0.52;
-      const attackSec = 0.018;
-      const decaySec  = 0.20;
-      g.setValueAtTime(sustain, t0);
-      g.linearRampToValueAtTime(peak, t0 + attackSec);
-      g.exponentialRampToValueAtTime(sustain + 0.001, t0 + attackSec + decaySec);
-      g.linearRampToValueAtTime(sustain, t0 + attackSec + decaySec + 0.01);
-
-    } else if (this.timbre === 'pad') {
-      // Sustain: 0.06 — always present but background
-      // Accent peak: 0.22 — gentle swell that fills the half-note gap
-      const sustain   = 0.06;
-      const peak      = 0.22;
-      const attackSec = 0.14;
-      const decaySec  = 0.70;
-      g.setValueAtTime(sustain, t0);
-      g.linearRampToValueAtTime(peak, t0 + attackSec);
-      g.exponentialRampToValueAtTime(sustain + 0.001, t0 + attackSec + decaySec);
-      g.linearRampToValueAtTime(sustain, t0 + attackSec + decaySec + 0.02);
-
-    } else if (this.timbre === 'woodblock') {
-      // Sustain: 0.04 — faint resonant tail keeps it spatially present
-      // Accent peak: 0.34 — sharp strike
-      const sustain   = 0.04;
-      const peak      = 0.34;
-      const attackSec = 0.005;
-      const decaySec  = 0.28;
-      g.setValueAtTime(sustain, t0);
-      g.linearRampToValueAtTime(peak, t0 + attackSec);
-      g.exponentialRampToValueAtTime(sustain + 0.001, t0 + attackSec + decaySec);
-      g.linearRampToValueAtTime(sustain, t0 + attackSec + decaySec + 0.02);
-    }
-  }
-
-  stopRhythm() {
-    this._stopped = true;
-    if (this._schedTid !== null) { clearTimeout(this._schedTid); this._schedTid = null; }
-    // Fade out quickly rather than abrupt cut
-    if (this._masterGain) {
-      const g = this._masterGain.gain;
-      const now = this.audioCtx.currentTime;
-      g.cancelScheduledValues(now);
-      g.setValueAtTime(g.value, now);
-      g.linearRampToValueAtTime(0.0, now + 0.08);
-    }
-  }
-
-  destroy() {
-    this.stopRhythm();
-    // Stop all oscillators
-    [this._osc1, this._osc2, this._lfo].forEach(n => {
-      if (n) { try { n.stop(); n.disconnect(); } catch(e) {} }
-    });
-    [this._lfoGain, this._osc2Gain, this._filterNode, this._masterGain].forEach(n => {
-      if (n) { try { n.disconnect(); } catch(e) {} }
-    });
-    if (this.resonanceSource) {
-      try { this.resonanceSource.input.disconnect(); } catch(e) {}
-      this.resonanceSource = null;
-    }
-    this._osc1 = this._osc2 = this._lfo = this._lfoGain = this._osc2Gain = null;
-    this._filterNode = this._masterGain = null;
-  }
-
-  setPosition(x, y, z) {
-    this.position = { x, y, z };
-    if (this.resonanceSource) this.resonanceSource.setPosition(x, y, z);
-  }
-}
-
-// Bell/chime for reveal tone (incorrect answer) — unchanged
-function playRevealTone(audioCtx, resonanceScene, x, y, z) {
-  const src = resonanceScene.createSource();
-  src.setPosition(x, y, z);
-  const osc = audioCtx.createOscillator(); osc.type = 'sine'; osc.frequency.value = 880;
-  const gain = audioCtx.createGain();
-  const now = audioCtx.currentTime;
-  osc.connect(gain); gain.connect(src.input);
-  gain.gain.setValueAtTime(0.0, now);
-  gain.gain.linearRampToValueAtTime(0.3, now + 0.008);
-  gain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
-  osc.start(now); osc.stop(now + 1.85);
-  const osc2 = audioCtx.createOscillator(); osc2.type = 'sine'; osc2.frequency.value = 1318;
-  const g2 = audioCtx.createGain();
-  osc2.connect(g2); g2.connect(src.input);
-  g2.gain.setValueAtTime(0.0, now);
-  g2.gain.linearRampToValueAtTime(0.12, now + 0.006);
-  g2.gain.exponentialRampToValueAtTime(0.001, now + 1.1);
-  osc2.start(now); osc2.stop(now + 1.15);
-}
-
-// ═══ PATH GENERATOR ═════════════════════════════════════
-const DIAGRAM_RADIUS = 150;
-function polarToXY(angleDeg, distance) { const rad = (angleDeg - 90) * Math.PI / 180; return { x: distance * Math.cos(rad), y: distance * Math.sin(rad) }; }
-function xyToSpatial(x, y) { return { sx: (x / DIAGRAM_RADIUS) * 2, sy: 0, sz: -(y / DIAGRAM_RADIUS) * 2 }; }
-
-let rnd = Math.random;   // the day's challenge swaps in a seeded one, so everyone gets the same paths
-function generatePath(complexity, durationSec, startAngleDeg, speedMul) {
-  const FPS = 60;
-  const frames = Math.round((durationSec / speedMul) * FPS);
-  const pts = [];
-
-  if (complexity === 'simple') {
-    const baseR = DIAGRAM_RADIUS * (0.55 + rnd() * 0.25);
-    const wobbleAmp = DIAGRAM_RADIUS * 0.08;
-    for (let i = 0; i <= frames; i++) {
-      const t = i / frames;
-      const angle = startAngleDeg + (270 * t);
-      const r = baseR + wobbleAmp * Math.sin(t * Math.PI * 3);
-      const { x, y } = polarToXY(angle, r);
-      const { sx, sy, sz } = xyToSpatial(x, y);
-      pts.push({ x, y, sx, sy, sz });
-    }
-
-  } else if (complexity === 'medium') {
-    const A = DIAGRAM_RADIUS * 0.75;
-    const offset = startAngleDeg * Math.PI / 180;
-    const ratios = [[3, 2], [4, 3], [5, 3]];
-    const [p, q] = ratios[Math.floor(startAngleDeg / 120) % 3];
-    for (let i = 0; i <= frames; i++) {
-      const t = (i / frames) * Math.PI * 2;
-      const x = A * Math.sin(p * t + offset);
-      const y = A * Math.sin(q * t);
-      const { sx, sy, sz } = xyToSpatial(x, y);
-      pts.push({ x, y, sx, sy, sz });
-    }
-
-  } else {
-    let angle = startAngleDeg;
-    let distance = DIAGRAM_RADIUS * 0.50;
-    const raw = [];
-
-    for (let i = 0; i <= frames; i++) {
-      angle += (rnd() - 0.5) * 38;
-      distance += (rnd() - 0.5) * 22;
-      distance = Math.max(28, Math.min(DIAGRAM_RADIUS * 0.85, distance));
-      const { x, y } = polarToXY(angle, distance);
-      raw.push({ x, y });
-    }
-
-    const W = 2;
-    for (let i = 0; i <= frames; i++) {
-      const lo = Math.max(0, i - W); const hi = Math.min(frames, i + W);
-      let ax = 0; let ay = 0;
-      for (let j = lo; j <= hi; j++) { ax += raw[j].x; ay += raw[j].y; }
-      const n = hi - lo + 1;
-      const x = ax / n; const y = ay / n;
-      const sp = xyToSpatial(x, y);
-      pts.push({ x, y, sx: sp.sx, sy: sp.sy, sz: sp.sz });
-    }
-  }
-
-  return pts;
-}
-
-function pointAngle(x, y) { return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360; }
-function angularDist(a1, a2) { const d = Math.abs(a1 - a2) % 360; return d > 180 ? 360 - d : d; }
-function pixelDist(p1, p2) { return Math.hypot(p1.x - p2.x, p1.y - p2.y); }
-
-function buildPathsWithSeparation(levelCfg) {
-  const { sources: numSrc, complexity, speed: speedMul, minSep } = levelCfg;
-  const MAX_ATTEMPTS = 30;
-  const MIN_PIXEL_DIST = 22;
-
-  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-    const paths = [];
-    for (let i = 0; i < numSrc; i++) { paths.push(generatePath(complexity, 5.0, rnd() * 360, speedMul)); }
-
-    let ok = true;
-    for (let i = 0; i < numSrc && ok; i++) {
-      for (let j = i + 1; j < numSrc && ok; j++) {
-        const fi = paths[i][paths[i].length - 1];
-        const fj = paths[j][paths[j].length - 1];
-        const ai = pointAngle(fi.x, fi.y); const aj = pointAngle(fj.x, fj.y);
-        if (angularDist(ai, aj) < minSep) { ok = false; break; }
-        if (pixelDist(fi, fj) < MIN_PIXEL_DIST) { ok = false; break; }
-      }
-    }
-    if (ok) return paths;
-  }
-
-  const paths = [];
-  const angleStep = 360 / numSrc;
-  for (let i = 0; i < numSrc; i++) {
-    const p = generatePath(complexity, 5.0, rnd() * 360, speedMul);
-    const forcedAngle = (i * angleStep) + rnd() * (angleStep * 0.4);
-    const forcedR = DIAGRAM_RADIUS * 0.65;
-    const { x, y } = polarToXY(forcedAngle, forcedR);
-    const { sx, sy, sz } = xyToSpatial(x, y);
-    p[p.length - 1] = { x, y, sx, sy, sz };
-    paths.push(p);
-  }
-  return paths;
-}
-
-// ═══ GAME STATE ══════════════════════════════════════════
-const G = {
-  audioCtx: null, resonanceScene: null, sources: [], paths: [],
-  targetIndex: 0, phase: 'idle',
-  trialsInLevel: 0, trialResults: [],
-  trials: 0, correct: 0, streak: 0, misses: 0, bestStreak: 0,
-  currentLevel: 1, animRaf: null, trackStart: null, trackDuration: 0,
-  bestScores: {}, daily: false, room: DEFAULT_ROOM,
-};
-
-// ─── ROOM ────────────────────────────────────────────────
-function applyRoom() {
-  const r = ROOMS[G.room]; if (!G.resonanceScene) return;
-  G.resonanceScene.setRoomProperties(r.size, r.materials);
-}
-
-// ─── AUDIO INIT ──────────────────────────────────────────
+/** One audio context and one Resonance scene for everything on the page (the game and the tutorial). Always started from a button press. */
 function initAudio() {
   if (G.audioCtx) return;
   G.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  G.resonanceScene = new ResonanceAudio(G.audioCtx);
-  applyRoom();
+  // third-order ambisonics: much sharper placement than the default first order, which smears a sound across a wide area
+  G.resonanceScene = new ResonanceAudio(G.audioCtx, { ambisonicOrder: 3 }); G.sceneAt = performance.now();
+  G.resonanceScene.setRoomProperties(LISTENING_ROOM.size, LISTENING_ROOM.materials);
   G.resonanceScene.output.connect(G.audioCtx.destination);
 }
+/** The spatial engine decodes its head-response tables when it is created; a source started before that finishes is silent. So it is created early
+ *  (the context stays suspended until a press) and we wait out whatever is left of that moment before any sound begins. */
+async function wake() {
+  initAudio(); if (G.audioCtx.state !== 'running') { try { await G.audioCtx.resume(); } catch { /* checked below */ } }
+  const wait = 600 - (performance.now() - G.sceneAt); if (wait > 0) await sleep(wait);
+  return G.audioCtx.state === 'running';
+}
+function playRevealTone(x, y, z) {
+  const c = G.audioCtx, src = G.resonanceScene.createSource({ minDistance: 1.5, maxDistance: 12 }); src.setPosition(x, y, z); const now = c.currentTime;
+  [[880, 0.3, 1.8], [1318, 0.12, 1.1], [2637, 0.05, 0.6]].forEach(([f, v, d]) => { const o = c.createOscillator(), g = c.createGain(); o.frequency.value = f; o.connect(g); g.connect(src.input); g.gain.setValueAtTime(0, now); g.gain.linearRampToValueAtTime(v, now + 0.008); g.gain.exponentialRampToValueAtTime(0.001, now + d); o.start(now); o.stop(now + d + 0.05); });
+}
 
-// ─── SOURCE CONFIGS ──────────────────────────────────────
-// Major triad: A3 (220 Hz) · C#4 (277.18 Hz) · E4 (329.63 Hz)
-// Rhythm roles on a 100 BPM grid:
-//   string    — quarter note  (BEAT_SEC   = 0.600 s) — most prominent
-//   pad       — half note     (HALF_SEC   = 1.200 s) — gentle, background
-//   woodblock — dotted quarter(DOT_Q_SEC  = 0.900 s) — syncopated accent
-const SOURCE_CONFIGS = [
-  { frequency: 220.00,  timbre: 'string',    beatInterval: BEAT_SEC,  isTarget: true  },
-  { frequency: 277.18,  timbre: 'pad',       beatInterval: HALF_SEC,  isTarget: false },
-  { frequency: 329.63,  timbre: 'woodblock', beatInterval: DOT_Q_SEC, isTarget: false },
-];
-
-// ─── CSS PULSE ANIMATIONS ────────────────────────────────
-// Durations match the feel of each timbre's envelope:
-//   string  — sharp ring, matches accent attack + short decay
-//   pad     — slow swell, matches long attack/release
-//   woodblock — quick pop, matches percussive strike
-// Colours match the original scheme (green, blue, purple).
-// The JS scheduler re-triggers these in sync with the audio clock.
-
-// ─── DOM HELPERS ─────────────────────────────────────────
-const diagram    = document.getElementById('spatial-diagram');
-const pathSvg    = document.getElementById('path-trace');
-const phaseEl    = document.getElementById('phase-indicator');
-const feedbackEl = document.getElementById('feedback-msg');
-const btnPlay    = document.getElementById('btn-play');
-
-function setPhase(text) { phaseEl.textContent = text; }
-function setFeedback(msg, cls) { feedbackEl.textContent = msg; feedbackEl.className = 'feedback-msg' + (cls ? ' ' + cls : ''); }
-function clearDots() { diagram.querySelectorAll('.sound-source').forEach(d => d.remove()); }
-function clearPath() { pathSvg.innerHTML = ''; }
-
-// PULSE_CLASSES indexed by source index — same as original
-const PULSE_CLASSES = ['pulse-string', 'pulse-pad', 'pulse-block'];
+// ═══ DOM ═══
+const $ = id => document.getElementById(id);
+const diagram = $('spatial-diagram'), pathSvg = $('path-trace'), btnPlay = $('btn-play');
+const setPhase = t => { $('phase-indicator').textContent = t; };
+const setFeedback = (m, cls) => { const el = $('feedback-msg'); el.textContent = m; el.className = 'feedback-msg' + (cls ? ' ' + cls : ''); };
+const clearDots = () => diagram.querySelectorAll('.sound-source').forEach(d => d.remove());
+const clearPath = () => { pathSvg.innerHTML = ''; };
+const setArc = f => { $('arc-fill').style.strokeDashoffset = String(305.4 * (1 - Math.max(0, Math.min(1, f)))); };
+const arena = () => { const r = diagram.offsetWidth / 2; return { r, scale: r * 0.96 / R }; };   // the arena fills the stage almost to its edge
 
 function buildSources() {
-  G.sources.forEach(s => s.destroy());
-  G.sources = [];
-  const lvl = LEVELS[G.currentLevel - 1];
-  for (let i = 0; i < lvl.sources; i++) {
-    const src = new ToneSource(G.audioCtx, G.resonanceScene, SOURCE_CONFIGS[i]);
-    src.init();
-    G.sources.push(src);
-  }
+  G.sources.forEach(s => s.destroy()); G.sources = [];
+  for (let i = 0; i < LEVELS[G.currentLevel - 1].sources; i++) { const s = new ToneSource(G.audioCtx, G.resonanceScene, SOURCE_CONFIGS[i]); s.init(); G.sources.push(s); }
   G.targetIndex = 0;
 }
-
-function drawDots(showTarget, withPulse) {
+function drawDots(mode) {   // mode: 'identity' (target marked) | 'hidden-ready' | 'neutral' (all alike, for the guess)
   clearDots();
   G.sources.forEach((src, i) => {
-    const dot = document.createElement('div'); dot.className = 'sound-source'; dot.dataset.idx = i;
-    if (showTarget && i === G.targetIndex) dot.classList.add('source-target');
-    else dot.classList.add('source-distractor');
+    const dot = document.createElement('div'); dot.className = 'sound-source'; dot.dataset.idx = i; dot.style.setProperty('--c', COLORS[i]);
+    dot.classList.add(mode === 'neutral' ? 'source-neutral' : i === G.targetIndex ? 'source-target' : 'source-distractor');
     diagram.appendChild(dot);
-
-    if (withPulse) {
-      const pulseClass = PULSE_CLASSES[i];
-      src.onBeat = () => {
-        const d = diagram.querySelector(`.sound-source[data-idx="${i}"]`);
-        if (!d) return;
-        d.classList.remove(pulseClass);
-        void d.offsetWidth;
-        d.classList.add(pulseClass);
-      };
-      src.onBeat();
-    }
   });
 }
-
-function removePulseClasses() {
-  G.sources.forEach(src => { src.onBeat = null; });
-  diagram.querySelectorAll('.sound-source').forEach(dot => {
-    PULSE_CLASSES.forEach(c => dot.classList.remove(c));
-  });
-}
-
+function pulseDot(i) { const d = diagram.querySelector(`.sound-source[data-idx="${i}"]`); if (!d) return; d.classList.remove('pulse'); void d.offsetWidth; d.classList.add('pulse'); }
+function setPulses(indices) { G.sources.forEach((s, i) => { s.onBeat = indices.includes(i) ? () => pulseDot(i) : null; }); }
+function elapsedFrac() { return G.trackStart === null ? 0 : Math.min(1, (performance.now() - G.trackStart) / G.trackDuration); }
+function moveAudio() { const u = elapsedFrac(); G.sources.forEach((s, i) => { const p = sampleAt(G.paths[i], u); s.setPosition(p.sx, p.sy, p.sz); }); }
 function placeDots() {
-  const r = diagram.offsetWidth / 2; const scale = r / DIAGRAM_RADIUS;
-  G.sources.forEach((src, i) => {
-    const dot = diagram.querySelector(`.sound-source[data-idx="${i}"]`); if (!dot) return;
-    const frame = currentFrame(i); const pos = G.paths[i][frame];
-    dot.style.left = (r + pos.x * scale) + 'px'; dot.style.top = (r + pos.y * scale) + 'px';
-    src.setPosition(pos.sx, pos.sy, pos.sz);
-  });
+  const { r, scale } = arena(), u = elapsedFrac();
+  G.sources.forEach((s, i) => { const dot = diagram.querySelector(`.sound-source[data-idx="${i}"]`); if (!dot) return; const p = sampleAt(G.paths[i], u); dot.style.left = (r + p.x * scale) + 'px'; dot.style.top = (r + p.y * scale) + 'px'; });
 }
-
-function currentFrame(sourceIndex) {
-  if (G.trackStart === null) return 0;
-  const elapsed = performance.now() - G.trackStart;
-  const total = G.paths[sourceIndex].length - 1;
-  return Math.min(total, Math.floor((elapsed / G.trackDuration) * total));
+function placeAtStart() { G.trackStart = null; placeDots(); G.sources.forEach((s, i) => { const p = sampleAt(G.paths[i], 0); s.setPosition(p.sx, p.sy, p.sz); }); }
+function fadeOpacity(from, to, ms) { return new Promise(res => { const t0 = performance.now(); (function step(now) { const t = Math.min((now - t0) / ms, 1); diagram.querySelectorAll('.sound-source').forEach(d => { d.style.opacity = from + (to - from) * t; }); t < 1 ? requestAnimationFrame(step) : res(); })(t0); }); }
+function drawPathTrace(i) {
+  clearPath(); const pts = G.paths[i]; if (pts.length < 2) return; const { r, scale } = arena();
+  const d = pts.map((p, k) => (k ? 'L' : 'M') + (r + p.x * scale).toFixed(1) + ',' + (r + p.y * scale).toFixed(1)).join(' ');
+  const el = document.createElementNS('http://www.w3.org/2000/svg', 'path'); el.setAttribute('d', d); el.setAttribute('fill', 'none'); el.setAttribute('stroke', COLORS[i]); el.setAttribute('stroke-width', '2'); el.setAttribute('stroke-dasharray', '5 4'); el.setAttribute('opacity', '0.6'); pathSvg.appendChild(el);
+  const s = pts[0], c = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c.setAttribute('cx', r + s.x * scale); c.setAttribute('cy', r + s.y * scale); c.setAttribute('r', '4'); c.setAttribute('fill', COLORS[i]); c.setAttribute('opacity', '0.7'); pathSvg.appendChild(c);
 }
-
-function setDotsOpacity(opacity) {
-  diagram.querySelectorAll('.sound-source').forEach(d => { d.style.opacity = opacity; });
-}
-
-function drawPathTrace(sourceIndex) {
-  clearPath();
-  const pts = G.paths[sourceIndex]; if (pts.length < 2) return;
-  const r = diagram.offsetWidth / 2; const scale = r / DIAGRAM_RADIUS;
-  const d = pts.map((p, i) => { const px = r + p.x * scale; const py = r + p.y * scale; return (i === 0 ? 'M' : 'L') + px.toFixed(1) + ',' + py.toFixed(1); }).join(' ');
-  const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  el.setAttribute('d', d); el.setAttribute('fill', 'none'); el.setAttribute('stroke', 'var(--accent)');
-  el.setAttribute('stroke-width', '1.5'); el.setAttribute('stroke-dasharray', '5 3'); el.setAttribute('opacity', '0.45');
-  pathSvg.appendChild(el);
-  const sp = pts[0];
-  const startDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  startDot.setAttribute('cx', r + sp.x * scale); startDot.setAttribute('cy', r + sp.y * scale);
-  startDot.setAttribute('r', '4'); startDot.setAttribute('fill', 'var(--accent)'); startDot.setAttribute('opacity', '0.5');
-  pathSvg.appendChild(startDot);
-}
-
 function updateStats() {
-  document.getElementById('stat-trials').textContent  = G.trials;
-  document.getElementById('stat-correct').textContent = G.correct;
-  const pct = G.trials > 0 ? Math.round((G.correct / G.trials) * 100) + '%' : '—';
-  document.getElementById('stat-accuracy').textContent = pct;
-  document.getElementById('stat-streak').textContent = G.streak;
-  document.getElementById('stat-best-streak').textContent = G.bestStreak;
+  $('stat-trials').textContent = G.trials; $('stat-correct').textContent = G.correct; $('stat-accuracy').textContent = G.trials > 0 ? Math.round((G.correct / G.trials) * 100) + '%' : '—';
+  $('stat-streak').textContent = G.streak; $('stat-best-streak').textContent = G.bestStreak;
 }
 
-// ─── RUNS, LEVEL AUTO-ADJUST, HAPTICS, HEADPHONE CHECK (all on this device) ───
+// ─── runs, auto level, haptics, headphone check ───
 try { G.bestStreak = parseInt(localStorage.getItem('sil.spatial.bestStreak') || '0', 10) || 0; } catch (_) { /* storage unavailable */ }
-const autoLevel = () => document.getElementById('auto-level').checked;
-const buzz = pattern => { try { navigator.vibrate && navigator.vibrate(pattern); } catch (_) { /* not supported */ } };
-function noteResult(isCorrect) {
-  if (isCorrect) {
-    G.streak++; G.misses = 0; buzz(25);
-    if (G.streak > G.bestStreak) { G.bestStreak = G.streak; try { localStorage.setItem('sil.spatial.bestStreak', String(G.bestStreak)); } catch (_) { /* ignore */ } }
-  } else { G.streak = 0; G.misses++; buzz([40, 60, 40]); }
+const autoLevel = () => $('auto-level').checked;
+const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (_) { /* not supported */ } };
+function noteResult(ok) {
+  if (ok) { G.streak++; G.misses = 0; buzz(25); if (G.streak > G.bestStreak) { G.bestStreak = G.streak; try { localStorage.setItem('sil.spatial.bestStreak', String(G.bestStreak)); } catch (_) { /* ignore */ } } }
+  else { G.streak = 0; G.misses++; buzz([40, 60, 40]); }
 }
-/** In "move me" mode: returns a short message when the level changed. */
 function adjustLevel() {
   if (!autoLevel()) return '';
   let to = G.currentLevel, msg = '';
-  if (G.streak >= 3 && G.currentLevel < 10) { to = G.currentLevel + 1; msg = `Level ${to}`; G.streak = 0; }
-  else if (G.misses >= 2 && G.currentLevel > 1) { to = G.currentLevel - 1; msg = `Back to level ${to}`; G.misses = 0; }
-  if (to !== G.currentLevel) {
-    G.currentLevel = to;
-    document.querySelectorAll('.level-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.level) === to));
-    levelDesc.innerHTML = `<strong>Level ${to}:</strong> ${LEVELS[to - 1].label}`;
-    document.getElementById('level-badge').textContent = `Level ${to}`;
-  }
+  if (G.streak >= 3 && G.currentLevel < 10) { to++; msg = `Level ${to}`; G.streak = 0; } else if (G.misses >= 2 && G.currentLevel > 1) { to--; msg = `Back to level ${to}`; G.misses = 0; }
+  if (to !== G.currentLevel) { G.currentLevel = to; showLevel(); }
   return msg;
 }
-window.__spatial = { G, noteResult, adjustLevel, buildPaths: (lvl) => { rnd = G.daily ? mulberry32(trialSeed(localDate(), G.currentLevel, G.trialsInLevel)) : Math.random; return buildPathsWithSeparation(LEVELS[lvl - 1]); }, applyRoom };   // for the browser tests
-document.getElementById('btn-headphones').addEventListener('click', async () => {
-  setFeedback('You should hear one tone on the left, then one on the right. If not, check your headphones.');
-  setTimeout(() => setFeedback(''), 5000);
-  try {
-    initAudio(); if (G.audioCtx.state === 'suspended') await G.audioCtx.resume();
-    const c = G.audioCtx, t = c.currentTime + 0.05;
-    [-1, 1].forEach((pan, i) => {
-      const o = c.createOscillator(), g = c.createGain(), p = c.createStereoPanner();
-      o.frequency.value = 440; p.pan.value = pan;
-      g.gain.setValueAtTime(0, t + i * 1.2); g.gain.linearRampToValueAtTime(0.15, t + i * 1.2 + 0.05); g.gain.linearRampToValueAtTime(0, t + i * 1.2 + 0.8);
-      o.connect(g).connect(p).connect(c.destination); o.start(t + i * 1.2); o.stop(t + i * 1.2 + 0.9);
-    });
-  } catch (e) { setFeedback('Sound could not start. Check that your browser allows audio.'); }
-});
+window.__spatial = { G, noteResult, adjustLevel, buildPaths: lvl => { rnd = G.daily ? mulberry32(trialSeed(localDate(), G.currentLevel, G.trialsInLevel)) : Math.random; return buildPaths(LEVELS[lvl - 1], rnd); } };
+
+async function headphoneCheck(statusFn) {
+  const ready = await wake(); if (!ready) { statusFn('Sound could not start. Check that your browser allows audio and the volume is up.', true); return; }
+  const c = G.audioCtx, t = c.currentTime + 0.05;
+  [-1, 1].forEach((pan, i) => { const o = c.createOscillator(), g = c.createGain(), p = c.createStereoPanner(); o.frequency.value = 440; p.pan.value = pan; g.gain.setValueAtTime(0, t + i * 1.2); g.gain.linearRampToValueAtTime(0.15, t + i * 1.2 + 0.05); g.gain.linearRampToValueAtTime(0, t + i * 1.2 + 0.8); o.connect(g).connect(p).connect(c.destination); o.start(t + i * 1.2); o.stop(t + i * 1.2 + 0.9); });
+  statusFn('You should hear one tone on the left, then one on the right.');
+}
+$('btn-headphones').addEventListener('click', () => { headphoneCheck((m, warn) => { setFeedback(m); setTimeout(() => setFeedback(''), 5000); }); });
 
 function renderPips() {
-  const container = document.getElementById('trial-pips'); container.innerHTML = '';
-  for (let i = 0; i < 10; i++) {
-    const pip = document.createElement('div'); pip.className = 'trial-pip';
-    if (i < G.trialResults.length) pip.classList.add(G.trialResults[i].correct ? 'correct' : 'incorrect');
-    else if (i === G.trialsInLevel && G.trialsInLevel < 10) pip.classList.add('current');
-    container.appendChild(pip);
-  }
+  const box = $('trial-pips'); box.innerHTML = '';
+  for (let i = 0; i < 10; i++) { const p = document.createElement('div'); p.className = 'trial-pip'; if (i < G.trialResults.length) p.classList.add(G.trialResults[i].correct ? 'correct' : 'incorrect'); else if (i === G.trialsInLevel && G.trialsInLevel < 10) p.classList.add('current'); box.appendChild(p); }
 }
-
 function updateLevelButtons() {
-  document.querySelectorAll('.level-btn').forEach(btn => {
-    const num = parseInt(btn.dataset.level); const best = G.bestScores[num];
-    let sub = btn.querySelector('.lvl-best');
-    if (!sub) { sub = document.createElement('span'); sub.className = 'lvl-best'; btn.appendChild(sub); }
-    if (best) { const isPerfect = best.accuracy === 100; sub.textContent = isPerfect ? '100% ★' : best.accuracy + '%'; sub.classList.toggle('perfect', isPerfect); }
-    else { sub.textContent = '—'; sub.classList.remove('perfect'); }
-  });
+  document.querySelectorAll('.level-btn').forEach(btn => { const best = G.bestScores[+btn.dataset.level]; let sub = btn.querySelector('.lvl-best'); if (!sub) { sub = document.createElement('span'); sub.className = 'lvl-best'; btn.appendChild(sub); }
+    if (best) { const p = best.accuracy === 100; sub.textContent = p ? '100% ★' : best.accuracy + '%'; sub.classList.toggle('perfect', p); } else { sub.textContent = '—'; sub.classList.remove('perfect'); } });
 }
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-// ─── TRIAL FLOW ──────────────────────────────────────────
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-function fadeOpacity(fromVal, toVal, ms) {
-  return new Promise(resolve => {
-    const start = performance.now();
-    function step(now) {
-      const t = Math.min((now - start) / ms, 1);
-      const v = fromVal + (toVal - fromVal) * t;
-      diagram.querySelectorAll('.sound-source').forEach(d => { d.style.opacity = v; });
-      if (t < 1) requestAnimationFrame(step); else resolve();
-    }
-    requestAnimationFrame(step);
-  });
-}
-
+// ═══ A TRIAL ═══
+let driver = null;
 async function runTrial() {
   if (G.phase !== 'idle') return;
-
-  btnPlay.disabled = true;
-  setFeedback('');
-
+  btnPlay.disabled = true; setFeedback('');
   const lvl = LEVELS[G.currentLevel - 1];
   rnd = G.daily ? mulberry32(trialSeed(localDate(), G.currentLevel, G.trialsInLevel)) : Math.random;
-  G.paths = buildPathsWithSeparation(lvl);
-  G.trackDuration = (5.0 / lvl.speed) * 1000;
-  G.trackStart = null;
+  G.paths = buildPaths(lvl, rnd); G.trackDuration = (5.0 / lvl.speed) * 1000; G.trackStart = null; setArc(0);
+  $('lvl-trial').textContent = `Trial ${G.trialsInLevel + 1} of 10`; renderPips();
 
-  document.getElementById('trial-num').textContent = G.trialsInLevel + 1;
-  renderPips();
+  G.phase = 'identity'; setPhase('Listen: the bright dot is the bowed string'); $('stage-msg').textContent = '';
+  drawDots('identity'); diagram.querySelectorAll('.sound-source').forEach(d => { d.style.opacity = 1; }); placeAtStart();
+  setPulses([G.targetIndex]); G.sources[G.targetIndex].startRhythm(); pulseDot(G.targetIndex);
+  await sleep(1600);
+  setPhase('Now the others join'); G.sources.forEach((s, i) => { if (i !== G.targetIndex) s.startRhythm(); }); setPulses(G.sources.map((_, i) => i));
+  await sleep(1700);
 
-  // ── PHASE 1: IDENTITY ────────────────────────────────
-  G.phase = 'identity';
-  setPhase('listen — the filled dot plays the bowed string');
-  // Draw dots with pulse only for the target initially; distractors get plain dots
-  drawDots(true, false);
-  setDotsOpacity(1);
-  placeDots();
-
-  // Register and fire onBeat for target only
-  const targetPulseClass = PULSE_CLASSES[G.targetIndex];
-  G.sources[G.targetIndex].onBeat = () => {
-    const d = diagram.querySelector(`.sound-source[data-idx="${G.targetIndex}"]`);
-    if (!d) return;
-    d.classList.remove(targetPulseClass);
-    void d.offsetWidth;
-    d.classList.add(targetPulseClass);
-  };
-  G.sources[G.targetIndex].startRhythm();
-  G.sources[G.targetIndex].onBeat(); // fire immediately so first beat is visible
-  await sleep(1500);
-
-  // Now start distractors and register their pulses in sync with their audio
-  G.sources.forEach((src, i) => {
-    if (i === G.targetIndex) return;
-    const pc = PULSE_CLASSES[i];
-    src.onBeat = () => {
-      const d = diagram.querySelector(`.sound-source[data-idx="${i}"]`);
-      if (!d) return;
-      d.classList.remove(pc);
-      void d.offsetWidth;
-      d.classList.add(pc);
-    };
-    src.startRhythm();
-    src.onBeat(); // fire immediately so first beat is visible
-  });
-  await sleep(1500);
-
-  // ── PHASE 2: HANDOFF ─────────────────────────────────
-  G.phase = 'handoff';
-  setPhase('track the bowed string as it moves');
-  G.trackStart = performance.now();
-  let animRunning = true;
-  function animate() { if (!animRunning) return; placeDots(); G.animRaf = requestAnimationFrame(animate); }
-  animate();
-  removePulseClasses();
+  G.phase = 'handoff'; setPhase('Follow the bowed string'); G.trackStart = performance.now(); setPulses([]);
+  let run = true; const raf = () => { if (!run) return; placeDots(); setArc(elapsedFrac()); requestAnimationFrame(raf); }; raf();
+  driver = setInterval(moveAudio, 16); moveAudio();   // positions are sent to the audio engine on a steady 16 ms tick, apart from the drawing
   await fadeOpacity(1, 0, 1000);
 
-  // ── PHASE 3: TRACKING ────────────────────────────────
-  G.phase = 'tracking';
-  setPhase('tracking…');
+  G.phase = 'tracking'; setPhase('Tracking by ear…'); $('stage-msg').textContent = 'listen';
   await sleep(Math.max(0, G.trackDuration - 1000));
 
-  // ── PHASE 4: REVEAL ──────────────────────────────────
-  G.phase = 'reveal';
-  setPhase('where did the bowed string end up?');
-  animRunning = false;
-  if (G.animRaf) cancelAnimationFrame(G.animRaf);
-  G.sources.forEach(s => s.stopRhythm());
-
-  drawDots(false, false);
-  const r = diagram.offsetWidth / 2; const scale = r / DIAGRAM_RADIUS;
-  G.sources.forEach((src, i) => {
-    const dot = diagram.querySelector(`.sound-source[data-idx="${i}"]`);
-    const final = G.paths[i][G.paths[i].length - 1];
-    if (dot) { dot.style.left = (r + final.x * scale) + 'px'; dot.style.top = (r + final.y * scale) + 'px'; dot.style.opacity = 1; }
-  });
-
-  diagram.querySelectorAll('.sound-source').forEach(dot => {
-    dot.classList.add('source-clickable');
-    dot.addEventListener('click', () => handleGuess(parseInt(dot.dataset.idx)), { once: true });
-  });
-
+  G.phase = 'reveal'; run = false; clearInterval(driver); driver = null; G.trackStart = 0; G.trackStart = performance.now() - G.trackDuration - 1; moveAudio(); setArc(1);
+  await sleep(450);   // the sounds settle where they ended
+  G.sources.forEach(s => s.stopRhythm()); $('stage-msg').textContent = '';
+  setPhase('Where did the bowed string end up? Tap it.');
+  drawDots('neutral'); placeDots();
+  diagram.querySelectorAll('.sound-source').forEach(dot => { dot.style.opacity = 1; dot.classList.add('source-clickable'); dot.tabIndex = 0; dot.setAttribute('role', 'button'); dot.setAttribute('aria-label', `Dot ${+dot.dataset.idx + 1}`);
+    const pick = () => handleGuess(+dot.dataset.idx); dot.addEventListener('click', pick, { once: true }); dot.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } }); });
   G.phase = 'guess';
 }
 
-// ─── GUESS ───────────────────────────────────────────────
-async function handleGuess(selectedIndex) {
-  if (G.phase !== 'guess') return;
-  G.phase = 'result';
-
-  diagram.querySelectorAll('.sound-source').forEach(d => { d.classList.remove('source-clickable'); d.style.cursor = 'default'; });
-
-  const isCorrect = selectedIndex === G.targetIndex;
-  G.trials++; G.trialsInLevel++;
-  if (isCorrect) G.correct++;
-  G.trialResults.push({ correct: isCorrect });
-  noteResult(isCorrect);
-  const runBefore = G.streak, levelMsg = adjustLevel();
-  updateStats(); renderPips();
-
-  const selectedDot = diagram.querySelector(`.sound-source[data-idx="${selectedIndex}"]`);
-  if (selectedDot) selectedDot.classList.add('source-selected');
-
-  if (isCorrect) {
-    setFeedback(levelMsg ? `Correct · ${levelMsg}` : runBefore >= 3 ? `Correct · ${runBefore} in a row` : 'Correct', 'success');
-    setPhase('');
-    if (G.trialsInLevel >= 10 && !autoLevel()) {
-      await sleep(1000);
-      showLevelComplete();
-    } else {
-      btnPlay.disabled = false;
-      await sleep(1800);
-      resetTrial();
-    }
+async function handleGuess(i) {
+  if (G.phase !== 'guess') return; G.phase = 'result';
+  diagram.querySelectorAll('.sound-source').forEach(d => { d.classList.remove('source-clickable'); d.style.cursor = 'default'; d.tabIndex = -1; });
+  const ok = i === G.targetIndex; G.trials++; G.trialsInLevel++; if (ok) G.correct++; G.trialResults.push({ correct: ok }); noteResult(ok);
+  const run = G.streak, levelMsg = adjustLevel(); updateStats(); renderPips();
+  diagram.querySelectorAll('.sound-source').forEach(d => { d.classList.remove('source-neutral'); d.classList.add(+d.dataset.idx === G.targetIndex ? 'source-target' : 'source-distractor'); });
+  const picked = diagram.querySelector(`.sound-source[data-idx="${i}"]`); if (picked) picked.classList.add('source-selected');
+  const target = diagram.querySelector(`.sound-source[data-idx="${G.targetIndex}"]`); if (target) target.classList.add('source-revealed');
+  if (ok) {
+    setFeedback(levelMsg ? `Correct · ${levelMsg}` : run >= 3 ? `Correct · ${run} in a row` : 'Correct', 'success'); setPhase('');
+    if (G.trialsInLevel >= 10 && !autoLevel()) { await sleep(1000); showLevelComplete(); } else { btnPlay.disabled = false; await sleep(1800); resetTrial(); }
   } else {
-    setFeedback(levelMsg ? `Incorrect — target revealed · ${levelMsg}` : 'Incorrect — target revealed', 'error');
-    const targetDot = diagram.querySelector(`.sound-source[data-idx="${G.targetIndex}"]`);
-    if (targetDot) targetDot.classList.add('source-revealed');
-    drawPathTrace(G.targetIndex);
-    setPhase('');
-
-    const finalPos = G.paths[G.targetIndex][G.paths[G.targetIndex].length - 1];
-    if (G.audioCtx && G.resonanceScene) {
-      if (G.audioCtx.state === 'suspended') G.audioCtx.resume();
-      playRevealTone(G.audioCtx, G.resonanceScene, finalPos.sx, finalPos.sy, finalPos.sz);
-    }
-
-    if (G.trialsInLevel >= 10 && !autoLevel()) {
-      await sleep(1200);
-      showLevelComplete();
-    } else {
-      btnPlay.disabled = false;
-      await sleep(3000);
-      resetTrial();
-    }
+    setFeedback(levelMsg ? `Not that one. The bowed string is marked · ${levelMsg}` : 'Not that one. The bowed string is marked.', 'error'); drawPathTrace(G.targetIndex); setPhase('');
+    const f = G.paths[G.targetIndex].at(-1), p = sampleAt(G.paths[G.targetIndex], 1); if (G.audioCtx) { if (G.audioCtx.state === 'suspended') G.audioCtx.resume(); playRevealTone(p.sx, p.sy, p.sz); }
+    if (G.trialsInLevel >= 10 && !autoLevel()) { await sleep(1200); showLevelComplete(); } else { btnPlay.disabled = false; await sleep(3000); resetTrial(); }
   }
 }
 
-// ─── LEVEL COMPLETE ──────────────────────────────────────
 async function showLevelComplete() {
-  const results = G.trialResults;
-  const correct = results.filter(r => r.correct).length;
-  const accuracy = Math.round((correct / 10) * 100);
-
-  const prev = G.bestScores[G.currentLevel];
+  const results = G.trialResults, correct = results.filter(r => r.correct).length, accuracy = Math.round(correct / 10 * 100), prev = G.bestScores[G.currentLevel];
   const isNewBest = !prev || correct > (prev.correct || 0) || (correct === (prev.correct || 0) && accuracy > (prev.accuracy || 0));
-  if (isNewBest && G.room === DEFAULT_ROOM) {   // other rooms are practice: scores in different rooms are not comparable
-    G.bestScores[G.currentLevel] = { correct, trials: 10, accuracy };
-    saveBestScore(G.currentLevel, correct, 10, accuracy);
-    updateLevelButtons();
-  }
-
+  if (isNewBest) { G.bestScores[G.currentLevel] = { correct, trials: 10, accuracy }; saveBestScore(G.currentLevel, correct, 10, accuracy); updateLevelButtons(); }
   saveSession(G.currentLevel, correct, 10, accuracy);
-
-  document.getElementById('lc-title').textContent = correct === 10 ? '★ Perfect score' : correct >= 7 ? 'Level complete' : 'Level finished';
-  document.getElementById('lc-score').textContent = `${correct} / 10`;
-  document.getElementById('lc-accuracy').textContent = accuracy + '%';
-  document.getElementById('lc-prev-best').textContent = prev ? prev.accuracy + '%' : '—';
-
-  const recordEl = document.getElementById('lc-record');
-  recordEl.classList.toggle('visible', isNewBest && !!prev);
-
-  const pipRow = document.getElementById('lc-pips');
-  pipRow.innerHTML = results.map(r => `<div class="lc-pip ${r.correct ? 'correct' : 'incorrect'}"></div>`).join('');
-
-  document.getElementById('lc-msg').textContent = LEVEL_MESSAGES[G.currentLevel - 1];
-
-  const nextBtn = document.getElementById('lc-next-btn');
-  if (G.currentLevel >= 10) {
-    nextBtn.textContent = 'Try level 1 again';
-    nextBtn.onclick = () => { closeLevelComplete(); setLevel(1); };
-  } else {
-    nextBtn.textContent = `Next: Level ${G.currentLevel + 1} →`;
-    nextBtn.onclick = () => { closeLevelComplete(); setLevel(G.currentLevel + 1); };
-  }
-
-  document.getElementById('levelComplete').classList.add('visible');
+  $('lc-title').textContent = correct === 10 ? '★ Perfect score' : correct >= 7 ? 'Level complete' : 'Level finished'; $('lc-score').textContent = `${correct} / 10`; $('lc-accuracy').textContent = accuracy + '%'; $('lc-prev-best').textContent = prev ? prev.accuracy + '%' : '—';
+  $('lc-record').classList.toggle('visible', isNewBest && !!prev); $('lc-pips').innerHTML = results.map(r => `<div class="lc-pip ${r.correct ? 'correct' : 'incorrect'}"></div>`).join(''); $('lc-msg').textContent = LEVEL_MESSAGES[G.currentLevel - 1];
+  const nb = $('lc-next-btn'); if (G.currentLevel >= 10) { nb.textContent = 'Try level 1 again'; nb.onclick = () => { closeLevelComplete(); setLevel(1); }; } else { nb.textContent = `Next: Level ${G.currentLevel + 1} →`; nb.onclick = () => { closeLevelComplete(); setLevel(G.currentLevel + 1); }; }
+  $('levelComplete').classList.add('visible');
 }
+const closeLevelComplete = () => $('levelComplete').classList.remove('visible');
+window.retryLevel = () => { closeLevelComplete(); setLevel(G.currentLevel); };
 
-function closeLevelComplete() { document.getElementById('levelComplete').classList.remove('visible'); }
-window.retryLevel = function() { closeLevelComplete(); setLevel(G.currentLevel); };
-
-// ─── RESET ───────────────────────────────────────────────
 function resetTrial() {
-  G.phase = 'idle';
-  if (G.animRaf) { cancelAnimationFrame(G.animRaf); G.animRaf = null; }
-  G.trackStart = null;
-  G.sources.forEach(s => s.stopRhythm());
-  clearDots(); clearPath(); setPhase(''); setFeedback('');
-  btnPlay.disabled = false;
+  G.phase = 'idle'; if (driver) { clearInterval(driver); driver = null; } G.trackStart = null; G.sources.forEach(s => s.stopRhythm());
+  clearDots(); clearPath(); setPhase(''); setFeedback(''); setArc(0); $('stage-msg').textContent = ''; btnPlay.disabled = false;
 }
 
-// ─── LEVEL SELECTOR ──────────────────────────────────────
-// ─── DAILY AND ROOM CONTROLS ─────────────────────────────
-const dailyToggle = document.getElementById('daily-toggle'), roomSelect = document.getElementById('room-select'), modeNote = document.getElementById('mode-note');
-Object.entries(ROOMS).forEach(([k, r]) => roomSelect.appendChild(Object.assign(document.createElement('option'), { value: k, textContent: r.label })));
-function describeMode() {
-  const parts = [];
-  if (G.daily) parts.push("Today's challenge: everyone gets the same paths today, at each level. Come back tomorrow for new ones.");
-  if (G.room !== DEFAULT_ROOM) parts.push('This room is for practice: scores here are not saved as your best, because the room changes how hard it is.');
-  modeNote.textContent = parts.join(' ');
+// ═══ LEVEL CONTROLS ═══
+const dailyToggle = $('daily-toggle');
+function describeMode() { $('mode-note').textContent = G.daily ? "Today's challenge: the paths are the same for everyone today, at each level. Come back tomorrow for new ones." : ''; }
+try { G.daily = localStorage.getItem('sil.spatial.daily') === '1'; } catch { /* storage unavailable */ }
+dailyToggle.checked = G.daily; describeMode();
+dailyToggle.addEventListener('change', () => { G.daily = dailyToggle.checked; try { localStorage.setItem('sil.spatial.daily', G.daily ? '1' : '0'); } catch { /* ignore */ } describeMode(); });
+function showLevel() {
+  const n = G.currentLevel, lvl = LEVELS[n - 1];
+  document.querySelectorAll('.level-btn').forEach(b => b.classList.toggle('active', +b.dataset.level === n));
+  $('level-desc').innerHTML = `<strong>Level ${n}:</strong> ${lvl.label}`; $('lvl-name').firstChild.textContent = `Level ${n}`; $('lvl-prev').disabled = n <= 1; $('lvl-next').disabled = n >= 10;
 }
-try { G.room = roomKey(localStorage.getItem('sil.spatial.room')); G.daily = localStorage.getItem('sil.spatial.daily') === '1'; } catch {}
-dailyToggle.checked = G.daily; roomSelect.value = G.room; describeMode();
-dailyToggle.addEventListener('change', () => { G.daily = dailyToggle.checked; try { localStorage.setItem('sil.spatial.daily', G.daily ? '1' : '0'); } catch {} describeMode(); });
-roomSelect.addEventListener('change', () => { G.room = roomKey(roomSelect.value); try { localStorage.setItem('sil.spatial.room', G.room); } catch {} applyRoom(); describeMode(); });
-
-const levelSelector = document.getElementById('level-selector');
-const levelDesc = document.getElementById('level-desc');
-
-function buildLevelUI() {
-  LEVELS.forEach(lvl => {
-    const btn = document.createElement('button');
-    btn.className = 'level-btn' + (lvl.num >= 8 ? ' level-hard' : '');
-    btn.dataset.level = lvl.num;
-    btn.innerHTML = `<span class="lvl-num">${lvl.num}</span><span class="lvl-best">—</span>`;
-    btn.setAttribute('aria-label', `Level ${lvl.num}`);
-    btn.addEventListener('click', () => setLevel(lvl.num));
-    levelSelector.appendChild(btn);
-  });
+function buildLevelUI() { LEVELS.forEach(l => { const b = document.createElement('button'); b.type = 'button'; b.className = 'level-btn' + (l.num >= 8 ? ' level-hard' : ''); b.dataset.level = l.num; b.innerHTML = `<span>${l.num}</span><span class="lvl-best">—</span>`; b.setAttribute('aria-label', `Level ${l.num}`); b.addEventListener('click', () => setLevel(l.num)); $('level-selector').appendChild(b); }); }
+function setLevel(n) {
+  G.currentLevel = Math.max(1, Math.min(10, n)); G.trialsInLevel = 0; G.trialResults = []; G.trials = 0; G.correct = 0; G.streak = 0; G.misses = 0;
+  showLevel(); $('lvl-trial').textContent = 'Ready'; resetTrial(); updateStats(); renderPips(); updateLevelButtons();
 }
+$('lvl-prev').addEventListener('click', () => { if (G.phase === 'idle' || G.phase === 'guess') setLevel(G.currentLevel - 1); });
+$('lvl-next').addEventListener('click', () => { if (G.phase === 'idle' || G.phase === 'guess') setLevel(G.currentLevel + 1); });
 
-function setLevel(num) {
-  G.currentLevel = num;
-  G.trialsInLevel = 0; G.trialResults = [];
-  G.trials = 0; G.correct = 0; G.streak = 0; G.misses = 0;
-  document.querySelectorAll('.level-btn').forEach(b => { b.classList.toggle('active', parseInt(b.dataset.level) === num); });
-  const lvl = LEVELS[num - 1];
-  levelDesc.innerHTML = `<strong>Level ${num}:</strong> ${lvl.label}`;
-  document.getElementById('level-badge').textContent = `Level ${num}`;
-  document.getElementById('trial-num').textContent = '—';
-  resetTrial(); updateStats(); renderPips();
-}
-
-// ─── PLAY BUTTON ─────────────────────────────────────────
 btnPlay.addEventListener('click', async () => {
-  initAudio();
-  if (G.audioCtx.state === 'suspended') await G.audioCtx.resume();
-  if (G.trialsInLevel >= 10 && !autoLevel()) { setLevel(G.currentLevel); }
-  buildSources();
-  runTrial();
+  const ready = await wake();
+  if (!ready) { setFeedback('Sound could not start. Check that your browser allows audio and the volume is up, then press Play again.', 'error'); return; }
+  if (G.phase === 'guess') resetTrial();
+  if (G.trialsInLevel >= 10 && !autoLevel()) setLevel(G.currentLevel);
+  buildSources(); runTrial();
 });
 
-// ─── TUTORIAL ────────────────────────────────────────────
-const tutOverlay = document.getElementById('tutorial-overlay');
-const tutDot = document.getElementById('tut-dot');
-let tutAnimRaf = null, tutAudioCtx = null, tutResonance = null, tutSource = null;
-
-function tutPointOnCircle(angleDeg, r) { const rad = (angleDeg - 90) * Math.PI / 180; return { x: 100 + r * Math.cos(rad), y: 100 + r * Math.sin(rad) }; }
-
-function startTutorialDemo() {
-  let angle = 0;
-  function animStep(ts) {
-    angle = (ts / 20) % 360;
-    const { x, y } = tutPointOnCircle(angle, 68);
-    tutDot.style.left = x + 'px'; tutDot.style.top = y + 'px';
-    if (tutSource?.resonanceSource) { tutSource.resonanceSource.setPosition((x - 100) / 50, 0, -(y - 100) / 50); }
-    tutAnimRaf = requestAnimationFrame(animStep);
-  }
-  tutAnimRaf = requestAnimationFrame(animStep);
-  startTutorialAudio();
+// ═══ TUTORIAL ═══
+const tut = $('tutorial-overlay'); let tutStep = 1, tutRaf = null, tutSrc = null, tutDemoTimer = null;
+const tutStatus = (n, m, warn) => { const el = $('tut-status-' + n); if (el) { el.textContent = m || ' '; el.classList.toggle('warn', !!warn); } };
+function tutStopSound() { if (tutRaf) { cancelAnimationFrame(tutRaf); tutRaf = null; } clearTimeout(tutDemoTimer); if (tutSrc) { tutSrc.destroy(); tutSrc = null; } }
+function tutDot(stage, color, id) { let d = stage.querySelector('.sound-source'); if (!d) { d = document.createElement('div'); d.className = 'sound-source source-target'; d.id = id; stage.appendChild(d); } d.style.setProperty('--c', color); return d; }
+/** Step 1: the bowed string circles the listener, with the real engine. The button press is what lets the browser play sound. */
+async function tutOrbit() {
+  tutStopSound(); tutStatus(1, 'Starting sound…');
+  const ready = await wake(); if (!ready) { tutStatus(1, 'The browser would not start sound. Turn the volume up, check the silent switch, and try again.', true); return; }
+  const dot = tutDot($('tut-stage-1'), COLORS[0], 'tut-dot-1'); tutSrc = new ToneSource(G.audioCtx, G.resonanceScene, SOURCE_CONFIGS[0]); tutSrc.init(); tutSrc.startRhythm(); tutStatus(1, 'Listen: it should move around your head.');
+  const t0 = performance.now(), turn = 7000;
+  const step = now => { const a = ((now - t0) / turn) * Math.PI * 2, x = Math.sin(a), y = -Math.cos(a);   // starts straight ahead, then to the right
+    dot.style.left = (50 + x * 36) + '%'; dot.style.top = (50 + y * 36) + '%'; tutSrc && tutSrc.setPosition(x * 2.2, 0, y * 2.2); tutRaf = requestAnimationFrame(step); };
+  tutRaf = requestAnimationFrame(step); $('tut-hear').textContent = '■ Stop';
+  tutDemoTimer = setTimeout(() => { tutStopSound(); $('tut-hear').textContent = '▶ Hear it again'; tutStatus(1, ''); }, turn * 2);
 }
-
-function startTutorialAudio() {
-  try {
-    if (!tutAudioCtx) {
-      tutAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      tutResonance = new ResonanceAudio(tutAudioCtx);
-      tutResonance.setRoomProperties({ width: 7, height: 3.5, depth: 7 }, { left: 'brick-bare', right: 'brick-bare', front: 'brick-bare', back: 'brick-bare', down: 'concrete-block', up: 'acoustic-ceiling-tiles' });
-      tutResonance.output.connect(tutAudioCtx.destination);
-      tutSource = new ToneSource(tutAudioCtx, tutResonance, SOURCE_CONFIGS[0]);
-      tutSource.init();
-    }
-    if (tutAudioCtx.state === 'suspended') tutAudioCtx.resume();
-    tutSource.startRhythm();
-  } catch(e) {}
+async function tutSample(timbre, btn) {
+  tutStopSound(); const ready = await wake(); if (!ready) { tutStatus(2, 'The browser would not start sound. Turn the volume up and try again.', true); return; }
+  const i = SOURCE_CONFIGS.findIndex(c => c.timbre === timbre), side = [-1.6, 0, 1.6][i]; const s = new ToneSource(G.audioCtx, G.resonanceScene, SOURCE_CONFIGS[i]); s.init(); s.setPosition(side, 0, -1.2); s.startRhythm(); tutSrc = s;
+  tutStatus(2, `${TIMBRE_NAMES[timbre]}: ${side < 0 ? 'on your left' : side > 0 ? 'on your right' : 'ahead of you'}`); tutDemoTimer = setTimeout(() => { tutStopSound(); tutStatus(2, ''); }, 3500);
 }
-
-function stopTutorialDemo() {
-  if (tutAnimRaf) { cancelAnimationFrame(tutAnimRaf); tutAnimRaf = null; }
-  if (tutSource) { tutSource.destroy(); tutSource = null; }
-  if (tutAudioCtx) { tutAudioCtx.close().catch(() => {}); tutAudioCtx = null; tutResonance = null; }
+function tutShow(n) {
+  tutStopSound(); tutStep = n; for (let i = 1; i <= 3; i++) $('tut-step-' + i).hidden = i !== n; $('tut-hear').textContent = '▶ Hear it circle around you';
+  if (n === 3) tutPreview(); const first = $('tut-step-' + n).querySelector('button'); if (first) first.focus({ preventScroll: true });
 }
-
-function closeTutorial() {
-  stopTutorialDemo();
-  tutOverlay.classList.add('hidden');
-  try { localStorage.setItem('sil_spatial_tutorial_seen', '1'); } catch(e) {}
+let prevTimer = null;
+function tutPreview() {   // a silent picture of one round: dots appear, drift, fade, return alike
+  const stage = $('tut-stage-3'); stage.querySelectorAll('.sound-source').forEach(d => d.remove()); const dots = [0, 1].map(i => { const d = document.createElement('div'); d.className = 'sound-source ' + (i ? 'source-distractor' : 'source-target'); d.style.setProperty('--c', COLORS[i]); stage.appendChild(d); return d; });
+  const t0 = performance.now(); clearInterval(prevTimer);
+  prevTimer = setInterval(() => { if (tut.classList.contains('hidden') || tutStep !== 3) { clearInterval(prevTimer); return; } const t = ((performance.now() - t0) % 7000) / 7000, move = Math.min(1, t / 0.55);
+    dots.forEach((d, i) => { const a = (i ? 3.4 : 0.2) + move * 2.6 * (i ? -1 : 1), r = 34 - i * 6; d.style.left = (50 + Math.sin(a) * r) + '%'; d.style.top = (50 - Math.cos(a) * r) + '%'; d.style.opacity = t < 0.15 ? 1 : t < 0.35 ? 1 - (t - 0.15) / 0.2 : t < 0.7 ? 0 : 1; d.classList.toggle('source-target', t < 0.35 && !i); d.classList.toggle('source-neutral', t >= 0.7); d.classList.toggle('source-distractor', t < 0.7 && i); }); }, 40);
 }
-function openTutorial() {
-  tutOverlay.classList.remove('hidden');
-  document.getElementById('tut-step-1').style.display = 'block';
-  document.getElementById('tut-step-2').style.display = 'none';
-  setTimeout(startTutorialDemo, 200);
-}
-function showTutorialStep2() {
-  document.getElementById('tut-step-1').style.display = 'none';
-  document.getElementById('tut-step-2').style.display = 'block';
-}
+function tutClose() { tutStopSound(); clearInterval(prevTimer); tut.classList.add('hidden'); try { localStorage.setItem('sil_spatial_tutorial_seen', '1'); } catch { /* ignore */ } $('how-to-play-btn').focus({ preventScroll: true }); }
+function tutOpen() { tut.classList.remove('hidden'); tutShow(1); }
+$('tut-hear').addEventListener('click', () => { if (tutRaf) { tutStopSound(); $('tut-hear').textContent = '▶ Hear it circle around you'; tutStatus(1, ''); } else tutOrbit(); });
+document.querySelectorAll('#tut-sounds [data-timbre]').forEach(b => b.addEventListener('click', () => tutSample(b.dataset.timbre, b)));
+document.querySelectorAll('[data-tut-next]').forEach(b => b.addEventListener('click', () => tutShow(Math.min(3, tutStep + 1))));
+document.querySelectorAll('[data-tut-skip]').forEach(b => b.addEventListener('click', tutClose));
+$('tut-finish').addEventListener('click', tutClose); $('how-to-play-btn').addEventListener('click', tutOpen);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !tut.classList.contains('hidden')) tutClose(); });
+window.addEventListener('pagehide', tutStopSound);
 
-document.getElementById('tut-skip').addEventListener('click', closeTutorial);
-document.getElementById('tut-skip-2').addEventListener('click', closeTutorial);
-document.getElementById('tut-finish').addEventListener('click', closeTutorial);
-document.getElementById('tut-next-1').addEventListener('click', () => { showTutorialStep2(); startTutorialAudio(); });
-document.getElementById('how-to-play-btn').addEventListener('click', openTutorial);
-tutOverlay.addEventListener('click', () => { startTutorialAudio(); }, { once: true });
-
-window.addEventListener('beforeunload', stopTutorialDemo);
-
-// ─── INIT ────────────────────────────────────────────────
-buildLevelUI();
-setLevel(1);
-
-function onAuthReady(cb) { if (window._currentUser) { cb(); return; } window.addEventListener('authReady', cb, { once: true }); }
-onAuthReady(async () => { await loadBestScores(); });
-
-try {
-  if (!localStorage.getItem('sil_spatial_tutorial_seen')) {
-    tutOverlay.classList.remove('hidden');
-    setTimeout(startTutorialDemo, 200);
-  }
-} catch(e) {}
+// ═══ START ═══
+try { initAudio(); } catch { /* the first press will try again */ }   // created early and left suspended, so its tables are ready by the first press
+buildLevelUI(); setLevel(1);
+(function (cb) { if (window._currentUser) cb(); else window.addEventListener('authReady', cb, { once: true }); })(() => loadBestScores());
+try { if (!localStorage.getItem('sil_spatial_tutorial_seen')) tutOpen(); } catch { /* ignore */ }
 </script>
 </body>
 </html>
