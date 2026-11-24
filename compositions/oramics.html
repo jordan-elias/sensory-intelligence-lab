@@ -633,6 +633,13 @@
     }
     footer a { color: var(--muted); text-decoration: none; }
     footer a:hover { color: var(--accent); }
+      .tick { display:inline-flex; align-items:center; gap:.35rem; font-size:.68rem; color: var(--muted); font-family: var(--font-heading); cursor:pointer; }
+    .opt-row { display:flex; align-items:center; gap:.35rem; flex-wrap:wrap; margin-top:.45rem; }
+    .file-name { font-family: var(--font-body); font-size:.72rem; padding:.35rem .5rem; border:1px solid var(--film-edge); background: var(--film); color: var(--text); min-width:0; width:9.5rem; }
+    .file-msg { font-size:.65rem; color: var(--muted); margin-top:.5rem; max-width:17rem; line-height:1.5; }
+    .tool-btn:disabled { opacity:.4; cursor:not-allowed; }
+    .tool-btn:focus-visible, .tbtn:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+    .bottom-panel { flex-wrap: wrap; }
   </style>
   <link rel="stylesheet" href="/assets/css/header.css">
   <link rel="stylesheet" href="/assets/css/a11y.css">
@@ -653,7 +660,7 @@
 
   <div class="ph">
     <h2>Oramics</h2>
-    <p>Draw directly onto a moving film strip. Your shapes become sound — pitch, amplitude, timbre, modulation — exactly as Daphne Oram's machine translated drawn marks into music in 1957.</p>
+    <p>Draw directly onto a moving film strip. Your shapes become sound — pitch, amplitude, timbre, modulation — much as Daphne Oram's machine translated drawn marks into music from the late 1950s.</p>
   </div>
 
   <!-- THE INSTRUMENT -->
@@ -697,6 +704,10 @@
       </div>
       <div class="toolbar-sep"></div>
 
+      <button class="tbtn" id="btn-undo" onclick="ORM.undo()" title="Undo (Ctrl+Z)" disabled>↶ undo</button>
+      <button class="tbtn" id="btn-redo" onclick="ORM.redo()" title="Redo (Ctrl+Y)" disabled>↷ redo</button>
+      <label class="tick" title="Undo and redo the most recent change on any layer"><input type="checkbox" id="undo-all" onchange="ORM.setUndoAll(this.checked)"> all layers</label>
+      <div class="toolbar-sep"></div>
       <button class="tbtn" onclick="ORM.randomize()" title="Generate random Oramics-style shapes">✦ randomize</button>
       <button class="tbtn" onclick="ORM.clearAll()">clear</button>
       <button class="tbtn" onclick="ORM.exportWav()" id="btn-export">export WAV</button>
@@ -773,13 +784,56 @@
       <!-- Tools section -->
       <div class="bp-section" style="flex-shrink:0;">
         <div class="bp-section-title">tools</div>
+        <div class="tool-grid" role="group" aria-label="Drawing tools">
+          <button class="tool-btn active" id="tool-brush"  onclick="ORM.setTool('brush')" title="Brush (B)">brush</button>
+          <button class="tool-btn" id="tool-pencil" onclick="ORM.setTool('pencil')" title="Pencil (P)">pencil</button>
+          <button class="tool-btn" id="tool-spray"  onclick="ORM.setTool('spray')" title="Spray (A)">spray</button>
+          <button class="tool-btn" id="tool-erase"  onclick="ORM.setTool('erase')" title="Eraser (E)">erase</button>
+          <button class="tool-btn" id="tool-fill"   onclick="ORM.setTool('fill')" title="Fill (G)">fill</button>
+          <button class="tool-btn" id="tool-line"   onclick="ORM.setTool('line')" title="Line (L)">line</button>
+          <button class="tool-btn" id="tool-curve"  onclick="ORM.setTool('curve')" title="Curve (U)">curve</button>
+          <button class="tool-btn" id="tool-rect"   onclick="ORM.setTool('rect')" title="Rectangle (R)">▭ rect</button>
+          <button class="tool-btn" id="tool-circle" onclick="ORM.setTool('circle')" title="Ellipse (C)">◯ ellipse</button>
+          <button class="tool-btn" id="tool-sine"   onclick="ORM.setTool('sine')" title="Sine (S)">∿ sine</button>
+          <button class="tool-btn" id="tool-flat"   onclick="ORM.setTool('flat')" title="Flat line (F)">― flat</button>
+          <button class="tool-btn" id="tool-select" onclick="ORM.setTool('select')" title="Select and move (M)">⬚ select</button>
+          <button class="tool-btn" id="tool-head"   onclick="ORM.setTool('head')" title="Reading head (H)">⇥ head</button>
+        </div>
+        <div class="opt-row" role="group" aria-label="Shapes">
+          <span class="brush-label" style="width:auto">shapes</span>
+          <button class="tool-btn active" id="shape-outline" onclick="ORM.setShapeFill(false)">outline</button>
+          <button class="tool-btn" id="shape-filled" onclick="ORM.setShapeFill(true)">filled</button>
+        </div>
+      </div>
+
+      <!-- Selection section -->
+      <div class="bp-section" style="flex-shrink:0;">
+        <div class="bp-section-title">selection</div>
         <div class="tool-grid">
-          <button class="tool-btn active" id="tool-brush"  onclick="ORM.setTool('brush')">brush</button>
-          <button class="tool-btn"        id="tool-line"   onclick="ORM.setTool('line')">line</button>
-          <button class="tool-btn"        id="tool-erase"  onclick="ORM.setTool('erase')">erase</button>
-          <button class="tool-btn"        id="tool-sine"   onclick="ORM.setTool('sine')">∿ sine</button>
-          <button class="tool-btn"        id="tool-circle" onclick="ORM.setTool('circle')">◯ circle</button>
-          <button class="tool-btn"        id="tool-flat"   onclick="ORM.setTool('flat')">― flat</button>
+          <button class="tool-btn" data-selop="flipTime" onclick="ORM.selOp('flipTime')" title="Play the selection backwards" disabled>⇋ reverse</button>
+          <button class="tool-btn" data-selop="flipPitch" onclick="ORM.selOp('flipPitch')" title="Turn the selection upside down" disabled>⇅ invert</button>
+          <button class="tool-btn" data-selop="repeat" onclick="ORM.selOp('repeat')" title="Repeat it straight after (Ctrl+D)" disabled>⧉ repeat</button>
+          <button class="tool-btn" data-selop="copy" onclick="ORM.selOp('copy')" title="Copy (Ctrl+C)" disabled>copy</button>
+          <button class="tool-btn" data-selop="cut" onclick="ORM.selOp('cut')" title="Cut (Ctrl+X)" disabled>cut</button>
+          <button class="tool-btn" data-selop="paste" onclick="ORM.selOp('paste')" title="Paste at the reading head (Ctrl+V)" disabled>paste</button>
+          <button class="tool-btn" data-selop="delete" onclick="ORM.selOp('delete')" title="Delete (Del)" disabled>delete</button>
+        </div>
+        <label class="tick"><input type="checkbox" id="sel-all" onchange="ORM.setSelAll(this.checked)"> all layers together</label>
+      </div>
+
+      <!-- Pitch section -->
+      <div class="bp-section" style="flex-shrink:0;">
+        <div class="bp-section-title">pitch</div>
+        <div class="tool-grid" role="group" aria-label="Pitch behaviour">
+          <button class="tool-btn active" id="pitch-free" onclick="ORM.setPitchMode('free')" title="Pitch slides smoothly wherever you draw (the original behaviour)">free glide</button>
+          <button class="tool-btn" id="pitch-snap" onclick="ORM.setPitchMode('snap')" title="Pitch lands on the notes of a scale">snap to scale</button>
+        </div>
+        <div id="snap-opts" hidden>
+          <div class="opt-row">
+            <select class="wave-select" id="snap-key" aria-label="Key" onchange="ORM.setKey(this.value)"><option value="0">C</option><option value="1">C♯</option><option value="2">D</option><option value="3">E♭</option><option value="4">E</option><option value="5">F</option><option value="6">F♯</option><option value="7">G</option><option value="8">A♭</option><option value="9">A</option><option value="10">B♭</option><option value="11">B</option></select>
+            <select class="wave-select" id="snap-scale" aria-label="Scale" onchange="ORM.setScale(this.value)"><option value="major">major</option><option value="minor">minor</option><option value="dorian">dorian</option><option value="pentatonic">pentatonic</option><option value="minor pentatonic">minor pentatonic</option><option value="blues">blues</option><option value="whole tone">whole tone</option><option value="chromatic">chromatic</option></select>
+          </div>
+          <div class="brush-row"><span class="brush-label">glide</span><input type="range" class="brush-slider" min="0" max="1" step=".05" value="0.3" aria-label="Glide between notes" oninput="ORM.setGlide(this.value)"><span class="brush-val" id="glide-val">0.30</span></div>
         </div>
       </div>
 
@@ -807,8 +861,19 @@
         </div>
       </div>
 
-      
-
+      <!-- File section -->
+      <div class="bp-section" style="flex-shrink:0;">
+        <div class="bp-section-title">file</div>
+        <div class="opt-row"><input type="text" id="file-name" class="file-name" maxlength="40" placeholder="name this drawing" aria-label="Name of the drawing"><button class="tool-btn" onclick="ORM.save()">save</button></div>
+        <div class="opt-row"><select class="wave-select" id="file-slots" aria-label="Drawings saved on this device" onchange="ORM.loadSlot()"></select><button class="tool-btn" onclick="ORM.deleteSlot()">remove</button></div>
+        <div class="opt-row">
+          <button class="tool-btn" onclick="ORM.downloadProject()">save as file</button>
+          <button class="tool-btn" onclick="document.getElementById('file-open').click()">open file</button>
+          <button class="tool-btn" onclick="ORM.exportPng()">picture</button>
+          <input type="file" id="file-open" accept=".json,application/json" hidden onchange="ORM.openFile(this)">
+        </div>
+        <div class="file-msg" id="file-msg" role="status" aria-live="polite">Drawings stay on this device. Nothing is sent anywhere.</div>
+      </div>
 
     </div><!-- /bottom-panel -->
 
@@ -855,323 +920,162 @@
 <!-- ════════════════════════════════════════════════════════
      ORAMICS ENGINE
 ════════════════════════════════════════════════════════ -->
-<script>
-(function () {
-'use strict';
+<script type="module">
+import { PITCH, CUTOFF, normToRange, scanColumns, emptyCurve, curveAt, voiceParams, SCALES, scaleNotes, hzOfMidi } from '/assets/js/oramics/curves.js';
+import { floodFill, copyRegion, clearRegion, flipRegionH, flipRegionV, pasteRegion, sprayPoints, rectOf, squareTo } from '/assets/js/oramics/raster.js';
+import { createHistory } from '/assets/js/oramics/history.js';
+import { makeMaster, createVoiceBank } from '/assets/js/oramics/voices.js';
+import { cleanProject, cleanSettings, loadSlots, saveSlot, deleteSlot } from '/assets/js/oramics/store.js';
 
 /* ── LAYER CONFIG ── */
 const LAYERS = {
   pitch:  { id: 'c-pitch',  color: '#2a5c45', alpha: 0.85,
-            hint: 'Vertical position = frequency. Top = 2000 Hz · Bottom = 80 Hz.' },
+            hint: 'Vertical position = frequency. Top = 2000 Hz · Bottom = 80 Hz. Free glide: the pitch slides smoothly wherever you draw.' },
   amp:    { id: 'c-amp',    color: '#1a4d6b', alpha: 0.75,
-            hint: 'Pixel brightness = amplitude. Dark dense marks = louder output.' },
+            hint: 'Vertical position = loudness. Top = loud · Bottom = quiet. Where nothing is drawn, the pitch line plays at a steady level.' },
   timbre: { id: 'c-timbre', color: '#7b3f00', alpha: 0.75,
             hint: 'Vertical position = filter cutoff. Top = bright · Bottom = muffled.' },
   mod:    { id: 'c-mod',    color: '#5c2a5c', alpha: 0.75,
             hint: 'Vertical position = modulation depth. Top = heavy vibrato/FM.' },
 };
-
+const KEYS = Object.keys(LAYERS);
 const LAYER_SCALES = {
   pitch:  { top: '2000 Hz', mid: '600 Hz',  bot: '80 Hz',  },
-  amp:    { top: '100%',    mid: '50%',     bot: '0%',     },
+  amp:    { top: 'loud',    mid: 'half',    bot: 'quiet',  },
   timbre: { top: '8000 Hz', mid: '2000 Hz', bot: '200 Hz', },
   mod:    { top: '100%',    mid: '50%',     bot: '0%',     },
 };
+const NOTE_NAMES = ['C','C♯','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
 
-/* ── AUDIO ENGINE ── */
-let AC = null, masterGain, analyserNode;
-const voices = [];
-let numVoices = 1;
-let waveType = 'sine';
-let analogOn = false;
-let analogLFO = null, analogLFOGain = null;
-
+/* ── AUDIO ── */
+let AC = null, master = null, bank = null, analyserNode = null;
+let numVoices = 1, waveType = 'sine', analogOn = false;
+const snap = { on: false, root: 0, scale: 'major' };   // free glide is the default; snapping is an option
+let glide = 0.3;
 function initAudio() {
   if (AC) return;
   AC = new (window.AudioContext || window.webkitAudioContext)();
-  masterGain = AC.createGain();
-  masterGain.gain.value = 0.7;
-
-  const limiter = AC.createDynamicsCompressor();
-  limiter.threshold.value = -8;
-  limiter.knee.value = 6;
-  limiter.ratio.value = 10;
-  limiter.attack.value = 0.005;
-  limiter.release.value = 0.1;
-
-  analyserNode = AC.createAnalyser();
-  analyserNode.fftSize = 256;
-
-  masterGain.connect(limiter);
-  limiter.connect(analyserNode);
-  analyserNode.connect(AC.destination);
-
-  analogLFO = AC.createOscillator();
-  analogLFOGain = AC.createGain();
-  analogLFO.type = 'sine';
-  analogLFO.frequency.value = 0.7;
-  analogLFOGain.gain.value = 0;
-  analogLFO.connect(analogLFOGain);
-  analogLFO.start();
-
-  buildVoices();
+  master = makeMaster(AC, { analyser: true }); analyserNode = master.analyser;
+  bank = createVoiceBank(AC, master.input, { count: numVoices, wave: waveType, analog: analogOn });
 }
-
-function buildVoices() {
-  voices.forEach(v => {
-    try { v.osc.stop(); } catch(e){}
-    try { v.vibLFO.stop(); } catch(e){}
-    try { v.fmLFO.stop(); } catch(e){}
-  });
-  voices.length = 0;
-
-  for (let i = 0; i < numVoices; i++) {
-    const osc     = AC.createOscillator();
-    const oscGain = AC.createGain();
-    const filter  = AC.createBiquadFilter();
-    const vGain   = AC.createGain();
-
-    const vibLFO  = AC.createOscillator();
-    const vibGain = AC.createGain();
-    vibLFO.type = 'sine';
-    vibLFO.frequency.value = 5.5;
-    vibGain.gain.value = 0;
-    vibLFO.connect(vibGain);
-    vibGain.connect(osc.frequency);
-
-    const fmLFO  = AC.createOscillator();
-    const fmGain = AC.createGain();
-    fmLFO.type = 'sine';
-    fmLFO.frequency.value = 2.3;
-    fmGain.gain.value = 0;
-    fmLFO.connect(fmGain);
-    fmGain.connect(osc.frequency);
-
-    if (analogLFOGain) analogLFOGain.connect(osc.frequency);
-
-    filter.type = 'lowpass';
-    filter.frequency.value = 2000;
-    filter.Q.value = 1.2;
-
-    osc.type = waveType;
-    osc.frequency.value = 220;
-    oscGain.gain.value = 0;
-    vGain.gain.value = 0;
-
-    osc.connect(oscGain);
-    oscGain.connect(filter);
-    filter.connect(vGain);
-    vGain.connect(masterGain);
-
-    osc.start();
-    vibLFO.start();
-    fmLFO.start();
-
-    voices.push({ osc, oscGain, filter, vGain, vibLFO, vibGain, fmLFO, fmGain });
-  }
-}
-
-function ramp(param, val, tc) {
-  if (!AC) return;
-  param.setTargetAtTime(val, AC.currentTime, tc || 0.04);
-}
+/** The smoothing time of the voices: the same slow, even slide as before when free; shorter and adjustable when snapped to a scale. */
+const glideTc = () => snap.on ? 0.006 + glide * 0.14 : 0.06;
+const paramOpts = () => ({ snap });
 
 /* ── CANVAS STATE ── */
-let canvases = {};
-let ctxs = {};
+const canvases = {}, ctxs = {};
 let W = 0, H = 0;
-let gridCtx = null, uiCtx = null, drawCtx = null, rulerCtx = null, overlayCtx = null;
+let gridCtx = null, uiCtx = null, overlayCtx = null, rulerCtx = null;
 
 /* ── PLAYBACK STATE ── */
-let playing = false;
-let looping = true;
-let playheadX = 0;
-let playheadT = 0;
-let lastRafT  = 0;
-let rafId     = null;
-let speed = 0.8;
+let playing = false, looping = true, playheadX = 0, playheadT = 0, lastRafT = 0, rafId = null, speed = 0.8;
 const PIXELS_PER_SECOND = 80;
 
 /* ── DRAWING STATE ── */
-let activeLayer = 'pitch';
-let tool = 'brush';
-let brushSize = 8;
-let brushSoft = 0.6;
-let drawing = false;
-let lineStart = null;
-let lastPos   = null;
-let visibleLayers = { pitch: true, amp: true, timbre: true, mod: true };
+let activeLayer = 'pitch', tool = 'brush', brushSize = 8, brushSoft = 0.6, shapeFill = false, selAll = false, undoAll = false;
+let drawing = false, lineStart = null, lastPos = null, curveStage = 0, curveBase = null, sprayTimer = null, strokePressure = 1, penDown = false;
+const visibleLayers = { pitch: true, amp: true, timbre: true, mod: true };
+const GESTURE = ['line', 'sine', 'circle', 'rect', 'flat'];
 
-/* ── UNDO STACK ── */
-const MAX_UNDO = 20;
-const undoStack = {}; // layer → [{imageData}]
-Object.keys(LAYERS).forEach(k => { undoStack[k] = []; });
+/* ── SCANNED CURVES (each layer is scanned once, and only the columns that changed are scanned again) ── */
+const curves = {}, dirty = {};
+function invalidate(k, x0 = 0, x1 = W) { const d = dirty[k]; dirty[k] = d ? [Math.min(d[0], x0), Math.max(d[1], x1)] : [x0, x1]; }
+function ensureCurve(k) {
+  if (!W || !H) return null;
+  if (!curves[k] || curves[k].length !== W) { curves[k] = emptyCurve(W); dirty[k] = [0, W - 1]; }
+  const d = dirty[k]; if (!d) return curves[k];
+  const x0 = Math.max(0, Math.floor(d[0])), x1 = Math.min(W - 1, Math.ceil(d[1])); delete dirty[k];
+  if (x1 < x0) return curves[k];
+  const part = emptyCurve(x1 - x0 + 1); scanColumns(ctxs[k].getImageData(x0, 0, x1 - x0 + 1, H), part); curves[k].set(part, x0);
+  return curves[k];
+}
+const sampleLayer = (k, x) => curveAt(ensureCurve(k), x);
+const normsAt = x => ({ pitch: sampleLayer('pitch', x), amp: sampleLayer('amp', x), timbre: sampleLayer('timbre', x), mod: sampleLayer('mod', x) });
 
-function pushUndo(k) {
-  if (!W || !H) return;
-  const stack = undoStack[k];
-  stack.push(ctxs[k].getImageData(0, 0, W, H));
-  if (stack.length > MAX_UNDO) stack.shift();
+/* ── HISTORY ── */
+const hist = createHistory({ max: 30 });
+const snapshot = k => ctxs[k].getImageData(0, 0, canvases[k].width, canvases[k].height);
+function pushUndo(k) { if (W && H) hist.record(k, snapshot(k)); syncHistoryButtons(); }
+function applySnapshot(k, img) { ctxs[k].clearRect(0, 0, W, H); ctxs[k].putImageData(img, 0, 0); invalidate(k); drawUI(); }
+function undo() { const e = hist.undo(undoAll ? null : activeLayer, snapshot); if (e) applySnapshot(e.layer, e.img); syncHistoryButtons(); }
+function redo() { const e = hist.redo(undoAll ? null : activeLayer, snapshot); if (e) applySnapshot(e.layer, e.img); syncHistoryButtons(); }
+function syncHistoryButtons() {
+  const u = document.getElementById('btn-undo'), r = document.getElementById('btn-redo'), s = undoAll ? null : activeLayer;
+  if (u) u.disabled = !hist.canUndo(s); if (r) r.disabled = !hist.canRedo(s);
 }
 
-function undo() {
-  const stack = undoStack[activeLayer];
-  if (!stack.length) return;
-  const img = stack.pop();
-  ctxs[activeLayer].putImageData(img, 0, 0);
-  layerImages[activeLayer] = ctxs[activeLayer].getImageData(0, 0, W, H);
-  drawUI();
-}
-
-/* ── SMOOTH PARAMETER HISTORY ── */
+/* ── SMOOTH PARAMETER HISTORY (for the readout) ── */
 let smoothPitch = 440, smoothAmp = 0, smoothFilter = 2000, smoothMod = 0;
 
-/* ── CANVAS HEIGHT CALCULATION ── */
 function calcCanvasHeight() {
-  const vph = window.innerHeight;
-  const isMobile = window.innerWidth < 600;
-  // Aim for ~40–50% of viewport, respecting a min/max
-  let h = Math.min(Math.max(isMobile ? 240 : 320, vph * 0.42), 560);
-  return Math.round(h);
+  const vph = window.innerHeight, isMobile = window.innerWidth < 600;
+  return Math.round(Math.min(Math.max(isMobile ? 240 : 320, vph * 0.42), 560));
 }
 
-/* ══════════════════════════════════════════════════════════
-   INIT
-══════════════════════════════════════════════════════════ */
+/* ══════════ INIT ══════════ */
 function init() {
-  Object.keys(LAYERS).forEach(k => {
-    const c = document.getElementById(LAYERS[k].id);
-    canvases[k] = c;
-    ctxs[k] = c.getContext('2d');
-  });
-  gridCtx    = document.getElementById('c-grid').getContext('2d');
-  uiCtx      = document.getElementById('c-ui').getContext('2d');
+  KEYS.forEach(k => { const c = document.getElementById(LAYERS[k].id); canvases[k] = c; ctxs[k] = c.getContext('2d', { willReadFrequently: true }); });
+  gridCtx = document.getElementById('c-grid').getContext('2d');
+  uiCtx = document.getElementById('c-ui').getContext('2d');
   overlayCtx = document.getElementById('c-overlay').getContext('2d');
-  drawCtx    = document.getElementById('c-draw').getContext('2d');
-  rulerCtx   = document.getElementById('c-ruler').getContext('2d');
-
-  resize();
-  window.addEventListener('resize', resize);
+  rulerCtx = document.getElementById('c-ruler').getContext('2d');
+  resize(); window.addEventListener('resize', resize);
 
   const dc = document.getElementById('c-draw');
-
-  // Mouse events
-  dc.addEventListener('mousedown',  onDrawStart);
-  dc.addEventListener('mousemove',  onDrawMove);
-  dc.addEventListener('mouseup',    onDrawEnd);
-  dc.addEventListener('mouseleave', onDrawLeave);
-
-  // Touch events — prevent page scroll during draw
-  dc.addEventListener('touchstart', e => { e.preventDefault(); onDrawStart(normTouch(e)); }, { passive: false });
-  dc.addEventListener('touchmove',  e => { e.preventDefault(); onDrawMove(normTouch(e)); },  { passive: false });
-  dc.addEventListener('touchend',   e => { e.preventDefault(); onDrawEnd(normTouch(e)); },   { passive: false });
-  dc.addEventListener('touchcancel',e => { e.preventDefault(); onDrawLeave(); },              { passive: false });
-
-  // Click = scrub (only when not drawing)
-  dc.addEventListener('click', e => {
-    if (drawing) return;
-    const r = dc.getBoundingClientRect();
-    playheadX = e.clientX - r.left;
-    playheadT = playheadX / PIXELS_PER_SECOND;
-    drawUI();
-    if (!playing) sampleAndApply();
-  });
-
-  // Keyboard shortcuts
+  dc.style.touchAction = 'none';
+  dc.addEventListener('pointerdown', e => { if (e.button > 0 && e.pointerType === 'mouse') return; try { dc.setPointerCapture(e.pointerId); } catch { /* not capturable */ } onDrawStart(e); });
+  dc.addEventListener('pointermove', onDrawMove);
+  dc.addEventListener('pointerup', onDrawEnd);
+  dc.addEventListener('pointercancel', () => onDrawEnd(null));
+  dc.addEventListener('contextmenu', e => e.preventDefault());
   document.addEventListener('keydown', onKeyDown);
-
-  // Init brush preview
-  updateBrushPreview();
-
-  // Set initial loop state
+  updateBrushPreview(); syncHistoryButtons(); refreshSlots();
   document.getElementById('btn-loop').classList.add('active');
 }
 
-function normTouch(e) {
-  const t = e.touches && e.touches[0] ? e.touches[0] : (e.changedTouches && e.changedTouches[0]);
-  if (!t) return e;
-  return { clientX: t.clientX, clientY: t.clientY, pageX: t.pageX, pageY: t.pageY };
-}
-
 function resize() {
-  const canvasArea = document.getElementById('canvasArea');
-  const h = calcCanvasHeight();
-  canvasArea.style.height = h + 'px';
-
-  const inner = document.getElementById('canvasInner');
-  W = inner.clientWidth;
-  H = inner.clientHeight;
-  if (W <= 0 || H <= 0) return;
-
-  const allIds = ['c-grid','c-pitch','c-amp','c-timbre','c-mod','c-ui','c-overlay','c-draw'];
-  allIds.forEach(id => {
-    const c = document.getElementById(id);
-    if (c) { c.width = W; c.height = H; }
-  });
-
-  const ruler = document.getElementById('c-ruler');
-  ruler.width  = ruler.offsetWidth || 30;
-  ruler.height = H;
-
-  drawGrid();
-  drawRuler();
-  restoreLayerImages();
-  drawUI();
+  const area = document.getElementById('canvasArea'); area.style.height = calcCanvasHeight() + 'px';
+  const inner = document.getElementById('canvasInner'), nW = inner.clientWidth, nH = inner.clientHeight;
+  if (nW <= 0 || nH <= 0) return;
+  const saved = {}; KEYS.forEach(k => { if (canvases[k].width && canvases[k].height) saved[k] = snapshot(k); });
+  W = nW; H = nH;
+  ['c-grid','c-pitch','c-amp','c-timbre','c-mod','c-ui','c-overlay','c-draw'].forEach(id => { const c = document.getElementById(id); if (c) { c.width = W; c.height = H; } });
+  const ruler = document.getElementById('c-ruler'); ruler.width = ruler.offsetWidth || 30; ruler.height = H;
+  KEYS.forEach(k => { if (saved[k]) ctxs[k].putImageData(saved[k], 0, 0); invalidate(k); });
+  drawGrid(); drawRuler(); drawUI();
 }
 
-/* Offscreen backup */
-const layerImages = {};
-
-function backupLayer(k) {
-  if (!W || !H) return;
-  layerImages[k] = ctxs[k].getImageData(0, 0, W, H);
-}
-
-function restoreLayerImages() {
-  Object.keys(LAYERS).forEach(k => {
-    if (layerImages[k]) ctxs[k].putImageData(layerImages[k], 0, 0);
-  });
-}
+/* ── COORDINATE HELPERS ── */
+function hzToY(hz) { const t = (Math.log(hz) - Math.log(PITCH.min)) / (Math.log(PITCH.max) - Math.log(PITCH.min)); return H - t * H; }
+function yToHz(y) { if (!H) return 440; return normToRange(Math.max(0, Math.min(1, y / H)), PITCH); }
 
 /* ── GRID ── */
 function drawGrid() {
   if (!gridCtx || !W || !H) return;
   gridCtx.clearRect(0, 0, W, H);
-
-  gridCtx.strokeStyle = 'rgba(0,0,0,.06)';
-  gridCtx.lineWidth = 1;
+  gridCtx.strokeStyle = 'rgba(0,0,0,.06)'; gridCtx.lineWidth = 1;
   for (let x = 0; x <= W; x += PIXELS_PER_SECOND) {
     gridCtx.beginPath(); gridCtx.moveTo(x, 0); gridCtx.lineTo(x, H); gridCtx.stroke();
-    // Time label
-    if (x > 0) {
-      gridCtx.fillStyle = 'rgba(0,0,0,.2)';
-      gridCtx.font = '9px Courier New, monospace';
-      gridCtx.fillText((x / PIXELS_PER_SECOND).toFixed(0) + 's', x + 3, H - 4);
-    }
+    if (x > 0) { gridCtx.fillStyle = 'rgba(0,0,0,.2)'; gridCtx.font = '9px Courier New, monospace'; gridCtx.fillText((x / PIXELS_PER_SECOND).toFixed(0) + 's', x + 3, H - 4); }
   }
   gridCtx.strokeStyle = 'rgba(0,0,0,.03)';
-  for (let x = 0; x <= W; x += PIXELS_PER_SECOND / 4) {
-    gridCtx.beginPath(); gridCtx.moveTo(x, 0); gridCtx.lineTo(x, H); gridCtx.stroke();
+  for (let x = 0; x <= W; x += PIXELS_PER_SECOND / 4) { gridCtx.beginPath(); gridCtx.moveTo(x, 0); gridCtx.lineTo(x, H); gridCtx.stroke(); }
+  if (snap.on && activeLayer === 'pitch') {   // the notes you can land on
+    for (const m of scaleNotes(snap.root, snap.scale)) {
+      const y = hzToY(hzOfMidi(m)), isRoot = (((m - snap.root) % 12) + 12) % 12 === 0;
+      gridCtx.strokeStyle = isRoot ? 'rgba(42,92,69,.28)' : 'rgba(42,92,69,.12)'; gridCtx.beginPath(); gridCtx.moveTo(0, y); gridCtx.lineTo(W, y); gridCtx.stroke();
+    }
+  } else {
+    gridCtx.strokeStyle = 'rgba(42,92,69,.08)';
+    [80, 160, 320, 640, 1280].forEach(hz => {
+      const y = hzToY(hz); if (y < 0 || y > H) return;
+      gridCtx.beginPath(); gridCtx.moveTo(0, y); gridCtx.lineTo(W, y); gridCtx.stroke();
+      gridCtx.fillStyle = 'rgba(42,92,69,.3)'; gridCtx.font = '9px Courier New, monospace'; gridCtx.fillText(hz + 'Hz', 4, y - 2);
+    });
   }
-
-  gridCtx.strokeStyle = 'rgba(42,92,69,.08)';
-  const octaves = [80, 160, 320, 640, 1280];
-  octaves.forEach(hz => {
-    const y = hzToY(hz);
-    if (y < 0 || y > H) return;
-    gridCtx.beginPath(); gridCtx.moveTo(0, y); gridCtx.lineTo(W, y); gridCtx.stroke();
-    gridCtx.fillStyle = 'rgba(42,92,69,.3)';
-    gridCtx.font = '9px Courier New, monospace';
-    gridCtx.fillText(hz + 'Hz', 4, y - 2);
-  });
-
-  gridCtx.strokeStyle = 'rgba(0,0,0,.08)';
-  gridCtx.lineWidth = 1;
-  gridCtx.setLineDash([4, 4]);
-  gridCtx.beginPath(); gridCtx.moveTo(0, H / 2); gridCtx.lineTo(W, H / 2); gridCtx.stroke();
-  gridCtx.setLineDash([]);
+  gridCtx.strokeStyle = 'rgba(0,0,0,.08)'; gridCtx.setLineDash([4, 4]);
+  gridCtx.beginPath(); gridCtx.moveTo(0, H / 2); gridCtx.lineTo(W, H / 2); gridCtx.stroke(); gridCtx.setLineDash([]);
 }
-
 function drawRuler() {
   if (!rulerCtx) return;
   const rW = rulerCtx.canvas.width;
@@ -1194,6 +1098,7 @@ function drawRuler() {
   });
   rulerCtx.textAlign = 'left';
 }
+
 
 /* ── UI CANVAS (playhead + layer compositing) ── */
 function drawUI() {
@@ -1226,627 +1131,357 @@ function drawUI() {
   uiCtx.fillText(label, labelX, 12);
 }
 
-/* ── OVERLAY (ghost preview during drag) ── */
-function clearOverlay() {
-  if (overlayCtx) overlayCtx.clearRect(0, 0, W, H);
+
+
+/* ── OVERLAY (ghost previews and the selection) ── */
+function clearOverlay() { if (overlayCtx) overlayCtx.clearRect(0, 0, W, H); }
+let sel = null;                 // { x, y, w, h } of the selection (in the active layer, or in all when selAll)
+let moving = null;              // while dragging a selection: { regs: {layer: region}, ox, oy, x, y }
+let clip = null;                // copied regions: { regs: {layer: region}, w, h, y }
+const off = document.createElement('canvas');
+function drawRegion(reg, x, y, alpha = 0.85) { if (!reg.width || !reg.height) return; off.width = reg.width; off.height = reg.height; off.getContext('2d').putImageData(new ImageData(reg.data, reg.width, reg.height), 0, 0); overlayCtx.globalAlpha = alpha; overlayCtx.drawImage(off, x, y); overlayCtx.globalAlpha = 1; }
+function drawSelectionBox(r) {
+  overlayCtx.save(); overlayCtx.strokeStyle = '#1a1a14'; overlayCtx.lineWidth = 1; overlayCtx.setLineDash([5, 4]); overlayCtx.strokeRect(r.x + .5, r.y + .5, r.w, r.h);
+  overlayCtx.strokeStyle = '#fff'; overlayCtx.lineDashOffset = 5; overlayCtx.strokeRect(r.x + .5, r.y + .5, r.w, r.h); overlayCtx.restore();
+}
+function paintOverlay() {
+  clearOverlay(); if (!overlayCtx) return;
+  if (moving) { for (const k of Object.keys(moving.regs)) drawRegion(moving.regs[k], moving.x, moving.y); const r0 = moving.regs[Object.keys(moving.regs)[0]]; drawSelectionBox({ x: moving.x, y: moving.y, w: r0.width, h: r0.height }); }
+  else if (sel) drawSelectionBox(sel);
 }
 
-function drawOverlayLine(a, b) {
-  if (!overlayCtx || !a || !b) return;
-  overlayCtx.clearRect(0, 0, W, H);
-  overlayCtx.strokeStyle = LAYERS[activeLayer].color + '77';
-  overlayCtx.lineWidth = brushSize;
-  overlayCtx.lineCap = 'round';
-  overlayCtx.setLineDash([6, 4]);
-  overlayCtx.beginPath();
-  overlayCtx.moveTo(a.x, a.y);
-  overlayCtx.lineTo(b.x, b.y);
-  overlayCtx.stroke();
-  overlayCtx.setLineDash([]);
-}
-
-function drawOverlaySine(a, b) {
-  if (!overlayCtx || !a || !b) return;
-  overlayCtx.clearRect(0, 0, W, H);
-  overlayCtx.strokeStyle = LAYERS[activeLayer].color + '77';
-  overlayCtx.lineWidth = Math.max(1, brushSize * 0.6);
-  overlayCtx.lineCap = 'round';
-  overlayCtx.setLineDash([6, 4]);
-  const steps = Math.abs(b.x - a.x);
-  const cycles = 2;
-  overlayCtx.beginPath();
-  for (let i = 0; i <= steps; i++) {
-    const t = i / Math.max(1, steps);
-    const x = a.x + (b.x - a.x) * t;
-    const amp = (b.y - a.y) / 2;
-    const y = a.y + amp + Math.sin(t * cycles * Math.PI * 2) * amp;
-    i === 0 ? overlayCtx.moveTo(x, y) : overlayCtx.lineTo(x, y);
-  }
-  overlayCtx.stroke();
-  overlayCtx.setLineDash([]);
-}
-
-function drawOverlayCircle(a, b) {
-  if (!overlayCtx || !a || !b) return;
-  overlayCtx.clearRect(0, 0, W, H);
-  const cx = (a.x + b.x) / 2;
-  const cy = (a.y + b.y) / 2;
-  const rx = Math.abs(b.x - a.x) / 2;
-  const ry = Math.abs(b.y - a.y) / 2;
-  if (rx < 2 && ry < 2) return;
-  overlayCtx.strokeStyle = LAYERS[activeLayer].color + '77';
-  overlayCtx.lineWidth = Math.max(1, brushSize * 0.6);
-  overlayCtx.setLineDash([6, 4]);
-  overlayCtx.beginPath();
-  overlayCtx.ellipse(cx, cy, Math.max(1, rx), Math.max(1, ry), 0, 0, Math.PI * 2);
-  overlayCtx.stroke();
-  overlayCtx.setLineDash([]);
-  // Corner guides
-  overlayCtx.strokeStyle = LAYERS[activeLayer].color + '44';
-  overlayCtx.lineWidth = 1;
-  overlayCtx.strokeRect(a.x, a.y, b.x - a.x, b.y - a.y);
-}
-
-function drawOverlayFlat(a, b) {
-  if (!overlayCtx || !a || !b) return;
-  overlayCtx.clearRect(0, 0, W, H);
-  const midY = (a.y + b.y) / 2;
-  overlayCtx.strokeStyle = LAYERS[activeLayer].color + '77';
-  overlayCtx.lineWidth = brushSize;
-  overlayCtx.lineCap = 'round';
-  overlayCtx.setLineDash([6, 4]);
-  overlayCtx.beginPath();
-  overlayCtx.moveTo(a.x, midY);
-  overlayCtx.lineTo(b.x, midY);
-  overlayCtx.stroke();
-  overlayCtx.setLineDash([]);
-}
-
-/* ── COORDINATE HELPERS ── */
-function hzToY(hz) {
-  const minHz = 80, maxHz = 2000;
-  const t = (Math.log(hz) - Math.log(minHz)) / (Math.log(maxHz) - Math.log(minHz));
-  return H - t * H;
-}
-function yToHz(y) {
-  if (!H) return 440;
-  const minHz = 80, maxHz = 2000;
-  const t = 1 - (y / H);
-  return minHz * Math.pow(maxHz / minHz, Math.max(0, Math.min(1, t)));
-}
-
-/* ── CANVAS SAMPLING ── */
-function sampleLayer(layerKey, x) {
-  const ctx = ctxs[layerKey];
-  if (!ctx || !H) return -1;
-  const px = Math.max(0, Math.min(W - 1, Math.round(x)));
-  const imageData = ctx.getImageData(px, 0, 1, H);
-  const data = imageData.data;
-  let weightedY = 0, totalWeight = 0;
-  for (let row = 0; row < H; row++) {
-    const a = data[row * 4 + 3];
-    if (a > 8) {
-      const weight = a / 255;
-      weightedY += row * weight;
-      totalWeight += weight;
-    }
-  }
-  if (totalWeight === 0) return -1;
-  return (weightedY / totalWeight) / H;
-}
-
+/* ── SAMPLING FOR THE READOUT AND THE VOICES ── */
 function sampleAndApply() {
-  if (!AC) return;
-  const pitchNorm  = sampleLayer('pitch', playheadX);
-  const ampNorm    = sampleLayer('amp', playheadX);
-  const timbreNorm = sampleLayer('timbre', playheadX);
-  const modNorm    = sampleLayer('mod', playheadX);
-
-  const tc = 0.06;
-  const targetPitch  = pitchNorm  >= 0 ? 80 * Math.pow(2000/80, 1 - pitchNorm) : 0;
-  const targetAmp    = ampNorm    >= 0 ? (1 - ampNorm) : (pitchNorm >= 0 ? 0.6 : 0);
-  const targetFilter = timbreNorm >= 0 ? 200 * Math.pow(8000/200, 1 - timbreNorm) : 2000;
-  const targetMod    = modNorm    >= 0 ? (1 - modNorm) : 0;
-
-  const drift = analogOn ? (Math.random() - 0.5) * targetPitch * 0.004 : 0;
-
-  voices.forEach((v, i) => {
-    let pitchOffset = 0;
-    if (numVoices > 1) {
-      const intervals = [0, 1.5, 1.2, -1.2, 1.7, -1.5];
-      pitchOffset = (intervals[i] || 0) * 50;
-    }
-    if (targetPitch > 0 && targetAmp > 0) {
-      ramp(v.osc.frequency, Math.max(20, targetPitch + pitchOffset + drift), tc);
-      ramp(v.oscGain.gain, targetAmp * 0.6, tc);
-    } else {
-      ramp(v.oscGain.gain, 0, tc);
-    }
-    ramp(v.filter.frequency, targetFilter, tc * 2);
-    ramp(v.vGain.gain, 1, tc);
-    ramp(v.vibGain.gain, targetMod * 25, tc);
-    ramp(v.fmGain.gain, targetMod * targetPitch * 0.08, tc);
-    v.fmLFO.frequency.setTargetAtTime(2 + targetMod * 8, AC.currentTime, tc);
-    v.osc.type = waveType;
-  });
-
+  if (!AC || !bank) return;
+  const p = voiceParams(normsAt(playheadX), paramOpts());
+  bank.apply(p, AC.currentTime, { tc: glideTc() });
   const smooth = (cur, tgt) => cur * 0.85 + tgt * 0.15;
-  smoothPitch  = smooth(smoothPitch,  targetPitch);
-  smoothAmp    = smooth(smoothAmp,    targetAmp);
-  smoothFilter = smooth(smoothFilter, targetFilter);
-  smoothMod    = smooth(smoothMod,    targetMod);
-
+  smoothPitch = smooth(smoothPitch, p.hz); smoothAmp = smooth(smoothAmp, p.amp); smoothFilter = smooth(smoothFilter, p.cutoff); smoothMod = smooth(smoothMod, p.mod);
   updateInspector(smoothPitch, smoothAmp, smoothFilter, smoothMod, playheadT);
 }
-
 function updateInspector(pitch, amp, filter, mod, t) {
-  document.getElementById('st-pos').textContent      = t.toFixed(2)+'s';
-  document.getElementById('st-pitch').textContent    = pitch > 0 ? pitch.toFixed(0)+' Hz' : '—';
-  document.getElementById('st-amp').textContent      = amp > 0 ? (amp*100).toFixed(0)+'%' : '—';
-  document.getElementById('st-filter').textContent   = filter.toFixed(0)+' Hz';
+  document.getElementById('st-pos').textContent = t.toFixed(2) + 's';
+  document.getElementById('st-pitch').textContent = pitch > 0 ? pitch.toFixed(0) + ' Hz' : '—';
+  document.getElementById('st-amp').textContent = amp > 0 ? (amp * 100).toFixed(0) + '%' : '—';
+  document.getElementById('st-filter').textContent = filter.toFixed(0) + ' Hz';
 }
-
-/* ── RAF LOOP ── */
 function raf(ts) {
   if (!playing) return;
-  const dt = lastRafT ? (ts - lastRafT) / 1000 : 0;
-  lastRafT = ts;
-  playheadX += dt * speed * PIXELS_PER_SECOND;
-  playheadT  = playheadX / PIXELS_PER_SECOND;
-  if (playheadX >= W) {
-    if (looping) { playheadX = 0; playheadT = 0; }
-    else { playing = false; ORM.stop(); return; }
-  }
-  sampleAndApply();
-  drawUI();
-  rafId = requestAnimationFrame(raf);
+  const dt = lastRafT ? (ts - lastRafT) / 1000 : 0; lastRafT = ts;
+  playheadX += dt * speed * PIXELS_PER_SECOND; playheadT = playheadX / PIXELS_PER_SECOND;
+  if (playheadX >= W) { if (looping) { playheadX = 0; playheadT = 0; } else { ORM.stop(); return; } }
+  sampleAndApply(); drawUI(); rafId = requestAnimationFrame(raf);
 }
 
-/* ══════════════════════════════════════════════════════════
-   DRAWING
-══════════════════════════════════════════════════════════ */
+/* ══════════ DRAWING ══════════ */
 function getPos(e) {
-  const c = document.getElementById('c-draw');
-  const r = c.getBoundingClientRect();
-  return {
-    x: (e.clientX || e.pageX) - r.left,
-    y: (e.clientY || e.pageY) - r.top,
-  };
+  const c = document.getElementById('c-draw'), r = c.getBoundingClientRect();
+  return { x: Math.max(0, Math.min(W, e.clientX - r.left)), y: Math.max(0, Math.min(H, e.clientY - r.top)) };
 }
+const pressureOf = e => e && e.pointerType === 'pen' && e.pressure > 0 ? 0.25 + e.pressure * 1.1 : 1;
+const layerRGBA = (k, a = 204) => { const h = LAYERS[k].color; return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16), a]; };
+const inRect = (p, r) => r && p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h;
+const targets = () => selAll ? KEYS : [activeLayer];
+const needsInit = () => { if (!AC) initAudio(); if (AC.state === 'suspended') AC.resume(); };
 
 function onDrawStart(e) {
-  if (!AC) initAudio();
-  const pos = getPos(e);
-  const isGestureStart = ['line','sine','circle','flat'].includes(tool);
-
-  if (isGestureStart) {
-    lineStart = pos;
-    lastPos   = pos;
-    drawing   = true;
-    return;
+  needsInit();
+  const pos = getPos(e); strokePressure = pressureOf(e); penDown = true;
+  if (tool === 'head') { drawing = true; setPlayhead(pos.x); return; }
+  if (tool === 'select') return selectStart(pos);
+  if (tool === 'curve' && curveStage === 1) { pushUndo(activeLayer); paintShape(ctxs[activeLayer], 'curve', curveBase.a, curveBase.b, pos); invalidate(activeLayer); curveStage = 0; curveBase = null; clearOverlay(); drawUI(); return; }
+  if (tool === 'fill') {
+    pushUndo(activeLayer); const k = activeLayer, img = ctxs[k].getImageData(0, 0, W, H);
+    floodFill(img, pos.x, pos.y, layerRGBA(k), 40); ctxs[k].putImageData(img, 0, 0); invalidate(k); drawUI(); return;
   }
-
-  drawing   = true;
-  lastPos   = null;
-  pushUndo(activeLayer);
-  drawMark(pos);
-  backupLayer(activeLayer);
-  drawUI();
-  maybePreviewPitch(pos);
-  lastPos = pos;
+  if (GESTURE.includes(tool) || tool === 'curve') { lineStart = pos; lastPos = pos; drawing = true; return; }
+  drawing = true; lastPos = null; pushUndo(activeLayer);
+  drawMark(pos); drawUI(); maybePreviewPitch(pos); lastPos = pos;
+  if (tool === 'spray') { sprayTimer = setInterval(() => { if (drawing && lastPos) { drawMark(lastPos); invalidate(activeLayer, lastPos.x - brushSize * 2, lastPos.x + brushSize * 2); drawUI(); } }, 40); }
 }
-
 function onDrawMove(e) {
-  const pos = getPos(e);
-
-  // Status tip
-  const hz = yToHz(pos.y);
-  const valStr = activeLayer === 'pitch'
-    ? hz.toFixed(0) + ' Hz'
-    : ((1 - pos.y / H) * 100).toFixed(0) + '%';
-  document.getElementById('st-tip').textContent =
-    `cursor → ${activeLayer}: ${valStr} · t=${( pos.x / PIXELS_PER_SECOND).toFixed(2)}s`;
-
+  const pos = getPos(e); strokePressure = pressureOf(e);
+  const hz = yToHz(pos.y), val = activeLayer === 'pitch' ? hz.toFixed(0) + ' Hz' : ((1 - pos.y / H) * 100).toFixed(0) + '%';
+  document.getElementById('st-tip').textContent = `cursor → ${activeLayer}: ${val} · t=${(pos.x / PIXELS_PER_SECOND).toFixed(2)}s`;
+  if (tool === 'select') return selectMove(pos);
+  if (tool === 'curve' && curveStage === 1) { paintOverlayShape('curve', curveBase.a, curveBase.b, pos); return; }
   if (!drawing) return;
-
-  if (['line','sine','circle','flat'].includes(tool)) {
-    // Live preview
-    if (lineStart) {
-      if (tool === 'line')   drawOverlayLine(lineStart, pos);
-      if (tool === 'sine')   drawOverlaySine(lineStart, pos);
-      if (tool === 'circle') drawOverlayCircle(lineStart, pos);
-      if (tool === 'flat')   drawOverlayFlat(lineStart, pos);
-    }
-    return;
-  }
-
-  if (tool === 'erase' || tool === 'brush') {
-    drawMark(pos);
-    backupLayer(activeLayer);
-    drawUI();
-    maybePreviewPitch(pos);
-    lastPos = pos;
-  }
+  if (tool === 'head') { setPlayhead(pos.x); return; }
+  if (GESTURE.includes(tool) || tool === 'curve') { if (lineStart) paintOverlayShape(tool === 'curve' ? 'line' : tool, lineStart, constrain(tool === 'curve' ? 'line' : tool, lineStart, pos, e.shiftKey)); return; }
+  if (['brush', 'pencil', 'spray', 'erase'].includes(tool)) { drawMark(pos); drawUI(); maybePreviewPitch(pos); lastPos = pos; }
 }
-
 function onDrawEnd(e) {
+  penDown = false; clearInterval(sprayTimer); sprayTimer = null;
+  if (tool === 'select') return selectEnd(e ? getPos(e) : null);
   if (!drawing) return;
   const pos = e ? getPos(e) : lastPos;
-  clearOverlay();
-
-  if (['line','sine','circle','flat'].includes(tool) && lineStart && pos) {
-    pushUndo(activeLayer);
-    if (tool === 'line')   commitLine(lineStart, pos);
-    if (tool === 'sine')   commitSine(lineStart, pos);
-    if (tool === 'circle') commitCircle(lineStart, pos);
-    if (tool === 'flat')   commitFlat(lineStart, pos);
-    backupLayer(activeLayer);
-    drawUI();
-    lineStart = null;
+  if (tool === 'curve' && lineStart && pos) {   // first the line, then a second click bends it
+    const b = constrain('line', lineStart, pos, e && e.shiftKey);
+    if (Math.hypot(b.x - lineStart.x, b.y - lineStart.y) < 3) { lineStart = null; drawing = false; return; }
+    curveStage = 1; curveBase = { a: lineStart, b }; lineStart = null; drawing = false;
+    document.getElementById('st-tip').textContent = 'Now move and click to bend the line. Esc cancels.'; return;
   }
-
-  drawing = false;
-  lastPos = null;
-
-  if (AC && voices.length && activeLayer === 'pitch' && !playing) {
-    clearTimeout(ORM._previewTimeout);
-    ORM._previewTimeout = setTimeout(() => {
-      voices[0].oscGain.gain.setTargetAtTime(0, AC.currentTime, 0.08);
-    }, 120);
-  }
+  if (GESTURE.includes(tool) && lineStart && pos) {
+    clearOverlay(); const b = constrain(tool, lineStart, pos, e && e.shiftKey);
+    pushUndo(activeLayer); paintShape(ctxs[activeLayer], tool, lineStart, b); invalidate(activeLayer); drawUI(); lineStart = null;
+  } else if (['brush', 'pencil', 'spray', 'erase'].includes(tool)) { invalidate(activeLayer); }
+  drawing = false; lastPos = null;
+  if (AC && bank && activeLayer === 'pitch' && !playing) { clearTimeout(ORM._previewTimeout); ORM._previewTimeout = setTimeout(() => bank.silence(0.08), 120); }
 }
-
-function onDrawLeave() {
-  // Only end gesture if not a shape tool (shape tools can continue outside canvas)
-  if (!['line','sine','circle','flat'].includes(tool)) {
-    onDrawEnd(null);
-  }
-  document.getElementById('st-tip').textContent = 'Draw on the canvas. Left → right = time · Up/down = value.';
+function setPlayhead(x) { playheadX = x; playheadT = x / PIXELS_PER_SECOND; drawUI(); if (!playing) sampleAndApply(); }
+function constrain(t, a, b, shift) {
+  if (!shift) return b;
+  if (t === 'rect' || t === 'circle') return squareTo(a, b);
+  if (t === 'line') { const dx = b.x - a.x, dy = b.y - a.y, ang = Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) * (Math.PI / 4), d = Math.hypot(dx, dy); return { x: a.x + Math.cos(ang) * d, y: a.y + Math.sin(ang) * d }; }
+  return b;
 }
+function maybePreviewPitch(pos) { if (activeLayer === 'pitch' && AC && bank) { let hz = yToHz(pos.y); if (snap.on) hz = voiceParams({ pitch: pos.y / H, amp: -1, timbre: -1, mod: -1 }, paramOpts()).hz || hz; bank.preview(hz); } }
 
-function maybePreviewPitch(pos) {
-  if (activeLayer === 'pitch' && AC && voices.length) {
-    const targetHz = yToHz(pos.y);
-    voices[0].osc.frequency.setTargetAtTime(targetHz, AC.currentTime, 0.02);
-    voices[0].oscGain.gain.setTargetAtTime(0.35, AC.currentTime, 0.02);
-    voices[0].vGain.gain.value = 1;
-  }
-}
-
+/* tools that leave a mark as you drag */
 function drawMark(pos) {
-  const ctx   = ctxs[activeLayer];
-  const color = LAYERS[activeLayer].color;
-
+  const ctx = ctxs[activeLayer], k = activeLayer, color = LAYERS[k].color, size = Math.max(1, brushSize * strokePressure);
+  const from = lastPos || pos; invalidate(k, Math.min(from.x, pos.x) - size * 3, Math.max(from.x, pos.x) + size * 3);
   if (tool === 'erase') {
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.beginPath();
-    ctx.arc(pos.x, pos.y, brushSize * 1.5, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(0,0,0,1)';
-    ctx.fill();
-    ctx.globalCompositeOperation = 'source-over';
-    return;
+    ctx.save(); ctx.globalCompositeOperation = 'destination-out'; ctx.strokeStyle = '#000'; ctx.lineWidth = size * 3; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(from.x, from.y); ctx.lineTo(pos.x + 0.01, pos.y); ctx.stroke(); ctx.restore(); return;
   }
-
+  if (tool === 'pencil') { ctx.strokeStyle = color + 'ff'; ctx.lineWidth = Math.max(1, Math.round(size / 5)); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(from.x, from.y); ctx.lineTo(pos.x + 0.01, pos.y); ctx.stroke(); return; }
+  if (tool === 'spray') {
+    ctx.fillStyle = color + 'aa'; const n = Math.max(4, Math.round(size * 1.2));
+    for (const p of sprayPoints(pos.x, pos.y, size * 2, n)) ctx.fillRect(p.x, p.y, 1.4, 1.4); return;
+  }
   if (tool !== 'brush') return;
-
   if (lastPos && brushSoft > 0) {
-    const dist = Math.hypot(pos.x - lastPos.x, pos.y - lastPos.y);
-    const steps = Math.ceil(dist / (Math.max(1, brushSize) * 0.4));
-    for (let s = 0; s <= steps; s++) {
-      const t = steps ? s / steps : 0;
-      drawBrushDab(ctx, lastPos.x + (pos.x - lastPos.x) * t, lastPos.y + (pos.y - lastPos.y) * t, color);
-    }
-  } else {
-    drawBrushDab(ctx, pos.x, pos.y, color);
-  }
+    const dist = Math.hypot(pos.x - lastPos.x, pos.y - lastPos.y), steps = Math.ceil(dist / (size * 0.4));
+    for (let s = 0; s <= steps; s++) { const t = steps ? s / steps : 0; drawBrushDab(ctx, lastPos.x + (pos.x - lastPos.x) * t, lastPos.y + (pos.y - lastPos.y) * t, color, size); }
+  } else drawBrushDab(ctx, pos.x, pos.y, color, size);
 }
-
-function drawBrushDab(ctx, x, y, color) {
-  const r = Math.max(1, brushSize);
+function drawBrushDab(ctx, x, y, color, r) {
   if (brushSoft > 0.05) {
-    // Soft brush: radial gradient
-    // Core radius = (1 - brushSoft) * r; gradient fills to r
-    const coreR = (1 - brushSoft) * r;
-    const grad = ctx.createRadialGradient(x, y, Math.max(0, coreR), x, y, r);
-    grad.addColorStop(0,   color + 'ee');
-    grad.addColorStop(0.4, color + 'cc');
-    grad.addColorStop(1,   color + '00');
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fill();
-  } else {
-    // Hard brush
-    ctx.fillStyle = color + 'dd';
-    ctx.beginPath();
-    ctx.arc(x, y, r * 0.5, 0, Math.PI * 2);
-    ctx.fill();
+    const coreR = (1 - brushSoft) * r, grad = ctx.createRadialGradient(x, y, Math.max(0, coreR), x, y, r);
+    grad.addColorStop(0, color + 'ee'); grad.addColorStop(0.4, color + 'cc'); grad.addColorStop(1, color + '00');
+    ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+  } else { ctx.fillStyle = color + 'dd'; ctx.beginPath(); ctx.arc(x, y, r * 0.5, 0, Math.PI * 2); ctx.fill(); }
+}
+
+/* shapes: one path for the ghost and for the committed mark */
+function shapePath(ctx, t, a, b, c) {
+  ctx.beginPath();
+  if (t === 'line') { ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); }
+  else if (t === 'flat') { const y = (a.y + b.y) / 2; ctx.moveTo(a.x, y); ctx.lineTo(b.x, y); }
+  else if (t === 'rect') { const r = rectOf(a, b); ctx.rect(r.x, r.y, r.w, r.h); }
+  else if (t === 'circle') { const r = rectOf(a, b); ctx.ellipse(r.x + r.w / 2, r.y + r.h / 2, Math.max(1, r.w / 2), Math.max(1, r.h / 2), 0, 0, Math.PI * 2); }
+  else if (t === 'curve') { ctx.moveTo(a.x, a.y); ctx.quadraticCurveTo(c.x, c.y, b.x, b.y); }
+  else if (t === 'sine') {
+    const steps = Math.max(4, Math.abs(b.x - a.x)), amp = (b.y - a.y) / 2;
+    for (let i = 0; i <= steps; i++) { const u = i / steps, x = a.x + (b.x - a.x) * u, y = a.y + amp + Math.sin(u * 2 * Math.PI * 2) * amp; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
   }
 }
-
-/* Commit functions */
-function commitLine(a, b) {
-  const ctx = ctxs[activeLayer];
-  ctx.strokeStyle = LAYERS[activeLayer].color + 'cc';
-  ctx.lineWidth = brushSize;
-  ctx.lineCap = 'round';
-  ctx.beginPath();
-  ctx.moveTo(a.x, a.y);
-  ctx.lineTo(b.x, b.y);
-  ctx.stroke();
+function paintShape(ctx, t, a, b, c, ghost = false) {
+  const color = LAYERS[activeLayer].color, filled = shapeFill && (t === 'rect' || t === 'circle'); shapePath(ctx, t, a, b, c);
+  if (filled) { ctx.fillStyle = color + (ghost ? '55' : 'cc'); ctx.fill(); }
+  ctx.strokeStyle = color + (ghost ? '99' : 'cc'); ctx.lineWidth = ghost ? Math.max(1, brushSize * 0.6) : (filled ? 1 : Math.max(1, brushSize)); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  if (ghost) ctx.setLineDash([6, 4]); ctx.stroke(); ctx.setLineDash([]);
 }
+function paintOverlayShape(t, a, b, c) { clearOverlay(); paintShape(overlayCtx, t, a, b, c, true); }
 
-function commitSine(a, b) {
-  const ctx = ctxs[activeLayer];
-  ctx.strokeStyle = LAYERS[activeLayer].color + 'cc';
-  ctx.lineWidth = brushSize;
-  ctx.lineCap = 'round';
-  const steps = Math.max(4, Math.abs(b.x - a.x));
-  const cycles = 2;
-  ctx.beginPath();
-  for (let i = 0; i <= steps; i++) {
-    const t = i / steps;
-    const x = a.x + (b.x - a.x) * t;
-    const amp = (b.y - a.y) / 2;
-    const y = a.y + amp + Math.sin(t * cycles * Math.PI * 2) * amp;
-    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+/* ── selection ── */
+function selectStart(pos) {
+  if (sel && inRect(pos, sel)) {   // lift what is inside and drag it
+    pushAllTargets(); const regs = {};
+    for (const k of targets()) { const img = ctxs[k].getImageData(0, 0, W, H); regs[k] = copyRegion(img, sel.x, sel.y, sel.w, sel.h); clearRegion(img, sel.x, sel.y, sel.w, sel.h); ctxs[k].putImageData(img, 0, 0); invalidate(k); }
+    moving = { regs, ox: pos.x - sel.x, oy: pos.y - sel.y, x: sel.x, y: sel.y }; drawUI(); paintOverlay(); drawing = true; return;
   }
-  ctx.stroke();
+  sel = null; lineStart = pos; drawing = true; paintOverlay();
 }
-
-function commitCircle(a, b) {
-  const ctx = ctxs[activeLayer];
-  const cx = (a.x + b.x) / 2;
-  const cy = (a.y + b.y) / 2;
-  const rx = Math.max(1, Math.abs(b.x - a.x) / 2);
-  const ry = Math.max(1, Math.abs(b.y - a.y) / 2);
-  ctx.strokeStyle = LAYERS[activeLayer].color + 'cc';
-  ctx.lineWidth = brushSize;
-  ctx.lineCap = 'round';
-  ctx.beginPath();
-  ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
-  ctx.stroke();
+function selectMove(pos) {
+  if (!drawing) return;
+  if (moving) { moving.x = Math.max(-moving.regs[Object.keys(moving.regs)[0]].width + 4, Math.min(W - 4, pos.x - moving.ox)); moving.y = pos.y - moving.oy; paintOverlay(); return; }
+  if (lineStart) { clearOverlay(); const r = rectOf(lineStart, pos); drawSelectionBox(r); }
 }
-
-function commitFlat(a, b) {
-  const midY = (a.y + b.y) / 2;
-  const ctx = ctxs[activeLayer];
-  ctx.strokeStyle = LAYERS[activeLayer].color + 'cc';
-  ctx.lineWidth = brushSize;
-  ctx.lineCap = 'round';
-  ctx.beginPath();
-  ctx.moveTo(a.x, midY);
-  ctx.lineTo(b.x, midY);
-  ctx.stroke();
+function selectEnd(pos) {
+  if (!drawing) return; drawing = false;
+  if (moving) {
+    for (const k of Object.keys(moving.regs)) { const img = ctxs[k].getImageData(0, 0, W, H); pasteRegion(img, moving.regs[k], moving.x, moving.y); ctxs[k].putImageData(img, 0, 0); invalidate(k); }
+    const r0 = moving.regs[Object.keys(moving.regs)[0]]; sel = { x: Math.round(moving.x), y: Math.round(moving.y), w: r0.width, h: r0.height }; moving = null; drawUI(); paintOverlay(); syncSelButtons(); return;
+  }
+  if (lineStart && pos) { const r = rectOf(lineStart, pos); sel = r.w > 3 && r.h > 3 ? r : null; }
+  lineStart = null; paintOverlay(); syncSelButtons();
 }
+function pushAllTargets() { for (const k of targets()) pushUndo(k); }
+function selOp(kind) {
+  if (!sel && !(kind === 'paste' && clip)) return;
+  const ks = targets();
+  if (kind === 'copy' || kind === 'cut') {
+    const regs = {}; for (const k of ks) regs[k] = copyRegion(ctxs[k].getImageData(0, 0, W, H), sel.x, sel.y, sel.w, sel.h);
+    clip = { regs, w: sel.w, h: sel.h, y: sel.y };
+    if (kind === 'cut') { pushAllTargets(); for (const k of ks) { ctxs[k].clearRect(sel.x, sel.y, sel.w, sel.h); invalidate(k); } sel = null; drawUI(); }
+  } else if (kind === 'delete') { pushAllTargets(); for (const k of ks) { ctxs[k].clearRect(sel.x, sel.y, sel.w, sel.h); invalidate(k); } drawUI(); }
+  else if (kind === 'flipTime' || kind === 'flipPitch') {
+    pushAllTargets();
+    for (const k of ks) { const img = ctxs[k].getImageData(0, 0, W, H), r = copyRegion(img, sel.x, sel.y, sel.w, sel.h); clearRegion(img, sel.x, sel.y, sel.w, sel.h); pasteRegion(img, kind === 'flipTime' ? flipRegionH(r) : flipRegionV(r), r.x, r.y); ctxs[k].putImageData(img, 0, 0); invalidate(k); }
+    drawUI();
+  } else if (kind === 'paste' || kind === 'repeat') {
+    if (kind === 'repeat') { selOp('copy'); } if (!clip) return;
+    pushAllTargets(); const x = kind === 'repeat' ? sel.x + sel.w : Math.min(Math.max(0, playheadX), Math.max(0, W - clip.w)), y = kind === 'repeat' ? sel.y : clip.y;
+    const keys = Object.keys(clip.regs);
+    for (const k of keys) { const dest = keys.length > 1 ? k : activeLayer, img = ctxs[dest].getImageData(0, 0, W, H); pasteRegion(img, clip.regs[k], x, y); ctxs[dest].putImageData(img, 0, 0); invalidate(dest); }
+    sel = { x: Math.round(x), y: Math.round(y), w: clip.w, h: clip.h }; drawUI();
+  }
+  paintOverlay(); syncSelButtons();
+}
+function syncSelButtons() { document.querySelectorAll('[data-selop]').forEach(b => { b.disabled = b.dataset.selop === 'paste' ? !clip : !sel; }); }
 
 /* ── BRUSH PREVIEW ── */
 function updateBrushPreview() {
-  const dot = document.getElementById('brushPreviewDot');
-  if (!dot) return;
-  const maxDisplay = 34;
-  const displaySize = Math.min(maxDisplay, brushSize * (brushSoft > 0.05 ? 1.6 : 0.9));
-  dot.style.width  = displaySize + 'px';
-  dot.style.height = displaySize + 'px';
-  // Reflect softness as blur
-  dot.style.filter = brushSoft > 0.1 ? `blur(${(brushSoft * 2).toFixed(1)}px)` : 'none';
+  const dot = document.getElementById('brushPreviewDot'); if (!dot) return;
+  const d = Math.min(34, brushSize * (brushSoft > 0.05 ? 1.6 : 0.9));
+  dot.style.width = d + 'px'; dot.style.height = d + 'px'; dot.style.filter = brushSoft > 0.1 ? `blur(${(brushSoft * 2).toFixed(1)}px)` : 'none';
   dot.style.background = getComputedStyle(document.documentElement).getPropertyValue(`--${activeLayer}-col`).trim() || '#2a5c45';
 }
 
-/* ── KEYBOARD SHORTCUTS ── */
+/* ── KEYBOARD ── */
+const TOOL_KEYS = { b: 'brush', p: 'pencil', a: 'spray', e: 'erase', g: 'fill', l: 'line', u: 'curve', r: 'rect', c: 'circle', s: 'sine', f: 'flat', m: 'select', h: 'head' };
 function onKeyDown(e) {
-  const tag = (e.target || e.srcElement).tagName;
-  if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
-
-  switch (e.key) {
-    case ' ':      e.preventDefault(); playing ? ORM.stop() : ORM.play(); break;
-    case 'z': case 'Z':
-      if (e.metaKey || e.ctrlKey) { e.preventDefault(); undo(); } break;
-    case 'b': case 'B': ORM.setTool('brush');  break;
-    case 'l': case 'L': ORM.setTool('line');   break;
-    case 'e': case 'E': ORM.setTool('erase');  break;
-    case 's': case 'S': ORM.setTool('sine');   break;
-    case 'c': case 'C': ORM.setTool('circle'); break;
-    case 'f': case 'F': ORM.setTool('flat');   break;
-    case '1': ORM.setLayer('pitch');  break;
-    case '2': ORM.setLayer('amp');    break;
-    case '3': ORM.setLayer('timbre'); break;
-    case '4': ORM.setLayer('mod');    break;
-    case '[': ORM.setBrushSize(Math.max(1,  brushSize - 2)); document.getElementById('brush-size').value = brushSize; break;
-    case ']': ORM.setBrushSize(Math.min(60, brushSize + 2)); document.getElementById('brush-size').value = brushSize; break;
-  }
+  const tag = (e.target || e.srcElement).tagName; if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+  const mod = e.metaKey || e.ctrlKey, k = e.key.toLowerCase();
+  if (e.key === ' ') { if (tag === 'BUTTON') return; e.preventDefault(); playing ? ORM.stop() : ORM.play(); return; }
+  if (mod && k === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); return; }
+  if (mod && k === 'y') { e.preventDefault(); redo(); return; }
+  if (mod && ['c', 'x', 'v', 'd'].includes(k)) { e.preventDefault(); selOp({ c: 'copy', x: 'cut', v: 'paste', d: 'repeat' }[k]); return; }
+  if (e.key === 'Delete' || e.key === 'Backspace') { if (sel) { e.preventDefault(); selOp('delete'); } return; }
+  if (e.key === 'Escape') { curveStage = 0; curveBase = null; sel = null; lineStart = null; drawing = false; paintOverlay(); syncSelButtons(); return; }
+  if (mod) return;
+  if (TOOL_KEYS[k]) return ORM.setTool(TOOL_KEYS[k]);
+  if ('1234'.includes(k) && k) return ORM.setLayer(KEYS[+k - 1]);
+  if (e.key === '[') { ORM.setBrushSize(Math.max(1, brushSize - 2)); }
+  if (e.key === ']') { ORM.setBrushSize(Math.min(60, brushSize + 2)); }
 }
 
-/* ══════════════════════════════════════════════════════════
-   PUBLIC CONTROLLER
-══════════════════════════════════════════════════════════ */
+/* ══════════ PROJECT: save, load, export ══════════ */
+const isBlank = k => { const c = ensureCurve(k); for (let i = 0; i < c.length; i++) if (c[i] >= 0) return false; return true; };
+function say(msg) { const el = document.getElementById('file-msg'); if (el) el.textContent = msg; }
+function currentSettings() { return { wave: waveType, voices: numVoices, analog: analogOn, speed, loop: looping, snap: { ...snap } }; }
+function toProject(name) {
+  const layers = {}; for (const k of KEYS) if (!isBlank(k)) layers[k] = canvases[k].toDataURL('image/png');
+  return { v: 1, name: (name || '').trim() || 'Untitled', w: W, h: H, layers, settings: currentSettings() };
+}
+async function loadProject(raw) {
+  const p = cleanProject(raw); if (!p) { say('That file is not an Oramics drawing.'); return false; }
+  ORM.stop(); let cut = false;
+  for (const k of KEYS) {
+    pushUndo(k); ctxs[k].clearRect(0, 0, W, H);
+    if (p.layers[k]) {
+      const img = new Image(); await new Promise(res => { img.onload = res; img.onerror = res; img.src = p.layers[k]; });
+      if (img.width) { ctxs[k].drawImage(img, 0, 0, img.width, H); if (img.width > W) cut = true; }
+    }
+    invalidate(k);
+  }
+  const s = p.settings; ORM.setWave(s.wave); document.getElementById('wave-select').value = s.wave; ORM.setVoices(s.voices); document.getElementById('voices-slider').value = s.voices; document.getElementById('voices-val').textContent = s.voices;
+  ORM.setAnalog(s.analog); document.getElementById('analog-toggle').checked = s.analog; ORM.setSpeed(s.speed); document.getElementById('speed-slider').value = s.speed;
+  snap.on = s.snap.on; snap.root = s.snap.root; snap.scale = s.snap.scale; syncSnapUI(); drawGrid(); drawUI();
+  document.getElementById('file-name').value = p.name; say(cut ? `Opened “${p.name}”. It was longer than this screen, so the end was cut off. A wider screen will show all of it.` : `Opened “${p.name}”.`); return true;
+}
+function download(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
+const fileSlug = () => (document.getElementById('file-name').value.trim() || 'oramics').replace(/[^\w-]+/g, '-').slice(0, 40);
+function refreshSlots() {
+  const sel2 = document.getElementById('file-slots'); if (!sel2) return; const slots = loadSlots();
+  sel2.innerHTML = ''; const o0 = document.createElement('option'); o0.value = ''; o0.textContent = slots.length ? 'Saved on this device…' : 'Nothing saved yet'; sel2.appendChild(o0);
+  slots.forEach(s => { const o = document.createElement('option'); o.value = s.name; o.textContent = s.name; sel2.appendChild(o); });
+}
+function syncSnapUI() {
+  document.getElementById('pitch-free').classList.toggle('active', !snap.on); document.getElementById('pitch-snap').classList.toggle('active', snap.on);
+  document.getElementById('snap-key').value = snap.root; document.getElementById('snap-scale').value = snap.scale;
+  document.getElementById('snap-opts').hidden = !snap.on;
+}
+
+/* ══════════ PUBLIC CONTROLLER ══════════ */
+const TIPS = {
+  brush: 'Drag to paint a soft mark. Pen pressure changes the size.', pencil: 'Drag for a thin, hard-edged line: a precise pitch.', spray: 'Hold and drag for a scatter of points: a cloud of grains.',
+  erase: 'Drag to rub marks out of the active layer.', fill: 'Click inside a closed shape to fill it. An open shape fills the whole space around it.',
+  line: 'Drag a straight line. Shift snaps the angle.', curve: 'Drag a line, then move and click to bend it. Esc cancels.', rect: 'Drag a rectangle (a held note, a block of loudness). Shift = square.',
+  circle: 'Drag an ellipse. Shift = circle.', sine: 'Drag a vibrating curve.', flat: 'Drag a flat, sustained line.',
+  select: 'Drag a box to select. Drag inside it to move. Then flip, copy, repeat or delete with the buttons or Ctrl+C / X / V / D.', head: 'Drag to move the reading head to any point in the film.',
+};
 const ORM = window.ORM = {
   _previewTimeout: null,
-
-  togglePlay() {
-    playing ? ORM.stop() : ORM.play();
-  },
-
+  togglePlay() { playing ? ORM.stop() : ORM.play(); },
   play() {
-    if (!AC) initAudio();
-    if (AC.state === 'suspended') AC.resume();
-    playing = true;
-    lastRafT = 0;
-    const btn = document.getElementById('btn-play');
-    btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg> stop';
-    btn.classList.add('active');
+    needsInit(); playing = true; lastRafT = 0;
+    const btn = document.getElementById('btn-play'); btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg> stop'; btn.classList.add('active');
     rafId = requestAnimationFrame(raf);
   },
-
   stop() {
-    playing = false;
-    cancelAnimationFrame(rafId);
-    if (AC) voices.forEach(v => v.oscGain.gain.setTargetAtTime(0, AC.currentTime, 0.08));
-    const btn = document.getElementById('btn-play');
-    btn.innerHTML = '<svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> play';
-    btn.classList.remove('active');
-    drawUI();
+    playing = false; cancelAnimationFrame(rafId); if (bank) bank.silence(0.08);
+    const btn = document.getElementById('btn-play'); btn.innerHTML = '<svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> play'; btn.classList.remove('active'); drawUI();
   },
-  
-  toggleLoop() {
-    looping = !looping;
-    document.getElementById('btn-loop').classList.toggle('active', looping);
-  },
-
-  setSpeed(v) {
-    speed = v;
-    document.getElementById('speed-val').textContent = v.toFixed(2) + '×';
-  },
-
-  setWave(w) {
-    waveType = w;
-    voices.forEach(v => { v.osc.type = w; });
-  },
-
-  setVoices(n) {
-    numVoices = n;
-    if (AC) buildVoices();
-  },
-
-  setAnalog(on) {
-    analogOn = on;
-    if (analogLFOGain && AC) {
-      analogLFOGain.gain.setTargetAtTime(on ? 8 : 0, AC.currentTime, 0.3);
-    }
-  },
-
+  toggleLoop() { looping = !looping; document.getElementById('btn-loop').classList.toggle('active', looping); },
+  setSpeed(v) { speed = +v; document.getElementById('speed-val').textContent = (+v).toFixed(2) + '×'; },
+  setWave(w) { waveType = w; if (bank) bank.setWave(w); },
+  setVoices(n) { numVoices = n; if (bank) bank.setCount(n); },
+  setAnalog(on) { analogOn = on; if (bank) bank.setAnalog(on); },
   setLayer(k) {
     activeLayer = k;
-    document.querySelectorAll('.layer-tab').forEach(el => el.classList.remove('active'));
-    document.getElementById('layer-btn-' + k).classList.add('active');
+    document.querySelectorAll('.layer-tab').forEach(el => el.classList.remove('active')); document.getElementById('layer-btn-' + k).classList.add('active');
     document.getElementById('layer-hint').textContent = LAYERS[k].hint;
-    const sc = LAYER_SCALES[k];
-    document.getElementById('scale-top').textContent = sc.top;
-    document.getElementById('scale-mid').textContent = sc.mid;
-    document.getElementById('scale-bot').textContent = sc.bot;
-    updateBrushPreview();
+    const sc = LAYER_SCALES[k]; document.getElementById('scale-top').textContent = sc.top; document.getElementById('scale-mid').textContent = sc.mid; document.getElementById('scale-bot').textContent = sc.bot;
+    sel = null; paintOverlay(); syncSelButtons(); syncHistoryButtons(); updateBrushPreview(); drawGrid(); drawUI();
   },
-
-  toggleVis(k, e) {
-    e.stopPropagation();
-    visibleLayers[k] = !visibleLayers[k];
-    const dot = document.querySelector(`#layer-btn-${k} .layer-vis`);
-    if (dot) dot.style.opacity = visibleLayers[k] ? '1' : '0.2';
-    drawUI();
-  },
-
+  toggleVis(k, e) { e.stopPropagation(); visibleLayers[k] = !visibleLayers[k]; const dot = document.querySelector(`#layer-btn-${k} .layer-vis`); if (dot) dot.style.opacity = visibleLayers[k] ? '1' : '0.2'; drawUI(); },
   setTool(t) {
-    tool = t;
-    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-    const btn = document.getElementById('tool-' + t);
-    if (btn) btn.classList.add('active');
-    const cursors = { brush:'crosshair', line:'crosshair', erase:'cell', sine:'crosshair', circle:'crosshair', flat:'crosshair' };
-    document.getElementById('c-draw').style.cursor = cursors[t] || 'crosshair';
-    const tips = {
-      brush:  'Click and drag to draw freehand strokes.',
-      line:   'Click and drag to draw a straight line. Ghost preview shown while dragging.',
-      erase:  'Click and drag to erase marks from the active layer.',
-      sine:   'Click and drag to place a sine curve. Ghost preview shown while dragging.',
-      circle: 'Click and drag to draw an ellipse. Ghost preview shown. Shift = circle (use equal drag).',
-      flat:   'Click and drag to place a sustained flat line. Ghost preview shown.',
-    };
-    document.getElementById('st-tip').textContent = tips[t] || '';
+    if (tool === 'select' && t !== 'select') { sel = null; paintOverlay(); syncSelButtons(); }
+    tool = t; curveStage = 0; curveBase = null;
+    document.querySelectorAll('.tool-btn[id^="tool-"]').forEach(b => b.classList.toggle('active', b.id === 'tool-' + t));
+    document.getElementById('c-draw').style.cursor = t === 'erase' ? 'cell' : t === 'head' ? 'ew-resize' : t === 'select' ? 'default' : 'crosshair';
+    document.getElementById('st-tip').textContent = TIPS[t] || '';
   },
-
-  setBrushSize(v) {
-    brushSize = v;
-    document.getElementById('brush-size-val').textContent = v;
-    document.getElementById('brush-size').value = v;
-    updateBrushPreview();
-  },
-
-  setBrushSoft(v) {
-    brushSoft = v;
-    document.getElementById('brush-soft-val').textContent = v.toFixed(2);
-    document.getElementById('brush-soft').value = v;
-    updateBrushPreview();
-  },
-
-  clearAll() {
-    Object.keys(LAYERS).forEach(k => {
-      ctxs[k].clearRect(0, 0, W, H);
-      delete layerImages[k];
-      undoStack[k] = [];
-    });
-    drawUI();
-    ORM.stop();
-  },
-
+  setBrushSize(v) { brushSize = +v; document.getElementById('brush-size-val').textContent = v; document.getElementById('brush-size').value = v; updateBrushPreview(); },
+  setBrushSoft(v) { brushSoft = +v; document.getElementById('brush-soft-val').textContent = (+v).toFixed(2); document.getElementById('brush-soft').value = v; updateBrushPreview(); },
+  setShapeFill(on) { shapeFill = !!on; document.getElementById('shape-outline').classList.toggle('active', !on); document.getElementById('shape-filled').classList.toggle('active', !!on); },
+  setSelAll(on) { selAll = !!on; },
+  setUndoAll(on) { undoAll = !!on; syncHistoryButtons(); },
+  undo, redo, selOp,
+  setPitchMode(mode) { snap.on = mode === 'snap'; syncSnapUI(); drawGrid(); },
+  setKey(v) { snap.root = +v; drawGrid(); }, setScale(v) { if (SCALES[v]) snap.scale = v; drawGrid(); }, setGlide(v) { glide = +v; document.getElementById('glide-val').textContent = (+v).toFixed(2); },
+  clearAll() { KEYS.forEach(k => { pushUndo(k); ctxs[k].clearRect(0, 0, W, H); invalidate(k); }); sel = null; paintOverlay(); syncSelButtons(); drawUI(); ORM.stop(); },
   randomize() {
-    Object.keys(LAYERS).forEach(k => {
-      pushUndo(k);
-      ctxs[k].clearRect(0, 0, W, H);
-      const color = LAYERS[k].color;
-      const ctx   = ctxs[k];
-      if (k === 'pitch')  generateOrganicCurve(ctx, color, 3, 0.7);
-      else if (k === 'amp')    generateSwells(ctx, color, 4);
-      else if (k === 'timbre') generateOrganicCurve(ctx, color, 5, 0.5);
-      else if (k === 'mod')    generateSparseMarks(ctx, color);
-      backupLayer(k);
+    KEYS.forEach(k => {
+      pushUndo(k); ctxs[k].clearRect(0, 0, W, H); const color = LAYERS[k].color, ctx = ctxs[k];
+      if (k === 'pitch') generateOrganicCurve(ctx, color, 3, 0.7); else if (k === 'amp') generateSwells(ctx, color, 4); else if (k === 'timbre') generateOrganicCurve(ctx, color, 5, 0.5); else generateSparseMarks(ctx, color);
+      invalidate(k);
     });
     drawUI();
   },
-
-  async exportWav() {
-    if (!W || !H) return;
-    const btn = document.getElementById('btn-export');
-    btn.disabled = true;
-    btn.textContent = 'rendering…';
-
-    const duration = W / PIXELS_PER_SECOND;
-    const sr = 44100;
-    const offCtx = new OfflineAudioContext(2, Math.ceil(duration * sr), sr);
-
-    const offMaster = offCtx.createGain(); offMaster.gain.value = 0.7;
-    const offLimiter = offCtx.createDynamicsCompressor();
-    offLimiter.threshold.value = -8; offLimiter.ratio.value = 10;
-    offMaster.connect(offLimiter); offLimiter.connect(offCtx.destination);
-
-    const sliceCount = Math.min(W, 2000);
-    const sliceW = W / sliceCount;
-
-    const osc  = offCtx.createOscillator();
-    const oscG = offCtx.createGain();
-    const filt = offCtx.createBiquadFilter();
-    filt.type = 'lowpass'; osc.type = waveType;
-    osc.connect(oscG); oscG.connect(filt); filt.connect(offMaster);
-    osc.start(0);
-
-    for (let i = 0; i < sliceCount; i++) {
-      const x = i * sliceW;
-      const t = x / PIXELS_PER_SECOND;
-      const pN = sampleLayer('pitch', x);
-      const aN = sampleLayer('amp', x);
-      const tN = sampleLayer('timbre', x);
-      const hz  = pN >= 0 ? 80 * Math.pow(2000/80, 1-pN) : 0;
-      const amp = aN >= 0 ? (1-aN) * 0.6 : (pN >= 0 ? 0.55 : 0);
-      const fc  = tN >= 0 ? 200 * Math.pow(8000/200, 1-tN) : 2000;
-      if (hz > 0) {
-        osc.frequency.setValueAtTime(hz, t);
-        oscG.gain.setValueAtTime(amp, t);
-        filt.frequency.setValueAtTime(fc, t);
-      } else {
-        oscG.gain.setValueAtTime(0, t);
-      }
-    }
-
-    try {
-      const rendered = await offCtx.startRendering();
-      const wavBlob  = audioBufferToWav(rendered);
-      const url = URL.createObjectURL(wavBlob);
-      const a = document.createElement('a');
-      a.href = url; a.download = 'oramics-' + Date.now() + '.wav'; a.click();
-      URL.revokeObjectURL(url);
-    } catch(e) { console.error('Export failed', e); }
-
-    btn.disabled = false;
-    btn.textContent = 'export WAV';
+  /** Renders the film with the same voices and mapping as the live instrument (including voices, modulation, analog and snapping). */
+  async renderBuffer(sr = 44100) {
+    const spp = PIXELS_PER_SECOND * speed, duration = W / spp + 0.4, off = new OfflineAudioContext(2, Math.ceil(duration * sr), sr);
+    const m = makeMaster(off); const b = createVoiceBank(off, m.input, { count: numVoices, wave: waveType, analog: analogOn });
+    const step = Math.max(1, Math.floor(W / 2000)), tc = glideTc();
+    for (let x = 0; x < W; x += step) b.apply(voiceParams(normsAt(x), paramOpts()), x / spp, { tc });
+    b.apply(voiceParams({ pitch: -1, amp: -1, timbre: -1, mod: -1 }), W / spp, { tc });
+    return off.startRendering();
   },
+  async exportWav() {
+    if (!W || !H) return; const btn = document.getElementById('btn-export'); btn.disabled = true; btn.textContent = 'rendering…';
+    try { download(audioBufferToWav(await ORM.renderBuffer()), fileSlug() + '.wav'); } catch (e) { console.error('Export failed', e); say('The sound could not be rendered here.'); }
+    btn.disabled = false; btn.textContent = 'export WAV';
+  },
+  save() {
+    const p = toProject(document.getElementById('file-name').value); const r = saveSlot(p);
+    if (r.ok) { say(`Saved “${p.name}” on this device. It is not sent anywhere.`); refreshSlots(); document.getElementById('file-slots').value = p.name; } else say(r.error);
+  },
+  loadSlot() { const n = document.getElementById('file-slots').value; if (!n) return; const p = loadSlots().find(s => s.name === n); if (p) loadProject(p); },
+  deleteSlot() { const n = document.getElementById('file-slots').value; if (!n) return; deleteSlot(n); refreshSlots(); say(`Removed “${n}” from this device.`); },
+  downloadProject() { const p = toProject(document.getElementById('file-name').value); if (!Object.keys(p.layers).length) return say('There is nothing drawn to save.'); download(new Blob([JSON.stringify(p)], { type: 'application/json' }), fileSlug() + '.oramics.json'); say('Saved as a file.'); },
+  openFile(input) { const f = input.files && input.files[0]; if (!f) return; if (f.size > 8_000_000) { say('That file is too big.'); return; } f.text().then(t => { try { loadProject(JSON.parse(t)); } catch { say('That file is not an Oramics drawing.'); } }); input.value = ''; },
+  exportPng() {
+    const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d'); x.fillStyle = '#faf8f2'; x.fillRect(0, 0, W, H); x.drawImage(document.getElementById('c-grid'), 0, 0);
+    KEYS.forEach(k => { x.globalAlpha = LAYERS[k].alpha; x.drawImage(canvases[k], 0, 0); }); x.globalAlpha = 1; c.toBlob(b => download(b, fileSlug() + '.png'));
+  },
+  /** for the tests */
+  _state: () => ({ W, H, playheadX, tool, activeLayer, snap: { ...snap }, hasSel: !!sel, sel, shapeFill }),
+  _scan: k => { const c = ensureCurve(k); let n = 0; for (let i = 0; i < c.length; i++) if (c[i] >= 0) n++; return n; },
+  _curve: k => Array.from(ensureCurve(k)),
 };
 
 /* ── RANDOM GENERATORS ── */
@@ -1905,6 +1540,7 @@ function generateSparseMarks(ctx, color) {
   }
 }
 
+
 /* ── WAV EXPORT ── */
 function audioBufferToWav(buf) {
   const len=buf.length, sr=buf.sampleRate, ch=buf.numberOfChannels;
@@ -1924,16 +1560,10 @@ function audioBufferToWav(buf) {
   return new Blob([ab],{type:'audio/wav'});
 }
 
-/* ── HEADER / AUTH ── */
-const _path = window.location.pathname.replace(/\/$/, '') || '/';
 
 
-/* ── START ── */
-window.addEventListener('load', () => {
-  init();
-});
+window.addEventListener('load', () => { init(); ORM.setTool('brush'); syncSnapUI(); syncSelButtons(); });
 
-}());
 </script>
 
 </body>

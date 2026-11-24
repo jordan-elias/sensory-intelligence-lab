@@ -246,3 +246,8 @@ Phase D: accessibility (keyboard drawing, description, reduced motion); essay wo
 - Export: Save WAV (offline render, max 5 min) and Save MIDI (4 tracks, ritardando tempo map) for the last composed piece. Files are made on the device.
 - Play while typing: a note per finished word, a soft chord on . ? … (off by default).
 - Not verified by ear.
+
+## Oramics tools (branch app-70-oramics-tools)
+Done: pencil, spray, fill, curve, rectangle and ellipse (outline or filled), eraser that follows fast strokes, selection with move, reverse (time), invert (pitch), repeat, copy/cut/paste/delete (optionally all four layers together), reading-head tool, redo and undo (per layer or across layers), pen pressure, optional snap-to-scale with glide (free glide stays the default), layers scanned once (only changed columns rescanned), WAV export through the same voices and mapping as live (voices, modulation, analog, snapping, speed), save/load on the device, save/open as a file, picture export, amp hint corrected, essay wording softened.
+Next: polyphony (several pitch lines), pan / reverb / noise layers, a scrolling longer film, keyboard drawing for accessibility, sends to Sequencer and Ambience, a short guide to Oram's own method on the page.
+Not verified by ear.
