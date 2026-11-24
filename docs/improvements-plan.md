@@ -246,3 +246,9 @@ Phase D: accessibility (keyboard drawing, description, reduced motion); essay wo
 - Export: Save WAV (offline render, max 5 min) and Save MIDI (4 tracks, ritardando tempo map) for the last composed piece. Files are made on the device.
 - Play while typing: a note per finished word, a soft chord on . ? … (off by default).
 - Not verified by ear.
+
+## Semantic Synth UX pass (branch app-71-semantic-ux)
+- The page no longer scrolls to follow the playing word; a new run scrolls only inside the conversation box.
+- Earlier runs fold away when a new one starts; each can be reopened, plus collapse all / expand all.
+- Token field: hover shows a word's connections, click pins it, plays its note and lists what it connects to and its likely next words; clicking a next word adds it to your text. Keyboard: arrows, Enter, Escape. The playing word is ringed.
+- One play/stop toggle button, same icons and behaviour as the other modules.

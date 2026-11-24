@@ -167,6 +167,28 @@
       cursor:pointer;transition:background .12s;letter-spacing:-.01em;}
     .analyze-btn:hover{background:var(--accent-hover);}
     .analyze-btn:disabled{opacity:.45;cursor:not-allowed;}
+    .analyze-btn{display:inline-flex;align-items:center;gap:.45rem;}
+    .analyze-btn.playing{background:#c0392b;}
+    .analyze-btn.playing:hover{background:#a93226;}
+    .conv-tools{display:flex;gap:.5rem;justify-content:flex-end;margin-bottom:.4rem;}
+    .conv-tools button{font-family:var(--font-heading);font-size:.68rem;font-weight:600;background:transparent;color:var(--muted);border:1px solid var(--border);padding:.25rem .6rem;cursor:pointer;}
+    .conv-tools button:hover{color:var(--text);border-color:var(--text);}
+    .resp-head{all:unset;box-sizing:border-box;display:flex;gap:.6rem;align-items:baseline;width:100%;cursor:pointer;margin-bottom:.6rem;font-family:var(--font-heading);}
+    .resp-head:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+    .resp-chev{font-size:.7rem;color:var(--muted);width:.9rem;}
+    .resp-title{font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:600;}
+    .resp-sum{font-size:.74rem;color:var(--muted);font-family:var(--font-body);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .conv-response.collapsed .resp-head{margin-bottom:0;}
+    .token-chip{cursor:pointer;}
+    .token-chip:hover{filter:brightness(.95);}
+    .token-chip:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+    .token-chip.sel{box-shadow:0 0 0 2px var(--accent);}
+    .vis-canvas:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;}
+    .vis-detail{padding:.55rem .75rem;font-size:.78rem;line-height:1.7;color:var(--text);border-top:1px solid var(--border);background:var(--bg);}
+    .vd-line{margin:.1rem 0;}
+    .next-word{font-family:'Courier New',monospace;font-size:.72rem;background:transparent;border:1px solid #1a4d6b;color:#1a4d6b;padding:.1rem .45rem;margin:0 .3rem .25rem 0;cursor:pointer;}
+    .next-word:hover{background:#eaf3fa;}
+    .next-word i{font-style:normal;opacity:.6;}
     .stop-btn{font-family:var(--font-heading);font-size:.78rem;font-weight:600;
       background:transparent;color:var(--text);border:1px solid var(--border);
       padding:.55rem 1rem;cursor:pointer;transition:all .12s;}
@@ -297,6 +319,7 @@
     </div>
 
     <!-- Conversation -->
+    <div class="conv-tools"><button type="button" onclick="SS.collapseAll(true)">collapse all</button><button type="button" onclick="SS.collapseAll(false)">expand all</button></div>
     <div class="conversation" id="conversation">
       <div class="conv-empty" id="conv-empty">
         Submit a sentence, a paragraph, a question, a fragment.<br>
@@ -315,8 +338,7 @@
           <div class="input-controls">
             <button class="stop-btn" id="save-wav" onclick="SSComposed.saveWav()" disabled title="Save the last composed piece as audio">save WAV</button>
             <button class="stop-btn" id="save-midi" onclick="SSComposed.saveMidi()" disabled title="Save the last composed piece as a MIDI file">save MIDI</button>
-            <button class="stop-btn" id="stop-btn" onclick="SS.stop()" disabled>■ stop</button>
-            <button class="analyze-btn" id="analyze-btn" onclick="SS.analyze()">analyze</button>
+            <button class="analyze-btn play-btn" id="analyze-btn" type="button" onclick="SS.toggle()" aria-label="Play"></button>
           </div>
         </div>
       </div>
@@ -915,143 +937,129 @@ function posDistribution(tokens) {
 /* ══════════════════════════════════════════════════════════
    CANVAS VISUALIZATION
 ══════════════════════════════════════════════════════════ */
-function buildVisualization(analysis, container) {
-  const wrap = document.createElement('div');
-  wrap.className = 'vis-wrap';
+const CLUSTER_NAMES = ['Motion / action','Perception / senses','Emotion / affect','Cognition / mind','Time','Space / place','Nature / world','Body / physical','Language / communication','Number / quantity','Structure / order','Relation / social','Creation / art','Change / transformation','Abstraction / concept','Technology / machine','Light / colour','Scale / intensity','Negation / uncertainty','Common function words'];
+const POS_COLORS = { noun: '#4a1a6b', verb: '#1a4d6b', adjective: '#6b3a1a', adverb: '#1a5c5c', other: '#999' };
+const VIS_H = 200, NEAR = 4;
 
-  const canvas = document.createElement('canvas');
-  canvas.className = 'vis-canvas';
-  canvas.height = 180;
-  wrap.appendChild(canvas);
-
-  const label = document.createElement('div');
-  label.className = 'vis-label';
-  label.textContent = 'token field · semantic connections · probability branches';
-  wrap.appendChild(label);
-
-  container.appendChild(wrap);
-
-  // Draw after layout
-  requestAnimationFrame(() => {
-    const W = canvas.offsetWidth;
-    canvas.width = W;
-    const ctx = canvas.getContext('2d');
-    drawVis(ctx, W, 180, analysis);
-  });
-
-  return canvas;
+/** Words that connect to token i: the same word again, the same cluster, or a neighbouring one. */
+function relatedTo(tokens, i) {
+  const a = tokens[i], out = [];
+  tokens.forEach((t, j) => { if (j === i) return; if (t.lower === a.lower || (a.cluster >= 0 && t.cluster >= 0 && Math.abs(a.cluster - t.cluster) <= NEAR)) out.push(j); });
+  return out;
+}
+function nextWords(tok, analysis, tokens, i) {
+  if (tok && BIGRAMS[tok.lower]) return BIGRAMS[tok.lower];
+  return i === tokens.length - 1 && analysis.lastPred ? analysis.lastPred : null;
 }
 
-function drawVis(ctx, W, H, analysis) {
-  const { tokens } = analysis;
-  if (!tokens.length) return;
-
-  ctx.clearRect(0, 0, W, H);
-
-  // Background
-  ctx.fillStyle = '#f9f9f7';
-  ctx.fillRect(0, 0, W, H);
-
-  // Grid lines (Ikeda-inspired)
-  ctx.strokeStyle = '#e5e5e0';
-  ctx.lineWidth = 1;
-  for (let x = 0; x < W; x += 40) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
-  }
-  for (let y = 0; y < H; y += 40) {
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-  }
-
-  // Place tokens on a line, spaced evenly
-  const margin = 24;
-  const usable = W - margin * 2;
-  const nodePositions = [];
-
-  tokens.forEach((t, i) => {
-    const x = margin + (i / Math.max(tokens.length - 1, 1)) * usable;
-    const y = H / 2 + (t.cluster >= 0 ? (t.cluster - 9.5) * 5 : 0);
-    nodePositions.push({ x, y, token: t });
+/** Draws the token field. st = { hover, sel, playing } (token indexes or -1). Returns { nodes, hits } for hit-testing. */
+function drawVis(ctx, W, H, analysis, st = { hover: -1, sel: -1, playing: -1 }) {
+  const { tokens } = analysis, nodes = [], hits = [];
+  ctx.clearRect(0, 0, W, H); ctx.fillStyle = '#f9f9f7'; ctx.fillRect(0, 0, W, H);
+  if (!tokens.length) return { nodes, hits };
+  ctx.strokeStyle = '#e5e5e0'; ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+  for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+  const margin = 28, usable = W - margin * 2;
+  tokens.forEach((t, i) => nodes.push({ x: margin + (i / Math.max(tokens.length - 1, 1)) * usable, y: H / 2 + (t.cluster >= 0 ? (t.cluster - 9.5) * 5 : 0), token: t, i }));
+  const focus = st.sel >= 0 ? st.sel : st.hover, rel = new Set(focus >= 0 ? relatedTo(tokens, focus) : []);
+  // connections: all faint; those touching the focused word bold
+  nodes.forEach((a, i) => nodes.forEach((b, j) => {
+    if (j <= i || a.token.cluster < 0 || b.token.cluster < 0) return;
+    const dist = Math.abs(a.token.cluster - b.token.cluster); if (dist > NEAR) return;
+    const touches = focus >= 0 && (i === focus || j === focus), base = (1 - dist / NEAR) * 0.25;
+    ctx.strokeStyle = touches ? `rgba(42,92,69,${0.45 + base})` : `rgba(42,92,69,${focus >= 0 ? base * 0.35 : base})`; ctx.lineWidth = touches ? 1.8 : 0.8;
+    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.quadraticCurveTo((a.x + b.x) / 2, a.y - 20 - dist * 8, b.x, b.y); ctx.stroke();
+  }));
+  // next-word branches: from the focused word, else from the last word
+  const from = focus >= 0 ? nodes[focus] : nodes[nodes.length - 1], preds = from && nextWords(from.token, analysis, tokens, from.i);
+  if (preds) preds.slice(0, 5).forEach(([word, weight], k) => {
+    const ang = -0.6 + k * 0.3, len = 34 + (weight / 100) * 70, ex = from.x + Math.cos(ang) * len, ey = from.y + Math.sin(ang) * len, al = Math.max(0.25, weight / 100);
+    ctx.strokeStyle = `rgba(26,77,107,${al * 0.7})`; ctx.lineWidth = Math.max(1, weight / 25); ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(from.x, from.y); ctx.lineTo(ex, ey); ctx.stroke(); ctx.setLineDash([]);
+    ctx.font = `${10 + weight / 20}px 'Courier New', monospace`; const w = ctx.measureText(word).width;
+    ctx.fillStyle = `rgba(26,77,107,${Math.max(0.5, al)})`; ctx.fillText(word, ex + 3, ey + 3);
+    hits.push({ word, x: ex, y: ey - 10, w: w + 6, h: 18 });
+    if (focus >= 0) { ctx.strokeStyle = 'rgba(26,77,107,.35)'; ctx.strokeRect(ex + 1, ey - 10, w + 4, 17); }
   });
-
-  // Draw semantic connections (lines between nearby clusters)
-  nodePositions.forEach((a, i) => {
-    nodePositions.forEach((b, j) => {
-      if (j <= i) return;
-      if (a.token.cluster < 0 || b.token.cluster < 0) return;
-      const dist = Math.abs(a.token.cluster - b.token.cluster);
-      if (dist > 4) return; // only nearby clusters
-      const alpha = (1 - dist / 4) * 0.25;
-      ctx.strokeStyle = `rgba(42,92,69,${alpha})`;
-      ctx.lineWidth = 0.8;
-      ctx.beginPath();
-      ctx.moveTo(a.x, a.y);
-      // Curved arc
-      const cx = (a.x + b.x) / 2;
-      const cy = a.y - 20 - dist * 8;
-      ctx.quadraticCurveTo(cx, cy, b.x, b.y);
-      ctx.stroke();
-    });
+  nodes.forEach(({ x, y, token, i }) => {
+    const r = 3 + (1 - token.freqScore) * 5, color = POS_COLORS[token.pos] || POS_COLORS.other, dim = focus >= 0 && i !== focus && !rel.has(i);
+    ctx.globalAlpha = dim ? 0.3 : 1;
+    if (token.freqScore < 0.3) { ctx.beginPath(); ctx.arc(x, y, r + 3, 0, Math.PI * 2); ctx.fillStyle = color + '22'; ctx.fill(); }
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = color; ctx.fill();
+    if (i === st.playing) { ctx.beginPath(); ctx.arc(x, y, r + 5, 0, Math.PI * 2); ctx.strokeStyle = '#c0392b'; ctx.lineWidth = 2; ctx.stroke(); }
+    if (i === focus) { ctx.beginPath(); ctx.arc(x, y, r + 4, 0, Math.PI * 2); ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke(); }
+    ctx.globalAlpha = 1;
   });
-
-  // Draw nodes
-  const POS_COLORS = {
-    noun: '#4a1a6b', verb: '#1a4d6b', adjective: '#6b3a1a',
-    adverb: '#1a5c5c', other: '#999'
-  };
-
-  nodePositions.forEach(({ x, y, token }) => {
-    const r = 3 + (1 - token.freqScore) * 5; // rare = bigger
-    const color = POS_COLORS[token.pos] || POS_COLORS.other;
-
-    // Glow for rare words
-    if (token.freqScore < 0.3) {
-      ctx.beginPath();
-      ctx.arc(x, y, r + 3, 0, Math.PI * 2);
-      ctx.fillStyle = color + '22';
-      ctx.fill();
-    }
-
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.fill();
-  });
-
-  // Draw probability branches from last word
-  if (analysis.lastPred) {
-    const lastPos = nodePositions[nodePositions.length - 1];
-    if (lastPos) {
-      analysis.lastPred.slice(0, 5).forEach(([word, weight], i) => {
-        const angle = -0.6 + i * 0.3;
-        const len = 30 + (weight / 100) * 50;
-        const ex = lastPos.x + Math.cos(angle) * len;
-        const ey = lastPos.y + Math.sin(angle) * len;
-        const alpha = weight / 100;
-
-        ctx.strokeStyle = `rgba(26,77,107,${alpha * 0.7})`;
-        ctx.lineWidth = weight / 25;
-        ctx.setLineDash([3, 3]);
-        ctx.beginPath();
-        ctx.moveTo(lastPos.x, lastPos.y);
-        ctx.lineTo(ex, ey);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        ctx.fillStyle = `rgba(26,77,107,${alpha * 0.6})`;
-        ctx.font = `${9 + weight/20}px 'Courier New', monospace`;
-        ctx.fillText(word, ex + 3, ey + 3);
-      });
-    }
-  }
-
-  // X-axis: word labels
-  ctx.fillStyle = '#bbb';
-  ctx.font = '8px "Courier New", monospace';
-  ctx.textAlign = 'center';
-  nodePositions.forEach(({ x, token }) => {
-    if (token.word.length < 12) ctx.fillText(token.word, x, H - 6);
-  });
+  ctx.fillStyle = '#999'; ctx.font = '9px "Courier New", monospace'; ctx.textAlign = 'center';
+  nodes.forEach(({ x, token, i }) => { if (token.word.length < 12 && (tokens.length < 26 || i === focus || rel.has(i))) { ctx.fillStyle = i === focus ? '#1a1a1a' : (focus >= 0 && !rel.has(i) ? '#ccc' : '#999'); ctx.fillText(token.word, x, H - 6); } });
   ctx.textAlign = 'left';
+  return { nodes, hits };
+}
+
+function buildVisualization(analysis, container, text) {
+  const wrap = document.createElement('div'); wrap.className = 'vis-wrap';
+  const canvas = document.createElement('canvas'); canvas.className = 'vis-canvas'; canvas.height = VIS_H; canvas.tabIndex = 0;
+  canvas.setAttribute('role', 'group'); canvas.setAttribute('aria-label', 'Token field. Left and right arrows move between words, Enter plays the word, Escape clears.');
+  wrap.appendChild(canvas);
+  const label = document.createElement('div'); label.className = 'vis-label'; label.textContent = 'token field · hover or click a word'; wrap.appendChild(label);
+  const detail = document.createElement('div'); detail.className = 'vis-detail'; detail.setAttribute('aria-live', 'polite'); wrap.appendChild(detail);
+  container.appendChild(wrap);
+
+  const st = { hover: -1, sel: -1, playing: -1 }, tokens = analysis.tokens; let nodes = [], hits = [];
+  const chips = () => container.querySelectorAll('.token-chip');
+  function redraw() {
+    const W = canvas.offsetWidth; if (!W) return; if (canvas.width !== W) canvas.width = W;
+    const r = drawVis(canvas.getContext('2d'), W, VIS_H, analysis, st); nodes = r.nodes; hits = r.hits;
+  }
+  function describe() {
+    const i = st.sel; detail.textContent = '';
+    if (i < 0) { detail.textContent = 'Hover a word to see what it connects to. Click one to pin it, hear it, and explore what might come next.'; return; }
+    const t = tokens[i], rel = relatedTo(tokens, i), nx = nextWords(t, analysis, tokens, i);
+    const line = document.createElement('div'); line.className = 'vd-line';
+    line.innerHTML = `<strong>${escHtml(t.word)}</strong> · ${t.pos} · ${t.cluster >= 0 ? CLUSTER_NAMES[t.cluster] : 'no meaning group'} · rarity ${((1 - t.freqScore) * 100).toFixed(0)}%`;
+    detail.appendChild(line);
+    const rl = document.createElement('div'); rl.className = 'vd-line';
+    rl.textContent = rel.length ? 'Connects to: ' + [...new Set(rel.map(j => tokens[j].word))].slice(0, 8).join(', ') : 'Nothing else here is close in meaning.';
+    detail.appendChild(rl);
+    if (nx) {
+      const nl = document.createElement('div'); nl.className = 'vd-line'; nl.append('Likely next (click to add to your text): ');
+      nx.slice(0, 6).forEach(([w, pct]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'next-word'; b.innerHTML = `${escHtml(w)} <i>${pct}%</i>`; b.onclick = () => SS.addWord(w); nl.appendChild(b); });
+      detail.appendChild(nl);
+    }
+    const hear = document.createElement('button'); hear.type = 'button'; hear.className = 'next-word'; hear.textContent = '▶ hear this word'; hear.onclick = () => audition(i); detail.appendChild(hear);
+  }
+  function audition(i) { if (window.SSComposed) window.SSComposed.audition(text, tokens, i); }
+  function select(i, { hear = true } = {}) {
+    st.sel = i === st.sel ? -1 : i; chips().forEach((c, k) => c.classList.toggle('sel', k === st.sel));
+    describe(); redraw(); if (st.sel >= 0 && hear) audition(st.sel);
+  }
+  const near = e => { const r = canvas.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top; return { x, y }; };
+  canvas.addEventListener('pointermove', e => {
+    if (e.pointerType === 'touch') return;
+    const { x, y } = near(e); const hit = hits.some(h => x >= h.x && x <= h.x + h.w && y >= h.y && y <= h.y + h.h);
+    let best = -1, d = 16; nodes.forEach(n => { const k = Math.hypot(n.x - x, n.y - y); if (k < d) { d = k; best = n.i; } });
+    canvas.style.cursor = hit || best >= 0 ? 'pointer' : 'default';
+    if (best !== st.hover) { st.hover = best; redraw(); }
+  });
+  canvas.addEventListener('pointerleave', () => { if (st.hover !== -1) { st.hover = -1; redraw(); } });
+  canvas.addEventListener('click', e => {
+    const { x, y } = near(e), h = hits.find(h => x >= h.x && x <= h.x + h.w && y >= h.y && y <= h.y + h.h);
+    if (h) { SS.addWord(h.word); return; }
+    let best = -1, d = 18; nodes.forEach(n => { const k = Math.hypot(n.x - x, n.y - y); if (k < d) { d = k; best = n.i; } });
+    if (best >= 0) select(best); else if (st.sel >= 0) select(st.sel, { hear: false });
+  });
+  canvas.addEventListener('keydown', e => {
+    const n = tokens.length; if (!n) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); const to = st.sel < 0 ? 0 : (st.sel + (e.key === 'ArrowRight' ? 1 : n - 1)) % n; st.sel = -1; select(to); }
+    else if (e.key === 'Enter' && st.sel >= 0) { e.preventDefault(); audition(st.sel); }
+    else if (e.key === 'Escape' && st.sel >= 0) select(st.sel, { hear: false });
+  });
+  chips().forEach((c, k) => { c.tabIndex = 0; c.setAttribute('role', 'button'); c.addEventListener('click', () => select(k)); c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(k); } }); c.addEventListener('pointerenter', () => { if (st.hover !== k) { st.hover = k; redraw(); } }); c.addEventListener('pointerleave', () => { st.hover = -1; redraw(); }); });
+  describe();
+  container._vis = { redraw, st, select: i => select(i, { hear: false }), setPlaying(i) { st.playing = i; redraw(); } };
+  requestAnimationFrame(redraw);
+  return canvas;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -1059,20 +1067,25 @@ function drawVis(ctx, W, H, analysis) {
 ══════════════════════════════════════════════════════════ */
 let playbackTimer = null;
 let isPlaying = false;
+const ICON_PLAY = '<svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true"><path d="M0 0l10 6L0 12z"/></svg>', ICON_STOP = '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true"><rect width="10" height="10"/></svg>';
+/** One button plays and stops, like the other modules. */
+function setPlayUI(on) {
+  const b = document.getElementById('analyze-btn'); b.classList.toggle('playing', on); b.setAttribute('aria-label', on ? 'Stop' : 'Play');
+  b.innerHTML = on ? ICON_STOP + ' stop' : ICON_PLAY + ' play';
+}
+document.addEventListener('DOMContentLoaded', () => setPlayUI(false));
 
 function schedulePlayback(analysis, responseEl, text) {
   if (isPlaying) stopPlayback();
   if (SS.mode === 'composed' && window.SSComposed) {
     isPlaying = true;
-    document.getElementById('stop-btn').disabled = false;
-    document.getElementById('analyze-btn').disabled = true;
+    setPlayUI(true);
     window.SSComposed.start(analysis, text, responseEl, finishPlayback);
     return;
   }
   isPlaying = true;
 
-  document.getElementById('stop-btn').disabled = false;
-  document.getElementById('analyze-btn').disabled = true;
+  setPlayUI(true);
 
   const { tokens } = analysis;
   const tempo = SS.tempo;
@@ -1102,7 +1115,7 @@ function schedulePlayback(analysis, responseEl, text) {
     if (chips[tokenIdx]) {
       chips[tokenIdx].classList.add('playing');
       if (tokenIdx > 0 && chips[tokenIdx-1]) chips[tokenIdx-1].classList.add('played');
-      chips[tokenIdx].scrollIntoView({ behavior:'smooth', block:'nearest' });
+      if (responseEl._vis) responseEl._vis.setPlaying(tokenIdx);
     }
 
     // Voice 1: token pulse
@@ -1155,8 +1168,7 @@ function schedulePlayback(analysis, responseEl, text) {
 
 function finishPlayback() {
   isPlaying = false;
-  document.getElementById('stop-btn').disabled = true;
-  document.getElementById('analyze-btn').disabled = false;
+  setPlayUI(false);
   // Let entropy drone fade
   setTimeout(fadeEntropyDrone, 2000);
 }
@@ -1166,8 +1178,7 @@ function stopPlayback() {
   if (window.SSComposed) window.SSComposed.stop();
   clearTimeout(playbackTimer);
   fadeEntropyDrone();
-  document.getElementById('stop-btn').disabled = true;
-  document.getElementById('analyze-btn').disabled = false;
+  setPlayUI(false);
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -1256,7 +1267,7 @@ function buildResponseEl(analysis, similarity, memState, text) {
   div.appendChild(grid);
 
   // Canvas visualization
-  buildVisualization(analysis, div);
+  buildVisualization(analysis, div, text);
 
   // Probability prediction display
   if (analysis.lastPred) {
@@ -1300,7 +1311,25 @@ function buildResponseEl(analysis, similarity, memState, text) {
   memRow.appendChild(stateEl);
   div.appendChild(memRow);
 
-  return div;
+  return makeCollapsible(div, analysis);
+}
+
+/** Puts a response's contents in a body under a header you can click to fold it away. */
+function makeCollapsible(div, analysis) {
+  const label = div.querySelector('.conv-response-label'); if (label) label.remove();
+  const body = document.createElement('div'); body.className = 'resp-body';
+  while (div.firstChild) body.appendChild(div.firstChild);
+  const head = document.createElement('button'); head.type = 'button'; head.className = 'resp-head'; head.setAttribute('aria-expanded', 'true');
+  head.innerHTML = '<span class="resp-chev">▾</span><span class="resp-title">system</span><span class="resp-sum"></span>';
+  const sum = head.querySelector('.resp-sum'); let extra = '';
+  div._setSummary = t => { extra = t; };
+  div._setCollapsed = c => {
+    body.hidden = c; div.classList.toggle('collapsed', c); head.setAttribute('aria-expanded', String(!c)); head.querySelector('.resp-chev').textContent = c ? '▸' : '▾';
+    sum.textContent = c ? `${analysis.tokens.length} words` + (extra ? ' · ' + extra : '') : '';
+    if (!c && div._vis) requestAnimationFrame(() => div._vis.redraw());
+  };
+  head.onclick = () => div._setCollapsed(!body.hidden);
+  div.append(head, body); return div;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -1314,6 +1343,14 @@ const SS = {
   complexity: 0.5,
   volume: 0.7,
 
+  toggle() { if (isPlaying) stopPlayback(); else this.analyze(); },
+  collapseAll(c) { document.querySelectorAll('.conv-response').forEach(r => r._setCollapsed && r._setCollapsed(c)); },
+  /** Adds a word to the end of the text (from the token field's predictions) and puts the cursor there. */
+  addWord(word) {
+    const input = document.getElementById('main-input'), v = input.value.replace(/\s+$/, '');
+    input.value = (v ? v + ' ' : '') + word; input.focus({ preventScroll: true }); input.setSelectionRange(input.value.length, input.value.length);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  },
   live: false,
   toggleLive() {
     this.live = !this.live;
@@ -1360,9 +1397,11 @@ const SS = {
     MEMORY.add(analysis.fingerprint);
 
     // Build response bubble
+    conv.querySelectorAll('.conv-response').forEach(r => r._setCollapsed && r._setCollapsed(true));
     const responseEl = buildResponseEl(analysis, similarity, memState, text);
     conv.appendChild(responseEl);
-    conv.scrollTop = conv.scrollHeight;
+    // bring the new run into view inside the conversation box only; the page itself is never moved, and nothing follows the music
+    conv.scrollTop += userBubble.getBoundingClientRect().top - conv.getBoundingClientRect().top;
 
     // Clear input
     input.value = '';
@@ -1413,20 +1452,26 @@ window.SSComposed = {
     note.className = 'composed-note';
     note.textContent = `Composed in ${plan.key.name} at ${plan.bpm} bpm` + (plan.memory.mode === 'recall' ? ' · the earlier tune returns' : plan.memory.mode === 'deceptive' ? ' · ends unresolved' : '');
     document.getElementById('save-wav').disabled = false; document.getElementById('save-midi').disabled = false;
-    responseEl.insertBefore(note, responseEl.querySelector('.token-row'));
+    const tr = responseEl.querySelector('.token-row'); tr.parentNode.insertBefore(note, tr); if (responseEl._setSummary) responseEl._setSummary(note.textContent);
     const chips = responseEl.querySelectorAll('.token-chip'), bars = responseEl.querySelectorAll('.voice-bar-fill');
     if (bars[4]) bars[4].style.width = (analysis.entropy * 100) + '%';
     player.play(plan, {
       onWord(i) {
         chips.forEach(c => c.classList.remove('playing'));
-        if (chips[i]) { chips[i].classList.add('playing'); if (i > 0 && chips[i - 1]) chips[i - 1].classList.add('played'); chips[i].scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+        if (chips[i]) { chips[i].classList.add('playing'); if (i > 0 && chips[i - 1]) chips[i - 1].classList.add('played'); }
+        if (responseEl._vis) responseEl._vis.setPlaying(i);
       },
       onVoice(v, vel) { if (bars[v - 1] && v !== 5) bars[v - 1].style.width = Math.min(100, vel * 190) + '%'; },
-      onEnd() { chips.forEach(c => { c.classList.remove('playing'); c.classList.add('played'); }); done(); },
+      onEnd() { chips.forEach(c => { c.classList.remove('playing'); c.classList.add('played'); }); if (responseEl._vis) responseEl._vis.setPlaying(-1); done(); },
     });
   },
   stop() { if (player) player.stop(); },
   setMix(m) { if (player) player.setMix(m); },
+  /** Plays one word of a response as a single note, in the key its sentence suggests (for exploring the token field). */
+  audition(text, tokens, i) {
+    const { ctx, out } = window.SS_AUDIO(); if (!player) player = createPlayer({ ctx, out });
+    const n = liveNote(text, tokens, i); if (!n) return; player.playNow({ midi: [n.midi], kind: n.kind, vel: Math.max(n.vel, 0.42) }, 0);
+  },
   saveMidi() {
     const plan = window.SS_LAST_PLAN; if (!plan) return;
     download(new Blob([encodePlanMidi(plan)], { type: 'audio/midi' }), `semantic-synth-${plan.key.name.replace(/\W+/g, '-')}.mid`);

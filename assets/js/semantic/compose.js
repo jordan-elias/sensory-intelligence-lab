@@ -178,9 +178,9 @@ export function composePlan(text, tokens, opts = {}) {
  * What typing a word plays, for the live "play while typing" mode. `tokens` are the analysis of the text so far; the last one is the
  * word just finished. Returns { midi, kind, vel, key } for that word, in the key the text so far suggests, or null.
  */
-export function liveNote(text, tokens) {
-  if (!tokens.length) return null;
-  const key = deriveKey(tokens, scan(text)), t = tokens[tokens.length - 1], rank = 1 - (t.freqScore ?? 0.5);
+export function liveNote(text, tokens, index = tokens.length - 1) {
+  if (!tokens.length || !tokens[index]) return null;
+  const key = deriveKey(tokens, scan(text)), t = tokens[index], rank = 1 - (t.freqScore ?? 0.5);
   return { midi: degreeMidi({ root: key.root, mode: key.mode }, 7 + Math.round(rank * 8)), kind: rank > 0.8 ? 'bell' : 'pluck', vel: t.cluster === FUNCTION_CLUSTER ? 0.25 : 0.45, key };
 }
 /** The soft chord a mark of punctuation plays while typing: a full stop settles home, a question reaches for the dominant, an ellipsis hangs. Null for other marks. */
