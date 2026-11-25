@@ -1,4 +1,4 @@
-# A creative practice course: plan, second draft (25 Nov 2026)
+# Experiments in Creativity, the course: plan, second draft (25 Nov 2026)
 
 Status: **planning only. Nothing has been built.** This draft follows your notes: chapters instead of weeks, no fixed pace, a music and sound focus open to any creative person, the whole course on the paid plan, and a design that comes from the Lab's own thinking and not from any existing course.
 
@@ -137,7 +137,7 @@ The whole course is part of the paid subscription.
 - **Free users** see one page with the course's aim, a description of each chapter and what you leave with, and a **Subscribe** button that links to the existing subscribe page. They can open nothing else. (This uses the same gating the other paid modules use, with a preview-only page.)
 - **Subscribers** get everything. Threads and notes stay on their device. The existing sync stays optional.
 - The home grid and tab bar list the course under **Create**, with the "Preview" marker for free users, like other paid tools.
-- Open check: what happens to a subscriber's local threads if they cancel? Proposed: they stay on the device and stay readable and exportable, and only the guided chapters lock.
+- **If a subscriber cancels:** their work stays saved (on their device, and in sync if they turned it on), but the whole course and all its materials are locked, including the chapters, the thread gallery and exports. Everything is there again if they resubscribe. Nothing is deleted.
 
 ## 11. How it connects to what exists
 
@@ -160,12 +160,13 @@ The whole course is part of the paid subscription.
 6. Gallery, map, export, then-and-now, letter.
 7. Accessibility, phone layout, printable book.
 
-## 13. What I still need from you
+## 13. Decided, and what I still need
 
+Decided: the course keeps its name, **Experiments in Creativity**. Access is paid, with a free preview page. If someone cancels, their work stays saved but the whole course and its materials are locked until they resubscribe.
+
+Still needed from you:
 1. **Wording.** I can draft every prompt, but you should read and rewrite them, especially chapters 3 and 6, because they touch on personal material.
-2. **The name.** The page and the tab need a name for the course. Working title: *Practice*. Others to consider: *Listening Studio*, *Threads*, *Sound Practice*.
-3. **Chapter 6.** Are you comfortable with these prompts as drafted, or do you want them dropped or made more minimal?
-4. **Therapist sharing.** Should a client ever be able to share a thread with their therapist? I have assumed no for now, because therapists decide for themselves about clients and this adds privacy questions.
-5. **Cancellation behaviour.** Do you agree with the proposal in section 10?
+2. **Chapter 6.** Are you comfortable with these prompts as drafted, or do you want them dropped or kept minimal?
+3. **Therapist sharing.** I have assumed a client cannot share a thread with their therapist, because therapists decide for themselves about clients and it adds privacy questions. Say if you want that changed.
 
 Once you have answered these I'd start with the thread data model and the free preview page.
