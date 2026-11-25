@@ -277,3 +277,10 @@ Not verified by ear.
 - Oram essay rewritten from sources (Richards thesis, Wrench, the Daphne Oram Trust, Science Museum, Wikipedia). Claims that could not be checked were removed.
 - Spatial and cocktail essays rewritten, shared style in assets/css/essay.css. Shared button styles in assets/css/lab-ui.css (spatial, cocktail, Oramics). Semantic Synth is on another branch (app-71) and still needs its buttons moved to lab-ui.css after merging.
 - Minicourse: planning only, see docs/creative-practice-course-plan.md.
+
+## Experiments in Creativity: paid, with a free preview (branch app-74-painter)
+- Free users see one preview page (aim, the seven sections, how it works, what stays with you, Subscribe button to /subscribe/). The course code is not loaded for them. Subscribers see the course as before. The dashboard card and phone tile show the "Preview" marker.
+- If someone stops subscribing: work stays saved on their device; the course and materials are locked (this is how the gate already behaves, since the course only loads for paid users). Not tested against a real cancelled account.
+- Oramics has a "Keep as a seed" button: it renders the piece and keeps the recording in My seeds (on this device only, same store as the experiments).
+- Preview copy reuses the catalog text and METHOD steps; Jordan to review wording.
+- Next, once the course wording is agreed: seed data model for the new chapters, then chapters 1 to 3. See docs/creative-practice-course-plan.md.

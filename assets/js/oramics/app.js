@@ -11,6 +11,8 @@ import { createEngine, renderPiece, encodeWav } from './engine.js';
 import { STARTERS, starterMarks, surprise } from './starters.js';
 import { floodFill, sprayPoints, rectOf, squareTo } from './raster.js';
 import { createHistory } from './history.js';
+import { createProgress } from '/assets/js/experiments/progress.js';
+import { putAudio } from '/assets/js/experiments/shelf-audio.js';
 import { cleanProject, cleanSettings, saveSlot, loadSlots, deleteSlot, saveDraft, loadDraft, clearDraft } from './store.js';
 
 const $ = id => document.getElementById(id);
@@ -280,12 +282,24 @@ function scheduleSave() { clearTimeout(saveTimer); saveTimer = setTimeout(() => 
 function download(name, blob) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
 const fname = () => ($('pname').value.trim() || 'oramics').replace(/[^\w\- ]+/g, '').replace(/\s+/g, '-').slice(0, 40) || 'oramics';
 
+async function renderWav() {
+  flushAll(); const Off = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  const buf = await renderPiece({ Offline: Off, sampleRate: 44100, an, w: S.w, seconds: S.settings.seconds, settings: { snap: S.settings.snap, root: S.settings.root, scale: S.settings.scale }, mix: S.settings.mix, shade: S.settings.shade, space: S.settings.space });
+  return new Blob([encodeWav(buf)], { type: 'audio/wav' });
+}
 async function exportWav() {
-  flushAll(); say('Rendering the sound…'); const Off = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  say('Rendering the sound…');
+  try { download(fname() + '.wav', await renderWav()); say('Saved as a WAV file.'); } catch { say('The sound could not be rendered in this browser.'); }
+}
+/** Keeps the piece in My seeds (Experiments in Creativity): a recording stored on this device only. */
+async function keepSeed() {
+  if (!painted) { say('Paint something first.'); return; }
+  say('Keeping it as a seed…'); let id = null, pr = null;
   try {
-    const buf = await renderPiece({ Offline: Off, sampleRate: 44100, an, w: S.w, seconds: S.settings.seconds, settings: { snap: S.settings.snap, root: S.settings.root, scale: S.settings.scale }, mix: S.settings.mix, shade: S.settings.shade, space: S.settings.space });
-    download(fname() + '.wav', new Blob([encodeWav(buf)], { type: 'audio/wav' })); say('Saved as a WAV file.');
-  } catch { say('The sound could not be rendered in this browser.'); }
+    pr = createProgress({ storage: localStorage }); const blob = await renderWav();
+    id = pr.keep({ exp: 'oramics', kind: 'audio', title: $('pname').value.trim() || 'Oramics picture', secs: Math.round(S.settings.seconds) }); await putAudio(id, blob);
+    say('Kept in My seeds, on this device only. You will find it in Experiments in Creativity.');
+  } catch { if (id && pr) pr.unkeep(id); say('This browser would not let it be kept. Save it as a WAV file instead.'); }
 }
 function exportPng() { render(false); cv.toBlob(b => { download(fname() + '.png', b); say('Saved as an image.'); render(); }); }
 
@@ -338,7 +352,7 @@ function wire() {
     if (o) { const p = loadSlots().find(s => s.name === decodeURIComponent(o.dataset.open)); if (p && await loadProject(p)) say('Opened.'); }
     if (d) { deleteSlot(decodeURIComponent(d.dataset.del)); drawSlots(); }
   });
-  $('btnWav').addEventListener('click', exportWav); $('btnPng').addEventListener('click', exportPng);
+  $('btnWav').addEventListener('click', exportWav); $('btnPng').addEventListener('click', exportPng); $('btnSeed').addEventListener('click', keepSeed);
   $('btnFile').addEventListener('click', () => download(fname() + '.oramics.json', new Blob([JSON.stringify(project())], { type: 'application/json' })));
   $('btnOpen').addEventListener('click', () => $('fileIn').click());
   $('fileIn').addEventListener('change', async e => {

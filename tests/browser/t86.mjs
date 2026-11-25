@@ -56,6 +56,10 @@ ok(r.pl>0.05&&r.pr>0.05&&r.pl<=1.01,'the offline render has sound and does not c
 // per ink: each one alone makes sound
 const per=await page.evaluate(async()=>{ const m=await import('/assets/js/oramics/engine.js'); const out={}; for(const id of ['melody','harmony','bass','rhythm','texture']){ const only={[id]:ORM.an[id]}; const buf=await m.renderPiece({Offline:OfflineAudioContext,sampleRate:22050,an:only,w:ORM.S.w,seconds:4,settings:{snap:{on:false},root:0,scale:'major pentatonic'},mix:ORM.S.settings.mix,shade:ORM.S.settings.shade,space:0.3}); const d=buf.getChannelData(0);let p=0;for(let i=0;i<d.length;i++)p=Math.max(p,Math.abs(d[i]));out[id]=+p.toFixed(3);} return out; });
 ok(Object.values(per).every(p=>p>0.01),'each ink makes sound by itself '+JSON.stringify(per));
+// keep as a seed in the course shelf
+await page.$eval('#btnSeed',b=>b.click()); await sleep(2500);
+const seed=await page.evaluate(async()=>{const m=await import('/assets/js/experiments/progress.js');const p=m.createProgress({storage:localStorage});const it=p.shelf().find(i=>i.exp==='oramics');if(!it)return null;const a=await import('/assets/js/experiments/shelf-audio.js');const b=await a.getAudio(it.id);return {kind:it.kind,secs:it.secs,size:b&&b.size};});
+ok(seed&&seed.kind==='audio'&&seed.size>1000,'Keep as a seed puts a recording in My seeds '+JSON.stringify(seed));
 // keep, reload, restore
 await page.type('#pname','Test'); await page.$eval('#btnSave',b=>b.click()); await sleep(300);
 ok(await page.$$eval('#slots .slot',a=>a.length)===1,'a picture is kept on this device');
