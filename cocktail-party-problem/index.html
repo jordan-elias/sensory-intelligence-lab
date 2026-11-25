@@ -84,11 +84,6 @@
 
     .control-row { display: flex; align-items: center; gap: 8px; margin-bottom: .75rem; flex-wrap: wrap; }
 
-    .lab-btn { font-family: var(--font-heading); font-size: .78rem; font-weight: 600; background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: .5rem 1.2rem; cursor: pointer; transition: all .12s; white-space: nowrap; flex-shrink: 0; }
-    .lab-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
-    .lab-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
-    .lab-btn.primary:hover:not(:disabled) { background: var(--accent-hover); }
-    .lab-btn:disabled { opacity: .35; cursor: not-allowed; }
     .lab-preset-btn { font-family: var(--font-body); font-size: .72rem; font-weight: 500; background: var(--bg); color: var(--muted); border: 1px solid var(--border); padding: .28rem .8rem; cursor: pointer; transition: all .12s; }
     .lab-preset-btn:hover { border-color: var(--accent); color: var(--accent); }
     .lab-preset-btn.on { background: var(--accent); color: white; border-color: var(--accent); }
@@ -160,6 +155,7 @@
     }
   </style>
   <link rel="stylesheet" href="/assets/css/header.css">
+  <link rel="stylesheet" href="/assets/css/lab-ui.css">
   <link rel="stylesheet" href="/assets/css/a11y.css">
 </head>
 <body>
