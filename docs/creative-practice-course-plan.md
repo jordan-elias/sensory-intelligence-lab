@@ -1,186 +1,171 @@
-# A creative practice course: plan (draft for discussion, 25 Nov 2026)
+# A creative practice course: plan, second draft (25 Nov 2026)
 
-Status: **thinking and planning only. Nothing has been built or changed.** This replaces the idea of "a handful of experiments" with a course that has an arc, and asks you to decide a few things before any code is written (section 11).
+Status: **planning only. Nothing has been built.** This draft follows your notes: chapters instead of weeks, no fixed pace, a music and sound focus open to any creative person, the whole course on the paid plan, and a design that comes from the Lab's own thinking and not from any existing course.
 
-## 1. What we are trying to make
+## 1. The idea in one paragraph
 
-A guided course, done in the app or the browser over about ten weeks, that leaves a person with four things:
+The Lab's central idea is that attention to sensory experience is a skill: you can train how you listen, notice your own state, and carry what you learn from one moment into the next. This course applies that to making music and sound. It treats **listening as the source of ideas**, **your body's state as part of the creative process**, and **continuity as the way a practice grows**, so that nothing you make gets lost in the gaps. People leave with a body of small creative threads to build on, a changed way of listening and working, and a clearer sense of themselves as someone who makes sound.
 
-1. **A body of creative threads.** Dozens of small things they made (a rhythm, a phrase, a list, a sound, a drawing, a question) that they can keep building on.
-2. **A new perspective.** On how they make things, what they respond to, and what stops them.
-3. **A practice they can keep.** A few rules of their own and a small routine, not a streak to maintain.
-4. **A renewed identity as someone who makes things.** Built from evidence in their own hands, not from being told they are creative.
+## 2. What it draws on from the Lab (and not from elsewhere)
 
-Parallel to *The Artist's Way* in shape (a daily habit, a weekly outing, a weekly set of tasks, a sense of recovering something) but different in content: secular, concrete, built on constraints and real making, covering sound, words and marks, and designed so that **everything made is carried forward into the next session.**
+| Lab idea | What it means in the course |
+|---|---|
+| **Sensory intelligence:** attention to sound and the body is trainable | Chapters 2 and 3 are about listening and state, before anything is composed. Listening exercises produce raw material. |
+| **Regulation and the iso principle:** meet a state, then move it gently | Each session can begin with a short "arrive" step that names your state (energy, tension, mood) and offers a warm-up that matches it before shifting. Making with a tired or wired nervous system is treated as something to work with, not to push through. |
+| **Continuity between sessions:** insight is lost in the gaps | Every session ends by pinning **threads**. Later chapters start from your own threads. |
+| **Track your progress without being tracked** | Everything stays on the device. No streaks, no scores, no ranking, no data sent anywhere. Progress is shown to you as things you made, not numbers about you. |
+| **Self-directed, with a therapist available** | The course is self-guided. A therapist can see nothing unless you choose to show it. |
+| **The tools already built** | Oramics, Sequencer, Soundscape, the experiments' rhythm, dice and audio tools, Ambience, the journal, ear training. The course teaches people to *use the Lab's own instruments as a practice*. |
 
-## 2. What is wrong with the current course (and what to keep)
+The course is informed by the general literature on creativity and constraints, but its structure, vocabulary and exercises come from the above. It does not use other courses' names, language or exercise formats.
 
-The 36 experiments are good, and the November review found the same gaps I see here:
+## 3. What is wrong with the current experiments (and what to keep)
 
-- Each experiment is a **separate one-off**. Finishing one does not change what the next one starts from.
-- It leaves **a note, not a seed**. Little accumulates.
-- It is mostly about **technique and chance**. It does not address the things that actually stop people: the inner critic, comparison, not knowing what they like, not finishing, fear of showing.
-- There is **no sense of where you are going**, and no moment where you see how far you came.
+The 36 experiments are good, and the November review found the same gaps I see here: each one is a one-off, it leaves a note rather than something to build on, it is mostly technique and chance, and nothing shows where you are headed or how far you have come.
 
-Keep: the one-step-at-a-time screens, the constraint idea ("a small rule takes some choices away"), no scores, notes kept on the device, the tools (rhythm grid, dice, text operations, audio operations, marks), the Keep shelf and the notebook, and the printable book. The 36 experiments become **the Workbench**: a library that the weekly sessions draw from and that people can use any time.
+Keep: the one-step-at-a-time screens, the idea that a small limit is a door, no scores, notes kept on the device, the tools, the Keep shelf, the notebook, the printable book. The experiments become **the Workbench**: a library the chapters draw from, and which people can use at any time.
 
-## 3. Principles (the things every exercise has to satisfy)
+## 4. Principles
 
-1. **No judgement, built in.** No scores, ranking, "good/bad" language or comparison with others. Private by default. The first try counts. There is always a **Pass** button, and a session is "done" if you only did the warm-up.
-2. **Make first, think after.** Each session is mostly doing, with short timed bursts. Reflection is short and concrete ("I noticed… I wonder… Next I'll…"), never a test.
-3. **Everything made is kept and returns.** Every session ends by pinning one to three **threads**. Later sessions begin from them.
-4. **Constraints open doors.** Each task has a limit (time, notes, words, materials). The limit is the permission.
-5. **Concrete over abstract.** "List twenty sounds you can hear, from nearest to farthest" rather than "become more aware".
-6. **Your medium, but open to others.** Music, sound, words, or marks. People choose one or two in the first week and are invited to cross over.
-7. **Small enough to survive a bad week.** Sessions are 30 to 40 minutes. The daily part is three minutes. Nothing expires, there is no streak, and missed weeks are just skipped.
-8. **Honest about what it is.** A creative course, not therapy and not a treatment. Personal prompts are optional and gentle, and say how to stop.
+1. **Go at your own pace.** No schedule, no "week 3", no claim that it takes a set time. Chapters can be taken slowly, skipped, revisited or repeated. Many people may finish in about eight sittings and others will take a year; either is fine. The only suggested order is to begin with Arrival and Listening.
+2. **No judgement built in.** No scoring, grading, ranking or comparison. Private by default. The first try counts. Every step has a **Pass** button and any chapter can be done in part.
+3. **Make first, think after.** Mostly doing, in short timed bursts. Reflection is brief and concrete.
+4. **Everything made returns.** Pinned threads are the raw material of later chapters.
+5. **Limits open doors.** Each exercise has a limit, and the limit is the permission.
+6. **Concrete over abstract.** "List twenty sounds from nearest to farthest", not "become more aware".
+7. **Sound at the centre, open at the edges.** Projects are about sound, music and composition. Words and drawn marks appear as ways into sound (a poem becomes a rhythm, a drawing becomes a melody), so that people from other arts can take part.
+8. **Honest about what it is.** A creative course, not therapy and not a treatment. Personal prompts are optional, gentle and say how to stop.
 
-## 4. The shape: three beats a week
+## 5. How a sitting works
 
-| Beat | Time | What it is |
-|---|---|---|
-| **Session** | 30 to 40 min, once a week | The guided core: arrive, warm up, do the main exercise, harvest threads, reflect, choose what to carry. |
-| **Daily page** | 3 min, optional, up to 5 days | One tiny prompt: list, observe, finish a sentence, or make a 60-second mark. A calm tally of days you showed up (dots, never a streak that can break). |
-| **Field walk** | 15 to 20 min, once a week, away from the app | A short outing with a purpose ("collect ten sounds", "find three textures"). Capture with a voice note, photo or text on the phone. Always skippable. |
+A sitting is one guided session of about thirty to forty minutes, though people can stop early. It has six steps:
 
-Anatomy of a session:
+1. **Arrive.** Name your state in a few words and set a small intention. Optionally get a warm-up that matches it.
+2. **Warm up.** Something tiny and playful with sound.
+3. **Core exercise.** The main task, with its limit, using an in-app instrument or tool.
+4. **Harvest.** Choose one to three things you made and **pin them as threads**.
+5. **Notice.** Three short prompts: *I noticed / I wonder / Next*. An optional journal prompt.
+6. **Carry.** Choose one thread to bring to the next sitting.
 
-1. **Arrive (2 min).** A one-line check-in: an energy word and a small intention.
-2. **Warm-up (3 to 5 min).** Playful, tiny, impossible to do wrong.
-3. **Core (15 to 20 min).** The main exercise with its limit, using in-app tools (timer, notebook, rhythm grid, Oramics, Sequencer, marks).
-4. **Harvest (5 min).** Choose one to three things from what you just made to **pin as threads**.
-5. **Reflect (3 to 5 min).** Three chips: *I noticed / I wonder / Next*. Optional journaling prompt.
-6. **Carry (1 min).** Choose one thread to take into next week, and see this week's daily prompts.
+Two optional small practices sit beside the chapters:
 
-## 5. The through-lines that make it build
+- **A few minutes.** A tiny daily prompt (listen, list, finish a phrase, make a ten-second sound). A quiet tally of the days you did one, never a streak that can break.
+- **A listening walk.** A short outing with a purpose ("find five sounds that repeat"), captured as a voice note, photo or text. Always skippable.
 
-Three things grow every week, so the course is a single piece of work and not ten:
+## 6. The chapters
 
-- **The Thread Box.** Every pinned thread goes here, with its type (sound, rhythm, melody, text, mark, question, word), where it came from and when. It is available from every tool as a "Pin as a thread" button (Oramics, Sequencer, Soundscape, Journal, the writing and marks tools). Later sessions pull from it: **Thread Roulette** deals two or three threads from different weeks as a starting point.
-- **The Rulebook.** Every session ends with the question "what is one rule that helped?" (for example "start with the ending", "no more than five notes", "make it in the morning"). By week nine there are eight or nine rules of the person's own.
-- **Then and now.** Week 0 and week 9 ask the same three questions (what I make, what I've stopped making, what I would make if nobody saw it). The app shows the two sets side by side. This is the identity moment, using their own words.
+Eight chapters. They are phases of a body of work, not calendar slots. Each has three to five exercises, written below as concrete intentions, not final copy.
 
-## 6. The arc (ten sessions)
+**1. Arrival: where you are.**
+Purpose: lower the stakes and record a starting point.
+- Choose your main and a second medium (an instrument, voice, the Lab's tools, words, drawing) and name your studio (private).
+- *Starting inventory:* what I make now, what I have stopped making, what I would make if nobody would ever hear it.
+- *Two-minute sound:* make one tiny sound or phrase in two minutes, to prove the door opens.
 
-Each session is outlined with its purpose and a few concrete exercises. Wording below is a draft of intent, not final copy.
+**2. Listening: the ear as a source of ideas.**
+Purpose: raw material, and training the attention at the heart of the Lab.
+- *Near to far:* list the sounds around you from nearest to farthest. Do it again with eyes closed.
+- *One sound, three ways:* describe a single sound by its texture, its shape in time and what it reminds you of.
+- *Listening walk:* collect ten sounds, then pin three.
+- *Spatial listening:* using the spatial awareness idea, notice where sounds are, and make a sketch of a place by position (links to the Lab's spatial game).
+- *Translate it:* turn one found sound into a drawn shape in Oramics, then listen to what the picture makes of it.
 
-**Week 0: Arrival.** *Purpose: set up, lower the stakes.*
-- Choose a medium (or two) and name your studio (any name, private).
-- *Starting inventory:* three prompts (what I make now, what I stopped making, what I would make if nobody would ever see it). Written, kept, shown again in week 9.
-- *Two-minute thing:* make one tiny thing in your medium in two minutes, to prove to yourself the door opens.
+**3. State and body: making with the nervous system you have.**
+Purpose: the Lab's own territory, and what separates this course from a technique course.
+- *Check in, then make:* name your state, then make a short piece that matches it, then a version that nudges it a little (the iso idea applied to composing).
+- *Fast and slow:* make the same phrase at a pace that feels too fast and too slow, and notice which one your body trusts.
+- *Breath as a metronome:* use your own breathing as the pulse for a rhythm.
+- *When it will not come:* a gentle "stuck" toolbox: shrink the task, change the sense, stop on purpose.
+- Safety note: these exercises ask about energy and tension, not about trauma. Any step can be passed.
 
-**Week 1: Permission.** *Making badly on purpose, and meeting the critic.*
-- *Ugly on purpose (5 min, timer):* make the worst version you can. It is almost impossible not to enjoy it.
-- *Name the critic:* write down the critic's actual sentences word for word, give the voice a name and a job ("Quality Control: arrives after the timer ends").
-- *Five in ten:* five two-minute drafts, no editing, no deleting.
-- Journaling (skippable): "A small thing I made recently and did not judge."
-
-**Week 2: Noticing.** *Attention is the raw material.*
-- *Sit and list (5 min):* eyes closed, list the sounds you hear from nearest to farthest. Then do it with objects.
-- *Zoom:* describe one ordinary object three ways: from a metre away, from a centimetre away, and from memory.
-- Field walk: *collect ten:* ten sounds, textures or phrases from one place.
-- Harvest: pin three of the ten.
-
-**Week 3: Lineage and taste.** *You know more about what you like than you think.*
-- *Five works:* name five pieces (any art form) you return to. For each, one specific sentence about what you love. Not "it's beautiful"; what exactly.
-- *Find the pattern:* the app shows your five sentences together and asks what the common quality is (restraint, strangeness, warmth, speed).
-- *Borrow the skeleton, change the skin:* use the existing borrowed-chords, borrowed-contour and borrowed-rhythm experiments, now with the pattern you found.
+**4. Taste and lineage: what you are drawn to.**
+Purpose: finding your own ear.
+- *Five pieces:* name five pieces of music or sound you return to, and one specific sentence about what you love in each.
+- *The pattern:* the app shows your five sentences together and asks what they share (restraint, strangeness, warmth, speed).
+- *Borrow the skeleton:* use the borrowed-chords, borrowed-contour and borrowed-rhythm experiments with the pattern you found.
 - *Anti-taste:* three things you dislike, and what each is the opposite of.
 
-**Week 4: Constraints.** *The Workbench opens.*
-- Choose two experiments from the Workbench that match your medium, with the limit you did not choose.
-- *Same limit, three ways:* apply one limit to a sound, a word and a mark.
-- *A limit I live under:* a short, optional journal prompt about a rule you follow that you never chose.
+**5. Limits and chance: the Workbench.**
+Purpose: surprise and permission.
+- Choose two experiments from the Workbench that fit you, each with a limit you did not choose.
+- *Thread roulette:* the app deals three of your own threads. Combine them under a rule.
+- *Mutate:* change one thing and keep both versions.
+- *Answer your past self:* respond to a thread you made in chapter 2 or 3.
 
-**Week 5: Chance and play.** *Letting go of control on purpose.*
-- *Thread Roulette:* the app deals three of your own threads. Combine them under a rule.
-- *Mutate:* change one thing about a thread and keep both versions.
-- *Answer your past self:* take a thread from week 1 and reply to it.
+**6. Material: where your sounds come from.**
+Purpose: personal material, gently. Fully optional.
+- *A place:* gather sensory details from one specific place and make something from three of them.
+- *Voice memo from a room:* record ten seconds of a place and write what it says to you.
+- *A sound from childhood:* one remembered sound, written for five minutes, then made.
+- Every prompt begins "stay on the surface" and ends "you can stop at any time". No prompt asks about trauma or illness.
 
-**Week 6: Origins and material.** *Where the material comes from. Gentle and fully optional.*
-- *The first thing I made:* a memory, written for five minutes.
-- *A place:* collect sensory details (light, sound, smell, temperature) from one specific place, and make something from three of them.
-- *Boundaries:* every prompt here begins with "stay on the surface" and ends with "you can stop at any time". No prompt asks about trauma or illness.
+**7. Shaping and finishing: making something small and done.**
+Purpose: turning threads into a piece.
+- *Define done first:* write what "done" means before you start.
+- *Draft, subtract, add one:* take a thread to a short piece. Make it, remove a third, add one new thing.
+- *Name it:* give it three titles and keep the one that surprises you.
+- *Listen back:* use the Lab's listening tools to hear your piece as a stranger would.
 
-**Week 7: Shaping.** *Finishing small.*
-- *Define done first:* write what done means before starting.
-- *Draft, subtract, add one:* take a thread to a small finished piece. Make it, remove a third, add one new thing, name it.
-- *Titles:* give it three titles and keep the one that surprises you.
-
-**Week 8: Showing.** *A ladder, not a leap.*
-- *Choose your audience:* only me, one person, a few people, or public. Any rung is a success.
+**8. Sharing and carrying on: the practice you keep.**
+Purpose: leaving with something that lasts.
+- *Choose an audience:* only me, one person, a few people, or public. Any rung is a success.
 - *Ask better:* a short script for receiving feedback ("what did you notice?", "where did you lean in?").
-- A **listening-party** kit (outside the app): a short script and a message you can send.
-- Afterwards: what happened, what I would do differently.
+- *Then and now:* re-answer the three questions from chapter 1 and see both together.
+- *My studio rules:* the rules you collected along the way, gathered into your own list.
+- *A statement in your own words:* the app gathers phrases you wrote and lets you rearrange them. It never writes for you.
+- *Next steps:* a simple "when, where, what" plan, and three threads to carry.
+- *Letter to myself:* saved here and shown on return after a date you choose, no notifications needed.
 
-**Week 9: Practice and identity.** *Leaving with something.*
-- *Then and now:* re-answer the week 0 questions and see both.
-- *Artist statement in my own words:* the app gathers sentences you wrote across the course and offers them to be rearranged. You write the statement; the app never writes it for you.
-- *Rulebook:* your own studio rules, assembled.
-- *Next thirty days:* a when/where/what plan, and three threads to carry.
-- *Letter to my future self:* saved here and shown on return after a date you choose (no notifications needed).
+## 7. What grows through the whole course
 
-## 7. How it is facilitated in a browser (what the screens do)
+- **The Thread Box.** Everything pinned, with its type (sound, rhythm, melody, text, mark, question), where it came from and when. A "Pin as a thread" button in every tool (Oramics, Sequencer, Soundscape, journal, experiments).
+- **Studio rules.** After each sitting, one question: "What is one rule that helped?" By the end there are enough to form your own method.
+- **Then and now.** The same three questions in chapter 1 and chapter 8.
 
-The step-at-a-time screen stays. New step types:
+## 8. How it works in the browser
 
-- **Timer** with a soft end sound. When it ends, the screen says so and stops asking.
-- **Free-write** field that autosaves, with an optional "keep going" mode: no backspace, and a gentle nudge if you stop for twenty seconds.
-- **List** field that counts up to a number ("twenty sounds") and celebrates nothing but reaching it.
-- **Capture** (voice note, photo, text) for field walks, stored on the device.
-- **Make** panel: opens the right tool (marks, rhythm grid, Oramics, Sequencer, Soundscape) beside the instruction, with the limit shown, and a "Pin as a thread" button.
-- **Harvest**: choose one to three items from what you made.
-- **Chips** for reflection (*I noticed / I wonder / Next*) and **Pass** on every step.
-- **Stuck?**: shrinks the task ("make the smallest possible version") and never says "try harder".
+The existing step screen stays. New step types: **timer** (soft end sound, then it stops asking), **free-write** (autosaves; optional no-backspace "keep going" mode), **list** (counts toward a number), **capture** (voice, photo, text for listening walks), **make** (opens the right instrument beside the instruction, shows the limit, has a "Pin as a thread" button), **harvest**, **notice** chips, **Pass**, and **Stuck?** (shrinks the task, never says "try harder").
 
-Judgement-free by design: nothing is scored, nothing is shown to anyone, no comparison with other people, no "streak lost" message, nothing expires, deletion is one tap. Everything stays on the device unless the person turns on the existing sync.
+## 9. What people leave with
 
-## 8. What the person leaves with
+A **thread gallery** (playable and searchable), a **thread map** (what gathers around what), an **export** bundle (MIDI, WAV, text, images), a printable card of rules and statement, the **then and now** page and the **letter**.
 
-- **Thread gallery.** Everything pinned, searchable by type and week, playable and viewable.
-- **Thread map.** A simple view of how threads relate (same key or tempo, shared words, the same week) to show where the work gathers.
-- **Export.** MIDI, WAV, text and images in one bundle, plus a printable card of the rulebook and artist statement.
-- **Then and now** page and the **letter**.
+## 10. Access: paid plan, free preview
 
-## 9. Ideas we are borrowing, and what we are not claiming
+The whole course is part of the paid subscription.
 
-These shaped the design. They are **inspiration, not claims**. Before the app says anything about "research shows", each one must be checked and cited properly.
+- **Free users** see one page with the course's aim, a description of each chapter and what you leave with, and a **Subscribe** button that links to the existing subscribe page. They can open nothing else. (This uses the same gating the other paid modules use, with a preview-only page.)
+- **Subscribers** get everything. Threads and notes stay on their device. The existing sync stays optional.
+- The home grid and tab bar list the course under **Create**, with the "Preview" marker for free users, like other paid tools.
+- Open check: what happens to a subscriber's local threads if they cancel? Proposed: they stay on the device and stay readable and exportable, and only the guided chapters lock.
 
-- Constraints as a creative aid (Patricia Stokes, *Creativity from Constraints*).
-- Expected evaluation tends to undermine creative work (Teresa Amabile's work on intrinsic motivation). This is why everything is private and ungraded.
-- Different kinds of creativity: exploring, combining, transforming (Margaret Boden).
-- If-then planning helps people follow through (Peter Gollwitzer, implementation intentions). This is used in "Next thirty days".
-- Self-compassion over self-criticism (Kristin Neff), which informs how the critic exercises are worded.
-- Writing about experience (James Pennebaker). We do **not** promise any benefit; the prompts are creative, not therapeutic.
-
-The course makes no health claims. Its copy should say so plainly, and it should point to a professional when a personal prompt stirs something difficult.
-
-## 10. How it connects to what exists
+## 11. How it connects to what exists
 
 | Existing | In the course |
 |---|---|
-| 36 experiments | The Workbench; weeks 3, 4 and 5 draw from it. |
-| Keep shelf and "My seeds" | Become the Thread Box (same storage, same sync). |
-| Notebook | The place where reflections and journaling live. |
-| Tools (rhythm grid, text ops, audio ops, marks, Oramics, Sequencer, Soundscape) | The **Make** panel. |
-| Printable book | A paper edition of each session and the rulebook. |
-| Progress and sync | Extended to track sessions, daily marks and threads. |
+| 36 experiments | The Workbench, used in chapters 4 and 5. |
+| Keep shelf and "My seeds" | Become the Thread Box (same storage and optional sync). |
+| Notebook | Where reflections and journaling live. |
+| Rhythm grid, text and audio operations, marks, Oramics, Sequencer, Soundscape, spatial game | The **make** panel and the listening chapters. |
+| Printable book | A paper edition of the chapters and the studio rules. |
+| Progress and sync | Extended to hold threads and sittings, with no streaks. |
 
-**Build sequence (when we get there):**
+## 12. Build sequence (when we get there)
+
 1. The thread data model (validated, exportable, with tests), plus "Pin as a thread" in two tools.
-2. Session engine: reuse the step screen and add the new step types.
-3. Weeks 0 to 3 written and playable. **Stop and test with a few real people** before going on.
-4. Weeks 4 to 9, Thread Roulette, Rulebook.
-5. Gallery, map, export, then-and-now and letter.
-6. Accessibility, phone layout, printable book.
+2. The free preview page and the gating, so access works first.
+3. The sitting engine: reuse the step screen, add the new step types.
+4. Chapters 1 to 3, written and playable. You pilot them before I write more.
+5. Chapters 4 to 8, thread roulette, studio rules.
+6. Gallery, map, export, then-and-now, letter.
+7. Accessibility, phone layout, printable book.
 
-## 11. Decisions I need from you
+## 13. What I still need from you
 
-1. **Length:** ten weeks as drafted, or a shorter six-week version?
-2. **Audience and medium:** music and sound at the centre with writing and marks alongside, or genuinely any art form first?
-3. **Personal prompts:** are you comfortable with the week 6 prompts as drafted? Should a therapist be able to look at a shared thread if the client chooses to share it?
-4. **Access:** which parts are free and which belong to a paid plan?
-5. **Content ownership:** all prompts are your voice. I can draft them, but I'd like you to read and rewrite every one before it is shown to anyone, especially weeks 1 and 6.
-6. **A pilot:** can three to five people you know try weeks 0 to 3 before we write the rest?
+1. **Wording.** I can draft every prompt, but you should read and rewrite them, especially chapters 3 and 6, because they touch on personal material.
+2. **The name.** The page and the tab need a name for the course. Working title: *Practice*. Others to consider: *Listening Studio*, *Threads*, *Sound Practice*.
+3. **Chapter 6.** Are you comfortable with these prompts as drafted, or do you want them dropped or made more minimal?
+4. **Therapist sharing.** Should a client ever be able to share a thread with their therapist? I have assumed no for now, because therapists decide for themselves about clients and this adds privacy questions.
+5. **Cancellation behaviour.** Do you agree with the proposal in section 10?
 
-Also worth saying out loud: this is more than a rewrite, it is a new product. I'd suggest we build weeks 0 to 3 first and decide on the rest after seeing real people use them.
+Once you have answered these I'd start with the thread data model and the free preview page.
