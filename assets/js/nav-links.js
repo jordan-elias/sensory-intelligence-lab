@@ -27,6 +27,7 @@ function whenNav(cb, tries = 30) {
 }
 
 export function render(roles) {
+  try { document.dispatchEvent(new CustomEvent('sil:roles', { detail: roles })); } catch { /* not a browser */ }
   whenNav(nav => {
     nav.querySelectorAll('[data-role-link]').forEach(a => a.remove());
     const anchor = nav.querySelector('.sil-header__signout, .lab-signout');
