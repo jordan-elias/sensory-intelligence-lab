@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <script src="/assets/js/audio/safe-output.js"></script>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Oramics</title>
 
   <meta name="robots" content="noindex, nofollow">
@@ -23,626 +23,120 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --font-body:    'Inter', sans-serif;
-      --font-heading: 'Space Grotesk', sans-serif;
-      --bg:           #fff;
-      --surface:      #f9f9f7;
-      --border:       #e5e5e0;
-      --text:         #1a1a1a;
-      --muted:        #6b6b6b;
-      --accent:       #2a5c45;
-      --accent-light: #edf4f0;
-      --accent-hover: #1e4433;
-
-      --film:         #faf8f2;
-      --film-edge:    #e8e4d8;
-      --ink:          #1a1a14;
-      --playhead:     #c0392b;
-
-      --pitch-col:    #2a5c45;
-      --amp-col:      #1a4d6b;
-      --timbre-col:   #7b3f00;
-      --mod-col:      #5c2a5c;
-
-      /* Canvas height variable — set by JS */
-      --canvas-h:     340px;
+      --font-body: 'Inter', sans-serif; --font-heading: 'Space Grotesk', sans-serif;
+      --bg: #fff; --surface: #f9f9f7; --border: #e5e5e0; --text: #1a1a1a; --muted: #6b6b6b;
+      --accent: #2a5c45; --accent-light: #edf4f0; --accent-hover: #1e4433;
+      --stage: #12121a;
     }
-
     html { font-size: 16px; }
-    body {
-      font-family: var(--font-body);
-      color: var(--text);
-      background: var(--bg);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* ── BREADCRUMB ── */
-    .bc {
-      padding: .75rem 1.5rem 0;
-      max-width: 1200px;
-      margin: 0 auto;
-      width: 100%;
-    }
-    .bc ol {
-      list-style: none;
-      display: flex;
-      gap: .3rem;
-      align-items: center;
-      font-size: .75rem;
-      color: var(--muted);
-    }
+    body { font-family: var(--font-body); color: var(--text); background: var(--bg); min-height: 100vh; display: flex; flex-direction: column; }
+    .bc { padding: .75rem 1.5rem 0; max-width: 1280px; margin: 0 auto; width: 100%; }
+    .bc ol { list-style: none; display: flex; gap: .3rem; align-items: center; font-size: .75rem; color: var(--muted); }
     .bc li+li::before { content: '/'; margin-right: .3rem; color: var(--border); }
-    .bc a { color: var(--muted); text-decoration: none; }
-    .bc a:hover { color: var(--accent); text-decoration: underline; }
+    .bc a { color: var(--muted); text-decoration: none; } .bc a:hover { color: var(--accent); text-decoration: underline; }
+    main { max-width: 1280px; margin: 0 auto; padding: 1rem 1.5rem 4rem; flex: 1; width: 100%; }
+    .ph { margin-bottom: .8rem; display: flex; align-items: baseline; gap: .9rem; flex-wrap: wrap; }
+    .ph h2 { font-family: var(--font-heading); font-size: 1.4rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; }
+    .ph p { font-size: .86rem; color: var(--muted); line-height: 1.5; flex: 1; min-width: 16rem; }
+    footer { border-top: 1px solid var(--border); padding: 1.25rem 2rem; text-align: center; font-size: .78rem; color: var(--muted); margin-top: 2rem; }
+    footer a { color: var(--muted); text-decoration: none; } footer a:hover { color: var(--accent); }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-    /* ── PAGE LAYOUT ── */
-    main {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 1.5rem 1.5rem 4rem;
-      flex: 1;
-      width: 100%;
-    }
-    @media (max-width: 600px) { main { padding: .75rem .5rem 3rem; } }
+    /* ═══ THE PAINTING APP ═══ */
+    .oramics-app { border: 1px solid var(--border); background: var(--bg); }
+    .paint { display: grid; grid-template-columns: 58px minmax(0, 1fr) 310px; grid-template-rows: minmax(0, 1fr) auto;
+      grid-template-areas: "tools stage side" "tools bar side"; height: calc(100dvh - 190px); min-height: 560px; max-height: 920px; }
+    .p-tools { grid-area: tools; display: flex; flex-direction: column; gap: 4px; padding: 8px 6px; border-right: 1px solid var(--border); background: var(--surface); overflow-y: auto; }
+    .tool { position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: var(--bg); border: 1px solid var(--border); color: var(--text); cursor: pointer; border-radius: 0; flex-shrink: 0; touch-action: manipulation; }
+    .tool svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+    .tool:hover { border-color: var(--accent); color: var(--accent); }
+    .tool[aria-pressed=true] { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .tool:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .tool .tl { position: absolute; left: 50px; top: 50%; transform: translateY(-50%); background: var(--text); color: #fff; font: 500 .72rem var(--font-body); padding: .25rem .5rem; white-space: nowrap; pointer-events: none; opacity: 0; z-index: 30; }
+    .tool:hover .tl, .tool:focus-visible .tl { opacity: 1; }
 
-    .ph {
-      margin-bottom: 1.25rem;
-      padding-bottom: 1.1rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .ph h2 {
-      font-family: var(--font-heading);
-      font-size: 1.5rem;
-      font-weight: 600;
-      letter-spacing: -.02em;
-      line-height: 1.2;
-      margin-bottom: .3rem;
-    }
-    .ph p { font-size: .88rem; color: var(--muted); line-height: 1.6; max-width: 680px; }
+    .p-stage { grid-area: stage; background: var(--stage); display: flex; align-items: center; justify-content: center; min-width: 0; min-height: 0; position: relative; padding: 12px; overflow: hidden; }
+    #stage { display: block; background: #15151d; touch-action: none; cursor: crosshair; box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 10px 40px rgba(0,0,0,.45); max-width: 100%; }
+    #stage[data-tool=move] { cursor: grab; } #stage[data-tool=fill] { cursor: cell; }
+    .p-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; padding: 1rem; }
+    .p-empty > div { pointer-events: auto; background: rgba(18,18,26,.86); border: 1px solid rgba(255,255,255,.14); color: #f2efe8; padding: 1.2rem 1.3rem; max-width: 26rem; text-align: center; backdrop-filter: blur(4px); }
+    .p-empty h3 { font: 600 1.1rem var(--font-heading); margin-bottom: .3rem; } .p-empty p { font-size: .84rem; line-height: 1.5; color: #c9c5bb; margin-bottom: .9rem; }
+    .p-empty .row { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center; }
+    .p-empty .lab-btn { background: transparent; color: #f2efe8; border-color: rgba(255,255,255,.28); }
+    .p-empty .lab-btn:hover:not(:disabled) { background: rgba(255,255,255,.1); border-color: #fff; color: #fff; }
+    .p-empty .lab-btn.primary { background: #f2b632; border-color: #f2b632; color: #1a1a14; }
+    .p-empty[hidden] { display: none; }
 
-    /* ═══════════════════════════════════════════════
-       ORAMICS APP — full-width, panel below canvas
-    ═══════════════════════════════════════════════ */
-    .oramics-app {
-      display: flex;
-      flex-direction: column;
-      border: 1px solid var(--border);
-      background: var(--film);
-      position: relative;
-      overflow: hidden;
-    }
-    /* Paper grain */
-    .oramics-app::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      opacity: .025;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 10;
-    }
+    .p-bar { grid-area: bar; display: flex; align-items: center; gap: .5rem; padding: .55rem .7rem; border-top: 1px solid var(--border); background: var(--bg); flex-wrap: wrap; }
+    .p-len { display: flex; align-items: center; gap: .5rem; font: 500 .74rem var(--font-body); color: var(--muted); margin-left: auto; min-width: 0; }
+    .p-len input { width: 8.5rem; }
+    .p-time { font: 600 .78rem var(--font-heading); color: var(--text); min-width: 3.2rem; text-align: right; font-variant-numeric: tabular-nums; }
+    .lab-btn .ic { width: 15px; height: 15px; fill: currentColor; }
 
-    /* ── TRANSPORT BAR (top) ── */
-    .transport-bar {
-      display: flex;
-      align-items: center;
-      gap: .4rem;
-      padding: .55rem .85rem;
-      border-bottom: 1px solid var(--film-edge);
-      background: var(--film);
-      flex-wrap: wrap;
-      position: relative;
-      z-index: 5;
-      min-height: 46px;
-    }
-    .toolbar-sep {
-      width: 1px;
-      height: 20px;
-      background: var(--film-edge);
-      flex-shrink: 0;
-      margin: 0 .15rem;
-    }
-    .tbtn {
-      font-family: var(--font-heading);
-      font-size: .72rem;
-      font-weight: 600;
-      background: transparent;
-      color: var(--text);
-      border: 1px solid var(--film-edge);
-      padding: .38rem .85rem;
-      cursor: pointer;
-      transition: all .12s;
-      white-space: nowrap;
-      letter-spacing: .01em;
-      line-height: 1.4;
-      min-height: 34px;
-      touch-action: manipulation;
-    }
-    .tbtn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
-    .tbtn.active { background: var(--accent); color: white; border-color: var(--accent); }
-    .tbtn.danger { border-color: #e8c0bc; }
-    .tbtn.danger:hover { background: #c0392b; color: white; border-color: #c0392b; }
-    .tbtn:disabled { opacity: .35; cursor: not-allowed; pointer-events: none; }
-    .tbtn.play-btn { background: var(--accent); color: white; border-color: var(--accent); }
-    .tbtn.play-btn:hover { background: var(--accent-hover); }
-    .tbtn.stop-btn.active { background: #c0392b; color: white; border-color: #c0392b; }
+    .p-side { grid-area: side; border-left: 1px solid var(--border); overflow-y: auto; background: var(--bg); min-height: 0; }
+    .p-sec { padding: .8rem .9rem; border-bottom: 1px solid var(--border); }
+    .p-sec > h3, .p-sec > summary { font: 600 .68rem var(--font-heading); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: .55rem; cursor: default; list-style: none; }
+    details.p-sec > summary { cursor: pointer; margin-bottom: 0; display: flex; justify-content: space-between; } details.p-sec[open] > summary { margin-bottom: .6rem; }
+    details.p-sec > summary::after { content: '+'; } details.p-sec[open] > summary::after { content: '–'; }
+    details.p-sec > summary::-webkit-details-marker { display: none; }
+    .inks { display: flex; flex-direction: column; gap: 4px; }
+    .ink { display: flex; align-items: stretch; border: 1px solid var(--border); background: var(--bg); }
+    .ink[data-on=true] { border-color: var(--ink-c); box-shadow: inset 3px 0 0 var(--ink-c); background: var(--accent-light); }
+    .ink-main { flex: 1; display: flex; align-items: center; gap: .6rem; padding: .5rem .6rem; background: none; border: 0; text-align: left; cursor: pointer; color: var(--text); min-height: 46px; min-width: 0; border-radius: 0; touch-action: manipulation; }
+    .ink-main:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+    .dot { width: 18px; height: 18px; border-radius: 50%; background: var(--ink-c); flex-shrink: 0; box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--ink-c); }
+    .ink-t { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; } .ink-t b { font: 600 .84rem var(--font-heading); } .ink-t span { font-size: .7rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ink-btn { width: 34px; border: 0; border-left: 1px solid var(--border); background: none; font: 600 .7rem var(--font-heading); color: var(--muted); cursor: pointer; border-radius: 0; touch-action: manipulation; }
+    .ink-btn:hover { color: var(--accent); } .ink-btn[aria-pressed=true] { background: var(--text); color: #fff; }
+    .ink-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+    .how { font-size: .8rem; line-height: 1.55; color: var(--muted); margin-bottom: .7rem; }
+    .shades { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: .7rem; }
+    .shade { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 5px 7px; min-width: 56px; background: var(--bg); border: 1px solid var(--border); cursor: pointer; font: 500 .66rem var(--font-body); color: var(--muted); border-radius: 0; touch-action: manipulation; }
+    .shade i { width: 22px; height: 22px; border-radius: 50%; background: var(--sh); display: block; }
+    .shade[aria-pressed=true] { border-color: var(--text); color: var(--text); box-shadow: inset 0 -2px 0 var(--text); }
+    .shade:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .fld { display: flex; align-items: center; justify-content: space-between; gap: .6rem; margin: .5rem 0; font: 500 .78rem var(--font-body); }
+    .fld > span:first-child { color: var(--muted); }
+    .fld output { font: 600 .74rem var(--font-heading); min-width: 2.6rem; text-align: right; font-variant-numeric: tabular-nums; }
+    .fld input[type=range] { flex: 1; min-width: 0; max-width: 11rem; accent-color: var(--accent); }
+    select, .fld select { font: 500 .78rem var(--font-body); padding: .45rem .5rem; border: 1px solid var(--border); background: var(--bg); color: var(--text); min-height: 40px; border-radius: 0; max-width: 11rem; }
+    input[type=text] { font: 500 .8rem var(--font-body); padding: .5rem .6rem; border: 1px solid var(--border); background: var(--bg); color: var(--text); min-height: 40px; width: 100%; border-radius: 0; }
+    input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .row2 { display: flex; gap: .4rem; flex-wrap: wrap; margin-top: .5rem; }
+    .row2 .lab-btn { padding: .5rem .8rem; font-size: .76rem; min-height: 40px; }
+    .slot { display: flex; align-items: center; gap: .3rem; margin-top: .35rem; font-size: .78rem; }
+    .slot button.name { flex: 1; text-align: left; background: none; border: 0; cursor: pointer; color: var(--text); padding: .45rem .2rem; min-height: 40px; font: 500 .78rem var(--font-body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .slot button.name:hover { color: var(--accent); }
+    .slot button.del { background: none; border: 0; color: var(--muted); cursor: pointer; min-width: 40px; min-height: 40px; font-size: 1rem; }
+    .msg { font-size: .76rem; color: var(--muted); line-height: 1.5; margin-top: .5rem; min-height: 1.1em; }
+    .keys { font-size: .72rem; color: var(--muted); line-height: 1.7; } .keys kbd { font: 600 .68rem var(--font-heading); border: 1px solid var(--border); padding: 0 .3rem; background: var(--surface); }
 
-    .speed-row { display: flex; align-items: center; gap: .4rem; }
-    .speed-label { font-size: .65rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
-    .speed-val { font-family: 'Courier New', monospace; font-size: .72rem; color: var(--accent); min-width: 30px; }
-    input[type=range].slider {
-      -webkit-appearance: none;
-      width: 70px; height: 2px;
-      background: var(--film-edge);
-      outline: none;
-      cursor: pointer;
+    /* ═══ PHONE ═══ */
+    @media (max-width: 860px) {
+      main { padding: .5rem .5rem 2rem; } .bc { padding: .5rem .75rem 0; }
+      .ph { margin: 0 .25rem .6rem; } .ph p { display: none; }
+      .oramics-app { border: 0; }
+      .paint { display: flex; flex-direction: column; height: auto; min-height: 0; max-height: none; }
+      .p-stage { order: 1; padding: 0; background: var(--stage); }
+      #stage { box-shadow: none; }
+      .p-tools { order: 2; flex-direction: row; border-right: 0; border-bottom: 1px solid var(--border); overflow-x: auto; overflow-y: hidden; padding: 6px; scrollbar-width: none; }
+      .tool .tl { display: none; }
+      .p-side { order: 3; border-left: 0; overflow: visible; }
+      .inks { flex-direction: row; overflow-x: auto; gap: 6px; padding-bottom: 4px; scrollbar-width: none; }
+      .ink { flex: 0 0 auto; } .ink-main { padding: .45rem .55rem; } .ink-t span { display: none; } .ink-btn { width: 30px; }
+      .p-bar { order: 4; position: sticky; bottom: var(--tabbar-h, 0px); z-index: 40; padding: .5rem .6rem; box-shadow: 0 -6px 18px rgba(0,0,0,.07); gap: .4rem; flex-wrap: nowrap; }
+      .p-bar .lab-btn { padding: .55rem .8rem; }
+      .p-bar .t { display: none; } .p-bar .lab-btn { padding: .55rem .7rem; } .p-time { min-width: 0; font-size: .7rem; white-space: nowrap; }
+      .p-len { margin-left: 0; flex: 1; } .p-len input { flex: 1; width: auto; min-width: 3rem; } .p-len > span.lbl { display: none; }
+      .keys { display: none; }
+      .p-empty > div { padding: .9rem; } .p-empty p { margin-bottom: .6rem; }
     }
-    input[type=range].slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 14px; height: 14px;
-      border-radius: 50%;
-      background: var(--accent);
-      cursor: pointer;
-    }
-    input[type=range].slider::-moz-range-thumb {
-      width: 14px; height: 14px;
-      border-radius: 50%;
-      background: var(--accent);
-      border: none;
-      cursor: pointer;
-    }
-    .wave-select {
-      font-family: 'Courier New', monospace;
-      font-size: .72rem;
-      background: var(--film);
-      color: var(--text);
-      border: 1px solid var(--film-edge);
-      padding: .35rem .5rem;
-      cursor: pointer;
-      outline: none;
-      min-height: 34px;
-    }
-    .analog-toggle { display: flex; align-items: center; gap: .4rem; }
-    .analog-toggle-label { font-size: .68rem; color: var(--muted); }
-    .toggle-sw { position: relative; width: 32px; height: 18px; }
-    .toggle-sw input { opacity: 0; width: 0; height: 0; position: absolute; }
-    .toggle-sw-slider {
-      position: absolute; inset: 0;
-      background: var(--film-edge);
-      border-radius: 18px;
-      cursor: pointer;
-      transition: background .15s;
-    }
-    .toggle-sw-slider::before {
-      content: '';
-      position: absolute;
-      width: 12px; height: 12px;
-      left: 3px; top: 3px;
-      background: white;
-      border-radius: 50%;
-      transition: transform .15s;
-    }
-    .toggle-sw input:checked + .toggle-sw-slider { background: var(--accent); }
-    .toggle-sw input:checked + .toggle-sw-slider::before { transform: translateX(14px); }
-
-    /* ── CANVAS AREA — full width ── */
-    .canvas-area {
-      position: relative;
-      width: 100%;
-      /* Height controlled dynamically */
-      height: var(--canvas-h);
-      min-height: 240px;
-      overflow: hidden;
-    }
-
-    /* Decorative sprocket holes — absolutely positioned, no overlap with drawing area */
-    .sprocket-strip {
-      position: absolute;
-      left: 0; right: 0;
-      height: 10px;
-      z-index: 8;
-      pointer-events: none;
-      display: flex;
-      align-items: center;
-      gap: 0;
-    }
-    .sprocket-strip.top { top: 0; border-bottom: 1px solid var(--film-edge); }
-    .sprocket-strip.bot { bottom: 0; border-top: 1px solid var(--film-edge); }
-    .sprocket-strip-bg {
-      position: absolute;
-      inset: 0;
-      background: var(--film-edge);
-      opacity: .5;
-    }
-    .sprocket-holes {
-      position: absolute;
-      inset: 0;
-      background-image: repeating-linear-gradient(
-        90deg,
-        transparent 0px, transparent 14px,
-        rgba(250,248,242,.9) 14px, rgba(250,248,242,.9) 22px,
-        transparent 22px, transparent 28px
-      );
-    }
-
-    /* Canvas inner — fills between sprocket strips */
-    .canvas-inner {
-      position: absolute;
-      top: 10px; bottom: 10px; left: 0; right: 30px; /* right: 30px for ruler */
-    }
-
-    /* Y-axis ruler */
-    .y-ruler {
-      position: absolute;
-      top: 10px; bottom: 10px;
-      right: 0; width: 30px;
-      border-left: 1px solid var(--film-edge);
-      background: var(--film);
-      z-index: 8;
-      pointer-events: none;
-    }
-    .y-ruler canvas { display: block; width: 100%; height: 100%; }
-
-    /* Canvas layers */
-    .c-grid, .c-pitch, .c-amp, .c-timbre, .c-mod, .c-ui, .c-overlay, .c-draw {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      display: block;
-    }
-    .c-grid    { z-index: 1; pointer-events: none; }
-    .c-pitch   { z-index: 2; pointer-events: none; }
-    .c-amp     { z-index: 3; pointer-events: none; }
-    .c-timbre  { z-index: 4; pointer-events: none; }
-    .c-mod     { z-index: 5; pointer-events: none; }
-    .c-ui      { z-index: 6; pointer-events: none; }
-    .c-overlay { z-index: 7; pointer-events: none; } /* ghost preview */
-    .c-draw    { z-index: 8; cursor: crosshair; }
-
-    /* ── STATUS BAR ── */
-    .status-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: .35rem .85rem;
-      border-top: 1px solid var(--film-edge);
-      border-bottom: 1px solid var(--film-edge);
-      background: var(--film);
-      font-family: 'Courier New', monospace;
-      font-size: .65rem;
-      color: var(--muted);
-      flex-wrap: wrap;
-      gap: .4rem;
-      position: relative;
-      z-index: 5;
-    }
-    .status-pos    { color: var(--text); }
-    .status-param  { color: var(--accent); }
-    .status-tip    { font-family: var(--font-body); font-size: .65rem; font-style: italic; }
-
-    /* ── BOTTOM PANEL (layers + tools) ── */
-    .bottom-panel {
-      display: flex;
-      flex-direction: row;
-      border-top: none;
-      background: var(--film);
-      position: relative;
-      z-index: 5;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: thin;
-      scrollbar-color: var(--film-edge) transparent;
-    }
-    .bottom-panel::-webkit-scrollbar { height: 4px; }
-    .bottom-panel::-webkit-scrollbar-thumb { background: var(--film-edge); }
-
-    /* Section within bottom panel */
-    .bp-section {
-      border-right: 1px solid var(--film-edge);
-      padding: .65rem .85rem;
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      gap: .5rem;
-    }
-    .bp-section:last-child { border-right: none; }
-    .bp-section-title {
-      font-family: var(--font-heading);
-      font-size: .58rem;
-      font-weight: 600;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-
-    /* Layer tabs row */
-    .layer-tabs {
-      display: flex;
-      flex-direction: row;
-      gap: .35rem;
-    }
-    .layer-tab {
-      display: flex;
-      align-items: center;
-      gap: .35rem;
-      padding: .42rem .7rem;
-      border: 1px solid var(--film-edge);
-      cursor: pointer;
-      transition: background .1s, border-color .1s;
-      touch-action: manipulation;
-      min-height: 36px;
-      white-space: nowrap;
-    }
-    .layer-tab:hover { background: rgba(42,92,69,.05); border-color: var(--film-edge); }
-    .layer-tab.active { background: var(--accent-light); border-color: var(--accent); }
-    .layer-dot {
-      width: 9px; height: 9px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-    .layer-name {
-      font-family: var(--font-heading);
-      font-size: .7rem;
-      font-weight: 600;
-      color: var(--text);
-    }
-    .layer-tab.active .layer-name { color: var(--accent); }
-    .layer-vis {
-      font-size: .65rem;
-      color: var(--muted);
-      cursor: pointer;
-      padding: 2px 4px;
-      opacity: .6;
-      transition: opacity .1s;
-      line-height: 1;
-    }
-    .layer-vis:hover { opacity: 1; }
-
-    /* Layer hint */
-    .layer-hint-bar {
-      font-size: .68rem;
-      color: var(--muted);
-      line-height: 1.45;
-      font-style: italic;
-      padding: .2rem 0;
-    }
-
-    /* Scale display */
-    .scale-row {
-      display: flex;
-      gap: .75rem;
-      font-family: 'Courier New', monospace;
-      font-size: .65rem;
-      color: var(--muted);
-    }
-    .scale-entry { display: flex; flex-direction: column; align-items: center; gap: 1px; }
-    .scale-entry .sk { font-size: .55rem; text-transform: uppercase; letter-spacing: .08em; }
-    .scale-entry .sv { color: var(--accent); font-size: .68rem; }
-
-    /* Tool buttons */
-    .tool-grid {
-      display: flex;
-      flex-direction: row;
-      gap: .3rem;
-      flex-wrap: wrap;
-    }
-    .tool-btn {
-      font-family: var(--font-heading);
-      font-size: .68rem;
-      font-weight: 600;
-      padding: .38rem .65rem;
-      border: 1px solid var(--film-edge);
-      background: var(--film);
-      color: var(--muted);
-      cursor: pointer;
-      transition: all .1s;
-      white-space: nowrap;
-      min-height: 36px;
-      touch-action: manipulation;
-    }
-    .tool-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .tool-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
-
-    /* Brush controls */
-    .brush-controls {
-      display: flex;
-      flex-direction: column;
-      gap: .4rem;
-    }
-    .brush-row {
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-    }
-    .brush-label {
-      font-size: .62rem;
-      color: var(--muted);
-      width: 28px;
-      flex-shrink: 0;
-      font-family: 'Courier New', monospace;
-    }
-    .brush-val {
-      font-family: 'Courier New', monospace;
-      font-size: .62rem;
-      color: var(--accent);
-      min-width: 26px;
-    }
-    input[type=range].brush-slider {
-      -webkit-appearance: none;
-      width: 140px;
-      height: 2px;
-      background: var(--film-edge);
-      outline: none;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-    input[type=range].brush-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 14px; height: 14px;
-      border-radius: 50%;
-      background: var(--accent);
-      cursor: pointer;
-    }
-    input[type=range].brush-slider::-moz-range-thumb {
-      width: 14px; height: 14px;
-      border-radius: 50%;
-      background: var(--accent);
-      border: none;
-      cursor: pointer;
-    }
-    /* Brush preview circle */
-    .brush-preview {
-      width: 36px; height: 36px;
-      border: 1px solid var(--film-edge);
-      display: flex; align-items: center; justify-content: center;
-      background: white;
-      flex-shrink: 0;
-      border-radius: 2px;
-    }
-    .brush-preview-dot {
-      background: var(--accent);
-      border-radius: 50%;
-      opacity: .7;
-      transition: width .1s, height .1s;
-    }
-
-    /* Inspector cells */
-    .inspector-row {
-      display: flex;
-      gap: .4rem;
-      flex-wrap: nowrap;
-    }
-    .insp-cell {
-      border: 1px solid var(--film-edge);
-      padding: .4rem .6rem;
-      background: rgba(255,255,255,.6);
-      min-width: 80px;
-      flex: 1;
-    }
-    .insp-label {
-      font-size: .57rem;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: .15rem;
-      white-space: nowrap;
-    }
-    .insp-val {
-      font-family: 'Courier New', monospace;
-      font-size: .82rem;
-      font-weight: 600;
-      color: var(--text);
-    }
-    .insp-bar { height: 2px; background: var(--film-edge); margin-top: .25rem; position: relative; overflow: hidden; }
-    .insp-bar-fill { position: absolute; top: 0; left: 0; height: 100%; transition: width .05s; }
-
-    /* ── KEYBOARD SHORTCUTS HINT ── */
-    .kbd-hints {
-      display: flex;
-      gap: .5rem;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .kbd {
-      font-family: 'Courier New', monospace;
-      font-size: .6rem;
-      background: var(--film-edge);
-      padding: .1rem .35rem;
-      border-radius: 2px;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-    .kbd-sep { color: var(--film-edge); font-size: .65rem; }
-
-    /* Mobile adaptations */
-    @media (max-width: 600px) {
-      main { padding: .5rem .25rem 3rem; }
-      .transport-bar { padding: .45rem .5rem; gap: .3rem; }
-      .tbtn { padding: .38rem .6rem; font-size: .68rem; min-height: 40px; }
-      .bottom-panel { flex-direction: column; overflow-x: hidden; }
-      .bp-section {
-        border-right: none;
-        border-bottom: 1px solid var(--film-edge);
-        padding: .55rem .75rem;
-      }
-      .layer-tabs { flex-wrap: wrap; }
-      .layer-tab { min-height: 40px; }
-      .tool-btn { min-height: 40px; padding: .45rem .7rem; }
-      input[type=range].brush-slider { width: 160px; }
-      .canvas-area { min-height: 280px; }
-      .inspector-row { flex-wrap: wrap; }
-      .insp-cell { min-width: 70px; }
-      .kbd-hints { display: none; } /* hide on mobile */
-    }
-
-    /* ── ESSAY ── */
-    .essay {
-      margin-top: 2.5rem;
-      padding-top: 2rem;
-      border-top: 1px solid var(--border);
-      font-size: .9rem;
-      line-height: 1.8;
-      color: var(--text);
-    }
-    .essay h2 {
-      font-family: var(--font-heading);
-      font-size: 1rem;
-      font-weight: 600;
-      letter-spacing: -.01em;
-      margin: 1.75rem 0 .45rem;
-    }
-    .essay h2:first-child { margin-top: 0; }
-    .essay p + p { margin-top: .75rem; }
-    .essay em { font-style: italic; }
-    .essay strong { font-weight: 600; }
-    .essay-divider {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin: 2.5rem 0 2rem;
-    }
-    .essay-divider-line { flex: 1; height: 1px; background: var(--border); }
-    .essay-divider-label {
-      font-family: var(--font-heading);
-      font-size: .67rem;
-      font-weight: 600;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-    .pull-quote {
-      border-left: 3px solid var(--accent);
-      padding: .75rem 1rem;
-      margin: 1.25rem 0;
-      background: var(--surface);
-    }
-    .pull-quote p { font-size: .88rem; font-style: italic; line-height: 1.65; }
-    .pull-quote cite { display: block; font-size: .72rem; color: var(--muted); font-style: normal; margin-top: .35rem; }
-
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 1.25rem 2rem;
-      text-align: center;
-      font-size: .78rem;
-      color: var(--muted);
-      margin-top: 2rem;
-    }
-    footer a { color: var(--muted); text-decoration: none; }
-    footer a:hover { color: var(--accent); }
-      .tick { display:inline-flex; align-items:center; gap:.35rem; font-size:.68rem; color: var(--muted); font-family: var(--font-heading); cursor:pointer; }
-    .opt-row { display:flex; align-items:center; gap:.35rem; flex-wrap:wrap; margin-top:.45rem; }
-    .file-name { font-family: var(--font-body); font-size:.72rem; padding:.35rem .5rem; border:1px solid var(--film-edge); background: var(--film); color: var(--text); min-width:0; width:9.5rem; }
-    .file-msg { font-size:.65rem; color: var(--muted); margin-top:.5rem; max-width:17rem; line-height:1.5; }
-    .tool-btn:disabled { opacity:.4; cursor:not-allowed; }
-    .tool-btn:focus-visible, .tbtn:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
-    .bottom-panel { flex-wrap: wrap; }
+    @media (min-width: 861px) and (max-height: 720px) { .paint { height: 560px; } }
+    @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
   </style>
-  <link rel="stylesheet" href="/assets/css/header.css">
   <link rel="stylesheet" href="/assets/css/a11y.css">
+  <link rel="stylesheet" href="/assets/css/lab-ui.css">
+  <link rel="stylesheet" href="/assets/css/essay.css">
 </head>
 <body>
 
@@ -660,253 +154,189 @@
 
   <div class="ph">
     <h2>Oramics</h2>
-    <p>Draw directly onto a moving film strip. Your shapes become sound — pitch, amplitude, timbre, modulation — much as Daphne Oram's machine translated drawn marks into music from the late 1950s.</p>
+    <p>Paint a picture and hear it. Each colour is a part of the music: a melody, chords, a bass, a beat, a wash of air. Left to right is time, and height is pitch.</p>
   </div>
 
-  <!-- THE INSTRUMENT -->
   <div class="oramics-app" id="oramicsApp">
+    <div class="paint" id="paint">
 
-    <!-- Transport bar -->
-    <div class="transport-bar" id="toolbar">
-      <button class="tbtn play-btn" id="btn-play" onclick="ORM.togglePlay()"><svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> play</button>
-      <button class="tbtn" id="btn-loop" onclick="ORM.toggleLoop()" title="Loop playback">↺ loop</button>
-      <div class="toolbar-sep"></div>
-
-      <div class="speed-row">
-        <span class="speed-label">speed</span>
-        <input type="range" class="slider" id="speed-slider" min="0.1" max="3" step="0.05" value="0.8"
-          oninput="ORM.setSpeed(+this.value)">
-        <span class="speed-val" id="speed-val">0.80×</span>
-      </div>
-      <div class="toolbar-sep"></div>
-
-      <select class="wave-select" id="wave-select" onchange="ORM.setWave(this.value)">
-        <option value="sine">sine</option>
-        <option value="triangle">triangle</option>
-        <option value="sawtooth">sawtooth</option>
-        <option value="square">square</option>
-      </select>
-
-      <div class="speed-row">
-        <span class="speed-label">voices</span>
-        <input type="range" class="slider" id="voices-slider" min="1" max="6" step="1" value="1"
-          oninput="ORM.setVoices(+this.value); document.getElementById('voices-val').textContent = this.value;">
-        <span class="speed-val" id="voices-val">1</span>
-      </div>
-      <div class="toolbar-sep"></div>
-
-      <div class="analog-toggle">
-        <label class="toggle-sw" title="Analog imperfection — adds wow, flutter, drift">
-          <input type="checkbox" id="analog-toggle" onchange="ORM.setAnalog(this.checked)">
-          <span class="toggle-sw-slider"></span>
-        </label>
-        <span class="analog-toggle-label">analog</span>
-      </div>
-      <div class="toolbar-sep"></div>
-
-      <button class="tbtn" id="btn-undo" onclick="ORM.undo()" title="Undo (Ctrl+Z)" disabled>↶ undo</button>
-      <button class="tbtn" id="btn-redo" onclick="ORM.redo()" title="Redo (Ctrl+Y)" disabled>↷ redo</button>
-      <label class="tick" title="Undo and redo the most recent change on any layer"><input type="checkbox" id="undo-all" onchange="ORM.setUndoAll(this.checked)"> all layers</label>
-      <div class="toolbar-sep"></div>
-      <button class="tbtn" onclick="ORM.randomize()" title="Generate random Oramics-style shapes">✦ randomize</button>
-      <button class="tbtn" onclick="ORM.clearAll()">clear</button>
-      <button class="tbtn" onclick="ORM.exportWav()" id="btn-export">export WAV</button>
-    </div>
-
-    <!-- Canvas area — full width -->
-    <div class="canvas-area" id="canvasArea">
-      <div class="sprocket-strip top"><div class="sprocket-strip-bg"></div><div class="sprocket-holes"></div></div>
-      <div class="sprocket-strip bot"><div class="sprocket-strip-bg"></div><div class="sprocket-holes"></div></div>
-
-      <div class="canvas-inner" id="canvasInner">
-        <canvas class="c-grid"    id="c-grid"></canvas>
-        <canvas class="c-pitch"   id="c-pitch"></canvas>
-        <canvas class="c-amp"     id="c-amp"></canvas>
-        <canvas class="c-timbre"  id="c-timbre"></canvas>
-        <canvas class="c-mod"     id="c-mod"></canvas>
-        <canvas class="c-ui"      id="c-ui"></canvas>
-        <canvas class="c-overlay" id="c-overlay"></canvas>
-        <canvas class="c-draw"    id="c-draw"></canvas>
+      <!-- Tools -->
+      <div class="p-tools" role="toolbar" aria-label="Painting tools" id="tools">
+        <button type="button" class="tool" data-tool="brush" aria-pressed="true" aria-label="Brush (B)"><svg viewBox="0 0 24 24"><path d="M4 20c3 0 5-1 5-3.5 0-2 1.5-3 3-3.5l6.5-6.5a2.1 2.1 0 0 0-3-3L9 10c-.5 1.5-1.500 3-3.500 3C3 13 4 17 4 20z"/></svg><span class="tl">Brush · B</span></button>
+        <button type="button" class="tool" data-tool="dots" aria-pressed="false" aria-label="Dots (D)"><svg viewBox="0 0 24 24"><circle cx="6" cy="16" r="1.6"/><circle cx="12" cy="8" r="1.6"/><circle cx="18" cy="15" r="1.6"/><circle cx="14" cy="18.5" r="1"/></svg><span class="tl">Dots · D</span></button>
+        <button type="button" class="tool" data-tool="line" aria-pressed="false" aria-label="Line (L)"><svg viewBox="0 0 24 24"><path d="M5 19L19 5"/><circle cx="5" cy="19" r="1.3"/><circle cx="19" cy="5" r="1.3"/></svg><span class="tl">Line · L</span></button>
+        <button type="button" class="tool" data-tool="rect" aria-pressed="false" aria-label="Rectangle (R)"><svg viewBox="0 0 24 24"><rect x="4.5" y="6.500" width="15" height="11"/></svg><span class="tl">Rectangle · R</span></button>
+        <button type="button" class="tool" data-tool="ellipse" aria-pressed="false" aria-label="Ellipse (O)"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="8" ry="6"/></svg><span class="tl">Ellipse · O</span></button>
+        <button type="button" class="tool" data-tool="spray" aria-pressed="false" aria-label="Spray (S)"><svg viewBox="0 0 24 24"><rect x="8" y="12" width="8" height="8"/><path d="M10 12V9h4v3M12 9V6M7 5l1 1.200M17 5l-1 1.200M12 3v.5"/></svg><span class="tl">Spray · S</span></button>
+        <button type="button" class="tool" data-tool="fill" aria-pressed="false" aria-label="Fill (F)"><svg viewBox="0 0 24 24"><path d="M5 12l7-7 7 7-7 7z"/><path d="M19 15c1 1.500 1.500 2.300 1.500 3a1.500 1.500 0 0 1-3 0c0-.7.500-1.500 1.500-3z"/></svg><span class="tl">Fill · F</span></button>
+        <button type="button" class="tool" data-tool="erase" aria-pressed="false" aria-label="Eraser (E)"><svg viewBox="0 0 24 24"><path d="M4 16l9-9 6 6-6 6H8z"/><path d="M9 11l6 6M13 19h7"/></svg><span class="tl">Eraser · E</span></button>
+        <button type="button" class="tool" data-tool="move" aria-pressed="false" aria-label="Slide the ink (M)"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 3l-2.500 2.500M12 3l2.500 2.500M12 21l-2.500-2.500M12 21l2.500-2.500M3 12l2.500-2.500M3 12l2.500 2.500M21 12l-2.500-2.500M21 12l-2.500 2.500"/></svg><span class="tl">Slide the ink · M</span></button>
       </div>
 
-      <div class="y-ruler">
-        <canvas id="c-ruler"></canvas>
-      </div>
-    </div>
-
-    <!-- Status bar -->
-    <div class="status-bar">
-      <span>
-        pos: <span class="status-pos" id="st-pos">0.00s</span> ·
-        pitch: <span class="status-param" id="st-pitch">—</span> ·
-        amp: <span class="status-param" id="st-amp">—</span> ·
-        filter: <span class="status-param" id="st-filter">—</span>
-      </span>
-      <span class="status-tip" id="st-tip">Draw on the canvas. Left → right = time · Up/down = value.</span>
-    </div>
-
-    <!-- Bottom panel -->
-    <div class="bottom-panel" id="bottomPanel">
-
-      <!-- Layers section -->
-      <div class="bp-section" style="min-width:0; flex-shrink:0;">
-        <div class="bp-section-title">layers</div>
-        <div class="layer-tabs" id="layerTabs">
-          <div class="layer-tab active" id="layer-btn-pitch" onclick="ORM.setLayer('pitch')">
-            <span class="layer-dot" style="background:var(--pitch-col)"></span>
-            <span class="layer-name">Pitch</span>
-            <span class="layer-vis" onclick="ORM.toggleVis('pitch',event)">●</span>
-          </div>
-          <div class="layer-tab" id="layer-btn-amp" onclick="ORM.setLayer('amp')">
-            <span class="layer-dot" style="background:var(--amp-col)"></span>
-            <span class="layer-name">Amp</span>
-            <span class="layer-vis" onclick="ORM.toggleVis('amp',event)">●</span>
-          </div>
-          <div class="layer-tab" id="layer-btn-timbre" onclick="ORM.setLayer('timbre')">
-            <span class="layer-dot" style="background:var(--timbre-col)"></span>
-            <span class="layer-name">Timbre</span>
-            <span class="layer-vis" onclick="ORM.toggleVis('timbre',event)">●</span>
-          </div>
-          <div class="layer-tab" id="layer-btn-mod" onclick="ORM.setLayer('mod')">
-            <span class="layer-dot" style="background:var(--mod-col)"></span>
-            <span class="layer-name">Mod</span>
-            <span class="layer-vis" onclick="ORM.toggleVis('mod',event)">●</span>
-          </div>
-        </div>
-        <div class="layer-hint-bar" id="layer-hint">Vertical position = frequency. Top = 2000 Hz, Bottom = 80 Hz.</div>
-        <div class="scale-row">
-          <div class="scale-entry"><span class="sk">top</span><span class="sv" id="scale-top">2000 Hz</span></div>
-          <div class="scale-entry"><span class="sk">mid</span><span class="sv" id="scale-mid">600 Hz</span></div>
-          <div class="scale-entry"><span class="sk">bot</span><span class="sv" id="scale-bot">80 Hz</span></div>
-        </div>
-      </div>
-
-      <!-- Tools section -->
-      <div class="bp-section" style="flex-shrink:0;">
-        <div class="bp-section-title">tools</div>
-        <div class="tool-grid" role="group" aria-label="Drawing tools">
-          <button class="tool-btn active" id="tool-brush"  onclick="ORM.setTool('brush')" title="Brush (B)">brush</button>
-          <button class="tool-btn" id="tool-pencil" onclick="ORM.setTool('pencil')" title="Pencil (P)">pencil</button>
-          <button class="tool-btn" id="tool-spray"  onclick="ORM.setTool('spray')" title="Spray (A)">spray</button>
-          <button class="tool-btn" id="tool-erase"  onclick="ORM.setTool('erase')" title="Eraser (E)">erase</button>
-          <button class="tool-btn" id="tool-fill"   onclick="ORM.setTool('fill')" title="Fill (G)">fill</button>
-          <button class="tool-btn" id="tool-line"   onclick="ORM.setTool('line')" title="Line (L)">line</button>
-          <button class="tool-btn" id="tool-curve"  onclick="ORM.setTool('curve')" title="Curve (U)">curve</button>
-          <button class="tool-btn" id="tool-rect"   onclick="ORM.setTool('rect')" title="Rectangle (R)">▭ rect</button>
-          <button class="tool-btn" id="tool-circle" onclick="ORM.setTool('circle')" title="Ellipse (C)">◯ ellipse</button>
-          <button class="tool-btn" id="tool-sine"   onclick="ORM.setTool('sine')" title="Sine (S)">∿ sine</button>
-          <button class="tool-btn" id="tool-flat"   onclick="ORM.setTool('flat')" title="Flat line (F)">― flat</button>
-          <button class="tool-btn" id="tool-select" onclick="ORM.setTool('select')" title="Select and move (M)">⬚ select</button>
-          <button class="tool-btn" id="tool-head"   onclick="ORM.setTool('head')" title="Reading head (H)">⇥ head</button>
-        </div>
-        <div class="opt-row" role="group" aria-label="Shapes">
-          <span class="brush-label" style="width:auto">shapes</span>
-          <button class="tool-btn active" id="shape-outline" onclick="ORM.setShapeFill(false)">outline</button>
-          <button class="tool-btn" id="shape-filled" onclick="ORM.setShapeFill(true)">filled</button>
-        </div>
-      </div>
-
-      <!-- Selection section -->
-      <div class="bp-section" style="flex-shrink:0;">
-        <div class="bp-section-title">selection</div>
-        <div class="tool-grid">
-          <button class="tool-btn" data-selop="flipTime" onclick="ORM.selOp('flipTime')" title="Play the selection backwards" disabled>⇋ reverse</button>
-          <button class="tool-btn" data-selop="flipPitch" onclick="ORM.selOp('flipPitch')" title="Turn the selection upside down" disabled>⇅ invert</button>
-          <button class="tool-btn" data-selop="repeat" onclick="ORM.selOp('repeat')" title="Repeat it straight after (Ctrl+D)" disabled>⧉ repeat</button>
-          <button class="tool-btn" data-selop="copy" onclick="ORM.selOp('copy')" title="Copy (Ctrl+C)" disabled>copy</button>
-          <button class="tool-btn" data-selop="cut" onclick="ORM.selOp('cut')" title="Cut (Ctrl+X)" disabled>cut</button>
-          <button class="tool-btn" data-selop="paste" onclick="ORM.selOp('paste')" title="Paste at the reading head (Ctrl+V)" disabled>paste</button>
-          <button class="tool-btn" data-selop="delete" onclick="ORM.selOp('delete')" title="Delete (Del)" disabled>delete</button>
-        </div>
-        <label class="tick"><input type="checkbox" id="sel-all" onchange="ORM.setSelAll(this.checked)"> all layers together</label>
-      </div>
-
-      <!-- Pitch section -->
-      <div class="bp-section" style="flex-shrink:0;">
-        <div class="bp-section-title">pitch</div>
-        <div class="tool-grid" role="group" aria-label="Pitch behaviour">
-          <button class="tool-btn active" id="pitch-free" onclick="ORM.setPitchMode('free')" title="Pitch slides smoothly wherever you draw (the original behaviour)">free glide</button>
-          <button class="tool-btn" id="pitch-snap" onclick="ORM.setPitchMode('snap')" title="Pitch lands on the notes of a scale">snap to scale</button>
-        </div>
-        <div id="snap-opts" hidden>
-          <div class="opt-row">
-            <select class="wave-select" id="snap-key" aria-label="Key" onchange="ORM.setKey(this.value)"><option value="0">C</option><option value="1">C♯</option><option value="2">D</option><option value="3">E♭</option><option value="4">E</option><option value="5">F</option><option value="6">F♯</option><option value="7">G</option><option value="8">A♭</option><option value="9">A</option><option value="10">B♭</option><option value="11">B</option></select>
-            <select class="wave-select" id="snap-scale" aria-label="Scale" onchange="ORM.setScale(this.value)"><option value="major">major</option><option value="minor">minor</option><option value="dorian">dorian</option><option value="pentatonic">pentatonic</option><option value="minor pentatonic">minor pentatonic</option><option value="blues">blues</option><option value="whole tone">whole tone</option><option value="chromatic">chromatic</option></select>
-          </div>
-          <div class="brush-row"><span class="brush-label">glide</span><input type="range" class="brush-slider" min="0" max="1" step=".05" value="0.3" aria-label="Glide between notes" oninput="ORM.setGlide(this.value)"><span class="brush-val" id="glide-val">0.30</span></div>
-        </div>
-      </div>
-
-      <!-- Brush section -->
-      <div class="bp-section" style="flex-shrink:0;">
-        <div class="bp-section-title">brush</div>
-        <div class="brush-controls">
-          <div class="brush-row">
-            <div class="brush-preview" id="brushPreview">
-              <div class="brush-preview-dot" id="brushPreviewDot" style="width:8px;height:8px;"></div>
+      <!-- Canvas -->
+      <div class="p-stage" id="stageWrap">
+        <canvas id="stage" width="1280" height="800" data-tool="brush" role="img" aria-label="Painting canvas. Left to right is time, height is pitch."></canvas>
+        <div class="p-empty" id="empty">
+          <div>
+            <h3>Paint here, then press Play</h3>
+            <p>Pick an ink on the right and draw. Each colour is a different part of the music. Or begin with something to paint over.</p>
+            <div class="row">
+              <button type="button" class="lab-btn primary" id="btnSurprise">Surprise me</button>
+              <button type="button" class="lab-btn" data-starter="dawn">Dawn</button>
+              <button type="button" class="lab-btn" data-starter="rain">Rain</button>
+              <button type="button" class="lab-btn" data-starter="heartbeat">Heartbeat</button>
             </div>
           </div>
-          <div class="brush-row">
-            <span class="brush-label">size</span>
-            <input type="range" class="brush-slider" min="1" max="60" value="8" id="brush-size"
-              oninput="ORM.setBrushSize(+this.value)">
-            <span class="brush-val" id="brush-size-val">8</span>
-          </div>
-          <div class="brush-row">
-            <span class="brush-label">soft</span>
-            <input type="range" class="brush-slider" min="0" max="1" step=".05" value="0.6" id="brush-soft"
-              oninput="ORM.setBrushSoft(+this.value)">
-            <span class="brush-val" id="brush-soft-val">.60</span>
-          </div>
         </div>
       </div>
 
-      <!-- File section -->
-      <div class="bp-section" style="flex-shrink:0;">
-        <div class="bp-section-title">file</div>
-        <div class="opt-row"><input type="text" id="file-name" class="file-name" maxlength="40" placeholder="name this drawing" aria-label="Name of the drawing"><button class="tool-btn" onclick="ORM.save()">save</button></div>
-        <div class="opt-row"><select class="wave-select" id="file-slots" aria-label="Drawings saved on this device" onchange="ORM.loadSlot()"></select><button class="tool-btn" onclick="ORM.deleteSlot()">remove</button></div>
-        <div class="opt-row">
-          <button class="tool-btn" onclick="ORM.downloadProject()">save as file</button>
-          <button class="tool-btn" onclick="document.getElementById('file-open').click()">open file</button>
-          <button class="tool-btn" onclick="ORM.exportPng()">picture</button>
-          <input type="file" id="file-open" accept=".json,application/json" hidden onchange="ORM.openFile(this)">
-        </div>
-        <div class="file-msg" id="file-msg" role="status" aria-live="polite">Drawings stay on this device. Nothing is sent anywhere.</div>
+      <!-- Transport -->
+      <div class="p-bar">
+        <button type="button" class="lab-btn primary" id="btnPlay" aria-label="Play"><svg class="ic" viewBox="0 0 10 12" id="icPlay"><path d="M0 0l10 6L0 12z"/></svg><span id="playLbl">Play</span></button>
+        <button type="button" class="lab-btn" id="btnLoop" aria-pressed="true" aria-label="Loop">Loop</button>
+        <button type="button" class="lab-btn" id="undo" aria-label="Undo" disabled>↶<span class="t"> Undo</span></button>
+        <button type="button" class="lab-btn" id="redo" aria-label="Redo" disabled>↷<span class="t"> Redo</span></button>
+        <label class="p-len"><span class="lbl">Length</span><input type="range" id="dur" min="4" max="90" step="1" value="24" aria-label="Length of the piece in seconds"><span class="p-time" id="durOut">24 s</span></label>
       </div>
 
-    </div><!-- /bottom-panel -->
+      <!-- Inks and settings -->
+      <aside class="p-side" aria-label="Inks and settings">
+        <section class="p-sec">
+          <h3 id="inksH">Inks</h3>
+          <div class="inks" id="inks" role="radiogroup" aria-labelledby="inksH"></div>
+        </section>
+        <section class="p-sec" id="inkPanel" aria-live="polite">
+          <p class="how" id="inkHow"></p>
+          <div class="shades" id="shades" role="group" aria-label="Voice for this ink"></div>
+          <label class="fld"><span>Volume</span><input type="range" id="inkVol" min="0" max="1" step="0.01" value="0.8"><output id="inkVolOut">80</output></label>
+        </section>
+        <details class="p-sec" open>
+          <summary>Brush</summary>
+          <label class="fld"><span>Size</span><input type="range" id="brushSize" min="3" max="90" step="1" value="16"><output id="brushOut">16</output></label>
+          <label class="fld"><span>Echo (repeat in time)</span><select id="echoN" aria-label="Echo copies"><option value="1">Off</option><option value="2">×2</option><option value="3">×3</option><option value="4">×4</option></select></label>
+          <label class="fld"><span>Echo spacing</span><input type="range" id="echoGap" min="3" max="50" step="1" value="12"><output id="echoGapOut">12%</output></label>
+          <div class="row2"><button type="button" class="lab-btn" id="mirror" aria-pressed="false">Mirror pitch</button><button type="button" class="lab-btn" id="filled" aria-pressed="false">Filled shapes</button></div>
+        </details>
+        <details class="p-sec" open>
+          <summary>Sound</summary>
+          <label class="fld"><span>Key</span><select id="key" aria-label="Key"></select></label>
+          <label class="fld"><span>Scale</span><select id="scale" aria-label="Scale"></select></label>
+          <div class="row2"><button type="button" class="lab-btn" id="snap" aria-pressed="false">Snap melody to key</button></div>
+          <label class="fld"><span>Space</span><input type="range" id="space" min="0" max="1" step="0.01" value="0.5"><output id="spaceOut">50</output></label>
+          <div class="row2"><button type="button" class="lab-btn" id="guides" aria-pressed="true">Guides</button><button type="button" class="lab-btn" id="paper" aria-pressed="false">Light paper</button></div>
+          <p class="msg">Chords always land on the key. Melody and bass slide freely unless you snap them.</p>
+        </details>
+        <details class="p-sec">
+          <summary>Picture</summary>
+          <div class="row2"><button type="button" class="lab-btn" id="btnSurprise2">Surprise me</button><button type="button" class="lab-btn" id="clearInk">Clear this ink</button><button type="button" class="lab-btn" id="clearAll">Clear all</button></div>
+          <label class="fld" style="margin-top:.8rem"><span>Start from</span><select id="starter" aria-label="Starting picture"><option value="">Choose…</option><option value="dawn">Dawn</option><option value="rain">Rain</option><option value="heartbeat">Heartbeat</option></select></label>
+          <label class="sr-only" for="pname">Name this picture</label><input type="text" id="pname" maxlength="40" placeholder="Name this picture" style="margin-top:.8rem">
+          <div class="row2"><button type="button" class="lab-btn primary" id="btnSave">Keep on this device</button></div>
+          <div id="slots" aria-label="Pictures kept on this device"></div>
+          <div class="row2"><button type="button" class="lab-btn" id="btnWav">Save as sound (WAV)</button><button type="button" class="lab-btn" id="btnPng">Save as image</button><button type="button" class="lab-btn" id="btnFile">Save as file</button><button type="button" class="lab-btn" id="btnOpen">Open a file</button></div>
+          <input type="file" id="fileIn" accept=".json,application/json" hidden>
+          <p class="msg" id="msg" role="status" aria-live="polite"></p>
+          <p class="msg">Everything stays on this device. Nothing you paint is uploaded.</p>
+        </details>
+        <section class="p-sec keys" aria-label="Keyboard shortcuts">
+          <b>Keys</b> · <kbd>Space</kbd> play · <kbd>1</kbd>–<kbd>5</kbd> inks · <kbd>B</kbd> brush <kbd>D</kbd> dots <kbd>L</kbd> line <kbd>R</kbd> rectangle <kbd>O</kbd> ellipse <kbd>S</kbd> spray <kbd>F</kbd> fill <kbd>E</kbd> eraser <kbd>M</kbd> slide · <kbd>[</kbd> <kbd>]</kbd> size · <kbd>Ctrl</kbd>+<kbd>Z</kbd> undo
+        </section>
+      </aside>
 
+    </div>
   </div><!-- /oramics-app -->
 
-  <!-- Essay -->
-  <div class="essay">
-    <h2>Sound drawn onto film</h2>
-    <p>In 1957 Daphne Oram left the BBC, where she had worked as a sound engineer and composer for over a decade, and set up a studio in a converted oast house in Kent. There, over the following years, she built a machine unlike anything that existed: the Oramics machine. A set of ten synchronised strips of 35mm film ran horizontally through the device. The composer drew directly onto the film — shapes, curves, lines, marks — and as the film moved through a photoelectric cell, the light transmitted through the drawn marks was converted into control voltages, which in turn controlled oscillators, filters, and amplifiers. The drawing was the score. The score was the sound.</p>
-    <p>Oramics was not notation. It was not a description of sound intended for a performer to realise. It was a direct physical encoding of sound itself: the shape on the film was the sound you heard, with no intermediary, no interpretation, no performance. The composer drew in time and heard time drawn back. This was a genuinely new relationship between the act of inscription and the act of sounding — one that most electronic music systems of the period, which used keyboards, punch cards, or written parameter sheets, did not offer.</p>
+  <!-- ══ Essay ══ -->
+  <article class="essay" id="essay">
+    <h2>Sound you can see</h2>
+    <p>In the late 1950s a British composer built a machine that turned drawings into music. You painted onto strips of clear 35&nbsp;mm film, the strips ran through the machine, light-sensitive cells read the marks, and what they read became pitch, loudness, vibrato and reverberation. The composer was Daphne Oram, and she called the system <em>Oramics</em>. It is one of the earliest instruments in which you compose by <em>looking at time</em> instead of writing notes.</p>
+    <p>This page is not a copy of her machine. It borrows the central idea (a picture is the score, and the picture is read from left to right) and builds a different instrument around it: five coloured inks, each with its own job in the music. The rest of this page is about the machine, the woman who made it, and what it left behind.</p>
 
-    <div class="essay-divider">
-      <div class="essay-divider-line"></div>
-      <span class="essay-divider-label">Daphne Oram — Life &amp; Work</span>
-      <div class="essay-divider-line"></div>
+    <div class="essay-table-wrap"><table class="essay-table">
+      <caption class="sr-only">How Oram's machine and this page compare</caption>
+      <thead><tr><th scope="col">Oram's machine</th><th scope="col">This page</th></tr></thead>
+      <tbody>
+        <tr><td>Ten synchronised strips of 35&nbsp;mm film, painted by hand</td><td>Five layers of paint, one per ink, on one canvas</td></tr>
+        <tr><td>Four strips set the pitch, as painted spots; one drew vibrato</td><td>Height is pitch for melody and bass, and it glides freely unless you ask it to snap to a key</td></tr>
+        <tr><td>Four strips drew the loudness of four different tones</td><td>Thickness is loudness: a broad stroke is full, a thin line is soft</td></tr>
+        <tr><td>Hand-drawn waveform slides defined the timbre</td><td>Four shades of each ink are four voices, so colour is timbre</td></tr>
+        <tr><td>One voice at a time; chords were built up on tape</td><td>Chords, a beat and a wash all play at once</td></tr>
+        <tr><td>One strip drew how much reverberation the sound had</td><td>A Space control for the whole picture</td></tr>
+      </tbody>
+    </table></div>
+    <p class="essay-note">Details of the machine follow the descriptions by Tom Richards (Goldsmiths, 2018) and Graham Wrench, the engineer who worked with Oram in the 1960s; see the sources below. Oram kept changing the machine over the years, so descriptions of it differ in detail.</p>
+
+    <div class="essay-divider"><div class="essay-divider-line"></div><span class="essay-divider-label">Daphne Oram, 1925–2003</span><div class="essay-divider-line"></div></div>
+
+    <h2>A studio engineer who wanted to compose</h2>
+    <p>Daphne Oram was born in Devizes, Wiltshire, on 31 December 1925, and went to Sherborne School for Girls in Dorset. As a child she was curious about sound beyond the keyboard; her brothers introduced her to radio electronics. In 1942 she was offered a place at the Royal College of Music. She turned it down and joined the BBC instead, as a junior studio engineer and “music balancer”.</p>
+    <p>It was wartime, and her work was practical. Among other things she “shadowed” live concerts with pre-recorded copies, ready to be switched in if an air raid cut the broadcast. After hours she taught herself what tape could do: recording, cutting, splicing, looping, changing speed and playing sound backwards. These were the same techniques that would later fill the BBC’s Radiophonic Workshop, and she was using them years before the Workshop existed.</p>
+
+    <h2>A piece nobody played for seventy years</h2>
+    <p>In the 1940s she composed <em>Still Point</em>, for a double orchestra, live electronics and turntables. The BBC turned it down and it was not performed in her lifetime. Its first performance was on 24 June 2016, by Shiva Feshareki and the London Contemporary Orchestra, and a revised version was played at the BBC Proms on 23 July 2018. It is a reminder of how far ahead of what was possible she often was.</p>
+
+    <h2>The Radiophonic Workshop, and leaving it</h2>
+    <p>By the 1950s Oram was pressing the BBC to take electronic music seriously, and in 1956 she put a proposal for a dedicated experimental workshop to BBC managers. In 1957 she scored <em>Amphitryon 38</em> using a sine-wave oscillator, a tape recorder and filters she designed herself; the Daphne Oram Trust describes it as the first wholly electronic score in BBC history. Early in 1958 she and Desmond Briscoe set up the BBC Radiophonic Workshop, and she became its first studio manager.</p>
+    <p>She did not stay. In October 1958 the BBC sent her to the experimental music events at Expo 58 in Brussels, and she came back frustrated that the BBC would not make electronic composition a priority. She resigned later that year and, in 1959, set up her own studio: the Oramics Studios for Electronic Composition, in Tower Folly, a converted oast house at Fairseat in Kent.</p>
+
+    <h2>Drawing as a way of composing</h2>
+    <p>Oram had a problem that every composer who worked with tape shared. Tape music was made by cutting and joining recorded sound, which was slow, and the result could not be shaped note by note the way a performer shapes a phrase. She wanted a machine designed to make electronic sound directly, and she wanted the composer to control it by writing. In her own words, “every nuance, every subtlety of phrasing” had to be possible “just by a change in the written form”.</p>
+    <p>Her answer was to make the writing literal. A composer would draw on film, and the film would play the instrument. The idea has a long family tree (in the 1930s, for example, Yevgeny Sholpo’s Variophone read shapes cut into discs, and the animator Norman McLaren drew directly onto film soundtracks), but Oram’s was one of the most ambitious attempts to turn it into a complete instrument for composing.</p>
+
+    <h2>How the machine worked</h2>
+    <p>Work on the machine began in 1962, funded by a grant of £3,550 from the Calouste Gulbenkian Foundation (a further £1,000 followed in 1965). Graham Wrench, an engineer, worked with her on it in the 1960s.</p>
+    <p>In its final form, ten strips of 35&nbsp;mm film ran side by side across the top of the machine and did the following:</p>
+    <ul>
+      <li><strong>Four strips for pitch.</strong> Each one stood for a digit of the frequency in hertz (ones, tens, hundreds and thousands). A spot of paint on a track switched a value on, so to ask for 440&nbsp;Hz you painted a mark on the “hundreds” strip and another on the “tens”. Oram thought in frequencies rather than note names, which let her work outside the usual scales. A new pitch stayed in force until the next one was painted.</li>
+      <li><strong>One strip for vibrato.</strong> A continuous drawn line pushed the pitch up or down according to its distance from the middle of the track.</li>
+      <li><strong>Four strips for loudness.</strong> The machine had four tone generators, and each had its own drawn volume contour.</li>
+      <li><strong>One strip for reverberation,</strong> a drawn graph of how much of the sound was sent to the reverberation room.</li>
+    </ul>
+    <p>The timbre was drawn too, but not on the film. Each tone generator was something like an oscilloscope run in reverse. A hand-drawn waveform was held on a glass slide in front of a cathode-ray tube, and a light-sensitive tube followed its outline. The glowing dot traced the drawn shape, and the movement of that dot was the sound. Draw a smooth hill and you got a soft tone; draw a jagged one and you got a harsh one. The speed of the sweep set the pitch.</p>
+    <p>The machine played one voice at a time. To make a chord or a texture, Oram recorded one line to tape, drew the next, played it in sync and recorded again on a multitrack recorder. She described the method as painstaking, since a single note needed several drawn marks. A piece took patience. But the composer could see the entire piece laid out in front of them as a drawing, and change any part of it with a brush.</p>
+    <div class="pull-quote"><p>“Composers will be mingling with capacitors.”</p><cite>Daphne Oram, <em>An Individual Note of Music, Sound and Electronics</em>, as quoted by the Daphne Oram Trust</cite></div>
+
+    <h2>The ideas behind it</h2>
+    <p>Oram did not see electronic music as a novelty. She believed it could free composers from the limits of performance and of conventional instruments, and she was interested in how sound connects to physics, perception and even metaphysics. Her notes define Oramics as “the study of sound and its relationship to life”. In later years she divided her work into two kinds: “commercial Oramics”, the compositions for film, radio, theatre and exhibitions that paid for the research, and “mystical Oramics”, which looked into the way the ear responds to sound and into vibration.</p>
+    <p>Her book <em>An Individual Note of Music, Sound and Electronics</em>, published in the early 1970s, is as much philosophy as manual. She wrote about the composer Edgard Varèse’s hope for a score that would reach the listener without being altered by an interpreter. Oramics was in part a way to get there: if the drawing <em>is</em> the sound, there is nobody in between.</p>
+    <p>She also returned, again and again, to a passage from Francis Bacon’s <em>New Atlantis</em>, written in the seventeenth century: “We have also sound-houses, where we practise and demonstrate all sounds, and their generation.” A sound-house is a good description of what she was building: a place to explore every kind of sound, and how it is made.</p>
+
+    <h2>The work</h2>
+    <p>Money was always short, and Oram earned it as a working composer. She made electronic sound for radio, television, theatre, exhibitions and film: for Jack Clayton’s <em>The Innocents</em> (1961), for the short films <em>Snow</em> (1963) and <em>Rail</em> (1967), and, uncredited, for sounds that were used in <em>Dr. No</em> (1962) and the Bond films that followed. Her concert works include <em>Four Aspects</em> (1960) and <em>Pulse Persephone</em> (1965). <em>Contrasts Essonic</em>, dated 1963, is credited by the Daphne Oram Trust as her first composition made entirely from drawn sound.</p>
+    <p>She did not patent the machine. According to Graham Wrench, officials at the Patent Office thought it too advanced, warned that protecting it in every country would be expensive, and she decided to keep the workings quiet instead.</p>
+
+    <h2>Later years</h2>
+    <p>In the 1980s she developed a software version of Oramics for the Acorn Archimedes computer, funded by the Ralph Vaughan Williams Trust. She hoped to carry on with her “mystical Oramics” research, but without enough funding it was never fully realised. In the late 1970s she had begun an unfinished manuscript, <em>The Sound of the Past: A Resonating Speculation</em>, which suggests that Neolithic burial mounds, Stonehenge and the Great Pyramid may have worked as acoustic resonators. She had two strokes in the 1990s and stopped working. She died in Maidstone, Kent, on 5 January 2003, aged 77.</p>
+
+    <h2>What she left</h2>
+    <p>The only Oramics machine was acquired by the Science Museum in London with help from Goldsmiths, University of London. It was conserved and has been shown there; the museum has chosen not to run it, to protect its historic value. Her archive passed after her death to the composer Hugh Davies, then to the Sonic Arts Network, and in 2008 to Goldsmiths, where the Daphne Oram Collection is open to the public. The Oram Awards, which support innovation in sound and music, were launched in 2017 by the PRS Foundation and the New BBC Radiophonic Workshop.</p>
+    <p>Her influence is easiest to see in the instruments that followed. Systems for drawing sound include Iannis Xenakis’s UPIC (first used in the late 1970s) and many modern programs that read a picture as sound. This page belongs to the same family, and so does any app that lets you draw a shape and hear it. The deeper inheritance is an attitude: that a composer should be able to work with sound as directly as a painter works with colour.</p>
+
+    <h2>What is different here</h2>
+    <p>Oram’s machine was built for a composer with a precise sound in mind and the patience to specify it. A browser lets us change the balance. Here, a mark is heard the moment you make it, and you can undo it just as quickly. We replaced her four stacked pitch strips with height, which is closer to how most people think about drawing. We turned her tone generators into colours, because a colour is a faster way to choose a voice than a drawn waveform. We added things she did not have: a beat made of dots, chords made of stacked bars, echoes, a mirror, and a key to snap to if you want one.</p>
+    <p>What we kept is the part that matters most: you make marks in time, and then you listen to what they said.</p>
+
+    <div class="essay-try">
+      <h3>Try this</h3>
+      <ol>
+        <li><strong>Draw a sound you remember.</strong> Pick one ink and spend two minutes drawing a sound you know well: a kettle, a train, a door. Play it. What did the picture get right, and what did it miss?</li>
+        <li><strong>Question and answer.</strong> Draw a short melody phrase. Turn on Echo ×2, then change the second copy so that it answers the first.</li>
+        <li><strong>Weather.</strong> Use only Texture and Rhythm. Scatter dots for rain, then slide a wide, soft stroke across the top for wind.</li>
+        <li><strong>One shape, five ways.</strong> Draw the same spiral in every ink. Notice what each ink makes of it.</li>
+        <li><strong>Slide the ink.</strong> Take a picture you like and use the Slide tool to move the bass a little to the left. The same music changes character as its parts fall out of step.</li>
+      </ol>
     </div>
 
-    <h2>From the BBC to the oast house</h2>
-    <p>Daphne Oram was born in Wiltshire in 1925. She taught herself composition and showed exceptional ability young; at eighteen she joined the BBC as a music balancer, one of the few women in technical roles in the corporation at that time. Over the following decade she worked in studios, composed incidental music for radio programmes, and became increasingly convinced that electronic sound offered compositional possibilities unavailable through conventional instruments and notation. In 1957 she co-founded the BBC Radiophonic Workshop — alongside Desmond Briscoe — and became its first studio manager. She left the following year, frustrated by the institutional constraints placed on the Workshop's work and determined to pursue her own research independently.</p>
-    <p>The Oramics machine occupied much of the next two decades. It was an enormously laborious undertaking — designing, constructing, and refining a bespoke electronic instrument with minimal funding and institutional support, largely alone. Oram applied for patents, sought grants, and gave demonstrations, but the machine never received the recognition or resources that might have allowed it to develop into something widely used. She continued working in her studio in Fairseat, Kent, composing, teaching, and writing — her book <em>An Individual Note of Music, Sound and Electronics</em> (1972) remains one of the most distinctive accounts of electronic music's possibilities — until her death in 2003.</p>
-
-    <div class="pull-quote">
-      <p>The Oramics machine was trying to escape the tyranny of the note — to give composers direct, continuous, unquantised control over sound in time, in the same way a painter has continuous control over mark and surface.</p>
-      <cite>— paraphrased from Daphne Oram, <em>An Individual Note</em>, 1972</cite>
-    </div>
-
-    <h2>The machine and its logic</h2>
-    <p>The Oramics machine worked through photoelectric cells reading the opacity of marks drawn on clear film. A dense, opaque mark blocked more light; a thin or faint mark allowed more through. The amount of light reaching the cell determined the voltage output, which in turn determined the parameter being controlled — frequency on one strip, amplitude on another, filter settings on a third. Multiple strips ran simultaneously, so a composer could draw different control curves for different parameters on different strips, all advancing in synchrony through the machine.</p>
-    <p>The spatial logic of the system was immediate and intuitive: drawing a line that moved upward on the pitch strip produced a rising pitch. A dense, heavy mark on the amplitude strip produced a loud sound. A curved, organic shape produced a curved, organic modulation. The act of drawing was compositional; the visual shape of the drawing was the sonic shape of the music. Oram called this "visualising sound" — and it remains one of the most direct translations of visual mark-making into sonic experience that electronic music has produced.</p>
-
-    <h2>What this instrument does</h2>
-    <p>This browser-based Oramics instrument follows the logic of the original machine as closely as a digital medium allows. You draw on four independent layers — pitch, amplitude, timbre, and modulation — and as the playhead moves from left to right across your drawing, the pixel values it reads are converted into audio parameters in real time. The drawing tools include freehand brush, line, sine wave, ellipse (circle), and flat line — with live ghost previews during drag so you can see your shape before committing it. Keyboard shortcuts, undo history, and polyphonic voices let the instrument grow with your practice.</p>
-  </div>
+    <h2>Sources</h2>
+    <ul class="essay-sources">
+      <li>Tom Richards, <a href="https://eprints-gro.gold.ac.uk/26356/1/COM_thesis_RichardsT_2018.pdf" rel="noopener" target="_blank">doctoral thesis on the Oramics machine</a>, Goldsmiths, University of London (2018): the ten strips and how they were used.</li>
+      <li>Graham Wrench, <a href="https://www.soundonsound.com/people/graham-wrench-story-daphne-orams-optical-synthesizer" rel="noopener" target="_blank">“The Graham Wrench Story”</a>, <em>Sound On Sound</em>: building and running the machine in the 1960s.</li>
+      <li>Daphne Oram Trust, <a href="https://daphneoram.org/?p=4264" rel="noopener" target="_blank">“Daphne Oram: a brief biography”</a>: career, works, the quotations from her notes and book.</li>
+      <li>Science Museum, <a href="https://blog.sciencemuseum.org.uk/we-have-also-sound-houses/" rel="noopener" target="_blank">“We have also sound-houses”</a> (2011), on the machine and Bacon’s passage; <a href="https://collection.sciencemuseumgroup.org.uk/people/cp127589/daphne-oram" rel="noopener" target="_blank">the Museum’s collection entry</a>.</li>
+      <li>Wikipedia, <a href="https://en.wikipedia.org/wiki/Daphne_Oram" rel="noopener" target="_blank">Daphne Oram</a> and <a href="https://en.wikipedia.org/wiki/Oramics" rel="noopener" target="_blank">Oramics</a>: dates, grants and legacy (checked against the sources above).</li>
+      <li>NPR, <a href="https://www.npr.org/2011/10/09/141162005/a-relic-from-the-roots-of-electronic-music" rel="noopener" target="_blank">“A Relic From The Roots Of Electronic Music”</a> (2011).</li>
+    </ul>
+  </article>
 
 </main>
 
@@ -917,654 +347,6 @@
   </p>
 </footer>
 
-<!-- ════════════════════════════════════════════════════════
-     ORAMICS ENGINE
-════════════════════════════════════════════════════════ -->
-<script type="module">
-import { PITCH, CUTOFF, normToRange, scanColumns, emptyCurve, curveAt, voiceParams, SCALES, scaleNotes, hzOfMidi } from '/assets/js/oramics/curves.js';
-import { floodFill, copyRegion, clearRegion, flipRegionH, flipRegionV, pasteRegion, sprayPoints, rectOf, squareTo } from '/assets/js/oramics/raster.js';
-import { createHistory } from '/assets/js/oramics/history.js';
-import { makeMaster, createVoiceBank } from '/assets/js/oramics/voices.js';
-import { cleanProject, cleanSettings, loadSlots, saveSlot, deleteSlot } from '/assets/js/oramics/store.js';
-
-/* ── LAYER CONFIG ── */
-const LAYERS = {
-  pitch:  { id: 'c-pitch',  color: '#2a5c45', alpha: 0.85,
-            hint: 'Vertical position = frequency. Top = 2000 Hz · Bottom = 80 Hz. Free glide: the pitch slides smoothly wherever you draw.' },
-  amp:    { id: 'c-amp',    color: '#1a4d6b', alpha: 0.75,
-            hint: 'Vertical position = loudness. Top = loud · Bottom = quiet. Where nothing is drawn, the pitch line plays at a steady level.' },
-  timbre: { id: 'c-timbre', color: '#7b3f00', alpha: 0.75,
-            hint: 'Vertical position = filter cutoff. Top = bright · Bottom = muffled.' },
-  mod:    { id: 'c-mod',    color: '#5c2a5c', alpha: 0.75,
-            hint: 'Vertical position = modulation depth. Top = heavy vibrato/FM.' },
-};
-const KEYS = Object.keys(LAYERS);
-const LAYER_SCALES = {
-  pitch:  { top: '2000 Hz', mid: '600 Hz',  bot: '80 Hz',  },
-  amp:    { top: 'loud',    mid: 'half',    bot: 'quiet',  },
-  timbre: { top: '8000 Hz', mid: '2000 Hz', bot: '200 Hz', },
-  mod:    { top: '100%',    mid: '50%',     bot: '0%',     },
-};
-const NOTE_NAMES = ['C','C♯','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
-
-/* ── AUDIO ── */
-let AC = null, master = null, bank = null, analyserNode = null;
-let numVoices = 1, waveType = 'sine', analogOn = false;
-const snap = { on: false, root: 0, scale: 'major' };   // free glide is the default; snapping is an option
-let glide = 0.3;
-function initAudio() {
-  if (AC) return;
-  AC = new (window.AudioContext || window.webkitAudioContext)();
-  master = makeMaster(AC, { analyser: true }); analyserNode = master.analyser;
-  bank = createVoiceBank(AC, master.input, { count: numVoices, wave: waveType, analog: analogOn });
-}
-/** The smoothing time of the voices: the same slow, even slide as before when free; shorter and adjustable when snapped to a scale. */
-const glideTc = () => snap.on ? 0.006 + glide * 0.14 : 0.06;
-const paramOpts = () => ({ snap });
-
-/* ── CANVAS STATE ── */
-const canvases = {}, ctxs = {};
-let W = 0, H = 0;
-let gridCtx = null, uiCtx = null, overlayCtx = null, rulerCtx = null;
-
-/* ── PLAYBACK STATE ── */
-let playing = false, looping = true, playheadX = 0, playheadT = 0, lastRafT = 0, rafId = null, speed = 0.8;
-const PIXELS_PER_SECOND = 80;
-
-/* ── DRAWING STATE ── */
-let activeLayer = 'pitch', tool = 'brush', brushSize = 8, brushSoft = 0.6, shapeFill = false, selAll = false, undoAll = false;
-let drawing = false, lineStart = null, lastPos = null, curveStage = 0, curveBase = null, sprayTimer = null, strokePressure = 1, penDown = false;
-const visibleLayers = { pitch: true, amp: true, timbre: true, mod: true };
-const GESTURE = ['line', 'sine', 'circle', 'rect', 'flat'];
-
-/* ── SCANNED CURVES (each layer is scanned once, and only the columns that changed are scanned again) ── */
-const curves = {}, dirty = {};
-function invalidate(k, x0 = 0, x1 = W) { const d = dirty[k]; dirty[k] = d ? [Math.min(d[0], x0), Math.max(d[1], x1)] : [x0, x1]; }
-function ensureCurve(k) {
-  if (!W || !H) return null;
-  if (!curves[k] || curves[k].length !== W) { curves[k] = emptyCurve(W); dirty[k] = [0, W - 1]; }
-  const d = dirty[k]; if (!d) return curves[k];
-  const x0 = Math.max(0, Math.floor(d[0])), x1 = Math.min(W - 1, Math.ceil(d[1])); delete dirty[k];
-  if (x1 < x0) return curves[k];
-  const part = emptyCurve(x1 - x0 + 1); scanColumns(ctxs[k].getImageData(x0, 0, x1 - x0 + 1, H), part); curves[k].set(part, x0);
-  return curves[k];
-}
-const sampleLayer = (k, x) => curveAt(ensureCurve(k), x);
-const normsAt = x => ({ pitch: sampleLayer('pitch', x), amp: sampleLayer('amp', x), timbre: sampleLayer('timbre', x), mod: sampleLayer('mod', x) });
-
-/* ── HISTORY ── */
-const hist = createHistory({ max: 30 });
-const snapshot = k => ctxs[k].getImageData(0, 0, canvases[k].width, canvases[k].height);
-function pushUndo(k) { if (W && H) hist.record(k, snapshot(k)); syncHistoryButtons(); }
-function applySnapshot(k, img) { ctxs[k].clearRect(0, 0, W, H); ctxs[k].putImageData(img, 0, 0); invalidate(k); drawUI(); }
-function undo() { const e = hist.undo(undoAll ? null : activeLayer, snapshot); if (e) applySnapshot(e.layer, e.img); syncHistoryButtons(); }
-function redo() { const e = hist.redo(undoAll ? null : activeLayer, snapshot); if (e) applySnapshot(e.layer, e.img); syncHistoryButtons(); }
-function syncHistoryButtons() {
-  const u = document.getElementById('btn-undo'), r = document.getElementById('btn-redo'), s = undoAll ? null : activeLayer;
-  if (u) u.disabled = !hist.canUndo(s); if (r) r.disabled = !hist.canRedo(s);
-}
-
-/* ── SMOOTH PARAMETER HISTORY (for the readout) ── */
-let smoothPitch = 440, smoothAmp = 0, smoothFilter = 2000, smoothMod = 0;
-
-function calcCanvasHeight() {
-  const vph = window.innerHeight, isMobile = window.innerWidth < 600;
-  return Math.round(Math.min(Math.max(isMobile ? 240 : 320, vph * 0.42), 560));
-}
-
-/* ══════════ INIT ══════════ */
-function init() {
-  KEYS.forEach(k => { const c = document.getElementById(LAYERS[k].id); canvases[k] = c; ctxs[k] = c.getContext('2d', { willReadFrequently: true }); });
-  gridCtx = document.getElementById('c-grid').getContext('2d');
-  uiCtx = document.getElementById('c-ui').getContext('2d');
-  overlayCtx = document.getElementById('c-overlay').getContext('2d');
-  rulerCtx = document.getElementById('c-ruler').getContext('2d');
-  resize(); window.addEventListener('resize', resize);
-
-  const dc = document.getElementById('c-draw');
-  dc.style.touchAction = 'none';
-  dc.addEventListener('pointerdown', e => { if (e.button > 0 && e.pointerType === 'mouse') return; try { dc.setPointerCapture(e.pointerId); } catch { /* not capturable */ } onDrawStart(e); });
-  dc.addEventListener('pointermove', onDrawMove);
-  dc.addEventListener('pointerup', onDrawEnd);
-  dc.addEventListener('pointercancel', () => onDrawEnd(null));
-  dc.addEventListener('contextmenu', e => e.preventDefault());
-  document.addEventListener('keydown', onKeyDown);
-  updateBrushPreview(); syncHistoryButtons(); refreshSlots();
-  document.getElementById('btn-loop').classList.add('active');
-}
-
-function resize() {
-  const area = document.getElementById('canvasArea'); area.style.height = calcCanvasHeight() + 'px';
-  const inner = document.getElementById('canvasInner'), nW = inner.clientWidth, nH = inner.clientHeight;
-  if (nW <= 0 || nH <= 0) return;
-  const saved = {}; KEYS.forEach(k => { if (canvases[k].width && canvases[k].height) saved[k] = snapshot(k); });
-  W = nW; H = nH;
-  ['c-grid','c-pitch','c-amp','c-timbre','c-mod','c-ui','c-overlay','c-draw'].forEach(id => { const c = document.getElementById(id); if (c) { c.width = W; c.height = H; } });
-  const ruler = document.getElementById('c-ruler'); ruler.width = ruler.offsetWidth || 30; ruler.height = H;
-  KEYS.forEach(k => { if (saved[k]) ctxs[k].putImageData(saved[k], 0, 0); invalidate(k); });
-  drawGrid(); drawRuler(); drawUI();
-}
-
-/* ── COORDINATE HELPERS ── */
-function hzToY(hz) { const t = (Math.log(hz) - Math.log(PITCH.min)) / (Math.log(PITCH.max) - Math.log(PITCH.min)); return H - t * H; }
-function yToHz(y) { if (!H) return 440; return normToRange(Math.max(0, Math.min(1, y / H)), PITCH); }
-
-/* ── GRID ── */
-function drawGrid() {
-  if (!gridCtx || !W || !H) return;
-  gridCtx.clearRect(0, 0, W, H);
-  gridCtx.strokeStyle = 'rgba(0,0,0,.06)'; gridCtx.lineWidth = 1;
-  for (let x = 0; x <= W; x += PIXELS_PER_SECOND) {
-    gridCtx.beginPath(); gridCtx.moveTo(x, 0); gridCtx.lineTo(x, H); gridCtx.stroke();
-    if (x > 0) { gridCtx.fillStyle = 'rgba(0,0,0,.2)'; gridCtx.font = '9px Courier New, monospace'; gridCtx.fillText((x / PIXELS_PER_SECOND).toFixed(0) + 's', x + 3, H - 4); }
-  }
-  gridCtx.strokeStyle = 'rgba(0,0,0,.03)';
-  for (let x = 0; x <= W; x += PIXELS_PER_SECOND / 4) { gridCtx.beginPath(); gridCtx.moveTo(x, 0); gridCtx.lineTo(x, H); gridCtx.stroke(); }
-  if (snap.on && activeLayer === 'pitch') {   // the notes you can land on
-    for (const m of scaleNotes(snap.root, snap.scale)) {
-      const y = hzToY(hzOfMidi(m)), isRoot = (((m - snap.root) % 12) + 12) % 12 === 0;
-      gridCtx.strokeStyle = isRoot ? 'rgba(42,92,69,.28)' : 'rgba(42,92,69,.12)'; gridCtx.beginPath(); gridCtx.moveTo(0, y); gridCtx.lineTo(W, y); gridCtx.stroke();
-    }
-  } else {
-    gridCtx.strokeStyle = 'rgba(42,92,69,.08)';
-    [80, 160, 320, 640, 1280].forEach(hz => {
-      const y = hzToY(hz); if (y < 0 || y > H) return;
-      gridCtx.beginPath(); gridCtx.moveTo(0, y); gridCtx.lineTo(W, y); gridCtx.stroke();
-      gridCtx.fillStyle = 'rgba(42,92,69,.3)'; gridCtx.font = '9px Courier New, monospace'; gridCtx.fillText(hz + 'Hz', 4, y - 2);
-    });
-  }
-  gridCtx.strokeStyle = 'rgba(0,0,0,.08)'; gridCtx.setLineDash([4, 4]);
-  gridCtx.beginPath(); gridCtx.moveTo(0, H / 2); gridCtx.lineTo(W, H / 2); gridCtx.stroke(); gridCtx.setLineDash([]);
-}
-function drawRuler() {
-  if (!rulerCtx) return;
-  const rW = rulerCtx.canvas.width;
-  const rH = rulerCtx.canvas.height;
-  rulerCtx.clearRect(0, 0, rW, rH);
-  rulerCtx.fillStyle = '#f5f3ed';
-  rulerCtx.fillRect(0, 0, rW, rH);
-  rulerCtx.fillStyle = '#999';
-  rulerCtx.font = '8px Courier New, monospace';
-  rulerCtx.textAlign = 'right';
-  const octaves = [80, 160, 320, 640, 1280];
-  octaves.forEach(hz => {
-    if (!H) return;
-    const y = hzToY(hz);
-    if (y < 4 || y > rH - 4) return;
-    rulerCtx.fillStyle = '#bbb';
-    rulerCtx.fillRect(0, y, 6, 1);
-    rulerCtx.fillStyle = '#999';
-    rulerCtx.fillText(hz > 999 ? (hz/1000).toFixed(1)+'k' : hz, rW - 2, y + 3);
-  });
-  rulerCtx.textAlign = 'left';
-}
-
-
-/* ── UI CANVAS (playhead + layer compositing) ── */
-function drawUI() {
-  if (!uiCtx || !W || !H) return;
-  uiCtx.clearRect(0, 0, W, H);
-
-  Object.keys(LAYERS).forEach(k => {
-    if (!visibleLayers[k]) return;
-    const isActive = k === activeLayer;
-    uiCtx.globalAlpha = isActive ? LAYERS[k].alpha : LAYERS[k].alpha * 0.35;
-    uiCtx.drawImage(canvases[k], 0, 0);
-  });
-  uiCtx.globalAlpha = 1;
-
-  // Playhead
-  uiCtx.strokeStyle = 'rgba(192,57,43,0.9)';
-  uiCtx.lineWidth = 2;
-  uiCtx.shadowColor = '#c0392b';
-  uiCtx.shadowBlur = 6;
-  uiCtx.beginPath();
-  uiCtx.moveTo(playheadX, 0);
-  uiCtx.lineTo(playheadX, H);
-  uiCtx.stroke();
-  uiCtx.shadowBlur = 0;
-
-  uiCtx.fillStyle = '#c0392b';
-  uiCtx.font = '9px Courier New, monospace';
-  const label = playheadT.toFixed(2) + 's';
-  const labelX = playheadX + 4 + (playheadX > W - 40 ? -40 : 0);
-  uiCtx.fillText(label, labelX, 12);
-}
-
-
-
-/* ── OVERLAY (ghost previews and the selection) ── */
-function clearOverlay() { if (overlayCtx) overlayCtx.clearRect(0, 0, W, H); }
-let sel = null;                 // { x, y, w, h } of the selection (in the active layer, or in all when selAll)
-let moving = null;              // while dragging a selection: { regs: {layer: region}, ox, oy, x, y }
-let clip = null;                // copied regions: { regs: {layer: region}, w, h, y }
-const off = document.createElement('canvas');
-function drawRegion(reg, x, y, alpha = 0.85) { if (!reg.width || !reg.height) return; off.width = reg.width; off.height = reg.height; off.getContext('2d').putImageData(new ImageData(reg.data, reg.width, reg.height), 0, 0); overlayCtx.globalAlpha = alpha; overlayCtx.drawImage(off, x, y); overlayCtx.globalAlpha = 1; }
-function drawSelectionBox(r) {
-  overlayCtx.save(); overlayCtx.strokeStyle = '#1a1a14'; overlayCtx.lineWidth = 1; overlayCtx.setLineDash([5, 4]); overlayCtx.strokeRect(r.x + .5, r.y + .5, r.w, r.h);
-  overlayCtx.strokeStyle = '#fff'; overlayCtx.lineDashOffset = 5; overlayCtx.strokeRect(r.x + .5, r.y + .5, r.w, r.h); overlayCtx.restore();
-}
-function paintOverlay() {
-  clearOverlay(); if (!overlayCtx) return;
-  if (moving) { for (const k of Object.keys(moving.regs)) drawRegion(moving.regs[k], moving.x, moving.y); const r0 = moving.regs[Object.keys(moving.regs)[0]]; drawSelectionBox({ x: moving.x, y: moving.y, w: r0.width, h: r0.height }); }
-  else if (sel) drawSelectionBox(sel);
-}
-
-/* ── SAMPLING FOR THE READOUT AND THE VOICES ── */
-function sampleAndApply() {
-  if (!AC || !bank) return;
-  const p = voiceParams(normsAt(playheadX), paramOpts());
-  bank.apply(p, AC.currentTime, { tc: glideTc() });
-  const smooth = (cur, tgt) => cur * 0.85 + tgt * 0.15;
-  smoothPitch = smooth(smoothPitch, p.hz); smoothAmp = smooth(smoothAmp, p.amp); smoothFilter = smooth(smoothFilter, p.cutoff); smoothMod = smooth(smoothMod, p.mod);
-  updateInspector(smoothPitch, smoothAmp, smoothFilter, smoothMod, playheadT);
-}
-function updateInspector(pitch, amp, filter, mod, t) {
-  document.getElementById('st-pos').textContent = t.toFixed(2) + 's';
-  document.getElementById('st-pitch').textContent = pitch > 0 ? pitch.toFixed(0) + ' Hz' : '—';
-  document.getElementById('st-amp').textContent = amp > 0 ? (amp * 100).toFixed(0) + '%' : '—';
-  document.getElementById('st-filter').textContent = filter.toFixed(0) + ' Hz';
-}
-function raf(ts) {
-  if (!playing) return;
-  const dt = lastRafT ? (ts - lastRafT) / 1000 : 0; lastRafT = ts;
-  playheadX += dt * speed * PIXELS_PER_SECOND; playheadT = playheadX / PIXELS_PER_SECOND;
-  if (playheadX >= W) { if (looping) { playheadX = 0; playheadT = 0; } else { ORM.stop(); return; } }
-  sampleAndApply(); drawUI(); rafId = requestAnimationFrame(raf);
-}
-
-/* ══════════ DRAWING ══════════ */
-function getPos(e) {
-  const c = document.getElementById('c-draw'), r = c.getBoundingClientRect();
-  return { x: Math.max(0, Math.min(W, e.clientX - r.left)), y: Math.max(0, Math.min(H, e.clientY - r.top)) };
-}
-const pressureOf = e => e && e.pointerType === 'pen' && e.pressure > 0 ? 0.25 + e.pressure * 1.1 : 1;
-const layerRGBA = (k, a = 204) => { const h = LAYERS[k].color; return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16), a]; };
-const inRect = (p, r) => r && p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h;
-const targets = () => selAll ? KEYS : [activeLayer];
-const needsInit = () => { if (!AC) initAudio(); if (AC.state === 'suspended') AC.resume(); };
-
-function onDrawStart(e) {
-  needsInit();
-  const pos = getPos(e); strokePressure = pressureOf(e); penDown = true;
-  if (tool === 'head') { drawing = true; setPlayhead(pos.x); return; }
-  if (tool === 'select') return selectStart(pos);
-  if (tool === 'curve' && curveStage === 1) { pushUndo(activeLayer); paintShape(ctxs[activeLayer], 'curve', curveBase.a, curveBase.b, pos); invalidate(activeLayer); curveStage = 0; curveBase = null; clearOverlay(); drawUI(); return; }
-  if (tool === 'fill') {
-    pushUndo(activeLayer); const k = activeLayer, img = ctxs[k].getImageData(0, 0, W, H);
-    floodFill(img, pos.x, pos.y, layerRGBA(k), 40); ctxs[k].putImageData(img, 0, 0); invalidate(k); drawUI(); return;
-  }
-  if (GESTURE.includes(tool) || tool === 'curve') { lineStart = pos; lastPos = pos; drawing = true; return; }
-  drawing = true; lastPos = null; pushUndo(activeLayer);
-  drawMark(pos); drawUI(); maybePreviewPitch(pos); lastPos = pos;
-  if (tool === 'spray') { sprayTimer = setInterval(() => { if (drawing && lastPos) { drawMark(lastPos); invalidate(activeLayer, lastPos.x - brushSize * 2, lastPos.x + brushSize * 2); drawUI(); } }, 40); }
-}
-function onDrawMove(e) {
-  const pos = getPos(e); strokePressure = pressureOf(e);
-  const hz = yToHz(pos.y), val = activeLayer === 'pitch' ? hz.toFixed(0) + ' Hz' : ((1 - pos.y / H) * 100).toFixed(0) + '%';
-  document.getElementById('st-tip').textContent = `cursor → ${activeLayer}: ${val} · t=${(pos.x / PIXELS_PER_SECOND).toFixed(2)}s`;
-  if (tool === 'select') return selectMove(pos);
-  if (tool === 'curve' && curveStage === 1) { paintOverlayShape('curve', curveBase.a, curveBase.b, pos); return; }
-  if (!drawing) return;
-  if (tool === 'head') { setPlayhead(pos.x); return; }
-  if (GESTURE.includes(tool) || tool === 'curve') { if (lineStart) paintOverlayShape(tool === 'curve' ? 'line' : tool, lineStart, constrain(tool === 'curve' ? 'line' : tool, lineStart, pos, e.shiftKey)); return; }
-  if (['brush', 'pencil', 'spray', 'erase'].includes(tool)) { drawMark(pos); drawUI(); maybePreviewPitch(pos); lastPos = pos; }
-}
-function onDrawEnd(e) {
-  penDown = false; clearInterval(sprayTimer); sprayTimer = null;
-  if (tool === 'select') return selectEnd(e ? getPos(e) : null);
-  if (!drawing) return;
-  const pos = e ? getPos(e) : lastPos;
-  if (tool === 'curve' && lineStart && pos) {   // first the line, then a second click bends it
-    const b = constrain('line', lineStart, pos, e && e.shiftKey);
-    if (Math.hypot(b.x - lineStart.x, b.y - lineStart.y) < 3) { lineStart = null; drawing = false; return; }
-    curveStage = 1; curveBase = { a: lineStart, b }; lineStart = null; drawing = false;
-    document.getElementById('st-tip').textContent = 'Now move and click to bend the line. Esc cancels.'; return;
-  }
-  if (GESTURE.includes(tool) && lineStart && pos) {
-    clearOverlay(); const b = constrain(tool, lineStart, pos, e && e.shiftKey);
-    pushUndo(activeLayer); paintShape(ctxs[activeLayer], tool, lineStart, b); invalidate(activeLayer); drawUI(); lineStart = null;
-  } else if (['brush', 'pencil', 'spray', 'erase'].includes(tool)) { invalidate(activeLayer); }
-  drawing = false; lastPos = null;
-  if (AC && bank && activeLayer === 'pitch' && !playing) { clearTimeout(ORM._previewTimeout); ORM._previewTimeout = setTimeout(() => bank.silence(0.08), 120); }
-}
-function setPlayhead(x) { playheadX = x; playheadT = x / PIXELS_PER_SECOND; drawUI(); if (!playing) sampleAndApply(); }
-function constrain(t, a, b, shift) {
-  if (!shift) return b;
-  if (t === 'rect' || t === 'circle') return squareTo(a, b);
-  if (t === 'line') { const dx = b.x - a.x, dy = b.y - a.y, ang = Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) * (Math.PI / 4), d = Math.hypot(dx, dy); return { x: a.x + Math.cos(ang) * d, y: a.y + Math.sin(ang) * d }; }
-  return b;
-}
-function maybePreviewPitch(pos) { if (activeLayer === 'pitch' && AC && bank) { let hz = yToHz(pos.y); if (snap.on) hz = voiceParams({ pitch: pos.y / H, amp: -1, timbre: -1, mod: -1 }, paramOpts()).hz || hz; bank.preview(hz); } }
-
-/* tools that leave a mark as you drag */
-function drawMark(pos) {
-  const ctx = ctxs[activeLayer], k = activeLayer, color = LAYERS[k].color, size = Math.max(1, brushSize * strokePressure);
-  const from = lastPos || pos; invalidate(k, Math.min(from.x, pos.x) - size * 3, Math.max(from.x, pos.x) + size * 3);
-  if (tool === 'erase') {
-    ctx.save(); ctx.globalCompositeOperation = 'destination-out'; ctx.strokeStyle = '#000'; ctx.lineWidth = size * 3; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(from.x, from.y); ctx.lineTo(pos.x + 0.01, pos.y); ctx.stroke(); ctx.restore(); return;
-  }
-  if (tool === 'pencil') { ctx.strokeStyle = color + 'ff'; ctx.lineWidth = Math.max(1, Math.round(size / 5)); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(from.x, from.y); ctx.lineTo(pos.x + 0.01, pos.y); ctx.stroke(); return; }
-  if (tool === 'spray') {
-    ctx.fillStyle = color + 'aa'; const n = Math.max(4, Math.round(size * 1.2));
-    for (const p of sprayPoints(pos.x, pos.y, size * 2, n)) ctx.fillRect(p.x, p.y, 1.4, 1.4); return;
-  }
-  if (tool !== 'brush') return;
-  if (lastPos && brushSoft > 0) {
-    const dist = Math.hypot(pos.x - lastPos.x, pos.y - lastPos.y), steps = Math.ceil(dist / (size * 0.4));
-    for (let s = 0; s <= steps; s++) { const t = steps ? s / steps : 0; drawBrushDab(ctx, lastPos.x + (pos.x - lastPos.x) * t, lastPos.y + (pos.y - lastPos.y) * t, color, size); }
-  } else drawBrushDab(ctx, pos.x, pos.y, color, size);
-}
-function drawBrushDab(ctx, x, y, color, r) {
-  if (brushSoft > 0.05) {
-    const coreR = (1 - brushSoft) * r, grad = ctx.createRadialGradient(x, y, Math.max(0, coreR), x, y, r);
-    grad.addColorStop(0, color + 'ee'); grad.addColorStop(0.4, color + 'cc'); grad.addColorStop(1, color + '00');
-    ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
-  } else { ctx.fillStyle = color + 'dd'; ctx.beginPath(); ctx.arc(x, y, r * 0.5, 0, Math.PI * 2); ctx.fill(); }
-}
-
-/* shapes: one path for the ghost and for the committed mark */
-function shapePath(ctx, t, a, b, c) {
-  ctx.beginPath();
-  if (t === 'line') { ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); }
-  else if (t === 'flat') { const y = (a.y + b.y) / 2; ctx.moveTo(a.x, y); ctx.lineTo(b.x, y); }
-  else if (t === 'rect') { const r = rectOf(a, b); ctx.rect(r.x, r.y, r.w, r.h); }
-  else if (t === 'circle') { const r = rectOf(a, b); ctx.ellipse(r.x + r.w / 2, r.y + r.h / 2, Math.max(1, r.w / 2), Math.max(1, r.h / 2), 0, 0, Math.PI * 2); }
-  else if (t === 'curve') { ctx.moveTo(a.x, a.y); ctx.quadraticCurveTo(c.x, c.y, b.x, b.y); }
-  else if (t === 'sine') {
-    const steps = Math.max(4, Math.abs(b.x - a.x)), amp = (b.y - a.y) / 2;
-    for (let i = 0; i <= steps; i++) { const u = i / steps, x = a.x + (b.x - a.x) * u, y = a.y + amp + Math.sin(u * 2 * Math.PI * 2) * amp; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
-  }
-}
-function paintShape(ctx, t, a, b, c, ghost = false) {
-  const color = LAYERS[activeLayer].color, filled = shapeFill && (t === 'rect' || t === 'circle'); shapePath(ctx, t, a, b, c);
-  if (filled) { ctx.fillStyle = color + (ghost ? '55' : 'cc'); ctx.fill(); }
-  ctx.strokeStyle = color + (ghost ? '99' : 'cc'); ctx.lineWidth = ghost ? Math.max(1, brushSize * 0.6) : (filled ? 1 : Math.max(1, brushSize)); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  if (ghost) ctx.setLineDash([6, 4]); ctx.stroke(); ctx.setLineDash([]);
-}
-function paintOverlayShape(t, a, b, c) { clearOverlay(); paintShape(overlayCtx, t, a, b, c, true); }
-
-/* ── selection ── */
-function selectStart(pos) {
-  if (sel && inRect(pos, sel)) {   // lift what is inside and drag it
-    pushAllTargets(); const regs = {};
-    for (const k of targets()) { const img = ctxs[k].getImageData(0, 0, W, H); regs[k] = copyRegion(img, sel.x, sel.y, sel.w, sel.h); clearRegion(img, sel.x, sel.y, sel.w, sel.h); ctxs[k].putImageData(img, 0, 0); invalidate(k); }
-    moving = { regs, ox: pos.x - sel.x, oy: pos.y - sel.y, x: sel.x, y: sel.y }; drawUI(); paintOverlay(); drawing = true; return;
-  }
-  sel = null; lineStart = pos; drawing = true; paintOverlay();
-}
-function selectMove(pos) {
-  if (!drawing) return;
-  if (moving) { moving.x = Math.max(-moving.regs[Object.keys(moving.regs)[0]].width + 4, Math.min(W - 4, pos.x - moving.ox)); moving.y = pos.y - moving.oy; paintOverlay(); return; }
-  if (lineStart) { clearOverlay(); const r = rectOf(lineStart, pos); drawSelectionBox(r); }
-}
-function selectEnd(pos) {
-  if (!drawing) return; drawing = false;
-  if (moving) {
-    for (const k of Object.keys(moving.regs)) { const img = ctxs[k].getImageData(0, 0, W, H); pasteRegion(img, moving.regs[k], moving.x, moving.y); ctxs[k].putImageData(img, 0, 0); invalidate(k); }
-    const r0 = moving.regs[Object.keys(moving.regs)[0]]; sel = { x: Math.round(moving.x), y: Math.round(moving.y), w: r0.width, h: r0.height }; moving = null; drawUI(); paintOverlay(); syncSelButtons(); return;
-  }
-  if (lineStart && pos) { const r = rectOf(lineStart, pos); sel = r.w > 3 && r.h > 3 ? r : null; }
-  lineStart = null; paintOverlay(); syncSelButtons();
-}
-function pushAllTargets() { for (const k of targets()) pushUndo(k); }
-function selOp(kind) {
-  if (!sel && !(kind === 'paste' && clip)) return;
-  const ks = targets();
-  if (kind === 'copy' || kind === 'cut') {
-    const regs = {}; for (const k of ks) regs[k] = copyRegion(ctxs[k].getImageData(0, 0, W, H), sel.x, sel.y, sel.w, sel.h);
-    clip = { regs, w: sel.w, h: sel.h, y: sel.y };
-    if (kind === 'cut') { pushAllTargets(); for (const k of ks) { ctxs[k].clearRect(sel.x, sel.y, sel.w, sel.h); invalidate(k); } sel = null; drawUI(); }
-  } else if (kind === 'delete') { pushAllTargets(); for (const k of ks) { ctxs[k].clearRect(sel.x, sel.y, sel.w, sel.h); invalidate(k); } drawUI(); }
-  else if (kind === 'flipTime' || kind === 'flipPitch') {
-    pushAllTargets();
-    for (const k of ks) { const img = ctxs[k].getImageData(0, 0, W, H), r = copyRegion(img, sel.x, sel.y, sel.w, sel.h); clearRegion(img, sel.x, sel.y, sel.w, sel.h); pasteRegion(img, kind === 'flipTime' ? flipRegionH(r) : flipRegionV(r), r.x, r.y); ctxs[k].putImageData(img, 0, 0); invalidate(k); }
-    drawUI();
-  } else if (kind === 'paste' || kind === 'repeat') {
-    if (kind === 'repeat') { selOp('copy'); } if (!clip) return;
-    pushAllTargets(); const x = kind === 'repeat' ? sel.x + sel.w : Math.min(Math.max(0, playheadX), Math.max(0, W - clip.w)), y = kind === 'repeat' ? sel.y : clip.y;
-    const keys = Object.keys(clip.regs);
-    for (const k of keys) { const dest = keys.length > 1 ? k : activeLayer, img = ctxs[dest].getImageData(0, 0, W, H); pasteRegion(img, clip.regs[k], x, y); ctxs[dest].putImageData(img, 0, 0); invalidate(dest); }
-    sel = { x: Math.round(x), y: Math.round(y), w: clip.w, h: clip.h }; drawUI();
-  }
-  paintOverlay(); syncSelButtons();
-}
-function syncSelButtons() { document.querySelectorAll('[data-selop]').forEach(b => { b.disabled = b.dataset.selop === 'paste' ? !clip : !sel; }); }
-
-/* ── BRUSH PREVIEW ── */
-function updateBrushPreview() {
-  const dot = document.getElementById('brushPreviewDot'); if (!dot) return;
-  const d = Math.min(34, brushSize * (brushSoft > 0.05 ? 1.6 : 0.9));
-  dot.style.width = d + 'px'; dot.style.height = d + 'px'; dot.style.filter = brushSoft > 0.1 ? `blur(${(brushSoft * 2).toFixed(1)}px)` : 'none';
-  dot.style.background = getComputedStyle(document.documentElement).getPropertyValue(`--${activeLayer}-col`).trim() || '#2a5c45';
-}
-
-/* ── KEYBOARD ── */
-const TOOL_KEYS = { b: 'brush', p: 'pencil', a: 'spray', e: 'erase', g: 'fill', l: 'line', u: 'curve', r: 'rect', c: 'circle', s: 'sine', f: 'flat', m: 'select', h: 'head' };
-function onKeyDown(e) {
-  const tag = (e.target || e.srcElement).tagName; if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
-  const mod = e.metaKey || e.ctrlKey, k = e.key.toLowerCase();
-  if (e.key === ' ') { if (tag === 'BUTTON') return; e.preventDefault(); playing ? ORM.stop() : ORM.play(); return; }
-  if (mod && k === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); return; }
-  if (mod && k === 'y') { e.preventDefault(); redo(); return; }
-  if (mod && ['c', 'x', 'v', 'd'].includes(k)) { e.preventDefault(); selOp({ c: 'copy', x: 'cut', v: 'paste', d: 'repeat' }[k]); return; }
-  if (e.key === 'Delete' || e.key === 'Backspace') { if (sel) { e.preventDefault(); selOp('delete'); } return; }
-  if (e.key === 'Escape') { curveStage = 0; curveBase = null; sel = null; lineStart = null; drawing = false; paintOverlay(); syncSelButtons(); return; }
-  if (mod) return;
-  if (TOOL_KEYS[k]) return ORM.setTool(TOOL_KEYS[k]);
-  if ('1234'.includes(k) && k) return ORM.setLayer(KEYS[+k - 1]);
-  if (e.key === '[') { ORM.setBrushSize(Math.max(1, brushSize - 2)); }
-  if (e.key === ']') { ORM.setBrushSize(Math.min(60, brushSize + 2)); }
-}
-
-/* ══════════ PROJECT: save, load, export ══════════ */
-const isBlank = k => { const c = ensureCurve(k); for (let i = 0; i < c.length; i++) if (c[i] >= 0) return false; return true; };
-function say(msg) { const el = document.getElementById('file-msg'); if (el) el.textContent = msg; }
-function currentSettings() { return { wave: waveType, voices: numVoices, analog: analogOn, speed, loop: looping, snap: { ...snap } }; }
-function toProject(name) {
-  const layers = {}; for (const k of KEYS) if (!isBlank(k)) layers[k] = canvases[k].toDataURL('image/png');
-  return { v: 1, name: (name || '').trim() || 'Untitled', w: W, h: H, layers, settings: currentSettings() };
-}
-async function loadProject(raw) {
-  const p = cleanProject(raw); if (!p) { say('That file is not an Oramics drawing.'); return false; }
-  ORM.stop(); let cut = false;
-  for (const k of KEYS) {
-    pushUndo(k); ctxs[k].clearRect(0, 0, W, H);
-    if (p.layers[k]) {
-      const img = new Image(); await new Promise(res => { img.onload = res; img.onerror = res; img.src = p.layers[k]; });
-      if (img.width) { ctxs[k].drawImage(img, 0, 0, img.width, H); if (img.width > W) cut = true; }
-    }
-    invalidate(k);
-  }
-  const s = p.settings; ORM.setWave(s.wave); document.getElementById('wave-select').value = s.wave; ORM.setVoices(s.voices); document.getElementById('voices-slider').value = s.voices; document.getElementById('voices-val').textContent = s.voices;
-  ORM.setAnalog(s.analog); document.getElementById('analog-toggle').checked = s.analog; ORM.setSpeed(s.speed); document.getElementById('speed-slider').value = s.speed;
-  snap.on = s.snap.on; snap.root = s.snap.root; snap.scale = s.snap.scale; syncSnapUI(); drawGrid(); drawUI();
-  document.getElementById('file-name').value = p.name; say(cut ? `Opened “${p.name}”. It was longer than this screen, so the end was cut off. A wider screen will show all of it.` : `Opened “${p.name}”.`); return true;
-}
-function download(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
-const fileSlug = () => (document.getElementById('file-name').value.trim() || 'oramics').replace(/[^\w-]+/g, '-').slice(0, 40);
-function refreshSlots() {
-  const sel2 = document.getElementById('file-slots'); if (!sel2) return; const slots = loadSlots();
-  sel2.innerHTML = ''; const o0 = document.createElement('option'); o0.value = ''; o0.textContent = slots.length ? 'Saved on this device…' : 'Nothing saved yet'; sel2.appendChild(o0);
-  slots.forEach(s => { const o = document.createElement('option'); o.value = s.name; o.textContent = s.name; sel2.appendChild(o); });
-}
-function syncSnapUI() {
-  document.getElementById('pitch-free').classList.toggle('active', !snap.on); document.getElementById('pitch-snap').classList.toggle('active', snap.on);
-  document.getElementById('snap-key').value = snap.root; document.getElementById('snap-scale').value = snap.scale;
-  document.getElementById('snap-opts').hidden = !snap.on;
-}
-
-/* ══════════ PUBLIC CONTROLLER ══════════ */
-const TIPS = {
-  brush: 'Drag to paint a soft mark. Pen pressure changes the size.', pencil: 'Drag for a thin, hard-edged line: a precise pitch.', spray: 'Hold and drag for a scatter of points: a cloud of grains.',
-  erase: 'Drag to rub marks out of the active layer.', fill: 'Click inside a closed shape to fill it. An open shape fills the whole space around it.',
-  line: 'Drag a straight line. Shift snaps the angle.', curve: 'Drag a line, then move and click to bend it. Esc cancels.', rect: 'Drag a rectangle (a held note, a block of loudness). Shift = square.',
-  circle: 'Drag an ellipse. Shift = circle.', sine: 'Drag a vibrating curve.', flat: 'Drag a flat, sustained line.',
-  select: 'Drag a box to select. Drag inside it to move. Then flip, copy, repeat or delete with the buttons or Ctrl+C / X / V / D.', head: 'Drag to move the reading head to any point in the film.',
-};
-const ORM = window.ORM = {
-  _previewTimeout: null,
-  togglePlay() { playing ? ORM.stop() : ORM.play(); },
-  play() {
-    needsInit(); playing = true; lastRafT = 0;
-    const btn = document.getElementById('btn-play'); btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg> stop'; btn.classList.add('active');
-    rafId = requestAnimationFrame(raf);
-  },
-  stop() {
-    playing = false; cancelAnimationFrame(rafId); if (bank) bank.silence(0.08);
-    const btn = document.getElementById('btn-play'); btn.innerHTML = '<svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> play'; btn.classList.remove('active'); drawUI();
-  },
-  toggleLoop() { looping = !looping; document.getElementById('btn-loop').classList.toggle('active', looping); },
-  setSpeed(v) { speed = +v; document.getElementById('speed-val').textContent = (+v).toFixed(2) + '×'; },
-  setWave(w) { waveType = w; if (bank) bank.setWave(w); },
-  setVoices(n) { numVoices = n; if (bank) bank.setCount(n); },
-  setAnalog(on) { analogOn = on; if (bank) bank.setAnalog(on); },
-  setLayer(k) {
-    activeLayer = k;
-    document.querySelectorAll('.layer-tab').forEach(el => el.classList.remove('active')); document.getElementById('layer-btn-' + k).classList.add('active');
-    document.getElementById('layer-hint').textContent = LAYERS[k].hint;
-    const sc = LAYER_SCALES[k]; document.getElementById('scale-top').textContent = sc.top; document.getElementById('scale-mid').textContent = sc.mid; document.getElementById('scale-bot').textContent = sc.bot;
-    sel = null; paintOverlay(); syncSelButtons(); syncHistoryButtons(); updateBrushPreview(); drawGrid(); drawUI();
-  },
-  toggleVis(k, e) { e.stopPropagation(); visibleLayers[k] = !visibleLayers[k]; const dot = document.querySelector(`#layer-btn-${k} .layer-vis`); if (dot) dot.style.opacity = visibleLayers[k] ? '1' : '0.2'; drawUI(); },
-  setTool(t) {
-    if (tool === 'select' && t !== 'select') { sel = null; paintOverlay(); syncSelButtons(); }
-    tool = t; curveStage = 0; curveBase = null;
-    document.querySelectorAll('.tool-btn[id^="tool-"]').forEach(b => b.classList.toggle('active', b.id === 'tool-' + t));
-    document.getElementById('c-draw').style.cursor = t === 'erase' ? 'cell' : t === 'head' ? 'ew-resize' : t === 'select' ? 'default' : 'crosshair';
-    document.getElementById('st-tip').textContent = TIPS[t] || '';
-  },
-  setBrushSize(v) { brushSize = +v; document.getElementById('brush-size-val').textContent = v; document.getElementById('brush-size').value = v; updateBrushPreview(); },
-  setBrushSoft(v) { brushSoft = +v; document.getElementById('brush-soft-val').textContent = (+v).toFixed(2); document.getElementById('brush-soft').value = v; updateBrushPreview(); },
-  setShapeFill(on) { shapeFill = !!on; document.getElementById('shape-outline').classList.toggle('active', !on); document.getElementById('shape-filled').classList.toggle('active', !!on); },
-  setSelAll(on) { selAll = !!on; },
-  setUndoAll(on) { undoAll = !!on; syncHistoryButtons(); },
-  undo, redo, selOp,
-  setPitchMode(mode) { snap.on = mode === 'snap'; syncSnapUI(); drawGrid(); },
-  setKey(v) { snap.root = +v; drawGrid(); }, setScale(v) { if (SCALES[v]) snap.scale = v; drawGrid(); }, setGlide(v) { glide = +v; document.getElementById('glide-val').textContent = (+v).toFixed(2); },
-  clearAll() { KEYS.forEach(k => { pushUndo(k); ctxs[k].clearRect(0, 0, W, H); invalidate(k); }); sel = null; paintOverlay(); syncSelButtons(); drawUI(); ORM.stop(); },
-  randomize() {
-    KEYS.forEach(k => {
-      pushUndo(k); ctxs[k].clearRect(0, 0, W, H); const color = LAYERS[k].color, ctx = ctxs[k];
-      if (k === 'pitch') generateOrganicCurve(ctx, color, 3, 0.7); else if (k === 'amp') generateSwells(ctx, color, 4); else if (k === 'timbre') generateOrganicCurve(ctx, color, 5, 0.5); else generateSparseMarks(ctx, color);
-      invalidate(k);
-    });
-    drawUI();
-  },
-  /** Renders the film with the same voices and mapping as the live instrument (including voices, modulation, analog and snapping). */
-  async renderBuffer(sr = 44100) {
-    const spp = PIXELS_PER_SECOND * speed, duration = W / spp + 0.4, off = new OfflineAudioContext(2, Math.ceil(duration * sr), sr);
-    const m = makeMaster(off); const b = createVoiceBank(off, m.input, { count: numVoices, wave: waveType, analog: analogOn });
-    const step = Math.max(1, Math.floor(W / 2000)), tc = glideTc();
-    for (let x = 0; x < W; x += step) b.apply(voiceParams(normsAt(x), paramOpts()), x / spp, { tc });
-    b.apply(voiceParams({ pitch: -1, amp: -1, timbre: -1, mod: -1 }), W / spp, { tc });
-    return off.startRendering();
-  },
-  async exportWav() {
-    if (!W || !H) return; const btn = document.getElementById('btn-export'); btn.disabled = true; btn.textContent = 'rendering…';
-    try { download(audioBufferToWav(await ORM.renderBuffer()), fileSlug() + '.wav'); } catch (e) { console.error('Export failed', e); say('The sound could not be rendered here.'); }
-    btn.disabled = false; btn.textContent = 'export WAV';
-  },
-  save() {
-    const p = toProject(document.getElementById('file-name').value); const r = saveSlot(p);
-    if (r.ok) { say(`Saved “${p.name}” on this device. It is not sent anywhere.`); refreshSlots(); document.getElementById('file-slots').value = p.name; } else say(r.error);
-  },
-  loadSlot() { const n = document.getElementById('file-slots').value; if (!n) return; const p = loadSlots().find(s => s.name === n); if (p) loadProject(p); },
-  deleteSlot() { const n = document.getElementById('file-slots').value; if (!n) return; deleteSlot(n); refreshSlots(); say(`Removed “${n}” from this device.`); },
-  downloadProject() { const p = toProject(document.getElementById('file-name').value); if (!Object.keys(p.layers).length) return say('There is nothing drawn to save.'); download(new Blob([JSON.stringify(p)], { type: 'application/json' }), fileSlug() + '.oramics.json'); say('Saved as a file.'); },
-  openFile(input) { const f = input.files && input.files[0]; if (!f) return; if (f.size > 8_000_000) { say('That file is too big.'); return; } f.text().then(t => { try { loadProject(JSON.parse(t)); } catch { say('That file is not an Oramics drawing.'); } }); input.value = ''; },
-  exportPng() {
-    const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d'); x.fillStyle = '#faf8f2'; x.fillRect(0, 0, W, H); x.drawImage(document.getElementById('c-grid'), 0, 0);
-    KEYS.forEach(k => { x.globalAlpha = LAYERS[k].alpha; x.drawImage(canvases[k], 0, 0); }); x.globalAlpha = 1; c.toBlob(b => download(b, fileSlug() + '.png'));
-  },
-  /** for the tests */
-  _state: () => ({ W, H, playheadX, tool, activeLayer, snap: { ...snap }, hasSel: !!sel, sel, shapeFill }),
-  _scan: k => { const c = ensureCurve(k); let n = 0; for (let i = 0; i < c.length; i++) if (c[i] >= 0) n++; return n; },
-  _curve: k => Array.from(ensureCurve(k)),
-};
-
-/* ── RANDOM GENERATORS ── */
-function generateOrganicCurve(ctx, color, points, brushW) {
-  const ptList = [];
-  for (let i = 0; i <= points; i++) {
-    ptList.push({ x: (i / points) * W, y: 0.15*H + Math.random()*0.7*H });
-  }
-  ctx.strokeStyle = color + 'cc';
-  ctx.lineWidth   = brushW * 8;
-  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  ctx.beginPath(); ctx.moveTo(ptList[0].x, ptList[0].y);
-  for (let i = 1; i < ptList.length - 1; i++) {
-    const xc = (ptList[i].x + ptList[i+1].x) / 2;
-    const yc = (ptList[i].y + ptList[i+1].y) / 2;
-    ctx.quadraticCurveTo(ptList[i].x, ptList[i].y, xc, yc);
-  }
-  ctx.lineTo(ptList[ptList.length-1].x, ptList[ptList.length-1].y);
-  ctx.stroke();
-  for (let i = 0; i < points * 3; i++) {
-    const x = Math.random() * W;
-    const idx = Math.floor((x / W) * (ptList.length - 1));
-    const baseY = ptList[Math.min(idx, ptList.length-1)].y;
-    const grad = ctx.createRadialGradient(x, baseY, 0, x, baseY, 12 + Math.random()*20);
-    grad.addColorStop(0, color+'66'); grad.addColorStop(1, color+'00');
-    ctx.fillStyle = grad;
-    ctx.beginPath(); ctx.arc(x, baseY+(Math.random()-.5)*30, 12+Math.random()*20, 0, Math.PI*2); ctx.fill();
-  }
-}
-
-function generateSwells(ctx, color, count) {
-  for (let i = 0; i < count; i++) {
-    const cx = (i + 0.5 + Math.random()*0.4 - 0.2) / count * W;
-    const r  = (0.06 + Math.random()*0.12) * W;
-    const cy = H * (0.1 + Math.random()*0.3);
-    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-    grad.addColorStop(0, color+'dd'); grad.addColorStop(0.5, color+'88'); grad.addColorStop(1, color+'00');
-    ctx.fillStyle = grad;
-    ctx.beginPath(); ctx.ellipse(cx, cy, r, r*0.7, 0, 0, Math.PI*2); ctx.fill();
-  }
-}
-
-function generateSparseMarks(ctx, color) {
-  const count = 4 + Math.floor(Math.random()*6);
-  for (let i = 0; i < count; i++) {
-    const x   = Math.random() * W;
-    const y   = Math.random() * H * 0.5;
-    const len = (0.04 + Math.random()*0.12) * W;
-    ctx.strokeStyle = color + 'bb';
-    ctx.lineWidth = 4 + Math.random()*10;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x+len, y+(Math.random()-.5)*H*0.2);
-    ctx.stroke();
-  }
-}
-
-
-/* ── WAV EXPORT ── */
-function audioBufferToWav(buf) {
-  const len=buf.length, sr=buf.sampleRate, ch=buf.numberOfChannels;
-  const bps=2, dl=len*ch*bps;
-  const ab=new ArrayBuffer(44+dl), v=new DataView(ab);
-  const ws=(o,s)=>{ for(let i=0;i<s.length;i++) v.setUint8(o+i,s.charCodeAt(i)); };
-  ws(0,'RIFF'); v.setUint32(4,36+dl,true); ws(8,'WAVE'); ws(12,'fmt ');
-  v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,ch,true);
-  v.setUint32(24,sr,true); v.setUint32(28,sr*ch*bps,true);
-  v.setUint16(32,ch*bps,true); v.setUint16(34,16,true);
-  ws(36,'data'); v.setUint32(40,dl,true);
-  let off=44;
-  for(let i=0;i<len;i++) for(let c=0;c<ch;c++){
-    const s=Math.max(-1,Math.min(1,buf.getChannelData(c)[i]||0));
-    v.setInt16(off, s<0?s*0x8000:s*0x7FFF, true); off+=2;
-  }
-  return new Blob([ab],{type:'audio/wav'});
-}
-
-
-
-window.addEventListener('load', () => { init(); ORM.setTool('brush'); syncSnapUI(); syncSelButtons(); });
-
-</script>
-
+<script type="module" src="/assets/js/oramics/app.js"></script>
 </body>
 </html>

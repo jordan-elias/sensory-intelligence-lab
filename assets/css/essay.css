@@ -1,0 +1,25 @@
+/* Reading section under a tool: the same look for Oramics, the spatial game and the cocktail party. */
+.essay{margin-top:2.5rem;padding-top:2rem;border-top:1px solid var(--border);font-size:.94rem;line-height:1.8;color:var(--text);max-width:46rem}
+.essay h2{font-family:var(--font-heading);font-size:1.12rem;font-weight:600;letter-spacing:-.01em;margin:2.1rem 0 .5rem;line-height:1.3}
+.essay h2:first-child{margin-top:0}
+.essay h3{font-family:var(--font-heading);font-size:.95rem;font-weight:600;margin:1.4rem 0 .3rem}
+.essay p+p,.essay p+ul,.essay ul+p,.essay p+ol{margin-top:.8rem}
+.essay ul,.essay ol{padding-left:1.25rem}.essay li{margin:.3rem 0}
+.essay em{font-style:italic}.essay strong{font-weight:600}
+.essay a{color:var(--accent)}
+.essay-divider{display:flex;align-items:center;gap:1rem;margin:2.6rem 0 2rem}
+.essay-divider-line{flex:1;height:1px;background:var(--border)}
+.essay-divider-label{font-family:var(--font-heading);font-size:.67rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.pull-quote{border-left:3px solid var(--accent);padding:.8rem 1.1rem;margin:1.4rem 0;background:var(--surface)}
+.pull-quote p{font-size:.95rem;font-style:italic;line-height:1.65}
+.pull-quote cite{display:block;font-size:.74rem;color:var(--muted);font-style:normal;margin-top:.4rem}
+.essay-table{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.84rem;line-height:1.5}
+.essay-table th,.essay-table td{text-align:left;vertical-align:top;padding:.55rem .6rem;border-bottom:1px solid var(--border)}
+.essay-table th{font-family:var(--font-heading);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.essay-table-wrap{overflow-x:auto}
+.essay-try{margin:1.6rem 0;padding:1rem 1.2rem;border:1px solid var(--border);background:var(--surface)}
+.essay-try h3{margin-top:0}.essay-try ol{margin-top:.5rem}
+.essay-note{font-size:.82rem;color:var(--muted);line-height:1.6}
+.essay-sources{font-size:.82rem;line-height:1.6;color:var(--muted)}.essay-sources li{margin:.35rem 0}
+.essay-sources a{color:var(--muted)}.essay-sources a:hover{color:var(--accent)}
+@media (max-width:600px){.essay{font-size:.92rem}.essay-divider-label{white-space:normal;text-align:center}}
