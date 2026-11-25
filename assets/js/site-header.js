@@ -55,6 +55,9 @@
     toggle.setAttribute('aria-expanded', String(open));
   });
 
+  // On phones the signed-in pages get a bottom tab bar (Home, Calm, Listen, Create, You). The installed app has its own frame.
+  try { import('/assets/js/nav/tabbar.js').then(function (m) { m.mountResponsive(); }).catch(function () {}); } catch (e) { /* older browser: the top navigation still works */ }
+
   header.querySelector('#silSignOut').addEventListener('click', async function () {
     this.disabled = true;
     this.textContent = 'Signing out…';

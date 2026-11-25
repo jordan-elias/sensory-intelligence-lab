@@ -439,6 +439,7 @@
   <link rel="stylesheet" href="/assets/css/header.css">
   <link rel="stylesheet" href="/assets/css/a11y.css">
   <link rel="stylesheet" href="/assets/css/today.css">
+  <link rel="stylesheet" href="/assets/css/mobile-nav.css">
 </head>
 <body>
 
@@ -486,6 +487,10 @@
       <span class="prompt-label">Today's prompt</span>
       <span class="prompt-text" id="dailyPrompt">Loading…</span>
     </div>
+
+    <!-- Phone: search, jump back in and an icon grid (assets/js/dashboard/home-grid.js). Hidden on wide screens. -->
+    <section class="m-only" id="mobileHome" aria-label="Tools"></section>
+    <script type="module">import { mount } from '/assets/js/dashboard/home-grid.js'; window._mobileHome = mount(document.getElementById('mobileHome'));</script>
 
     <!-- ── Regulation ── -->
     <div class="modules-section">

@@ -1,0 +1,29 @@
+/* The phone home: search, jump back in, icon grid. Wide screens keep the card list and never see this block. */
+.m-only{display:none}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (max-width:640px){
+  .m-only{display:block;margin:0 0 1.5rem}
+  .modules-section,#dailyPromptBlock,.prompt-block{display:none!important}
+  html.m-group #checkinHero,html.m-group #insightCard,html.m-group #todayPath,html.m-group .page-header{display:none!important}
+  .m-find input{width:100%;box-sizing:border-box;font:1rem var(--font-body,system-ui);padding:.85rem 1rem;border:1px solid var(--border,#e5e5e0);background:var(--bg,#fff);color:var(--text,#1a1a1a);border-radius:0;-webkit-appearance:none;appearance:none}
+  .m-find input:focus{outline:2px solid var(--accent,#2a5c45);outline-offset:1px}
+  .m-h{font:600 .8rem var(--font-body,system-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--muted,#6b6b6b);margin:1.6rem 0 .6rem}
+  html.m-group .m-h{font:600 1.5rem var(--font-heading,Georgia,serif);letter-spacing:0;text-transform:none;color:var(--text,#1a1a1a);margin:.5rem 0 .2rem}
+  .m-sub{margin:0 0 1rem;color:var(--muted,#6b6b6b);font-size:.92rem}
+  .m-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-top:.7rem}
+  .m-grid--wide{grid-template-columns:1fr 1fr}
+  .m-tile{position:relative;display:flex;flex-direction:column;align-items:center;gap:.35rem;text-align:center;padding:.8rem .2rem .65rem;min-height:84px;text-decoration:none;color:var(--text,#1a1a1a);border:1px solid var(--border,#e5e5e0);background:var(--bg,#fff);-webkit-tap-highlight-color:transparent}
+  .m-tile:active{background:var(--accent-light,rgba(0,0,0,.05))}
+  .m-tile:focus-visible,.m-chip:focus-visible{outline:2px solid var(--accent,#2a5c45);outline-offset:2px}
+  .m-tile svg,.m-chip svg{width:26px;height:26px;fill:none;stroke:var(--accent,#2a5c45);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+  .m-tile__t{font:500 .72rem/1.2 var(--font-body,system-ui);overflow-wrap:anywhere}
+  .m-tile__b{display:none;font-size:.74rem;line-height:1.35;color:var(--muted,#6b6b6b)}
+  .m-grid--wide .m-tile{align-items:flex-start;text-align:left;padding:.9rem .8rem;gap:.4rem}
+  .m-grid--wide .m-tile__t{font-size:.92rem;font-weight:600}
+  .m-grid--wide .m-tile__b{display:block}
+  .m-tile__tag{display:none;position:absolute;top:.35rem;right:.35rem;font:500 .6rem var(--font-body,system-ui);color:var(--muted,#6b6b6b);border:1px solid var(--border,#e5e5e0);padding:0 .3rem}
+  body[data-access=free] .m-tile[data-gated=true] .m-tile__tag{display:block}
+  .m-chips{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.3rem;scrollbar-width:none}
+  .m-chip{flex:0 0 auto;display:flex;align-items:center;gap:.5rem;padding:.6rem .85rem;border:1px solid var(--border,#e5e5e0);text-decoration:none;color:var(--text,#1a1a1a);font:500 .85rem var(--font-body,system-ui)}
+  .m-chip svg{width:20px;height:20px}
+}
