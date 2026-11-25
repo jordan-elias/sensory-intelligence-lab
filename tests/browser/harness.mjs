@@ -49,7 +49,7 @@ const storage={ from:b=>({
   remove:async(ps)=>{ ps.forEach(p=>window.__storage.delete(p)); return {data:null,error:null}; } }) };
 const sb={ storage, rpc:(n,a)=>Promise.resolve(window.__rpc?window.__rpc(n,a):{error:null}), from:t=> t==='profiles'? {select(){return {eq(){return {single(){return Promise.resolve({data:{encryption_key_enc: window.__noLegacy?null:'x', full_name:'Test', intro_call_used:!!window.__introUsed, subscription_tier:window.__tier||'free', subscription_status:window.__tier&&window.__tier!=='free'?'active':'free'}})}}}}}} : builder(t),
   auth:{ getSession:async()=>({data:{session:{access_token:'t',user:{id:'u1'}}}}), signOut:async()=>{} } };
-window._supabase=sb; window._currentUser={id:'u1'};
+window._supabase=sb; window._currentUser={id:'u1'}; window._isPaidUser=!window.__free;
 window.dispatchEvent(new CustomEvent('authReady',{detail:{}}));
 import('/assets/js/nav-links.js').then(m=>m.mountRoleLinks(window._supabase,window._currentUser)).catch(()=>{});
 `;
@@ -68,7 +68,7 @@ const server = http.createServer((req,res)=>{
   const u=new URL(req.url,'http://x'); let p=u.pathname;
   if(p==='/dashboard/auth-guard.js'){ res.setHeader('content-type','text/javascript'); return res.end(AUTH_STUB); }
   if(p==='/assets/js/vault/gate.js' && process.env.REAL_GATE!=='1'){ res.setHeader('content-type','text/javascript'); return res.end(GATE_STUB); }
-  if(p==='/assets/js/gating.js'){ res.setHeader('content-type','text/javascript'); return res.end('export function applyGatingOnReady(){} export function applyMultipleGating(){}'); }
+  if(p==='/assets/js/gating.js'){ res.setHeader('content-type','text/javascript'); return res.end('export function isPaidUser(){return window._isPaidUser===true} export function applyGatingOnReady(){} export function applyMultipleGating(){}'); }
   if(p==='/.netlify/functions/get-or-create-vault-key'){ res.setHeader('content-type','application/json'); return res.end(JSON.stringify({key:KEY})); }
   if(p==='/.netlify/functions/genius-search'){ res.setHeader('content-type','application/json'); const q=u.searchParams.get('q'); return res.end(JSON.stringify({hits:[{result:{title:q+' One',primary_artist:{name:'Artist A'}}},{result:{title:q+' Two',primary_artist:{name:'Artist B'}}}]})); }
   if(p==='/.netlify/functions/youtube-search'){ res.setHeader('content-type','application/json'); return res.end(JSON.stringify({videoId:'vid'+(u.searchParams.get('q')||'').length})); }
