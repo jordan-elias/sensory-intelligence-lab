@@ -284,3 +284,6 @@ Not verified by ear.
 - Oramics has a "Keep as a seed" button: it renders the piece and keeps the recording in My seeds (on this device only, same store as the experiments).
 - Preview copy reuses the catalog text and METHOD steps; Jordan to review wording.
 - Next, once the course wording is agreed: seed data model for the new chapters, then chapters 1 to 3. See docs/creative-practice-course-plan.md.
+
+## Course chapters 1 to 3 (draft)
+`assets/js/experiments/chapters.js` holds Arrival, Listening and State and body as nine sittings, each ending in a seed. Shown above the existing sections in the course list; `byId` finds them. All wording is a draft for Jordan to pilot and rewrite. Chapters 4 to 8, seed notes and therapist sharing are still to build.

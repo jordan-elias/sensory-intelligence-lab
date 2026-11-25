@@ -766,4 +766,5 @@ export const UNITS = ORDER.map((id, i) => ({ id, number: i + 1, title: CATEGORIE
 /** The suggested order: unit by unit. */
 export const PATH = UNITS.flatMap(u => u.experiments);
 
-export const byId = id => EXPERIMENTS.find(e => e.id === id) || null;
+import { CHAPTER_SITTINGS } from './chapters.js';
+export const byId = id => EXPERIMENTS.find(e => e.id === id) || CHAPTER_SITTINGS.find(e => e.id === id) || null;
