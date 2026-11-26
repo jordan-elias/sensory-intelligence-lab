@@ -1,0 +1,22 @@
+// Oramics: the site header is styled, Clear is always in the bar, and the start card shows on the first visit only.
+import {launch,newPage} from './harness.mjs';
+const {browser,BASE,server}=await launch();
+let fail=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fail++; };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const P=await newPage(await browser.createBrowserContext(),BASE,{}); const page=P.page;
+await page.setViewport({width:1280,height:800});
+const open=async()=>{ await page.goto(`${BASE}/compositions/oramics.html`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('#stage'); await sleep(700); };
+await open();
+const hdr=await page.$eval('.sil-header',h=>({d:getComputedStyle(h).display,p:getComputedStyle(h).paddingLeft,w:h.getBoundingClientRect().height}));
+ok(hdr.d==='flex'&&parseFloat(hdr.p)>0,'the site header is styled (display '+hdr.d+', padding '+hdr.p+')');
+ok(await page.$eval('#empty',e=>!e.hidden),'first visit: the start card shows');
+await open();
+ok(await page.$eval('#empty',e=>e.hidden),'second visit: it does not show again');
+await page.evaluate(async()=>{const m=await import('/assets/js/oramics/starters.js'); ORM.startFrom(m.starterMarks('dawn'),'x');}); await sleep(200);
+ok(await page.$eval('#clearBar',b=>b.offsetParent!==null),'Clear is in the bar');
+await page.click('#clearBar'); await sleep(200);
+ok(await page.$eval('#empty',e=>e.hidden),'after Clear the start card stays away');
+ok(await page.evaluate(()=>{ORM.flushAll();return Object.values(ORM.an).every(a=>!a.runs.some(Boolean))}),'Clear empties every ink');
+await page.setViewport({width:390,height:800}); await sleep(300);
+ok(await page.$eval('#clearBar',b=>{const r=b.getBoundingClientRect();return r.width>0&&r.right<=innerWidth})&&await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'phone: Clear fits and no sideways scroll');
+await browser.close(); server&&server.close&&server.close(); process.exit(fail?1:0);

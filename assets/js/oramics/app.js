@@ -246,7 +246,14 @@ function syncInks() {
 function setInk(id) { S.ink = id; syncInks(); invalidate(); }
 function setTool(t) { S.tool = t; cv.dataset.tool = t; for (const b of document.querySelectorAll('.tool')) b.setAttribute('aria-pressed', b.dataset.tool === t); }
 function say(t) { $('msg').textContent = t; }
+const INTRO_KEY = 'sil.oramics.intro.v1';
 function hideEmpty() { $('empty').hidden = true; }
+/** The "paint here" card with starters is for the very first visit only. After that the canvas opens blank, even after Clear. */
+function introOnce() {
+  let seen = false;
+  try { seen = !!localStorage.getItem(INTRO_KEY); localStorage.setItem(INTRO_KEY, '1'); } catch { /* storage blocked: show it, nothing to remember */ }
+  if (seen) hideEmpty();
+}
 
 function setShade(id, i) {
   S.settings.shade[id] = i; recolour(id); if (engine) engine.setShade(id, i); syncInks(); invalidate(); scheduleSave();
@@ -345,7 +352,8 @@ function wire() {
   document.querySelectorAll('[data-starter]').forEach(b => b.addEventListener('click', () => { ensureAudio(); startFrom(starterMarks(b.dataset.starter), STARTERS.find(s => s.id === b.dataset.starter).blurb); }));
   $('starter').addEventListener('change', e => { if (e.target.value) { startFrom(starterMarks(e.target.value), STARTERS.find(s => s.id === e.target.value).blurb); e.target.value = ''; } });
   $('clearInk').addEventListener('click', () => { record(S.ink); layers[S.ink].g.clearRect(0, 0, S.w, S.h); touch(S.ink, 0, S.w - 1); flush(S.ink); invalidate(); say(INKS[S.ink].name + ' cleared. Undo brings it back.'); });
-  $('clearAll').addEventListener('click', () => { record('all'); for (const id of INK_ORDER) { layers[id].g.clearRect(0, 0, S.w, S.h); touch(id, 0, S.w - 1); flush(id); } painted = false; $('empty').hidden = false; clearDraft(); invalidate(); say('Cleared. Undo brings it back.'); });
+  const clearAll = () => { record('all'); for (const id of INK_ORDER) { layers[id].g.clearRect(0, 0, S.w, S.h); touch(id, 0, S.w - 1); flush(id); } painted = false; clearDraft(); invalidate(); say('Cleared. Undo brings it back.'); };
+  $('clearAll').addEventListener('click', clearAll); $('clearBar').addEventListener('click', clearAll);
   $('btnSave').addEventListener('click', () => { const r = saveSlot(project()); say(r.ok ? 'Kept on this device.' : r.error); drawSlots(); });
   $('slots').addEventListener('click', async e => {
     const o = e.target.closest('[data-open]'), d = e.target.closest('[data-del]');
@@ -378,7 +386,7 @@ function wire() {
 makeLayers(); buildInks(); wire(); syncInks(); syncSettings(); drawSlots(); fit(); render();
 const draft = loadDraft();
 if (draft) loadProject(draft).then(ok => { if (ok) { $('pname').value = ''; say('Picked up where you left off.'); } });
-syncHistory();
+syncHistory(); introOnce();
 requestAnimationFrame(fit);
 
 window.ORM = { S, layers, an, project, loadProject, play, stop, setInk, setTool, setShade, flushAll, startFrom, get engine() { return engine; }, get ctx() { return ctx; }, hzAt, melodyAt };

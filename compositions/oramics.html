@@ -134,6 +134,7 @@
     @media (min-width: 861px) and (max-height: 720px) { .paint { height: 560px; } }
     @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
   </style>
+  <link rel="stylesheet" href="/assets/css/header.css">
   <link rel="stylesheet" href="/assets/css/a11y.css">
   <link rel="stylesheet" href="/assets/css/lab-ui.css">
   <link rel="stylesheet" href="/assets/css/essay.css">
@@ -196,6 +197,7 @@
         <button type="button" class="lab-btn" id="btnLoop" aria-pressed="true" aria-label="Loop">Loop</button>
         <button type="button" class="lab-btn" id="undo" aria-label="Undo" disabled>↶<span class="t"> Undo</span></button>
         <button type="button" class="lab-btn" id="redo" aria-label="Redo" disabled>↷<span class="t"> Redo</span></button>
+        <button type="button" class="lab-btn" id="clearBar" aria-label="Clear the whole painting">Clear</button>
         <label class="p-len"><span class="lbl">Length</span><input type="range" id="dur" min="4" max="90" step="1" value="24" aria-label="Length of the piece in seconds"><span class="p-time" id="durOut">24 s</span></label>
       </div>
 
