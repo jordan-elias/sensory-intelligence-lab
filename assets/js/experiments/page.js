@@ -9,7 +9,6 @@ import { buildNotebook } from '/assets/js/experiments/notebook.js';
 import { createProgress } from '/assets/js/experiments/progress.js';
 import { createSync } from '/assets/js/experiments/sync.js';
 import { parseTimer, assignTools, toolsFor, setupChecklist, fmtClock } from '/assets/js/experiments/steps.js';
-import { CHAPTERS } from '/assets/js/experiments/chapters.js';
 import { recommend, TIMES, continueLabel } from '/assets/js/experiments/recommend.js';
 import { reflect } from '/assets/js/experiments/reflect.js';
 import { combineRolls } from '/assets/js/experiments/seeds-core.js';
@@ -66,7 +65,7 @@ function list() {
   const others = PATH.filter(e => e.category !== 'capstone'), othersDone = others.filter(e => done.has(e.id)).length, ready = othersDone >= READY_AT;
   const lead = resume ? linkBtn('#/' + resume.id, continueLabel(resume.e, resume.step, total(resume.e)), 'xpContinue', false)
     : next ? linkBtn('#/' + next.id, continueLabel(next, 0, total(next), done.size > 0), 'xpContinue', false) : el('span', { class: 'xp-hint' }, 'You have done them all. Do any again.');
-  const unitBanner = justFinished && el('div', { class: 'xp-banner', role: 'status' }, el('b', {}, `Unit ${justFinished.number} finished: ${justFinished.title}.`), ' Read what you wrote in ', el('a', { href: '#/notebook' }, 'My notebook'), ', or choose what comes next.');
+  const unitBanner = justFinished && el('div', { class: 'xp-banner', role: 'status' }, el('b', {}, `Chapter ${justFinished.number} finished: ${justFinished.title}.`), ' Read what you wrote in ', el('a', { href: '#/notebook' }, 'My notebook'), ', or choose what comes next.');
   justFinished = null;
   const sug = suggestion && recommend(PATH, { ...filter, done });
   render(
@@ -74,10 +73,10 @@ function list() {
     unitBanner,
     el('div', { class: 'ph' }, el('h2', {}, COURSE.name), el('p', {}, COURSE.tagline), el('p', { style: 'margin-top:.5rem' }, COURSE.intro)),
     el('div', { class: 'xp-prog', role: 'img', 'aria-label': `${done.size} of ${PATH.length} experiments done` }, el('div', { class: 'xp-prog-bar' }, el('span', { style: `width:${pct}%` })), el('span', { class: 'xp-count' }, `${done.size} of ${PATH.length} done`)),
-    done.size === 0 && !resume ? el('a', { class: 'xp-card xp-method', href: '#/method' }, el('h3', {}, 'Start here: ' + METHOD.title), el('p', {}, 'Five short ideas. Read once, then use them every time.'), el('small', {}, '1 minute')) : null,
+    done.size === 0 && !resume ? el('a', { class: 'xp-card xp-method', href: '#/method' }, el('h3', {}, 'Start here: ' + METHOD.title), el('p', {}, 'A few short ideas. Read once, then use them every time.'), el('small', {}, '1 minute')) : null,
     el('div', { class: 'xp-top' }, lead,
       el('button', { type: 'button', class: 'xp-btn xp-btn--alt', id: 'xpSurprise', onclick: () => { const e = pick(); if (e) location.hash = '#/' + e.id; } }, 'Surprise me')),
-    el('p', { class: 'xp-links' }, ...(done.size === 0 && !resume ? [] : [el('a', { href: '#/method' }, 'The five ideas'), ' · ']), el('a', { href: '#/book' }, 'Do it on paper'), ' · ', el('a', { href: '#/notebook', id: 'xpNotebookLink' }, 'My notebook'), ' · ', el('a', { href: '#/keep', id: 'xpKeepLink' }, `My seeds${progress.shelf().length ? ' (' + progress.shelf().length + ')' : ''}`)),
+    el('p', { class: 'xp-links' }, ...(done.size === 0 && !resume ? [] : [el('a', { href: '#/method' }, 'How it works'), ' · ']), el('a', { href: '#/book' }, 'Do it on paper'), ' · ', el('a', { href: '#/notebook', id: 'xpNotebookLink' }, 'My notebook'), ' · ', el('a', { href: '#/keep', id: 'xpKeepLink' }, `My seeds${progress.shelf().length ? ' (' + progress.shelf().length + ')' : ''}`)),
     el('details', { class: 'xp-find xp-details', id: 'xpFindWrap', open: !!suggestion },
       el('summary', {}, 'Which one for me?'),
       el('p', { class: 'xp-hint' }, 'Say what you have and how long you have. Your answers are not saved.'),
@@ -88,21 +87,21 @@ function list() {
         ? [el('p', {}, sug.allDone ? 'You have done every one that fits. Do one again:' : 'Try this one:'), el('a', { class: 'xp-card', href: '#/' + sug.pick.id }, el('h3', {}, sug.pick.title), el('p', {}, sug.pick.summary), el('small', {}, `${NEEDS[sug.pick.needs]} · ${sug.pick.minutes} min`)),
           sug.others.length ? el('p', { class: 'xp-hint' }, 'Or: ', ...sug.others.flatMap((e, i) => [i ? ' · ' : '', el('a', { href: '#/' + e.id }, e.title)])) : null]
         : el('p', {}, 'Nothing fits both. Try a longer time, or "Anything".')) : null),
-    ...CHAPTERS.map(c => el('section', { class: 'xp-unit xp-chapter', 'aria-labelledby': 'c-' + c.id },
-      el('h3', { class: 'xp-unit-h', id: 'c-' + c.id }, `Chapter ${c.number}: ${c.title}${c.optional ? ' (optional)' : ''}`, el('span', { class: 'xp-count' }, ` ${c.sittings.filter(e => done.has(e.id)).length} of ${c.sittings.length}`)),
-      el('p', { class: 'xp-hint' }, c.intro),
-      el('div', { class: 'xp-grid' }, c.sittings.map(e => el('a', { class: 'xp-card' + (done.has(e.id) ? ' done' : ''), href: '#/' + e.id },
-        el('h3', {}, e.title), el('p', {}, e.summary), el('small', {}, `${e.minutes} min${progress.pos(e.id) && !done.has(e.id) ? ` · in progress (step ${progress.pos(e.id)})` : ''}`)))))),
     ...UNITS.map(u => {
-      const shown = u.experiments.filter(e => filter.needs === 'all' || e.needs === filter.needs);
-      if (!shown.length) return null;
+      const pass = e => filter.needs === 'all' || e.needs === filter.needs;
+      const card = e => el('a', { class: 'xp-card' + (done.has(e.id) ? ' done' : ''), href: '#/' + e.id },
+        el('h3', {}, e.title), el('p', {}, e.summary), el('small', {}, `${NEEDS[e.needs] || ''}${e.needs ? ' · ' : ''}${e.minutes} min${progress.pos(e.id) && !done.has(e.id) ? ` · in progress (step ${progress.pos(e.id)})` : ''}`));
+      const own = u.sittings.filter(pass), groups = u.groups.map(g => ({ g, shown: g.experiments.filter(pass) })).filter(x => x.shown.length);
+      if (!own.length && !groups.length) return null;
       const n = u.experiments.filter(e => done.has(e.id)).length;
-      return el('section', { class: 'xp-unit', 'aria-labelledby': 'u-' + u.id },
-        el('h3', { class: 'xp-unit-h', id: 'u-' + u.id }, `Unit ${u.number}: ${u.title}`, el('span', { class: 'xp-count' }, ` ${n} of ${u.experiments.length}`), n === u.experiments.length ? el('span', { class: 'xp-fin' }, ' Finished') : null),
+      return el('section', { class: 'xp-unit xp-chapter', 'aria-labelledby': 'u-' + u.id },
+        el('h3', { class: 'xp-unit-h', id: 'u-' + u.id }, `Chapter ${u.number}: ${u.title}${u.optional ? ' (optional)' : ''}`, el('span', { class: 'xp-count' }, ` ${n} of ${u.experiments.length}`), n === u.experiments.length ? el('span', { class: 'xp-fin' }, ' Finished') : null),
         el('p', { class: 'xp-hint' }, u.intro),
-        u.id === 'capstone' ? el('p', { class: 'xp-hint' }, ready ? 'You have done enough to be ready for these. Choose any one, whenever you like.' : `Open any time. They are meant for after about ${READY_AT} of the others (${othersDone} so far).`) : null,
-        el('div', { class: 'xp-grid' }, shown.map(e => el('a', { class: 'xp-card' + (done.has(e.id) ? ' done' : ''), href: '#/' + e.id },
-          el('h3', {}, e.title), el('p', {}, e.summary), el('small', {}, `${NEEDS[e.needs]} · ${e.minutes} min${progress.pos(e.id) && !done.has(e.id) ? ` · in progress (step ${progress.pos(e.id)})` : ''}`)))));
+        own.length ? el('div', { class: 'xp-grid' }, own.map(card)) : null,
+        ...groups.flatMap(({ g, shown }) => [el('h4', { class: 'xp-group-h' }, g.title, el('span', { class: 'xp-count' }, ` ${g.experiments.filter(e => done.has(e.id)).length} of ${g.experiments.length}`)),
+          el('p', { class: 'xp-hint' }, g.intro),
+          g.id === 'capstone' ? el('p', { class: 'xp-hint' }, ready ? 'You have done enough to be ready for these. Choose any one, whenever you like.' : `Open any time. They are meant for after about ${READY_AT} of the others (${othersDone} so far).`) : null,
+          el('div', { class: 'xp-grid' }, shown.map(card))]));
     }),
     el('h3', { class: 'xp-h' }, 'Your devices'), syncPanel());
   window.scrollTo(0, 0);
@@ -112,7 +111,7 @@ function method() {
   view = 'method'; awake.release(); stopTimers();
   render(
     el('a', { class: 'xp-back', href: '#/' }, '← ' + COURSE.name),
-    el('div', { class: 'ph' }, el('h2', {}, METHOD.title), el('p', {}, 'The same five ideas apply to every experiment in this course.')),
+    el('div', { class: 'ph' }, el('h2', {}, METHOD.title), el('p', {}, 'The same ideas apply to every sitting in this course.')),
     el('ol', { class: 'xp-method-steps' }, METHOD.steps.map(([h, t]) => el('li', {}, el('strong', {}, h), el('p', {}, t)))),
     el('p', { class: 'xp-hint' }, 'Your notes are kept on this device. If you turn on sync, they are encrypted before they leave it.'),
     el('p', {}, el('a', { class: 'xp-btn', href: '#/' + PATH[0].id, style: 'text-decoration:none;display:inline-block' }, 'Begin with ' + PATH[0].title)));
@@ -137,7 +136,7 @@ function notebook() {
     r.notes ? el('section', { class: 'xp-reflect', id: 'xpReflect' }, el('h3', { class: 'xp-h' }, 'Looking back'),
       el('p', {}, `You have written ${r.notes} note${r.notes === 1 ? '' : 's'}, ${r.words} words in all.`),
       r.recurring.length ? el('p', {}, 'Words that came up more than once: ', ...r.recurring.flatMap((w, i) => [i ? ', ' : '', el('strong', {}, w.word), ` (${w.count})`])) : el('p', {}, 'No word has come up twice yet.'),
-      el('ul', { class: 'xp-reflect-units' }, r.units.filter(u => u.notes).map(u => el('li', {}, `Unit ${u.number}, ${u.unit}: ${u.notes} note${u.notes === 1 ? '' : 's'}, ${u.words} words${u.top.length ? '. Most often: ' + u.top.map(w => w.word).join(', ') : ''}.`))),
+      el('ul', { class: 'xp-reflect-units' }, r.units.filter(u => u.notes).map(u => el('li', {}, `Chapter ${u.number}, ${u.unit}: ${u.notes} note${u.notes === 1 ? '' : 's'}, ${u.words} words${u.top.length ? '. Most often: ' + u.top.map(w => w.word).join(', ') : ''}.`))),
       el('p', { class: 'xp-hint' }, 'These are counts of your own words, worked out on this device. They describe what you wrote, nothing more.')) : null);
   window.scrollTo(0, 0);
 }
@@ -196,7 +195,7 @@ function book() {
     el('a', { class: 'xp-back xp-noprint', href: '#/' }, '← ' + COURSE.name),
     el('div', { class: 'ph' }, el('h2', {}, COURSE.name), el('p', {}, COURSE.tagline), el('p', { class: 'xp-noprint' }, el('button', { type: 'button', class: 'xp-btn', id: 'xpPrint', onclick: () => window.print() }, 'Print or save as PDF'))),
     el('h3', { class: 'xp-h' }, METHOD.title), el('ol', {}, METHOD.steps.map(([h, t]) => el('li', {}, el('strong', {}, h + '. '), t))),
-    ...UNITS.flatMap(u => [el('h3', { class: 'xp-h xp-breakb' }, `Unit ${u.number}: ${u.title}`), ...u.experiments.map(e => el('article', { class: 'xp-bk' },
+    ...UNITS.flatMap(u => [el('h3', { class: 'xp-h xp-breakb' }, `Chapter ${u.number}: ${u.title}`), ...u.experiments.map(e => el('article', { class: 'xp-bk' },
       el('h4', {}, e.title), el('p', {}, el('em', {}, e.summary)),
       el('p', {}, el('strong', {}, 'Finding out. '), e.question),
       el('p', {}, el('strong', {}, 'Limits: '), e.parameters.map(([k, v]) => `${k}: ${v}`).join(' · ')),
@@ -247,7 +246,7 @@ function detail(e) {
   };
 
   function savePanel() {
-    ticks = tools.map(t => t.keepable && t.keepable()).filter(Boolean).map(item => ({ item, box: el('input', { type: 'checkbox', checked: true }) }));
+    ticks = tools.flatMap(t => [].concat(t.keepable ? t.keepable() : [])).filter(Boolean).map(item => ({ item, box: el('input', { type: 'checkbox', checked: true }) }));
     if (!ticks.length) return null;
     const what = it => it.kind === 'audio' ? `${it.label} (${Math.round(it.clip.data.length / it.clip.sr)} s of sound)` : `${it.label}: ${it.text.replace(/\s+/g, ' ').slice(0, 70)}${it.text.length > 70 ? '…' : ''}`;
     const slug = it => (e.id + '-' + it.label).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -257,7 +256,7 @@ function detail(e) {
       it.midi ? ['Download MIDI', () => grab(slug(it) + '.mid', it.midi(), 'audio/midi')] : null,
     ].filter(Boolean);
     return el('div', { class: 'xp-save', id: 'xpSave' }, el('h3', { class: 'xp-h' }, 'Take it with you'),
-      el('p', { class: 'xp-hint' }, 'What you made here is a seed. Download it and carry it into your DAW, instrument or notebook.'),
+      el('p', { class: 'xp-hint' }, 'What you made here is a seed. Keep it whether it worked or not. You can also download it and carry it into your DAW, instrument or notebook.'),
       el('ul', { class: 'xp-check' }, ticks.map(({ item, box }) => el('li', {}, el('label', {}, box, ' ' + what(item)), ' ',
         ...files(item).map(([label, fn]) => el('button', { type: 'button', class: 'xp-btn xp-btn--alt xp-dl', onclick: fn }, label))))),
       el('p', { class: 'xp-hint' }, 'Ticked items also go into My seeds when you finish. Untick anything you do not want to keep.'));
@@ -285,10 +284,10 @@ function detail(e) {
     } else if (at <= n) {
       awake.hold();
       const here = per[at - 1].filter(i => !isTimer(i)), shownIdx = new Set(here);
-      const carry = tools.map((t, i) => ({ t, i })).filter(({ t, i }) => !shownIdx.has(i) && firstAt(i) >= 0 && firstAt(i) < at - 1 && t.keepable).map(({ t }) => ({ t, k: t.keepable() })).filter(x => x.k);
+      const carry = tools.map((t, i) => ({ t, i })).filter(({ t, i }) => !shownIdx.has(i) && firstAt(i) >= 0 && firstAt(i) < at - 1 && t.keepable).flatMap(({ t }) => [].concat(t.keepable()).filter(Boolean).map(k => ({ t, k })));
       const rest = tools.map((t, i) => ({ t, i })).filter(({ i }) => !shownIdx.has(i)).map(({ t }) => t);
       const secs = parseTimer(e.procedure[at - 1]);
-      const CUE = { gen: 'the button below', groove: 'the rhythm below', bench: 'the workbench below', marks: 'the stopwatch below', subtract: 'the parts list below', clip: 'the sound tool below', loops: 'the loops below', assign: 'the swap tool below', wordpoem: 'the word tool below', burn: 'the page below', cards: 'the cards below', blackout: 'the text below', roll: 'the chord tool below', sampler: 'the sampler below', treat: 'the treatments below', strings: 'the strings below', versions: 'the versions below' };
+      const CUE = { gen: 'the button below', groove: 'the rhythm below', bench: 'the workbench below', marks: 'the stopwatch below', subtract: 'the parts list below', clip: 'the sound tool below', loops: 'the loops below', assign: 'the swap tool below', wordpoem: 'the word tool below', burn: 'the page below', cards: 'the cards below', blackout: 'the text below', roll: 'the chord tool below', editor: 'the note editor below', keys: 'the keyboard below', recorder: 'the recorder below', sampler: 'the sampler below', treat: 'the treatments below', strings: 'the strings below', versions: 'the versions below' };
       const cue = [...new Set(here.map(i => CUE[cfgs[i].type]).filter(Boolean))];
       render(head, dots(),
         el('div', { class: 'xp-stepcard', 'aria-live': 'polite' }, el('div', { class: 'xp-stepno' }, `Step ${at} of ${n}`), el('p', { class: 'xp-steptext', id: 'xpStep' }, e.procedure[at - 1]), cue.length ? el('p', { class: 'xp-cue', id: 'xpCue' }, 'Use ' + cue.join(' and ')) : null),
@@ -307,7 +306,7 @@ function detail(e) {
         el('p', { class: 'xp-hint' }, 'Record your process or share your thoughts. If it helps to start: ' + e.reflect),
         note,
         el('div', { class: 'xp-recap', id: 'xpRecap' },
-          el('p', {}, `${n} steps done. ${unitDone} of ${unit.experiments.length} in Unit ${unit.number} (${unit.title}) once you mark this one.`),
+          el('p', {}, `${n} steps done. ${unitDone} of ${unit.experiments.length} in chapter ${unit.number} (${unit.title}) once you mark this one.`),
           kept.length ? el('p', {}, `Kept from this experiment: `, ...kept.flatMap((k, i) => [i ? ', ' : '', k.title.replace(e.title + ': ', '')]), '. ', el('a', { href: '#/keep' }, 'Open My seeds')) : el('p', { class: 'xp-note' }, 'You did not keep anything from this one.')),
         savePanel(),
         nav(btn('Finish', finish, false, 'xpFinish'), btn('Back to the steps', () => go(n), true, 'xpBackSteps')),

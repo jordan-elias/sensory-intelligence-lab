@@ -21,3 +21,18 @@ test('byId finds sittings, and chapterOf finds their chapter', () => {
   assert.equal(chapterOf('ch3-shift').id, 'state-body');
   assert.equal(chapterOf('nope'), null);
 });
+
+test('every step that asks you to make something has a tool, and the tool indexes are real', () => {
+  for (const s of CHAPTER_SITTINGS) {
+    assert.equal(s.stepTools.length, s.procedure.length, s.id);
+    s.stepTools.flat().forEach(i => assert.ok(s.tools[i], s.id + ' tool ' + i));
+    s.procedure.forEach((step, i) => { if (/\b(make|record)\b/i.test(step) && !/^(Decide|Write|Keep|Open)/.test(step)) assert.ok(s.stepTools[i].length, `${s.id} step ${i + 1} has a tool: ${step.slice(0, 40)}`); });
+  }
+});
+test('reflection questions are open, not yes/no or graded', () => {
+  for (const s of CHAPTER_SITTINGS) assert.ok(!/^(did|was|were|is|are|do|does|would|could|which one did you like)\b/i.test(s.reflect), s.id + ': ' + s.reflect);
+});
+
+test('every sitting has parameters and a solo version, as the player requires', () => {
+  for (const s of CHAPTER_SITTINGS) { assert.ok(s.parameters.every(p => p.length === 2 && p[0] && p[1]), s.id); assert.ok(s.solo.length > 10); }
+});

@@ -17,11 +17,14 @@ export function previewHtml() {
     <p><a class="xp-btn" href="/subscribe/" id="xpSubscribe" style="text-decoration:none;display:inline-flex;align-items:center">Subscribe to begin</a></p>
 
     <h2>What it is for</h2>
-    <p>To get curious about how you make sound and music, to get unstuck, and to leave with small starts of ideas that are yours to build on. Each experiment sets one small limit and walks you through it one step at a time, with the tools built into the page. You go at your own pace, in any order, and nothing is scored or compared.</p>
+    <p>To get curious about how you make sound and music, to get unstuck, and to leave with small starts of ideas that are yours to build on. Each sitting is one small thing to do, one step at a time, with the tools built into the page: a note editor, a keyboard, a recorder, dice, and paper for the rest. You go at your own pace, in any order, and nothing is scored or compared.</p>
 
     <h2>What is inside</h2>
-    <p>${count} experiments in ${UNITS.length} sections.</p>
-    <ol class="xp-prev-units">${UNITS.map(u => `<li><b>${esc(u.title)}</b> <span>${esc(u.intro)} (${u.experiments.length} ${u.experiments.length === 1 ? 'experiment' : 'experiments'})</span></li>`).join('')}</ol>
+    <p>${UNITS.length} chapters, ${count} sittings and experiments.</p>
+    <ol class="xp-prev-units">${UNITS.map(u => `<li><b>${esc(u.title)}</b> <span>${esc(u.intro)} (${u.experiments.length} ${u.experiments.length === 1 ? 'sitting' : 'sittings'})</span></li>`).join('')}</ol>
+
+    <h2>What the tools do</h2>
+    <p>The dice and cards are chance, not artificial intelligence. Nothing in this course generates your music or writing for you: what you make is yours. The sounds you hear in the page come from the browser, and recordings never leave your device, and your written notes and seeds leave it only if you turn on encrypted sync.</p>
 
     <h2>How it works</h2>
     <ol class="xp-prev-method">${METHOD.steps.map(([t, d]) => `<li><b>${esc(t)}.</b> ${esc(d)}</li>`).join('')}</ol>

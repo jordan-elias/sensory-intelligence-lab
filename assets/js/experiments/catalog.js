@@ -70,7 +70,7 @@ export const EXPERIMENTS = [
       KEEP,
     ],
     stop: 'After the fourth time through the progression, or 25 minutes.',
-    reflect: 'Which shape changed the most? Was it the one you least expected?',
+    reflect: 'Which shape changed the most, and what did that tell you about how you play?',
     tools: [{ type: 'gen', kind: 'tuning', label: 'Roll the retuning' }, { type: 'strings', bpm: 70 }, { type: 'timer', minutes: 25 }],
     solo: DICE + 'Number your strings (or groups of keys) on slips and draw one. Roll a die twice for the shift: the first roll for direction (even is down, odd is up), the second for the number of semitones.',
   },
@@ -87,7 +87,7 @@ export const EXPERIMENTS = [
       'Mark the bar you like most, and any clash you kept.',
     ],
     stop: 'After one full take, or 25 minutes.',
-    reflect: 'Did any clash become the best part?',
+    reflect: 'What happened at the clashes?',
     tools: [{ type: 'gen', kind: 'notes', count: 5, label: 'Draw five notes' }, { type: 'groove', steps: 4, hits: 4, bpm: 90 }, { type: 'timer', minutes: 25 }],
     solo: DICE + 'Write the twelve note names on twelve slips, fold them and draw five. Use any metronome set to 90.',
   },
@@ -138,7 +138,7 @@ export const EXPERIMENTS = [
       'Pick the one you would never have chosen on purpose.',
     ],
     stop: 'After the ninth treatment.',
-    reflect: 'Did the way of playing change the chord more than the chord itself?',
+    reflect: 'What changed the chord more: the way of playing it, or the chord itself?',
     tools: [{ type: 'gen', kind: 'shuffle', label: 'Roll the order', options: [
       'Very soft', 'Very loud', 'Broken, one note at a time', 'Struck once, then silence', 'High register only',
       'Low register only', 'Held low note, the rest above', 'Spread out slowly', 'Quick repetition'] }, { type: 'timer', minutes: 2 }],
@@ -159,7 +159,7 @@ export const EXPERIMENTS = [
       'Stop adding after 6 sounds. Listen for one more cycle.',
     ],
     stop: 'After 6 sounds and one more cycle, or at 20 minutes.',
-    reflect: 'When did the best moments happen: near the start of the cycle or later?',
+    reflect: 'When did the best moments happen, and what was going on then?',
     tools: [{ type: 'bench', tracks: ['kick', 'snare', 'hihat'], lengths: { kick: 3, snare: 4, hihat: 5 }, lockLength: true, bring: false, bpm: 90 }, { type: 'timer', minutes: 20 }],
     solo: 'Clap or tap three patterns at once with two friends: one counting to 3, one to 4, one to 5, each stressing its first beat. Or set three loops of those lengths in any looper.',
   },
@@ -176,7 +176,7 @@ export const EXPERIMENTS = [
       'Mark the beat where your body wanted the strongest weight.',
     ],
     stop: 'After 5 minutes of playing the finished groove.',
-    reflect: 'When did it stop feeling odd, and what changed?',
+    reflect: 'What changed when it stopped feeling odd?',
     tools: [{ type: 'gen', kind: 'range', min: 5, max: 13, count: 1, label: 'Roll the number of beats' }, { type: 'bench', tracks: ['kick', 'snare', 'hihat'], number: true, bring: false, bpm: 100 }, { type: 'timer', minutes: 5 }],
     solo: DICE + 'Roll two dice and add them, then add 3 (range 5 to 15; re-roll 14 and 15). Count aloud and tap the groove.',
   },
@@ -193,7 +193,7 @@ export const EXPERIMENTS = [
       'Play it 3 times, then ask someone (or yourself, a day later) whether they can tell what the sentence was.',
     ],
     stop: 'After three plays.',
-    reflect: 'Could you still hear the sentence in the rhythm?',
+    reflect: 'What could you still hear of the sentence in the rhythm?',
     tools: [{ type: 'gen', kind: 'choice', label: 'Draw a sentence', options: [
       'The kettle is louder than I remembered.', 'Nobody told the pigeons about the plan.', 'We left before the rain made up its mind.',
       'A very small door in a very large wall.', 'Please keep the tune you almost lost.', 'Somebody is practising scales next door.',
@@ -217,7 +217,7 @@ export const EXPERIMENTS = [
       'Name the one sound that changed most.',
     ],
     stop: 'After the third listen to the layered version.',
-    reflect: 'Did small sounds start to feel like landscapes?',
+    reflect: 'What happened to the small sounds as you stayed with them?',
     tools: [{ type: 'clip', ops: ['slow', 'fast', 'contrast'] }, { type: 'timer', minutes: 20 }],
     solo: 'In any editor, copy the clip to a second track. Slow one copy to 25% and speed the other to 400% with pitch following speed, then play them together.',
   },
@@ -251,7 +251,7 @@ export const EXPERIMENTS = [
       'Record your answer. It must not be longer than the clip.',
     ],
     stop: 'After one recorded answer.',
-    reflect: 'Did your answer swell instead of attack? How did that feel?',
+    reflect: 'What was it like to answer with a swell instead of an attack?',
     tools: [{ type: 'clip', ops: ['reverse'] }, { type: 'timer', minutes: 20 }],
     solo: 'Any editor has a Reverse command. Reverse the clip and play along.',
   },
@@ -285,7 +285,7 @@ export const EXPERIMENTS = [
       'Choose the most startling.',
     ],
     stop: 'After ten moments.',
-    reflect: 'How many of the ten were startling? Was it one in ten, as people expect?',
+    reflect: 'What was startling, and how often?',
     tools: [{ type: 'clip', ops: ['stutter'] }, { type: 'timer', minutes: 15 }],
     solo: 'In an editor, loop a very short selection. Move the start by a tiny amount for each of ten tries.',
   },
@@ -302,7 +302,7 @@ export const EXPERIMENTS = [
       'Play one of the musical sounds on your instrument, as close as you can.',
     ],
     stop: 'After the instrument attempt.',
-    reflect: 'How many sounds were new to you? Was one musical?',
+    reflect: 'What sounds were new to you, and what did you hear in them?',
     tools: [{ type: 'clip', ops: [] }, { type: 'timer', minutes: 15 }],
     solo: 'Use your phone voice recorder and listen on headphones.',
   },
@@ -321,7 +321,7 @@ export const EXPERIMENTS = [
       'Listen to version 3 for 4 minutes. Then line up all five from the one you like most to the one you like least.',
     ],
     stop: 'After you have lined all five up.',
-    reflect: 'Did the order you would have picked change after four minutes with version 3?',
+    reflect: 'How did the order you would have picked change after four minutes with version 3?',
     tools: [{ type: 'gen', kind: 'pattern', steps: 8, setSize: 5, label: 'Roll a pattern' }, { type: 'groove', steps: 8, hits: 8, bpm: 110 }, { type: 'versions', max: 5, bpm: 110 }, { type: 'timer', minutes: 4 }],
     solo: DICE + 'Pick five notes from a hat, then draw one of them for each of eight steps (put it back each time).',
   },
@@ -338,7 +338,7 @@ export const EXPERIMENTS = [
       'Note the minute you ran out of material, then continue to 30 minutes.',
     ],
     stop: 'At 30 minutes, even if it is unfinished.',
-    reflect: 'When you ran out of material, what did you do next?',
+    reflect: 'What did you do when you ran out of material?',
     tools: [{ type: 'clip', ops: ['grain', 'stutter'] }, { type: 'timer', minutes: 30 }],
     solo: 'Record with a phone and import the recording into your DAW or sampler.',
   },
@@ -355,7 +355,7 @@ export const EXPERIMENTS = [
       'Choose your favourite 20 seconds.',
     ],
     stop: 'After the 4 minute sweep and one listen-back.',
-    reflect: 'Was there a sweet spot you had not found before?',
+    reflect: 'What did you find on the way that you had not looked for?',
     tools: [{ type: 'marks', mode: 'spots', label: 'Sweet spots', noun: 'spot' }, { type: 'gen', kind: 'choice', label: 'Roll the control', options: [
       'Filter cutoff', 'Reverb size', 'Delay time', 'Pitch of everything', 'Bit depth', 'Playback speed', 'Stereo width', 'Grain size', 'Distortion drive', 'Envelope release'] }, { type: 'bench', tracks: ['kick', 'snare', 'hihat', 'bass'], steps: 64, bring: false, bpm: 100 }, { type: 'timer', minutes: 4 }],
     solo: DICE + 'Write ten controls on slips of paper and draw one.',
@@ -373,7 +373,7 @@ export const EXPERIMENTS = [
       'After 1 hour, play it again and write one more word. Keep at least one swap.',
     ],
     stop: 'After the second word.',
-    reflect: 'Did the word change after an hour?',
+    reflect: 'How did the word change for you after an hour?',
     tools: [{ type: 'assign' }],
     solo: 'Write the instruments on cards and deal them to the tracks, making sure no track keeps its own.',
   },
@@ -390,7 +390,7 @@ export const EXPERIMENTS = [
       'Note who seemed to lead.',
     ],
     stop: 'After the 3 minute recording.',
-    reflect: 'Who was leading, you or the soundscape?',
+    reflect: 'Who was leading, you or the soundscape, and how did that shift?',
     tools: [{ type: 'gen', kind: 'choice', label: 'Roll a mood', options: ['Waiting', 'Relief', 'Restless', 'Tender', 'Suspicious', 'Wide open', 'Tired but fond', 'Ceremonial'] }, { type: 'timer', minutes: 3 }],
     links: [{ href: '/soundscape-machine/', label: 'Open the Soundscape Machine' }],
     solo: 'Use any ambient recording or a drone from your instrument as the soundscape.',
@@ -410,7 +410,7 @@ export const EXPERIMENTS = [
       'Play that phrase 3 times.',
     ],
     stop: 'After 10 minutes.',
-    reflect: 'Was the least tidy phrase also the most alive?',
+    reflect: 'What was alive in the least tidy phrase?',
     tools: [{ type: 'gen', kind: 'choice', label: 'Roll your limit', options: [
       'Your non-dominant hand only', 'Black keys only', 'One string only', 'Only the top three strings', 'Only notes within a fifth',
       'Only three different notes', 'No note longer than a beat', 'Eyes closed'] }, { type: 'groove', steps: 4, hits: 4, bpm: 80 }, { type: 'timer', minutes: 10 }],
@@ -429,7 +429,7 @@ export const EXPERIMENTS = [
       'Listen once more. Compare how all three felt.',
     ],
     stop: 'After at most two cuts.',
-    reflect: 'Did the piece feel clearer after the cut, or emptier?',
+    reflect: 'What did the piece say once half was gone?',
     tools: [{ type: 'subtract' }, { type: 'timer', minutes: 20 }],
     solo: 'Copy your piece before you start, so that nothing is really lost.',
   },
@@ -448,7 +448,7 @@ export const EXPERIMENTS = [
       'After 15 minutes, stop. Spend the last 5 on small edits, but keep every end-word.',
     ],
     stop: 'After 20 minutes, or when the last word has its line.',
-    reflect: 'Did you end up somewhere the borrowed line would not have taken you?',
+    reflect: 'Where did you end up that the borrowed line would not have taken you?',
     tools: [{ type: 'wordpoem', source: 'line', min: 5, max: 14 }, { type: 'timer', minutes: 20 }],
     solo: 'Write the words of the line down the right-hand side of a page. Fill in the line before each one, in order.',
   },
@@ -465,7 +465,7 @@ export const EXPERIMENTS = [
       'Burn a second page if you want to. Compare the two.',
     ],
     stop: 'After two pages at most.',
-    reflect: 'Did the haiku say something you had not planned?',
+    reflect: 'What did the haiku say that you had not planned?',
     tools: [{ type: 'burn' }],
     solo: 'Write for one minute. Cross out words in a random order (use a die to pick the line, then count in from the left) until only 17 syllables remain. They must stay in their original order.',
   },
@@ -502,7 +502,7 @@ export const EXPERIMENTS = [
       'Leave it for 10 minutes. Read it aloud once. Change nothing except spelling.',
     ],
     stop: 'After 20 minutes.',
-    reflect: 'Did the poem keep any of the photo, or did it leave it?',
+    reflect: 'What did the poem keep of the photo, and what did it leave?',
     tools: [{ type: 'wordpoem', source: 'photo', min: 5, max: 16 }, { type: 'timer', minutes: 20 }],
     solo: 'Print or open a photo with signs in it. Write each word on its own card, shuffle, and lay the cards in a column. Write a line to each.',
   },
@@ -519,7 +519,7 @@ export const EXPERIMENTS = [
       'Give it a title taken from the page.',
     ],
     stop: 'After 20 minutes, or at 25 kept words.',
-    reflect: 'Did the poem surprise you, and how far is it from the page?',
+    reflect: 'What surprised you in the poem, and how far is it from the page?',
     tools: [{ type: 'blackout' }, { type: 'timer', minutes: 20 }],
     solo: 'Photocopy a page. With a marker, black out everything except the words you keep. Do not change the order.',
   },
@@ -555,7 +555,7 @@ export const EXPERIMENTS = [
       'Download the MIDI file and open it in your DAW or notation program, or play the melody on your own instrument.',
     ],
     stop: 'After 20 minutes, or after the 4 changes.',
-    reflect: 'Did the chord you liked least give you the best idea?',
+    reflect: 'What came from the chord you liked least?',
     tools: [{ type: 'roll' }, { type: 'timer', minutes: 20 }],
     links: [],
     solo: 'Roll four chords with a die (numbers 1 to 6 for degrees I to vi; re-roll a repeat). Write them on staff paper. Write a melody of 16 sixteenth notes, using only the notes of the key.',
@@ -573,7 +573,7 @@ export const EXPERIMENTS = [
       'Download the beat. Listen once and notice how it feels.',
     ],
     stop: 'After the 6 changes and one download.',
-    reflect: 'Did the beat feel like it came from one place?',
+    reflect: 'Where did the beat seem to come from?',
     tools: [{ type: 'sampler' }, { type: 'timer', minutes: 25 }],
     solo: 'Record one sound. In your DAW, slice it into four pieces, pitch each by a different amount, and sequence them on a 16-step grid. Use no other sound.',
   },
@@ -590,7 +590,7 @@ export const EXPERIMENTS = [
       'Write down which treatment changed the track the most.',
     ],
     stop: 'After you have heard all three stages.',
-    reflect: 'Which stage did you prefer, and did the treatments help or just change it?',
+    reflect: 'What did each stage change, and what did the treatments add or take away?',
     tools: [{ type: 'assign' }, { type: 'treat' }],
     solo: 'Write 10 effects on cards with a number on each. Give each swapped track one card and set the effect to that number.',
   },
@@ -643,7 +643,7 @@ export const EXPERIMENTS = [
       'Play it through once. Notice the feeling of arrival.',
     ],
     stop: 'After one full play-through.',
-    reflect: 'Did the shape of the time carry anything across?',
+    reflect: 'What did the shape of the time carry across?',
     tools: [{ type: 'marks', mode: 'sections' }, { type: 'timer', minutes: 30 }],
     solo: 'Write the section lengths as a row of boxes on paper, one box per 5 seconds. Fill each section in with a different mark.',
   },
@@ -739,17 +739,18 @@ export const EXPERIMENTS = [
 /** The course: a name, a method lesson, and units in a suggested order. People may take them in any order. */
 export const COURSE = {
   name: 'Experiments in Creativity',
-  tagline: 'Creative prompts and guided activities for getting curious about how you make things, and for getting unstuck.',
-  intro: 'Each experiment sets one small limit and walks you through it one step at a time. Most take 15 to 25 minutes. You only need what is listed on each. Take them in the suggested order or choose your own.',
+  tagline: 'Small things to do with sound, one step at a time, for getting curious about how you make things and getting unstuck.',
+  intro: 'Eight chapters you can move through at any pace and in any order. Each sitting is one small thing to do, with a tool here to do it with: a note editor, a keyboard, a recorder, dice, or paper. What you make is kept as a seed, whether it worked or not.',
 };
 export const METHOD = {
   title: 'How it works',
   steps: [
-    ['Take on the limit', 'Each experiment gives you a small rule. The rule is the point: it takes some of the usual choices away so you can find new ones.'],
+    ['Take on the limit', 'Each sitting gives you a small rule or a small question. The limit is the point: it takes some of the usual choices away so you can find new ones.'],
     ['One step at a time', 'The app shows a single step on screen. Do it, then tap Next. You never have to hold the whole thing in your head.'],
     ['Do not fix things as you go', 'If you break the rule, say so and carry on. No redoing, no second takes. The first try is the one that counts.'],
     ['Notice', 'Pay attention to what surprises you, what you like and what annoys you. You do not have to rate or score anything.'],
-    ['Leave a note, if you want to', 'At the end you can record your process or share your thoughts in your own words. It is optional and kept on this device only.'],
+    ['Keep what you make, including what did not work', 'At the end you can keep what you made as a seed, with a note to yourself. Keep the unfinished and the ones you think failed too. They are material, and you will not know which is which until later. Keeping nothing today is fine.'],
+    ['Skip, stop or come back', 'Skip any sitting. Stop in the middle. There is no right order and no pace to keep up with.'],
   ],
 };
 export const UNIT_INTROS = {
@@ -761,10 +762,17 @@ export const UNIT_INTROS = {
   writing: 'The same method for words: borrowed endings, burning pages, found text.',
   capstone: 'Finish by making something of your own. Choose one of four ways, each under limits you did not choose.',
 };
-const ORDER = ['limits', 'melody', 'rhythm', 'field', 'production', 'writing', 'capstone'];
-export const UNITS = ORDER.map((id, i) => ({ id, number: i + 1, title: CATEGORIES[id], intro: UNIT_INTROS[id], experiments: EXPERIMENTS.filter(e => e.category === id) }));
-/** The suggested order: unit by unit. */
+/** The older experiments, by kind. They now sit inside chapters 5 and 7 as groups. */
+const GROUP_OF = id => ({ id, title: CATEGORIES[id], intro: UNIT_INTROS[id], experiments: EXPERIMENTS.filter(e => e.category === id) });
+/** The eight chapters. Each has its own sittings first, then any older experiments gathered as groups. */
+export const UNITS = CHAPTERS.map(c => {
+  const groups = (c.groups || []).map(([id]) => GROUP_OF(id));
+  return { id: c.id, number: c.number, title: c.title, intro: c.intro, optional: !!c.optional, sittings: c.sittings, groups, experiments: [...c.sittings, ...groups.flatMap(g => g.experiments)] };
+});
+/** The suggested order: chapter by chapter. */
 export const PATH = UNITS.flatMap(u => u.experiments);
 
-import { CHAPTER_SITTINGS } from './chapters.js';
+import { CHAPTERS, CHAPTER_SITTINGS } from './chapters.js';
+import { addStudioTools } from './studio-tools.js';
+addStudioTools(EXPERIMENTS);
 export const byId = id => EXPERIMENTS.find(e => e.id === id) || CHAPTER_SITTINGS.find(e => e.id === id) || null;
