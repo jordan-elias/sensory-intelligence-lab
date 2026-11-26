@@ -176,8 +176,10 @@ function shelf() {
         body.replaceChildren(el('audio', { controls: true, src: url, 'aria-label': it.title }), el('div', { class: 'xp-row' }, el('a', { class: 'xp-btn xp-btn--alt', href: url, download: 'experiment.wav', style: 'text-decoration:none' }, 'Download'), del));
       }).catch(() => body.replaceChildren(el('p', { class: 'xp-hint' }, 'Recordings could not be opened here.'), del));
     }
+    const noteBox = el('textarea', { class: 'xp-seed-note', rows: 2, maxlength: 2000, placeholder: 'A note to yourself: where this came from, what you might do with it', 'aria-label': 'Note for this seed' }, it.note || '');
+    noteBox.addEventListener('change', () => progress.setSeedNote(it.id, noteBox.value));
     const pick = it.kind === 'text' ? el('label', { class: 'xp-pick' }, el('input', { type: 'checkbox', class: 'xp-pickbox', 'data-id': it.id, onchange: syncCombine }), ' Pick to combine') : null;
-    return el('article', { class: 'xp-kept-item' }, el('h3', {}, it.title), pick, el('p', { class: 'xp-hint' }, `${when(it.at)}${e ? ' · ' : ''}`, e ? el('a', { href: '#/' + e.id }, e.title) : null, it.kind === 'audio' ? ' · this device only' : ''), body);
+    return el('article', { class: 'xp-kept-item' }, el('h3', {}, it.title), pick, el('p', { class: 'xp-hint' }, `${when(it.at)}${e ? ' · ' : ''}`, e ? el('a', { href: '#/' + e.id }, e.title) : null, it.kind === 'audio' ? ' · this device only' : ''), body, noteBox);
   };
   render(
     el('a', { class: 'xp-back', href: '#/' }, '← ' + COURSE.name),
@@ -270,7 +272,7 @@ function detail(e) {
       render(head,
         el('div', { class: 'ph' }, el('h2', {}, e.title), el('p', { id: 'xpQuestion' }, e.question)),
         el('p', { class: 'xp-hint' }, 'First: ' + e.procedure[0]),
-        ...(e.links || []).map(l => el('p', {}, el('a', { href: l.href, target: '_blank', rel: 'noopener' }, l.label))),
+        ...(e.links || []).map(l => el('p', {}, el('a', l.href[0] === '#' ? { href: l.href } : { href: l.href, target: '_blank', rel: 'noopener' }, l.label))),
         nav(btn('Begin', () => go(1), false, 'xpBegin'), saved >= 1 && saved <= n ? btn(`Resume at step ${saved}`, () => go(saved), true, 'xpResume') : null),
         el('details', { class: 'xp-solo', id: 'xpAbout' }, el('summary', {}, 'About this experiment'),
           el('ul', { class: 'xp-intro-list' },

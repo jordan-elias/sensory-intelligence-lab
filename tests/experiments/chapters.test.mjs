@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { CHAPTERS, CHAPTER_SITTINGS, chapterOf } from '../../assets/js/experiments/chapters.js';
 import { byId, EXPERIMENTS } from '../../assets/js/experiments/catalog.js';
 
-test('chapters 1 to 3 exist with sittings', () => {
-  assert.deepEqual(CHAPTERS.map(c => c.number), [1, 2, 3]);
+test('chapters 1 to 5 exist with sittings', () => {
+  assert.deepEqual(CHAPTERS.map(c => c.number), [1, 2, 3, 4, 5]);
   assert.ok(CHAPTERS.every(c => c.sittings.length >= 3));
 });
 test('every sitting has the fields the player needs and keeps a seed', () => {

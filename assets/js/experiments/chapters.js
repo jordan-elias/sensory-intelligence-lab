@@ -1,7 +1,7 @@
 /**
  * /assets/js/experiments/chapters.js
  * The chapter sittings of the course. Same shape as a catalog experiment, so the player, notebook and seed box treat them alike.
- * DRAFT WORDING: every prompt below is a first draft for Jordan to pilot and rewrite. Chapters 4 to 8 are not written yet.
+ * DRAFT WORDING: every prompt below is a first draft for Jordan to pilot and rewrite. Chapters 6 to 8 are not written yet.
  * A sitting is: arrive, warm up, core, harvest (keep seeds), notice, carry. Each one ends by keeping at least one seed.
  */
 const note = (label, target, placeholder) => ({ type: 'pad', label, target, placeholder });
@@ -114,6 +114,77 @@ export const CHAPTERS = [
       ],
       stop: 'After five minutes.', reflect: 'Where in the body did it live?',
       tools: [{ type: 'timer', minutes: 5 }, note('My pattern', 4, 'long, short, short, long…')] }),
+  ] },
+  { id: 'taste-lineage', number: 4, title: 'Taste and lineage', intro: 'What you love is information. These sittings trace it back, and find where your own taste is already pointing.', sittings: [
+    sitting({ id: 'ch4-ten-loves', title: 'Ten things you love', minutes: 15,
+      summary: 'List the sounds, records and moments you love, then look for what they share.',
+      question: 'What do the things I love have in common?',
+      parameters: [['List', 'Ten items'], ['Time', '8 minutes']],
+      procedure: [
+        'List ten pieces, sounds or moments in music that you love. Do not edit for taste. Take 5 minutes.',
+        'Next to each, write one word for what it does to you, for 3 minutes.',
+        'Keep the word that appears most, or the odd one out, as a seed.',
+      ],
+      stop: 'After eight minutes.', reflect: 'What is the pattern you did not expect?',
+      tools: [note('What I love', 12, 'A record, a sound, a moment, and its word…'), { type: 'timer', minutes: 8 }] }),
+    sitting({ id: 'ch4-borrow', title: 'Borrow one thing', minutes: 20,
+      summary: 'Take one feature of a piece you love and make something small with it.',
+      question: 'What happens when I borrow one gesture, and nothing else?',
+      parameters: [['Borrow', 'One feature only'], ['Time', '12 minutes']],
+      procedure: [
+        'Choose one piece you love. Name one feature of it: a rhythm, an interval, a texture, a silence.',
+        'Make 12 minutes of anything that uses only that feature. Record it or write it down.',
+        'Keep what you made as a seed, with the name of what you borrowed from.',
+      ],
+      stop: 'After twelve minutes.', reflect: 'What stayed yours?',
+      tools: [note('What I borrowed, and what I made', 6, 'Borrowed: … Made: …'), { type: 'timer', minutes: 12 }] }),
+    sitting({ id: 'ch4-not-me', title: 'What I do not love', minutes: 12,
+      summary: 'Look at what you reject. It is the other edge of your taste.',
+      question: 'What do I turn away from, and what is it protecting?',
+      parameters: [['Time', '6 minutes']],
+      procedure: [
+        'List sounds or kinds of music you dislike, for 3 minutes.',
+        'Choose one. Write one thing about it that is worth stealing, for 3 minutes.',
+        'Keep that line as a seed.',
+      ],
+      stop: 'After six minutes.', reflect: 'Was that harder than it sounds?',
+      tools: [note('What I turn away from', 8, 'I cannot stand…'), { type: 'timer', minutes: 6 }] }),
+  ] },
+  { id: 'limits-chance', number: 5, title: 'Limits and chance', intro: 'A fixed limit, or a roll of the dice, takes the choosing off you. This is where your seeds meet the Workbench.', sittings: [
+    sitting({ id: 'ch5-one-rule', title: 'One rule', minutes: 20,
+      summary: 'Invent one rule, and make a small piece inside it.',
+      question: 'What does one clear limit give me that freedom does not?',
+      parameters: [['Rule', 'One, written first'], ['Time', '12 minutes']],
+      procedure: [
+        'Write one rule for a small piece. Example: only three notes, or nothing louder than a whisper. Take 3 minutes.',
+        'Make something for 12 minutes that obeys it exactly.',
+        'Keep what you made as a seed, with the rule written above it.',
+      ],
+      stop: 'After twelve minutes.', reflect: 'Where did the rule push you somewhere new?',
+      tools: [note('The rule, and what I made', 8, 'Rule: … Result: …'), { type: 'timer', minutes: 12 }] }),
+    sitting({ id: 'ch5-roll-seeds', title: 'Roll your seeds', minutes: 20,
+      summary: 'Let a die choose between things you already made.',
+      question: 'What happens when chance chooses my combination?',
+      parameters: [['Seeds', 'Two, chosen by a die'], ['Time', '12 minutes']],
+      procedure: [
+        'Open My seeds. Number six of them, or use all you have. Roll a die twice, or choose at random.',
+        'Make something that holds the two seeds together for 12 minutes. Neither may be dropped.',
+        'Keep the result as a seed. Use the note to say which two it came from.',
+      ],
+      stop: 'After twelve minutes.', reflect: 'Which pairing did you not choose, and liked?',
+      links: [{ href: '#/keep', label: 'Open My seeds' }],
+      tools: [note('The two, and what I made', 6, 'Seeds: … and … Result: …'), { type: 'timer', minutes: 12 }] }),
+    sitting({ id: 'ch5-wrong-tool', title: 'The wrong tool', minutes: 15,
+      summary: 'Make a seed with a tool you do not know.',
+      question: 'What do I make when I cannot rely on skill?',
+      parameters: [['Tool', 'One you do not use'], ['Time', '10 minutes']],
+      procedure: [
+        'Pick something you hardly use: a toy, a kitchen object, the other hand, an app you have never opened.',
+        'Make a sound or a pattern with it for 10 minutes. Do not try to improve it.',
+        'Keep a description as a seed. Record it if you can.',
+      ],
+      stop: 'After ten minutes.', reflect: 'What did not knowing give you?',
+      tools: [note('What I used, and what happened', 6, 'I used… it did…'), { type: 'timer', minutes: 10 }] }),
   ] },
 ];
 

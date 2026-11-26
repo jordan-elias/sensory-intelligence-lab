@@ -287,3 +287,4 @@ Not verified by ear.
 
 ## Course chapters 1 to 3 (draft)
 `assets/js/experiments/chapters.js` holds Arrival, Listening and State and body as nine sittings, each ending in a seed. Shown above the existing sections in the course list; `byId` finds them. All wording is a draft for Jordan to pilot and rewrite. Chapters 4 to 8, seed notes and therapist sharing are still to build.
+Update: chapters 4 (Taste and lineage) and 5 (Limits and chance) added as drafts; seeds now take an optional note (`note`, `edited` fields; later edit wins on sync). Remaining: chapters 6 to 8, then-and-now, therapist sharing.
