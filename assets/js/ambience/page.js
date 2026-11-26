@@ -43,7 +43,7 @@ const stateText = { off: 'off', idle: 'on, paused', pending: 'starting on the ne
 function draw() {
   for (const b of document.querySelectorAll('.tile')) { const id = b.dataset.id, s = engine.status(id); b.dataset.state = s; b.dataset.pinned = String(engine.isPinned(id) && engine.mode === 'drift'); b.setAttribute('aria-pressed', String(s !== 'off')); b.setAttribute('aria-label', `${label[id]}, ${stateText[s]}`); }
   const play = $('#play'); play.setAttribute('aria-pressed', String(engine.running)); play.setAttribute('aria-label', engine.running ? 'Stop' : 'Play');
-  play.innerHTML = engine.running ? '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>' : '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg>';
+  play.textContent = engine.running ? 'Stop' : 'Play';
   for (const c of document.querySelectorAll('[data-mode]')) if (c.classList.contains('chip')) c.setAttribute('aria-pressed', String(c.dataset.mode === engine.mode));
   for (const c of document.querySelectorAll('[data-feel]')) c.setAttribute('aria-pressed', String(c.dataset.feel === engine.feel));
   for (const c of document.querySelectorAll('[data-pace]')) c.setAttribute('aria-pressed', String(c.dataset.pace === engine.pace));

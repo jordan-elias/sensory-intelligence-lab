@@ -572,7 +572,7 @@
           <div class="chord-notes-display" id="chordNotesDisplay"></div>
         </div>
         <div class="note-controls">
-          <button class="note-ctrl-btn play" id="playChordBtn" disabled onclick="handlePlayChord()">▶ Play chord</button>
+          <button class="note-ctrl-btn play" id="playChordBtn" disabled onclick="handlePlayChord()">Play chord</button>
           <button class="note-ctrl-btn clear" id="clearNotesBtn" disabled onclick="handleClearNotes()">Clear</button>
         </div>
       </div>
@@ -1230,7 +1230,7 @@ function renderDashboard() {
           <input type="range" id="tempoSlider" min="0.5" max="4" step="0.5" value="2">
           <span class="tempo-val" id="tempoVal">2s</span>
         </div>
-        <button class="play-progression-btn" id="playProgressionBtn" disabled onclick="toggleProgression()">▶ Play progression</button>
+        <button class="play-progression-btn" id="playProgressionBtn" disabled onclick="toggleProgression()">Play progression</button>
       </div>
     </div>
     <div id="chordHistoryList"></div>
@@ -1532,7 +1532,7 @@ function renderChordHistory(checkins) {
       <span class="chord-history-name${!c.chord_name?' unnamed':''}">${chordName}</span>
       <span class="chord-history-notes">${noteNames}</span>
       <span class="chord-history-date">${date} ${time}</span>
-      <button class="chord-play-btn" type="button" aria-label="Play chord">▶</button>`;
+      <button class="chord-play-btn" type="button" aria-label="Play chord">Play</button>`;
     item.querySelector('.chord-play-btn').addEventListener('click', () => {
       playChord(c.selected_notes.map(pc => ({ pitchClass: pc, octave: 4 })), { duration: S.chordDuration });
     });
@@ -1652,7 +1652,7 @@ function startProgression() {
   if (!withChords.length) return;
   S.progressionPlaying = true;
   const btn = document.getElementById('playProgressionBtn');
-  if (btn) btn.textContent = '■ Stop';
+  if (btn) btn.textContent = 'Stop';
   let idx = 0;
 
   function playNext() {
@@ -1672,7 +1672,7 @@ function stopProgression() {
   S.progressionPlaying = false;
   if (S.progressionTimer) { clearTimeout(S.progressionTimer); S.progressionTimer = null; }
   const btn = document.getElementById('playProgressionBtn');
-  if (btn) btn.textContent = '▶ Play progression';
+  if (btn) btn.textContent = 'Play progression';
   document.querySelectorAll('.chord-history-item').forEach(el => { el.style.background = ''; });
 }
 

@@ -277,7 +277,7 @@
 
     <!-- Transport -->
     <div class="row">
-      <button class="btn primary" id="r-play"><svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> Play</button>
+      <button class="btn primary" id="r-play">Play</button>
     </div>
 
     <!-- Presets -->
@@ -468,7 +468,7 @@ function startR(){
   }
   
   R.playing=true;
-  document.getElementById('r-play').innerHTML='<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg> Stop';  document.getElementById('r-play').classList.add('on');
+  document.getElementById('r-play').innerHTML='Stop';  document.getElementById('r-play').classList.add('on');
   
   rTmr=setInterval(updateRDisp,200);
   updateRDisp();
@@ -482,7 +482,7 @@ function stopR(){
   if(rTmr){clearInterval(rTmr);rTmr=null;}
   
   R.playing=false;
-  document.getElementById('r-play').innerHTML='<svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> Play';
+  document.getElementById('r-play').innerHTML='Play';
   document.getElementById('r-play').classList.remove('on');
 }
 

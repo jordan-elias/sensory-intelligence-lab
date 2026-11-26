@@ -251,7 +251,7 @@
         </div>
       </div>
 
-      <button class="apply-btn" id="applyBtn" onclick="UI.apply()">▶ Apply &amp; begin</button>
+      <button class="apply-btn" id="applyBtn" onclick="UI.apply()">Apply &amp; begin</button>
     </div>
 
     <!-- ── RIGHT PANEL ── -->
@@ -260,7 +260,7 @@
       <!-- Transport bar -->
       <div class="transport-bar">
         <button class="play-btn" id="playBtn" onclick="Game.playSound()">
-          <span class="play-icon"></span> Play again
+          Play again
         </button>
         <div class="score-items">
           <span>Correct <strong id="scoreCorrect">0</strong></span>
@@ -465,10 +465,10 @@ function settingsChanged() {
 function updateApplyBtn() {
   const btn = document.getElementById('applyBtn');
   if (settingsChanged()) {
-    btn.textContent = '▶ Apply changes';
+    btn.textContent = 'Apply changes';
     btn.classList.add('has-changes');
   } else {
-    btn.textContent = '▶ Apply & begin';
+    btn.textContent = 'Apply & begin';
     btn.classList.remove('has-changes');
   }
 }
