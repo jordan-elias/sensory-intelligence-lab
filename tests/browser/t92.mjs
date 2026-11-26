@@ -1,0 +1,23 @@
+// Breathing in the calm look: dark theme, compact patterns on a phone, a circle that fits, Pause and Resume as words, no sideways scroll.
+import {launch,newPage} from './harness.mjs';
+const {browser,BASE,server}=await launch({extraArgs:['--autoplay-policy=no-user-gesture-required']});
+let fail=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fail++; };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const P=await newPage(await browser.createBrowserContext(),BASE,{}); const p=P.page; const errs=[]; p.on('pageerror',e=>errs.push(e.message));
+await p.setViewport({width:360,height:740});
+await p.goto(`${BASE}/breathing/`,{waitUntil:'domcontentloaded'}); await sleep(900);
+ok(await p.evaluate(()=>getComputedStyle(document.body).backgroundColor==='rgb(15, 23, 20)'),'it uses the calm dark theme, like Ambience');
+ok(await p.$eval('#startBtn',b=>b.disabled),'Begin waits for a pattern');
+await p.click('.pb[data-p="resonant"]');
+ok(await p.$eval('.pb[data-p="resonant"]',b=>b.getAttribute('aria-pressed')==='true'),'the pattern reports it is chosen');
+ok((await p.$$eval('.pb',b=>b.filter(x=>x.querySelector('.pdesc').offsetParent).length))===1,'on a phone only the chosen pattern shows its description');
+const begin=await p.$eval('#startBtn',b=>b.getBoundingClientRect().bottom); ok(begin<740-58,'Begin is on screen without scrolling, above the tab bar ('+Math.round(begin)+')');
+await p.click('#startBtn'); await sleep(6500);
+const g=await p.evaluate(()=>{const o=document.querySelector('.viz-outer').getBoundingClientRect(),c=document.getElementById('vizCircle').getBoundingClientRect();return {ow:o.width,cw:c.width,in:c.left>=o.left&&c.right<=o.right}});
+ok(g.ow>250&&g.ow<=340&&g.in,'the circle fits its space on a phone (outer '+Math.round(g.ow)+', circle '+Math.round(g.cw)+')');
+ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'no sideways scroll at 360px');
+ok(await p.$eval('#plabel',e=>e.textContent)==='Pause','playing shows Pause');
+await p.click('#ppb'); await sleep(300); ok(await p.$eval('#plabel',e=>e.textContent)==='Resume','paused shows Resume');
+ok((await p.$$('#ppb svg')).length===0,'no icon on the play button');
+ok(errs.length===0,'no page errors '+errs.join('|'));
+await browser.close(); server&&server.close&&server.close(); process.exit(fail?1:0);

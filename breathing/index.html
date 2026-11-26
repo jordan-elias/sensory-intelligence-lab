@@ -16,232 +16,115 @@
   <script src="/dashboard/auth-guard.js" type="module"></script>
 
   <link href="/assets/css/fonts.css" rel="stylesheet">
-  <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{
-      --font-body:'Inter',sans-serif;
-      --font-heading:'Space Grotesk',sans-serif;
-      --bg:#fff;--surface:#f9f9f7;--border:#e5e5e0;
-      --text:#1a1a1a;--muted:#6b6b6b;
-      --accent:#2a5c45;--accent-light:#edf4f0;--accent-hover:#1e4433;
-      --inhale-fill: 196, 82%, 65%;
-      --hold-fill:   160, 45%, 55%;
-      --exhale-fill: 150, 38%, 42%;
-      --rest-fill:   150, 20%, 72%;
-    }
-    html{font-size:16px}
-    body{font-family:var(--font-body);color:var(--text);background:var(--bg);line-height:1.6;min-height:100vh;display:flex;flex-direction:column;}
-    a{color:var(--text);text-decoration:underline;text-underline-offset:3px}
-    a:hover{color:var(--accent)}
-
-    /* ── Breadcrumb ── */
-    .bc{padding:.75rem 1.5rem 0;max-width:900px;margin:0 auto;width:100%;}
-    .bc ol{list-style:none;display:flex;gap:.3rem;align-items:center;font-size:.75rem;color:var(--muted);flex-wrap:wrap}
-    .bc li+li::before{content:'/';margin-right:.3rem;color:var(--border)}
-    .bc a{color:var(--muted);text-decoration:none}
-    .bc a:hover{color:var(--accent);text-decoration:underline}
-
-    /* ── Main layout ── */
-    main{max-width:900px;margin:0 auto;padding:2.5rem 2rem 4rem;flex:1;}
-    @media(max-width:600px){main{padding:1.5rem 1rem 3rem}}
-
-    /* ── Page header ── */
-    .ph{margin-bottom:2rem;padding-bottom:1.75rem;border-bottom:1px solid var(--border)}
-    .ph h2{font-family:var(--font-heading);font-size:2rem;font-weight:600;letter-spacing:-.02em;line-height:1.2;margin-bottom:.4rem}
-    .ph p{font-size:.9rem;color:var(--muted)}
-
-    /* ── Section label ── */
-    .sl{font-family:var(--font-heading);font-size:.65rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem}
-
-    /* ── Pattern selector ── */
-    .pattern-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:2rem}
-    @media(max-width:520px){.pattern-grid{grid-template-columns:1fr}}
-
-    .pb{font-family:var(--font-body);font-size:.85rem;font-weight:500;padding:.75rem 1rem;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer;transition:all .12s;text-align:left;line-height:1.3;width:100%}
-    .pb:hover:not(.sel){border-color:var(--accent);color:var(--accent)}
-    .pb.sel{background:var(--accent-light);border-color:var(--accent);color:var(--accent);font-weight:600}
-    .pb .pname{display:block;font-weight:600;margin-bottom:.15rem}
-    .pb .ptiming{display:block;font-size:.72rem;font-weight:500;color:var(--accent);opacity:.8;margin-bottom:.1rem;font-family:var(--font-heading);letter-spacing:.03em}
-    .pb.sel .ptiming{opacity:1}
-    .pb .pdesc{display:block;font-size:.72rem;font-weight:400;color:var(--muted);margin-top:.1rem}
-    .pb.sel .pdesc{color:var(--accent);opacity:.75}
-
-    /* ── Mantra quote ── */
-    .mantra{display:none;background:var(--surface);border-left:3px solid var(--accent);padding:1rem 1.25rem;margin-bottom:1.75rem;font-size:.9rem;line-height:1.7;color:var(--text);font-style:italic}
-    .mantra.vis{display:block}
-    .mantra .attr{display:block;margin-top:.4rem;font-size:.72rem;font-style:normal;color:var(--muted);font-weight:500;letter-spacing:.04em}
-
-    /* ── Action row ── */
-    .ar{display:flex;gap:.75rem;margin-bottom:2rem;flex-wrap:wrap;align-items:center}
-    .gb{font-family:var(--font-heading);font-size:.875rem;font-weight:600;padding:.8rem 2rem;border:none;background:var(--accent);color:white;cursor:pointer;transition:background .15s;letter-spacing:-.01em}
-    .gb:hover{background:var(--accent-hover)}
-    .gb:disabled{opacity:.4;cursor:not-allowed}
-
-    /* ── Breath session panel ── */
-    .session{display:none;border:1px solid var(--border);background:var(--surface)}
-    .session.vis{display:block}
-    #soundSel{font:inherit;margin-left:.4rem;padding:.25rem .4rem;border:1px solid var(--border);border-radius:0;background:var(--bg);color:var(--text)}
-    .haptic-opt{display:block;text-align:center;font-size:.85rem;color:var(--muted);padding:.4rem 1rem 1rem} .haptic-opt input{width:20px;height:20px;vertical-align:-5px;margin-right:.35rem}
-    .end-note{text-align:center;padding:1rem 1.5rem 1.4rem;font-size:.95rem} .end-note p{margin:.3rem 0} .end-note a{color:var(--accent)}
-
-    /* ── Visualiser ── */
-    .viz-wrap{padding:2.5rem 1.5rem;display:flex;flex-direction:column;align-items:center;gap:1.5rem;border-bottom:1px solid var(--border);background:var(--bg)}
-
-    .viz-outer{position:relative;width:220px;height:220px;display:flex;align-items:center;justify-content:center}
-    .viz-ring{position:absolute;inset:0;border-radius:50%;transition:transform .15s ease-out;transform:scale(1)}
-    .viz-ring-1{background:radial-gradient(circle, hsl(var(--rest-fill)/0.13) 0%, hsl(var(--rest-fill)/0.04) 70%, transparent 100%);transform:scale(1.18)}
-    .viz-ring-2{background:radial-gradient(circle, hsl(var(--rest-fill)/0.08) 0%, transparent 100%);transform:scale(1.35)}
-    .viz-circle{
-      position:relative;z-index:2;
-      width:130px;height:130px;border-radius:50%;
-      background:radial-gradient(circle at 38% 38%, hsl(var(--rest-fill)) 0%, hsl(var(--rest-fill)/0.82) 100%);
-      box-shadow:0 4px 28px hsl(var(--rest-fill)/0.35), 0 0 0 1px hsl(var(--rest-fill)/0.18);
-      transition:width .1s, height .1s, background .4s, box-shadow .4s;
-      will-change:width,height,background,box-shadow;
-      display:flex;align-items:center;justify-content:center;
-    }
-    .viz-label{
-      font-family:var(--font-heading);font-size:.7rem;font-weight:600;
-      letter-spacing:.12em;text-transform:uppercase;
-      color:white;opacity:.92;text-shadow:0 1px 3px rgba(0,0,0,.18);
-      pointer-events:none;user-select:none;text-align:center;line-height:1.3;
-    }
-
-    /* ── Session meta ── */
-    .session-meta{display:flex;gap:2rem;justify-content:center;align-items:center;flex-wrap:wrap}
-    .meta-item{text-align:center}
-    .meta-val{font-family:var(--font-heading);font-size:1.1rem;font-weight:600;color:var(--text);line-height:1}
-    .meta-sub{font-size:.68rem;font-weight:500;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin-top:.2rem}
-
-    /* ── Session controls ── */
-    .session-controls{padding:.85rem 1.5rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:.75rem}
-
-    footer{border-top:1px solid var(--border);padding:1.5rem 2rem;text-align:center;font-size:.8rem;color:var(--muted);margin-top:auto}
-    footer a{color:var(--muted);text-decoration:none;}
-    footer a:hover{color:var(--accent);}
-  </style>
   <link rel="stylesheet" href="/assets/css/header.css">
   <link rel="stylesheet" href="/assets/css/ui.css">
+  <link rel="stylesheet" href="/assets/css/lab-ui.css">
+  <link rel="stylesheet" href="/assets/css/calm.css">
+  <link rel="stylesheet" href="/assets/css/breathing.css">
   <script src="/assets/js/ui/icons.js" defer></script>
   <script type="module" src="/assets/js/app/session.js"></script>
   <link rel="stylesheet" href="/assets/css/a11y.css">
 </head>
-<body>
+<body class="calm breathing">
 
-<!-- ══════════════════════════════════════
-     HEADER
-══════════════════════════════════════ -->
 <script src="/assets/js/site-header.js"></script>
 
 <nav aria-label="Breadcrumb" class="bc">
   <ol>
     <li><a href="/dashboard/">Dashboard</a></li>
-    <li>Breath Regulation</li>
+    <li>Breathing</li>
   </ol>
 </nav>
 
-<main>
-  <div class="ph">
-    <h2>Breath Regulation</h2>
-    <p>Choose a breathing pattern. The circle and sound will guide each breath — simply follow what you see and hear. No counting required.</p>
+<main class="br-main">
+  <div class="br-top">
+    <h1>Breathing</h1>
+    <p>Pick a pattern. The circle and the sound guide each breath. No counting needed.</p>
   </div>
 
-  <p class="sl">Choose a pattern</p>
+  <h2 class="br-label" id="pickLabel">Pattern</h2>
+  <div class="pattern-grid" role="group" aria-labelledby="pickLabel">
 
-  <div class="pattern-grid">
-
-    <button class="pb" data-p="478" onclick="selectPattern('478',this)">
+    <button class="pb" type="button" aria-pressed="false" data-p="478" onclick="selectPattern('478',this)">
       <span class="pname">4–7–8 Breath</span>
       <span class="ptiming">Inhale 4 · Hold 7 · Exhale 8</span>
-      <span class="pdesc">Activates the parasympathetic nervous system through extended exhale and breath retention. 8 breaths · ~4 min.</span>
+      <span class="pdesc">A long exhale and a held breath settle the body. 8 breaths, about 4 minutes.</span>
     </button>
 
-    <button class="pb" data-p="box" onclick="selectPattern('box',this)">
+    <button class="pb" type="button" aria-pressed="false" data-p="box" onclick="selectPattern('box',this)">
       <span class="pname">Box Breathing</span>
       <span class="ptiming">Inhale 4 · Hold 4 · Exhale 4 · Hold 4</span>
-      <span class="pdesc">Symmetric four-phase cycle used for nervous system regulation and focused calm. 10 breaths · ~3 min.</span>
+      <span class="pdesc">Four even sides, for calm focus. 10 breaths, about 3 minutes.</span>
     </button>
 
-    <button class="pb" data-p="physiological" onclick="selectPattern('physiological',this)">
+    <button class="pb" type="button" aria-pressed="false" data-p="physiological" onclick="selectPattern('physiological',this)">
       <span class="pname">Physiological Sigh</span>
       <span class="ptiming">Double inhale · Long exhale</span>
-      <span class="pdesc">Two-part inhale deflates alveolar collapse; extended exhale rapidly down-regulates stress. 10 breaths · ~3 min.</span>
+      <span class="pdesc">Two short inhales, then a long sigh out. A quick way to let stress down. 10 breaths, about 3 minutes.</span>
     </button>
 
-    <button class="pb" data-p="resonant" onclick="selectPattern('resonant',this)">
+    <button class="pb" type="button" aria-pressed="false" data-p="resonant" onclick="selectPattern('resonant',this)">
       <span class="pname">Resonant Breathing</span>
       <span class="ptiming">Inhale 5 · Exhale 5</span>
-      <span class="pdesc">Breathing at ~6 cycles per minute synchronises heart rate variability. Even, rhythmic, meditative. 18 breaths · ~3 min.</span>
+      <span class="pdesc">Even, slow, about six breaths a minute. 18 breaths, about 3 minutes.</span>
     </button>
 
   </div>
 
-  <div class="mantra" id="mantra"><span id="mtext"></span><span class="attr" id="mattr"></span></div>
-
-  <div class="ar">
-    <button class="gb" id="startBtn" disabled onclick="startSession()">Begin session</button>
-  </div>
-
-  <div class="session" id="session">
-
-    <div class="viz-wrap">
-      <div class="viz-outer">
-        <div class="viz-ring viz-ring-2" id="ring2"></div>
-        <div class="viz-ring viz-ring-1" id="ring1"></div>
-        <div class="viz-circle" id="vizCircle">
-          <div class="viz-label" id="vizLabel">Settle</div>
-        </div>
-      </div>
-      <div class="session-meta">
-        <div class="meta-item">
-          <div class="meta-val" id="breathCount">—</div>
-          <div class="meta-sub">Breath</div>
-        </div>
-        <div class="meta-item">
-          <div class="meta-val" id="timeLeft">—</div>
-          <div class="meta-sub">Remaining</div>
-        </div>
-        <div class="meta-item">
-          <div class="meta-val" id="totalBreaths">—</div>
-          <div class="meta-sub">Total breaths</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="session-controls">
-      <button class="btn btn--primary" id="ppb" onclick="togglePlay()">
-        <span id="icon" data-icon="play"></span>
-        <span id="plabel">Play</span>
-      </button>
-    </div>
-
-    <label class="haptic-opt" id="soundOpt">Sound
+  <div class="br-options">
+    <label class="br-opt" id="soundOpt"><span>Sound</span>
       <select id="soundSel" aria-label="Sound">
         <option value="drone">Soft drone</option>
         <option value="breath">Drone and a breath you can hear</option>
         <option value="pad">Warm pad</option>
         <option value="chimes">Quiet chimes only</option>
       </select></label>
-    <label class="haptic-opt" id="hapticOpt" hidden><input type="checkbox" id="hapticBox"> Vibrate gently with each breath (phone)</label>
+    <label class="br-opt br-check" id="hapticOpt" hidden><input type="checkbox" id="hapticBox"><span>Vibrate gently with each breath</span></label>
+  </div>
+
+  <div class="ar">
+    <button class="lab-btn primary br-begin" id="startBtn" type="button" disabled onclick="startSession()">Begin</button>
+  </div>
+
+  <div class="mantra" id="mantra"><span id="mtext"></span><span class="attr" id="mattr"></span></div>
+
+  <section class="session" id="session" aria-label="Breathing session">
+
+    <div class="viz-wrap">
+      <div class="viz-outer">
+        <div class="viz-ring viz-ring-2" id="ring2"></div>
+        <div class="viz-ring viz-ring-1" id="ring1"></div>
+        <div class="viz-circle" id="vizCircle">
+          <div class="viz-label" id="vizLabel" role="status" aria-live="off">Settle</div>
+        </div>
+      </div>
+      <div class="session-meta">
+        <div class="meta-item"><div class="meta-val" id="breathCount">—</div><div class="meta-sub">Breath</div></div>
+        <div class="meta-item"><div class="meta-val" id="timeLeft">—</div><div class="meta-sub">Remaining</div></div>
+        <div class="meta-item"><div class="meta-val" id="totalBreaths">—</div><div class="meta-sub">Total</div></div>
+      </div>
+    </div>
+
+    <div class="session-controls">
+      <button class="lab-btn primary" id="ppb" type="button" aria-pressed="false" onclick="togglePlay()"><span id="plabel">Play</span></button>
+    </div>
 
     <div class="end-note" id="endNote" hidden role="status">
       <p>That is the end. Stay as you are for a moment before you carry on.</p>
       <p><a href="/check-in/">Check in</a> · <a href="/journal/">Timed journal</a> · <a href="/dashboard/">Dashboard</a></p>
     </div>
 
-  </div>
+  </section>
 
-  <br>
-  <h2>How these exercises work</h2>
-  <br>
-  <p>Each breathing pattern is drawn from clinical and research contexts where voluntary breath control has been shown to influence autonomic nervous system activity — specifically the balance between sympathetic (activating) and parasympathetic (calming) responses.</p>
-  <br>
-  <p>The extended exhale used in the 4–7–8 breath and the physiological sigh increases vagal tone, which is associated with reduced heart rate and a shift away from stress arousal. Box breathing's symmetrical structure is used in high-performance and clinical settings for sustained regulation. Resonant breathing targets the specific frequency (~0.1 Hz) at which heart rate variability peaks, producing measurable coherence between cardiac and respiratory rhythm.</p>
-  <br>
-  <p>The accompanying soundscape follows the shape of each breath: the fundamental tone and harmonic richness expand on inhale and contract on exhale, giving the sound the same quality of opening and closing as the breath itself. You do not need to consciously follow the pattern — the visual and sound are designed to entrain the body gently.</p>
+  <details class="br-about">
+    <summary>How these exercises work</summary>
+    <p>Each breathing pattern is drawn from clinical and research contexts where voluntary breath control has been shown to influence autonomic nervous system activity — specifically the balance between sympathetic (activating) and parasympathetic (calming) responses.</p>
+    <p>The extended exhale used in the 4–7–8 breath and the physiological sigh increases vagal tone, which is associated with reduced heart rate and a shift away from stress arousal. Box breathing's symmetrical structure is used in high-performance and clinical settings for sustained regulation. Resonant breathing targets the specific frequency (~0.1 Hz) at which heart rate variability peaks, producing measurable coherence between cardiac and respiratory rhythm.</p>
+    <p>The accompanying soundscape follows the shape of each breath: the fundamental tone and harmonic richness expand on inhale and contract on exhale, giving the sound the same quality of opening and closing as the breath itself. You do not need to consciously follow the pattern — the visual and sound are designed to entrain the body gently.</p>
+  </details>
 </main>
 
-<footer><p>Jordan Elias Music Therapy · Berlin · <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a></p></footer>
+<footer class="br-foot"><p>Jordan Elias Music Therapy · Berlin · <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a></p></footer>
 
 <script type="module">
 
@@ -332,11 +215,11 @@ function easeIn(t)    { return Math.pow(clamp(t,0,1),2.2); }
 // HSL COLOUR HELPERS
 // ─────────────────────────────────────────────────────────
 const PHASE_HSL = {
-  inhale:  [196, 72, 62],
-  hold:    [165, 40, 55],
-  exhale:  [148, 38, 38],
-  rest:    [150, 18, 68],
-  settle:  [150, 15, 75],
+  inhale:  [190, 58, 66],
+  hold:    [165, 48, 62],
+  exhale:  [152, 40, 48],
+  rest:    [152, 24, 42],
+  settle:  [152, 22, 52],
 };
 
 function lerpHSL(a, b, t) {
@@ -392,7 +275,7 @@ function fmt(s) { s=Math.max(0,Math.floor(s)); return `${Math.floor(s/60)}:${Str
 // PATTERN SELECTION
 // ─────────────────────────────────────────────────────────
 function selectPattern(key, btn) {
-  document.querySelectorAll('.pb').forEach(b=>b.classList.remove('sel'));
+  document.querySelectorAll('.pb').forEach(b=>{b.classList.remove('sel');b.setAttribute('aria-pressed','false');});
   btn.classList.add('sel');
   S.pattern = key;
   const p = PATTERNS[key];
@@ -400,6 +283,7 @@ function selectPattern(key, btn) {
   document.getElementById('mtext').textContent = m.t;
   document.getElementById('mattr').textContent = '— '+m.a;
   document.getElementById('mantra').classList.add('vis');
+  btn.setAttribute('aria-pressed', 'true');
   document.getElementById('startBtn').disabled = false;
   document.getElementById('startBtn').textContent = 'Begin session';
 }
@@ -431,7 +315,9 @@ function startSession() {
   S.vizHSL         = [...PHASE_HSL.settle];
 
   document.getElementById('startBtn').textContent = 'Restart';
+  document.body.classList.add('br-started');
   document.getElementById('session').classList.add('vis');
+  document.getElementById('session').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'auto' : 'smooth', block: 'start' });
   document.getElementById('totalBreaths').textContent = p.breaths;
   document.getElementById('breathCount').textContent = '—';
   document.getElementById('timeLeft').textContent = fmt(totalDuration(p));
@@ -515,7 +401,8 @@ function animateCircle(type, t, targetHSL) {
   const ring1  = document.getElementById('ring1');
   const ring2  = document.getElementById('ring2');
 
-  const minPx = 72, maxPx = 190;
+  const W = document.querySelector('.viz-outer').clientWidth || 260;   // the circle scales with the space it has
+  const minPx = W * 0.26, maxPx = W * 0.66;
   const sizePx = lerp(minPx, maxPx, S.vizSize);
   circle.style.width  = sizePx + 'px';
   circle.style.height = sizePx + 'px';
@@ -578,14 +465,9 @@ const _ms = silAudio.mediaSession({ title: 'Breathing exercise', play: () => { i
 function setIcon(playing) {
   _ms.state(playing ? 'playing' : 'paused');
   if (playing) window.SILSession?.start(); else window.SILSession?.end();
-  const ic = document.getElementById('icon'), lb = document.getElementById('plabel');
-  if (playing) {
-    ic.innerHTML=silIcons.html('pause');
-    lb.textContent='Pause';
-  } else {
-    ic.innerHTML=silIcons.html('play');
-    lb.textContent = S.done ? 'Begin again' : 'Resume';
-  }
+  const lb = document.getElementById('plabel');
+  lb.textContent = playing ? 'Pause' : (S.done ? 'Begin again' : 'Resume');
+  document.getElementById('ppb').setAttribute('aria-pressed', String(playing));
 }
 
 // ─────────────────────────────────────────────────────────
