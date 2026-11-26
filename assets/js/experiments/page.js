@@ -89,7 +89,7 @@ function list() {
           sug.others.length ? el('p', { class: 'xp-hint' }, 'Or: ', ...sug.others.flatMap((e, i) => [i ? ' · ' : '', el('a', { href: '#/' + e.id }, e.title)])) : null]
         : el('p', {}, 'Nothing fits both. Try a longer time, or "Anything".')) : null),
     ...CHAPTERS.map(c => el('section', { class: 'xp-unit xp-chapter', 'aria-labelledby': 'c-' + c.id },
-      el('h3', { class: 'xp-unit-h', id: 'c-' + c.id }, `Chapter ${c.number}: ${c.title}`, el('span', { class: 'xp-count' }, ` ${c.sittings.filter(e => done.has(e.id)).length} of ${c.sittings.length}`)),
+      el('h3', { class: 'xp-unit-h', id: 'c-' + c.id }, `Chapter ${c.number}: ${c.title}${c.optional ? ' (optional)' : ''}`, el('span', { class: 'xp-count' }, ` ${c.sittings.filter(e => done.has(e.id)).length} of ${c.sittings.length}`)),
       el('p', { class: 'xp-hint' }, c.intro),
       el('div', { class: 'xp-grid' }, c.sittings.map(e => el('a', { class: 'xp-card' + (done.has(e.id) ? ' done' : ''), href: '#/' + e.id },
         el('h3', {}, e.title), el('p', {}, e.summary), el('small', {}, `${e.minutes} min${progress.pos(e.id) && !done.has(e.id) ? ` · in progress (step ${progress.pos(e.id)})` : ''}`)))))),

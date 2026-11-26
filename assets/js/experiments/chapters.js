@@ -1,7 +1,7 @@
 /**
  * /assets/js/experiments/chapters.js
  * The chapter sittings of the course. Same shape as a catalog experiment, so the player, notebook and seed box treat them alike.
- * DRAFT WORDING: every prompt below is a first draft for Jordan to pilot and rewrite. Chapters 6 to 8 are not written yet.
+ * DRAFT WORDING: every prompt below is a first draft for Jordan to pilot and rewrite. All eight chapters are drafted.
  * A sitting is: arrive, warm up, core, harvest (keep seeds), notice, carry. Each one ends by keeping at least one seed.
  */
 const note = (label, target, placeholder) => ({ type: 'pad', label, target, placeholder });
@@ -185,6 +185,102 @@ export const CHAPTERS = [
       ],
       stop: 'After ten minutes.', reflect: 'What did not knowing give you?',
       tools: [note('What I used, and what happened', 6, 'I used… it did…'), { type: 'timer', minutes: 10 }] }),
+  ] },
+  { id: 'sources', number: 6, title: 'Sources', optional: true, intro: 'An optional side road. Sound and place as material: where you live, what it sounds like, and what you can make from it. Skip it, or return to it any time.', sittings: [
+    sitting({ id: 'ch6-room-tone', title: 'Room tone', minutes: 12,
+      summary: 'Listen to the room you are in as if it were a piece.',
+      question: 'What is this room playing?',
+      parameters: [['Time', '5 minutes']],
+      procedure: [
+        'Sit in a room you use often. Close your eyes and listen for 5 minutes.',
+        'Write its sound as a score: what comes first, what repeats, what arrives once.',
+        'Keep the score as a seed.',
+      ],
+      stop: 'After five minutes.', reflect: 'What does this room do that you had stopped hearing?',
+      tools: [{ type: 'timer', minutes: 5 }, note('The room as a score', 8, 'Constant: … Repeats: … Once: …')] }),
+    sitting({ id: 'ch6-place-map', title: 'A map of sounds', minutes: 20,
+      summary: 'Map the sounds of a place you know well, from memory.',
+      question: 'What does a place sound like when I remember it?',
+      parameters: [['Place', 'One you know well'], ['Time', '12 minutes']],
+      procedure: [
+        'Choose a place: a street, a house, a school. Write the sounds that belong to it, for 6 minutes.',
+        'Add when each one happens, and how it felt, for 6 minutes.',
+        'Keep the list as a seed. Only record real sounds if you have the right to.',
+      ],
+      stop: 'After twelve minutes.', reflect: 'Which sound would make you feel you were back there?',
+      tools: [note('The sounds of…', 10, 'Morning: … Evening: …'), { type: 'timer', minutes: 12 }] }),
+  ] },
+  { id: 'shaping', number: 7, title: 'Shaping and finishing', intro: 'You now have a box of seeds. These sittings shape some of them, and finish a small piece.', sittings: [
+    sitting({ id: 'ch7-choose', title: 'Choose three', minutes: 15,
+      summary: 'Pick three seeds that belong together and say why.',
+      question: 'Which of my seeds are already related?',
+      parameters: [['Seeds', 'Three'], ['Time', '8 minutes']],
+      procedure: [
+        'Open My seeds and read all of them once. Do not judge.',
+        'Choose three that want to be near each other. Write what links them, for 5 minutes.',
+        'Keep your sentence about the link as a seed.',
+      ],
+      stop: 'After eight minutes.', reflect: 'What surprised you about what you already made?',
+      links: [{ href: '#/keep', label: 'Open My seeds' }],
+      tools: [note('The three, and what links them', 8, 'The three: … They share…'), { type: 'timer', minutes: 8 }] }),
+    sitting({ id: 'ch7-sketch', title: 'A short piece', minutes: 25,
+      summary: 'Make one small piece from your three seeds.',
+      question: 'What is the smallest finished thing my seeds can become?',
+      parameters: [['Length', 'Under two minutes'], ['Time', '20 minutes']],
+      procedure: [
+        'Decide the length first: under two minutes, or one page.',
+        'Make the piece from your three seeds for 20 minutes. You may cut but not add anything new.',
+        'Stop at the end of the time, even if it is unfinished. Keep it as a seed.',
+      ],
+      stop: 'After twenty minutes.', reflect: 'What did you cut, and was it hard?',
+      tools: [note('What I made', 8, 'Length: … Made of: …'), { type: 'timer', minutes: 20 }] }),
+    sitting({ id: 'ch7-finish', title: 'Call it finished', minutes: 12,
+      summary: 'Name it, date it, and decide it is done.',
+      question: 'What does finishing feel like when nothing is perfect?',
+      parameters: [['Time', '8 minutes']],
+      procedure: [
+        'Give the piece a title and write the date.',
+        'Write three honest sentences: what it is, what you like, what you would try next. Take 5 minutes.',
+        'Keep them as a seed. Then say aloud: this is finished.',
+      ],
+      stop: 'After eight minutes.', reflect: 'What is the next thing it points to?',
+      tools: [note('Title, date, three sentences', 6, 'Title: … Date: …'), { type: 'timer', minutes: 5 }] }),
+  ] },
+  { id: 'sharing', number: 8, title: 'Sharing and carrying on', intro: 'Look back, choose who hears your work, and decide how to keep a practice going on your own terms.', sittings: [
+    sitting({ id: 'ch8-then-now', title: 'Then and now', minutes: 15,
+      summary: 'Read your first seeds beside your latest.',
+      question: 'What has changed in how I listen, and in what I make?',
+      parameters: [['Time', '10 minutes']],
+      procedure: [
+        'Open My seeds. Read the oldest few, at the end of the list, then the newest.',
+        'Write what is different, and what has stayed the same, for 8 minutes.',
+        'Keep one sentence about who you are as a maker now as a seed.',
+      ],
+      stop: 'After ten minutes.', reflect: 'What would you tell the person who made the first seed?',
+      links: [{ href: '#/keep', label: 'Open My seeds' }],
+      tools: [note('Then and now', 10, 'Then I… Now I…'), { type: 'timer', minutes: 8 }] }),
+    sitting({ id: 'ch8-who-hears', title: 'Who hears it', minutes: 12,
+      summary: 'Decide who, if anyone, you want to share a seed with, and why.',
+      question: 'Who do I want to hear this, and what do I want from them?',
+      parameters: [['Time', '6 minutes']],
+      procedure: [
+        'Choose one seed. List who could hear it: a friend, a teacher, a therapist, nobody yet. Take 3 minutes.',
+        'Write what you would like back: nothing, a listen, a reaction, or a question. Take 3 minutes.',
+        'Keep your answer as a seed. You do not have to share anything.',
+      ],
+      stop: 'After six minutes.', reflect: 'What would make sharing feel safe?',
+      tools: [note('Who, and what I would ask', 6, 'Who: … I would like…'), { type: 'timer', minutes: 6 }] }),
+    sitting({ id: 'ch8-carry-on', title: 'A practice of my own', minutes: 15,
+      summary: 'Design the smallest practice you will actually keep.',
+      question: 'What is the smallest regular thing that keeps me connected to making?',
+      parameters: [['Time', '10 minutes']],
+      procedure: [
+        'Write one small practice that takes under ten minutes. Choose what, where and when.',
+        'Write what you will do on a day you skip it.',
+        'Keep the plan as a seed. Pace is yours; there is no right rhythm.',
+      ],
+      stop: 'After ten minutes.', reflect: 'What will make it easy to begin?',
+      tools: [note('My practice', 8, 'What: … Where: … When: … If I skip: …'), { type: 'timer', minutes: 10 }] }),
   ] },
 ];
 
