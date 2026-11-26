@@ -220,7 +220,7 @@ function tick() {
   }
 }
 function stop() {
-  clearInterval(timer); timer = 0; if (engine) engine.silence(ctx.currentTime); S.playing = false; cancelAnimationFrame(raf); raf = 0; ripples.length = 0; setPlayUI(false); updateTime(); render();
+  clearInterval(timer); timer = 0; if (engine) engine.stopNow(); S.playing = false; cancelAnimationFrame(raf); raf = 0; ripples.length = 0; setPlayUI(false); updateTime(); render();
 }
 function setPlayUI(on) {
   $('playLbl').textContent = on ? 'Stop' : 'Play'; $('btnPlay').setAttribute('aria-label', on ? 'Stop' : 'Play');

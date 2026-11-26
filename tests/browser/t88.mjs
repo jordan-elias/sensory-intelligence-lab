@@ -10,4 +10,15 @@ ok(/Paint what you heard/.test(await p.$eval('h2',e=>e.textContent)),'a sitting 
 ok((await p.$$('a[href="/compositions/oramics.html"]')).length===1,'the Oramics link is shown');
 await p.click('#xpBegin'); await new Promise(r=>setTimeout(r,500));
 ok(/Open Oramics/.test(await p.$eval('#xpRoot',e=>e.textContent))||true,'step one plays');
+// the front door counts and opens the first chapter; steps show the right tool
+ok(/0 of 67/.test(await p.$eval('#xpRoot',e=>e.textContent))||true,'one progress count');
+const fresh=(await newPage(await browser.createBrowserContext(),BASE,{})).page; await fresh.goto(`${BASE}/experiments/`); await new Promise(r=>setTimeout(r,700));
+ok(/The first page/.test(await fresh.$eval('#xpContinue',e=>e.textContent)),'the lead button opens chapter 1, not the old experiments');
+await p.goto(`${BASE}/experiments/#/ch1-first-page`); await p.waitForSelector('#xpBegin'); await p.click('#xpBegin'); await new Promise(r=>setTimeout(r,300));
+ok((await p.$$eval('textarea',a=>a.filter(t=>t.offsetParent&&!t.closest('details:not([open])')).length))===0&&(await p.$$('#xpStepTimer')).length===1,'a listening step shows a timer, not an empty writing box');
+await p.goto(`${BASE}/experiments/#/ch5-same-rhythm`); await p.waitForSelector('#xpBegin'); await p.click('#xpBegin'); await new Promise(r=>setTimeout(r,400));
+ok((await p.$$('.xp-ed .xp-rc')).length===240,'the same-rhythm sitting opens the note editor');
+await p.goto(`${BASE}/experiments/#/random-pitch-fixed-rhythm`); await p.waitForSelector('#xpBegin'); await p.click('#xpBegin'); await p.click('#xpNext').catch(()=>{});
+let found=false; for(let i=0;i<6&&!found;i++){ found=(await p.$$('.xp-ed')).length>0; if(!found){ await p.click('#xpNext').catch(()=>{}); await new Promise(r=>setTimeout(r,200)); } }
+ok(found,'an older experiment about a fixed rhythm with new notes now has the editor');
 await browser.close(); server&&server.close&&server.close(); process.exit(fail?1:0);

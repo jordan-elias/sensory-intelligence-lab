@@ -289,3 +289,12 @@ Not verified by ear.
 `assets/js/experiments/chapters.js` holds Arrival, Listening and State and body as nine sittings, each ending in a seed. Shown above the existing sections in the course list; `byId` finds them. All wording is a draft for Jordan to pilot and rewrite. Chapters 4 to 8, seed notes and therapist sharing are still to build.
 Update: chapters 4 (Taste and lineage) and 5 (Limits and chance) added as drafts; seeds now take an optional note (`note`, `edited` fields; later edit wins on sync). Remaining: chapters 6 to 8, then-and-now, therapist sharing.
 Update: chapters 6 (Sources, optional), 7 (Shaping and finishing) and 8 (Sharing and carrying on, with the then-and-now sitting) drafted. Course content is complete as a draft. Therapist sharing (section 10b of the course plan) is not built: it needs a Supabase migration, row-level security, a therapist-side view and a privacy page change, so it should be done as its own reviewed step.
+
+## Course restructure after the "stuck creative" walkthrough
+- One path: eight chapters. The old seven units are folded into chapter 5 (the Workbench) and chapter 7 (four ways to finish). One progress count, and the front door opens chapter 1.
+- New in-app tools so every step can be done without a DAW or instrument: note editor (`roll-core.js`, `tools-roll.js`: scale-locked piano roll, up to four tracks, new pitches with the same rhythm, shuffle, shift, reverse, double, MIDI and WAV export), a keyboard that records, and a microphone recorder. Placed on the steps that ask you to make something (`studio-tools.js`, `steps.js`).
+- Seeds can be sound: editor, keyboard and recorder all keep audio. `keepable()` may now return a list.
+- New sittings: Before I begin (private statement, revisited in chapter 8), The worst version, Collect one sound, The gap, Same rhythm new notes.
+- Listening steps show a timer, not an empty box. No quota counters. Reflection questions are open, not yes/no.
+- "How it works" now says to keep what did not work, and that skipping is fine. The preview says what chance tools are and are not, and that recordings never leave the device.
+- Still wording drafts for Jordan; who wrote the prompts is Jordan's to state.

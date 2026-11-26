@@ -58,7 +58,7 @@ export function createEngine(ctx, { destination = ctx.destination } = {}) {
   const master = ctx.createGain(); master.gain.value = 0.85;
   const lim = ctx.createDynamicsCompressor(); lim.threshold.value = -10; lim.knee.value = 8; lim.ratio.value = 8; lim.attack.value = 0.004; lim.release.value = 0.12;
   master.connect(lim); lim.connect(destination);
-  const conv = ctx.createConvolver(); conv.buffer = impulse(ctx); const wet = ctx.createGain(); wet.gain.value = 0.5; conv.connect(wet); wet.connect(master);
+  const verbBuf = impulse(ctx); let conv = ctx.createConvolver(); conv.buffer = verbBuf; const wet = ctx.createGain(); wet.gain.value = 0.5; conv.connect(wet); wet.connect(master);
   const noise = noiseBuffer(ctx);
 
   const mix = {}, shade = {}, bus = {}, send = {}, state = {}; let solo = null, space = 0.5;
@@ -100,18 +100,19 @@ export function createEngine(ctx, { destination = ctx.destination } = {}) {
     v.set = p => { v.p = p; f.type = p.type; f.Q.value = p.q; lg.gain.value = p.trem; lfo.frequency.value = p.tremRate; }; v.set(VOICES.texture[0]); return v;
   })();
 
-  /* Drums: a short burst of nodes per hit. */
+  /* Drums: a short burst of nodes per hit. They all go through one gate so a stop can cut hits that are already scheduled. */
+  let gate = ctx.createGain(); gate.connect(bus.rhythm);
   let kit = KITS[0];
   const burst = (t, nodes, life) => { const stop = t + life; for (const n of nodes) if (n.stop) { try { n.stop(stop); } catch { /* already scheduled */ } } };
   const env = (g, t, peak, dec) => { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak), t + 0.003); g.gain.exponentialRampToValueAtTime(0.0001, t + dec); };
   const noiseHit = (t, type, f, q, peak, dec, pan = 0) => {
     const s = ctx.createBufferSource(); s.buffer = noise; const flt = ctx.createBiquadFilter(), g = ctx.createGain(); flt.type = type; flt.frequency.value = f; flt.Q.value = q;
-    s.connect(flt); flt.connect(g); let out = g; if (pan && ctx.createStereoPanner) { const p = ctx.createStereoPanner(); p.pan.value = pan; g.connect(p); out = p; } out.connect(bus.rhythm);
+    s.connect(flt); flt.connect(g); let out = g; if (pan && ctx.createStereoPanner) { const p = ctx.createStereoPanner(); p.pan.value = pan; g.connect(p); out = p; } out.connect(gate);
     env(g, t, peak, dec); s.start(t, (t * 7.3) % 1.5); burst(t, [s], dec + 0.05);
   };
   const toneHit = (t, wave, f0, f1, drop, peak, dec) => {
     const o = ctx.createOscillator(), g = ctx.createGain(); o.type = wave; o.frequency.setValueAtTime(f0, t); if (f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, t + drop);
-    o.connect(g); g.connect(bus.rhythm); env(g, t, peak, dec); o.start(t); burst(t, [o], dec + 0.05);
+    o.connect(g); g.connect(gate); env(g, t, peak, dec); o.start(t); burst(t, [o], dec + 0.05);
   };
   function hit(zone, c, vel, t) {
     const k = kit;
@@ -164,6 +165,23 @@ export function createEngine(ctx, { destination = ctx.destination } = {}) {
     /** Everything to silence at time t (stop, or the end of a one-shot render). */
     silence(t = ctx.currentTime) {
       for (const v of [melody, bass, ...chord]) v.amp(0, t, 0.04); tex.g.gain.setTargetAtTime(0, t, 0.05);
+      engine.resetMemory();
+    },
+    /**
+     * A real stop, for live playback. silence() only fades what is sounding; notes already scheduled a moment ahead, drum hits
+     * waiting to start and the reverb tail would carry on. This cancels the scheduled changes, cuts the drum gate and swaps the
+     * reverb for a fresh one (the old tail is simply left behind). Do not use it for an offline render.
+     */
+    stopNow() {
+      const t = ctx.currentTime;
+      for (const v of [melody, bass, ...chord]) { v.g.gain.cancelScheduledValues(t); v.g.gain.setTargetAtTime(0, t, 0.015); }
+      tex.g.gain.cancelScheduledValues(t); tex.g.gain.setTargetAtTime(0, t, 0.015);
+      const old = gate; old.gain.cancelScheduledValues(t); old.gain.setTargetAtTime(0, t, 0.008);
+      gate = ctx.createGain(); gate.connect(bus.rhythm);
+      const oldConv = conv; conv = ctx.createConvolver(); conv.buffer = verbBuf; conv.connect(wet);
+      for (const id of INK_ORDER) { try { send[id].disconnect(oldConv); } catch { /* not connected */ } send[id].connect(conv); }
+      try { oldConv.disconnect(); } catch { /* gone */ }
+      setTimeout(() => { try { old.disconnect(); } catch { /* gone */ } }, 300);
       engine.resetMemory();
     },
     /** A short note on the ink at height c, so painting is heard while the music is stopped. */

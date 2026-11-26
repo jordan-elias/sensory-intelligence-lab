@@ -9,7 +9,7 @@ const loaded=[]; fp.on('request',r=>loaded.push(r.url()));
 await fp.evaluateOnNewDocument(()=>{window.__free=true;});
 await fp.goto(`${BASE}/experiments/`,{waitUntil:'domcontentloaded'}); await fp.waitForSelector('.xp-preview',{timeout:20000}); await sleep(500);
 ok(await fp.$eval('#xpSubscribe',a=>a.getAttribute('href'))==='/subscribe/','free users see a Subscribe button that goes to the subscribe page');
-ok((await fp.$$('.xp-prev-units li')).length===7,'the preview lists the seven sections');
+ok((await fp.$$('.xp-prev-units li')).length===8,'the preview lists the eight chapters');
 ok(/part of the Lab.s paid plan/.test(await fp.$eval('.xp-preview',e=>e.textContent)),'it says the course is part of the paid plan');
 ok(!loaded.some(u=>u.includes('/experiments/page.js')),'the course code is not even loaded for free users');
 ok(await fp.$('.xp-list, .xp-card, #xpResume')===null,'no course content on the page');

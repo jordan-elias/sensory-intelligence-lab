@@ -16,7 +16,7 @@ export function buildNotebook({ course, units, done, saved, kept = [] }) {
       n++;
       parts.push([`### ${e.title}${done.has(e.id) ? ' (done)' : ''}`, note || '(no note)'].join('\n'));
     }
-    if (parts.length) out.push(`## Unit ${u.number}: ${u.title}`, '', parts.join('\n\n'), '');
+    if (parts.length) out.push(`## Chapter ${u.number}: ${u.title}`, '', parts.join('\n\n'), '');
   }
   const texts = kept.filter(k => k.kind === 'text' && String(k.text || '').trim());
   if (texts.length) { n += texts.length; out.push('## Kept', '', texts.map(k => `### ${k.title}\n${String(k.text).trim()}`).join('\n\n'), ''); }

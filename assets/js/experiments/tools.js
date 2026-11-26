@@ -10,6 +10,7 @@ import { wordPoemTool, burnTool, cardsTool, blackoutTool, padTool } from './tool
 import { rollTool, samplerTool, treatTool } from './tools-music.js';
 import { attachKeep } from './keep.js';
 import { benchTool } from './bench.js';
+import { editorTool, keysTool, recorderTool } from './tools-roll.js';
 import { marksTool, subtractTool } from './tools-marks.js';
 import { stringsTool } from './tools-strings.js';
 import { versionsTool } from './tools-versions.js';
@@ -268,7 +269,10 @@ function buildOne(cfg) {
     case 'strings': return stringsTool(cfg);
     case 'versions': return versionsTool(cfg);
     case 'subtract': return subtractTool(cfg);
+    case 'editor': return editorTool(cfg);
+    case 'keys': return keysTool(cfg);
+    case 'recorder': return recorderTool(cfg);
     default: return el('p', {}, '');
   }
 }
-export const TOOL_TYPES = ['gen', 'timer', 'clip', 'loops', 'groove', 'assign', 'wordpoem', 'burn', 'cards', 'blackout', 'roll', 'sampler', 'treat', 'bench', 'pad', 'marks', 'subtract', 'strings', 'versions'];
+export const TOOL_TYPES = ['gen', 'timer', 'clip', 'loops', 'groove', 'assign', 'wordpoem', 'burn', 'cards', 'blackout', 'roll', 'sampler', 'treat', 'bench', 'pad', 'marks', 'subtract', 'strings', 'versions', 'editor', 'keys', 'recorder'];

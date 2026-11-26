@@ -1,3 +1,4 @@
+import { CHAPTER_SITTINGS } from '../../assets/js/experiments/chapters.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mulberry32, generate, shuffle, sample, rotateAssign, degreeNotes, NOTE_NAMES, euclid, chordTable } from '../../assets/js/experiments/rng.js';
@@ -72,7 +73,7 @@ test('euclid generator gives a pattern of the requested length', () => {
 });
 
 test('every experiment is a complete protocol with real parameters, tools and generators', () => {
-  const ids = new Set(), kinds = ['degrees', 'notes', 'tuning', 'range', 'choice', 'shuffle', 'pattern', 'chords', 'euclid'], tools = ['gen', 'timer', 'clip', 'loops', 'groove', 'assign', 'wordpoem', 'burn', 'cards', 'blackout', 'roll', 'sampler', 'treat', 'pad', 'bench', 'marks', 'subtract', 'strings', 'versions'], ops = ['slow', 'fast', 'contrast', 'reverse', 'chop', 'stutter', 'grain'];
+  const ids = new Set(), kinds = ['degrees', 'notes', 'tuning', 'range', 'choice', 'shuffle', 'pattern', 'chords', 'euclid'], tools = ['gen', 'timer', 'clip', 'loops', 'groove', 'assign', 'wordpoem', 'burn', 'cards', 'blackout', 'roll', 'sampler', 'treat', 'pad', 'bench', 'marks', 'subtract', 'strings', 'versions', 'editor', 'keys', 'recorder'], ops = ['slow', 'fast', 'contrast', 'reverse', 'chop', 'stutter', 'grain'];
   for (const e of EXPERIMENTS) {
     assert.ok(!ids.has(e.id), 'duplicate id ' + e.id); ids.add(e.id);
     assert.ok(CATEGORIES[e.category], e.id); assert.ok(NEEDS[e.needs], e.id);
@@ -143,9 +144,10 @@ test('treatments gives every track an effect, all different while there are enou
   for (let s = 0; s < 30; s++) { const t = treatments(mulberry32(s), ['a', 'b', 'c', 'd']); assert.equal(new Set(t.map(x => x.effect)).size, 4); assert.ok(t.every(x => /\d/.test(x.setting))); }
   assert.ok(EFFECTS.length >= 8);
 });
-test('the course has a name, seven units, and every experiment is in the path once', () => {
-  assert.equal(COURSE.name, 'Experiments in Creativity'); assert.equal(UNITS.length, 7);
-  assert.equal(PATH.length, EXPERIMENTS.length); assert.equal(new Set(PATH.map(e => e.id)).size, EXPERIMENTS.length);
+test('the course has a name, eight chapters, and every experiment and sitting is in the path once', () => {
+  assert.equal(COURSE.name, 'Experiments in Creativity'); assert.equal(UNITS.length, 8);
+  assert.equal(PATH.length, EXPERIMENTS.length + CHAPTER_SITTINGS.length); assert.equal(new Set(PATH.map(e => e.id)).size, PATH.length);
+  assert.ok(EXPERIMENTS.every(e => PATH.includes(e)));
   assert.ok(EXPERIMENTS.length >= 36);
 });
 

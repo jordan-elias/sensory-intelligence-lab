@@ -25,6 +25,9 @@ export const fmtClock = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${S
 
 /** Tools that every step works on (the clip you loaded, the loops, the poem). They stay with the step the whole time. */
 const WORKBENCH = new Set(['clip', 'loops', 'assign', 'wordpoem', 'burn', 'blackout', 'cards', 'roll', 'sampler', 'treat', 'pad', 'bench', 'marks', 'subtract', 'strings', 'versions']);
+/** The in-app instruments go with the steps that ask you to make or play something, not with every step. */
+const MAKERS = new Set(['editor', 'keys', 'recorder']);
+const MAKING = /\b(play|playing|record|make|compose|improvi[sz]e|sing|tap|build|write|create|loop|repeat|melody|notes?|phrase|rhythm|beat|chords?|piece|song|version|take)\b/i;
 const ROLL = /\b(roll|rolled|draw|drawn)\b/i, PICK = /\b(pick|choose|generate)\b/i, RHYTHM = /\b(metronome|bpm|rhythm|groove|beats?|loops?|pulse)\b/i;
 
 /**
@@ -41,8 +44,11 @@ export function toolsFor(e) {
 export function assignTools(e) {
   const n = e.procedure.length, tools = toolsFor(e), out = Array.from({ length: n }, () => []);
   if (Array.isArray(e.stepTools)) { e.stepTools.forEach((list, i) => { if (out[i]) out[i] = [...list]; }); return out; }
-  const gens = [], grooves = [], benches = [];
-  tools.forEach((t, i) => { if (t.type === 'gen') gens.push(i); else if (t.type === 'groove') grooves.push(i); else if (t.type === 'bench' && t.auto) benches.push(i); else if (WORKBENCH.has(t.type)) out.forEach(s => s.push(i)); });
+  const gens = [], grooves = [], benches = [], makers = [];
+  tools.forEach((t, i) => { if (t.type === 'gen') gens.push(i); else if (t.type === 'groove') grooves.push(i); else if (t.type === 'bench' && t.auto) benches.push(i); else if (MAKERS.has(t.type)) makers.push(i); else if (WORKBENCH.has(t.type)) out.forEach(s => s.push(i)); });
+  // Editor, keyboard and recorder: with every step that asks you to make something (the first step if none does).
+  const msteps = e.procedure.map((s, i) => (MAKING.test(s) ? i : -1)).filter(i => i >= 0);
+  for (const m of makers) for (const i of (msteps.length ? msteps : [0])) out[i].push(m);
   // Generators go with the steps that say roll / draw (or pick / choose when none do), one generator per such step, the last taking any left.
   let steps = e.procedure.map((s, i) => (ROLL.test(s) ? i : -1)).filter(i => i >= 0);
   if (!steps.length) steps = e.procedure.map((s, i) => (PICK.test(s) ? i : -1)).filter(i => i >= 0);
@@ -63,7 +69,8 @@ export function setupChecklist(e) {
   if (need) items.push(need);
   const types = new Set((e.tools || []).map(t => t.type));
   if (['gen', 'groove', 'loops', 'clip', 'roll', 'sampler'].some(t => types.has(t))) items.push('Sound on. Headphones help');
-  if (types.has('clip') || types.has('sampler')) items.push('Permission for the microphone, if you want to record here');
+  if (types.has('clip') || types.has('sampler') || types.has('recorder')) items.push('Permission for the microphone, if you want to record here');
+  if (types.has('editor') || types.has('keys')) items.push('No instrument or DAW? The note editor and keyboard here will do');
   items.push(`About ${e.minutes} minutes where you will not be interrupted`);
   return items;
 }
