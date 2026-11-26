@@ -324,7 +324,7 @@
 
         <div class="transport">
           <button class="btn primary" id="ch-generate">Generate Composition</button>
-          <button class="btn" id="ch-play" disabled>▶ Play</button>
+          <button class="btn" id="ch-play" disabled>Play</button>
         </div>
 
         <div class="export-row">
@@ -515,7 +515,7 @@ function stop(){
 function updatePlayBtn(){
   var btn=document.getElementById('ch-play');
   btn.disabled=!audioBuffer;
-  btn.textContent=isPlaying?'⏸ Stop':'▶ Play';
+  btn.textContent=isPlaying?'Stop':'Play';
 }
 
 function updateSummary(){

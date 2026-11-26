@@ -153,7 +153,7 @@
       <p>Everything here is about <strong>where a sound is</strong>. Headphones let you hear left, right, in front and behind. On speakers it will not work.</p>
       <div class="tut-stage" id="tut-stage-1"><div class="tut-you"></div></div>
       <div class="tut-status" id="tut-status-1" role="status" aria-live="polite">&nbsp;</div>
-      <div class="tutorial-actions" style="margin-bottom:.9rem"><button class="lab-btn primary" id="tut-hear" style="flex:1">▶ Hear it circle around you</button></div>
+      <div class="tutorial-actions" style="margin-bottom:.9rem"><button class="lab-btn primary" id="tut-hear" style="flex:1">Hear it circle around you</button></div>
       <p style="font-size:.78rem;margin-bottom:.4rem">You are in the middle. The green marker points straight ahead.</p>
       <div class="tutorial-actions"><button class="link-btn" data-tut-skip>Skip</button><div class="tut-nav"><span class="active"></span><span></span><span></span></div><button class="lab-btn primary" data-tut-next>Next →</button></div>
     </div>
@@ -219,7 +219,7 @@
     <div class="phase-indicator" id="phase-indicator" role="status" aria-live="polite"></div>
     <div class="feedback-msg" id="feedback-msg" role="status" aria-live="polite"></div>
 
-    <div class="dock"><button class="lab-btn primary" id="btn-play" type="button"><svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor" aria-hidden="true"><path d="M0 0l10 6L0 12z"/></svg> <span id="play-label">Play</span></button></div>
+    <div class="dock"><button class="lab-btn primary" id="btn-play" type="button"><span id="play-label">Play</span></button></div>
 
     <details class="more" id="more">
       <summary>Levels, stats and settings</summary>
@@ -570,8 +570,8 @@ async function tutOrbit() {
   const t0 = performance.now(), turn = 7000;
   const step = now => { const a = ((now - t0) / turn) * Math.PI * 2, x = Math.sin(a), y = -Math.cos(a);   // starts straight ahead, then to the right
     dot.style.left = (50 + x * 36) + '%'; dot.style.top = (50 + y * 36) + '%'; tutSrc && tutSrc.setPosition(x * 2.2, 0, y * 2.2); tutRaf = requestAnimationFrame(step); };
-  tutRaf = requestAnimationFrame(step); $('tut-hear').textContent = '■ Stop';
-  tutDemoTimer = setTimeout(() => { tutStopSound(); $('tut-hear').textContent = '▶ Hear it again'; tutStatus(1, ''); }, turn * 2);
+  tutRaf = requestAnimationFrame(step); $('tut-hear').textContent = 'Stop';
+  tutDemoTimer = setTimeout(() => { tutStopSound(); $('tut-hear').textContent = 'Hear it again'; tutStatus(1, ''); }, turn * 2);
 }
 async function tutSample(timbre, btn) {
   tutStopSound(); const ready = await wake(); if (!ready) { tutStatus(2, 'The browser would not start sound. Turn the volume up and try again.', true); return; }
@@ -579,7 +579,7 @@ async function tutSample(timbre, btn) {
   tutStatus(2, `${TIMBRE_NAMES[timbre]}: ${side < 0 ? 'on your left' : side > 0 ? 'on your right' : 'ahead of you'}`); tutDemoTimer = setTimeout(() => { tutStopSound(); tutStatus(2, ''); }, 3500);
 }
 function tutShow(n) {
-  tutStopSound(); tutStep = n; for (let i = 1; i <= 3; i++) $('tut-step-' + i).hidden = i !== n; $('tut-hear').textContent = '▶ Hear it circle around you';
+  tutStopSound(); tutStep = n; for (let i = 1; i <= 3; i++) $('tut-step-' + i).hidden = i !== n; $('tut-hear').textContent = 'Hear it circle around you';
   if (n === 3) tutPreview(); const first = $('tut-step-' + n).querySelector('button'); if (first) first.focus({ preventScroll: true });
 }
 let prevTimer = null;
@@ -591,7 +591,7 @@ function tutPreview() {   // a silent picture of one round: dots appear, drift, 
 }
 function tutClose() { tutStopSound(); clearInterval(prevTimer); tut.classList.add('hidden'); try { localStorage.setItem('sil_spatial_tutorial_seen', '1'); } catch { /* ignore */ } $('how-to-play-btn').focus({ preventScroll: true }); }
 function tutOpen() { tut.classList.remove('hidden'); tutShow(1); }
-$('tut-hear').addEventListener('click', () => { if (tutRaf) { tutStopSound(); $('tut-hear').textContent = '▶ Hear it circle around you'; tutStatus(1, ''); } else tutOrbit(); });
+$('tut-hear').addEventListener('click', () => { if (tutRaf) { tutStopSound(); $('tut-hear').textContent = 'Hear it circle around you'; tutStatus(1, ''); } else tutOrbit(); });
 document.querySelectorAll('#tut-sounds [data-timbre]').forEach(b => b.addEventListener('click', () => tutSample(b.dataset.timbre, b)));
 document.querySelectorAll('[data-tut-next]').forEach(b => b.addEventListener('click', () => tutShow(Math.min(3, tutStep + 1))));
 document.querySelectorAll('[data-tut-skip]').forEach(b => b.addEventListener('click', tutClose));

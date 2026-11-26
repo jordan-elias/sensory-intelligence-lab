@@ -22,7 +22,7 @@ body.amb .bc li+li::before{color:var(--amb-border)}
 .amb-play{width:3.4rem;height:3.4rem;border-radius:50%;border:1px solid var(--amb-accent);background:transparent;color:var(--amb-accent);cursor:pointer;display:grid;place-items:center;transition:background .15s,box-shadow .15s}
 .amb-play:hover{background:var(--amb-glow)}
 .amb-play[aria-pressed=true]{background:var(--amb-accent);color:var(--amb-accent-ink);box-shadow:0 0 0 6px var(--amb-glow)}
-.amb-play svg{width:22px;height:22px}
+.amb-play{font:600 .8rem var(--font-body,system-ui)}
 .amb-bar{display:flex;flex-wrap:wrap;gap:.6rem 1.2rem;align-items:center;padding:.7rem .85rem;background:var(--amb-surface);border:1px solid var(--amb-border);border-radius:14px;margin-bottom:1.25rem}
 .amb-group{display:flex;align-items:center;gap:.4rem}
 .amb-group>span{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--amb-muted);margin-right:.15rem}

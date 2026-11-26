@@ -220,7 +220,7 @@
     </div>
 
     <div class="control-row">
-      <button class="lab-btn primary" id="btn-play" disabled><svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> Play</button>
+      <button class="lab-btn primary" id="btn-play" disabled>Play</button>
       <button class="lab-btn" id="btn-repeat" disabled>↺ Repeat</button>
       <div class="feedback-msg" id="feedback-msg"></div>
     </div>
@@ -676,8 +676,8 @@ async function play() {
 function setPlayBtn(playing) {
   const btn = document.getElementById('btn-play');
   btn.innerHTML = playing
-    ? '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg> Stop'
-    : '<svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> Play';
+    ? 'Stop'
+    : 'Play';
   btn.classList.toggle('primary', !playing);
 }
 

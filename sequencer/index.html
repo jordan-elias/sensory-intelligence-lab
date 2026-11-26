@@ -550,7 +550,7 @@
 
     <!-- TRANSPORT -->
     <div class="transport" id="transport">
-      <button class="tbtn play-btn" id="btn-play" onclick="SEQ.togglePlay()"><svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> play</button>
+      <button class="tbtn play-btn" id="btn-play" onclick="SEQ.togglePlay()">Play</button>
       <div class="t-sep"></div>
 
       <div class="tempo-group">
@@ -1470,14 +1470,14 @@ const SEQ = window.SEQ = {
       chainPos     = 0;
       chainReps    = 0;
       nextStepTime = AC.currentTime + 0.05;
-      btn.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect width="10" height="10"/></svg> stop';
+      btn.innerHTML = 'Stop';
       btn.classList.add('playing');
       scheduler();
       window.SEQAWAKE?.hold();
     } else {
       clearTimeout(scheduleTimer);
       window.SEQAWAKE?.release();
-      btn.innerHTML = '<svg width="10" height="12" viewBox="0 0 10 12" fill="currentColor"><path d="M0 0l10 6L0 12z"/></svg> play';
+      btn.innerHTML = 'Play';
       btn.classList.remove('playing');
       // Clear playhead
       document.querySelectorAll('.pad, .step-num').forEach(el => el.classList.remove('playing'));

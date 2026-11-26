@@ -224,7 +224,6 @@ function stop() {
 }
 function setPlayUI(on) {
   $('playLbl').textContent = on ? 'Stop' : 'Play'; $('btnPlay').setAttribute('aria-label', on ? 'Stop' : 'Play');
-  $('icPlay').innerHTML = on ? '<rect width="10" height="10" y="1"/>' : '<path d="M0 0l10 6L0 12z"/>';
 }
 const toggle = () => (S.playing ? stop() : play());
 
