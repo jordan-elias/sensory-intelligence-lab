@@ -26,7 +26,7 @@ export function clean(raw) {
   if (isObj(raw.pos)) for (const [id, p] of Object.entries(raw.pos)) if (id && isObj(p)) s.pos[id] = { s: Math.max(0, Math.min(99, Math.trunc(num(p.s)))), at: num(p.at) };
   if (isObj(raw.shelf)) for (const [id, it] of Object.entries(raw.shelf)) {
     if (!id || !isObj(it) || !['text', 'audio'].includes(it.kind)) continue;
-    s.shelf[id] = { exp: str(it.exp, 80), kind: it.kind, title: str(it.title, 120), text: it.kind === 'text' ? str(it.text, 20000) : '', at: num(it.at), ...(it.kind === 'audio' ? { local: true, secs: num(it.secs) } : {}) };
+    s.shelf[id] = { exp: str(it.exp, 80), kind: it.kind, title: str(it.title, 120), text: it.kind === 'text' ? str(it.text, 20000) : '', at: num(it.at), note: str(it.note, 2000), edited: num(it.edited), ...(it.kind === 'audio' ? { local: true, secs: num(it.secs) } : {}) };
   }
   if (isObj(raw.gone)) for (const [id, at] of Object.entries(raw.gone)) if (id && Number.isFinite(at)) s.gone[id] = at;
   s.updated = num(raw.updated);
@@ -44,7 +44,7 @@ export function merge(a, b) {
   }
   for (const id of new Set([...Object.keys(a.gone), ...Object.keys(b.gone)])) out.gone[id] = Math.max(a.gone[id] ?? 0, b.gone[id] ?? 0);
   for (const id of new Set([...Object.keys(a.shelf), ...Object.keys(b.shelf)])) {
-    const x = a.shelf[id], y = b.shelf[id], it = !x ? y : !y ? x : y.at > x.at ? y : x;
+    const x = a.shelf[id], y = b.shelf[id], it = !x ? y : !y ? x : Math.max(y.at, y.edited) > Math.max(x.at, x.edited) ? y : x;
     if (out.gone[id] !== undefined && out.gone[id] >= it.at) continue;      // deleted after it was made
     out.shelf[id] = it;
   }
@@ -108,6 +108,8 @@ export function createProgress({ storage, now = Date.now } = {}) {
       const id = (globalThis.crypto?.randomUUID?.() || `k${now().toString(36)}${Math.random().toString(36).slice(2, 8)}`);
       state.shelf[id] = clean({ shelf: { [id]: { exp, kind, title, text, secs, at: now() } } }).shelf[id]; touch(); return id;
     },
+    /** A short note about a seed: where it came from, or what to do with it. Empty clears it. */
+    setSeedNote(id, text) { const it = state.shelf[id]; if (!it) return false; it.note = str(text, 2000); it.edited = now(); touch(); return true; },
     unkeep(id) { delete state.shelf[id]; state.gone[id] = now(); touch(); },
     shelf: () => Object.entries(state.shelf).map(([id, it]) => ({ id, ...it })).sort((x, y) => y.at - x.at),
     /** Merge a record from another device; returns true when anything changed here. */

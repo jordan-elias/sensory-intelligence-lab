@@ -51,3 +51,13 @@ test('recordings never leave the device, and a merge from elsewhere does not dro
 });
 test('applyRemote reports whether anything changed', () => { const p = createProgress({ storage: mem(), now: clock }); assert.equal(p.applyRemote({ done: { q: 1 } }), true); assert.equal(p.applyRemote({ done: { q: 1 } }), false); });
 test('change listeners run on every save', () => { const p = createProgress({ storage: mem(), now: clock }); let n = 0; const off = p.onChange(() => n++); p.setNote('a', 'x'); p.setPos('a', 1); off(); p.setNote('a', 'y'); assert.equal(n, 2); });
+
+test('a seed note is kept, cleared, and the later edit wins when devices merge', async () => {
+  const { merge, clean } = await import('../../assets/js/experiments/progress.js');
+  const base = { shelf: { s1: { exp: 'x', kind: 'text', title: 'T', text: 'hi', at: 100 } } };
+  const a = clean({ shelf: { s1: { ...base.shelf.s1, note: 'mine', edited: 300 } } });
+  const b = clean({ shelf: { s1: { ...base.shelf.s1, note: 'older', edited: 200 } } });
+  assert.equal(merge(a, b).shelf.s1.note, 'mine');
+  assert.equal(merge(b, a).shelf.s1.note, 'mine');
+  assert.equal(clean({ shelf: { s1: { ...base.shelf.s1, note: 'x'.repeat(5000) } } }).shelf.s1.note.length, 2000);
+});

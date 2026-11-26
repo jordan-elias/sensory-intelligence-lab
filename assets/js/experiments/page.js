@@ -9,6 +9,7 @@ import { buildNotebook } from '/assets/js/experiments/notebook.js';
 import { createProgress } from '/assets/js/experiments/progress.js';
 import { createSync } from '/assets/js/experiments/sync.js';
 import { parseTimer, assignTools, toolsFor, setupChecklist, fmtClock } from '/assets/js/experiments/steps.js';
+import { CHAPTERS } from '/assets/js/experiments/chapters.js';
 import { recommend, TIMES, continueLabel } from '/assets/js/experiments/recommend.js';
 import { reflect } from '/assets/js/experiments/reflect.js';
 import { combineRolls } from '/assets/js/experiments/seeds-core.js';
@@ -87,6 +88,11 @@ function list() {
         ? [el('p', {}, sug.allDone ? 'You have done every one that fits. Do one again:' : 'Try this one:'), el('a', { class: 'xp-card', href: '#/' + sug.pick.id }, el('h3', {}, sug.pick.title), el('p', {}, sug.pick.summary), el('small', {}, `${NEEDS[sug.pick.needs]} · ${sug.pick.minutes} min`)),
           sug.others.length ? el('p', { class: 'xp-hint' }, 'Or: ', ...sug.others.flatMap((e, i) => [i ? ' · ' : '', el('a', { href: '#/' + e.id }, e.title)])) : null]
         : el('p', {}, 'Nothing fits both. Try a longer time, or "Anything".')) : null),
+    ...CHAPTERS.map(c => el('section', { class: 'xp-unit xp-chapter', 'aria-labelledby': 'c-' + c.id },
+      el('h3', { class: 'xp-unit-h', id: 'c-' + c.id }, `Chapter ${c.number}: ${c.title}${c.optional ? ' (optional)' : ''}`, el('span', { class: 'xp-count' }, ` ${c.sittings.filter(e => done.has(e.id)).length} of ${c.sittings.length}`)),
+      el('p', { class: 'xp-hint' }, c.intro),
+      el('div', { class: 'xp-grid' }, c.sittings.map(e => el('a', { class: 'xp-card' + (done.has(e.id) ? ' done' : ''), href: '#/' + e.id },
+        el('h3', {}, e.title), el('p', {}, e.summary), el('small', {}, `${e.minutes} min${progress.pos(e.id) && !done.has(e.id) ? ` · in progress (step ${progress.pos(e.id)})` : ''}`)))))),
     ...UNITS.map(u => {
       const shown = u.experiments.filter(e => filter.needs === 'all' || e.needs === filter.needs);
       if (!shown.length) return null;
@@ -170,8 +176,10 @@ function shelf() {
         body.replaceChildren(el('audio', { controls: true, src: url, 'aria-label': it.title }), el('div', { class: 'xp-row' }, el('a', { class: 'xp-btn xp-btn--alt', href: url, download: 'experiment.wav', style: 'text-decoration:none' }, 'Download'), del));
       }).catch(() => body.replaceChildren(el('p', { class: 'xp-hint' }, 'Recordings could not be opened here.'), del));
     }
+    const noteBox = el('textarea', { class: 'xp-seed-note', rows: 2, maxlength: 2000, placeholder: 'A note to yourself: where this came from, what you might do with it', 'aria-label': 'Note for this seed' }, it.note || '');
+    noteBox.addEventListener('change', () => progress.setSeedNote(it.id, noteBox.value));
     const pick = it.kind === 'text' ? el('label', { class: 'xp-pick' }, el('input', { type: 'checkbox', class: 'xp-pickbox', 'data-id': it.id, onchange: syncCombine }), ' Pick to combine') : null;
-    return el('article', { class: 'xp-kept-item' }, el('h3', {}, it.title), pick, el('p', { class: 'xp-hint' }, `${when(it.at)}${e ? ' · ' : ''}`, e ? el('a', { href: '#/' + e.id }, e.title) : null, it.kind === 'audio' ? ' · this device only' : ''), body);
+    return el('article', { class: 'xp-kept-item' }, el('h3', {}, it.title), pick, el('p', { class: 'xp-hint' }, `${when(it.at)}${e ? ' · ' : ''}`, e ? el('a', { href: '#/' + e.id }, e.title) : null, it.kind === 'audio' ? ' · this device only' : ''), body, noteBox);
   };
   render(
     el('a', { class: 'xp-back', href: '#/' }, '← ' + COURSE.name),
@@ -264,6 +272,7 @@ function detail(e) {
       render(head,
         el('div', { class: 'ph' }, el('h2', {}, e.title), el('p', { id: 'xpQuestion' }, e.question)),
         el('p', { class: 'xp-hint' }, 'First: ' + e.procedure[0]),
+        ...(e.links || []).map(l => el('p', {}, el('a', l.href[0] === '#' ? { href: l.href } : { href: l.href, target: '_blank', rel: 'noopener' }, l.label))),
         nav(btn('Begin', () => go(1), false, 'xpBegin'), saved >= 1 && saved <= n ? btn(`Resume at step ${saved}`, () => go(saved), true, 'xpResume') : null),
         el('details', { class: 'xp-solo', id: 'xpAbout' }, el('summary', {}, 'About this experiment'),
           el('ul', { class: 'xp-intro-list' },

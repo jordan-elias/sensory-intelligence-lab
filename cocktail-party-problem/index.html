@@ -84,11 +84,6 @@
 
     .control-row { display: flex; align-items: center; gap: 8px; margin-bottom: .75rem; flex-wrap: wrap; }
 
-    .lab-btn { font-family: var(--font-heading); font-size: .78rem; font-weight: 600; background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: .5rem 1.2rem; cursor: pointer; transition: all .12s; white-space: nowrap; flex-shrink: 0; }
-    .lab-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
-    .lab-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
-    .lab-btn.primary:hover:not(:disabled) { background: var(--accent-hover); }
-    .lab-btn:disabled { opacity: .35; cursor: not-allowed; }
     .lab-preset-btn { font-family: var(--font-body); font-size: .72rem; font-weight: 500; background: var(--bg); color: var(--muted); border: 1px solid var(--border); padding: .28rem .8rem; cursor: pointer; transition: all .12s; }
     .lab-preset-btn:hover { border-color: var(--accent); color: var(--accent); }
     .lab-preset-btn.on { background: var(--accent); color: white; border-color: var(--accent); }
@@ -160,6 +155,8 @@
     }
   </style>
   <link rel="stylesheet" href="/assets/css/header.css">
+  <link rel="stylesheet" href="/assets/css/lab-ui.css">
+  <link rel="stylesheet" href="/assets/css/essay.css">
   <link rel="stylesheet" href="/assets/css/a11y.css">
 </head>
 <body>
@@ -268,12 +265,53 @@
     </div>
   </div>
 
-  <div class="article-text">
-    <h3>The cocktail party problem</h3>
-    <p>The term was coined by Colin Cherry in 1953 to describe the auditory system's remarkable ability to selectively attend to a single voice or sound source within a complex acoustic scene. At a crowded party, you can focus on one conversation while filtering out others — not by reducing the volume of competing sounds, but by directing attentional resources toward specific auditory streams.</p>
-    <p>This capacity depends on a network of auditory and prefrontal cortex regions that work together to segregate sound sources using spatial cues (where the sound comes from), spectral cues (its frequency content), and temporal cues (its rhythmic and timing patterns). As you progress through the levels, the signal-to-noise ratio decreases and additional competing sound sources are added — requiring increasing reliance on selective attention rather than simple loudness detection.</p>
-    <p>Training on this task is associated with improved performance in real-world noisy environments, and is used in auditory rehabilitation contexts for hearing loss and auditory processing difficulties.</p>
-  </div>
+  <article class="essay" id="essay">
+    <h2>One voice in a room full of them</h2>
+    <p>You are at a party. Someone is telling you a story, and around you a dozen other conversations are going on, some louder than your own. And yet you follow the story. The sound reaching your ears is a mixture of every voice in the room, added together into one pressure wave in each ear, and somehow you pull one voice out of it. In 1953 the British scientist Colin Cherry named this the <strong>cocktail party problem</strong>, and it is still not fully solved. This game is a small version of it: a single word, spoken among background sounds that get gradually louder.</p>
+
+    <h2>Cherry’s experiment</h2>
+    <p>Cherry played two different spoken messages at once, one to each ear over headphones, and asked people to repeat one of them aloud as they heard it. This is called <em>shadowing</em>. People could do it well. When he asked what they had noticed in the other ear, they could say whether it was speech or a tone, and whether the voice was a man’s or a woman’s. Many did not notice when the language changed, or that the speech had been played backwards. The message in the unattended ear had been heard, but only as sound, and not as meaning.</p>
+    <p>Donald Broadbent proposed in 1958 that attention acts as a <em>filter</em>: it lets one channel through for full processing and blocks the rest early on. But the filter turned out to be leaky. In 1959 Neville Moray found that about a third of people shadowing one message noticed their own name in the other ear. Anne Treisman suggested that the unattended message is turned down rather than blocked, so that words that matter to you, like your name, can still break through. In 2001 Andrew Conway, Nelson Cowan and Michael Bunting found that how likely people were to hear their own name depended on their working memory: about 65% of people with low working-memory span did, against about 20% of those with high span. A good filter, on this view, takes mental effort to hold up.</p>
+
+    <h2>Sorting a mixture into streams</h2>
+    <p>Albert Bregman’s 1990 book <em>Auditory Scene Analysis</em> gave a framework that is still the starting point. The brain does not hear a mixture; it builds <em>streams</em>, one for each thing in the scene, by grouping parts of the sound that belong together. It uses clues that real sources tend to supply: parts that start and stop together, parts that share a pitch or whose harmonics line up, sounds that come from the same direction, sounds that change smoothly rather than in jumps. A voice is easy to follow because all of these clues agree.</p>
+    <p>Then comes attention: you choose a stream to follow, and the brain brings it forward. Barbara Shinn-Cunningham and colleagues have described attention as acting on <em>objects</em> in the auditory scene, once the scene has been sorted.</p>
+
+    <h2>Two kinds of masking</h2>
+    <p>A background can get in the way in two ways. <strong>Energetic masking</strong> is simple: the noise has energy at the same frequencies and the same moments as the sound you want, so part of the sound is physically buried, as a lamp is lost in sunlight. Steady noise like wind or distant traffic mostly masks this way. <strong>Informational masking</strong> is subtler. The sounds do not bury each other, but they are alike enough that it becomes hard to tell which belongs to which stream, or to keep your attention on the right one. Other talkers tend to cause this the most, because speech draws attention. The levels of this game add backgrounds in stages, from nature to traffic to voices, so that you meet both kinds.</p>
+
+    <h2>Where the sounds are</h2>
+    <p>Location helps. When a target and its competitors come from different directions, listeners do better, which researchers call <em>spatial release from masking</em>, and in some studies with competing talkers the benefit is large. In this game the word always comes from straight ahead. The backgrounds come from elsewhere: the first from the left, the second from the front left, the third from the front right. Because it is heard over headphones with a generic head model, the spatial effect depends on your ears and you may find it works better for some sounds than others.</p>
+
+    <h2>What the numbers mean</h2>
+    <p>The levels set a signal-to-noise ratio in decibels. At 0&nbsp;dB the word and the background are equally loud. At +15&nbsp;dB the word is much louder than the background, and at −15&nbsp;dB it is much quieter. Perhaps surprisingly, people with typical hearing can often follow sentences in steady noise when the speech is a few decibels <em>below</em> the noise level, because speech has so much redundancy: if you miss a syllable, the rest of the sentence fills it in. A single isolated word has none of that, so this task becomes hard at a better signal-to-noise ratio than ordinary conversation would.</p>
+
+    <h2>Hearing in noise, and what training can do</h2>
+    <p>Trouble following speech in noise is one of the commonest reasons people ask for a hearing assessment, and it can occur even when a standard hearing test comes out normal. Listening in noise is also more effortful than listening in quiet, which is why a long session of this game feels tiring.</p>
+    <p>Can practice help? The honest answer is: partly, and we do not know how much carries over. A 2013 systematic review of computer-based auditory training for people with hearing loss found improvement on the tasks that were trained, and small, not-robust gains on untrained measures. The authors rated the studies as very low to moderate in quality. Whether musicians hear better in noise has also been argued back and forth: some studies found an advantage, and others did not. This game is not a test or a treatment. If listening in noise is a problem for you, a hearing assessment is the place to start. What the game does offer is practice in a particular act of attention (choosing one sound in a crowd) and a chance to notice how you do it.</p>
+
+    <div class="essay-try">
+      <h3>Tips and things to try</h3>
+      <ol>
+        <li><strong>Find your edge.</strong> Work up until the word is only sometimes clear. That is where you are paying attention rather than just hearing.</li>
+        <li><strong>Listen for where it comes from.</strong> The word is always straight ahead. Notice what happens if you focus on that spot.</li>
+        <li><strong>Notice how you guess.</strong> Do you catch the beginning of the word, the shape of it, the colour or the number? Different people lean on different clues.</li>
+        <li><strong>Take real breaks.</strong> Fatigue makes this much harder, so do a few trials at a time.</li>
+        <li><strong>Do it at a comfortable level.</strong> The game will never need loud sound. Make it quieter if you can, and stop if anything hurts.</li>
+      </ol>
+    </div>
+
+    <h2>Sources</h2>
+    <ul class="essay-sources">
+      <li>E. C. Cherry, “Some experiments on the recognition of speech, with one and with two ears”, <em>Journal of the Acoustical Society of America</em> (1953).</li>
+      <li>D. E. Broadbent, <em>Perception and Communication</em> (1958); N. Moray, “Attention in dichotic listening: affective cues and the influence of instructions”, <em>Quarterly Journal of Experimental Psychology</em> (1959); A. M. Treisman, “Contextual cues in selective listening”, <em>QJEP</em> (1960).</li>
+      <li><a href="https://memory.psych.missouri.edu/assets/doc/articles/2001/conway-et-al-pbr-2001.pdf" rel="noopener" target="_blank">A. R. A. Conway, N. Cowan &amp; M. F. Bunting, “The cocktail party phenomenon revisited: the importance of working memory capacity”</a>, <em>Psychonomic Bulletin &amp; Review</em> (2001).</li>
+      <li>A. S. Bregman, <em>Auditory Scene Analysis: The Perceptual Organization of Sound</em>, MIT Press (1990).</li>
+      <li>B. G. Shinn-Cunningham, “Object-based auditory and visual attention”, <em>Trends in Cognitive Sciences</em> (2008).</li>
+      <li>R. L. Freyman, K. S. Helfer, D. D. McCall &amp; R. K. Clifton, “The role of perceived spatial separation in the unmasking of speech”, <em>JASA</em> (1999); A. W. Bronkhorst, “The cocktail party phenomenon: a review of research on speech intelligibility in multiple-talker conditions”, <em>Acta Acustica</em> (2000).</li>
+      <li><a href="https://doaj.org/article/09602b51d8d5495a9aff6f6a689060a9" rel="noopener" target="_blank">H. Henshaw &amp; M. A. Ferguson, “Efficacy of individual computer-based auditory training for people with hearing loss: a systematic review of the evidence”</a>, <em>PLoS ONE</em> (2013).</li>
+    </ul>
+  </article>
 </main>
 
 <footer>

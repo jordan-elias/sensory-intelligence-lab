@@ -1,0 +1,17 @@
+/* One set of controls for every tool page: .lab-btn (+ .primary, .quiet), .lab-seg (a row of choices), .lab-icon.
+   Same size, same hover, same focus ring, 44px tall so a thumb can hit it. Colours come from each page's own variables. */
+.lab-btn{font-family:var(--font-heading,system-ui);font-size:.82rem;font-weight:600;background:var(--bg,#fff);color:var(--text,#1a1a1a);border:1px solid var(--border,#ddd);padding:.6rem 1.2rem;min-height:44px;cursor:pointer;transition:background .12s,border-color .12s,color .12s;display:inline-flex;align-items:center;justify-content:center;gap:.45rem;white-space:nowrap;flex-shrink:0;border-radius:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.lab-btn:hover:not(:disabled){border-color:var(--accent,#2a5c45);color:var(--accent,#2a5c45);background:var(--accent-light,rgba(42,92,69,.08))}
+.lab-btn.primary{background:var(--accent,#2a5c45);color:#fff;border-color:var(--accent,#2a5c45)}
+.lab-btn.primary:hover:not(:disabled){background:var(--accent-hover,#1f4635);border-color:var(--accent-hover,#1f4635);color:#fff}
+.lab-btn.quiet{border-color:transparent;background:transparent;color:var(--muted,#6b6b6b)}
+.lab-btn.quiet:hover:not(:disabled){border-color:var(--border,#ddd);color:var(--text,#1a1a1a);background:transparent}
+.lab-btn:disabled{opacity:.4;cursor:not-allowed}
+.lab-btn:focus-visible,.lab-seg button:focus-visible{outline:2px solid var(--accent,#2a5c45);outline-offset:2px}
+.lab-btn svg,.lab-icon{width:14px;height:14px;fill:currentColor;flex-shrink:0}
+.lab-btn[aria-pressed=true]{background:var(--accent,#2a5c45);color:#fff;border-color:var(--accent,#2a5c45)}
+.lab-seg{display:inline-flex;border:1px solid var(--border,#ddd)}
+.lab-seg button{font-family:var(--font-heading,system-ui);font-size:.78rem;font-weight:600;min-height:40px;padding:.4rem .9rem;background:var(--bg,#fff);color:var(--muted,#6b6b6b);border:0;border-right:1px solid var(--border,#ddd);cursor:pointer;border-radius:0}
+.lab-seg button:last-child{border-right:0}
+.lab-seg button:hover{color:var(--accent,#2a5c45)}
+.lab-seg button[aria-pressed=true],.lab-seg button.on{background:var(--accent,#2a5c45);color:#fff}

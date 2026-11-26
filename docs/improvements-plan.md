@@ -262,3 +262,30 @@ Not verified by ear.
 - The engine decodes its head-response tables when created; a source started before that is silent. It is now created early and the first sound waits for it.
 - Safe-output headphone note on phones was a narrow tall box; now sized to its text.
 - Not verified by ear. Offline renders show left/right placement (2x level difference or more) for all three voices.
+
+## Phone navigation (branch app-73-mobile-nav)
+- One module list (assets/js/nav/modules.js) drives the bottom tab bar (Home, Calm, Listen, Create, You), the icon grid, search and which tab a page belongs to.
+- Website: the bar appears on phone-sized screens only; wide screens keep the top navigation and the card list. The installed app uses the same bar through its shell.
+- Phone home: search box, "Jump back in" (recent tools, kept in this browser only), icon tiles grouped by tab. A tab opens the same page filtered to its group.
+- Fixed bottom controls use --tabbar-h so they sit above the bar.
+
+## Oramics painter, essays, shared controls (branch app-74-painter, built on app-73)
+- Oramics rebuilt as a canvas-first painting app. Five inks = five layers = five parts: Melody, Harmony (stack bars for chords, always on the key), Bass, Rhythm (each new mark is a hit, height picks the drum), Texture (filtered noise). Four shades per ink are four voices. Thickness is loudness.
+- Tools: brush, dots, line, rectangle, ellipse, spray, fill, eraser, slide. Echo, mirror, guides, light/dark paper, undo/redo, Surprise me, three starters, keep on device, WAV, PNG, file. Draft autosaved locally.
+- One engine (engine.js) serves live play and the WAV export. Offline renders checked: each ink makes sound alone, no clipping. Not verified by ear.
+- Old Oramics saves (v1) are not read; the new format is v2.
+- Oram essay rewritten from sources (Richards thesis, Wrench, the Daphne Oram Trust, Science Museum, Wikipedia). Claims that could not be checked were removed.
+- Spatial and cocktail essays rewritten, shared style in assets/css/essay.css. Shared button styles in assets/css/lab-ui.css (spatial, cocktail, Oramics). Semantic Synth is on another branch (app-71) and still needs its buttons moved to lab-ui.css after merging.
+- Minicourse: planning only, see docs/creative-practice-course-plan.md.
+
+## Experiments in Creativity: paid, with a free preview (branch app-74-painter)
+- Free users see one preview page (aim, the seven sections, how it works, what stays with you, Subscribe button to /subscribe/). The course code is not loaded for them. Subscribers see the course as before. The dashboard card and phone tile show the "Preview" marker.
+- If someone stops subscribing: work stays saved on their device; the course and materials are locked (this is how the gate already behaves, since the course only loads for paid users). Not tested against a real cancelled account.
+- Oramics has a "Keep as a seed" button: it renders the piece and keeps the recording in My seeds (on this device only, same store as the experiments).
+- Preview copy reuses the catalog text and METHOD steps; Jordan to review wording.
+- Next, once the course wording is agreed: seed data model for the new chapters, then chapters 1 to 3. See docs/creative-practice-course-plan.md.
+
+## Course chapters 1 to 3 (draft)
+`assets/js/experiments/chapters.js` holds Arrival, Listening and State and body as nine sittings, each ending in a seed. Shown above the existing sections in the course list; `byId` finds them. All wording is a draft for Jordan to pilot and rewrite. Chapters 4 to 8, seed notes and therapist sharing are still to build.
+Update: chapters 4 (Taste and lineage) and 5 (Limits and chance) added as drafts; seeds now take an optional note (`note`, `edited` fields; later edit wins on sync). Remaining: chapters 6 to 8, then-and-now, therapist sharing.
+Update: chapters 6 (Sources, optional), 7 (Shaping and finishing) and 8 (Sharing and carrying on, with the then-and-now sitting) drafted. Course content is complete as a draft. Therapist sharing (section 10b of the course plan) is not built: it needs a Supabase migration, row-level security, a therapist-side view and a privacy page change, so it should be done as its own reviewed step.

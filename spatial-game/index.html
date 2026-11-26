@@ -37,12 +37,6 @@
     .ph p { font-size: .9rem; color: var(--muted); }
 
     .lab-section { border: 1px solid var(--border); padding: 1.25rem; margin-bottom: 1.5rem; background: var(--surface); }
-    .lab-btn { font-family: var(--font-heading); font-size: .82rem; font-weight: 600; background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: .6rem 1.2rem; min-height: 44px; cursor: pointer; transition: all .12s; display: inline-flex; align-items: center; justify-content: center; gap: .45rem; }
-    .lab-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
-    .lab-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-    .lab-btn.primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); color: #fff; }
-    .lab-btn:disabled { opacity: .4; cursor: not-allowed; }
-    .lab-btn:focus-visible, .level-btn:focus-visible, .link-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .link-btn { font-family: var(--font-body); font-size: .78rem; color: var(--muted); background: none; border: none; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; padding: .5rem .25rem; min-height: 44px; }
     .link-btn:hover { color: var(--accent); }
 
@@ -144,6 +138,8 @@
     @media (prefers-reduced-motion: reduce) { .pulse { animation: none; } .sound-source { transition: none; } }
   </style>
   <link rel="stylesheet" href="/assets/css/header.css">
+  <link rel="stylesheet" href="/assets/css/lab-ui.css">
+  <link rel="stylesheet" href="/assets/css/essay.css">
   <link rel="stylesheet" href="/assets/css/a11y.css">
 </head>
 <body>
@@ -260,12 +256,55 @@
     </div>
   </div>
 
-  <div class="article-text">
-    <h3>How spatial hearing works</h3>
-    <p>The auditory system locates sound in space using interaural time differences (ITD) — the tiny delay between a sound reaching each ear — and interaural level differences (ILD), the difference in loudness between ears. For sounds above and below, the shape of the outer ear (the pinna) introduces frequency-dependent filtering that the brain learns to decode as elevation.</p>
-    <p>Practising active sound tracking exercises the superior colliculus and auditory cortex circuits responsible for reflexive and voluntary spatial attention. The shell game format — watching a target, then selecting its resting position from among identical-looking distractors — separates perceptual tracking from motor response, isolating the attentional component.</p>
-    <p>This exercise is adapted from research on auditory scene analysis (Bregman, 1990) and the cocktail party effect. Consistent practice improves the ability to selectively attend to a single sound source in noisy environments.</p>
-  </div>
+  <article class="essay" id="essay">
+    <h2>Tracking by ear</h2>
+    <p>Watch someone play the shell game and you will see how much of the skill is attention rather than sight. You follow one cup, you keep following it when it slides behind the others, and at the end you point to where you think it is. This game asks you to do the same thing with sound. A few tones move around you in a circle. Then they vanish from the screen, and the sound is the only thing that tells you where each one is going. When they stop, you choose where the target ended up.</p>
+    <p>That is a hard thing to ask of your ears, and the rest of this page is about why: how a sound gets a location in your head, what headphones can and cannot do about it, and why a moving sound is harder to hold on to than a still one.</p>
+
+    <h2>How a sound gets a place</h2>
+    <p>You have two ears, and a sound from one side reaches them differently. It arrives at the nearer ear slightly earlier and slightly louder. These are the two main cues for left and right, usually called the <strong>interaural time difference</strong> and the <strong>interaural level difference</strong>. Lord Rayleigh described the idea over a century ago, and it is often called the duplex theory. In a typical adult head the largest possible time difference, for a sound directly to one side, is a bit under a millisecond. Time differences work best for low frequencies, below roughly 1.5&nbsp;kHz, where the sound wave is long compared with your head. Higher frequencies are blocked by your head, so the far ear gets a quieter, shadowed version, and level differences take over.</p>
+    <p>Straight ahead, people are remarkably precise. In classic experiments with steady tones, listeners could notice a shift of about one degree. The precision falls off as the sound moves to the side, where the same shift in angle changes the two ears’ signals less, and it can drop to several degrees.</p>
+    <p>Left and right are the easy part. A time difference alone cannot tell front from back, or above from below, because many positions give the same difference, a set sometimes called the <em>cone of confusion</em>. The brain resolves these with a third cue: the folds of your outer ear (the pinna), head and shoulders filter a sound differently depending on the direction it comes from, adding peaks and notches at high frequencies. Each person’s ears are shaped differently, and you have learned your own over a lifetime. In real life you also help yourself by moving: turning your head slightly changes the cues in a way that resolves front/back ambiguities, and studies of listeners with and without head movement have shown how much this helps.</p>
+
+    <h2>What headphones can and cannot do</h2>
+    <p>Over headphones, each ear gets its own signal, so the left-right cues can be reproduced exactly. To go beyond left and right, the sound can be filtered with a <em>head-related transfer function</em> (HRTF), a measurement of how a head and ears change sound from each direction. This game uses Resonance Audio, an open-source spatial audio engine, with its general-purpose HRTF. It is not a measurement of your own ears, and that matters. With someone else’s ears, left-right placement still works well, but front/back and up/down are less reliable and some listeners hear sounds in front as behind them. Sounds can also seem to sit close to or inside the head. Distance is hard to convey.</p>
+    <p>For these reasons the game uses a flat circle around you, at ear height. The top of the screen is in front of you and the bottom behind. There is no head tracking, so the sound moves with your head, not with the room. It helps to keep still, because turning your head will not give you the help it would in real life.</p>
+
+    <h2>Why moving sounds are harder</h2>
+    <p>A sound that stays put gives your brain time to settle on a position. A moving one asks the binaural system to keep updating, and that system is surprisingly slow. Experiments on <em>binaural sluggishness</em> found that the ears’ comparison is averaged over a window of tenths of a second, so fast movement is blurred. Listeners need a sound to move further before they notice the direction of motion than they need to notice that a still sound has been displaced. That is part of why the early levels are slow, and why speed is one of the things that makes later levels hard.</p>
+    <p>The other part is attention. Following one object while others move is a general limit of the mind, and it has been studied far more in vision than in hearing. In the best-known experiments on multiple object tracking, people could follow around four moving targets among identical distractors, and fewer as the objects moved faster or came closer together. The same three things make this game hard: how many sources there are, how fast they move, and how close together they pass. When a path crosses another, your ears have to decide which is which using only a small difference in position, or in pitch and rhythm.</p>
+
+    <h2>Why the dots disappear</h2>
+    <p>If you can see the dots, your eyes do the tracking and your ears only confirm. Making them vanish removes that crutch. Then you can only keep a picture of where the sound is and how it is moving, correct it with each new cue, and predict where it will be next. Skilled players often describe following the pattern of a path (a circle, a figure of eight, a loop) rather than the position at each moment. When all else fails, the shape of the path is a clue as strong as the sound.</p>
+
+    <h2>What this is, and what it is not</h2>
+    <p>It is a way to pay close attention to where sounds are, and to find out how fine your own sense of it is today. It is not a hearing test, a diagnosis, or a treatment. We cannot say that playing it will improve your hearing in a crowded room. Research on computer-based listening training suggests that people get better at the task they practise, and that gains on other tasks, such as understanding speech, are small and not yet reliable. A 2013 review of studies in people with hearing loss put it exactly that way, and rated the studies as very low to moderate in quality. If you are worried about your hearing, a hearing assessment is the right step, and there is no need to wait for a game to tell you.</p>
+    <p>Why do it, then? Because it is an unusual and satisfying way to listen. Most of the time we use sound to know what a thing is, and rarely to know where it is and where it is going. A few minutes of that can change how a room sounds afterwards.</p>
+
+    <div class="essay-try">
+      <h3>Tips and things to try</h3>
+      <ol>
+        <li><strong>Headphones, both ears.</strong> Place them so the left side is on the left ear, and set the level low. Quiet rooms work best.</li>
+        <li><strong>Keep still, and close your eyes</strong> once the dots vanish. It sharpens the picture in your head.</li>
+        <li><strong>Follow the shape, not the moment.</strong> Ask yourself where the path is heading and what it will do next.</li>
+        <li><strong>Use the different voices.</strong> Each source has its own timbre. Learn to tell them apart before the spacing gets tight.</li>
+        <li><strong>Notice when you are guessing.</strong> Your confidence is data too. On which side, and at what speed, do you start to lose the sound?</li>
+        <li><strong>Take breaks.</strong> Careful listening is tiring, and results at the end of a long session usually say more about tiredness than hearing.</li>
+      </ol>
+    </div>
+
+    <h2>Sources</h2>
+    <ul class="essay-sources">
+      <li>Lord Rayleigh, “On our perception of sound direction”, <em>Philosophical Magazine</em> (1907): the duplex theory.</li>
+      <li>A. W. Mills, “On the minimum audible angle”, <em>Journal of the Acoustical Society of America</em> (1958).</li>
+      <li>F. L. Wightman &amp; D. J. Kistler, “Resolution of front–back ambiguity in spatial hearing by listener and source movement”, <em>JASA</em> (1999).</li>
+      <li>D. W. Grantham &amp; F. L. Wightman, “Detectability of varying interaural temporal differences”, <em>JASA</em> (1978): binaural sluggishness.</li>
+      <li>Z. W. Pylyshyn &amp; R. W. Storm, “Tracking multiple independent targets: evidence for a parallel tracking mechanism”, <em>Spatial Vision</em> (1988).</li>
+      <li>J. Blauert, <em>Spatial Hearing: The Psychophysics of Human Sound Localization</em>, MIT Press (revised edition 1997).</li>
+      <li>H. Henshaw &amp; M. A. Ferguson, <a href="https://doaj.org/article/09602b51d8d5495a9aff6f6a689060a9" rel="noopener" target="_blank">“Efficacy of individual computer-based auditory training for people with hearing loss: a systematic review of the evidence”</a>, <em>PLoS ONE</em> (2013).</li>
+      <li><a href="https://resonance-audio.github.io/resonance-audio/" rel="noopener" target="_blank">Resonance Audio</a>, the spatial audio engine used in this game.</li>
+    </ul>
+  </article>
 </main>
 
 <footer>
