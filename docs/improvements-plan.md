@@ -298,3 +298,9 @@ Update: chapters 6 (Sources, optional), 7 (Shaping and finishing) and 8 (Sharing
 - Listening steps show a timer, not an empty box. No quota counters. Reflection questions are open, not yes/no.
 - "How it works" now says to keep what did not work, and that skipping is fine. The preview says what chance tools are and are not, and that recordings never leave the device.
 - Still wording drafts for Jordan; who wrote the prompts is Jordan's to state.
+
+## Breathing in the calm look, and one button everywhere
+- `assets/css/calm.css` holds the Ambience tokens, base, chips and a round version of the shared button; Ambience and Breathing both use it. `breathing.css` is the page: one column, compact pattern cards on a phone (only the chosen one shows its description), a Begin button that stays above the tab bar until it is pressed, a circle that scales to its space, a calm stage card, "How these exercises work" folded away.
+- Play and Pause are words, not icons, on Breathing, Regulation and Soundscape too.
+- Sequencer, Rooms, Phase Machine, Waves, Chance and Semantic Synth now use `lab-btn` (`.sm` for small, `.on`/`.active` for pressed) and `lab-seg`; their own button CSS is removed. `t93` checks ten tool pages for the shared button.
+- Left alone on purpose: Chance's option cards and Waves' preset chips (they are choices, not actions), and the Ear Training answer buttons.

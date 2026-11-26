@@ -23,6 +23,7 @@
   <!-- compromise.js NLP library -->
   <script src="/assets/js/vendor/compromise.js"></script>
 
+  <link rel="stylesheet" href="/assets/css/lab-ui.css">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -162,16 +163,6 @@
       padding:.6rem 1rem;flex-wrap:wrap;gap:.5rem;}
     .input-hint{font-size:.72rem;color:var(--muted);}
     .input-controls{display:flex;gap:.5rem;align-items:center;}
-    .analyze-btn{font-family:var(--font-heading);font-size:.78rem;font-weight:600;
-      background:var(--accent);color:white;border:none;padding:.55rem 1.5rem;
-      cursor:pointer;transition:background .12s;letter-spacing:-.01em;}
-    .analyze-btn:hover{background:var(--accent-hover);}
-    .analyze-btn:disabled{opacity:.45;cursor:not-allowed;}
-    .stop-btn{font-family:var(--font-heading);font-size:.78rem;font-weight:600;
-      background:transparent;color:var(--text);border:1px solid var(--border);
-      padding:.55rem 1rem;cursor:pointer;transition:all .12s;}
-    .stop-btn:hover{border-color:var(--text);}
-    .stop-btn:disabled{opacity:.35;cursor:not-allowed;}
 
     /* Controls strip */
     .controls-strip{border:1px solid var(--border);padding:.75rem 1rem;
@@ -189,12 +180,6 @@
 
     /* Mode chips */
     .ctrl-mode{flex:0 0 auto;min-width:0}
-    .mode-chips{display:flex}
-    .mode-chip{font-family:var(--font-heading);font-size:.7rem;font-weight:600;padding:.4rem .9rem;border:1px solid var(--border);
-      background:var(--bg);color:var(--text);cursor:pointer;min-height:34px}
-    .mode-chip+.mode-chip{border-left:none}
-    .mode-chip:hover{border-color:var(--text)}
-    .mode-chip[aria-pressed=true]{background:var(--accent);color:#fff;border-color:var(--accent)}
     .composed-note{font-size:.72rem;color:var(--muted);padding:.4rem .75rem;border:1px solid var(--border);background:var(--surface);
       margin-bottom:.5rem;font-variant-numeric:tabular-nums}
     /* ── ESSAY ── */
@@ -263,14 +248,14 @@
     <div class="controls-strip">
       <div class="ctrl-mini ctrl-mode">
         <span class="ctrl-mini-label">Mode</span>
-        <div class="mode-chips" role="group" aria-label="Playback mode">
+        <div class="lab-seg mode-chips" role="group" aria-label="Playback mode">
           <button type="button" class="mode-chip" data-mode="composed" aria-pressed="true" onclick="SS.setMode('composed')">Composed</button>
           <button type="button" class="mode-chip" data-mode="raw" aria-pressed="false" onclick="SS.setMode('raw')">Raw</button>
         </div>
       </div>
       <div class="ctrl-mini ctrl-mode">
         <span class="ctrl-mini-label">While typing</span>
-        <div class="mode-chips" role="group" aria-label="Play while typing">
+        <div class="lab-seg mode-chips" role="group" aria-label="Play while typing">
           <button type="button" class="mode-chip" id="live-toggle" aria-pressed="false" onclick="SS.toggleLive()">Play words</button>
         </div>
       </div>
@@ -313,10 +298,10 @@
         <div class="input-footer">
           <span class="input-hint" id="input-hint">Five voices · Composed from your words</span>
           <div class="input-controls">
-            <button class="stop-btn" id="save-wav" onclick="SSComposed.saveWav()" disabled title="Save the last composed piece as audio">save WAV</button>
-            <button class="stop-btn" id="save-midi" onclick="SSComposed.saveMidi()" disabled title="Save the last composed piece as a MIDI file">save MIDI</button>
-            <button class="stop-btn" id="stop-btn" onclick="SS.stop()" disabled>Stop</button>
-            <button class="analyze-btn" id="analyze-btn" onclick="SS.analyze()">analyze</button>
+            <button class="lab-btn stop-btn" id="save-wav" onclick="SSComposed.saveWav()" disabled title="Save the last composed piece as audio">save WAV</button>
+            <button class="lab-btn stop-btn" id="save-midi" onclick="SSComposed.saveMidi()" disabled title="Save the last composed piece as a MIDI file">save MIDI</button>
+            <button class="lab-btn stop-btn" id="stop-btn" onclick="SS.stop()" disabled>Stop</button>
+            <button class="lab-btn primary analyze-btn" id="analyze-btn" onclick="SS.analyze()">analyze</button>
           </div>
         </div>
       </div>

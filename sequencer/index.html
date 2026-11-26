@@ -15,6 +15,7 @@
   <link href="/assets/css/fonts.css" rel="stylesheet">
 
 
+  <link rel="stylesheet" href="/assets/css/lab-ui.css">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -111,21 +112,6 @@
     }
     .t-sep { width: 1px; height: 20px; background: var(--border); flex-shrink: 0; margin: 0 .1rem; }
 
-    .tbtn {
-      font-family: var(--font-head); font-size: .72rem; font-weight: 600;
-      background: transparent; color: var(--text);
-      border: 1px solid var(--border);
-      padding: .38rem .85rem; cursor: pointer;
-      transition: all .12s; white-space: nowrap;
-      letter-spacing: .01em; line-height: 1.4;
-      min-height: 34px; touch-action: manipulation;
-    }
-    .tbtn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
-    .tbtn.active { background: var(--accent); color: white; border-color: var(--accent); }
-    .tbtn.play-btn { background: var(--accent); color: white; border-color: var(--accent); }
-    .tbtn.play-btn:hover { background: var(--accent-hover); }
-    .tbtn.play-btn.playing { background: var(--pad-play); border-color: var(--pad-play); }
-    .tbtn:disabled { opacity: .4; cursor: not-allowed; pointer-events: none; }
 
     .tempo-group { display: flex; align-items: center; gap: .45rem; }
     .tempo-label { font-size: .65rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
@@ -483,7 +469,6 @@
       .pad-grid { gap: 5px; max-width: 100%; }
       .pad { min-height: 52px; }
       .transport { padding: .5rem .6rem; }
-      .tbtn { font-size: .68rem; padding: .38rem .6rem; min-height: 40px; }
       input[type=range].t-slider { width: 70px; }
       .loop-section { padding: .55rem .75rem; }
     }
@@ -550,7 +535,7 @@
 
     <!-- TRANSPORT -->
     <div class="transport" id="transport">
-      <button class="tbtn play-btn" id="btn-play" onclick="SEQ.togglePlay()">Play</button>
+      <button class="lab-btn sm tbtn play-btn" id="btn-play" onclick="SEQ.togglePlay()">Play</button>
       <div class="t-sep"></div>
 
       <div class="tempo-group">
@@ -596,15 +581,15 @@
         <input type="number" class="t-num" id="euclid-hits" min="0" max="16" value="5" aria-label="Number of hits">
         <span class="tempo-label">rot</span>
         <input type="number" class="t-num" id="euclid-rot" min="0" max="15" value="0" aria-label="Rotation">
-        <button class="tbtn" onclick="SEQ.euclid()" title="Fill the active track with a Euclidean rhythm">fill</button>
+        <button class="lab-btn sm tbtn" onclick="SEQ.euclid()" title="Fill the active track with a Euclidean rhythm">fill</button>
       </div>
       <div class="t-sep"></div>
 
       <div class="tempo-group" role="group" aria-label="What tapping a step changes" title="Notes: turn steps on or off. Velocity and chance: tap an active step to step through 100, 75, 50 and 25 percent.">
         <span class="tempo-label">tap sets</span>
-        <button class="tbtn active" data-editmode="notes" aria-pressed="true" onclick="SEQ.setEditMode('notes')">notes</button>
-        <button class="tbtn" data-editmode="vel" aria-pressed="false" onclick="SEQ.setEditMode('vel')">velocity</button>
-        <button class="tbtn" data-editmode="prob" aria-pressed="false" onclick="SEQ.setEditMode('prob')">chance</button>
+        <button class="lab-btn sm tbtn active" data-editmode="notes" aria-pressed="true" onclick="SEQ.setEditMode('notes')">notes</button>
+        <button class="lab-btn sm tbtn" data-editmode="vel" aria-pressed="false" onclick="SEQ.setEditMode('vel')">velocity</button>
+        <button class="lab-btn sm tbtn" data-editmode="prob" aria-pressed="false" onclick="SEQ.setEditMode('prob')">chance</button>
       </div>
       <div class="t-sep"></div>
       <div class="tempo-group" title="How many steps the active track plays before it starts again. A length that is not 16 makes it drift against the other tracks.">
@@ -613,9 +598,9 @@
       </div>
       <div class="t-sep"></div>
 
-      <button class="tbtn" onclick="SEQ.randomize()" title="Randomize active track">✦ randomize</button>
-      <button class="tbtn" onclick="SEQ.clearTrack()" title="Clear active track">clear</button>
-      <button class="tbtn" onclick="SEQ.loadDefault()" title="Load example beat">example</button>
+      <button class="lab-btn sm tbtn" onclick="SEQ.randomize()" title="Randomize active track">✦ randomize</button>
+      <button class="lab-btn sm tbtn" onclick="SEQ.clearTrack()" title="Clear active track">clear</button>
+      <button class="lab-btn sm tbtn" onclick="SEQ.loadDefault()" title="Load example beat">example</button>
     </div>
 
     <!-- BODY: tracks + grid -->
@@ -653,10 +638,10 @@
     <div class="pat-bar" id="patBar">
       <span class="tempo-label">patterns</span>
       <input class="t-num pat-name" id="pat-name" maxlength="40" placeholder="name" aria-label="Pattern name">
-      <button class="tbtn" onclick="SEQ.savePattern()">save</button>
+      <button class="lab-btn sm tbtn" onclick="SEQ.savePattern()">save</button>
       <select class="t-select" id="pat-select" aria-label="Saved patterns"></select>
-      <button class="tbtn" onclick="SEQ.loadPattern()">load</button>
-      <button class="tbtn" onclick="SEQ.deletePattern()">delete</button>
+      <button class="lab-btn sm tbtn" onclick="SEQ.loadPattern()">load</button>
+      <button class="lab-btn sm tbtn" onclick="SEQ.deletePattern()">delete</button>
       <span class="pat-msg" id="pat-msg" role="status"></span>
       <span class="pat-note">Saved on this device only.</span>
     </div>

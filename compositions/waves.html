@@ -24,6 +24,7 @@
   });
 </script>
   
+  <link rel="stylesheet" href="/assets/css/lab-ui.css">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -98,21 +99,8 @@
       text-transform:uppercase;color:var(--muted);white-space:nowrap}
 
     /* Pills */
-    .pill{font-family:var(--font-body);font-size:.78rem;background:transparent;
-      color:var(--text);border:1px solid var(--border);padding:.4rem .85rem;cursor:pointer;
-      white-space:nowrap;transition:all .12s}
-    .pill:hover{background:var(--surface);border-color:var(--accent)}
-    .pill.on{background:var(--accent);color:white;border-color:var(--accent)}
 
     /* Buttons */
-    .btn{font-family:var(--font-heading);font-size:.78rem;font-weight:600;
-      background:transparent;color:var(--text);border:1px solid var(--border);
-      padding:.5em 1.2em;cursor:pointer;white-space:nowrap;transition:all .12s}
-    .btn:hover{background:var(--accent);color:white;border-color:var(--accent)}
-    .btn.on{background:var(--accent);color:white;border-color:var(--accent)}
-    .btn.primary{background:var(--accent);color:white;border-color:var(--accent)}
-    .btn.primary:hover{background:var(--accent-hover)}
-    .btn:disabled{opacity:.3;cursor:not-allowed;pointer-events:none}
 
     /* Presets */
     .presets-section{border-top:1px solid var(--border);padding-top:1.5rem;margin-top:1.5rem}
@@ -210,8 +198,8 @@
       <!-- Oscillator count -->
       <div class="row">
         <span class="row-lbl">oscillators →</span>
-        <button class="pill" data-oscs="2">2</button>
-        <button class="pill on" data-oscs="3">3</button>
+        <button class="lab-btn sm pill" data-oscs="2">2</button>
+        <button class="lab-btn sm pill on" data-oscs="3">3</button>
       </div>
     </div>
 
@@ -277,7 +265,7 @@
 
     <!-- Transport -->
     <div class="row">
-      <button class="btn primary" id="r-play">Play</button>
+      <button class="lab-btn btn primary" id="r-play">Play</button>
     </div>
 
     <!-- Presets -->
@@ -285,7 +273,7 @@
       <div class="presets-label">Presets</div>
       <div class="row" style="margin-bottom:.75rem;gap:.5rem">
         <input type="text" id="preset-name" placeholder="Preset name" style="flex:1;min-width:120px;padding:.4rem .65rem;border:1px solid var(--border);font-size:.8rem;font-family:var(--font-body)">
-        <button class="btn" id="preset-save" style="min-width:auto">Save</button>
+        <button class="lab-btn btn" id="preset-save" style="min-width:auto">Save</button>
       </div>
       <div class="presets-list" id="presets-list">
         <div style="color:var(--muted);font-size:.8rem;padding:.5rem">No presets yet</div>
@@ -302,7 +290,7 @@
         <option value="10">10 min (~50 MB)</option>
         <option value="20">20 min (~100 MB)</option>
       </select>
-      <button class="btn primary" id="r-dl-btn" style="min-width:110px">Download WAV</button>
+      <button class="lab-btn btn primary" id="r-dl-btn" style="min-width:110px">Download WAV</button>
       <span class="dl-prog" id="r-dl-prog">rendering…</span>
     </div>
 

@@ -12,7 +12,7 @@ await page.goto(`${BASE}/experiments/`,{waitUntil:'domcontentloaded'}); await pa
 const n=await page.$$eval('.xp-unit .xp-card',c=>c.length);
 ok(n>=20,'the list shows every experiment ('+n+')');
 ok(/Experiments in Creativity/.test(await page.$eval('.ph h2',e=>e.textContent)),'the course has its name');
-ok((await page.$$eval('.xp-unit',u=>u.length))===7,'the course is laid out in seven units');
+ok((await page.$$eval('.xp-unit',u=>u.length))===8,'the course is laid out in eight chapters');
 const f=await page.$$eval('.xp-unit:nth-of-type(4) .xp-card h3',c=>c.map(x=>x.textContent));
 ok(await page.$$eval('.xp-unit .xp-card h3',c=>c.some(x=>x.textContent==='Chop and reorder')),'units list their experiments');
 ok(/Begin:/.test(await page.$eval('#xpContinue',e=>e.textContent)),'the course offers a place to begin');
@@ -81,7 +81,7 @@ for(const [id,btn] of [['scale-contrast','Slow and fast together'],['reverse-ans
 }
 // method lesson and printable book
 await page.goto(`${BASE}/experiments/#/method`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('.xp-method-steps');
-ok((await page.$$eval('.xp-method-steps li',l=>l.length))===5,'the method lesson has five steps');
+ok((await page.$$eval('.xp-method-steps li',l=>l.length))===6,'the method lesson has six steps');
 await page.goto(`${BASE}/experiments/#/book`,{waitUntil:'domcontentloaded'}); await page.waitForSelector('.xp-bk');
 ok((await page.$$eval('.xp-bk',l=>l.length))>=30&&await page.$('#xpPrint')!==null,'the printable book lists every protocol');
 // notebook
