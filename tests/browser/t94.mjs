@@ -1,0 +1,24 @@
+// Regulation in the calm look: dark theme, chip states on a phone, Generate above the tab bar, shared buttons, no sideways scroll.
+import {launch,newPage} from './harness.mjs';
+const {browser,BASE,server}=await launch({extraArgs:['--autoplay-policy=no-user-gesture-required']});
+let fail=0; const ok=(c,m)=>{ console.log((c?'PASS ':'FAIL ')+m); if(!c) fail++; };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const P=await newPage(await browser.createBrowserContext(),BASE,{}); const p=P.page; const errs=[]; p.on('pageerror',e=>errs.push(e.message));
+await p.setViewport({width:360,height:740});
+await p.goto(`${BASE}/regulation/`,{waitUntil:'domcontentloaded'}); await sleep(900);
+ok(await p.evaluate(()=>getComputedStyle(document.body).backgroundColor==='rgb(15, 23, 20)'),'uses the calm dark theme');
+ok(await p.$eval('#genBtn',b=>b.disabled),'Generate waits for both states');
+await p.click('.sb[data-s="anxious"]'); await p.click('.sb[data-s="calm"]');
+ok(!(await p.$eval('#genBtn',b=>b.disabled)),'Generate enables after both are chosen');
+ok(await p.$eval('#mantra',m=>m.classList.contains('vis')),'a mantra shows');
+ok((await p.$$eval('.sb .sd',d=>d.filter(x=>x.offsetParent).length))===0,'on a phone the states are compact chips');
+const g=await p.$eval('#genBtn',b=>b.getBoundingClientRect().bottom); ok(g<=740,'Generate is on screen ('+Math.round(g)+')');
+ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'no sideways scroll at 360px');
+ok(await p.$eval('#genBtn',b=>b.classList.contains('lab-btn')),'Generate uses the shared button');
+await p.$eval('#genBtn',b=>b.click()); await sleep(2500);
+ok(await p.$eval('#player',e=>e.classList.contains('vis')),'player appears');
+ok(await p.$eval('#ppb',b=>b.classList.contains('lab-btn')&&!b.querySelector('svg')),'play button is the shared one, no icon');
+ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'no sideways scroll with the player');
+await p.screenshot({path:process.env.SHOT||'/tmp/reg.png'});
+ok(errs.length===0,'no page errors '+errs.join('|'));
+await browser.close(); server&&server.close&&server.close(); process.exit(fail?1:0);

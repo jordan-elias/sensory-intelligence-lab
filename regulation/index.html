@@ -18,89 +18,60 @@
   <script src="/dashboard/auth-guard.js" type="module"></script>
 
   <link href="/assets/css/fonts.css" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/lab-ui.css">
+  <link rel="stylesheet" href="/assets/css/calm.css">
   <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{
-      --font-body:'Inter',sans-serif;
-      --font-heading:'Space Grotesk',sans-serif;
-      --bg:#fff;--surface:#f9f9f7;--border:#e5e5e0;
-      --text:#1a1a1a;--muted:#6b6b6b;
-      --accent:#2a5c45;--accent-light:#edf4f0;--accent-hover:#1e4433;
+    main{max-width:760px;margin:0 auto;padding:1.5rem 1rem 3rem}
+    .ph{margin-bottom:1.25rem}
+    .ph h2{font-family:'Space Grotesk',sans-serif;font-size:1.7rem;font-weight:600;letter-spacing:-.02em;line-height:1.2;margin-bottom:.4rem}
+    .ph p{font-size:.9rem;color:var(--amb-muted);line-height:1.6}
+    .cr{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem}
+    @media(max-width:600px){.cr{grid-template-columns:1fr;gap:1.1rem}}
+    .sg{display:flex;flex-direction:column;gap:.55rem}
+    .sgh{font-family:'Space Grotesk',sans-serif;font-size:.7rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--amb-muted)}
+    .sbs{display:flex;flex-direction:column;gap:.4rem}
+    /* on phones the states are wrapped chips: the description is shown for the chosen one only */
+    .sb{font:inherit;font-size:.9rem;font-weight:500;padding:.7rem 1rem;min-height:44px;border:1px solid var(--amb-border);border-radius:16px;background:var(--amb-surface);color:var(--amb-text);cursor:pointer;text-align:left;line-height:1.3;transition:border-color .12s,background .12s}
+    .sb:hover:not(.sel){border-color:var(--amb-accent)}
+    .sb.sel{background:var(--amb-accent);border-color:var(--amb-accent);color:var(--amb-accent-ink);font-weight:600}
+    .sb .sd{display:block;font-size:.74rem;font-weight:400;color:var(--amb-muted);margin-top:.15rem}
+    .sb.sel .sd{color:var(--amb-accent-ink);opacity:.8}
+    @media(max-width:600px){
+      .sbs{flex-direction:row;flex-wrap:wrap}
+      .sb{padding:.55rem .95rem;border-radius:999px}
+      .sb .sd{display:none}
     }
-    html{font-size:16px}
-    body{font-family:var(--font-body);color:var(--text);background:var(--bg);line-height:1.6;min-height:100vh;display:flex;flex-direction:column;}
-    a{color:var(--text);text-decoration:underline;text-underline-offset:3px}
-    a:hover{color:var(--accent)}
-
-    /* ── Breadcrumb ── */
-    .bc{padding:.75rem 1.5rem 0;max-width:900px;margin:0 auto;width:100%}
-    .bc ol{list-style:none;display:flex;gap:.3rem;align-items:center;font-size:.75rem;color:var(--muted);flex-wrap:wrap}
-    .bc li+li::before{content:'/';margin-right:.3rem;color:var(--border)}
-    .bc a{color:var(--muted);text-decoration:none}
-    .bc a:hover{color:var(--accent);text-decoration:underline}
-    @media(max-width:400px){.bc li.mid{display:none}.bc li.mid+li::before{display:none}}
-
-    main{max-width:900px;margin:0 auto;padding:2.5rem 2rem 4rem;flex:1;}
-    @media(max-width:600px){main{padding:1.5rem 1rem 3rem}}
-
-    /* ── Page header ── */
-    .ph{margin-bottom:2rem;padding-bottom:1.75rem;border-bottom:1px solid var(--border)}
-    .ph h2{font-family:var(--font-heading);font-size:2rem;font-weight:600;letter-spacing:-.02em;line-height:1.2;margin-bottom:.4rem}
-    .ph p{font-size:.9rem;color:var(--muted)}
-
-    .sl{font-family:var(--font-heading);font-size:.65rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.75rem}
-
-    .cr{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-bottom:2rem}
-    @media(max-width:580px){.cr{grid-template-columns:1fr;gap:1.5rem}}
-
-    .sg{display:flex;flex-direction:column;gap:.65rem}
-    .sgh{font-family:var(--font-heading);font-size:.7rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-    .sbs{display:flex;flex-direction:column;gap:4px}
-
-    .sb{font-family:var(--font-body);font-size:.85rem;font-weight:500;padding:.6rem 1rem;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer;transition:all .12s;text-align:left;line-height:1.3}
-    .sb:hover:not(.sel){border-color:var(--accent);color:var(--accent)}
-    .sb.sel{background:var(--accent-light);border-color:var(--accent);color:var(--accent);font-weight:600}
-    .sb .sd{display:block;font-size:.7rem;font-weight:400;color:var(--muted);margin-top:.1rem}
-    .sb.sel .sd{color:var(--accent);opacity:.75}
-
-    .mantra{display:none;background:var(--surface);border-left:3px solid var(--accent);padding:1rem 1.25rem;margin-bottom:1.75rem;font-size:.9rem;line-height:1.7;color:var(--text);font-style:italic}
+    .mantra{display:none;background:var(--amb-surface);border:1px solid var(--amb-border);border-radius:16px;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.92rem;line-height:1.7;font-style:italic}
     .mantra.vis{display:block}
-    .mantra .attr{display:block;margin-top:.4rem;font-size:.72rem;font-style:normal;color:var(--muted);font-weight:500;letter-spacing:.04em}
-
-    .ar{display:flex;gap:.75rem;margin-bottom:2rem;flex-wrap:wrap;align-items:center}
-    .gb{font-family:var(--font-heading);font-size:.875rem;font-weight:600;padding:.8rem 2rem;border:none;background:var(--accent);color:white;cursor:pointer;transition:background .15s;letter-spacing:-.01em}
-    .gb:hover{background:var(--accent-hover)}
-    .gb:disabled{opacity:.4;cursor:not-allowed}
-
-    .player{display:none;border:1px solid var(--border);background:var(--surface)}
+    .mantra .attr{display:block;margin-top:.4rem;font-size:.72rem;font-style:normal;color:var(--amb-muted);font-weight:500;letter-spacing:.04em}
+    .ar{display:flex;margin-bottom:1.5rem;position:sticky;bottom:calc(var(--tabbar-h,0px) + .6rem);z-index:5}
+    .ar .lab-btn{width:100%;min-height:48px;justify-content:center;font-size:1rem}
+    .player{display:none;border:1px solid var(--amb-border);border-radius:20px;background:var(--amb-surface);overflow:hidden}
     .player.vis{display:block}
-
-    .pt{display:flex;align-items:center;gap:1rem;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);flex-wrap:wrap}
-
-    .pi{flex:1;min-width:0}
-    .ptitle{font-size:.875rem;font-weight:500;color:var(--text);margin-bottom:.1rem}
-    .pphase{font-size:.75rem;color:var(--accent);font-weight:500}
-    .ptime{font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0}
-
-    .pw{padding:.75rem 1.5rem 1rem}
-    .pbg{height:6px;background:var(--border);position:relative;user-select:none}
-    .pfill{height:100%;background:var(--accent);width:0%;pointer-events:none}
-    .phandle{position:absolute;top:50%;transform:translate(-50%,-50%);width:14px;height:14px;background:var(--accent);border:2px solid white;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,.2)}
-    .pm{position:absolute;top:-4px;width:1px;height:14px;background:var(--border);pointer-events:none}
-
-    .pf{padding:.85rem 1.5rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem}
-    .rs{font-size:.75rem;color:var(--muted)}
-
-    footer{border-top:1px solid var(--border);padding:1.5rem 2rem;text-align:center;font-size:.8rem;color:var(--muted);margin-top:auto}
-    footer a{color:var(--muted);text-decoration:none;}
-    footer a:hover{color:var(--accent);}
+    .pt{display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;flex-wrap:wrap}
+    .pi{flex:1;min-width:8rem}
+    .ptitle{font-size:.9rem;font-weight:500;margin-bottom:.1rem}
+    .pphase{font-size:.78rem;color:var(--amb-accent);font-weight:500}
+    .ptime{font-size:.8rem;color:var(--amb-muted);font-variant-numeric:tabular-nums;flex-shrink:0}
+    .pw{padding:.25rem 1.25rem 1rem}
+    .pbg{height:6px;border-radius:3px;background:var(--amb-border);position:relative;user-select:none}
+    .pfill{height:100%;border-radius:3px;background:var(--amb-accent);width:0%;pointer-events:none}
+    .phandle{position:absolute;top:50%;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:50%;background:var(--amb-accent);border:2px solid var(--amb-bg);pointer-events:none}
+    .pm{position:absolute;top:-4px;width:1px;height:14px;background:var(--amb-border);pointer-events:none}
+    .pf{padding:.8rem 1.25rem;border-top:1px solid var(--amb-border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem}
+    .rs{font-size:.75rem;color:var(--amb-muted)}
+    .about h2{font-family:'Space Grotesk',sans-serif;font-size:1.15rem;margin:2rem 0 .6rem}
+    .about p{font-size:.9rem;line-height:1.7;color:var(--amb-muted);margin-bottom:.9rem}
+    footer{border-top:1px solid var(--amb-border);padding:1.5rem 1rem;text-align:center;font-size:.8rem;color:var(--amb-muted)}
+    footer a{color:var(--amb-muted);text-decoration:none}
+    footer a:hover{color:var(--amb-accent)}
   </style>
   <link rel="stylesheet" href="/assets/css/header.css">
   <link rel="stylesheet" href="/assets/css/ui.css">
   <script src="/assets/js/ui/icons.js" defer></script>
   <link rel="stylesheet" href="/assets/css/a11y.css">
 </head>
-<body>
+<body class="calm">
 
 <!-- ══════════════════════════════════════
      HEADER
@@ -146,12 +117,12 @@
   <div class="mantra" id="mantra"><span id="mtext"></span><span class="attr" id="mattr"></span></div>
 
   <div class="ar">
-    <button class="gb" id="genBtn" disabled onclick="generate()">Generate soundscape</button>
+    <button class="lab-btn primary" id="genBtn" disabled onclick="generate()">Generate soundscape</button>
   </div>
 
   <div class="player" id="player">
     <div class="pt">
-      <button class="btn btn--primary" id="ppb" onclick="togglePlay()">
+      <button class="lab-btn primary" id="ppb" onclick="togglePlay()">
         <span id="plabel">Play</span>
       </button>
       <div class="pi">
@@ -170,25 +141,20 @@
     </div>
     <div class="pf">
       <span class="rs" id="rs">Rendering WAV…</span>
-      <button class="btn btn--secondary" id="dlbtn" disabled onclick="dlWav()"><span data-icon="download"></span>Download WAV</button>
+      <button class="lab-btn sm" id="dlbtn" disabled onclick="dlWav()">Download WAV</button>
     </div>
   </div>
 
-  <br>
-
+  <div class="about">
   <h2>How the soundscapes work</h2>
-
-  <br>
-
   <p>
     Each soundscape is generated in real time rather than played from a recording. A slow drone, a melodic voice and a soft rhythm are shaped by the two states you choose: each state has its own scale, register, speed, tone and amount of echo, and the sound moves gradually from the character of your current state to the character of your target. Because the sounds are generated, no two sessions are exactly the same, even when you select the same options.
   </p>
 
-  <br>
-
   <p>
     The journey follows the iso principle from music therapy. Instead of switching to a new sound at once, the music begins by matching where you are and then moves step by step toward where you want to be. The structure draws on ideas from music cognition and deep listening. It is a listening experience, not a treatment, and it makes no claims about what it does to your body.
   </p>
+  </div>
 </main>
 
 <footer><p>Jordan Elias Music Therapy · Berlin · <a href="https://jordanelias.de/contact/" target="_blank" rel="noopener">Contact</a></p></footer>
