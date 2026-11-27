@@ -1,0 +1,28 @@
+/* Calm pages (Ambience, Breathing): dark, minimal, rounded. Shared tokens, header colours, chips and focus ring. Colours are tokens so the whole page can be re-themed in one place. */
+:root{
+  --amb-bg:#0f1714; --amb-surface:#17221d; --amb-raise:#1e2d26; --amb-border:#2c3d35; --amb-text:#e8f0ea; --amb-muted:#93aa9d;
+  --amb-accent:#86d8ad; --amb-accent-ink:#0c1a13; --amb-glow:rgba(134,216,173,.28); --amb-focus:#bfe9d3;
+}
+/* the shared header and the breadcrumb read these page variables */
+:root{--bg:var(--amb-bg);--surface:var(--amb-surface);--border:var(--amb-border);--text:var(--amb-text);--muted:var(--amb-muted);--accent:var(--amb-accent);--accent-light:var(--amb-glow);--accent-hover:var(--amb-focus);--font-body:'Inter',sans-serif;--font-heading:'Space Grotesk',sans-serif;color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+html{background:var(--amb-bg)}
+input[type=range],input[type=checkbox]{accent-color:var(--amb-accent)}
+.bc{padding:.75rem 1rem 0;max-width:760px;margin:0 auto;width:100%}
+.bc ol{list-style:none;display:flex;gap:.3rem;align-items:center;font-size:.75rem;padding:0}
+.bc li+li::before{content:'/';margin-right:.3rem}
+.bc a{text-decoration:none}.bc a:hover{color:var(--amb-accent);text-decoration:underline}
+:where(body.amb,body.calm) :where(h1,h2,h3,p){margin:0}
+body.amb,body.calm{background:var(--amb-bg);color:var(--amb-text);font-family:'Inter',sans-serif;min-height:100vh}
+body.amb .bc ol,body.amb .bc a,body.calm .bc ol,body.calm .bc a{color:var(--amb-muted)}
+body.amb .bc li+li::before,body.calm .bc li+li::before{color:var(--amb-border)}
+.chip{font:inherit;font-size:.82rem;padding:.35rem .8rem;border-radius:999px;border:1px solid var(--amb-border);background:transparent;color:var(--amb-text);cursor:pointer;min-height:36px}
+.chip:hover{border-color:var(--amb-accent)}
+.chip[aria-pressed=true]{background:var(--amb-accent);color:var(--amb-accent-ink);border-color:var(--amb-accent)}
+:focus-visible{outline:2px solid var(--amb-focus);outline-offset:2px}
+/* the shared button, in the calm look: round, light on dark */
+body.calm .lab-btn{border-radius:999px;background:transparent;color:var(--amb-text);border-color:var(--amb-border)}
+body.calm .lab-btn:hover:not(:disabled){border-color:var(--amb-accent);color:var(--amb-accent);background:var(--amb-glow)}
+body.calm .lab-btn.primary{background:var(--amb-accent);color:var(--amb-accent-ink);border-color:var(--amb-accent)}
+body.calm .lab-btn.primary:hover:not(:disabled){background:var(--amb-focus);border-color:var(--amb-focus);color:var(--amb-accent-ink)}
+

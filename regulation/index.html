@@ -152,7 +152,6 @@
   <div class="player" id="player">
     <div class="pt">
       <button class="btn btn--primary" id="ppb" onclick="togglePlay()">
-        <span id="icon" data-icon="play"></span>
         <span id="plabel">Play</span>
       </button>
       <div class="pi">
@@ -835,9 +834,9 @@ const _ms = silAudio.mediaSession({ title: 'Regulation soundscape', play: () => 
 function setIcon(playing) {
   _ms.state(playing ? 'playing' : 'paused');
   if (playing) window.SILSession?.start(); else window.SILSession?.end();
-  const ic=document.getElementById('icon'), lb=document.getElementById('plabel');
-  if (playing) { ic.innerHTML=silIcons.html('pause'); lb.textContent='Pause'; }
-  else         { ic.innerHTML=silIcons.html('play'); lb.textContent = (S.pausedAt===null&&S.sessionStartWall===null)?'Play':'Resume'; }
+  const lb=document.getElementById('plabel');
+  if (playing) { lb.textContent='Pause'; }
+  else         { lb.textContent = (S.pausedAt===null&&S.sessionStartWall===null)?'Play':'Resume'; }
 }
 
 // ─────────────────────────────────────────────────────────

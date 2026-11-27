@@ -23,6 +23,7 @@
   });
 </script>
   
+  <link rel="stylesheet" href="/assets/css/lab-ui.css">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -81,18 +82,7 @@
     .phase-bar-fill{position:absolute;left:0;top:0;height:100%;background:var(--accent);width:0%;transition:width 0.06s linear}
     .phase-meta{font-family:'Courier New',monospace;font-size:.82rem;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums;min-width:72px}
 
-    .btn{font-family:var(--font-heading);font-size:.78rem;font-weight:600;background:transparent;color:var(--text);border:1px solid var(--border);padding:.5em 1.2em;cursor:pointer;white-space:nowrap;transition:all .12s}
-    .btn:hover{background:var(--accent);color:white;border-color:var(--accent)}
-    .btn.on{background:var(--accent);color:white;border-color:var(--accent)}
-    .btn.on:hover{background:var(--accent-hover)}
-    .btn:disabled{opacity:.3;cursor:not-allowed;pointer-events:none}
-    .btn.primary{background:var(--accent);color:white;border-color:var(--accent)}
-    .btn.primary:hover{background:var(--accent-hover)}
 
-    .pill{font-family:var(--font-body);font-size:.78rem;background:transparent;color:var(--text);border:1px solid var(--border);padding:3px 12px;cursor:pointer;transition:all .12s}
-    .pill:hover{background:var(--accent);color:white;border-color:var(--accent)}
-    .pill.on{background:var(--accent);color:white;border-color:var(--accent)}
-    .pill.on:hover{background:var(--accent-hover)}
 
     .upload-lbl{font-family:var(--font-body);font-size:.78rem;background:transparent;color:var(--text);border:1px solid var(--border);padding:3px 12px;cursor:pointer;display:inline-block;transition:all .12s}
     .upload-lbl:hover{background:var(--accent);color:white;border-color:var(--accent)}
@@ -174,13 +164,13 @@
 
     <div class="row">
       <span class="row-lbl">source →</span>
-      <button class="pill on" id="src-default">default loop</button>
+      <button class="lab-btn sm pill on" id="src-default">default loop</button>
       <label  class="upload-lbl" id="pm-ul-lbl" for="pm-file">upload file</label>
       <input  type="file" id="pm-file" accept="audio/*">
-      <button class="pill" id="src-mic">microphone</button>
-      <button class="btn" id="pm-rec" style="display:none;min-width:80px">Record</button>
+      <button class="lab-btn sm pill" id="src-mic">microphone</button>
+      <button class="lab-btn btn" id="pm-rec" style="display:none;min-width:80px">Record</button>
       <span   class="rec-state" id="pm-rec-state" style="display:none"></span>
-      <button class="pill" id="pm-rec-new" style="display:none">record new</button>
+      <button class="lab-btn sm pill" id="pm-rec-new" style="display:none">record new</button>
     </div>
 
     <!-- Waveform Editor -->
@@ -199,14 +189,14 @@
       <div class="waveform-controls">
         <div class="waveform-zoom">
           <span class="row-lbl">zoom →</span>
-          <button class="pill" id="wf-zoom-out" aria-label="Zoom out" type="button">−</button>
-          <button class="pill" id="wf-zoom-in" aria-label="Zoom in" type="button">+</button>
-          <button class="pill" id="wf-zoom-fit">Fit</button>
+          <button class="lab-btn sm pill" id="wf-zoom-out" aria-label="Zoom out" type="button">−</button>
+          <button class="lab-btn sm pill" id="wf-zoom-in" aria-label="Zoom in" type="button">+</button>
+          <button class="lab-btn sm pill" id="wf-zoom-fit">Fit</button>
         </div>
         <div class="waveform-actions">
-          <button class="btn" id="wf-preview">Preview Selection</button>
-          <button class="btn primary" id="wf-use">Use Selection</button>
-          <button class="btn" id="wf-reset">Reset to Full</button>
+          <button class="lab-btn btn" id="wf-preview">Preview Selection</button>
+          <button class="lab-btn btn primary" id="wf-use">Use Selection</button>
+          <button class="lab-btn btn" id="wf-reset">Reset to Full</button>
         </div>
       </div>
     </div>
@@ -233,8 +223,8 @@
     </div>
 
     <div class="row">
-      <button class="btn primary" id="pm-play" style="min-width:80px">Play</button>
-      <button class="btn" id="pm-reset" style="min-width:80px">Reset</button>
+      <button class="lab-btn btn primary" id="pm-play" style="min-width:80px">Play</button>
+      <button class="lab-btn btn" id="pm-reset" style="min-width:80px">Reset</button>
     </div>
 
     <div class="sliders">
@@ -276,7 +266,7 @@
           <option value="3" selected>3 min</option>
           <option value="5">5 min</option>
         </select>
-        <button class="btn primary" id="dl-btn" disabled style="min-width:120px">Download WAV</button>
+        <button class="lab-btn btn primary" id="dl-btn" disabled style="min-width:120px">Download WAV</button>
         <span class="dl-prog" id="dl-prog">rendering…</span>
       </div>
     </div>

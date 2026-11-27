@@ -25,6 +25,7 @@
   });
 </script>
   
+  <link rel="stylesheet" href="/assets/css/lab-ui.css">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -99,13 +100,6 @@
       transition:color 0.15s;min-height:1.2em}
 
     /* Buttons */
-    .btn{font-family:var(--font-heading);font-size:.78rem;font-weight:600;
-      background:transparent;color:var(--text);border:1px solid var(--border);
-      padding:.5em 1.2em;cursor:pointer;white-space:nowrap;transition:all .12s}
-    .btn:hover{background:var(--accent);color:white;border-color:var(--accent)}
-    .btn.primary{background:var(--accent);color:white;border-color:var(--accent)}
-    .btn.primary:hover{background:var(--accent-hover)}
-    .btn:disabled{opacity:.3;cursor:not-allowed;pointer-events:none}
 
     /* Step buttons */
     .step-buttons{display:flex;gap:.75rem;margin-top:2rem;flex-wrap:wrap}
@@ -323,8 +317,8 @@
         </div>
 
         <div class="transport">
-          <button class="btn primary" id="ch-generate">Generate Composition</button>
-          <button class="btn" id="ch-play" disabled>Play</button>
+          <button class="lab-btn btn primary" id="ch-generate">Generate Composition</button>
+          <button class="lab-btn btn" id="ch-play" disabled>Play</button>
         </div>
 
         <div class="export-row">
@@ -333,7 +327,7 @@
             <option value="wav">WAV</option>
             <option value="json">JSON (parameters)</option>
           </select>
-          <button class="btn" id="ch-dl" disabled>Download</button>
+          <button class="lab-btn btn" id="ch-dl" disabled>Download</button>
           <span class="dl-note" id="ch-dl-note">generate a composition first</span>
           <span class="dl-prog" id="ch-dl-prog">rendering…</span>
         </div>
@@ -343,8 +337,8 @@
 
     <!-- Navigation buttons -->
     <div class="step-buttons">
-      <button class="btn" id="btn-prev" style="display:none">← Previous</button>
-      <button class="btn primary" id="btn-next">Next →</button>
+      <button class="lab-btn btn" id="btn-prev" style="display:none">← Previous</button>
+      <button class="lab-btn btn primary" id="btn-next">Next →</button>
     </div>
 
   </div>
