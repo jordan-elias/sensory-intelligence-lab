@@ -99,7 +99,7 @@
         <button class="sb" data-g="cur" data-s="overwhelmed" onclick="pick('cur','overwhelmed',this)">Overwhelmed<span class="sd">Too much input, flooded, can't process</span></button>
         <button class="sb" data-g="cur" data-s="anxious"     onclick="pick('cur','anxious',this)">Anxious<span class="sd">Unsettled, racing thoughts, physical tension</span></button>
         <button class="sb" data-g="cur" data-s="tired"       onclick="pick('cur','tired',this)">Tired<span class="sd">Low energy, heavy, withdrawn</span></button>
-        <button class="sb" data-g="cur" data-s="unfocused"   onclick="pick('cur','unfocused',this)">Unfocused<span class="sd">Scattered, drifting, can't settle</span></button>
+        <button class="sb" data-g="cur" data-s="angry"       onclick="pick('cur','angry',this)">Angry<span class="sd">Tense, hot, sharp edges, wants to push back</span></button>
         <button class="sb" data-g="cur" data-s="overstim"    onclick="pick('cur','overstim',this)">Overstimulated<span class="sd">Sensory overload, frayed, sharp edges</span></button>
       </div>
     </div>
@@ -162,6 +162,7 @@
 <script type="module">
 'use strict';
 import { melodyEvents, blendColor, echoAt } from '/assets/js/regulation/character.js';
+import { CUES, cuesAt, windows, tonicAt, pulseBeats, pulseHits, beatHz } from '/assets/js/regulation/cues.js';
 
 // ─────────────────────────────────────────────────────────
 // HEADER BEHAVIOUR
@@ -219,7 +220,7 @@ const CX = {
   overwhelmed: { rh:.85, ha:.80, sp:.78, pr:.82 },
   anxious:     { rh:.78, ha:.72, sp:.65, pr:.75 },
   tired:       { rh:.05, ha:.15, sp:.12, pr:.08 },
-  unfocused:   { rh:.45, ha:.42, sp:.40, pr:.50 },
+  angry:       { rh:.90, ha:.88, sp:.90, pr:.35 },
   overstim:    { rh:.60, ha:.55, sp:.85, pr:.55 },
   calm:        { rh:.00, ha:.05, sp:.10, pr:.02 },
   alert:       { rh:.55, ha:.20, sp:.60, pr:.22 },
@@ -243,14 +244,16 @@ function arcFromCX(curState, tgtState) {
     filterEnd:    lerp(300, 7000, cT.sp),
     filterQStart: lerp(0.4, 5.0, cS.ha),
     filterQEnd:   lerp(0.4, 2.0, cT.ha * .4),
-    noiseStart:   cS.sp * 0.18,
-    noiseEnd:     cT.sp * 0.04,
+    noiseStart:   cS.sp * 0.12,
+    noiseEnd:     cT.sp * 0.12,
     noiseHpStart: lerp(80, 2000, cS.sp),
-    noiseHpEnd:   lerp(80, 600,  cT.sp),
+    noiseHpEnd:   lerp(80, 2000, cT.sp),
     ampStart: lerp(0.24, 0.42, (cS.rh+cS.sp)/2),
     ampEnd:   lerp(0.22, 0.40, (cT.rh+cT.sp)/2),
-    subStart: lerp(0.0, 0.03, 1-cS.rh),
-    subEnd:   lerp(0.0, 0.20, 1-cT.rh) * (cT.ha < 0.12 ? 1.5 : 0.6),
+    subStart: lerp(0.0, 0.08, 1-cS.rh) * (cS.ha < 0.12 ? 1.3 : 0.6),
+    subEnd:   lerp(0.0, 0.08, 1-cT.rh) * (cT.ha < 0.12 ? 1.3 : 0.6),
+    shelfStart: lerp(3.5, -1.5, cS.sp),
+    shelfEnd:   lerp(3.5, -1.5, cT.sp),
     panStart: lerp(0.05, 0.75, (cS.rh+cS.sp)/2),
     panEnd:   lerp(0.04, 0.50, (cT.rh+cT.sp)/2),
     driftStart: lerp(1, 16, cS.ha),
@@ -268,7 +271,7 @@ const TIMBRE = {
   overwhelmed: { osc:5, fund:82.4,  pb:[1,.45,.25], filterChar:'dark-gritty' },
   anxious:     { osc:4, fund:110,   pb:[1,.35,.20], filterChar:'mid-tension' },
   tired:       { osc:3, fund:82.4,  pb:[1,.15,.06], filterChar:'dark-soft'   },
-  unfocused:   { osc:4, fund:98,    pb:[1,.28,.14], filterChar:'mid-wander'  },
+  angry:       { osc:5, fund:73.4,  pb:[1,.5,.3],   filterChar:'bright-gritty'},
   overstim:    { osc:6, fund:65.4,  pb:[1,.40,.22], filterChar:'bright-full' },
   calm:        { osc:3, fund:82.4,  pb:[1,.10,.03], filterChar:'warm-sparse' },
   alert:       { osc:4, fund:110,   pb:[1,.32,.18], filterChar:'bright-clear'},
@@ -306,10 +309,10 @@ const PHASE_LABELS = {
   'tired→alert':           ['Waking','Brightening','Arriving'],
   'tired→grounded':        ['Settling','Sinking','Rooting'],
   'tired→energized':       ['Stirring','Rising','Activating'],
-  'unfocused→calm':        ['Gathering','Settling','Resting'],
-  'unfocused→alert':       ['Collecting','Clarifying','Focusing'],
-  'unfocused→grounded':    ['Centering','Descending','Anchoring'],
-  'unfocused→energized':   ['Gathering','Directing','Moving'],
+  'angry→calm':            ['Meeting','Easing','Settling'],
+  'angry→alert':           ['Meeting','Clarifying','Focusing'],
+  'angry→grounded':        ['Meeting','Lowering','Rooting'],
+  'angry→energized':       ['Meeting','Opening','Moving'],
   'overstim→calm':         ['Thinning','Softening','Settling'],
   'overstim→alert':        ['Containing','Clarifying','Arriving'],
   'overstim→grounded':     ['Releasing','Descending','Rooting'],
@@ -332,26 +335,16 @@ const MANTRAS = {
   'tired→alert':           { t:'Include your listening in the sound. Something is already waking — allow it to be slow.', a:'After Pauline Oliveros, Deep Listening' },
   'tired→grounded':        { t:'The lowest sound is still a sound. Weight and stillness are not the same as absence.', a:'After Salomé Voegelin, Listening to Noise and Silence' },
   'tired→energized':       { t:'Breathe more deeply. What is slow can choose its own moment to become movement.', a:'After Brian Eno & Peter Schmidt, Oblique Strategies' },
-  'unfocused→calm':        { t:'Expand to the whole field of sound while finding focus. You do not need to gather yourself — just listen.', a:'After Pauline Oliveros, Deep Listening' },
-  'unfocused→alert':       { t:'Allow sounds to inform rather than to be overridden. Let the listening bring the attention.', a:'After Pauline Oliveros, Quantum Listening' },
-  'unfocused→grounded':    { t:'Disconnect from desire. The ground is where you already are.', a:'After Brian Eno & Peter Schmidt, Oblique Strategies' },
-  'unfocused→energized':   { t:'The scattered and the purposeful are made of the same material. Notice where the current already flows.', a:'After Brian Eno' },
+  'angry→calm': { t:'Start by meeting the anger as it is. Nothing here asks you to push it away; the sound will slow down at its own pace.', a:'After the iso principle: the music meets the mood first' },
+  'angry→alert': { t:'Anger carries a great deal of energy. Listen for where it can become clear rather than loud.', a:'After the iso principle: the music meets the mood first' },
+  'angry→grounded': { t:'Let the heat move down into weight. The lowest sound can hold a lot without needing to move.', a:'After the iso principle: the music meets the mood first' },
+  'angry→energized': { t:'The force is already here. Hear it open out from tight and sharp to wide and moving.', a:'After the iso principle: the music meets the mood first' },
   'overstim→calm':         { t:'Take away the elements in order of apparent non-importance. What remains is what was always there.', a:'After Brian Eno & Peter Schmidt, Oblique Strategies' },
   'overstim→alert':        { t:'Listening is hearing plus attention. You do not need to reduce — only to direct.', a:'After Pauline Oliveros' },
   'overstim→grounded':     { t:'Sound is not information. Let it pass through rather than accumulate. The low register is waiting beneath everything.', a:'After Salomé Voegelin, Listening to Noise and Silence' },
   'overstim→energized':    { t:'Complexity becomes resource when it has a direction. Not building a wall; making a brick.', a:'After Brian Eno & Peter Schmidt, Oblique Strategies' },
 };
 
-// ─────────────────────────────────────────────────────────
-// RHYTHM MOTIFS
-// ─────────────────────────────────────────────────────────
-const MOTIFS = {
-  sparse:   [[2.0,1.5,3.0],[1.5,2.5,2.0],[3.0,1.0,2.0]],
-  moderate: [[1.0,.5,.5,1.0],[.75,.75,1.5],[1.0,1.0,.5,.5]],
-  dense:    [[.5,.5,.5,1.0],[.75,.25,.5,1.0],[.5,.25,.25,.5,1.0]],
-  chaotic:  [[.3,.5,.2,.8,.4],[.25,.4,.15,.6,.5],[.35,.2,.55,.3,.4]],
-};
-const POLY = [[3,2],[4,3],[5,3],[5,4]];
 
 // ─────────────────────────────────────────────────────────
 // AUDIO ENGINE
@@ -367,7 +360,9 @@ function buildGraph(ctx, curState, tgtState, rng) {
   // A transparent safety limiter: it only acts if the sum of all layers gets close to full scale.
   const limiter = ctx.createDynamicsCompressor();
   limiter.threshold.value = -4; limiter.knee.value = 0; limiter.ratio.value = 20; limiter.attack.value = 0.003; limiter.release.value = 0.25;
-  master.connect(limiter); limiter.connect(ctx.destination);
+  // overall level per state (calm is softer than angry), moving with the loudness cues
+  const lvl = ctx.createGain(); master.connect(lvl); lvl.connect(limiter); limiter.connect(ctx.destination);
+  for (let i = 0; i <= 40; i++) { const pr = i / 40, g = cuesAt(curState, tgtState, pr).lvl; if (i === 0) lvl.gain.setValueAtTime(g, now); else lvl.gain.linearRampToValueAtTime(g, now + pr * DUR); }
   master.gain.setValueAtTime(0, now);
   master.gain.linearRampToValueAtTime(1.0, now + FI);
   master.gain.setValueAtTime(1.0, now + DUR - FO);
@@ -432,6 +427,9 @@ function buildGraph(ctx, curState, tgtState, rng) {
       gVoice.connect(master);
 
       osc.type = 'sine';
+      // a second sine a little away from the first: the two beat against each other, slowly for calm and as a buzz for tense states
+      let twin = null;
+      if (p.h === 1) { twin = ctx.createOscillator(); const tg = ctx.createGain(); tg.gain.value = 0.7; twin.type = 'sine'; twin.connect(tg); tg.connect(filt); twin.start(now); twin.stop(now+DUR+.1); }
       filt.type = 'lowpass';
       shelf.type = 'lowshelf';
       shelf.frequency.value = 200;
@@ -469,35 +467,39 @@ function buildGraph(ctx, curState, tgtState, rng) {
 
       for (let i=0; i<=STEPS; i++) {
         const tn   = i/STEPS;
-        const ct   = curve(tn, tn < 0.5 ? 'linear' : arc.dissonanceEnd < 0.2 ? 'exp' : 'sigmoid');
+        const W    = windows(tn), ct = W.harm, cd = W.dyn, cx = W.tex, cs = W.space;
         const t    = now + tn*DUR;
 
-        const fund = lerp(fundS, fundE, ct);
+        const fund = tonicAt(curState, tgtState, tn);
         const rNum = lerp(rS[0], rE[0], ct), rDen = lerp(rS[1], rE[1], ct);
         const baseF = fund * rNum/rDen * p.h;
-        const dHz   = lerp(drift[i], drift[i]*lerp(1,.1,ct), ct) * lerp(1, arc.harmonicConvRate, ct);
+        const dHz   = drift[i] * lerp(1, clamp(arc.driftEnd/arc.driftStart, 0, 2), cx);
         const freq  = baseF + dHz;
         if (i===0) osc.frequency.setValueAtTime(freq, t);
         else       osc.frequency.linearRampToValueAtTime(freq, t);
+        if (twin) {
+          const bh = beatHz(lerp(CUES[curState].rough, CUES[tgtState].rough, cx)) * (1 + v*0.17);
+          if (i===0) twin.frequency.setValueAtTime(freq + bh, t); else twin.frequency.linearRampToValueAtTime(freq + bh, t);
+        }
 
-        const fc = lerp(arc.filterStart, arc.filterEnd, ct);
-        const fq = lerp(arc.filterQStart, arc.filterQEnd, ct);
+        const fc = lerp(arc.filterStart, arc.filterEnd, cd);
+        const fq = lerp(arc.filterQStart, arc.filterQEnd, cd);
         if (i===0) { filt.frequency.setValueAtTime(fc,t); filt.Q.setValueAtTime(fq,t); }
         else       { filt.frequency.linearRampToValueAtTime(fc,t); filt.Q.linearRampToValueAtTime(fq,t); }
 
-        const sg = lerp(-1.5, 3.5, ct);
+        const sg = lerp(arc.shelfStart, arc.shelfEnd, cd);
         if (i===0) shelf.gain.setValueAtTime(sg,t);
         else       shelf.gain.linearRampToValueAtTime(sg,t);
 
-        const pw   = lerp(arc.panStart, arc.panEnd, ct);
+        const pw   = lerp(arc.panStart, arc.panEnd, cs);
         const panV = Math.sin(panPhase*Math.PI + tn*Math.PI*2*panSpeed*DUR)*pw;
         if (i===0) pan.pan.setValueAtTime(panV,t);
         else       pan.pan.linearRampToValueAtTime(panV,t);
 
-        const nVoicesNow = lerp(curT.osc, tgtT.osc, ct);
-        const vActive    = lerp(vActiveStart?1:0, vActiveEnd?1:0, ct);
-        const pbNow_p    = lerp(pbS[p.pbi]||0.05, pbE[p.pbi]||0.05, ct);
-        const voiceAmp   = lerp(aS, aE, ct) * pbNow_p * vActive / Math.max(nVoicesNow,1);
+        const nVoicesNow = lerp(curT.osc, tgtT.osc, cd);
+        const vActive    = lerp(vActiveStart?1:0, vActiveEnd?1:0, cd);
+        const pbNow_p    = lerp(pbS[p.pbi]||0.05, pbE[p.pbi]||0.05, cd);
+        const voiceAmp   = lerp(aS, aE, cd) * pbNow_p * vActive / Math.max(nVoicesNow,1);
         if (i===0) gVoice.gain.setValueAtTime(voiceAmp,t);
         else       gVoice.gain.linearRampToValueAtTime(voiceAmp,t);
       }
@@ -506,20 +508,23 @@ function buildGraph(ctx, curState, tgtState, rng) {
     }
   }
 
-  if (arc.subEnd > 0.01 || arc.subStart > 0.01) {
+  if (arc.subEnd > 0.004 || arc.subStart > 0.004) {
     const sub = ctx.createOscillator();
     const subF= ctx.createBiquadFilter();
     const subG= ctx.createGain();
     sub.connect(subF); subF.connect(subG); subG.connect(master);
     sub.type='sine';
-    sub.frequency.value = fundS * 0.5;
+    sub.frequency.setValueAtTime(fundS * 0.5, now);
+    sub.frequency.setValueAtTime(fundS * 0.5, now + DUR*0.5);
+    sub.frequency.linearRampToValueAtTime(fundE * 0.5, now + DUR*0.92);
     subF.type='lowpass'; subF.frequency.value=160; subF.Q.value=0.5;
     subG.gain.setValueAtTime(arc.subStart*norm, now);
-    subG.gain.linearRampToValueAtTime(arc.subEnd*norm, now+DUR-FO);
+    subG.gain.setValueAtTime(arc.subStart*norm, now + DUR*0.12);
+    subG.gain.linearRampToValueAtTime(arc.subEnd*norm, now + DUR*0.7);
     sub.start(now); sub.stop(now+DUR+.1);
   }
 
-  if (arc.noiseStart > 0.005) {
+  if (arc.noiseStart > 0.005 || arc.noiseEnd > 0.005) {
     const nLen = Math.min(ctx.sampleRate*8, 441000);
     const nBuf = ctx.createBuffer(1, nLen, ctx.sampleRate);
     const nd   = nBuf.getChannelData(0);
@@ -551,9 +556,8 @@ function buildGraph(ctx, curState, tgtState, rng) {
 
     const NS=60;
     for (let i=0;i<=NS;i++) {
-      const tn=i/NS, ct=curve(tn,'sigmoid'), t=now+tn*DUR;
-      const fadeOut = tn < 0.68 ? 1 : Math.max(0, 1-(tn-0.68)/0.04);
-      const na=lerp(arc.noiseStart*norm, arc.noiseEnd*norm, ct) * fadeOut;
+      const tn=i/NS, ct=windows(tn).dyn, t=now+tn*DUR;
+      const na=lerp(arc.noiseStart*norm, arc.noiseEnd*norm, ct);
       const nh=lerp(arc.noiseHpStart, arc.noiseHpEnd, ct);
       if (i===0) { nG.gain.setValueAtTime(na,t); nHp.frequency.setValueAtTime(nh,t); }
       else       { nG.gain.linearRampToValueAtTime(na,t); nHp.frequency.linearRampToValueAtTime(nh,t); }
@@ -561,7 +565,7 @@ function buildGraph(ctx, curState, tgtState, rng) {
     nSrc.start(now); nSrc.stop(now+DUR+.1);
   }
 
-  buildRhythm(ctx, arc, rng, master, now, DUR, norm, curState, tgtState);
+  buildPulse(ctx, mkRng((rng() * 4294967296) >>> 0), master, now, DUR, norm, curState, tgtState);
   buildVoice(ctx, master, mkRng((rng() * 4294967296) >>> 0), now, norm, curState, tgtState);
 
   return master;
@@ -572,7 +576,17 @@ function buildGraph(ctx, curState, tgtState, rng) {
 function buildVoice(ctx, master, rng, now, norm, curState, tgtState) {
   const ev = melodyEvents(rng, curState, tgtState, DUR, { fadeIn: FI, fadeOut: FO });
   if (!ev.length) return;
-  const dry = ctx.createGain(); dry.connect(master);
+  const bus = ctx.createGain(); bus.gain.value = 0.88; bus.connect(master);
+  const dry = ctx.createGain(); dry.connect(bus);
+  // tremolo on the voice (depth and speed from the cue table) and a parallel distorted path for the harsher states
+  const tl = ctx.createOscillator(), tlg = ctx.createGain(); tl.type = 'sine'; tlg.gain.value = 0; tl.connect(tlg); tlg.connect(bus.gain); tl.start(now); tl.stop(now + DUR + .1);
+  const shaper = ctx.createWaveShaper(), pre = ctx.createGain(), post = ctx.createGain(); pre.gain.value = 9; post.gain.value = 0;
+  { const n = 1024, cv = new Float32Array(n); for (let i = 0; i < n; i++) { const x = i / (n - 1) * 2 - 1; cv[i] = Math.tanh(3 * x); } shaper.curve = cv; }
+  pre.connect(shaper); shaper.connect(post); post.connect(dry);
+  for (let i = 0; i <= 40; i++) { const pr = i / 40, c = cuesAt(curState, tgtState, pr), t = now + pr * DUR;
+    const dp = c.trem * 0.12, dd = c.drive * 0.16;
+    if (i === 0) { tlg.gain.setValueAtTime(dp, t); tl.frequency.setValueAtTime(c.tremHz, t); post.gain.setValueAtTime(dd, t); }
+    else { tlg.gain.linearRampToValueAtTime(dp, t); tl.frequency.linearRampToValueAtTime(c.tremHz, t); post.gain.linearRampToValueAtTime(dd, t); } }
   const send = ctx.createGain(), wet = ctx.createGain(), d1 = ctx.createDelay(1), d2 = ctx.createDelay(1), fb = ctx.createGain(), tone = ctx.createBiquadFilter();
   const pL = ctx.createStereoPanner(), pR = ctx.createStereoPanner();
   d1.delayTime.value = 0.31; d2.delayTime.value = 0.47; fb.gain.value = 0.52; tone.type = 'lowpass'; tone.frequency.value = 2600; pL.pan.value = -0.6; pR.pan.value = 0.6;
@@ -585,93 +599,32 @@ function buildVoice(ctx, master, rng, now, norm, curState, tgtState) {
   };
   for (const e of ev) {
     const t0 = now + e.t, osc = ctx.createOscillator(), g = ctx.createGain(), pan = ctx.createStereoPanner();
-    osc.setPeriodicWave(waveAt(c01(e.t / DUR))); osc.frequency.value = e.freq; pan.pan.value = e.pan;
-    osc.connect(g); g.connect(pan); pan.connect(dry); pan.connect(send);
+    osc.setPeriodicWave(waveAt(windows(c01(e.t / DUR)).dyn)); osc.frequency.value = e.freq; pan.pan.value = e.pan;
+    osc.connect(g); g.connect(pan); pan.connect(dry); pan.connect(send); pan.connect(pre);
     const a = e.amp * norm;
     g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(a, t0 + Math.max(0.003, e.att)); g.gain.linearRampToValueAtTime(0, t0 + e.dur);
     osc.start(t0); osc.stop(t0 + e.dur + 0.05);
   }
 }
 
-function buildRhythm(ctx, arc, rng, master, startAt, dur, norm, curState, tgtState) {
-  if (arc.densityStart===0 && arc.densityEnd===0) return;
-  const bpmToInt = b => b>1 ? 60/b : 9999;
-  const fundS = TIMBRE[curState].fund;
-  const fundE = TIMBRE[tgtState].fund;
-
-  let motif=null, motifEnd=0, motifIdx=0, lastClass='';
-
-  let t=0, hits=0;
-  while (t < dur-2 && hits<1200) {
-    const prog = t/dur;
-    const ct   = curve(prog, 'sigmoid');
-    const density = lerp(arc.densityStart, arc.densityEnd, ct);
-    const chaos   = lerp(arc.chaosStart,   arc.chaosEnd,   ct);
-    const bpm     = lerp(arc.tempoStart,   arc.tempoEnd,   ct);
-    const baseInt = bpmToInt(bpm);
-
-    if (density < 0.08) { t+=1+rng()*.5; continue; }
-
-    const dClass = density<1.5?'sparse':density<2.5?'moderate':density<3.5?'dense':'chaotic';
-    if (t >= motifEnd || dClass !== lastClass) {
-      const pool = MOTIFS[dClass] || MOTIFS.sparse;
-      motif    = pool[Math.floor(rng()*pool.length)];
-      motifIdx = 0;
-      motifEnd = t + 20 + rng()*30;
-      lastClass = dClass;
+// A soft pulse the other layers lean on loosely: thumps on a drifting beat and lighter ticks between beats, from the cue table.
+// The pulse slows or quickens with the tempo of the journey, and its hits sit a little off the grid.
+function buildPulse(ctx, rng, master, startAt, dur, norm, curState, tgtState) {
+  const hits = pulseHits(rng, curState, tgtState, dur, pulseBeats(rng, curState, tgtState, dur, { start: FI, end: FO }));
+  for (const h of hits) {
+    const pt = startAt + h.t, f = tonicAt(curState, tgtState, h.p), c = cuesAt(curState, tgtState, h.p);
+    const o = ctx.createOscillator(), g = ctx.createGain(); o.connect(g); g.connect(master); o.type = 'sine';
+    if (h.kind === 'thump') {
+      const base = f * (f < 60 ? 2 : 1), amp = 0.05 * norm * h.amp, len = 0.16 + (1 - c.drive) * 0.12;
+      o.frequency.setValueAtTime(base * 1.6, pt); o.frequency.exponentialRampToValueAtTime(base, pt + 0.05);
+      g.gain.setValueAtTime(0, pt); g.gain.linearRampToValueAtTime(amp, pt + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, pt + len);
+      o.start(pt); o.stop(pt + len + 0.03);
+    } else {
+      const amp = 0.018 * norm * h.amp, len = 0.05;
+      o.frequency.value = f * 4;
+      g.gain.setValueAtTime(0, pt); g.gain.linearRampToValueAtTime(amp, pt + 0.003); g.gain.exponentialRampToValueAtTime(0.0001, pt + len);
+      o.start(pt); o.stop(pt + len + 0.03);
     }
-
-    const step   = motif[motifIdx%motif.length] * baseInt;
-    motifIdx++;
-    const jitter = (rng()-.5)*2*chaos*step*.6;
-    const intv   = Math.max(0.08, step+jitter);
-
-    const pt = startAt+t;
-    if (pt < startAt+dur-1.5) {
-      const fund = lerp(fundS, fundE, ct);
-      const freq = fund * (rng()>.65?2:1);
-      const pDur = 0.04+rng()*.09;
-      const amp  = 0.025 * norm * lerp(arc.ampStart, arc.ampEnd, ct) * (1-chaos*.3);
-      const po=ctx.createOscillator(), pg=ctx.createGain();
-      po.connect(pg); pg.connect(master);
-      po.type='sine'; po.frequency.value=freq;
-      pg.gain.setValueAtTime(0,pt);
-      pg.gain.linearRampToValueAtTime(amp,pt+.006);
-      pg.gain.linearRampToValueAtTime(0,pt+pDur);
-      po.start(pt); po.stop(pt+pDur+.03);
-    }
-    t+=intv; hits++;
-  }
-
-  if (arc.polyrhythm) {
-    const pair = POLY[Math.floor(rng()*POLY.length)];
-    const [N,M] = pair;
-    const cyc = 2.4;
-    const polyStart = 90;
-    const fund = TIMBRE[tgtState].fund;
-
-    [N,M].forEach((beats, li) => {
-      const freq = fund * (li===0 ? 3 : 2);
-      let t2 = polyStart; let h2=0;
-      while (t2<dur-2 && h2<500) {
-        const prog=t2/dur, ct=curve(prog,'sigmoid');
-        const density=lerp(arc.densityStart,arc.densityEnd,ct);
-        if (density<0.8) { t2+=1; continue; }
-        const pt=startAt+t2;
-        if (pt<startAt+dur-1.5) {
-          const amp=0.014*norm*lerp(arc.ampStart,arc.ampEnd,ct);
-          const pDur=0.032;
-          const po=ctx.createOscillator(), pg=ctx.createGain();
-          po.connect(pg); pg.connect(master);
-          po.type='sine'; po.frequency.value=freq;
-          pg.gain.setValueAtTime(0,pt);
-          pg.gain.linearRampToValueAtTime(amp,pt+.005);
-          pg.gain.linearRampToValueAtTime(0,pt+pDur);
-          po.start(pt); po.stop(pt+pDur+.02);
-        }
-        t2+=cyc/beats; h2++;
-      }
-    });
   }
 }
 
@@ -698,7 +651,7 @@ function getElapsed() {
 // ─────────────────────────────────────────────────────────
 // LABELS & DISPLAY
 // ─────────────────────────────────────────────────────────
-const LABELS = { overwhelmed:'Overwhelmed',anxious:'Anxious',tired:'Tired',unfocused:'Unfocused',overstim:'Overstimulated',calm:'Calm',alert:'Alert',grounded:'Grounded',energized:'Energized' };
+const LABELS = { overwhelmed:'Overwhelmed',anxious:'Anxious',tired:'Tired',angry:'Angry',overstim:'Overstimulated',calm:'Calm',alert:'Alert',grounded:'Grounded',energized:'Energized' };
 
 function phaseName(elapsed) {
   const labels = PHASE_LABELS[S.key] || ['Orientation','Transition','Arrival'];
@@ -902,6 +855,7 @@ window.generate   = generate;
 window.togglePlay = togglePlay;
 window.dlWav      = dlWav;
 window.__regS     = S;
+window.__reg      = { buildGraph, mkRng, DUR, SR };
 
 </script>
 </body>

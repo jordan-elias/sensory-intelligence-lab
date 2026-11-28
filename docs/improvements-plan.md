@@ -304,3 +304,11 @@ Update: chapters 6 (Sources, optional), 7 (Shaping and finishing) and 8 (Sharing
 - Play and Pause are words, not icons, on Breathing, Regulation and Soundscape too.
 - Sequencer, Rooms, Phase Machine, Waves, Chance and Semantic Synth now use `lab-btn` (`.sm` for small, `.on`/`.active` for pressed) and `lab-seg`; their own button CSS is removed. `t93` checks ten tool pages for the shared button.
 - Left alone on purpose: Chance's option cards and Waves' preset chips (they are choices, not actions), and the Ear Training answer buttons.
+
+## Regulation Engine sound (app-76)
+- One cue table per state (`assets/js/regulation/cues.js`): pulse tempo, timing looseness, syncopation, rests, roughness, tremolo, distortion, level, scale and tonic. The drone, voice and pulse all read it.
+- "Unfocused" replaced by "Angry" (four new mantra lines, for Jordan's review).
+- Pulse is a drifting beat; notes sit loosely around it (early, late, off-beat), never quantised. Drone voices now have a detuned twin whose beating runs from a slow shimmer (calm) to a buzz (angry).
+- Transitions change one group of cues at a time (tempo, then loudness and tone, then texture, then the pitch set last, through shared notes, with the tonic gliding under the voice).
+- Fixed: the old drone settled (quieter, darker) by built-in rule whatever the states.
+- `tests/browser/t95.mjs` renders journeys offline and measures loudness, brightness, onsets and peak (about 4 minutes). It cannot say whether it sounds good: that needs ears. Cue values are hypotheses to tune by ear.
